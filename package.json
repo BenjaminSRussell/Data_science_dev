@@ -1,0 +1,29 @@
+{
+  "name": "data-science-tycoon",
+  "version": "1.0.0",
+  "description": "A web-based WASM/C++ simulation game where players climb the corporate data science ladder",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:wasm": "emcc src/cpp/main.cpp src/cpp/game_state.cpp src/cpp/data_generator.cpp src/cpp/task_system.cpp src/cpp/scorer.cpp src/cpp/economy.cpp -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 --bind -o public/wasm/game.js",
+    "build:all": "npm run build:wasm && npm run build"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.1",
+    "howler": "^2.2.4"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "keywords": [
+    "game",
+    "data-science",
+    "simulation",
+    "wasm",
+    "webassembly"
+  ],
+  "author": "",
+  "license": "MIT"
+}

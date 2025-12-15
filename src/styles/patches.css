@@ -1,0 +1,10 @@
+/* Safeguard: Ensure inactive screens are strictly hidden */
+.screen:not(.active) {
+    display: none !important;
+}
+
+/* Ensure location interactions are properly layered */
+.location-interactions {
+    position: relative;
+    z-index: 10;
+}

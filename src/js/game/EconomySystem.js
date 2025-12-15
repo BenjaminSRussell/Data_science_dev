@@ -1,0 +1,310 @@
+/**
+ * EconomySystem - Handles scoring, rewards, and progression
+ */
+
+import { RANKS } from '../data/ranks.js';
+
+export class EconomySystem {
+    constructor(gameState) {
+        this.gameState = gameState;
+    }
+
+    /**
+     * Evaluate a submitted chart and calculate score
+     */
+    evaluateChart(task, chartConfig) {
+        // Score components (0-100 each)
+        const chartAppropriateness = this.scoreChartAppropriateness(task, chartConfig);
+        const visualClarity = this.scoreVisualClarity(chartConfig);
+        const dataAccuracy = this.scoreDataAccuracy(task, chartConfig);
+
+        // Boss modifier (some bosses are stricter)
+        const bossModifier = task.boss.strictness || 1.0;
+
+        // Calculate weighted average
+        const rawScore = (
+            chartAppropriateness * 0.4 +
+            visualClarity * 0.3 +
+            dataAccuracy * 0.3
+        ) * bossModifier;
+
+        // Convert to stars (1-5)
+        const stars = this.scoreToStars(rawScore);
+
+        // Calculate rewards
+        const moneyEarned = this.calculateMoneyReward(task, stars);
+        const repEarned = this.calculateRepReward(stars);
+
+        // Track stats
+        this.gameState.totalRatings++;
+        this.gameState.ratingSum += stars;
+        if (stars === 5) {
+            this.gameState.perfectScores++;
+        }
+
+        return {
+            chartAppropriateness,
+            visualClarity,
+            dataAccuracy,
+            rawScore,
+            stars,
+            moneyEarned,
+            repEarned
+        };
+    }
+
+    /**
+     * Score how appropriate the chart type is for the data
+     */
+    scoreChartAppropriateness(task, chartConfig) {
+        const selected = chartConfig.type;
+        const optimal = task.optimalChartTypes || [];
+        const acceptable = task.template?.acceptableChartTypes || [];
+
+        // Perfect match
+        if (optimal.includes(selected)) {
+            return 90 + Math.random() * 10; // 90-100
+        }
+
+        // Acceptable choice
+        if (acceptable.includes(selected)) {
+            return 60 + Math.random() * 20; // 60-80
+        }
+
+        // Chart type appropriateness matrix
+        const appropriateness = this.getChartAppropriatenessMatrix();
+        const dataType = task.template?.dataType || 'default';
+        const score = appropriateness[dataType]?.[selected] || 40;
+
+        return score + (Math.random() * 10 - 5); // Add some variance
+    }
+
+    /**
+     * Get chart appropriateness matrix
+     */
+    getChartAppropriatenessMatrix() {
+        return {
+            'quarterly_sales': {
+                bar: 95, line: 85, pie: 40, scatter: 30, doughnut: 45, radar: 35
+            },
+            'monthly_revenue': {
+                bar: 75, line: 95, pie: 30, scatter: 50, doughnut: 35, radar: 40
+            },
+            'product_comparison': {
+                bar: 95, line: 50, pie: 60, scatter: 45, doughnut: 55, radar: 70
+            },
+            'category_breakdown': {
+                bar: 60, line: 30, pie: 95, scatter: 25, doughnut: 90, radar: 40
+            },
+            'trend_analysis': {
+                bar: 50, line: 95, pie: 20, scatter: 70, doughnut: 25, radar: 30
+            },
+            'customer_demographics': {
+                bar: 85, line: 40, pie: 90, scatter: 35, doughnut: 85, radar: 50
+            },
+            'performance_metrics': {
+                bar: 70, line: 45, pie: 40, scatter: 35, doughnut: 45, radar: 95
+            },
+            'default': {
+                bar: 70, line: 70, pie: 60, scatter: 50, doughnut: 55, radar: 50
+            }
+        };
+    }
+
+    /**
+     * Score visual clarity of the chart
+     */
+    scoreVisualClarity(chartConfig) {
+        let score = 70; // Base score
+
+        // Legend helps readability
+        if (chartConfig.showLegend) {
+            score += 10;
+        }
+
+        // Grid helps precision reading
+        if (chartConfig.showGrid) {
+            score += 5;
+        }
+
+        // Data labels can help (but can also clutter)
+        if (chartConfig.showDataLabels) {
+            score += 3;
+        }
+
+        // Having a title is important
+        if (chartConfig.title && chartConfig.title.trim().length > 0) {
+            score += 10;
+        }
+
+        // Add some randomness
+        score += Math.random() * 5 - 2.5;
+
+        return Math.min(100, Math.max(0, score));
+    }
+
+    /**
+     * Score data accuracy (mostly simulated)
+     */
+    scoreDataAccuracy(task, chartConfig) {
+        // In a full implementation, this would check:
+        // - Correct data columns mapped
+        // - No data missing/truncated
+        // - Proper axis scales
+
+        // For now, we'll give a good base score with variance
+        const baseScore = 80;
+        const variance = Math.random() * 20 - 5;
+
+        return Math.min(100, Math.max(60, baseScore + variance));
+    }
+
+    /**
+     * Convert raw score (0-100) to stars (1-5)
+     */
+    scoreToStars(rawScore) {
+        if (rawScore >= 90) return 5;
+        if (rawScore >= 75) return 4;
+        if (rawScore >= 55) return 3;
+        if (rawScore >= 35) return 2;
+        return 1;
+    }
+
+    /**
+     * Calculate money reward
+     */
+    calculateMoneyReward(task, stars) {
+        const baseReward = task.potentialReward;
+
+        // Star multiplier
+        const starMultipliers = {
+            1: 0.2,
+            2: 0.4,
+            3: 0.7,
+            4: 1.0,
+            5: 1.3
+        };
+
+        const multiplier = starMultipliers[stars] || 1.0;
+
+        // Time bonus (if completed quickly)
+        // const elapsed = (Date.now() - task.startTime) / 1000;
+        // const timeBonus = elapsed < task.timeLimit / 2 ? 1.2 : 1.0;
+
+        return Math.round(baseReward * multiplier);
+    }
+
+    /**
+     * Calculate reputation reward
+     */
+    calculateRepReward(stars) {
+        const repRewards = {
+            1: 2,
+            2: 5,
+            3: 10,
+            4: 18,
+            5: 30
+        };
+
+        return repRewards[stars] || 10;
+    }
+
+    /**
+     * Check if player should be promoted
+     */
+    checkPromotion() {
+        const nextRank = this.gameState.nextRank;
+
+        if (!nextRank) return false; // Already max rank
+
+        if (this.gameState.reputation >= nextRank.repRequired) {
+            this.gameState.rankIndex++;
+
+            // Notify player
+            this.showPromotionNotification(this.gameState.currentRank);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Show promotion notification
+     */
+    showPromotionNotification(newRank) {
+        // This will be handled by the main game class through toast/modal
+        console.log(`🎉 Promoted to ${newRank.title}!`);
+
+        // Dispatch custom event
+        window.dispatchEvent(new CustomEvent('promotion', {
+            detail: { rank: newRank }
+        }));
+    }
+
+    /**
+     * Get item price (can be modified by perks)
+     */
+    getItemPrice(item) {
+        let price = item.price;
+
+        // Check for discount perks
+        if (this.gameState.unlockedTools.includes('bargain_hunter')) {
+            price = Math.round(price * 0.9); // 10% discount
+        }
+
+        return price;
+    }
+
+    /**
+     * Calculate salary bonus for current rank
+     */
+    getSalaryMultiplier() {
+        return this.gameState.currentRank.salaryMultiplier;
+    }
+
+    /**
+     * Calculate tax on income
+     */
+    calculateTax(amount) {
+        let taxRate = 0.0;
+
+        // Progressive tax brackets (simplified)
+        if (this.gameState.money > 10000) {
+            taxRate = 0.25;
+        } else if (this.gameState.money > 5000) {
+            taxRate = 0.15;
+        } else if (this.gameState.money > 1000) {
+            taxRate = 0.05;
+        }
+
+        return Math.floor(amount * taxRate);
+    }
+
+    /**
+     * Get daily living expenses
+     */
+    getDailyExpenses() {
+        // Base living cost
+        let dailyCost = 15; // Food, transport, etc.
+
+        // Location multiplier (Apartment is cheaper than luxury condo)
+        if (this.gameState.currentLocation === 'apartment') {
+            dailyCost *= 1.0;
+        }
+
+        // Add variance
+        dailyCost += Math.floor(Math.random() * 10);
+
+        return dailyCost;
+    }
+
+    /**
+     * Process daily finances (expenses)
+     */
+    processDailyFinances() {
+        const expenses = this.getDailyExpenses();
+        this.gameState.money -= expenses;
+        return { expenses };
+    }
+}
