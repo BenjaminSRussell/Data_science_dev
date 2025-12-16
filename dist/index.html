@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Data Science Tycoon - Climb the corporate ladder by creating stunning data visualizations for your demanding bosses">
+    <title>Data Science Tycoon | Master the Art of Data Visualization</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+  <script type="module" crossorigin src="/assets/index-B9x8vuNT.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DnkaUIc0.css">
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <span class="logo-icon">📊</span>
+                <h1>Data Science Tycoon</h1>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-bar-fill"></div>
+            </div>
+            <p class="loading-text">Initializing your career...</p>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div id="game-container" class="game-container hidden">
+
+        <!-- Top Navigation Bar -->
+        <header id="top-bar" class="top-bar">
+            <div class="top-bar-left">
+                <span class="game-logo">📊 Data Science Tycoon</span>
+            </div>
+            <div class="top-bar-center">
+                <div class="stat-pill" id="stat-money">
+                    <span class="stat-icon">💰</span>
+                    <span class="stat-value" id="money-value">$0</span>
+                </div>
+                <div class="stat-pill" id="stat-reputation">
+                    <span class="stat-icon">⭐</span>
+                    <span class="stat-value" id="reputation-value">0</span>
+                </div>
+                <div class="stat-pill" id="stat-rank">
+                    <span class="stat-icon">📈</span>
+                    <span class="stat-value" id="rank-value">Data Entry Clerk</span>
+                </div>
+            </div>
+            <div class="top-bar-right">
+                <button class="icon-btn inbox-button" id="btn-research-inbox" aria-label="Research Papers" title="Research Papers Inbox">
+                    📚
+                    <span class="inbox-unread-badge hidden" id="inbox-unread-badge"></span>
+                </button>
+                <button class="icon-btn" id="btn-nav-map" aria-label="City Map">🗺️</button>
+                <button class="icon-btn" id="btn-nav-bank" aria-label="City Bank">🏦</button>
+                <button class="icon-btn" id="btn-settings" aria-label="Settings">⚙️</button>
+                <button class="icon-btn" id="btn-sound" aria-label="Toggle Sound">🔊</button>
+            </div>
+        </header>
+
+        <!-- Screen Container -->
+        <main id="screen-container" class="screen-container">
+
+            <!-- Main Menu Screen -->
+            <section id="screen-menu" class="screen screen-menu active">
+                <div class="menu-content">
+                    <div class="menu-header">
+                        <div class="menu-logo-large">
+                            <span class="logo-chart animate-float">📊</span>
+                            <span class="logo-chart animate-float delay-1">📈</span>
+                            <span class="logo-chart animate-float delay-2">📉</span>
+                        </div>
+                        <h1 class="menu-title">Data Science Tycoon</h1>
+                        <p class="menu-tagline">Master Data. Impress Bosses. Climb the Ladder.</p>
+                    </div>
+                    <nav class="menu-buttons">
+                        <button class="btn btn-primary btn-lg" id="btn-new-game">
+                            <span class="btn-icon">🚀</span>
+                            New Career
+                        </button>
+                        <button class="btn btn-secondary btn-lg" id="btn-continue" disabled>
+                            <span class="btn-icon">💼</span>
+                            Continue
+                        </button>
+                        <button class="btn btn-ghost btn-lg" id="btn-tutorial">
+                            <span class="btn-icon">📚</span>
+                            How to Play
+                        </button>
+                    </nav>
+                    <div class="menu-footer">
+                        <p class="version">v1.0.0</p>
+                    </div>
+                </div>
+                <div class="menu-background">
+                    <div class="floating-chart chart-1">📊</div>
+                    <div class="floating-chart chart-2">📈</div>
+                    <div class="floating-chart chart-3">🥧</div>
+                    <div class="floating-chart chart-4">📉</div>
+                </div>
+            </section>
+
+            <!-- Game Screen (Office View) -->
+            <section id="screen-game" class="screen screen-game">
+                <div class="office-layout">
+                    <!-- Left Panel: Boss & Task -->
+                    <aside class="panel panel-left">
+                        <div class="boss-section glass-card">
+                            <div class="boss-header">
+                                <div class="boss-avatar" id="boss-avatar">👔</div>
+                                <div class="boss-info">
+                                    <h3 class="boss-name" id="boss-name">Mr. Anderson</h3>
+                                    <span class="boss-title" id="boss-title">Department Head</span>
+                                </div>
+                                <div class="boss-mood" id="boss-mood">😐</div>
+                            </div>
+                            <div class="boss-dialogue">
+                                <div class="dialogue-bubble" id="boss-dialogue">
+                                    <p>Welcome to the team! Let's see what you can do with some data.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-section glass-card">
+                            <div class="task-header">
+                                <h3>📋 Current Task</h3>
+                                <div class="task-timer hidden" id="task-timer">
+                                    <span class="timer-icon">⏱️</span>
+                                    <span class="timer-value">5:00</span>
+                                </div>
+                            </div>
+                            <div class="task-content" id="task-content">
+                                <p class="task-description">Create a visualization showing quarterly sales performance.
+                                </p>
+                                <div class="task-requirements">
+                                    <span class="requirement-tag">📊 Chart Required</span>
+                                    <span class="requirement-tag">📈 Show Trends</span>
+                                </div>
+                            </div>
+                            <div class="task-reward">
+                                <span class="reward-label">Potential Reward:</span>
+                                <span class="reward-value" id="task-reward">$150</span>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Center: Data Table -->
+                    <div class="panel panel-center">
+                        <div class="data-section glass-card">
+                            <div class="data-header">
+                                <h3>📄 Dataset</h3>
+                                <div class="data-actions">
+                                    <button class="btn btn-sm btn-ghost" id="btn-sort">Sort</button>
+                                    <button class="btn btn-sm btn-ghost" id="btn-filter">Filter</button>
+                                </div>
+                            </div>
+                            <div class="data-table-container" id="data-table-container">
+                                <div class="table-controls">
+                                    <input type="text" id="table-filter" placeholder="Filter data..."
+                                        class="table-input">
+                                    <span class="table-help">Click headers to sort</span>
+                                </div>
+                                <table class="data-table" id="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Quarter</th>
+                                            <th>Revenue</th>
+                                            <th>Expenses</th>
+                                            <th>Profit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Q1 2024</td>
+                                            <td>$125,000</td>
+                                            <td>$80,000</td>
+                                            <td>$45,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Q2 2024</td>
+                                            <td>$142,000</td>
+                                            <td>$85,000</td>
+                                            <td>$57,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Q3 2024</td>
+                                            <td>$138,000</td>
+                                            <td>$82,000</td>
+                                            <td>$56,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Q4 2024</td>
+                                            <td>$165,000</td>
+                                            <td>$90,000</td>
+                                            <td>$75,000</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="action-bar">
+                            <button class="btn btn-primary btn-lg" id="btn-create-chart">
+                                <span class="btn-icon">🎨</span>
+                                Create Visualization
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Quick Stats & Navigation -->
+                    <aside class="panel panel-right">
+                        <div class="progress-section glass-card">
+                            <h3>📈 Career Progress</h3>
+                            <div class="rank-display">
+                                <span class="current-rank" id="current-rank">Data Entry Clerk</span>
+                                <div class="rank-progress-bar">
+                                    <div class="rank-progress-fill" id="rank-progress" style="width: 0%"></div>
+                                </div>
+                                <span class="next-rank">Next: Junior Analyst</span>
+                            </div>
+                        </div>
+
+                        <div class="quick-nav glass-card">
+                            <button class="nav-btn" id="btn-nav-map">
+                                <span class="nav-icon">🗺️</span>
+                                <span class="nav-label">City</span>
+                            </button>
+                            <button class="nav-btn" id="btn-nav-clients">
+                                <span class="nav-icon">📬</span>
+                                <span class="nav-label">Inbox</span>
+                                <span class="notification-badge hidden" id="clients-badge">0</span>
+                            </button>
+                            <button class="nav-btn" id="btn-nav-office">
+                                <span class="nav-icon">🏢</span>
+                                <span class="nav-label">Office</span>
+                            </button>
+                            <button class="nav-btn" id="btn-nav-stats">
+                                <span class="nav-icon">📊</span>
+                                <span class="nav-label">Stats</span>
+                            </button>
+                            <button class="nav-btn" id="btn-nav-staff">
+                                <span class="nav-icon">👥</span>
+                                <span class="nav-label">Team</span>
+                            </button>
+                            <button class="nav-btn" id="btn-nav-career">
+                                <span class="nav-icon">🏆</span>
+                                <span class="nav-label">Career</span>
+                            </button>
+                            <button class="nav-btn" id="btn-nav-shop">
+                                <span class="nav-icon">🛒</span>
+                                <span class="nav-label">Shop</span>
+                            </button>
+                            <button class="nav-btn" id="btn-nav-newspaper">
+                                <span class="nav-icon">📰</span>
+                                <span class="nav-label">Paper</span>
+                            </button>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- Chart Studio Screen -->
+            <section id="screen-chart-studio" class="screen screen-chart-studio">
+                <div class="studio-layout">
+                    <!-- Chart Type Selection -->
+                    <aside class="studio-sidebar glass-card">
+                        <h3>📊 Chart Types</h3>
+                        <div class="chart-type-grid" id="chart-type-grid">
+                            <button class="chart-type-btn active" data-type="bar">
+                                <span class="chart-icon">📊</span>
+                                <span class="chart-name">Bar</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="line">
+                                <span class="chart-icon">📈</span>
+                                <span class="chart-name">Line</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="pie">
+                                <span class="chart-icon">🥧</span>
+                                <span class="chart-name">Pie</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="scatter">
+                                <span class="chart-icon">⚬</span>
+                                <span class="chart-name">Scatter</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="doughnut">
+                                <span class="chart-icon">🍩</span>
+                                <span class="chart-name">Donut</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="radar">
+                                <span class="chart-icon">📡</span>
+                                <span class="chart-name">Radar</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="area">
+                                <span class="chart-icon">📉</span>
+                                <span class="chart-name">Area</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="bubble">
+                                <span class="chart-icon">⭕</span>
+                                <span class="chart-name">Bubble</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="polarArea">
+                                <span class="chart-icon">🧭</span>
+                                <span class="chart-name">Polar</span>
+                            </button>
+                        </div>
+
+                        <div class="software-status" id="software-status">
+                            <h4>💻 Active Software</h4>
+                            <div id="software-list">
+                                <p class="software-none">No software purchased</p>
+                            </div>
+                        </div>
+
+                        <div class="data-mapping">
+                            <h4>Data Columns</h4>
+                            <div class="mapping-dropzone" id="x-axis-drop">
+                                <span class="dropzone-label">X-Axis</span>
+                                <span class="dropzone-value" id="x-axis-value">Quarter</span>
+                            </div>
+                            <div class="mapping-dropzone" id="y-axis-drop">
+                                <span class="dropzone-label">Y-Axis</span>
+                                <span class="dropzone-value" id="y-axis-value">Revenue</span>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Chart Preview -->
+                    <div class="studio-main">
+                        <div class="chart-preview glass-card">
+                            <div class="chart-header">
+                                <input type="text" class="chart-title-input" id="chart-title"
+                                    placeholder="Enter chart title..." value="Quarterly Revenue Performance">
+                            </div>
+                            <div class="chart-canvas-container">
+                                <canvas id="preview-chart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="studio-actions">
+                            <button class="btn btn-ghost btn-lg" id="btn-back-to-office">
+                                <span class="btn-icon">↩️</span>
+                                Back to Office
+                            </button>
+                            <button class="btn btn-primary btn-lg" id="btn-submit-chart">
+                                <span class="btn-icon">✅</span>
+                                Submit to Boss
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Customization Options -->
+                    <aside class="studio-options glass-card">
+                        <h3>🎨 Customize</h3>
+                        <div class="option-group">
+                            <label>Color Palette</label>
+                            <div class="color-palette-picker" id="color-palette">
+                                <button class="palette-btn active" data-palette="corporate"></button>
+                                <button class="palette-btn" data-palette="vibrant"></button>
+                                <button class="palette-btn" data-palette="pastel"></button>
+                                <button class="palette-btn" data-palette="monochrome"></button>
+                            </div>
+                        </div>
+                        <div class="option-group">
+                            <label>Show Legend</label>
+                            <label class="toggle">
+                                <input type="checkbox" id="show-legend" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="option-group">
+                            <label>Show Grid</label>
+                            <label class="toggle">
+                                <input type="checkbox" id="show-grid" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="option-group">
+                            <label>Data Labels</label>
+                            <label class="toggle">
+                                <input type="checkbox" id="show-data-labels">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- Boss Review Screen -->
+            <section id="screen-review" class="screen screen-review">
+                <div class="review-content">
+                    <div class="review-boss glass-card">
+                        <div class="boss-reaction" id="boss-reaction">
+                            <div class="boss-avatar-large">👔</div>
+                            <div class="reaction-emoji" id="reaction-emoji">🤔</div>
+                        </div>
+                        <div class="boss-feedback" id="boss-feedback">
+                            <p class="feedback-text">Analyzing your work...</p>
+                        </div>
+                    </div>
+
+                    <div class="review-chart glass-card">
+                        <h3>Your Submission</h3>
+                        <div class="submitted-chart">
+                            <canvas id="submitted-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="review-score glass-card" id="review-score">
+                        <h3>Performance Rating</h3>
+                        <div class="stars-container" id="stars-container">
+                            <span class="star">☆</span>
+                            <span class="star">☆</span>
+                            <span class="star">☆</span>
+                            <span class="star">☆</span>
+                            <span class="star">☆</span>
+                        </div>
+                        <div class="score-breakdown">
+                            <div class="score-item">
+                                <span class="score-label">Chart Appropriateness</span>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width:0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Visual Clarity</span>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width:0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Data Accuracy</span>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width:0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-rewards glass-card" id="review-rewards">
+                        <h3>💰 Rewards Earned</h3>
+                        <div class="reward-display">
+                            <div class="reward-item">
+                                <span class="reward-icon">💵</span>
+                                <span class="reward-amount" id="reward-money">+$0</span>
+                            </div>
+                            <div class="reward-item">
+                                <span class="reward-icon">⭐</span>
+                                <span class="reward-amount" id="reward-rep">+0 Rep</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-lg" id="btn-next-task">
+                        <span class="btn-icon">➡️</span>
+                        Next Task
+                    </button>
+                </div>
+            </section>
+
+            <!-- Career Screen -->
+            <section id="screen-career" class="screen screen-career">
+                <div class="career-content">
+                    <button class="btn btn-ghost back-btn" id="btn-back-career">← Back</button>
+                    <h2 class="screen-title">📜 Contracts & Projects</h2>
+
+                    <!-- Active Project Section -->
+                    <div id="active-project-container" class="glass-card hidden">
+                        <div class="project-header">
+                            <h3 id="active-project-title">Project Title</h3>
+                            <span class="badge" id="active-project-stage">Stage 1/3</span>
+                        </div>
+                        <div class="stage-info">
+                            <h4 id="current-stage-name">Stage Name</h4>
+                            <p id="current-stage-desc">Description of current task...</p>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-fill" id="project-progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="project-actions">
+                            <button class="btn btn-primary" id="btn-work-project">Work on Project</button>
+                        </div>
+                    </div>
+
+                    <!-- Available Contracts Grid -->
+                    <h3>Available Contracts</h3>
+                    <div class="contracts-grid" id="contracts-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Daily Newspaper Screen -->
+            <section id="screen-newspaper" class="screen screen-newspaper hidden">
+                <div class="newspaper-content glass-card">
+                    <div class="newspaper-header">
+                        <div class="header-top">
+                            <span class="paper-date" id="paper-date">January 1, 2024</span>
+                            <span class="paper-price">$2.00</span>
+                        </div>
+                        <h1 class="paper-title"> The Daily Data </h1>
+                        <div class="header-sub">
+                            <span class="sub-item">Vol. 1</span>
+                            <span class="sub-item">City Edition</span>
+                        </div>
+                    </div>
+
+                    <div class="newspaper-body">
+                        <div class="main-story">
+                            <h2 class="story-headline" id="paper-headline">Market Crash Imminent?</h2>
+                            <p class="story-text" id="paper-story">Details about the main story go here...</p>
+                        </div>
+
+                        <div class="side-stories">
+                            <div class="side-story">
+                                <h3 id="paper-sub-1-title">Tech Sector Booms</h3>
+                                <p id="paper-sub-1-text">Small blurb.</p>
+                            </div>
+                            <div class="side-story">
+                                <h3 id="paper-sub-2-title">Coffee Prices Up</h3>
+                                <p id="paper-sub-2-text">Small blurb.</p>
+                            </div>
+                        </div>
+
+                        <div class="paper-extras">
+                            <div class="weather-box">
+                                <span class="weather-icon">☀️</span>
+                                <span class="weather-text" id="paper-weather">Clear, 72°F</span>
+                            </div>
+                            <div class="horoscope-box">
+                                <strong>Horoscope:</strong> <span id="paper-horoscope">Good luck today.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="newspaper-actions">
+                        <button class="btn btn-primary btn-lg" id="btn-close-paper">Read & Close</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bank Screen -->
+            <section id="screen-bank" class="screen screen-bank hidden">
+                <div class="bank-layout">
+                    <header class="bank-header">
+                        <h2>🏦 City Bank & Trust</h2>
+                        <div class="net-worth-display">
+                            <span class="label">Net Worth</span>
+                            <span class="value" id="bank-net-worth">$0</span>
+                        </div>
+                        <button class="btn-close-bank" id="btn-close-bank">Exit Bank</button>
+                    </header>
+
+                    <div class="bank-grid">
+                        <!-- Savings Account -->
+                        <div class="bank-card savings-card">
+                            <div class="card-header">
+                                <h3>🐖 Savings Account</h3>
+                                <span class="rate-badge">0.5% Weekly APY</span>
+                            </div>
+                            <div class="card-balance">
+                                <span class="label">Balance</span>
+                                <span class="amount" id="bank-savings-balance">$0</span>
+                            </div>
+                            <div class="card-actions">
+                                <div class="input-group">
+                                    <input type="number" id="bank-deposit-input" placeholder="Amount">
+                                    <button class="btn btn-primary" id="btn-bank-deposit">Deposit</button>
+                                </div>
+                                <div class="input-group">
+                                    <input type="number" id="bank-withdraw-input" placeholder="Amount">
+                                    <button class="btn btn-secondary" id="btn-bank-withdraw">Withdraw</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loan Management -->
+                        <div class="bank-card loan-card">
+                            <div class="card-header">
+                                <h3>💸 Loan Management</h3>
+                                <span class="rate-badge warning">10% Weekly Interest</span>
+                            </div>
+                            <div class="card-balance">
+                                <span class="label">Owed</span>
+                                <span class="amount negative" id="bank-loan-balance">$0</span>
+                            </div>
+                            <div class="credit-score">
+                                <span>Credit Score: <strong id="bank-credit-score">500</strong></span>
+                                <span class="limit-text">Max Loan: <span id="bank-loan-limit">$1,000</span></span>
+                            </div>
+                            <div class="card-actions">
+                                <div class="input-group">
+                                    <input type="number" id="bank-loan-input" placeholder="Amount">
+                                    <button class="btn btn-warning" id="btn-bank-take-loan">Take Loan</button>
+                                </div>
+                                <div class="input-group">
+                                    <input type="number" id="bank-repay-input" placeholder="Amount">
+                                    <button class="btn btn-success" id="btn-bank-repay">Repay</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Shop Screen -->
+            <section id="screen-shop" class="screen screen-shop">
+                <div class="shop-content">
+                    <button class="btn btn-ghost back-btn" id="btn-back-shop">← Back</button>
+                    <h2 class="screen-title">🛒 Upgrade Shop</h2>
+
+                    <div class="shop-categories">
+                        <button class="category-btn active" data-category="tools">🔧 Tools</button>
+                        <button class="category-btn" data-category="software">💻 Software</button>
+                        <button class="category-btn" data-category="perks">✨ Perks</button>
+                    </div>
+
+                    <div class="shop-grid" id="shop-grid">
+                        <!-- Shop items will be populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stock Market Screen -->
+            <section id="screen-stock-market" class="screen hidden">
+                <div class="top-bar-screens">
+                    <button class="btn-icon" id="btn-back-market">⬅️ Back</button>
+                    <h2 class="screen-title">📈 Stock Exchange</h2>
+                </div>
+
+                <div class="market-overview glass-card">
+                    <div class="market-stat">
+                        <span class="label">Portfolio Value</span>
+                        <span class="value" id="portfolio-value">$0.00</span>
+                    </div>
+                    <div class="market-stat">
+                        <span class="label">Liquid Cash</span>
+                        <span class="value" id="liquid-cash">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="stock-grid" id="stock-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Office Screen (Tycoon Upgrades) -->
+            <section id="screen-office" class="screen screen-office">
+                <div class="office-content">
+                    <button class="btn btn-ghost back-btn" id="btn-back-office">← Back</button>
+                    <h2 class="screen-title">🏢 Your Office</h2>
+
+                    <!-- Office Scene Visualization -->
+                    <div class="office-scene-container" id="office-scene">
+                        <div class="office-scene">
+                            <div class="office-background"></div>
+                            <div class="office-floor"></div>
+
+                            <!-- Desk with equipment -->
+                            <div class="office-desk">
+                                <div class="office-computer" id="office-computer">💻</div>
+                                <div class="office-monitor" id="office-monitor">🖥️</div>
+                            </div>
+
+                            <!-- Chair -->
+                            <div class="office-chair" id="office-chair">🪑</div>
+
+                            <!-- Character at desk -->
+                            <div class="office-character" id="office-character">
+                                <div class="character-avatar char-working">👨‍💻</div>
+                            </div>
+
+                            <!-- Office name badge -->
+                            <div class="office-badge">
+                                <span class="office-icon">🛏️</span>
+                                <span class="office-name" id="current-office-name">Bedroom Corner</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Interactions (Replaces Equipment/Upgrades when not in office) -->
+                    <div class="location-interactions hidden" id="location-interactions">
+                        <h3 class="section-title" id="location-name-title">Donut Shop</h3>
+                        <p class="location-desc" id="location-desc">Welcome!</p>
+
+                        <div class="shop-keeper-area">
+                            <div class="shop-keeper-avatar" id="shop-keeper-avatar">👩‍🍳</div>
+                            <div class="shop-keeper-bubble" id="shop-keeper-saying">Fresh donuts!</div>
+                        </div>
+
+                        <div class="interaction-grid" id="interaction-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Equipment Grid -->
+                    <div id="office-equipment-section">
+                        <h3 class="section-title">⚡ Equipment</h3>
+                        <div class="equipment-grid" id="equipment-grid">
+                            <div class="equipment-card" data-type="computer">
+                                <div class="equipment-icon">💻</div>
+                                <div class="equipment-name">Computer</div>
+                                <div class="equipment-level" id="computer-level">Old Laptop</div>
+                                <div class="equipment-bonus">Speed: 1.0x</div>
+                                <button class="equipment-upgrade-btn" id="upgrade-computer">
+                                    Upgrade - $500
+                                </button>
+                            </div>
+                            <div class="equipment-card" data-type="desk">
+                                <div class="equipment-icon">🪑</div>
+                                <div class="equipment-name">Desk</div>
+                                <div class="equipment-level" id="desk-level">Folding Table</div>
+                                <div class="equipment-bonus">Comfort: 1.0x</div>
+                                <button class="equipment-upgrade-btn" id="upgrade-desk">
+                                    Upgrade - $300
+                                </button>
+                            </div>
+                            <div class="equipment-card" data-type="monitor">
+                                <div class="equipment-icon">🖥️</div>
+                                <div class="equipment-name">Monitor</div>
+                                <div class="equipment-level" id="monitor-level">Laptop Screen</div>
+                                <div class="equipment-bonus">Clarity: 1.0x</div>
+                                <button class="equipment-upgrade-btn" id="upgrade-monitor">
+                                    Upgrade - $250
+                                </button>
+                            </div>
+                            <div class="equipment-card" data-type="chair">
+                                <div class="equipment-icon">💺</div>
+                                <div class="equipment-name">Chair</div>
+                                <div class="equipment-level" id="chair-level">Kitchen Chair</div>
+                                <div class="equipment-bonus">Stamina: 1.0x</div>
+                                <button class="equipment-upgrade-btn" id="upgrade-chair">
+                                    Upgrade - $200
+                                </button>
+                            </div>
+                            <div class="equipment-card" data-type="software">
+                                <div class="equipment-icon">📊</div>
+                                <div class="equipment-name">Software</div>
+                                <div class="equipment-level" id="software-level">Spreadsheets</div>
+                                <div class="equipment-bonus">Capability: 1.0x</div>
+                                <button class="equipment-upgrade-btn" id="upgrade-software">
+                                    Upgrade - $500
+                                </button>
+                            </div>
+                        </div>
+                    </div> <!-- End of office-equipment-section -->
+
+                    <!-- Office Upgrade -->
+                    <div class="office-upgrade-section glass-card">
+                        <h3>🏠 Upgrade Office Space</h3>
+                        <div class="office-preview">
+                            <div class="next-office-icon" id="next-office-icon">🏠</div>
+                            <div class="next-office-info">
+                                <div class="next-office-name" id="next-office-name">Home Office</div>
+                                <div class="next-office-bonus">+10% client attraction</div>
+                                <div class="next-office-capacity">Capacity: 1 employee</div>
+                            </div>
+                            <button class="btn-cartoon" id="btn-upgrade-office">
+                                $2,000
+                            </button>
+                        </div>
+                    </div>
+                    <!-- AI Server Rack -->
+                    <div class="ai-console-section glass-card">
+                        <h3>🤖 AI Server Rack</h3>
+                        <div class="ai-console-layout">
+                            <div class="ai-visual">
+                                <div class="ai-avatar-large">🧠</div>
+                                <div class="ai-status-light pulse"></div>
+                            </div>
+                            <div class="ai-info">
+                                <h4 id="ai-name">Project Prometheus</h4>
+                                <div class="ai-level-badge">Level <span id="ai-level">1</span></div>
+                                <div class="ai-xp-bar">
+                                    <div class="ai-xp-fill" id="ai-xp-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="ai-stats-mini">
+                                <div class="ai-stat-row">
+                                    <span>Intelligence</span>
+                                    <span id="ai-stat-int">1</span>
+                                </div>
+                                <div class="ai-stat-row">
+                                    <span>Processing Speed</span>
+                                    <span id="ai-stat-spd">1</span>
+                                </div>
+                            </div>
+                            <div class="ai-actions">
+                                <button class="btn btn-primary btn-sm" id="btn-train-ai">
+                                    Train AI (10 XP)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Clients Screen (Inbox) -->
+            <section id="screen-clients" class="screen screen-clients">
+                <div class="clients-content">
+                    <button class="btn btn-ghost back-btn" id="btn-back-clients">← Back</button>
+                    <h2 class="screen-title">📬 Client Inbox</h2>
+
+                    <!-- Client Stats -->
+                    <div class="client-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">📬</div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="pending-jobs-count">0</span>
+                                <span class="stat-label">Pending</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏳</div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="active-jobs-count">0</span>
+                                <span class="stat-label">In Progress</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="completed-jobs-count">0</span>
+                                <span class="stat-label">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Listings -->
+                    <div class="jobs-container">
+                        <h3>📋 Available Jobs</h3>
+                        <div class="jobs-list" id="pending-jobs-list">
+                            <!-- Pending jobs populated by JS -->
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <p>No client requests yet!</p>
+                                <p class="empty-hint">Invest in marketing to attract clients</p>
+                            </div>
+                        </div>
+
+                        <h3>⏳ Active Jobs</h3>
+                        <div class="jobs-list" id="active-jobs-list">
+                            <!-- Active jobs populated by JS -->
+                            <div class="empty-state">
+                                <div class="empty-icon">💼</div>
+                                <p>No active jobs</p>
+                                <p class="empty-hint">Accept a job to get started!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Marketing Section -->
+                    <div class="marketing-section glass-card">
+                        <h3>📣 Marketing Channels</h3>
+                        <div class="marketing-grid" id="marketing-grid">
+                            <div class="marketing-card active" data-channel="word_of_mouth">
+                                <div class="marketing-icon">🗣️</div>
+                                <div class="marketing-name">Word of Mouth</div>
+                                <div class="marketing-cost">Free</div>
+                                <div class="marketing-leads">+0.5 leads/day</div>
+                            </div>
+                            <div class="marketing-card" data-channel="linkedin">
+                                <div class="marketing-icon">💼</div>
+                                <div class="marketing-name">LinkedIn</div>
+                                <div class="marketing-cost">$20/day</div>
+                                <div class="marketing-leads">+1 lead/day</div>
+                            </div>
+                            <div class="marketing-card locked" data-channel="website">
+                                <div class="marketing-icon">🌐</div>
+                                <div class="marketing-name">Website</div>
+                                <div class="marketing-cost">$50/day</div>
+                                <div class="marketing-leads">+2 leads/day</div>
+                            </div>
+                            <div class="marketing-card locked" data-channel="ads">
+                                <div class="marketing-icon">📢</div>
+                                <div class="marketing-name">Online Ads</div>
+                                <div class="marketing-cost">$100/day</div>
+                                <div class="marketing-leads">+4 leads/day</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Staff Screen -->
+            <section id="screen-staff" class="screen screen-staff">
+                <div class="staff-content">
+                    <button class="btn btn-ghost back-btn" id="btn-back-staff">← Back</button>
+                    <h2 class="screen-title">👥 Team Management</h2>
+
+                    <!-- Office Capacity -->
+                    <div class="capacity-bar glass-card">
+                        <div class="capacity-info">
+                            <span class="capacity-label">Office Capacity</span>
+                            <span class="capacity-value" id="staff-capacity">0 / 1</span>
+                        </div>
+                        <div class="cartoon-progress">
+                            <div class="cartoon-progress-fill" id="capacity-progress" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Current Staff -->
+                    <h3 class="section-title">🏢 Your Team</h3>
+                    <div class="staff-grid" id="current-staff-grid">
+                        <div class="empty-state">
+                            <div class="empty-icon">👤</div>
+                            <p>No employees yet!</p>
+                            <p class="empty-hint">Upgrade your office to hire staff</p>
+                        </div>
+                    </div>
+
+                    <!-- Hire Staff -->
+                    <h3 class="section-title">➕ Hire New Staff</h3>
+                    <div class="hire-grid" id="hire-staff-grid">
+                        <div class="staff-card hire-card" data-type="intern">
+                            <div class="staff-avatar">👶</div>
+                            <div class="staff-name">Intern</div>
+                            <div class="staff-role">Entry Level</div>
+                            <div class="staff-efficiency">Efficiency: 0.5x</div>
+                            <div class="staff-salary">$50/day</div>
+                            <button class="btn-cartoon btn-cartoon-success">
+                                Hire - $100
+                            </button>
+                        </div>
+                        <div class="staff-card hire-card" data-type="junior_analyst">
+                            <div class="staff-avatar">🧑‍💼</div>
+                            <div class="staff-name">Junior Analyst</div>
+                            <div class="staff-role">Basic Charts</div>
+                            <div class="staff-efficiency">Efficiency: 0.8x</div>
+                            <div class="staff-salary">$150/day</div>
+                            <button class="btn-cartoon btn-cartoon-success">
+                                Hire - $300
+                            </button>
+                        </div>
+                        <div class="staff-card hire-card" data-type="analyst">
+                            <div class="staff-avatar">👨‍💻</div>
+                            <div class="staff-name">Data Analyst</div>
+                            <div class="staff-role">All-Rounder</div>
+                            <div class="staff-efficiency">Efficiency: 1.0x</div>
+                            <div class="staff-salary">$300/day</div>
+                            <button class="btn-cartoon btn-cartoon-success">
+                                Hire - $600
+                            </button>
+                        </div>
+                        <div class="staff-card hire-card locked" data-type="data_scientist">
+                            <div class="staff-avatar">🧙</div>
+                            <div class="staff-name">Data Scientist</div>
+                            <div class="staff-role">ML & Stats</div>
+                            <div class="staff-efficiency">Efficiency: 2.0x</div>
+                            <div class="staff-salary">$800/day</div>
+                            <button class="btn-cartoon" disabled>
+                                Requires Office Floor
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Daily Expenses -->
+                    <div class="expenses-summary glass-card">
+                        <h3>💸 Daily Expenses</h3>
+                        <div class="expense-row">
+                            <span>Staff Salaries</span>
+                            <span class="money-display expense" id="daily-salaries">$0</span>
+                        </div>
+                        <div class="expense-row">
+                            <span>Marketing</span>
+                            <span class="money-display expense" id="daily-marketing">$0</span>
+                        </div>
+                        <div class="expense-row total">
+                            <span>Total Daily Cost</span>
+                            <span class="money-display expense" id="daily-total">$0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Library Screen (The Grimoire) -->
+            <section id="screen-library" class="screen screen-library">
+                <div class="library-content">
+                    <button class="btn btn-ghost back-btn" id="btn-back-library">← Back</button>
+                    <h2 class="screen-title">📚 The Data Grimoire</h2>
+
+                    <div class="library-categories">
+                        <button class="lib-cat-btn active" data-cat="all">All</button>
+                        <button class="lib-cat-btn" data-cat="scraping">🕷️ Scraping</button>
+                        <button class="lib-cat-btn" data-cat="cleaning">🧹 Cleaning</button>
+                        <button class="lib-cat-btn" data-cat="modeling">📊 Modeling</button>
+                        <button class="lib-cat-btn" data-cat="ai">🧠 AI</button>
+                    </div>
+
+                    <div class="library-grid" id="library-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- World Map Screen -->
+            <section id="screen-map" class="screen screen-map">
+                <div class="map-content">
+                    <button class="btn btn-ghost back-btn" id="btn-back-map">← Back</button>
+
+                    <!-- Time and Date Display -->
+                    <div class="time-display-bar">
+                        <div class="date-display">
+                            <span class="time-icon" id="time-slot-icon">☀️</span>
+                            <span class="time-text" id="current-time-slot">Late Morning</span>
+                            <span class="date-text" id="current-date">Monday, January 1, Year 1</span>
+                        </div>
+                        <div class="energy-display">
+                            <span class="energy-label">⚡ Energy</span>
+                            <div class="energy-bar">
+                                <div class="energy-fill" id="energy-fill" style="width: 100%"></div>
+                            </div>
+                            <span class="energy-text" id="energy-text">100/100</span>
+                        </div>
+                        <button class="btn-cartoon" id="btn-sleep">🛏️ Sleep</button>
+                    </div>
+
+                    <!-- News Ticker -->
+                    <div class="news-ticker-container glass-card">
+                        <div class="news-label">📰 NEWS:</div>
+                        <div class="news-content-wrapper">
+                            <div class="news-content" id="news-ticker-content">
+                                Welcome to Data Science Tycoon! Market is stable.
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="screen-title">🗺️ City Map</h2>
+
+                    <!-- Map Visualization -->
+                    <div class="map-container" id="world-map">
+                        <div class="map-background"></div>
+                        
+                        <!-- Road Network -->
+                        <svg class="map-roads" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <!-- Main roads connecting key locations -->
+                            <!-- Horizontal main road (top) -->
+                            <path class="road major" d="M 20,25 L 80,25" stroke-width="0.8"/>
+                            <!-- Vertical main road (center) -->
+                            <path class="road major" d="M 50,10 L 50,85" stroke-width="0.8"/>
+                            <!-- Diagonal road (library to gym) -->
+                            <path class="road minor" d="M 30,40 L 60,35" stroke-width="0.5"/>
+                            <!-- Residential area road -->
+                            <path class="road minor" d="M 40,50 L 55,60" stroke-width="0.5"/>
+                            <!-- Coffee shop area -->
+                            <path class="road minor" d="M 45,55 L 48,58" stroke-width="0.4"/>
+                            <!-- Office to home -->
+                            <path class="road minor" d="M 40,50 L 50,70" stroke-width="0.5"/>
+                        </svg>
+
+                        <!-- Map locations will be positioned here -->
+                        <div class="map-location" data-location="home" style="left: 50%; top: 70%;">
+                            <div class="location-icon">🏠</div>
+                            <div class="location-name">Home</div>
+                        </div>
+                        <div class="map-location" data-location="office" style="left: 40%; top: 50%;">
+                            <div class="location-icon">🏢</div>
+                            <div class="location-name">Office</div>
+                        </div>
+                        <div class="map-location" data-location="library" style="left: 30%; top: 40%;">
+                            <div class="location-icon">📚</div>
+                            <div class="location-name">Library</div>
+                        </div>
+                        <div class="map-location" data-location="gym" style="left: 60%; top: 35%;">
+                            <div class="location-icon">🏋️</div>
+                            <div class="location-name">Gym</div>
+                        </div>
+                        <div class="map-location" data-location="coffee_shop" style="left: 45%; top: 55%;">
+                            <div class="location-icon">☕</div>
+                            <div class="location-name">Coffee Shop</div>
+                        </div>
+                        <div class="map-location locked" data-location="networking_bar" style="left: 70%; top: 45%;">
+                            <div class="location-icon">🍸</div>
+                            <div class="location-name">Data Lounge</div>
+                            <div class="lock-badge">🔒</div>
+                        </div>
+                        <div class="map-location" data-location="university" style="left: 25%; top: 25%;">
+                            <div class="location-icon">🏛️</div>
+                            <div class="location-name">University</div>
+                        </div>
+                        <div class="map-location locked" data-location="bank" style="left: 55%; top: 20%;">
+                            <div class="location-icon">🏦</div>
+                            <div class="location-name">Bank</div>
+                            <div class="lock-badge">🚌</div>
+                        </div>
+                        <div class="map-location locked" data-location="stock_exchange" style="left: 75%; top: 25%;">
+                            <div class="location-icon">📈</div>
+                            <div class="location-name">Stock Exchange</div>
+                            <div class="lock-badge">🚌</div>
+                        </div>
+                        <div class="map-location locked" data-location="mall" style="left: 80%; top: 60%;">
+                            <div class="location-icon">🏪</div>
+                            <div class="location-name">Mall</div>
+                            <div class="lock-badge">🚌</div>
+                        </div>
+
+                        <!-- New Shops -->
+                        <div class="map-location" data-location="donut_shop" style="left: 48%; top: 58%;">
+                            <div class="location-icon">🍩</div>
+                            <div class="location-name">Donuts</div>
+                        </div>
+                        <div class="map-location" data-location="bagel_shop" style="left: 42%; top: 52%;">
+                            <div class="location-icon">🥯</div>
+                            <div class="location-name">Bagels</div>
+                        </div>
+                        <div class="map-location" data-location="flower_store" style="left: 55%; top: 60%;">
+                            <div class="location-icon">💐</div>
+                            <div class="location-name">Flowers</div>
+                        </div>
+                        <div class="map-location locked" data-location="downtown" style="left: 50%; top: 15%;">
+                            <div class="location-icon">🏙️</div>
+                            <div class="location-name">Downtown</div>
+                            <div class="lock-badge">🚗</div>
+                        </div>
+
+                        <!-- Dynamic Player Marker -->
+                        <div class="player-marker" id="player-marker" style="left: 50%; top: 70%;">
+                            <div class="player-icon">👤</div>
+                        </div>
+                    </div>
+
+                    <!-- Location Actions -->
+                    <div id="location-actions" class="location-actions">
+                        <!-- Populated by JS based on current location -->
+                    </div>
+
+                    <!-- Vehicle selector -->
+                    <div class="vehicle-bar glass-card">
+                        <h3>🚗 Transportation</h3>
+                        <div class="vehicle-options" id="vehicle-options">
+                            <div class="vehicle-option active" data-vehicle="walking">
+                                <span class="vehicle-icon">🚶</span>
+                                <span class="vehicle-name">Walking</span>
+                            </div>
+                            <div class="vehicle-option locked" data-vehicle="bus_pass">
+                                <span class="vehicle-icon">🚌</span>
+                                <span class="vehicle-name">Bus Pass</span>
+                                <span class="vehicle-price">$50/mo</span>
+                            </div>
+                            <div class="vehicle-option locked" data-vehicle="used_car">
+                                <span class="vehicle-icon">🚗</span>
+                                <span class="vehicle-name">Used Car</span>
+                                <span class="vehicle-price">$5,000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Character Stats Screen -->
+            <section id="screen-stats" class="screen screen-stats">
+                <div class="stats-content">
+                    <button class="btn btn-ghost back-btn" id="btn-back-stats">← Back</button>
+                    <div class="screen-header-row">
+                        <h2 class="screen-title">📊 Character Stats</h2>
+                        <button class="btn-cartoon" id="btn-view-relationships">👥 Relationships</button>
+                    </div>
+
+                    <!-- Character Overview -->
+                    <div class="character-overview glass-card">
+                        <div class="character-avatar large" id="stats-avatar">
+                            <span class="avatar-emoji">👨‍💻</span>
+                        </div>
+                        <div class="character-info">
+                            <h3 class="character-name" id="stats-name">New Player</h3>
+                            <div class="character-title" id="stats-title">Data Entry Clerk</div>
+                            <div class="character-level">
+                                <span>Total Level: </span>
+                                <span class="level-number" id="total-level">60</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid" id="stats-grid">
+                        <div class="stat-card" data-stat="intelligence">
+                            <div class="stat-icon">💡</div>
+                            <div class="stat-info">
+                                <div class="stat-name">Intelligence</div>
+                                <div class="stat-value" id="stat-intelligence">10</div>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 10%"></div>
+                            </div>
+                            <div class="stat-xp">XP: 0/100</div>
+                        </div>
+                        <div class="stat-card" data-stat="charisma">
+                            <div class="stat-icon">🎭</div>
+                            <div class="stat-info">
+                                <div class="stat-name">Charisma</div>
+                                <div class="stat-value" id="stat-charisma">10</div>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 10%"></div>
+                            </div>
+                            <div class="stat-xp">XP: 0/100</div>
+                        </div>
+                        <div class="stat-card" data-stat="stamina">
+                            <div class="stat-icon">💪</div>
+                            <div class="stat-info">
+                                <div class="stat-name">Stamina</div>
+                                <div class="stat-value" id="stat-stamina">10</div>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 10%"></div>
+                            </div>
+                            <div class="stat-xp">XP: 0/100</div>
+                        </div>
+                        <div class="stat-card" data-stat="focus">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-info">
+                                <div class="stat-name">Focus</div>
+                                <div class="stat-value" id="stat-focus">10</div>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 10%"></div>
+                            </div>
+                            <div class="stat-xp">XP: 0/100</div>
+                        </div>
+                        <div class="stat-card" data-stat="luck">
+                            <div class="stat-icon">🍀</div>
+                            <div class="stat-info">
+                                <div class="stat-name">Luck</div>
+                                <div class="stat-value" id="stat-luck">5</div>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 10%"></div>
+                            </div>
+                            <div class="stat-xp">XP: 0/50</div>
+                        </div>
+                        <div class="stat-card" data-stat="analytics">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-info">
+                                <div class="stat-name">Analytics</div>
+                                <div class="stat-value" id="stat-analytics">5</div>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 5%"></div>
+                            </div>
+                            <div class="stat-xp">XP: 0/100</div>
+                        </div>
+                    </div>
+
+                    <!-- Training Section -->
+                    <h3 class="section-title">🏋️ Training Activities</h3>
+                    <div class="training-grid" id="training-grid">
+                        <div class="training-card" data-activity="study_books">
+                            <div class="training-icon">📚</div>
+                            <div class="training-name">Study Books</div>
+                            <div class="training-effects">+💡 +📊</div>
+                            <div class="training-cost">Free • 2 slots • 15⚡</div>
+                            <button class="btn-cartoon btn-cartoon-success">Train</button>
+                        </div>
+                        <div class="training-card" data-activity="gym_workout">
+                            <div class="training-icon">🏋️</div>
+                            <div class="training-name">Gym Workout</div>
+                            <div class="training-effects">+💪 +🎯</div>
+                            <div class="training-cost">$20 • 1 slot • 25⚡</div>
+                            <button class="btn-cartoon btn-cartoon-success">Train</button>
+                        </div>
+                        <div class="training-card" data-activity="meditation">
+                            <div class="training-icon">🧘</div>
+                            <div class="training-name">Meditation</div>
+                            <div class="training-effects">+🎯 +💪</div>
+                            <div class="training-cost">Free • 1 slot • +10⚡</div>
+                            <button class="btn-cartoon btn-cartoon-success">Train</button>
+                        </div>
+                        <div class="training-card" data-activity="networking_event">
+                            <div class="training-icon">🍸</div>
+                            <div class="training-name">Networking</div>
+                            <div class="training-effects">+🎭 +🍀</div>
+                            <div class="training-cost">$30 • 2 slots • 20⚡</div>
+                            <button class="btn-cartoon btn-cartoon-success">Train</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Relationships Screen -->
+            <section id="screen-relationships" class="screen screen-relationships">
+                <div class="relationships-content">
+                    <button class="btn btn-ghost back-btn" id="btn-back-relationships">← Back</button>
+                    <h2 class="screen-title">👥 Relationships</h2>
+
+                    <!-- NPC Grid -->
+                    <div class="npc-grid" id="npc-grid">
+                        <div class="npc-card" data-npc="alex_rivera">
+                            <div class="npc-avatar">🧑‍💻</div>
+                            <div class="npc-info">
+                                <div class="npc-name">Alex Rivera</div>
+                                <div class="npc-title">Fellow Freelancer</div>
+                            </div>
+                            <div class="relationship-bar">
+                                <div class="relationship-fill" style="width: 30%"></div>
+                            </div>
+                            <div class="relationship-tier">Acquaintance</div>
+                        </div>
+                        <div class="npc-card" data-npc="professor_chen">
+                            <div class="npc-avatar">👨‍🏫</div>
+                            <div class="npc-info">
+                                <div class="npc-name">Professor Chen</div>
+                                <div class="npc-title">University Professor</div>
+                            </div>
+                            <div class="relationship-bar">
+                                <div class="relationship-fill" style="width: 10%"></div>
+                            </div>
+                            <div class="relationship-tier">Stranger</div>
+                        </div>
+                        <div class="npc-card locked" data-npc="mike_johnson">
+                            <div class="npc-avatar">👔</div>
+                            <div class="npc-info">
+                                <div class="npc-name">???</div>
+                                <div class="npc-title">Unlock with 🎭 20</div>
+                            </div>
+                            <div class="lock-overlay">🔒</div>
+                        </div>
+                        <div class="npc-card locked" data-npc="david_chen">
+                            <div class="npc-avatar">💰</div>
+                            <div class="npc-info">
+                                <div class="npc-name">???</div>
+                                <div class="npc-title">Unlock with 1000 Rep</div>
+                            </div>
+                            <div class="lock-overlay">🔒</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Exam Modal -->
+            <div id="modal-exam" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="exam-title">Final Exam</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="exam-intro">
+                            <p>Answer the following questions correctly to pass.</p>
+                            <p>Passing Score: 70%</p>
+                            <button id="btn-start-exam" class="btn-primary">Start Exam</button>
+                        </div>
+                        <div id="exam-questions" class="hidden">
+                            <div id="question-container">
+                                <h3 id="question-text">Question 1...</h3>
+                                <div id="options-container" class="options-grid">
+                                    <!-- Options injected here -->
+                                </div>
+                            </div>
+                        </div>
+                        <div id="exam-results" class="hidden">
+                            <h3>Exam Complete!</h3>
+                            <p>Score: <span id="exam-score">0</span>%</p>
+                            <p id="exam-status">FAILED</p>
+                            <button id="btn-close-exam" class="btn-primary">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fast Forward Working Overlay -->
+            <div id="working-overlay" class="working-overlay hidden">
+                <div class="working-container glass-card">
+                    <h2 class="animate-pulse">👨‍💻 Coding...</h2>
+                    <div class="working-visuals">
+                        <div class="code-stream" id="code-stream">
+                            // Analyzing Data...
+                        </div>
+                        <div class="clock-spinner" id="work-clock">
+                            🕒
+                        </div>
+                    </div>
+                    <div class="working-stats">
+                        <div class="stat-row">
+                            <span>Time Passed</span>
+                            <span id="work-time-passed">0h 0m</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Progress</span>
+                            <span id="work-progress-text">0%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-fill" id="work-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <button class="btn btn-danger btn-sm" id="btn-stop-work">Stop Early</button>
+                </div>
+            </div>
+
+            <!-- Jail Screen -->
+            <section id="screen-jail" class="screen hidden" style="text-align: center; background-color: #2c3e50;">
+                <div class="jail-bars" style="font-size: 100px; margin-top: 50px;">⛓️</div>
+                <h1 style="color: #e74c3c; font-size: 3rem;">BUSTED!</h1>
+                <p style="color: #bdc3c7; font-size: 1.2rem;">You have been arrested for financial crimes.</p>
+
+                <div class="jail-stats glass-card" style="margin: 30px auto; max-width: 400px; padding: 20px;">
+                    <div style="margin-bottom: 10px;">Sentence Remaining: <span id="jail-time-left"
+                            style="color: #e74c3c; font-weight: bold;">0 days</span></div>
+                    <button class="btn-cartoon btn-danger" id="btn-serve-time"
+                        onclick="game.handleServeJailTime()">Serve Time (Skip Day)</button>
+                    <button class="btn-cartoon" id="btn-bribe-guard" onclick="game.handleBribeGuard()"
+                        style="margin-top: 10px;">Bribe Guard ($5,000)</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modal-container" class="modal-container hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content glass-card" id="modal-content">
+            <!-- Modal content injected by JS -->
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+</body>
+
+</html>

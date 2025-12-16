@@ -3,6 +3,24 @@
  * Dynamic conversations based on relationship level and player choices
  */
 
+import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
+import { dialogueTreeSystem } from './dialogue/DialogueTreeSystem.js';
+
+// Initialize all NPC images - ensures every NPC has a visual
+function initializeNPCImages() {
+    // This will be called after NPCs array is defined
+    if (typeof NPCs !== 'undefined') {
+        NPCs.forEach(npc => {
+            if (!npc.image) {
+                npc.image = getNPCImage(npc);
+            }
+            if (!npc.fallbackIcon) {
+                npc.fallbackIcon = getNPCFallback(npc);
+            }
+        });
+    }
+}
+
 // NPC personality traits
 export const PERSONALITY_TRAITS = {
     friendly: { relationshipGain: 1.2, dialogueTone: 'warm' },
@@ -27,7 +45,11 @@ export const NPCs = [
         gifts: ['books', 'coffee'],
         dialogueTopics: ['data_science', 'career', 'research'],
         benefits: { statBoost: 'intelligence', referrals: true },
-        backstory: 'A veteran data scientist who teaches at the university. Known for mentoring successful analysts.'
+        backstory: 'A veteran data scientist who teaches at the university. Known for mentoring successful analysts.',
+        description: 'Distinguished professor with decades of experience in statistical analysis and machine learning. Always willing to share knowledge with eager students.',
+        age: 58,
+        interests: ['academic research', 'statistics', 'mentoring'],
+        favoriteTopics: ['Bayesian inference', 'neural networks', 'career advice']
     },
     {
         id: 'sarah_martinez',
@@ -41,7 +63,11 @@ export const NPCs = [
         gifts: ['coffee', 'tech_gadgets'],
         dialogueTopics: ['industry', 'career', 'visualization'],
         benefits: { statBoost: 'analytics', clientReferrals: true },
-        backstory: 'Works at a top tech company. Loves helping newcomers break into the field.'
+        backstory: 'Works at a top tech company. Loves helping newcomers break into the field.',
+        description: 'Experienced analyst at a Fortune 500 company. Known for her clear communication and ability to translate complex data into actionable insights.',
+        age: 34,
+        interests: ['data visualization', 'career development', 'coffee'],
+        favoriteTopics: ['Tableau', 'Python', 'industry trends']
     },
 
     // Business Contacts
@@ -57,7 +83,11 @@ export const NPCs = [
         gifts: ['drinks', 'business_cards'],
         dialogueTopics: ['marketing', 'data', 'business'],
         benefits: { clientReferrals: true, premiumClients: true },
-        backstory: 'Runs marketing for a Fortune 500. Always looking for good analysts.'
+        backstory: 'Runs marketing for a Fortune 500. Always looking for good analysts.',
+        description: 'A charismatic marketing executive who understands the power of data-driven decisions. Known for his extensive network and ability to connect the right people.',
+        age: 41,
+        interests: ['networking', 'marketing analytics', 'golf'],
+        favoriteTopics: ['brand strategy', 'customer insights', 'business opportunities']
     },
     {
         id: 'lisa_wong',
@@ -87,7 +117,11 @@ export const NPCs = [
         gifts: ['fine_wine', 'art'],
         dialogueTopics: ['investments', 'startups', 'market'],
         benefits: { seedFunding: true, vcIntros: true },
-        backstory: 'Made millions in tech. Now invests in promising data-driven startups.'
+        backstory: 'Made millions in tech. Now invests in promising data-driven startups.',
+        description: 'A wealthy investor who made his fortune in the tech boom. Speaks in riddles but has an eye for promising ventures. Very selective about who he works with.',
+        age: 52,
+        interests: ['venture capital', 'fine art', 'cryptocurrency'],
+        favoriteTopics: ['market trends', 'startup valuations', 'exit strategies']
     },
     {
         id: 'victoria_sterling',
@@ -117,7 +151,11 @@ export const NPCs = [
         gifts: ['tips', 'compliments'],
         dialogueTopics: ['baking', 'sugar', 'mornings'],
         benefits: { free_donuts: true },
-        backstory: 'Bakes the best donuts in the city. Always has a smile ready.'
+        backstory: 'Bakes the best donuts in the city. Always has a smile ready.',
+        description: 'The cheerful owner of Donut Delights. Her donuts are legendary, and her positive energy is infectious. Knows all the regulars by name.',
+        age: 42,
+        interests: ['baking', 'customer service', 'morning routines'],
+        favoriteTopics: ['new recipes', 'customer stories', 'sweet treats']
     },
     {
         id: 'bob_bagel',
@@ -131,7 +169,11 @@ export const NPCs = [
         gifts: ['tips', 'coffee'],
         dialogueTopics: ['yeast', 'nyc', 'cream_cheese'],
         benefits: { extra_cream_cheese: true },
-        backstory: 'Takes bagels very seriously. Claims to import water from NYC.'
+        backstory: 'Takes bagels very seriously. Claims to import water from NYC.',
+        description: 'A passionate bagel maker who moved from Brooklyn to start his own shop. Extremely knowledgeable about traditional bagel-making techniques.',
+        age: 48,
+        interests: ['baking', 'NYC culture', 'food traditions'],
+        favoriteTopics: ['bagel history', 'yeast fermentation', 'perfect cream cheese ratios']
     },
     {
         id: 'flora_bloom',
@@ -145,7 +187,11 @@ export const NPCs = [
         gifts: ['water', 'sunshine'],
         dialogueTopics: ['gardening', 'nature', 'design'],
         action: 'buy_flowers',
-        backstory: 'Loves plants more than people. Makes beautiful arrangements.'
+        backstory: 'Loves plants more than people. Makes beautiful arrangements.',
+        description: 'A gentle florist who finds peace in nature. Her flower arrangements are works of art, and she has a deep understanding of plant care.',
+        age: 35,
+        interests: ['botany', 'floral design', 'sustainability'],
+        favoriteTopics: ['plant care', 'seasonal flowers', 'arrangement techniques']
     },
 
 
@@ -163,7 +209,11 @@ export const NPCs = [
         gifts: ['coffee', 'snacks'],
         dialogueTopics: ['freelancing', 'life', 'hobbies'],
         benefits: { moralBoost: true, jobSharing: true },
-        backstory: 'Started freelancing the same time as you. Currently struggling to find steady work.'
+        backstory: 'Started freelancing the same time as you. Currently struggling to find steady work.',
+        description: 'A fellow freelancer trying to make it in the data science world. Shares your struggles and dreams. Always up for a coffee chat.',
+        age: 26,
+        interests: ['coding', 'startups', 'coffee shops'],
+        favoriteTopics: ['freelance life', 'side projects', 'mutual support']
     },
     {
         id: 'jordan_kim',
@@ -177,7 +227,11 @@ export const NPCs = [
         gifts: ['protein', 'sports_gear'],
         dialogueTopics: ['fitness', 'motivation', 'life'],
         benefits: { staminaBoost: true, workoutPartner: true },
-        backstory: 'Personal trainer who believes in work-life balance.'
+        backstory: 'Personal trainer who believes in work-life balance.',
+        description: 'An enthusiastic personal trainer who combines fitness expertise with motivational support. Believes that physical health enhances mental performance.',
+        age: 29,
+        interests: ['weightlifting', 'nutrition', 'mental health'],
+        favoriteTopics: ['workout routines', 'protein intake', 'recovery strategies']
     },
 
     // Rivals
@@ -248,7 +302,7 @@ export const NPCs = [
         name: 'Emma Bloom',
         title: 'Librarian & Teacher',
         icon: '📚',
-        // image: '/assets/npcs/emma_young.png',
+        image: '/assets/npcs/npc_good_character_1765747743170.png',
         type: 'romance',
         personality: 'friendly',
         location: 'library',
@@ -257,14 +311,17 @@ export const NPCs = [
         gifts: ['books', 'flowers'],
         dialogueTopics: ['books', 'education', 'future'],
         benefits: { studyBoost: true, ethicsBoost: true },
-        backstory: 'Passionate about education. Looking for someone kind and stable.'
+        backstory: 'Passionate about education. Looking for someone kind and stable.',
+        description: 'A gentle soul who finds joy in books and helping others learn. Values integrity and intellectual curiosity above all else.',
+        age: 28,
+        interests: ['literature', 'education', 'gardening'],
+        favoriteTopics: ['classic novels', 'teaching methods', 'personal growth']
     },
     {
         id: 'bella_lux',
         name: 'Bella Lux',
         title: 'Influencer',
         icon: '💎',
-        // image: '/assets/npcs/bella_young.png',
         type: 'romance',
         personality: 'high_maintenance', // Custom handling
         location: 'luxury_district',
@@ -274,8 +331,327 @@ export const NPCs = [
         dialogueTopics: ['parties', 'fame', 'money'],
         benefits: { popularityBoost: true, expensiveTastes: true },
         backstory: 'Always chasing the spotlight. Wants a partner who can fund her lifestyle.'
+    },
+
+    // Additional Mentors
+    {
+        id: 'dr_amara_patel',
+        name: 'Dr. Amara Patel',
+        title: 'Machine Learning Expert',
+        icon: '👩‍🔬',
+        type: 'mentor',
+        personality: 'professional',
+        location: 'university',
+        unlockRequirement: { stat: 'intelligence', value: 30 },
+        gifts: ['research_papers', 'coffee'],
+        dialogueTopics: ['machine_learning', 'neural_networks', 'research'],
+        benefits: { statBoost: 'intelligence', mlProjects: true },
+        backstory: 'Leading researcher in deep learning. Published dozens of papers.'
+    },
+    {
+        id: 'marcus_thompson',
+        name: 'Marcus Thompson',
+        title: 'Data Engineering Lead',
+        icon: '👨‍💻',
+        type: 'mentor',
+        personality: 'generous',
+        location: 'tech_hub',
+        unlockRequirement: { reputation: 300 },
+        gifts: ['tech_gadgets', 'books'],
+        dialogueTopics: ['data_pipelines', 'infrastructure', 'scalability'],
+        benefits: { statBoost: 'analytics', systemDesign: true },
+        backstory: 'Built data infrastructure for major tech companies. Knows everything about scale.'
+    },
+
+    // Additional Business Contacts
+    {
+        id: 'rachel_green',
+        name: 'Rachel Green',
+        title: 'Product Manager',
+        icon: '👩‍💼',
+        type: 'business',
+        personality: 'friendly',
+        location: 'coffee_shop',
+        unlockRequirement: { day: 10 },
+        gifts: ['coffee', 'notebooks'],
+        dialogueTopics: ['product_development', 'user_experience', 'roadmaps'],
+        benefits: { productInsights: true, clientReferrals: true },
+        backstory: 'Manages products at a growing startup. Always looking for data-driven insights.'
+    },
+    {
+        id: 'james_wilson',
+        name: 'James Wilson',
+        title: 'Consulting Director',
+        icon: '👔',
+        type: 'business',
+        personality: 'professional',
+        location: 'downtown',
+        unlockRequirement: { reputation: 800 },
+        gifts: ['fine_wine', 'business_cards'],
+        dialogueTopics: ['consulting', 'strategy', 'enterprise'],
+        benefits: { premiumClients: true, consultingGigs: true },
+        backstory: 'Runs a top consulting firm. Clients pay premium for his team\'s insights.'
+    },
+    {
+        id: 'priya_sharma',
+        name: 'Priya Sharma',
+        title: 'Data Privacy Officer',
+        icon: '🛡️',
+        type: 'business',
+        personality: 'professional',
+        location: 'city_hall',
+        unlockRequirement: { reputation: 400 },
+        gifts: ['books', 'coffee'],
+        dialogueTopics: ['privacy', 'compliance', 'ethics'],
+        benefits: { complianceHelp: true, ethicsBoost: true },
+        backstory: 'Ensures companies follow data privacy laws. Very ethical and principled.'
+    },
+
+    // Additional Friends
+    {
+        id: 'sam_taylor',
+        name: 'Sam Taylor',
+        title: 'Freelance Designer',
+        icon: '🎨',
+        type: 'friend',
+        personality: 'friendly',
+        location: 'coffee_shop',
+        unlockRequirement: { day: 3 },
+        gifts: ['art_supplies', 'coffee'],
+        dialogueTopics: ['design', 'creativity', 'freelancing'],
+        benefits: { designHelp: true, creativeBoost: true },
+        backstory: 'Works on visual design projects. Great at making charts look beautiful.'
+    },
+    {
+        id: 'taylor_morgan',
+        name: 'Taylor Morgan',
+        title: 'Software Developer',
+        icon: '💻',
+        type: 'friend',
+        personality: 'friendly',
+        location: 'coffee_shop',
+        unlockRequirement: null,
+        gifts: ['coffee', 'keyboard'],
+        dialogueTopics: ['coding', 'tech', 'startups'],
+        benefits: { codingHelp: true, techInsights: true },
+        backstory: 'Full-stack developer. Always working on side projects.'
+    },
+    {
+        id: 'casey_lee',
+        name: 'Casey Lee',
+        title: 'Marketing Specialist',
+        icon: '📱',
+        type: 'friend',
+        personality: 'friendly',
+        location: 'coffee_shop',
+        unlockRequirement: { day: 7 },
+        gifts: ['coffee', 'social_media_tips'],
+        dialogueTopics: ['marketing', 'social_media', 'branding'],
+        benefits: { marketingHelp: true, clientReferrals: true },
+        backstory: 'Helps businesses grow through digital marketing. Very social.'
+    },
+
+    // Additional Shopkeepers
+    {
+        id: 'carlos_tech',
+        name: 'Carlos',
+        title: 'Tech Store Owner',
+        icon: '🖥️',
+        type: 'shopkeeper',
+        personality: 'friendly',
+        location: 'mall',
+        unlockRequirement: { money: 2000 },
+        gifts: ['tips', 'tech_reviews'],
+        dialogueTopics: ['hardware', 'gadgets', 'tech'],
+        benefits: { hardwareDiscounts: true },
+        backstory: 'Runs the best tech store in town. Knows all the latest gear.'
+    },
+    {
+        id: 'luna_bookstore',
+        name: 'Luna',
+        title: 'Bookstore Owner',
+        icon: '📖',
+        type: 'shopkeeper',
+        personality: 'generous',
+        location: 'library',
+        unlockRequirement: null,
+        gifts: ['bookmarks', 'coffee'],
+        dialogueTopics: ['books', 'learning', 'knowledge'],
+        benefits: { bookDiscounts: true, studyBoost: true },
+        backstory: 'Loves books more than anything. Always recommends great reads.'
+    },
+
+    // Additional Investors
+    {
+        id: 'robert_kim',
+        name: 'Robert Kim',
+        title: 'Seed Investor',
+        icon: '💼',
+        type: 'investor',
+        personality: 'professional',
+        location: 'tech_hub',
+        unlockRequirement: { reputation: 800, stat: 'charisma', value: 30 },
+        gifts: ['business_plans', 'fine_wine'],
+        dialogueTopics: ['startups', 'funding', 'valuation'],
+        benefits: { seedFunding: true, startupIntros: true },
+        backstory: 'Early-stage investor. Focuses on data-driven startups.'
+    },
+    {
+        id: 'sophia_zhang',
+        name: 'Sophia Zhang',
+        title: 'Corporate Investor',
+        icon: '🏢',
+        type: 'investor',
+        personality: 'professional',
+        location: 'downtown',
+        unlockRequirement: { reputation: 1500, money: 50000 },
+        gifts: ['luxury_watch', 'fine_wine'],
+        dialogueTopics: ['corporate_strategy', 'acquisitions', 'scaling'],
+        benefits: { corporateFunding: true, acquisitionOpportunities: true },
+        backstory: 'Represents a major corporation\'s investment arm. Deals in millions.'
+    },
+
+    // Additional Rivals
+    {
+        id: 'chloe_competitor',
+        name: 'Chloe Martinez',
+        title: 'Rival Analyst',
+        icon: '😤',
+        type: 'rival',
+        personality: 'competitive',
+        location: 'networking_bar',
+        unlockRequirement: { reputation: 150 },
+        gifts: [], // Rivals don't accept gifts
+        dialogueTopics: ['competition', 'achievements', 'clients'],
+        benefits: { competitionEvents: true, motivationBoost: true },
+        backstory: 'Always trying to steal your clients. Very competitive.'
+    },
+    {
+        id: 'tyler_rival',
+        name: 'Tyler Brooks',
+        title: 'Competing Freelancer',
+        icon: '⚔️',
+        type: 'rival',
+        personality: 'competitive',
+        location: 'coffee_shop',
+        unlockRequirement: { reputation: 100 },
+        gifts: [],
+        dialogueTopics: ['competition', 'rates', 'clients'],
+        benefits: { competitionEvents: true },
+        backstory: 'Undercuts your rates. Always trying to one-up you.'
+    },
+
+    // Additional Criminal/Shady Characters
+    {
+        id: 'shadow_broker',
+        name: 'Shadow',
+        title: 'Information Broker',
+        icon: '🌑',
+        type: 'criminal',
+        personality: 'mysterious',
+        location: 'networking_bar',
+        unlockRequirement: { ethics: -15 },
+        gifts: ['crypto', 'anonymous_tips'],
+        dialogueTopics: ['insider_info', 'data_leaks', 'secrets'],
+        benefits: { insiderInfo: true, marketManipulation: true },
+        backstory: 'Sells information to the highest bidder. Very secretive.'
+    },
+
+    // Additional Romance Options
+    {
+        id: 'maya_engineer',
+        name: 'Maya Chen',
+        title: 'Software Engineer',
+        icon: '👩‍💻',
+        type: 'romance',
+        personality: 'friendly',
+        location: 'tech_hub',
+        unlockRequirement: { stat: 'intelligence', value: 25 },
+        romanceOptions: { minIntelligence: 20 },
+        gifts: ['code_reviews', 'tech_gadgets'],
+        dialogueTopics: ['coding', 'tech', 'innovation'],
+        benefits: { codingHelp: true, techInsights: true },
+        backstory: 'Brilliant engineer. Appreciates intelligence and creativity.'
+    },
+    {
+        id: 'noah_artist',
+        name: 'Noah Williams',
+        title: 'Visual Artist',
+        icon: '🎨',
+        type: 'romance',
+        personality: 'friendly',
+        location: 'coffee_shop',
+        unlockRequirement: { day: 15 },
+        romanceOptions: { minCharisma: 15 },
+        gifts: ['art_supplies', 'coffee'],
+        dialogueTopics: ['art', 'creativity', 'aesthetics'],
+        benefits: { designHelp: true, creativeBoost: true },
+        backstory: 'Creates beautiful visualizations. Values creativity and expression.'
+    },
+
+    // Government/Authority Figures
+    {
+        id: 'agent_smith',
+        name: 'Agent Smith',
+        title: 'IRS Investigator',
+        icon: '👮',
+        type: 'authority',
+        personality: 'professional',
+        location: 'city_hall',
+        unlockRequirement: { ethics: -30 },
+        gifts: [], // Can't bribe
+        dialogueTopics: ['taxes', 'compliance', 'audits'],
+        benefits: { taxAdvice: true, auditProtection: true },
+        backstory: 'Investigates financial crimes. Very thorough and by-the-book.'
+    },
+    {
+        id: 'judge_roberts',
+        name: 'Judge Roberts',
+        title: 'City Judge',
+        icon: '⚖️',
+        type: 'authority',
+        personality: 'professional',
+        location: 'city_hall',
+        unlockRequirement: { reputation: 2000 },
+        gifts: ['respect', 'legal_books'],
+        dialogueTopics: ['law', 'justice', 'ethics'],
+        benefits: { legalProtection: true, ethicsBoost: true },
+        backstory: 'Fair and just. Respects those who follow the law.'
+    },
+
+    // Service Providers
+    {
+        id: 'dr_wellness',
+        name: 'Dr. Wellness',
+        title: 'Health Coach',
+        icon: '🏥',
+        type: 'service',
+        personality: 'generous',
+        location: 'gym',
+        unlockRequirement: { stat: 'stamina', value: 20 },
+        gifts: ['healthy_food', 'vitamins'],
+        dialogueTopics: ['health', 'fitness', 'wellness'],
+        benefits: { healthBoost: true, staminaBoost: true },
+        backstory: 'Helps people maintain healthy lifestyles. Very encouraging.'
+    },
+    {
+        id: 'coach_motivation',
+        name: 'Coach Motivation',
+        title: 'Life Coach',
+        icon: '💪',
+        type: 'service',
+        personality: 'friendly',
+        location: 'gym',
+        unlockRequirement: { stat: 'focus', value: 25 },
+        gifts: ['motivational_books', 'protein'],
+        dialogueTopics: ['motivation', 'goals', 'success'],
+        benefits: { motivationBoost: true, focusBoost: true },
+        backstory: 'Helps people achieve their goals. Very inspiring.'
     }
 ];
+
+// Initialize all NPC images on module load
+initializeNPCImages();
 
 // Dialogue templates based on relationship levels
 export const DIALOGUE_TEMPLATES = {
@@ -624,6 +1000,13 @@ export class NPCManager {
 
         // Active conversations
         this.currentConversation = null;
+        
+        // Connect dialogue system to NPC manager (will be set after initialization)
+        setTimeout(() => {
+            if (dialogueTreeSystem) {
+                dialogueTreeSystem.setNPCManager(this);
+            }
+        }, 0);
     }
 
     initializeRelationships() {
@@ -702,6 +1085,52 @@ export class NPCManager {
     }
 
     /**
+     * Get all NPCs (for map rendering, etc.)
+     */
+    getAllNPCs() {
+        return NPCs.map(npc => {
+            // Ensure every NPC has image path
+            if (!npc.image) {
+                npc.image = getNPCImage(npc);
+            }
+            if (!npc.fallbackIcon) {
+                npc.fallbackIcon = getNPCFallback(npc);
+            }
+            return npc;
+        });
+    }
+
+    /**
+     * Get met NPCs with relationship data
+     */
+    getMetNPCs() {
+        // At game start, player knows NO ONE - empty city
+        if (!this.metNPCs) {
+            this.metNPCs = []; // Start empty
+        }
+
+        return this.metNPCs.map(npcId => {
+            const npc = this.getNPC(npcId);
+            if (!npc) return null;
+            
+            return {
+                ...npc,
+                relationship: this.relationships[npcId] || 0,
+                tier: this.getRelationshipTier(npcId)
+            };
+        }).filter(n => n !== null);
+    }
+
+    /**
+     * Mark NPC as met (when first encountered)
+     */
+    markNPCAsMet(npcId) {
+        if (!this.metNPCs.includes(npcId)) {
+            this.metNPCs.push(npcId);
+        }
+    }
+
+    /**
      * Get relationship level
      */
     getRelationship(npcId) {
@@ -738,44 +1167,81 @@ export class NPCManager {
     }
 
     /**
-     * Start conversation with NPC
+     * Start conversation with NPC using dialogue tree system
      */
-    startConversation(npcId) {
+    async startConversation(npcId) {
         const npc = this.getNPC(npcId);
         if (!npc) return null;
 
-        const relationship = this.relationships[npcId];
+        const relationship = this.relationships[npcId] || 0;
         const isFirstMeeting = !this.metNPCs.includes(npcId);
 
         if (isFirstMeeting) {
-            this.metNPCs.push(npcId);
+            this.markNPCAsMet(npcId);
         }
 
-        // Get appropriate greeting
-        let greetingPool;
-        if (isFirstMeeting) {
-            greetingPool = DIALOGUE_TEMPLATES.first_meeting;
-        } else if (relationship < 20) {
-            greetingPool = DIALOGUE_TEMPLATES.low_relationship;
-        } else if (relationship < 50) {
-            greetingPool = DIALOGUE_TEMPLATES.medium_relationship;
-        } else if (relationship < 80) {
-            greetingPool = DIALOGUE_TEMPLATES.high_relationship;
+        // Progressive relationship: Just talking increases relationship slightly
+        if (!isFirstMeeting && relationship < 100) {
+            let talkGain = 1;
+            if (relationship > 60) talkGain = 0.5;
+            if (relationship > 85) talkGain = 0.25;
+            this.modifyRelationship(npcId, talkGain);
+        }
+
+        // Get dialogue using relationship dialogue system (loads individual NPC files)
+        // relationship already declared above
+        
+        // Try to get dialogue from individual NPC file first
+        let dialogueText = null;
+        if (this.gameState.relationshipDialogueSystem) {
+            try {
+                dialogueText = await this.gameState.relationshipDialogueSystem.getDialogue(npcId, relationship);
+            } catch (error) {
+                console.warn(`Could not load dialogue for ${npcId}:`, error);
+            }
+        }
+        
+        // Fallback to dialogue tree system
+        const dialogueTree = dialogueTreeSystem.getTree(npcId, relationship);
+        const rootNode = dialogueTree ? dialogueTree.getRootNode() : null;
+
+        // Get greeting based on relationship level
+        // Use relationship variable already declared above
+        let greetingText;
+        if (dialogueText) {
+            greetingText = dialogueText;
+        } else if (rootNode) {
+            greetingText = this.getDynamicGreeting(npc, relationship, rootNode);
         } else {
-            greetingPool = DIALOGUE_TEMPLATES.max_relationship;
+            // Fallback to template system
+            const greetingPool = this.getGreetingPool(relationship, isFirstMeeting);
+            greetingText = greetingPool[Math.floor(Math.random() * greetingPool.length)].text;
         }
-
-        const greeting = greetingPool[Math.floor(Math.random() * greetingPool.length)];
 
         this.currentConversation = {
             npc,
-            relationship,
+            relationship: relationship,
             isFirstMeeting,
-            stage: 'greeting'
+            stage: 'greeting',
+            currentNode: 'root',
+            dialogueTree: dialogueTree
         };
 
-        // Check for dynamic choices
-        let choices = this.getAvailableChoices('greeting', relationship);
+        // Get choices from dialogue tree or fallback
+        let choices = [];
+        if (rootNode && rootNode.choices) {
+            choices = rootNode.choices.filter(choice => {
+                // Check conditions
+                if (choice.conditions) {
+                    if (choice.conditions.relationship && updatedRelationship < choice.conditions.relationship) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        } else {
+            choices = this.getAvailableChoices('greeting', updatedRelationship);
+        }
 
         // Add "Ask on Date" if eligible and single
         if (!this.gameState.romanceSystem.partnerId && npc.romanceOptions && relationship >= 30) {
@@ -800,11 +1266,70 @@ export class NPCManager {
 
         return {
             npc,
-            greeting: greeting.text.replace('{name}', npc.name),
+            greeting: greetingText.replace('{name}', npc.name),
             choices: choices,
-            relationship,
-            tier: this.getRelationshipTier(npcId)
+            relationship: updatedRelationship,
+            tier: this.getRelationshipTier(npcId),
+            dialogueTree: dialogueTree
         };
+    }
+    
+    /**
+     * Get dynamic greeting based on relationship and personality
+     */
+    getDynamicGreeting(npc, relationship, rootNode) {
+        if (rootNode && rootNode.text) {
+            return rootNode.text;
+        }
+        
+        // Fallback greeting generation
+        const personalityGreetings = {
+            friendly: [
+                "Hey! Great to see you!",
+                "Hi there! How's it going?",
+                "Hello! Always happy to chat!"
+            ],
+            professional: [
+                "Good day. How can I assist you?",
+                "Hello. What brings you here?",
+                "Greetings. How may I help?"
+            ],
+            competitive: [
+                "Oh, it's you. What do you want?",
+                "Hey. Still trying to keep up?",
+                "What's up? Got something to prove?"
+            ],
+            mysterious: [
+                "...",
+                "You again.",
+                "*nods silently*"
+            ],
+            generous: [
+                "Hello! I'm here to help!",
+                "Hi! Need anything?",
+                "Welcome! What can I do for you?"
+            ]
+        };
+        
+        const greetings = personalityGreetings[npc.personality] || personalityGreetings.friendly;
+        return greetings[Math.floor(Math.random() * greetings.length)];
+    }
+    
+    /**
+     * Get greeting pool based on relationship
+     */
+    getGreetingPool(relationship, isFirstMeeting) {
+        if (isFirstMeeting) {
+            return DIALOGUE_TEMPLATES.first_meeting;
+        } else if (relationship < 20) {
+            return DIALOGUE_TEMPLATES.low_relationship;
+        } else if (relationship < 50) {
+            return DIALOGUE_TEMPLATES.medium_relationship;
+        } else if (relationship < 80) {
+            return DIALOGUE_TEMPLATES.high_relationship;
+        } else {
+            return DIALOGUE_TEMPLATES.max_relationship;
+        }
     }
 
     /**
@@ -902,67 +1427,54 @@ export class NPCManager {
             };
         }
 
-        // Handle Tree Navigation
-        const npcId = this.currentConversation.npc.id;
-        if (choice.next) {
-            const state = this.getNPCState(npcId);
-            state.currentNode = choice.next;
-
-            // If navigating to root, maybe just keep conversation open?
-            // Or update greeting text based on next node?
-        }
-
+        // Apply choice effects
         const effects = choice.effect || {};
+        this.applyChoiceEffects(effects);
+
+        // Return result
+        return {
+            success: true,
+            text: choice.text,
+            effects,
+            newRelationship: this.relationships[this.currentConversation.npc.id],
+            tier: this.getRelationshipTier(this.currentConversation.npc.id),
+            isTreeAction: false
+        };
+    }
+    
+    /**
+     * Apply choice effects
+     */
+    applyChoiceEffects(effects) {
+        const npcId = this.currentConversation.npc.id;
+        
         // Apply relationship change
         if (effects.relationship) {
             this.modifyRelationship(npcId, effects.relationship);
         }
 
-        // Other effects
+        // XP rewards
         if (effects.xp) {
-            const amount = 20;
+            const amount = effects.xpAmount || 20;
             this.gameState.characterStats.addXP(effects.xp, amount);
-            // alert(`Learned something! +${amount} ${effects.xp} XP`);
         }
 
-        // Handle Ethics change from dialogue
+        // Ethics change
         if (effects.ethics) {
             this.gameState.characterStats.modifyEthics(effects.ethics);
         }
 
-        // Handle Money change (Loans/Jobs)
+        // Money change
         if (effects.money) {
             this.gameState.money += effects.money;
-            // No easy way to show toast from here unless passed down or via GameState events
-            // Assuming UI updates automatically via listeners or main loop
         }
 
-        // Handle Flags (Quest tracking)
+        // Flags (Quest tracking)
         if (effects.flag) {
             const state = this.getNPCState(npcId);
             if (!state.flags) state.flags = {};
             state.flags[effects.flag] = true;
         }
-
-        // Return result including new dialogue text if in tree
-        let responseText = choice.text;
-
-        if (DIALOGUE_TREES[npcId]) {
-            const state = this.getNPCState(npcId);
-            const nextNode = DIALOGUE_TREES[npcId][state.currentNode];
-            if (nextNode) {
-                responseText = nextNode.text;
-            }
-        }
-
-        return {
-            success: true,
-            text: responseText,
-            effects,
-            newRelationship: this.relationships[npcId],
-            tier: this.getRelationshipTier(npcId),
-            isTreeAction: true
-        };
     }
 
     /**
@@ -972,10 +1484,21 @@ export class NPCManager {
         const npc = this.getNPC(npcId);
         if (!npc) return { success: false, reason: 'NPC not found' };
 
-        const likesGift = npc.gifts.includes(giftId);
-        const relationshipGain = likesGift ? 15 : 5;
+        // Mark as met if not already
+        if (!this.metNPCs.includes(npcId)) {
+            this.markNPCAsMet(npcId);
+        }
 
-        this.modifyRelationship(npcId, relationshipGain);
+        const likesGift = npc.gifts.includes(giftId);
+        const relationshipGain = likesGift ? 15 : 5; // Liked gift = +15, generic = +5
+        
+        // Progressive relationship: Higher relationships get less gain (harder to maintain)
+        const currentRel = this.relationships[npcId] || 0;
+        let adjustedGain = relationshipGain;
+        if (currentRel > 60) adjustedGain = Math.max(3, relationshipGain * 0.5); // Harder to gain at high levels
+        if (currentRel > 85) adjustedGain = Math.max(2, relationshipGain * 0.3); // Very hard at max levels
+
+        this.modifyRelationship(npcId, adjustedGain);
 
         return {
             success: true,
@@ -985,16 +1508,6 @@ export class NPCManager {
         };
     }
 
-    /**
-     * Get all met NPCs
-     */
-    getMetNPCs() {
-        return this.metNPCs.map(id => ({
-            ...this.getNPC(id),
-            relationship: this.relationships[id],
-            tier: this.getRelationshipTier(id)
-        }));
-    }
 }
 
 

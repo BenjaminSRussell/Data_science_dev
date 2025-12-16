@@ -1,0 +1,205 @@
+/* =====================================================
+   CHARACTER ANIMATIONS & EMOTIONS
+   Dynamic character expressions and body language
+   ===================================================== */
+
+.character {
+    position: relative;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.character-sprite {
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.character-name {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: white;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Emotion Classes */
+.character.emotion-happy {
+    filter: brightness(1.1) saturate(1.2);
+}
+
+.character.emotion-sad {
+    filter: brightness(0.9) saturate(0.8);
+}
+
+.character.emotion-angry {
+    filter: hue-rotate(350deg) brightness(1.1);
+}
+
+.character.emotion-excited {
+    animation: bounce 0.5s ease infinite;
+}
+
+.character.emotion-thinking {
+    filter: brightness(0.95);
+    animation: pulse 2s ease infinite;
+}
+
+/* Pose Classes */
+.character.pose-standing {
+    /* Default standing pose */
+}
+
+.character.pose-sitting {
+    transform: scaleY(0.85) translateY(8px);
+}
+
+.character.pose-talking {
+    animation: talk 0.3s ease infinite;
+}
+
+.character.pose-thinking {
+    animation: think 2s ease infinite;
+}
+
+.character.pose-working {
+    animation: work 1s ease infinite;
+}
+
+/* Animation States */
+.character.talking {
+    animation: talk 0.3s ease infinite;
+}
+
+.character.thinking {
+    animation: think 2s ease infinite;
+}
+
+.character.idle-animation {
+    animation: idle 3s ease infinite;
+}
+
+.character.emotion-changing {
+    animation: emotionChange 0.5s ease;
+}
+
+/* Keyframe Animations */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes talk {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.95); }
+}
+
+@keyframes think {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-2deg); }
+    75% { transform: rotate(2deg); }
+}
+
+@keyframes work {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(2px); }
+}
+
+@keyframes idle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+@keyframes emotionChange {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Body Language Indicators */
+.character::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.character.pose-talking::before {
+    border-bottom: 8px solid rgba(139, 92, 246, 0.8);
+    opacity: 1;
+    animation: speechBubble 0.5s ease infinite;
+}
+
+.character.pose-thinking::before {
+    border-bottom: 8px solid rgba(139, 92, 246, 0.8);
+    opacity: 1;
+    animation: thoughtBubble 1s ease infinite;
+}
+
+@keyframes speechBubble {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+@keyframes thoughtBubble {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.1); }
+}
+
+/* Character Container */
+.character-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+}
+
+/* Multiple Characters */
+.characters-group {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+/* Character in Dialogue */
+.dialogue-character {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+}
+
+.dialogue-character .character-sprite {
+    width: 120px;
+    height: 120px;
+}
+
+/* Character in Location */
+.location-character {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+

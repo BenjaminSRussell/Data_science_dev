@@ -1,0 +1,201 @@
+/* =====================================================
+   LOCATION BACKGROUNDS
+   Cartoonish style backgrounds for every location
+   ===================================================== */
+
+.location-background {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 600px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+/* Home/Apartment Background */
+.location-background.home {
+    background-image: url('/assets/backgrounds/locations/home.png');
+    background-color: #e8e4d9;
+}
+
+.location-background.home::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(232, 228, 217, 0.3) 0%, rgba(232, 228, 217, 0.1) 100%);
+}
+
+/* Office Background */
+.location-background.office {
+    background-image: url('/assets/backgrounds/locations/office.png');
+    background-color: #d4d8dc;
+}
+
+.location-background.office::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(212, 216, 220, 0.3) 0%, rgba(212, 216, 220, 0.1) 100%);
+}
+
+/* Coffee Shop Background */
+.location-background.coffee_shop {
+    background-image: url('/assets/backgrounds/locations/coffee_shop.png');
+    background-color: #d4a574;
+}
+
+.location-background.coffee_shop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(212, 165, 116, 0.2) 0%, rgba(212, 165, 116, 0.1) 100%);
+}
+
+/* University Background */
+.location-background.university {
+    background-image: url('/assets/backgrounds/locations/university.png');
+    background-color: #b8c5d1;
+}
+
+.location-background.university::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(184, 197, 209, 0.3) 0%, rgba(184, 197, 209, 0.1) 100%);
+}
+
+/* Bank Background */
+.location-background.bank {
+    background-image: url('/assets/backgrounds/locations/bank.png');
+    background-color: #c9b99b;
+}
+
+.location-background.bank::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(201, 185, 155, 0.3) 0%, rgba(201, 185, 155, 0.1) 100%);
+}
+
+/* Park Background */
+.location-background.park {
+    background-image: url('/assets/backgrounds/locations/park.png');
+    background-color: #a8c090;
+}
+
+.location-background.park::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(168, 192, 144, 0.2) 0%, rgba(168, 192, 144, 0.1) 100%);
+}
+
+/* Fallback Backgrounds (if images don't load) */
+.location-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--fallback-color, #1e293b);
+    z-index: -1;
+}
+
+/* Location Features Overlay */
+.location-features {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.location-feature {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    pointer-events: all;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.location-feature:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.location-feature-label {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: white;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.location-feature:hover .location-feature-label {
+    opacity: 1;
+}
+
+/* Day/Night Variations */
+.location-background.time-morning {
+    filter: brightness(1.1) saturate(1.1);
+}
+
+.location-background.time-noon {
+    filter: brightness(1) saturate(1);
+}
+
+.location-background.time-night {
+    filter: brightness(0.7) saturate(0.9);
+}
+
+/* Location View Container */
+.location-view-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.location-view-container.hidden {
+    display: none;
+}
+
+/* Location Content */
+.location-content {
+    position: relative;
+    z-index: 20;
+    padding: 2rem;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.location-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.location-description {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+

@@ -26,6 +26,7 @@ export class UIUpdater {
         this.updateTopBar();
         this.updateRankProgress();
         this.updateChartTypeGrid();
+        this.updateSoftwareDisplay();
         this.updateBankScreen();
     }
 
@@ -112,6 +113,50 @@ export class UIUpdater {
     }
 
     /**
+     * Update software display in chart studio
+     */
+    updateSoftwareDisplay() {
+        const softwareList = document.getElementById('software-list');
+        if (!softwareList) return;
+
+        const purchasedSoftware = SHOP_ITEMS.filter(item => 
+            item.type === 'software' && this.gameState.purchasedItems.includes(item.id)
+        );
+
+        if (purchasedSoftware.length === 0) {
+            softwareList.innerHTML = '<p class="software-none">No software purchased</p>';
+            return;
+        }
+
+        const multipliers = this.gameState.getSoftwareQualityMultiplier();
+        
+        softwareList.innerHTML = purchasedSoftware.map(item => {
+            const bonuses = [];
+            if (item.id === 'soft_ide_pro') {
+                bonuses.push('+5% Visual Clarity', '+3% Data Accuracy');
+            } else if (item.id === 'soft_automl') {
+                bonuses.push('+10% Speed', '+3% Chart Appropriateness');
+            } else if (item.id === 'soft_cloud_basic') {
+                bonuses.push('+5% Data Accuracy', '+5% Speed');
+            } else if (item.id === 'soft_enterprise_db') {
+                bonuses.push('+8% Data Accuracy', '+2% Chart Appropriateness');
+            } else if (item.id === 'soft_neural_arch') {
+                bonuses.push('+10% Visual Clarity', '+8% Chart Appropriateness', '+5% Data Accuracy');
+            }
+
+            return `
+                <div class="software-item">
+                    <span class="software-icon">${item.icon}</span>
+                    <div class="software-info">
+                        <div class="software-name">${item.name}</div>
+                        <div class="software-bonuses">${bonuses.join(', ')}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    /**
      * Update task display
      */
     updateTaskDisplay() {
@@ -190,7 +235,7 @@ export class UIUpdater {
     /**
      * Update shop screen
      */
-    updateShopScreen(category = 'charts') {
+    updateShopScreen(category = 'tools') {
         const grid = document.getElementById('shop-grid');
         if (!grid) return;
 

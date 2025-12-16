@@ -3,7 +3,8 @@
  */
 
 export class ScreenManager {
-    constructor() {
+    constructor(mainGame) {
+        this.mainGame = mainGame;
         this.currentScreen = 'screen-menu';
         this.screens = {};
         this.history = [];
@@ -30,6 +31,11 @@ export class ScreenManager {
         if (!targetScreen) {
             console.error(`Screen not found: ${screenId}`);
             return;
+        }
+
+        // Apply screen theme if theme manager exists
+        if (this.mainGame?.gameState?.screenThemeManager) {
+            this.mainGame.gameState.screenThemeManager.applyTheme(screenId);
         }
 
         // Hide current screen

@@ -7,17 +7,17 @@
    CARTOON VARIABLES
    ===================================================== */
 :root {
-    /* Cartoon color palette - bright and fun */
-    --cartoon-bg-primary: #1a1b3c;
-    --cartoon-bg-secondary: #252750;
-    --cartoon-bg-tertiary: #2f3260;
+    /* Modern, professional color palette - clean and vibrant */
+    --cartoon-bg-primary: #0f172a;
+    --cartoon-bg-secondary: #1e293b;
+    --cartoon-bg-tertiary: #334155;
 
-    --cartoon-accent-blue: #4ecdc4;
-    --cartoon-accent-purple: #a855f7;
-    --cartoon-accent-pink: #ff6b9d;
-    --cartoon-accent-yellow: #ffd93d;
-    --cartoon-accent-orange: #ff8548;
-    --cartoon-accent-green: #6bcb77;
+    --cartoon-accent-blue: #8b5cf6;
+    --cartoon-accent-purple: #a78bfa;
+    --cartoon-accent-pink: #f472b6;
+    --cartoon-accent-yellow: #fbbf24;
+    --cartoon-accent-orange: #fb923c;
+    --cartoon-accent-green: #34d399;
 
     /* Fun gradients */
     --cartoon-gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f472b6 100%);

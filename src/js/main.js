@@ -17,6 +17,53 @@ import { CharacterStats, STATS, TRAINING_ACTIVITIES } from './game/CharacterStat
 import { TimeManager } from './game/TimeManager.js';
 import { WorldMap } from './game/WorldMap.js';
 import { NPCManager, NPCs } from './game/NPCManager.js';
+import { ContractSystem } from './game/contracts/ContractSystem.js';
+import { MapProgressionSystem } from './game/MapProgressionSystem.js';
+import { dialogueTreeSystem } from './game/dialogue/DialogueTreeSystem.js';
+import { ConversationScreen } from './game/dialogue/ConversationScreen.js';
+import { IntroSystem } from './game/IntroSystem.js';
+import { DayNightCycle, TIME_OF_DAY } from './game/DayNightCycle.js';
+import { NotificationSystem } from './game/NotificationSystem.js';
+import { LocationDetailSystem } from './game/locations/LocationDetailSystem.js';
+import { CompanyManagementSystem } from './game/company/CompanyManagementSystem.js';
+import { RomanceProgressionSystem } from './game/romance/RomanceProgressionSystem.js';
+import { JealousySystem } from './game/social/JealousySystem.js';
+import { DemandingBossSystem } from './game/work/DemandingBossSystem.js';
+import { GameplaySettings } from './game/settings/GameplaySettings.js';
+import { RoommateSystem } from './game/social/RoommateSystem.js';
+import { DirtyDataSystem } from './game/data/DirtyDataSystem.js';
+import { DetailedMapSystem } from './game/map/DetailedMapSystem.js';
+import { RoomSystem } from './game/locations/RoomSystem.js';
+import { EventSystem } from './game/events/EventSystem.js';
+import { VisualProgressionSystem } from './game/visual/VisualProgressionSystem.js';
+import { RealWorldTaskSystem } from './game/work/RealWorldTaskSystem.js';
+import { TaskVisualRenderer } from './game/work/TaskVisualRenderer.js';
+import { AITrainingStoryline } from './game/ai/AITrainingStoryline.js';
+import { GitHubIssuesSystem } from './game/github/GitHubIssuesSystem.js';
+import { ResearchPaperNotificationSystem } from './game/research/ResearchPaperNotificationSystem.js';
+import { ResearchInboxUI } from './ui/ResearchInboxUI.js';
+import { EmotionalBreakdownSystem } from './game/dialogue/EmotionalBreakdownSystem.js';
+import { RelationshipDialogueSystem } from './game/dialogue/RelationshipDialogueSystem.js';
+import { ComprehensiveSpriteSystem } from './assets/ComprehensiveSpriteSystem.js';
+import { getTextIcon } from './utils/IconMapper.js';
+import { JobSystem } from './game/JobSystem.js';
+import { WorkInteractionSystem } from './game/WorkInteractionSystem.js';
+import { RealisticDialogueSystem } from './game/RealisticDialogueSystem.js';
+import { RelationshipEmotionSystem } from './game/RelationshipEmotionSystem.js';
+import { WorldEvolutionSystem } from './game/WorldEvolutionSystem.js';
+import { InvestmentEcommerceSystem } from './game/InvestmentEcommerceSystem.js';
+import { StorylineManager } from './game/StorylineManager.js';
+import { IDESystem } from './game/IDESystem.js';
+import { LocationBackgroundSystem } from './game/LocationBackgroundSystem.js';
+import { WeeklyNewsSystem } from './game/WeeklyNewsSystem.js';
+import { ScreenThemeManager } from './game/ScreenThemeManager.js';
+import { MapCoordinateSystem } from './game/MapCoordinateSystem.js';
+import { VisualSystem } from './visual/VisualSystem.js';
+import { AnimationManager } from './animation/AnimationManager.js';
+import { AssetManager } from './assets/AssetManager.js';
+import { PerformanceManager } from './performance/PerformanceManager.js';
+import { UILayerManager } from './ui/UILayerManager.js';
+import { CameraSystem } from './camera/CameraSystem.js';
 import { NewsManager } from './game/NewsManager.js';
 import { StockMarket } from './game/StockMarket.js';
 import { CrimeSystem } from './game/CrimeSystem.js';
@@ -28,6 +75,13 @@ import { ProjectSystem } from './game/ProjectSystem.js';
 import { AISystem } from './game/AISystem.js';
 import { HardwareManager } from './game/HardwareSystems.js'; // NEW
 import { LIBRARY_CONTENT, CATEGORIES } from './game/LibraryDatabase.js';
+
+// Helper modules - split from main.js for easier debugging
+import * as MapHelpers from './helpers/MapHelpers.js';
+import * as NPCHelpers from './helpers/NPCHelpers.js';
+import * as StockMarketHelpers from './helpers/StockMarketHelpers.js';
+import * as EducationHelpers from './helpers/EducationHelpers.js';
+import * as ProjectHelpers from './helpers/ProjectHelpers.js';
 
 let game = null; // Declare game instance
 
@@ -174,7 +228,7 @@ export class MainGame {
 
         // RPG Navigation
         document.getElementById('btn-nav-map')?.addEventListener('click', () => {
-            this.screenManager.showScreen('screen-map');
+            this.screenManager.showScreen('screen-game');
             this.updateMapScreen();
         });
 
@@ -228,7 +282,7 @@ export class MainGame {
         });
 
         document.getElementById('btn-back-market')?.addEventListener('click', () => {
-            this.screenManager.showScreen('screen-map');
+            this.screenManager.showScreen('screen-game');
             this.updateMapScreen();
         });
 
@@ -434,13 +488,13 @@ export class MainGame {
     }
 
     /**
-     * Start a new game
-     */
-    /**
-     * Start a new game
+     * Start a new game (optimized for fast loading)
      */
     startNewGame() {
         console.log('🚀 Starting new game...');
+        
+        // Show loading indicator
+        this.showLoadingProgress('Initializing game...', 0);
 
         try {
             // Reset game state
@@ -448,23 +502,143 @@ export class MainGame {
             this.gameState.isGameStarted = true;
             console.log('DEBUG [startNewGame]: gameState reset');
 
-            // Initialize RPG systems
+            // CRITICAL SYSTEMS - Load immediately (required for game to start)
+            this.showLoadingProgress('Loading core systems...', 10);
             this.gameState.characterStats = new CharacterStats();
             this.gameState.timeManager = new TimeManager();
             this.gameState.economySystem = new EconomySystem(this.gameState);
-            this.bankSystem = new BankSystem(this.gameState); // Initialize BankSystem
+            this.bankSystem = new BankSystem(this.gameState);
             this.gameState.worldMap = new WorldMap(this.gameState);
             this.gameState.npcManager = new NPCManager(this.gameState);
+            
+            // HIGH PRIORITY - Load next
+            this.showLoadingProgress('Loading game systems...', 30);
             this.gameState.newsManager = new NewsManager(this.gameState);
             this.gameState.stockMarket = new StockMarket(this.gameState);
-            this.gameState.crimeSystem = new CrimeSystem(this.gameState);
-            this.gameState.romanceSystem = new RomanceSystem(this.gameState);
-            this.gameState.legalSystem = new LegalSystem(this.gameState);
-            this.gameState.educationSystem = new EducationSystem(this.gameState);
-            this.gameState.worldEventManager = new WorldEventManager(this.gameState);
-            this.gameState.projectSystem = new ProjectSystem(this.gameState);
-            this.gameState.aiSystem = new AISystem(this.gameState);
-            this.gameState.hardwareManager = new HardwareManager(this.gameState); // NEW
+            
+            // MEDIUM PRIORITY - Load in background (defer)
+            setTimeout(() => {
+                try {
+                    this.gameState.crimeSystem = new CrimeSystem(this.gameState);
+                    this.gameState.romanceSystem = new RomanceSystem(this.gameState);
+                    this.gameState.legalSystem = new LegalSystem(this.gameState);
+                    this.gameState.educationSystem = new EducationSystem(this.gameState);
+                    this.gameState.worldEventManager = new WorldEventManager(this.gameState);
+                    this.gameState.projectSystem = new ProjectSystem(this.gameState);
+                } catch (error) {
+                    console.warn('Error loading medium priority systems:', error);
+                }
+            }, 0);
+            
+            // LOW PRIORITY - Load last (defer)
+            setTimeout(() => {
+                try {
+                    this.gameState.aiSystem = new AISystem(this.gameState);
+                    this.gameState.hardwareManager = new HardwareManager(this.gameState);
+                    this.gameState.contractSystem = new ContractSystem(this.gameState);
+                    this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
+                } catch (error) {
+                    console.warn('Error loading low priority systems:', error);
+                }
+            }, 100);
+            
+            // HIGH PRIORITY - Needed for intro
+            this.showLoadingProgress('Loading UI systems...', 50);
+            this.conversationScreen = new ConversationScreen(this);
+            this.gameState.conversationScreen = this.conversationScreen;
+            
+            this.introSystem = new IntroSystem(this);
+            this.gameState.introSystem = this.introSystem;
+            
+            this.gameState.dayNightCycle = new DayNightCycle(this.gameState);
+            this.dayNightCycle = this.gameState.dayNightCycle;
+            
+            this.gameState.notificationSystem = new NotificationSystem(this.gameState);
+            this.notificationSystem = this.gameState.notificationSystem;
+            this.notificationSystem.scheduleDefaultNotifications();
+            
+            // DEFER ALL OTHER SYSTEMS - Load in background
+            setTimeout(() => this.loadDeferredSystems(), 50);
+            
+            // Asset systems - Initialize but don't load assets yet
+            this.showLoadingProgress('Preparing assets...', 70);
+            this.assetManager = new AssetManager();
+            this.gameState.assetManager = this.assetManager;
+            
+            this.spriteSheetManager = new SpriteSheetManager();
+            this.gameState.spriteSheetManager = this.spriteSheetManager;
+            
+            this.animatedCharacterRenderer = new AnimatedCharacterRenderer(this.spriteSheetManager);
+            this.gameState.animatedCharacterRenderer = this.animatedCharacterRenderer;
+            
+            this.characterAnimationSystem = new CharacterAnimationSystem(this.assetManager);
+            this.gameState.characterAnimationSystem = this.characterAnimationSystem;
+            
+            this.locationView = new LocationView(this, this.assetManager, this.characterAnimationSystem);
+            this.gameState.locationView = this.locationView;
+            
+            // Load assets in background (non-blocking, low priority)
+            setTimeout(() => {
+                this.assetManager.loadAll().then(success => {
+                    if (success) {
+                        console.log('Assets loaded successfully');
+                    } else {
+                        console.warn('Some assets failed to load, using fallbacks');
+                    }
+                }).catch(err => {
+                    console.warn('Asset loading error (using fallbacks):', err);
+                });
+            }, 500);
+            
+            // Make game accessible globally for intro callbacks
+            window.game = this;
+            
+            // Initialize all new integrated systems
+            this.gameState.jobSystem = new JobSystem(this.gameState);
+            this.gameState.workInteractionSystem = new WorkInteractionSystem(this.gameState);
+            this.gameState.realisticDialogueSystem = new RealisticDialogueSystem();
+            this.gameState.relationshipEmotionSystem = new RelationshipEmotionSystem(this.gameState);
+            this.gameState.worldEvolutionSystem = new WorldEvolutionSystem(this.gameState);
+            this.gameState.investmentEcommerceSystem = new InvestmentEcommerceSystem(this.gameState);
+            this.gameState.storylineManager = new StorylineManager(this.gameState);
+            this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
+            this.gameState.ideSystem = new IDESystem(this.gameState);
+            this.gameState.locationBackgroundSystem = new LocationBackgroundSystem(this.gameState);
+            this.gameState.weeklyNewsSystem = new WeeklyNewsSystem(this.gameState);
+            this.gameState.screenThemeManager = new ScreenThemeManager();
+            this.gameState.mapCoordinateSystem = new MapCoordinateSystem();
+            
+            // DEFER Phase 1 Visual Systems - Load in background
+            setTimeout(() => {
+                try {
+                    this.gameState.visualSystem = new VisualSystem(this.gameState);
+                    this.gameState.animationManager = new AnimationManager();
+                    this.gameState.performanceManager = new PerformanceManager();
+                    this.gameState.uiLayerManager = new UILayerManager();
+                } catch (error) {
+                    console.warn('Error loading visual systems:', error);
+                }
+            }, 300);
+            
+            // Register visual subsystems
+            this.gameState.visualSystem.registerRenderer('animation', this.gameState.animationManager);
+            
+            // Detect hardware and set quality
+            try {
+                this.gameState.performanceManager.detectHardware();
+                // Start monitoring after a short delay to ensure game loop is running
+                setTimeout(() => {
+                    if (this.gameState.performanceManager) {
+                        this.gameState.performanceManager.startMonitoring();
+                    }
+                }, 100);
+            } catch (error) {
+                console.warn('Performance manager initialization failed:', error);
+            }
+            
+            // Link mainGame reference for systems that need it
+            this.gameState.mainGame = this;
+            
             console.log('DEBUG [startNewGame]: all systems initialized');
 
             // Link managers to main class for easy access
@@ -481,44 +655,115 @@ export class MainGame {
             this.worldEventManager = this.gameState.worldEventManager;
             this.projectSystem = this.gameState.projectSystem;
             this.aiSystem = this.gameState.aiSystem;
-            this.hardwareManager = this.gameState.hardwareManager; // NEW
+            this.hardwareManager = this.gameState.hardwareManager;
+            this.contractSystem = this.gameState.contractSystem;
+            this.mapProgressionSystem = this.gameState.mapProgressionSystem;
+            
+            // Link new systems
+            this.jobSystem = this.gameState.jobSystem;
+            this.workInteractionSystem = this.gameState.workInteractionSystem;
+            this.realisticDialogueSystem = this.gameState.realisticDialogueSystem;
+            this.relationshipEmotionSystem = this.gameState.relationshipEmotionSystem;
+            this.worldEvolutionSystem = this.gameState.worldEvolutionSystem;
+            this.investmentEcommerceSystem = this.gameState.investmentEcommerceSystem;
+            this.storylineManager = this.gameState.storylineManager;
+            this.mapProgressionSystem = this.gameState.mapProgressionSystem;
+            this.ideSystem = this.gameState.ideSystem;
+            this.locationBackgroundSystem = this.gameState.locationBackgroundSystem;
+            this.weeklyNewsSystem = this.gameState.weeklyNewsSystem;
+            this.screenThemeManager = this.gameState.screenThemeManager;
+            this.mapCoordinateSystem = this.gameState.mapCoordinateSystem;
+            
+            // Link Phase 1 Visual Systems
+            this.visualSystem = this.gameState.visualSystem;
+            this.animationManager = this.gameState.animationManager;
+            this.assetManager = this.gameState.assetManager;
+            this.performanceManager = this.gameState.performanceManager;
+            this.uiLayerManager = this.gameState.uiLayerManager;
+            
+            // Initialize camera system for map (lazy initialization when map is accessed)
+            // Camera will be initialized in updateMapScreen() when needed
+            
+            // Initialize storyline
+            this.storylineManager.initialize();
+            
+            // Initialize map coordinate system with existing locations
+            if (this.worldMap) {
+                const locations = this.worldMap.getAccessibleLocations();
+                this.mapCoordinateSystem.initializeWithLocations(locations);
+            }
+            
             console.log('DEBUG [startNewGame]: managers linked');
+            this.showLoadingProgress('Ready!', 100);
+            console.log('DEBUG [startNewGame]: core systems initialized, showing intro');
+            
+            // Hide loading, show intro
+            setTimeout(() => {
+                this.hideLoadingProgress();
+                // Show intro instead of jumping directly to game
+                this.introSystem.showIntro();
+            }, 100);
+        } catch (error) {
+            console.error('❌ startNewGame ERROR:', error);
+            console.error('Stack:', error.stack);
+            this.showError('Failed to start game. Please refresh the page.');
+        }
+    }
 
+
+    /**
+     * Finish game start after intro/job selection
+     */
+    finishGameStart() {
+        try {
+            console.log('DEBUG [finishGameStart]: completing game initialization');
+            
             // Generate first task
             this.taskSystem.generateNewTask();
-            console.log('DEBUG [startNewGame]: first task generated');
+            console.log('DEBUG [finishGameStart]: first task generated');
 
             // Generate initial news
             this.newsManager.generateDailyNews();
-            console.log('DEBUG [startNewGame]: news generated');
+            console.log('DEBUG [finishGameStart]: news generated');
 
             // Update UI
             this.uiUpdater.updateAllUI();
-            console.log('DEBUG [startNewGame]: UI updated');
+            console.log('DEBUG [finishGameStart]: UI updated');
 
-            this.updateMapScreen(); // Initial map update
-            console.log('DEBUG [startNewGame]: map updated');
+            this.updateMapScreen();
+            console.log('DEBUG [finishGameStart]: map updated');
 
-            // Update environment (office location, weather)
+            // Update environment
             this.environmentManager.updateLocation();
-            console.log('DEBUG [startNewGame]: environment updated');
+            console.log('DEBUG [finishGameStart]: environment updated');
 
-            // Show game screen
+            // Show map screen as main area
             this.screenManager.showScreen('screen-game');
-            console.log('DEBUG [startNewGame]: showScreen called');
+            console.log('DEBUG [finishGameStart]: showScreen called (map)');
 
             // Play sound
             this.audioManager.play('start');
 
-            // Show toast
-            this.showToast('Welcome to your new career!', 'success');
-            console.log('DEBUG [startNewGame]: COMPLETE');
+            // Show toast with job info
+            const job = this.gameState.currentJob;
+            if (job) {
+                this.showToast(`Day 1 at ${job.company}. Let's do this!`, 'success');
+            } else {
+                this.showToast('Welcome to your new career!', 'success');
+            }
+            
+            // Start game loop
+            if (!this.gameLoopId) {
+                this.gameLoopId = requestAnimationFrame(this.gameLoop);
+                console.log('DEBUG [finishGameStart]: Game loop started');
+            }
+            
+            console.log('DEBUG [finishGameStart]: COMPLETE');
         } catch (error) {
-            console.error('❌ startNewGame ERROR:', error);
-            console.error('Stack:', error.stack);
+            console.error('❌ finishGameStart ERROR:', error);
+            this.showError('Failed to start game. Please refresh.');
         }
     }
-
 
     /**
      * Continue saved game
@@ -643,6 +888,12 @@ export class MainGame {
         // Show game screen
         this.screenManager.showScreen('screen-game');
 
+        // Start game loop if not already running
+        if (!this.gameLoopId) {
+            this.gameLoopId = requestAnimationFrame(this.gameLoop);
+            console.log('DEBUG [continueGame]: Game loop started');
+        }
+
         // Show toast
         this.showToast('Welcome back!', 'success');
     }
@@ -657,278 +908,58 @@ export class MainGame {
 
     // Append this to end or inside class
 
+    // ========== STOCK MARKET METHODS (delegated to StockMarketHelpers) ==========
+    
     updateStockMarketScreen() {
-        if (!this.stockMarket) return;
-
-        const grid = document.getElementById('stock-grid');
-        if (!grid) return;
-
-        grid.innerHTML = '';
-
-        this.stockMarket.stocks.forEach(stock => {
-            const owned = this.stockMarket.portfolio.getQuantity(stock.id);
-            const card = document.createElement('div');
-            card.className = 'stock-card';
-
-            // Calculate change (mock for now, or based on history)
-            const lastPrice = stock.history.length > 1 ? stock.history[stock.history.length - 2] : stock.price;
-            const change = ((stock.price - lastPrice) / lastPrice) * 100;
-            const changeClass = change >= 0 ? 'positive' : 'negative';
-            const changeSymbol = change >= 0 ? '▲' : '▼';
-
-            // Illegal Actions Check
-            let illegalActionsHtml = '';
-            // If Ethics < -10, show Pump & Dump option
-            // If Ethics < -30, show Insider Pump (needs NPC?)
-            if (this.characterStats.ethics < -10) {
-                illegalActionsHtml = `
-                    <div class="stock-actions-illegal" style="margin-top: 5px; border-top: 1px dashed red; padding-top: 5px;">
-                        <button class="btn-cartoon btn-sm btn-danger" onclick="game.handleCrime('pump_dump', '${stock.id}')">⚡ Pump & Dump</button>
-                    </div>
-                `;
-            }
-
-            card.innerHTML = `
-                <div class="stock-header">
-                    <div class="stock-ticker">${stock.ticker}</div>
-                    <div class="stock-price">$${stock.price.toFixed(2)}</div>
-                </div>
-                <div class="stock-name">${stock.name}</div>
-                <div class="stock-change ${changeClass}">${changeSymbol} ${Math.abs(change).toFixed(2)}%</div>
-                <div class="stock-holdings">Owned: ${owned}</div>
-                <div class="stock-actions">
-                    <button class="btn-cartoon btn-sm" onclick="game.handleBuyStock('${stock.id}')">Buy</button>
-                    <button class="btn-cartoon btn-sm" onclick="game.handleSellStock('${stock.id}')">Sell</button>
-                </div>
-                ${illegalActionsHtml}
-            `;
-            grid.appendChild(card);
-        });
-
-        // Update portfolio summary
-        document.getElementById('portfolio-value').textContent = `$${this.stockMarket.getPortfolioValue().toFixed(2)}`;
-        document.getElementById('liquid-cash').textContent = `$${this.gameState.money.toFixed(2)}`;
-
-        // Show Heat if active
-        // Maybe add Heat Display to market screen?
+        StockMarketHelpers.updateStockMarketScreen(this);
     }
 
     handleCrime(type, params) {
-        if (!confirm("⚠️ This is illegal! If caught, you could go to jail. Proceed?")) return;
-
-        const result = this.crimeSystem.commitCrime(type, params);
-        if (result.success) {
-            this.showToast(result.message, 'success');
-            if (result.profit) {
-                this.showToast(`Profit: $${result.profit}`, 'success');
-            }
-            this.updateStockMarketScreen();
-            this.uiUpdater.updateAllUI();
-        } else {
-            if (result.caught) {
-                this.handleArrest(result.message);
-            } else {
-                this.showToast(result.message, 'warning');
-            }
-        }
-    }
-
-    updateStatsScreen() {
-        const stats = this.characterStats.stats;
-        const level = this.characterStats.level;
-        const xp = this.characterStats.experience;
-        const xpNext = this.characterStats.xpPerLevel;
-
-        document.getElementById('stats-level').textContent = `Level ${level}`;
-        document.getElementById('stats-ethics').textContent = `Ethics: ${this.characterStats.ethics}`;
-
-        // Character Image (Dynamic)
-        // For now, use the static start image but apply "Alive" class
-        const charContainer = document.getElementById('character-preview'); // Ensure this ID exists in HTML
-        if (charContainer) {
-            let playerImage = '/assets/npcs/player_young.png';
-            // Logic to switch image based on evolution would go here
-            // e.g. if (this.characterStats.physics.clothes === 'expensive_suit') playerImage = '/assets/npcs/player_evil.png';
-
-            charContainer.innerHTML = `
-                <img src="${playerImage}" class="char-sprite char-alive" alt="Player Character">
-            `;
-        }
-
-        // ... existing stat updates ...
-    }
-
-    // ... existing relationship update ...
-
-    handleVisitNPC(npcId) {
-        // Show modal with full body
-        const npc = this.gameState.npcManager.getNPC(npcId);
-        if (!npc) return;
-
-        const tier = this.gameState.npcManager.getRelationshipTier(npc.id);
-
-        // Create or get modal
-        let modal = document.getElementById('npc-modal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'npc-modal';
-            modal.className = 'modal screen active'; // Re-use screen styles or custom modal
-            document.body.appendChild(modal);
-        }
-
-        modal.className = 'modal active'; // Show it
-
-        // Content
-        modal.innerHTML = `
-            <div class="modal-content" style="background: var(--cartoon-bg-primary); padding: 20px; border-radius: 15px; max-width: 600px; margin: 100px auto; text-align: center; position: relative;">
-                <button class="btn-close" onclick="document.getElementById('npc-modal').className='modal hidden'" style="position: absolute; top: 10px; right: 10px;">❌</button>
-                
-                <h2 style="font-family: 'Bangers', cursive; font-size: 2.5rem; color: var(--cartoon-text); margin-bottom: 5px;">${npc.name}</h2>
-                <div style="color: grey; margin-bottom: 20px;">${npc.title} | ${tier.label}</div>
-                
-                <div class="character-display" style="height: 350px; margin-bottom: 20px;">
-                     <img src="${npc.image || npc.icon}" class="char-sprite char-alive ${npc.id === this.currentTalkingNPC ? 'char-talking' : ''}" style="height: 100%;">
-                </div>
-                
-                <div class="dialogue-box" id="npc-dialogue-area" style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px; min-height: 80px;">
-                    "Hey there! What's new?"
-                </div>
-                
-                <div class="npc-actions">
-                     <button class="btn-cartoon" onclick="game.handleNPCTalk('${npc.id}')">💬 Chat</button>
-                     <button class="btn-cartoon" onclick="game.handleNPCGift('${npc.id}')">🎁 Gift</button>
-                     <button class="btn-cartoon btn-danger" onclick="document.getElementById('npc-modal').className='modal hidden'">Leave</button>
-                </div>
-            </div>
-         `;
-
-        this.currentTalkingNPC = npc.id;
-    }
-
-    handleNPCTalk(npcId) {
-        const convo = this.gameState.npcManager.startConversation(npcId);
-        if (!convo) return;
-
-        const dialogArea = document.getElementById('npc-dialogue-area');
-        dialogArea.innerHTML = `"${convo.greeting}"`;
-
-        // Update actions to choices
-        const actionsDiv = document.querySelector('#npc-modal .npc-actions');
-        actionsDiv.innerHTML = '';
-
-        convo.choices.forEach((choice, index) => {
-            const btn = document.createElement('button');
-            btn.className = 'btn-cartoon btn-sm';
-            btn.textContent = choice.text;
-            btn.onclick = () => {
-                const result = this.gameState.npcManager.makeChoice(index);
-                this.handleNPCResponse(result);
-            };
-            actionsDiv.appendChild(btn);
-        });
-    }
-
-    handleNPCResponse(result) {
-        if (!result) return;
-        const dialogArea = document.getElementById('npc-dialogue-area');
-        // Simple response for now
-        dialogArea.innerHTML = "Interesting... (Relationship Changed)";
-
-        // Reset buttons after short delay or immediately
-        setTimeout(() => {
-            // Close or return to main menu? For now close
-            document.getElementById('npc-modal').className = 'modal hidden';
-            this.showToast('Conversation finished.', 'success');
-        }, 1500);
-    }
-
-    handleNPCGift(npcId) {
-        // Simple gift logic for MVP
-        const result = this.gameState.npcManager.giveGift(npcId, 'coffee'); // Default gift
-        const dialogArea = document.getElementById('npc-dialogue-area');
-        if (result.liked) dialogArea.innerHTML = "Wow! I love this! Thanks!";
-        else dialogArea.innerHTML = "Oh... thanks, I guess.";
+        StockMarketHelpers.handleCrime(this, type, params);
     }
 
     handleArrest(reason) {
-        // Send to jail
-        this.gameState.jailSentence = 30; // 30 days
-        this.screenManager.showScreen('screen-jail');
-        document.getElementById('jail-time-left').textContent = `${this.gameState.jailSentence} days`;
-
-        // Penalty
-        this.gameState.reputation = Math.floor(this.gameState.reputation / 2);
-        this.gameState.money -= 5000; // Legal fees
-        this.showToast("You've been arrested! Reputation halved.", 'error');
-        this.audioManager.play('error');
+        StockMarketHelpers.handleArrest(this, reason);
     }
 
     handleServeJailTime() {
-        if (this.gameState.jailSentence <= 0) {
-            this.showToast("You are free to go!", 'success');
-            this.screenManager.showScreen('screen-game');
-            return;
-        }
-
-        this.handleTimeAdvance(6); // Advance full day
-        this.gameState.jailSentence--;
-        document.getElementById('jail-time-left').textContent = `${this.gameState.jailSentence} days`;
-
-        if (this.gameState.jailSentence <= 0) {
-            this.showToast("You served your time.", 'info');
-            this.screenManager.showScreen('screen-game');
-        }
+        StockMarketHelpers.handleServeJailTime(this);
     }
 
     handleBribeGuard() {
-        if (this.gameState.money < 5000) {
-            this.showToast("Not enough money!", 'error');
-            return;
-        }
-
-        this.gameState.money -= 5000;
-        const success = Math.random() > 0.5;
-
-        if (success) {
-            this.gameState.jailSentence = 0;
-            this.showToast("The guard looks the other way...", 'success');
-            this.screenManager.showScreen('screen-game');
-            this.characterStats.modifyEthics(-10);
-        } else {
-            this.gameState.jailSentence += 7;
-            this.showToast("Bribe failed! Sentence extended.", 'error');
-            document.getElementById('jail-time-left').textContent = `${this.gameState.jailSentence} days`;
-        }
-        this.uiUpdater.updateAllUI();
+        StockMarketHelpers.handleBribeGuard(this);
     }
 
     handleBuyStock(stockId) {
-        // Simplified buy 10 shares for now or prompt
-        const qty = parseInt(prompt("How many shares to buy?", "10"));
-        if (!qty || qty <= 0) return;
-
-        const result = this.stockMarket.buyStock(stockId, qty);
-        if (result.success) {
-            this.showToast(`Bought ${qty} shares of ${result.stock.ticker}`, 'success');
-            this.updateStockMarketScreen();
-            this.uiUpdater.updateAllUI(); // Update money
-        } else {
-            this.showError(result.reason);
-        }
+        StockMarketHelpers.handleBuyStock(this, stockId);
     }
 
     handleSellStock(stockId) {
-        const qty = parseInt(prompt("How many shares to sell?", "10"));
-        if (!qty || qty <= 0) return;
+        StockMarketHelpers.handleSellStock(this, stockId);
+    }
 
-        const result = this.stockMarket.sellStock(stockId, qty);
-        if (result.success) {
-            this.showToast(`Sold ${qty} shares of ${result.stock.ticker}`, 'success');
-            this.updateStockMarketScreen();
-            this.uiUpdater.updateAllUI(); // Update money
-        } else {
-            this.showError(result.reason);
-        }
+    // ========== NPC METHODS (delegated to NPCHelpers) ==========
+
+    handleVisitNPC(npcId) {
+        NPCHelpers.handleVisitNPC(this, npcId);
+    }
+
+    handleNPCTalk(npcId) {
+        NPCHelpers.handleNPCTalk(this, npcId);
+    }
+
+    handleNPCResponse(result) {
+        NPCHelpers.handleNPCResponse(this, result);
+    }
+
+    handleNPCGift(npcId) {
+        NPCHelpers.handleNPCGift(this, npcId);
+    }
+
+    // ========== STATS SCREEN ==========
+    
+    updateStatsScreen() {
+        ProjectHelpers.updateStatsScreen(this);
     }
 
     // Updated time advance to update market
@@ -992,6 +1023,9 @@ export class MainGame {
             this.gameState.currentTask.data,
             this.gameState.chartConfig
         );
+
+        // Update software display
+        this.uiUpdater.updateSoftwareDisplay();
     }
 
     /**
@@ -1134,6 +1168,7 @@ export class MainGame {
             this.gameState.reputation += score.repEarned;
             this.gameState.tasksCompleted++;
             this.gameState.totalEarned += score.moneyEarned;
+            this.gameState.weeklyIncome += score.moneyEarned; // Track for taxes
 
             // Check for promotion
             this.economySystem.checkPromotion();
@@ -1375,125 +1410,15 @@ export class MainGame {
      * Update Office Screen with current equipment and office status
      */
     updateOfficeScreen() {
-        // Update office badge
-        const officeNames = ['Bedroom Corner', 'Home Office', 'Co-working Space', 'Small Office', 'Office Floor', 'Company HQ'];
-        const officeIcons = ['🛏️', '🏠', '👥', '🏢', '🏛️', '🏰'];
-        const currentOffice = this.gameState.officeIndex || 0;
-
-        document.getElementById('current-office-name').textContent = officeNames[currentOffice];
-        document.querySelector('.office-badge .office-icon').textContent = officeIcons[currentOffice];
-
-        // Update equipment levels (Delegated to HardwareManager/UIUpdater)
-        if (this.uiUpdater && this.uiUpdater.updateOfficeEquipment) {
-            this.uiUpdater.updateOfficeEquipment();
-        }
-
-        // Check layout visibility
-        const locId = this.worldMap.currentLocation;
-        this.uiUpdater.updateLocationLayout(locId);
-
-        const nextBtn = document.getElementById('upgrade-office');
-        const officePrices = [0, 5000, 15000, 50000, 200000, 1000000]; // Prices for office upgrades
-
-        if (nextBtn) {
-            const nextOfficePrice = officePrices[currentOffice + 1];
-            nextBtn.textContent = `$${nextOfficePrice.toLocaleString()}`;
-            nextBtn.onclick = () => this.handleUpgradeOffice();
-
-            if (currentOffice >= officeNames.length - 1) {
-                nextBtn.textContent = 'MAXED';
-                nextBtn.disabled = true;
-                document.getElementById('next-office-info').classList.add('hidden');
-            } else if (this.gameState.money < nextOfficePrice) {
-                nextBtn.disabled = true;
-            } else {
-                nextBtn.disabled = false;
-            }
-        }
-
-        // --- AI System Update ---
-        if (this.aiSystem) {
-            const ai = this.aiSystem;
-            const aiSection = document.querySelector('.ai-console-section');
-            if (aiSection) aiSection.classList.remove('hidden');
-
-            document.getElementById('ai-name').textContent = ai.name;
-            document.getElementById('ai-level').textContent = ai.level;
-
-            document.getElementById('ai-stat-int').textContent = ai.intelligence;
-            document.getElementById('ai-stat-spd').textContent = ai.speed;
-
-            const xpPct = (ai.xp / ai.xpToNextLevel) * 100;
-            document.getElementById('ai-xp-fill').style.width = `${xpPct}%`;
-
-            const trainBtn = document.getElementById('btn-train-ai');
-            if (trainBtn) {
-                trainBtn.onclick = () => this.handleTrainAI();
-            }
-        }
-
-        // Update next office info
-        if (currentOffice < officeNames.length - 1) {
-            document.getElementById('next-office-icon').textContent = officeIcons[currentOffice + 1];
-            document.getElementById('next-office-name').textContent = officeNames[currentOffice + 1];
-        }
+        ProjectHelpers.updateOfficeScreen(this);
     }
 
     handleTrainAI() {
-        if (!this.aiSystem) return;
-
-        // Cost: 20 Energy + $50 Cloud Cost
-        const energyCost = 20;
-        const moneyCost = 50;
-
-        if (!this.timeManager.hasEnergy(energyCost)) {
-            this.showError("Too tired to train AI!");
-            return;
-        }
-
-        if (this.gameState.money < moneyCost) {
-            this.showError("Need $50 for Cloud Compute!");
-            return;
-        }
-
-        this.timeManager.useEnergy(energyCost);
-        this.gameState.money -= moneyCost;
-        this.handleTimeAdvance(2); // 2 hours
-
-        const result = this.aiSystem.train(10); // 10 Base XP
-
-        this.showToast(`Trained AI! Gained ${result.xpGained} XP.`, 'success');
-        this.audioManager.play('keyboard_typing') || this.audioManager.play('click');
-
-        if (this.aiSystem.checkLevelUp()) {
-            this.showToast(`AI LEVEL UP! Now Level ${this.aiSystem.level}`, 'success');
-            this.audioManager.play('kaching');
-        }
-
-        this.updateOfficeScreen();
-        this.uiUpdater.updateAllUI();
+        ProjectHelpers.handleTrainAI(this);
     }
 
     handleLearnLibrary(libId) {
-        if (!this.gameState.unlockedLibraries) this.gameState.unlockedLibraries = [];
-        if (this.gameState.unlockedLibraries.includes(libId)) return;
-
-        const lib = LIBRARY_CONTENT.find(l => l.id === libId);
-        if (!lib) return;
-
-        if (this.gameState.money < lib.cost) {
-            this.showError("Not enough money!");
-            return;
-        }
-
-        // Pay
-        this.gameState.money -= lib.cost;
-        this.gameState.unlockedLibraries.push(libId);
-
-        this.showToast(`Learned ${lib.name}!`, 'success');
-        this.audioManager.play('kaching');
-        this.uiUpdater.updateAllUI();
-        this.uiUpdater.updateLibraryScreen();
+        EducationHelpers.handleLearnLibrary(this, libId, LIBRARY_CONTENT);
     }
 
     /**
@@ -1546,445 +1471,60 @@ export class MainGame {
        RPG UPDATE METHODS
        ===================================================== */
 
+    // ========== MAP METHODS (delegated to MapHelpers) ==========
+
     updateMapScreen() {
-        if (!this.worldMap || !this.timeManager) return;
+        MapHelpers.updateMapScreen(this);
+    }
 
-        // Update time display
-        const timeSlot = this.timeManager.getCurrentSlot();
-        document.getElementById('current-time-slot').textContent = timeSlot.name;
-        document.getElementById('time-slot-icon').textContent = timeSlot.icon;
-        document.getElementById('current-date').textContent = this.timeManager.getDateString();
+    renderMapBuildings() {
+        MapHelpers.renderMapBuildings(this);
+    }
 
-        // Update energy
-        const energyPct = this.timeManager.getEnergyPercent();
-        document.getElementById('energy-fill').style.width = `${energyPct}%`;
-        document.getElementById('energy-text').textContent = `${Math.floor(this.timeManager.energy)}/${this.timeManager.maxEnergy}`;
-
-        // Update news ticker
-        if (this.newsManager) {
-            const latestNews = this.newsManager.getRecentNews(5);
-            const newsEl = document.getElementById('news-ticker-content');
-            if (latestNews.length > 0 && newsEl) {
-                const newsText = latestNews.map(n => `[${n.category}] ${n.text}`).join('    •    ');
-                newsEl.textContent = newsText + '    •    ' + newsText;
-            }
-        }
-
-        // Location Actions
-        const actionsEl = document.getElementById('location-actions');
-        if (actionsEl) {
-            actionsEl.innerHTML = '';
-            const locId = this.worldMap.currentLocation;
-
-            if (locId === 'stock_exchange') {
-                const btn = document.createElement('button');
-                btn.className = 'btn-cartoon';
-                btn.textContent = '📈 Enter Stock Exchange';
-                btn.onclick = () => {
-                    this.screenManager.showScreen('screen-stock-market');
-                    this.updateStockMarketScreen();
-                };
-                actionsEl.appendChild(btn);
-            } else if (locId === 'gym') {
-                const btn = document.createElement('button');
-                btn.className = 'btn-cartoon';
-                btn.textContent = '🏋️ Workout ($20 / 2h)';
-                btn.onclick = () => {
-                    this.handleTraining('gym_workout');
-                };
-                actionsEl.appendChild(btn);
-            } else if (locId === 'library') {
-                const btnStudy = document.createElement('button');
-                btnStudy.className = 'btn-cartoon';
-                btnStudy.textContent = '📚 Study (2h)';
-                btnStudy.onclick = () => {
-                    this.handleTraining('study_books');
-                };
-                actionsEl.appendChild(btnStudy);
-
-                const btnGrimoire = document.createElement('button');
-                btnGrimoire.className = 'btn-cartoon btn-special';
-                btnGrimoire.textContent = '📖 Open Manual';
-                btnGrimoire.onclick = () => {
-                    this.screenManager.showScreen('screen-library');
-                    this.uiUpdater.updateLibraryScreen();
-                };
-                actionsEl.appendChild(btnGrimoire);
-            } else if (locId === 'city_hall') {
-                // Show License Buttons
-                const llcOwned = this.gameState.legalSystem.hasLicense('llc_registration');
-                const series7Owned = this.gameState.legalSystem.hasLicense('series_7');
-
-                const llcBtn = document.createElement('button');
-                llcBtn.className = `btn-cartoon ${llcOwned ? 'disabled' : ''}`;
-                llcBtn.innerHTML = llcOwned ? '✅ LLC Registered' : '📝 Register LLC ($500)';
-                if (!llcOwned) llcBtn.onclick = () => this.handleBuyLicense('llc_registration');
-                actionsEl.appendChild(llcBtn);
-
-                const s7Btn = document.createElement('button');
-                s7Btn.className = `btn-cartoon ${series7Owned ? 'disabled' : ''}`;
-                s7Btn.innerHTML = series7Owned ? '✅ Series 7 Active' : '📜 Take Series 7 Exam ($1,500)';
-                if (!series7Owned) s7Btn.onclick = () => this.handleBuyLicense('series_7');
-                actionsEl.appendChild(s7Btn);
-            }
-        }
-        // ... rest of function
-
-        // Update map locations
-        const accessible = this.worldMap.getAccessibleLocations();
-        document.querySelectorAll('.map-location').forEach(el => {
-            const id = el.dataset.location;
-            if (!id) return;
-
-            const isAccessible = accessible.some(l => l.id === id);
-            if (isAccessible) {
-                el.classList.remove('locked');
-            } else {
-                el.classList.add('locked');
-            }
-
-            // Highlight current location
-            if (this.worldMap.currentLocation === id) {
-                el.classList.add('current');
-            } else {
-                el.classList.remove('current');
-            }
-        });
-
-        // Update player marker position
-        const currentLocation = this.worldMap.getCurrentLocation();
-        if (currentLocation && currentLocation.position) {
-            const marker = document.getElementById('player-marker');
-            marker.style.left = `${currentLocation.position.x}%`;
-            marker.style.top = `${currentLocation.position.y}%`;
-        }
-
-        // Update vehicles
-        document.querySelectorAll('.vehicle-option').forEach(el => {
-            const id = el.dataset.vehicle;
-            if (!id) return;
-
-            // Check if owned
-            if (this.worldMap.ownedVehicles.includes(id)) {
-                el.classList.remove('locked');
-                const priceEl = el.querySelector('.vehicle-price');
-                if (priceEl) priceEl.textContent = 'Owned';
-            }
-
-            // Highlight active
-            if (this.worldMap.currentVehicle === id) {
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
-            }
-        });
+    renderNPCHouses() {
+        MapHelpers.renderNPCHouses(this);
     }
 
     handleBuyLicense(licenseId) {
-        if (!this.gameState.legalSystem) return;
-        const result = this.gameState.legalSystem.acquireLicense(licenseId);
-        if (result.success) {
-            this.showToast(result.message, 'success');
-            this.audioManager.play('kaching'); // Or distinct sound
-            this.updateMapScreen(); // Refresh buttons
-        } else {
-            this.showToast(result.message, 'error');
-            this.audioManager.play('error');
-        }
+        EducationHelpers.handleBuyLicense(this, licenseId);
     }
 
+    // ========== EDUCATION METHODS (delegated to EducationHelpers) ==========
+
     handleStartExam(courseId) {
-        const course = this.gameState.educationSystem.courses[courseId];
-        if (this.gameState.money < course.cost) {
-            this.showToast('Tuition too high!', 'error');
-            this.audioManager.play('error');
-            return;
-        }
-
-        // Pay tuition (or exam fee)
-        this.gameState.money -= course.cost;
-        this.uiUpdater.updateAllUI();
-
-        this.currentExam = {
-            courseId: courseId,
-            questions: course.questions,
-            currentQuestionIndex: 0,
-            score: 0
-        };
-
-        // Show Modal
-        const modal = document.getElementById('modal-exam');
-        modal.classList.remove('hidden');
-        modal.classList.add('active');
-
-        document.getElementById('exam-title').textContent = `${course.name} Exam`;
-        document.getElementById('exam-intro').classList.remove('hidden');
-        document.getElementById('exam-questions').classList.add('hidden');
-        document.getElementById('exam-results').classList.add('hidden');
-
-        // Bind Start Button
-        const startBtn = document.getElementById('btn-start-exam');
-        startBtn.onclick = () => this.startExamQuestions();
-
-        // Bind Close Button
-        document.querySelector('#modal-exam .close-modal').onclick = () => {
-            modal.classList.remove('active');
-            modal.classList.add('hidden');
-        };
+        EducationHelpers.handleStartExam(this, courseId);
     }
 
     startExamQuestions() {
-        document.getElementById('exam-intro').classList.add('hidden');
-        document.getElementById('exam-questions').classList.remove('hidden');
-        this.showExamQuestion();
+        EducationHelpers.startExamQuestions(this);
     }
 
     showExamQuestion() {
-        const exam = this.currentExam;
-        const q = exam.questions[exam.currentQuestionIndex];
-
-        document.getElementById('question-text').textContent = `${exam.currentQuestionIndex + 1}. ${q.q}`;
-
-        const optsContainer = document.getElementById('options-container');
-        optsContainer.innerHTML = '';
-
-        q.options.forEach((opt, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'btn-cartoon';
-            btn.textContent = opt;
-            btn.onclick = () => this.handleAnswerQuestion(idx);
-            optsContainer.appendChild(btn);
-        });
+        EducationHelpers.showExamQuestion(this);
     }
 
     handleAnswerQuestion(answerIndex) {
-        const exam = this.currentExam;
-        const q = exam.questions[exam.currentQuestionIndex];
-
-        if (answerIndex === q.correct) {
-            exam.score++;
-        }
-
-        exam.currentQuestionIndex++;
-
-        if (exam.currentQuestionIndex < exam.questions.length) {
-            this.showExamQuestion();
-        } else {
-            this.finishExam();
-        }
+        EducationHelpers.handleAnswerQuestion(this, answerIndex);
     }
 
     finishExam() {
-        const exam = this.currentExam;
-        const total = exam.questions.length;
-        const pct = Math.round((exam.score / total) * 100);
-        const passed = pct >= 70;
-
-        document.getElementById('exam-questions').classList.add('hidden');
-        document.getElementById('exam-results').classList.remove('hidden');
-
-        document.getElementById('exam-score').textContent = pct;
-        const statusEl = document.getElementById('exam-status');
-        statusEl.textContent = passed ? "PASSED!" : "FAILED";
-        statusEl.className = passed ? 'success-text' : 'error-text';
-
-        if (passed) {
-            this.gameState.educationSystem.completeCourse(exam.courseId);
-            this.audioManager.play('kaching'); // Success sound
-            this.showToast(`Passed ${exam.courseId}!`, 'success');
-        } else {
-            this.audioManager.play('error');
-            this.showToast('Failed the exam.', 'error');
-        }
-
-        document.getElementById('btn-close-exam').onclick = () => {
-            const modal = document.getElementById('modal-exam');
-            modal.classList.remove('active');
-            modal.classList.add('hidden');
-            this.updateMapScreen(); // Refresh finished status
-        };
-    }
-
-    updateStatsScreen() {
-        if (!this.characterStats) return;
-
-        // Update overview
-        const charName = this.gameState.playerName || 'New Player';
-        document.getElementById('stats-name').textContent = charName;
-        // document.getElementById('stats-title').textContent = this.gameState.ranks[this.gameState.rankIndex].title;
-
-        // Update stat bars
-        this.characterStats.getAllStats().forEach(stat => {
-            const el = document.querySelector(`.stat-card[data-stat="${stat.id}"]`);
-            if (el) {
-                el.querySelector('.stat-value').textContent = stat.value;
-                el.querySelector('.stat-bar-fill').style.width = `${(stat.value / stat.maxLevel) * 100}%`;
-                el.querySelector('.stat-xp').textContent = `XP: ${Math.floor(stat.xp)}/${stat.xpNeeded}`;
-            }
-        });
-
-        // Calculate total level
-        const totalLevel = this.characterStats.getAllStats().reduce((sum, s) => sum + s.value, 0);
-        document.getElementById('total-level').textContent = totalLevel;
+        EducationHelpers.finishExam(this);
     }
 
     updateRelationshipsScreen() {
-        if (!this.npcManager) return;
-
-        const npcs = this.npcManager.getMetNPCs();
-        const grid = document.getElementById('npc-grid');
-        grid.innerHTML = '';
-
-        // Show met NPCs
-        npcs.forEach(npc => {
-            const card = document.createElement('div');
-            card.className = 'npc-card';
-            card.dataset.npc = npc.id;
-            card.innerHTML = `
-                <div class="npc-avatar">${npc.icon}</div>
-                <div class="npc-info">
-                    <div class="npc-name">${npc.name}</div>
-                    <div class="npc-title">${npc.title}</div>
-                </div>
-                <div class="relationship-bar">
-                    <div class="relationship-fill" style="width: ${npc.relationship}%"></div>
-                </div>
-                <div class="relationship-tier">${npc.tier.label}</div>
-            `;
-
-            card.addEventListener('click', () => {
-                this.interactWithNPC(npc.id);
-            });
-
-            grid.appendChild(card);
-        });
-
-        // Show unknown/locked NPCs
-        const allNPCs = this.npcManager.gameState.npcManager.getAllNPCs ?
-            this.npcManager.gameState.npcManager.getAllNPCs() : NPCs; // Hack access to raw list
-
-        // Use raw list from imported module if needed, or implement getAllNPCs
-        // Ideally NPCManager should have getAllNPCs
+        NPCHelpers.updateRelationshipsScreen(this);
     }
 
     interactWithNPC(npcId) {
-        // Simple interaction for now
-        const conversation = this.npcManager.startConversation(npcId);
-        if (!conversation) return;
-
-        // Check if we should move to location
-        if (conversation.npc.location !== this.worldMap.currentLocation) {
-            const confirmMove = confirm(`${conversation.npc.name} is at ${conversation.npc.location}. Travel there?`);
-            if (confirmMove) {
-                this.handleTravel(conversation.npc.location);
-            }
-            return;
-        }
-
-        // Show dialog modal (simplified for now)
-        alert(`${conversation.npc.name} says: "${conversation.greeting}"`);
-
-        // TODO: Implement full dialogue UI
-        this.npcManager.makeChoice(0); // Default friendly response
-        this.showToast(`Relationship with ${conversation.npc.name} improved!`, 'success');
-        this.updateRelationshipsScreen();
+        NPCHelpers.interactWithNPC(this, npcId);
     }
 
     handleTravel(locationId) {
-        const result = this.worldMap.travelTo(locationId);
-
-        if (result.success) {
-            // Advance time based on travel
-            this.handleTimeAdvance(result.timeCost);
-            this.updateMapScreen();
-            this.updateEnvironmentForLocation(locationId);
-            this.uiUpdater.updateLocationLayout(locationId); // Visual update
-            this.showToast(`Traveled to ${result.location.name}`, 'success');
-
-            // Switch to location view
-            setTimeout(() => {
-                this.screenManager.showScreen('screen-office');
-            }, 500);
-        } else {
-            this.showError(result.reason);
-        }
+        MapHelpers.handleTravel(this, locationId);
     }
 
-    /**
-     * Handle Location Actions (Shop interactions)
-     */
     handleLocationAction(action) {
-        let cost = 0;
-        let message = '';
-        let energyGain = 0;
-        let moodGain = 0;
-
-        switch (action) {
-            case 'buy_donut':
-                cost = 5;
-                if (this.gameState.money < cost) {
-                    this.showError("Not enough money!");
-                    return;
-                }
-                energyGain = 10;
-                message = "Yummy donut! +10 Energy";
-                break;
-            case 'eat_donut':
-                // Contextual (if inventory existed), for now same as buy
-                cost = 5;
-                energyGain = 10;
-                message = "Yum!";
-                break;
-            case 'buy_coffee':
-                cost = 4;
-                if (this.gameState.money < cost) {
-                    this.showError("Not enough money!");
-                    return;
-                }
-                energyGain = 15;
-                message = "Caffeine boost! +15 Energy";
-                break;
-            case 'buy_bagel':
-                cost = 6;
-                if (this.gameState.money < cost) {
-                    this.showError("Not enough money!");
-                    return;
-                }
-                energyGain = 12;
-                message = "Tasty bagel! +12 Energy";
-                break;
-            case 'buy_flowers':
-                cost = 15;
-                if (this.gameState.money < cost) {
-                    this.showError("Not enough money!");
-                    return;
-                }
-                moodGain = 10; // Placeholder for mood
-                message = "Smells nice! You feel happier.";
-                break;
-            case 'buy_plant':
-                cost = 25;
-                if (this.gameState.money < cost) {
-                    this.showError("Not enough money!");
-                    return;
-                }
-                // Add decoration logic later
-                message = "A nice plant for your office. (Visual only for now)";
-                break;
-            default:
-                console.log("Unknown action:", action);
-                return;
-        }
-
-        // Apply effects
-        this.gameState.money -= cost;
-        if (energyGain > 0) this.timeManager.gainEnergy(energyGain);
-        // if (moodGain > 0) ... // Mood system not fully exposed in TimeManager? 
-
-        this.uiUpdater.updateAllUI();
-        this.updateMapScreen(); // Update money
-        this.showToast(message, 'success');
-        this.audioManager.play('kaching');
+        MapHelpers.handleLocationAction(this, action);
     }
 
     handleTimeAdvance(slots) {
@@ -2015,6 +1555,19 @@ export class MainGame {
             } else if (event.type === 'new_week') {
                 const rent = this.gameState.rent || 500;
                 this.gameState.money -= rent;
+
+                // Calculate and deduct taxes based on previous week's income
+                const weeklyIncome = this.gameState.weeklyIncome || 0;
+                if (weeklyIncome > 0) {
+                    const tax = this.economySystem.calculateTax(weeklyIncome);
+                    if (tax > 0) {
+                        this.gameState.money -= tax;
+                        this.showToast(`Taxes paid: -$${tax.toLocaleString()}`, 'warning');
+                    }
+                }
+
+                // Reset weekly income tracker
+                this.gameState.weeklyIncome = 0;
 
                 // Bank Interest
                 if (this.bankSystem) {
@@ -2080,120 +1633,29 @@ export class MainGame {
     }
 
     updateEnvironmentForLocation(locationId) {
-        // Map simplified locations to environment types
-        const map = {
-            'home': 'home',
-            'office': 'office',
-            'downtown': 'city',
-            'library': 'city', // Use city for now
-            'gym': 'city'
-        };
-        // This is separate from background rendering, just updates GameState context
+        MapHelpers.updateEnvironmentForLocation(this, locationId);
     }
-    checkForCharacterEvolution() {
-        if (!this.gameState.characterStats) return;
 
-        const evolution = this.gameState.characterStats.checkEvolution(this.gameState.money);
-        if (evolution.evolved) {
-            this.showToast(`Character Evolved: ${evolution.stage.replace(/_/g, ' ').toUpperCase()}!`, 'success');
-            this.audioManager.play('kaching'); // Evolution sound
-            this.updatePlayerAvatar();
-        }
+    checkForCharacterEvolution() {
+        ProjectHelpers.checkForCharacterEvolution(this);
     }
 
     updatePlayerAvatar() {
-        if (!this.gameState.characterStats) return;
-
-        // Map stage to emoji for now (until assets ready)
-        const stage = this.gameState.characterStats.visualStage;
-        let icon = '👤'; // level_1 default
-
-        if (stage === 'level_2_good') icon = '🤵';
-        if (stage === 'level_2_evil') icon = '😎'; // Leather jacket vibe
-        if (stage === 'level_3_good') icon = '🦸'; // Visionary
-        if (stage === 'level_3_evil') icon = '🦹'; // Villain
-
-        const markers = document.querySelectorAll('.player-icon');
-        markers.forEach(el => el.textContent = icon);
+        ProjectHelpers.updatePlayerAvatar(this);
     }
 
-    handleStartProject(contractId) {
-        if (!this.projectSystem) return;
+    // ========== PROJECT METHODS (delegated to ProjectHelpers) ==========
 
-        const result = this.projectSystem.startProject(contractId);
-        if (result.success) {
-            this.showToast(`Accepted Contract: ${result.project.title}`, 'success');
-            this.uiUpdater.updateCareerScreen();
-        } else {
-            this.showError(result.reason);
-        }
+    handleStartProject(contractId) {
+        ProjectHelpers.handleStartProject(this, contractId);
     }
 
     handleWorkOnProject() {
-        if (!this.projectSystem || !this.projectSystem.activeProject) return;
-
-        // Energy Check
-        const energyCost = 15;
-        if (!this.timeManager.hasEnergy(energyCost)) {
-            this.showError("You are too exhausted to code. Go sleep!");
-            return;
-        }
-
-        this.timeManager.useEnergy(energyCost);
-
-        // Trigger Fast Forward Session (3 hours work in 3 seconds)
-        this.startWorkingSession(3);
+        ProjectHelpers.handleWorkOnProject(this);
     }
 
     startWorkingSession(hours) {
-        const overlay = document.getElementById('working-overlay');
-        overlay.classList.remove('hidden');
-
-        const tickRate = 100; // ms per tick
-        const ticksPerHour = 10;
-        const totalTicks = hours * ticksPerHour;
-        let currentTick = 0;
-
-        // Disable Stop button for first second? No.
-        document.getElementById('btn-stop-work').onclick = () => {
-            this.finishWorkingSession(currentTick, totalTicks);
-        };
-
-        this.workInterval = setInterval(() => {
-            currentTick++;
-
-            // Advance small time
-            this.handleTimeAdvance(0.1); // 0.1 hours
-
-            // Add Progress
-            this.simulateWorkTick();
-
-            // Update UI
-            const pct = (currentTick / totalTicks) * 100;
-            document.getElementById('work-progress-fill').style.width = `${pct}%`;
-            document.getElementById('work-progress-text').textContent = `${Math.round(pct)}%`;
-
-            const hoursPassed = Math.floor(currentTick / ticksPerHour);
-            const minsPassed = Math.round((currentTick % ticksPerHour) * (60 / ticksPerHour));
-            document.getElementById('work-time-passed').textContent = `${hoursPassed}h ${minsPassed}m`;
-
-            // Random Events (Bug, Epiphany)
-            if (Math.random() < 0.02) { // 2% chance per tick
-                this.showToast("Bug found! Fixing...", "warning");
-                // Maybe pause? For now just visual.
-            }
-
-            if (currentTick >= totalTicks) {
-                this.finishWorkingSession(currentTick, totalTicks);
-            }
-
-            // Check if stage completed early
-            if (this.projectSystem.activeProject.stageProgress >=
-                this.projectSystem.activeProject.stages[this.projectSystem.activeProject.currentStageIndex].maxProgress) {
-                this.finishWorkingSession(currentTick, totalTicks);
-            }
-
-        }, tickRate);
+        ProjectHelpers.startWorkingSession(this, hours);
     }
     /**
      * Main Game Loop
@@ -2203,46 +1665,288 @@ export class MainGame {
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
 
-        // Future: Update animations or continuous logic here
+        // Update day/night cycle
+        if (this.dayNightCycle) {
+            this.dayNightCycle.update();
+        }
+        
+        // Check notifications
+        if (this.notificationSystem) {
+            this.notificationSystem.checkNotifications();
+        }
+        
+        // Check for events (once per day)
+        if (this.eventSystem && this.gameState.timeManager) {
+            const currentDay = this.gameState.timeManager.totalDays || 1;
+            const lastEventCheck = this.gameState.lastEventCheck || 0;
+            
+            if (currentDay > lastEventCheck) {
+                const todayEvents = this.eventSystem.checkTodayEvents();
+                todayEvents.forEach(event => {
+                    const result = this.eventSystem.triggerEvent(event.id);
+                    if (result && this.showToast) {
+                        this.showToast(result.message, result.type === 'crash' ? 'error' : 'info');
+                    }
+                });
+                this.gameState.lastEventCheck = currentDay;
+            }
+        }
+        
+        // Check visual progression milestones
+        if (this.visualProgressionSystem) {
+            this.visualProgressionSystem.checkMilestones();
+        }
+        
+        // Check for new research papers (only if game is started)
+        if (this.researchPaperSystem && this.gameState.isGameStarted) {
+            try {
+                this.researchPaperSystem.checkForNewPapers();
+                
+                // Update inbox button badge
+                this.updateInboxBadge();
+            } catch (error) {
+                console.error('Error checking research papers:', error);
+            }
+        }
+
+        // Update Phase 1 Visual Systems
+        try {
+            if (this.visualSystem) {
+                this.visualSystem.update(deltaTime);
+            }
+            
+            // Update camera system
+            if (this.cameraSystem) {
+                this.cameraSystem.update();
+            }
+            
+            // Update animated characters
+            if (this.animatedCharacterRenderer) {
+                this.animatedCharacterRenderer.updateAll(deltaTime);
+            }
+        } catch (error) {
+            console.error('Error updating visual systems:', error);
+        }
 
         this.gameLoopId = requestAnimationFrame(this.gameLoop);
+    }
+    
+    /**
+     * Update inbox badge with unread count
+     */
+    updateInboxBadge() {
+        try {
+            if (!this.researchPaperSystem || !this.researchInboxUI) return;
+            
+            const unreadCount = this.researchPaperSystem.getUnreadCount();
+            const badge = document.getElementById('inbox-unread-badge');
+            const button = document.getElementById('btn-research-inbox');
+            
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.classList.remove('hidden');
+                    if (button) button.classList.add('has-unread');
+                } else {
+                    badge.classList.add('hidden');
+                    if (button) button.classList.remove('has-unread');
+                }
+            }
+            
+            // Update inbox UI if open
+            if (this.researchInboxUI && this.researchInboxUI.isOpen) {
+                this.researchInboxUI.updateUnreadCount();
+            }
+        } catch (error) {
+            console.error('Error updating inbox badge:', error);
+        }
     }
 
 
     finishWorkingSession(ticks, totalTicks) {
-        clearInterval(this.workInterval);
-        document.getElementById('working-overlay').classList.add('hidden');
-
-        // Final UI Update
-        this.uiUpdater.updateCareerScreen();
-        this.uiUpdater.updateAllUI();
-
-        // Check completion status via ProjectSystem
-        const result = this.projectSystem.checkProgress();
-
-        if (result && result.status === 'project_complete') {
-            this.showToast(`PROJECT COMPLETE! Earned $${result.reward}`, 'success');
-            this.audioManager.play('kaching');
-            this.uiUpdater.updateCareerScreen();
-        } else if (result && result.status === 'stage_complete') {
-            this.showToast(`Stage Complete! Next: ${result.nextStage.name}`, 'info');
-            this.uiUpdater.updateCareerScreen();
-        }
+        ProjectHelpers.finishWorkingSession(this, ticks, totalTicks);
     }
 
     simulateWorkTick() {
-        // Calculate work output per tick
-        let basePower = 5; // Power per hour approx
-        // Stats
-        if (this.characterStats) {
-            basePower += (this.characterStats.getStat('intelligence') * 0.5);
+        ProjectHelpers.simulateWorkTick(this);
+    }
+    
+    /**
+     * Show loading progress
+     */
+    showLoadingProgress(message, percent) {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            const text = loadingScreen.querySelector('.loading-text');
+            const bar = loadingScreen.querySelector('.loading-bar-fill');
+            if (text) text.textContent = message || 'Loading...';
+            if (bar) bar.style.width = `${Math.min(100, Math.max(0, percent))}%`;
         }
-
-        // Per tick (assuming 1 tick = 0.1 hour)
-        let tickPower = basePower * 0.1;
-
-        const result = this.projectSystem.workOnProject(tickPower);
-        // result handling is done in finish currently, but we update state here.
+    }
+    
+    /**
+     * Hide loading progress
+     */
+    hideLoadingProgress() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 300);
+        }
+    }
+    
+    /**
+     * Load deferred systems in background
+     */
+    loadDeferredSystems() {
+        try {
+            // Location detail system
+            if (!this.gameState.locationDetailSystem) {
+                this.gameState.locationDetailSystem = new LocationDetailSystem(this.gameState);
+                this.locationDetailSystem = this.gameState.locationDetailSystem;
+            }
+            
+            // Company management
+            if (!this.gameState.companyManagement) {
+                this.gameState.companyManagement = new CompanyManagementSystem(this.gameState);
+                this.companyManagement = this.gameState.companyManagement;
+            }
+            
+            // Romance progression
+            if (!this.gameState.romanceProgression) {
+                this.gameState.romanceProgression = new RomanceProgressionSystem(this.gameState);
+                this.romanceProgression = this.gameState.romanceProgression;
+            }
+            
+            // Jealousy system
+            if (!this.gameState.jealousySystem) {
+                this.gameState.jealousySystem = new JealousySystem(this.gameState);
+                this.jealousySystem = this.gameState.jealousySystem;
+            }
+            
+            // Demanding boss
+            if (!this.gameState.demandingBoss) {
+                this.gameState.demandingBoss = new DemandingBossSystem(this.gameState);
+                this.demandingBoss = this.gameState.demandingBoss;
+                this.demandingBoss.initializeBoss({
+                    name: 'Mr. Anderson',
+                    title: 'Department Head',
+                    demandLevel: 70
+                });
+            }
+            
+            // Gameplay settings
+            if (!this.gameState.gameplaySettings) {
+                this.gameState.gameplaySettings = new GameplaySettings();
+                this.gameplaySettings = this.gameState.gameplaySettings;
+            }
+            
+            // Roommate system
+            if (!this.gameState.roommateSystem) {
+                this.gameState.roommateSystem = new RoommateSystem(this.gameState);
+                this.roommateSystem = this.gameState.roommateSystem;
+            }
+            
+            // Dirty data system
+            if (!this.gameState.dirtyDataSystem) {
+                this.gameState.dirtyDataSystem = new DirtyDataSystem(this.gameState);
+                this.dirtyDataSystem = this.gameState.dirtyDataSystem;
+            }
+            
+            // Detailed map system
+            if (!this.gameState.detailedMapSystem) {
+                this.gameState.detailedMapSystem = new DetailedMapSystem(this.gameState);
+                this.detailedMapSystem = this.gameState.detailedMapSystem;
+            }
+            
+            // Room system
+            if (!this.gameState.roomSystem) {
+                this.gameState.roomSystem = new RoomSystem(this.gameState);
+                this.roomSystem = this.gameState.roomSystem;
+            }
+            
+            // Event system
+            if (!this.gameState.eventSystem) {
+                this.gameState.eventSystem = new EventSystem(this.gameState);
+                this.eventSystem = this.gameState.eventSystem;
+            }
+            
+            // Visual progression system
+            if (!this.gameState.visualProgressionSystem) {
+                this.gameState.visualProgressionSystem = new VisualProgressionSystem(this.gameState);
+                this.visualProgressionSystem = this.gameState.visualProgressionSystem;
+            }
+            
+            // Real-world task system
+            if (!this.gameState.realWorldTaskSystem) {
+                this.gameState.realWorldTaskSystem = new RealWorldTaskSystem(this.gameState);
+                this.realWorldTaskSystem = this.gameState.realWorldTaskSystem;
+            }
+            
+            // Task visual renderer
+            if (!this.gameState.taskVisualRenderer) {
+                this.taskVisualRenderer = new TaskVisualRenderer();
+                this.gameState.taskVisualRenderer = this.taskVisualRenderer;
+            }
+            
+            // AI training storyline
+            if (!this.gameState.aiTrainingStoryline) {
+                this.gameState.aiTrainingStoryline = new AITrainingStoryline(this.gameState);
+                this.aiTrainingStoryline = this.gameState.aiTrainingStoryline;
+            }
+            
+            // GitHub issues system
+            if (!this.gameState.githubIssuesSystem) {
+                this.gameState.githubIssuesSystem = new GitHubIssuesSystem(this.gameState);
+                this.githubIssuesSystem = this.gameState.githubIssuesSystem;
+            }
+            
+            // Research paper notification system
+            if (!this.gameState.researchPaperSystem) {
+                try {
+                    this.gameState.researchPaperSystem = new ResearchPaperNotificationSystem(this.gameState);
+                    this.researchPaperSystem = this.gameState.researchPaperSystem;
+                    
+                    this.researchInboxUI = new ResearchInboxUI(this.researchPaperSystem);
+                    this.gameState.researchInboxUI = this.researchInboxUI;
+                } catch (error) {
+                    console.error('Error initializing research paper system:', error);
+                    this.researchPaperSystem = null;
+                    this.researchInboxUI = null;
+                }
+            }
+            
+            // Initialize emotional breakdown system
+            this.gameState.emotionalBreakdownSystem = new EmotionalBreakdownSystem(this.gameState);
+            this.emotionalBreakdownSystem = this.gameState.emotionalBreakdownSystem;
+            
+            // Initialize relationship dialogue system
+            this.gameState.relationshipDialogueSystem = new RelationshipDialogueSystem(this.gameState);
+            this.relationshipDialogueSystem = this.gameState.relationshipDialogueSystem;
+            
+            // Initialize comprehensive sprite system
+            this.comprehensiveSpriteSystem = new ComprehensiveSpriteSystem(
+                this.assetManager,
+                this.spriteSheetManager
+            );
+            this.gameState.comprehensiveSpriteSystem = this.comprehensiveSpriteSystem;
+            
+            // Initialize sprite system in background
+            setTimeout(async () => {
+                try {
+                    await this.comprehensiveSpriteSystem.initialize();
+                    console.log('✅ Comprehensive sprite system loaded');
+                } catch (error) {
+                    console.warn('Sprite system initialization error:', error);
+                }
+            }, 1000);
+            
+            console.log('✅ Deferred systems loaded');
+        } catch (error) {
+            console.error('Error loading deferred systems:', error);
+        }
     }
 }
 

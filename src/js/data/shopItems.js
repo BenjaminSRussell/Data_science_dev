@@ -3,67 +3,7 @@
  */
 
 export const SHOP_ITEMS = [
-    // Chart unlocks
-    {
-        id: "chart_scatter",
-        name: "Scatter Plot",
-        description: "Unlock scatter plots for correlation analysis",
-        category: "charts",
-        type: "chart",
-        chartType: "scatter",
-        icon: "⚬",
-        price: 500
-    },
-    {
-        id: "chart_doughnut",
-        name: "Donut Chart",
-        description: "Unlock donut charts for stylish proportions",
-        category: "charts",
-        type: "chart",
-        chartType: "doughnut",
-        icon: "🍩",
-        price: 400
-    },
-    {
-        id: "chart_radar",
-        name: "Radar Chart",
-        description: "Unlock radar charts for multi-dimensional data",
-        category: "charts",
-        type: "chart",
-        chartType: "radar",
-        icon: "📡",
-        price: 800
-    },
-    {
-        id: "chart_area",
-        name: "Area Chart",
-        description: "Unlock area charts for volume visualization",
-        category: "charts",
-        type: "chart",
-        chartType: "area",
-        icon: "📉",
-        price: 600
-    },
-    {
-        id: "chart_bubble",
-        name: "Bubble Chart",
-        description: "Unlock bubble charts for 3-variable analysis",
-        category: "charts",
-        type: "chart",
-        chartType: "bubble",
-        icon: "⭕",
-        price: 1200
-    },
-    {
-        id: "chart_polar",
-        name: "Polar Area Chart",
-        description: "Unlock polar area charts for radial data",
-        category: "charts",
-        type: "chart",
-        chartType: "polarArea",
-        icon: "🧭",
-        price: 1500
-    },
+    // Note: Chart types are now free and unlocked by default. Strategy shifts to choosing the right chart for the task.
 
     // Tools
     {

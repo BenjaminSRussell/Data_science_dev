@@ -1,0 +1,204 @@
+/* =====================================================
+   MAP ICONS & DESIGNS
+   Icon-based system for parks, maps, and areas
+   ===================================================== */
+
+.map-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.map-icon.large {
+    width: 64px;
+    height: 64px;
+}
+
+.map-icon.small {
+    width: 16px;
+    height: 16px;
+}
+
+/* Location Icons */
+.map-icon.home {
+    background-image: url('/assets/icons/locations/home_icon.png');
+}
+
+.map-icon.office {
+    background-image: url('/assets/icons/locations/office_icon.png');
+}
+
+.map-icon.coffee_shop {
+    background-image: url('/assets/icons/locations/coffee_icon.png');
+}
+
+.map-icon.university {
+    background-image: url('/assets/icons/locations/university_icon.png');
+}
+
+.map-icon.bank {
+    background-image: url('/assets/icons/locations/bank_icon.png');
+}
+
+.map-icon.park {
+    background-image: url('/assets/icons/locations/park_icon.png');
+}
+
+/* Map Markers */
+.map-marker {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-image: url('/assets/icons/map/marker.png');
+    background-size: contain;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.map-marker:hover {
+    transform: scale(1.2);
+    filter: brightness(1.2);
+}
+
+.map-marker.player {
+    background-image: url('/assets/icons/map/player.png');
+    z-index: 200;
+    animation: pulse 2s ease infinite;
+}
+
+.map-marker.location {
+    background-image: url('/assets/icons/map/location_pin.png');
+}
+
+/* Park Areas */
+.park-area {
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    background: rgba(168, 192, 144, 0.3);
+    border: 2px solid rgba(168, 192, 144, 0.6);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.park-area::before {
+    content: '🌳';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+}
+
+.park-area:hover {
+    background: rgba(168, 192, 144, 0.5);
+    border-color: rgba(168, 192, 144, 0.9);
+    transform: scale(1.1);
+}
+
+/* Map Areas */
+.map-area {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+    padding: 1rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.map-area:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.map-area-icon {
+    margin-right: 0.5rem;
+}
+
+.map-area-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Icon Grid */
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.icon-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-4px);
+}
+
+.icon-item-icon {
+    width: 48px;
+    height: 48px;
+}
+
+.icon-item-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+}
+
+/* Map Legend */
+.map-legend {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    z-index: 300;
+}
+
+.map-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.map-legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.map-legend-icon {
+    width: 20px;
+    height: 20px;
+}
+

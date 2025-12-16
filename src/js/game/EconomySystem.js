@@ -14,9 +14,15 @@ export class EconomySystem {
      */
     evaluateChart(task, chartConfig) {
         // Score components (0-100 each)
-        const chartAppropriateness = this.scoreChartAppropriateness(task, chartConfig);
-        const visualClarity = this.scoreVisualClarity(chartConfig);
-        const dataAccuracy = this.scoreDataAccuracy(task, chartConfig);
+        let chartAppropriateness = this.scoreChartAppropriateness(task, chartConfig);
+        let visualClarity = this.scoreVisualClarity(chartConfig);
+        let dataAccuracy = this.scoreDataAccuracy(task, chartConfig);
+
+        // Apply software quality multipliers
+        const softwareMultipliers = this.gameState.getSoftwareQualityMultiplier();
+        chartAppropriateness = Math.min(100, chartAppropriateness * softwareMultipliers.chartAppropriateness);
+        visualClarity = Math.min(100, visualClarity * softwareMultipliers.visualClarity);
+        dataAccuracy = Math.min(100, dataAccuracy * softwareMultipliers.dataAccuracy);
 
         // Boss modifier (some bosses are stricter)
         const bossModifier = task.boss.strictness || 1.0;
@@ -49,7 +55,8 @@ export class EconomySystem {
             rawScore,
             stars,
             moneyEarned,
-            repEarned
+            repEarned,
+            softwareMultipliers // Include for display
         };
     }
 
@@ -264,39 +271,81 @@ export class EconomySystem {
     }
 
     /**
-     * Calculate tax on income
+     * Calculate tax on income (progressive brackets)
+     * @param {number} income - Weekly income to tax
+     * @returns {number} Tax amount
      */
-    calculateTax(amount) {
-        let taxRate = 0.0;
+    calculateTax(income) {
+        if (income <= 0) return 0;
 
-        // Progressive tax brackets (simplified)
-        if (this.gameState.money > 10000) {
-            taxRate = 0.25;
-        } else if (this.gameState.money > 5000) {
-            taxRate = 0.15;
-        } else if (this.gameState.money > 1000) {
-            taxRate = 0.05;
+        let tax = 0;
+        
+        // Progressive tax brackets (based on weekly income)
+        // $0-$10k/year = $0-$192/week: 0%
+        // $10k-$50k/year = $192-$962/week: 10%
+        // $50k-$100k/year = $962-$1,923/week: 20%
+        // $100k+/year = $1,923+/week: 30%
+
+        if (income > 1923) {
+            // Top bracket: $100k+/year
+            tax += (income - 1923) * 0.30;
+            income = 1923;
         }
+        if (income > 962) {
+            // $50k-$100k bracket: 20%
+            tax += (income - 962) * 0.20;
+            income = 962;
+        }
+        if (income > 192) {
+            // $10k-$50k bracket: 10%
+            tax += (income - 192) * 0.10;
+            income = 192;
+        }
+        // First $192/week ($0-$10k/year) is tax-free
 
-        return Math.floor(amount * taxRate);
+        return Math.floor(tax);
     }
 
     /**
-     * Get daily living expenses
+     * Get daily living expenses (enhanced with variable costs)
      */
     getDailyExpenses() {
-        // Base living cost
-        let dailyCost = 15; // Food, transport, etc.
+        let dailyCost = 0;
 
-        // Location multiplier (Apartment is cheaper than luxury condo)
-        if (this.gameState.currentLocation === 'apartment') {
-            dailyCost *= 1.0;
+        // Food expenses: $15-50/day based on lifestyle/location
+        const foodBase = this.gameState.currentLocation === 'apartment' ? 15 : 25;
+        const foodCost = foodBase + Math.floor(Math.random() * (foodBase * 2));
+        dailyCost += foodCost;
+
+        // Utilities: $5-15/day (electricity, water, internet)
+        const utilities = 5 + Math.floor(Math.random() * 10);
+        dailyCost += utilities;
+
+        // Transportation: Based on vehicle owned
+        // Walking is free, bus pass is $2/day, car has gas/maintenance
+        const transportation = this.getTransportationCost();
+        dailyCost += transportation;
+
+        return Math.floor(dailyCost);
+    }
+
+    /**
+     * Get daily transportation cost based on current vehicle
+     */
+    getTransportationCost() {
+        if (!this.gameState.worldMap) return 0;
+
+        const vehicle = this.gameState.worldMap.currentVehicle || 'walking';
+        
+        if (vehicle === 'walking') {
+            return 0; // Free
+        } else if (vehicle === 'bus_pass') {
+            return 2; // $2/day for bus pass
+        } else if (vehicle === 'used_car' || vehicle === 'car') {
+            return 5 + Math.floor(Math.random() * 10); // Gas, maintenance: $5-15/day
         }
 
-        // Add variance
-        dailyCost += Math.floor(Math.random() * 10);
-
-        return dailyCost;
+        return 0;
     }
 
     /**

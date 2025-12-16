@@ -23,6 +23,16 @@
     <link rel="stylesheet" href="/src/styles/cartoon.css">
     <link rel="stylesheet" href="/src/styles/tycoon.css">
     <link rel="stylesheet" href="/src/styles/rpg.css">
+    <link rel="stylesheet" href="/src/styles/characters.css">
+    <link rel="stylesheet" href="/src/styles/daynight.css">
+    <link rel="stylesheet" href="/src/styles/character-animations.css">
+    <link rel="stylesheet" href="/src/styles/location-backgrounds.css">
+    <link rel="stylesheet" href="/src/styles/map-icons.css">
+    <link rel="stylesheet" href="/src/styles/map-detailed.css">
+    <link rel="stylesheet" href="/src/styles/visual-progression.css">
+    <link rel="stylesheet" href="/src/styles/task-visuals.css">
+    <link rel="stylesheet" href="/src/styles/research-inbox.css">
+    <link rel="stylesheet" href="/src/styles/emotional-breakdown.css">
     <link rel="stylesheet" href="/src/styles/patches.css">
 </head>
 
@@ -64,6 +74,10 @@
                 </div>
             </div>
             <div class="top-bar-right">
+                <button class="icon-btn inbox-button" id="btn-research-inbox" aria-label="Research Papers" title="Research Papers Inbox">
+                    📚
+                    <span class="inbox-unread-badge hidden" id="inbox-unread-badge"></span>
+                </button>
                 <button class="icon-btn" id="btn-nav-map" aria-label="City Map">🗺️</button>
                 <button class="icon-btn" id="btn-nav-bank" aria-label="City Bank">🏦</button>
                 <button class="icon-btn" id="btn-settings" aria-label="Settings">⚙️</button>
@@ -290,18 +304,37 @@
                                 <span class="chart-icon">🥧</span>
                                 <span class="chart-name">Pie</span>
                             </button>
-                            <button class="chart-type-btn locked" data-type="scatter">
-                                <span class="chart-icon">🔒</span>
+                            <button class="chart-type-btn" data-type="scatter">
+                                <span class="chart-icon">⚬</span>
                                 <span class="chart-name">Scatter</span>
                             </button>
-                            <button class="chart-type-btn locked" data-type="doughnut">
-                                <span class="chart-icon">🔒</span>
+                            <button class="chart-type-btn" data-type="doughnut">
+                                <span class="chart-icon">🍩</span>
                                 <span class="chart-name">Donut</span>
                             </button>
-                            <button class="chart-type-btn locked" data-type="radar">
-                                <span class="chart-icon">🔒</span>
+                            <button class="chart-type-btn" data-type="radar">
+                                <span class="chart-icon">📡</span>
                                 <span class="chart-name">Radar</span>
                             </button>
+                            <button class="chart-type-btn" data-type="area">
+                                <span class="chart-icon">📉</span>
+                                <span class="chart-name">Area</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="bubble">
+                                <span class="chart-icon">⭕</span>
+                                <span class="chart-name">Bubble</span>
+                            </button>
+                            <button class="chart-type-btn" data-type="polarArea">
+                                <span class="chart-icon">🧭</span>
+                                <span class="chart-name">Polar</span>
+                            </button>
+                        </div>
+
+                        <div class="software-status" id="software-status">
+                            <h4>💻 Active Software</h4>
+                            <div id="software-list">
+                                <p class="software-none">No software purchased</p>
+                            </div>
                         </div>
 
                         <div class="data-mapping">
@@ -602,8 +635,7 @@
                     <h2 class="screen-title">🛒 Upgrade Shop</h2>
 
                     <div class="shop-categories">
-                        <button class="category-btn active" data-category="charts">📊 Charts</button>
-                        <button class="category-btn" data-category="tools">🔧 Tools</button>
+                        <button class="category-btn active" data-category="tools">🔧 Tools</button>
                         <button class="category-btn" data-category="software">💻 Software</button>
                         <button class="category-btn" data-category="perks">✨ Perks</button>
                     </div>
@@ -1023,6 +1055,23 @@
                     <!-- Map Visualization -->
                     <div class="map-container" id="world-map">
                         <div class="map-background"></div>
+                        
+                        <!-- Road Network -->
+                        <svg class="map-roads" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <!-- Main roads connecting key locations -->
+                            <!-- Horizontal main road (top) -->
+                            <path class="road major" d="M 20,25 L 80,25" stroke-width="0.8"/>
+                            <!-- Vertical main road (center) -->
+                            <path class="road major" d="M 50,10 L 50,85" stroke-width="0.8"/>
+                            <!-- Diagonal road (library to gym) -->
+                            <path class="road minor" d="M 30,40 L 60,35" stroke-width="0.5"/>
+                            <!-- Residential area road -->
+                            <path class="road minor" d="M 40,50 L 55,60" stroke-width="0.5"/>
+                            <!-- Coffee shop area -->
+                            <path class="road minor" d="M 45,55 L 48,58" stroke-width="0.4"/>
+                            <!-- Office to home -->
+                            <path class="road minor" d="M 40,50 L 50,70" stroke-width="0.5"/>
+                        </svg>
 
                         <!-- Map locations will be positioned here -->
                         <div class="map-location" data-location="home" style="left: 50%; top: 70%;">

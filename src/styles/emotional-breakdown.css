@@ -1,0 +1,301 @@
+/* =====================================================
+   EMOTIONAL BREAKDOWN SYSTEM
+   Quick-time events for emotional moments
+   ===================================================== */
+
+.emotional-breakdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 10002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.breakdown-container {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.breakdown-character {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.character-visual {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: emotionalPulse 2s ease-in-out infinite;
+}
+
+.breakdown-character.crying .character-visual {
+    animation: crying 1s ease-in-out infinite;
+    filter: blur(1px);
+}
+
+.breakdown-character.yelling .character-visual {
+    animation: yelling 0.5s ease-in-out infinite;
+    transform: scale(1.1);
+}
+
+.breakdown-character.fighting .character-visual {
+    animation: fighting 0.3s ease-in-out infinite;
+    filter: hue-rotate(0deg);
+}
+
+.emotion-indicator {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    animation: emotionPulse 1s ease-in-out infinite;
+}
+
+.emotion-indicator.crying {
+    background: rgba(100, 149, 237, 0.8);
+    box-shadow: 0 0 20px rgba(100, 149, 237, 0.6);
+}
+
+.emotion-indicator.yelling {
+    background: rgba(255, 87, 34, 0.8);
+    box-shadow: 0 0 20px rgba(255, 87, 34, 0.6);
+}
+
+.emotion-indicator.fighting {
+    background: rgba(244, 67, 54, 0.8);
+    box-shadow: 0 0 20px rgba(244, 67, 54, 0.6);
+}
+
+.breakdown-dialogue {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.dialogue-text {
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Quick-Time Event */
+.quick-time-event {
+    margin-top: 2rem;
+}
+
+.qte-prompt {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.qte-timer {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.qte-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50 0%, #FF9800 50%, #F44336 100%);
+    border-radius: 4px;
+    transition: width 0.1s linear;
+    width: 100%;
+}
+
+.qte-choices {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.qte-choice {
+    padding: 1rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 120px;
+}
+
+.qte-choice:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.qte-choice.positive {
+    border-color: #4CAF50;
+}
+
+.qte-choice.positive:hover {
+    background: rgba(76, 175, 80, 0.2);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.qte-choice.neutral {
+    border-color: #FF9800;
+}
+
+.qte-choice.neutral:hover {
+    background: rgba(255, 152, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+.qte-choice.negative {
+    border-color: #F44336;
+}
+
+.qte-choice.negative:hover {
+    background: rgba(244, 67, 54, 0.2);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+.breakdown-result {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    color: #fff;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+}
+
+.breakdown-result.positive {
+    background: rgba(76, 175, 80, 0.3);
+    border: 1px solid #4CAF50;
+}
+
+.breakdown-result.neutral {
+    background: rgba(255, 152, 0, 0.3);
+    border: 1px solid #FF9800;
+}
+
+.breakdown-result.negative {
+    background: rgba(244, 67, 54, 0.3);
+    border: 1px solid #F44336;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes emotionalPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes crying {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    25% {
+        transform: translateY(-2px) scale(1.02);
+        opacity: 0.9;
+    }
+    50% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    75% {
+        transform: translateY(2px) scale(0.98);
+        opacity: 0.9;
+    }
+}
+
+@keyframes yelling {
+    0%, 100% {
+        transform: scale(1.1) rotate(0deg);
+    }
+    25% {
+        transform: scale(1.15) rotate(-2deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(0deg);
+    }
+    75% {
+        transform: scale(1.15) rotate(2deg);
+    }
+}
+
+@keyframes fighting {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+    25% {
+        transform: scale(1.1) rotate(-5deg);
+        filter: hue-rotate(10deg);
+    }
+    50% {
+        transform: scale(1) rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+    75% {
+        transform: scale(1.1) rotate(5deg);
+        filter: hue-rotate(-10deg);
+    }
+}
+
+@keyframes emotionPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+

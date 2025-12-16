@@ -134,13 +134,12 @@
 .map-container {
     position: relative;
     width: 100%;
-    height: 450px;
-    background: linear-gradient(180deg,
-            #1a1a2e 0%,
-            #16213e 30%,
-            #1e3a5f 70%,
-            #2d3436 100%);
+    height: 600px;
+    min-height: 600px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    border: 3px solid rgba(167, 139, 250, 0.2);
     border-radius: var(--radius-xl);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     border: 4px solid rgba(0, 0, 0, 0.4);
     box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5), 0 8px 0 rgba(0, 0, 0, 0.3);
     overflow: hidden;
@@ -152,6 +151,171 @@
     inset: 0;
     background:
         url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Road Network */
+.map-roads {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.map-roads .road {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.map-roads .road.major {
+    stroke: rgba(100, 100, 120, 0.4);
+    stroke-width: 0.8;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.map-roads .road.minor {
+    stroke: rgba(80, 80, 100, 0.3);
+    stroke-width: 0.5;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+/* Building visuals for locations */
+.map-building {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    background: var(--cartoon-bg-secondary);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    opacity: 0.4;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.map-building.residence {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
+    border-color: rgba(167, 139, 250, 0.3);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.map-building.commercial {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    border-color: rgba(167, 139, 250, 0.3);
+    border-radius: 8px;
+}
+
+.map-building.education {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-color: rgba(167, 139, 250, 0.4);
+    clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%);
+}
+
+.map-building.work {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-color: rgba(167, 139, 250, 0.4);
+    border-radius: 50% 50% 0 0;
+}
+
+.map-building.shop {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-color: rgba(251, 191, 36, 0.4);
+    clip-path: polygon(0% 20%, 100% 20%, 100% 100%, 0% 100%);
+}
+
+.map-building.finance {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: rgba(16, 185, 129, 0.4);
+    clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
+}
+
+/* NPC Houses - Different Styles */
+.map-npc-house {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    opacity: 0.9;
+    z-index: 3;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* House Style 1: Classic Cottage */
+.map-npc-house[data-npc-type="friend"],
+.map-npc-house[data-npc-type="romance"] {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+/* House Style 2: Modern Apartment */
+.map-npc-house[data-npc-type="mentor"],
+.map-npc-house[data-npc-type="business"] {
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    border-radius: 4px;
+    border-color: rgba(167, 139, 250, 0.5);
+}
+
+/* House Style 3: Luxury Villa */
+.map-npc-house[data-npc-type="investor"] {
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%);
+    border-color: rgba(167, 139, 250, 0.5);
+    width: 42px;
+    height: 42px;
+}
+
+/* House Style 4: Cozy Shop */
+.map-npc-house[data-npc-type="shopkeeper"] {
+    background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+    clip-path: polygon(0% 20%, 100% 20%, 100% 100%, 0% 100%);
+    border-color: rgba(244, 114, 182, 0.5);
+}
+
+/* House Style 5: Rival's Den */
+.map-npc-house[data-npc-type="rival"] {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    border-radius: 50% 50% 0 0;
+    border-color: rgba(100, 116, 139, 0.5);
+}
+
+/* House Style 6: Shady Hideout */
+.map-npc-house[data-npc-type="criminal"] {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* House Style 7: Authority Building */
+.map-npc-house[data-npc-type="authority"],
+.map-npc-house[data-npc-type="service"] {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    border-radius: 4px;
+    border-color: rgba(52, 211, 153, 0.5);
+}
+
+.map-npc-house:hover {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.4);
+    z-index: 15;
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.6);
+    filter: brightness(1.2);
+}
+
+.npc-house-icon {
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
 }
 
 /* Map locations */
@@ -537,14 +701,56 @@
 .npc-card .npc-avatar {
     width: 80px;
     height: 80px;
-    background: var(--cartoon-bg-tertiary);
+    background: linear-gradient(135deg, var(--cartoon-bg-tertiary) 0%, var(--cartoon-bg-secondary) 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 2.5rem;
     margin-bottom: var(--space-3);
-    border: 3px solid rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(167, 139, 250, 0.3);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.npc-card .npc-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.npc-card:hover .npc-avatar-image {
+    transform: scale(1.1);
+}
+
+.npc-card .npc-avatar-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--cartoon-accent-blue);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 1px;
+}
+
+.npc-avatar-text-large {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-weight: 800;
+    font-size: 4rem;
+    color: var(--cartoon-accent-blue);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    animation: breathe 4s ease-in-out infinite, float 6s ease-in-out infinite;
+    letter-spacing: 2px;
 }
 
 .npc-card .npc-info {
@@ -728,9 +934,9 @@
     width: 200px;
     height: 300px;
     object-fit: contain;
-    /* Remove background hack if white background */
     mix-blend-mode: multiply;
     filter: contrast(1.1);
+    transition: transform 0.3s ease;
 }
 
 .char-alive {
@@ -739,7 +945,17 @@
 }
 
 .char-talking {
-    animation: nod 0.5s ease-in-out;
+    animation: nod 0.5s ease-in-out, breathe 4s ease-in-out infinite;
+}
+
+/* Smooth character transitions */
+.npc-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.npc-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 /* Container for full body characters */
@@ -827,4 +1043,436 @@
 
 .stock-actions button {
     flex: 1;
+}
+
+/* =====================================================
+   NPC MODAL SYSTEM
+   ===================================================== */
+.npc-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.npc-modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.npc-modal-container {
+    position: relative;
+    max-width: 900px;
+    width: 90%;
+    max-height: 90vh;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.npc-modal-overlay.active .npc-modal-container { transform: scale(1); }
+
+.npc-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    color: white;
+    font-size: 20px;
+}
+
+.npc-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.npc-modal-header {
+    padding: 40px 40px 20px;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.npc-modal-name {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.npc-modal-subtitle { font-size: 1.25rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 12px; }
+.npc-modal-tier {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(167, 139, 250, 0.15);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.npc-modal-character-section {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.character-display-container {
+    position: relative;
+    width: 300px;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.character-glow-effect {
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+.npc-character-image {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.npc-character-image:hover { transform: scale(1.05); }
+
+.npc-avatar-fallback {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.npc-description {
+    max-width: 600px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.npc-modal-dialogue-area {
+    padding: 30px 40px;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.npc-dialogue-text {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-style: italic;
+    text-align: center;
+    position: relative;
+    padding: 0 40px;
+}
+
+.npc-modal-actions {
+    padding: 30px 40px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.npc-action-btn {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.npc-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.npc-action-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* =====================================================
+   CONVERSATION SCREEN
+   ===================================================== */
+.conversation-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+}
+
+.conversation-screen.active { display: flex; }
+
+.conversation-header {
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.conversation-npc-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid rgba(167, 139, 250, 0.5);
+    overflow: hidden;
+}
+
+.conversation-npc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.conversation-npc-info { flex: 1; }
+.conversation-npc-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+.conversation-npc-title { color: rgba(255, 255, 255, 0.7); font-size: 0.875rem; }
+
+.conversation-relationship {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(167, 139, 250, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+.conversation-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    gap: 2rem;
+    overflow-y: auto;
+}
+
+.conversation-dialogue-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.conversation-dialogue-bubble {
+    max-width: 800px;
+    padding: 2rem;
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 20px;
+    border: 2px solid rgba(167, 139, 250, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.conversation-dialogue-bubble.friendly { border-color: rgba(52, 211, 153, 0.5); }
+.conversation-dialogue-bubble.professional { border-color: rgba(167, 139, 250, 0.5); }
+.conversation-dialogue-bubble.competitive { border-color: rgba(251, 191, 36, 0.5); }
+.conversation-dialogue-bubble.mysterious { border-color: rgba(139, 92, 246, 0.5); }
+.conversation-dialogue-bubble.generous { border-color: rgba(244, 114, 182, 0.5); }
+
+.conversation-dialogue-text {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+    padding-left: 2rem;
+}
+
+.conversation-choices-area {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.conversation-choice {
+    padding: 1rem 1.5rem;
+    background: rgba(30, 41, 59, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.conversation-choice:hover {
+    background: rgba(139, 92, 246, 0.2);
+    border-color: rgba(167, 139, 250, 0.5);
+    transform: translateX(8px);
+}
+
+.conversation-choice.disabled { opacity: 0.5; cursor: not-allowed; }
+.conversation-choice.disabled:hover { transform: none; background: rgba(30, 41, 59, 0.6); }
+
+.conversation-footer {
+    padding: 1.5rem 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.conversation-actions { display: flex; gap: 1rem; }
+
+.conversation-action-btn {
+    padding: 0.75rem 1.5rem;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.conversation-action-btn:hover {
+    background: rgba(139, 92, 246, 0.3);
+}
+
+.conversation-close-btn {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+}
+
+/* =====================================================
+   TRAVEL ANIMATIONS
+   ===================================================== */
+.travel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.travel-content { text-align: center; color: white; max-width: 500px; width: 90%; }
+
+.travel-vehicle {
+    font-size: 5rem;
+    margin-bottom: 2rem;
+    animation: vehicleBounce 1s ease-in-out infinite;
+}
+
+@keyframes vehicleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.travel-route {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.travel-from, .travel-to { font-size: 1.25rem; font-weight: 600; flex: 1; }
+
+.travel-path {
+    flex: 2;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.5), transparent);
+    position: relative;
+    overflow: hidden;
+}
+
+.travel-path::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 1), transparent);
+    animation: pathFlow 2s linear infinite;
+}
+
+@keyframes pathFlow {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.travel-progress { margin-top: 2rem; }
+
+.travel-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.travel-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+    border-radius: 4px;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
