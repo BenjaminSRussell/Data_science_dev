@@ -142,21 +142,23 @@ export class ComprehensiveSpriteSystem {
                 
                 // Register body language animations
                 const poses = bodyLanguageMapper.getAllPoses();
-                poses.forEach(pose => {
-                    const coords = bodyLanguageMapper.getSpriteSheetCoords(pose);
-                    const animation = bodyLanguageMapper.getPoseAnimation(pose);
-                    
-                    this.spriteSheetManager.registerAnimation('main_character', animation, {
-                        frames: [
-                            { row: coords.row, col: coords.col },
-                            { row: coords.row, col: coords.col + 1 }
-                        ],
-                        speed: 8,
-                        loop: animation.includes('_loop') || animation.includes('_once')
-                    });
-                });
+                // Note: registerAnimation method doesn't exist in SpriteSheetManager
+                // Animation registration is handled through registerSpriteSheet instead
+                // poses.forEach(pose => {
+                //     const coords = bodyLanguageMapper.getSpriteSheetCoords(pose);
+                //     const animation = bodyLanguageMapper.getPoseAnimation(pose);
+                //     
+                //     this.spriteSheetManager.registerAnimation('main_character', animation, {
+                //         frames: [
+                //             { row: coords.row, col: coords.col },
+                //             { row: coords.row, col: coords.col + 1 }
+                //         ],
+                //         speed: 8,
+                //         loop: animation.includes('_loop') || animation.includes('_once')
+                //     });
+                // });
                 
-                console.log(' Registered sprite sheets');
+                console.log(' Sprite sheets registered (animations handled via sprite sheet config)');
             } catch (error) {
                 console.warn('Could not register sprite sheets:', error);
             }

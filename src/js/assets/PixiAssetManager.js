@@ -18,6 +18,12 @@ export class PixiAssetManager {
      * Phase 4: Uses PixiJS Assets manifest system
      */
     async init(manifest) {
+        // Check if Assets is already initialized
+        if (Assets.cache) {
+            // Assets already initialized, just return success
+            return true;
+        }
+
         this.manifest = {
             bundles: [
                 {
@@ -39,6 +45,10 @@ export class PixiAssetManager {
             await Assets.init({ manifest: this.manifest });
             return true;
         } catch (error) {
+            // If error is about already being initialized, that's fine
+            if (error.message && error.message.includes('already initialized')) {
+                return true;
+            }
             console.warn('Asset initialization failed:', error);
             return false;
         }

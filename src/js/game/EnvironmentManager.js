@@ -168,7 +168,9 @@ export class EnvironmentManager {
             document.body.appendChild(overlay);
         }
 
-        overlay.style.backgroundColor = this.currentTimeOfDay.overlay;
+        if (this.currentTimeOfDay) {
+            overlay.style.backgroundColor = this.currentTimeOfDay.overlay;
+        }
 
         // Update greeting if on game screen
         this.updateGreeting();
@@ -229,7 +231,9 @@ export class EnvironmentManager {
             indicator.style.cssText = 'margin-left: 8px; font-size: 1rem;';
             document.querySelector('.top-bar-left')?.appendChild(indicator);
         }
-        indicator.textContent = this.currentWeather.icon;
+        if (this.currentWeather) {
+            indicator.textContent = this.currentWeather.icon;
+        }
     }
 
     /**

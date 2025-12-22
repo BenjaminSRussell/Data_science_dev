@@ -429,6 +429,12 @@ export class EmotionalBreakdownSystem {
         const breakdown = this.activeBreakdowns.get(breakdownId);
         if (!breakdown) return;
         
+        // Clear any active timers
+        if (breakdown.timer) {
+            clearInterval(breakdown.timer);
+            breakdown.timer = null;
+        }
+        
         breakdown.resolved = true;
         breakdown.resolvedAt = Date.now();
         

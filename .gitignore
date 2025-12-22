@@ -1,0 +1,91 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+*.log
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Large sprite sheets and binary assets
+# These are too large for GitHub - use Git LFS or host separately
+**/sprite*.png
+**/sprite*.jpg
+**/sprite*.jpeg
+**/*sheet*.png
+**/*sheet*.jpg
+**/*sheet*.jpeg
+**/character_sheet*.png
+**/emotion_sheet*.png
+
+# Downloaded assets (too large for git)
+downloaded_assets/
+# But keep the structure/manifests
+!downloaded_assets/**/*.json
+!downloaded_assets/**/*.md
+!downloaded_assets/**/*.txt
+
+# Large background assets
+assets/backgrounds/locations/**/*.png
+assets/backgrounds/locations/**/*.jpg
+# Keep structure files
+!assets/backgrounds/locations/**/*.json
+!assets/backgrounds/locations/**/*.svg
+
+# Character sprites (large collections)
+assets/characters/sprites/*.png
+assets/characters/sprites/*.jpg
+# Keep structure files
+!assets/characters/sprites/*.json
+!assets/characters/sprites/*.svg
+
+# Map assets
+assets/map/**/*.png
+assets/map/**/*.jpg
+# Keep structure files
+!assets/map/**/*.json
+
+# Public assets (generated/cached)
+public/assets/**/*.png
+public/assets/**/*.jpg
+public/wasm/
+# Keep manifests
+!public/assets/**/*.json
+!public/**/*.wasm
+
+# Test coverage
+coverage/
+*.lcov
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Compression artifacts (if we compress)
+*.zip
+*.tar
+*.tar.gz
+*.gz
+
+# Cache files
+.cache/
+.parcel-cache/
+

@@ -146,7 +146,7 @@ export default {
             condition: { playerSuccess: true, npcStruggling: true },
             emotion: 'jealousy',
             dialogue: "You make it look so easy.",
-            subtext: 'There's pain in her voice'
+            subtext: "There's pain in her voice"
         },
         {
             condition: { mentionKids: true, relationship: '>40' },
