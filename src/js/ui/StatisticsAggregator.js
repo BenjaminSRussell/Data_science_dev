@@ -29,10 +29,21 @@ export class StatisticsAggregator {
             if (saveData && saveData.state) {
                 const state = saveData.state;
                 
-                // Calculate playtime (rough estimate: days * 24 hours)
-                const days = state.timeManager?.totalDays || 0;
-                const hours = days * 24; // Rough estimate
-                totalPlaytime += hours;
+                // Calculate playtime more accurately
+                // Estimate: ~10-15 minutes per task completed
+                // This gives a better approximation than using game days
+                const tasksCompleted = state.tasksCompleted || 0;
+                const estimatedHours = tasksCompleted * 0.2; // 12 minutes per task = 0.2 hours
+                
+                // If we have startTime, use actual elapsed time (capped at estimated)
+                if (saveData.timestamp && state.startTime) {
+                    const elapsedMs = saveData.timestamp - state.startTime;
+                    const elapsedHours = elapsedMs / (1000 * 60 * 60);
+                    // Use the smaller of estimated or elapsed (elapsed can be inflated if game was paused)
+                    totalPlaytime += Math.min(estimatedHours, elapsedHours);
+                } else {
+                    totalPlaytime += estimatedHours;
+                }
                 
                 // Track highest rank
                 if (state.rankIndex > highestRank) {
@@ -104,18 +115,31 @@ export class StatisticsAggregator {
      * Format playtime
      */
     formatPlaytime(hours) {
-        if (hours < 1) {
-            return '< 1h';
+        if (hours < 0.5) {
+            return '< 30m';
+        } else if (hours < 1) {
+            return `${Math.round(hours * 60)}m`;
         } else if (hours < 24) {
-            return `${Math.round(hours)}h`;
+            const wholeHours = Math.floor(hours);
+            const minutes = Math.round((hours - wholeHours) * 60);
+            if (minutes > 0) {
+                return `${wholeHours}h ${minutes}m`;
+            }
+            return `${wholeHours}h`;
         } else if (hours < 168) {
             const days = Math.floor(hours / 24);
             const remainingHours = Math.round(hours % 24);
-            return `${days}d ${remainingHours}h`;
+            if (remainingHours > 0) {
+                return `${days}d ${remainingHours}h`;
+            }
+            return `${days}d`;
         } else {
             const weeks = Math.floor(hours / 168);
             const days = Math.floor((hours % 168) / 24);
-            return `${weeks}w ${days}d`;
+            if (days > 0) {
+                return `${weeks}w ${days}d`;
+            }
+            return `${weeks}w`;
         }
     }
 

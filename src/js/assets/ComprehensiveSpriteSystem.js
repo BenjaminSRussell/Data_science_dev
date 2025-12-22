@@ -114,7 +114,7 @@ export class ComprehensiveSpriteSystem {
      */
     async registerSpriteSheets() {
         // Main character sprite sheet
-        if (this.spriteSheetManager) {
+        if (this.spriteSheetManager?.registerSpriteSheet) {
             try {
                 await this.spriteSheetManager.registerSpriteSheet('main_character', {
                     url: '/assets/characters/sprites/character_sheet.png',
@@ -125,20 +125,14 @@ export class ComprehensiveSpriteSystem {
                 });
                 
                 // Register emotion animations
-                const emotions = emotionSpriteMapper.getAllEmotions();
-                emotions.forEach(emotion => {
-                    const coords = emotionSpriteMapper.getSpriteSheetCoords(emotion);
-                    const animation = emotionSpriteMapper.getEmotionAnimation(emotion);
-                    
-                    this.spriteSheetManager.registerAnimation('main_character', animation, {
-                        frames: [
-                            { row: coords.row, col: coords.col },
-                            { row: coords.row, col: coords.col + 1 }
-                        ],
-                        speed: 8,
-                        loop: true
-                    });
-                });
+                // Note: Animation registration is handled through sprite sheet configuration
+                // Individual animations are defined in the sprite sheet manifest
+                // const emotions = emotionSpriteMapper.getAllEmotions();
+                // emotions.forEach(emotion => {
+                //     const coords = emotionSpriteMapper.getSpriteSheetCoords(emotion);
+                //     const animation = emotionSpriteMapper.getEmotionAnimation(emotion);
+                //     // Animation frames are handled by SpriteSheetManager.parseAnimations()
+                // });
                 
                 // Register body language animations
                 const poses = bodyLanguageMapper.getAllPoses();

@@ -4,6 +4,7 @@
 
 import { TASKS } from '../data/tasks.js';
 import { BOSSES } from '../data/bosses.js';
+import { COMPREHENSIVE_DATA_SCIENCE_TASKS } from '../data/comprehensive_datascience_tasks.js';
 
 export class TaskSystem {
     constructor(gameState) {
@@ -17,8 +18,16 @@ export class TaskSystem {
         const rank = this.gameState.currentRank;
         const difficulty = this.getDifficultyForRank(this.gameState.rankIndex);
 
-        // Filter tasks by difficulty
-        const availableTasks = TASKS.filter(t => t.difficulty === difficulty);
+        // Use comprehensive data science tasks if available, fallback to original tasks
+        const allTasks = COMPREHENSIVE_DATA_SCIENCE_TASKS && COMPREHENSIVE_DATA_SCIENCE_TASKS.length > 0 
+            ? COMPREHENSIVE_DATA_SCIENCE_TASKS 
+            : TASKS;
+
+        // Filter tasks by difficulty (with tolerance for difficulty matching)
+        const availableTasks = allTasks.filter(t => {
+            const taskDiff = typeof t.difficulty === 'number' ? t.difficulty : parseInt(t.difficulty) || 1;
+            return Math.abs(taskDiff - difficulty) <= 0.5; // Allow 0.5 difficulty tolerance
+        });
 
         if (availableTasks.length === 0) {
             console.warn('No tasks found for difficulty:', difficulty);
@@ -31,11 +40,29 @@ export class TaskSystem {
         // Pick a random boss
         const boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
 
+        return this.createTaskFromTemplate(taskTemplate, boss);
+    }
+
+    /**
+     * Create task from template
+     */
+    createTaskFromTemplate(taskTemplate, boss = null) {
         // Generate data based on task template
         const data = this.generateData(taskTemplate);
 
+        // Get difficulty from template
+        const difficulty = typeof taskTemplate.difficulty === 'number' 
+            ? taskTemplate.difficulty 
+            : parseInt(taskTemplate.difficulty) || 1;
+        
+        // Pick boss if not provided
+        if (!boss) {
+            boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
+        }
+
         // Calculate reward based on rank and difficulty
-        const baseReward = 100 * rank.salaryMultiplier;
+        const rank = this.gameState.currentRank;
+        const baseReward = 100 * (rank?.salaryMultiplier || 1);
         const difficultyBonus = difficulty * 20;
         const potentialReward = Math.round(baseReward + difficultyBonus);
 
@@ -45,10 +72,17 @@ export class TaskSystem {
             template: taskTemplate,
             boss: boss,
             data: data,
-            requirements: taskTemplate.requirements,
-            optimalChartTypes: taskTemplate.optimalChartTypes,
+            requirements: taskTemplate.requirements || [],
+            optimalChartTypes: taskTemplate.optimalChartTypes || ['bar'],
+            acceptableChartTypes: taskTemplate.acceptableChartTypes || taskTemplate.optimalChartTypes || ['bar'],
             potentialReward: potentialReward,
-            startTime: Date.now()
+            startTime: Date.now(),
+            // Include additional metadata from comprehensive tasks
+            domain: taskTemplate.domain,
+            skills: taskTemplate.skills,
+            tools: taskTemplate.tools,
+            deliverable: taskTemplate.deliverable,
+            realWorldContext: taskTemplate.realWorldContext
         };
 
         // Update boss dialogue

@@ -47,12 +47,20 @@ Update asset paths in code to use hosted URLs.
 
 ### Option 3: Compression Script
 
-Create compressed versions for Git:
+Compress sprite sheets before committing:
 
+**Using pngquant (bash):**
 ```bash
-# Compress sprite sheets (example script)
-find assets -name "*.png" -exec pngquant --quality=65-80 {} \; -exec mv {}.quantized.png {} \;
+./scripts/compress-sprites.sh
 ```
+
+**Using Node.js (sharp):**
+```bash
+npm install sharp  # if not already installed
+node scripts/compress-assets.js
+```
+
+Both scripts will compress sprite sheets while maintaining visual quality.
 
 ### Option 4: Asset Packages
 

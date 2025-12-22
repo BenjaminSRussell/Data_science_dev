@@ -8,7 +8,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:wasm": "emcc src/cpp/main.cpp src/cpp/game_state.cpp src/cpp/data_generator.cpp src/cpp/task_system.cpp src/cpp/scorer.cpp src/cpp/economy.cpp -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 --bind -o public/wasm/game.js",
-    "build:all": "npm run build:wasm && npm run build"
+    "build:all": "npm run build:wasm && npm run build",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:watch": "vitest --watch",
+    "compress-assets": "node scripts/compress-assets-for-git.js",
+    "check-sizes": "node scripts/check-file-sizes.js"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
@@ -22,9 +28,14 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^2.0.0",
+    "@vitest/ui": "^2.0.0",
+    "jsdom": "^24.0.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "vite": "^5.0.0"
+    "sharp": "^0.34.5",
+    "vite": "^5.0.0",
+    "vitest": "^2.0.0"
   },
   "keywords": [
     "game",

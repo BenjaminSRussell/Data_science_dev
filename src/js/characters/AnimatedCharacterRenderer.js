@@ -122,7 +122,7 @@ export class AnimatedCharacterRenderer {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // Get current frame
-        const frame = this.spriteSheetManager.getCurrentFrame(
+        const frame = this.spriteSheetManager?.getCurrentFrame(
             state.spriteSheetId,
             state.currentAnimation,
             state.currentFrame

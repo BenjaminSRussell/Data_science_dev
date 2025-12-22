@@ -22,14 +22,16 @@ build/
 
 # Large sprite sheets and binary assets
 # These are too large for GitHub - use Git LFS or host separately
-**/sprite*.png
-**/sprite*.jpg
-**/sprite*.jpeg
+# Sprite sheet patterns
+**/*sprite*.png
+**/*sprite*.jpg
+**/*sprite*.jpeg
 **/*sheet*.png
 **/*sheet*.jpg
 **/*sheet*.jpeg
 **/character_sheet*.png
 **/emotion_sheet*.png
+**/*spritesheet*.png
 
 # Downloaded assets (too large for git)
 downloaded_assets/
@@ -84,6 +86,9 @@ Thumbs.db
 *.tar
 *.tar.gz
 *.gz
+
+# Compression reports
+compression-report.json
 
 # Cache files
 .cache/

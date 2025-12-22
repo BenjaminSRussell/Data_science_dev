@@ -321,6 +321,24 @@ export class MainGame {
             
             logger.info('Game initialized successfully!');
 
+            // Initialize developer tools (ONLY in dev mode - completely separate from main game)
+            // Dev tools never interfere with normal gameplay - they're isolated
+            const isDevMode = window.location.hostname === 'localhost' || 
+                            window.location.hostname === '127.0.0.1' ||
+                            localStorage.getItem('dev_mode') === 'true' ||
+                            new URLSearchParams(window.location.search).has('dev');
+            
+            if (isDevMode) {
+                try {
+                    const { DevTools } = await import('./dev/index.js');
+                    this.devTools = new DevTools(this);
+                    logger.debug('Developer tools initialized (separate from main game)');
+                } catch (error) {
+                    // Dev tools are optional, don't fail if they don't load
+                    logger.debug('Developer tools not available:', error.message);
+                }
+            }
+
         } catch (error) {
             logger.error('init() method error caught:', error);
             
@@ -1343,7 +1361,7 @@ export class MainGame {
                     } catch (error) {
                         logger.warn('PixiJS Assets failed, using fallback:', error);
                         // Fallback to old AssetManager
-                        this.assetManager.loadAll().then(success => {
+                        this.assetManager?.loadAll()?.then(success => {
                             if (success) {
                                 logger.info('Assets loaded successfully (fallback)');
                             }
@@ -1353,7 +1371,7 @@ export class MainGame {
                     }
                 } else {
                     // Fallback to old AssetManager
-                    this.assetManager.loadAll().then(success => {
+                    this.assetManager?.loadAll()?.then(success => {
                         if (success) {
                             logger.info('Assets loaded successfully');
                         }
@@ -1520,11 +1538,26 @@ export class MainGame {
             this.showLoadingProgress('Ready!', 100);
             logger.debug('[startNewGame]: core systems initialized, showing intro');
             
-            // Hide loading, show intro
+            // Hide loading, skip intro and jump directly to game
             setTimeout(() => {
                 this.hideLoadingProgress();
-                // Show intro instead of jumping directly to game
-                this.introSystem.showIntro();
+                // Skip intro - jump directly to game with a task ready
+                this.gameState.isGameStarted = true;
+                this.gameState.tutorialCompleted = true;
+                // Auto-assign first job and generate initial task
+                if (this.jobSystem && this.gameState.rankIndex === 0) {
+                    const firstJob = this.jobSystem.getAvailableJobs()[0];
+                    if (firstJob) {
+                        this.gameState.currentJob = firstJob;
+                        this.gameState.rankIndex = firstJob.rankIndex || 0;
+                        // Generate initial task immediately
+                        if (this.taskSystem) {
+                            this.taskSystem.generateNewTask();
+                        }
+                    }
+                }
+                // Show game screen directly
+                this.screenManager.showScreen('game');
             }, 100);
         } catch (error) {
             logger.error(' startNewGame ERROR:', error);

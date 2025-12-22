@@ -184,6 +184,13 @@ export class MenuLogoDisplay {
     }
 
     /**
+     * Cleanup - stop rotation when destroyed
+     */
+    destroy() {
+        this.stopRotation();
+    }
+
+    /**
      * Update stats (call when saves change)
      */
     update() {
