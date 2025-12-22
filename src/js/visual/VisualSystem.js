@@ -91,7 +91,15 @@ export class VisualSystem {
 
             // Update effect
             if (effect.update) {
-                effect.update(elapsed, delta);
+                const isActive = effect.update(elapsed, delta);
+                // If update returns false, effect is complete
+                if (isActive === false) {
+                    if (effect.cleanup) {
+                        effect.cleanup();
+                    }
+                    this.effects.splice(index, 1);
+                    return;
+                }
             }
         });
 

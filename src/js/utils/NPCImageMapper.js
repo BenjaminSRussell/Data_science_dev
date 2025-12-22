@@ -60,7 +60,6 @@ function generateImagePath(npc) {
     // Use hash to select variant (0-9)
     const variant = hash % 10;
     
-    // Return path - will use placeholder system until images are created
     // Format: /assets/npcs/{category}_{variant}.png
     return NPC_IMAGE_BASE + `${category}_${variant}.png`;
 }
@@ -78,18 +77,12 @@ function simpleHash(str) {
     return Math.abs(hash);
 }
 
+
 /**
  * Get fallback emoji/icon if image fails to load
  */
 export function getNPCFallback(npc) {
-    return npc.icon || '👤';
-}
-
-/**
- * Check if image exists (for error handling)
- */
-export function hasNPCImage(npc) {
-    return !!npc.image || !!EXISTING_IMAGES[npc.id];
+    return npc.icon || '';
 }
 
 /**

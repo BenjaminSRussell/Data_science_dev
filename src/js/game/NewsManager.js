@@ -5,12 +5,12 @@
 
 // News categories
 export const NEWS_CATEGORIES = {
-    market: { icon: '📈', color: '#6bcb77' },
-    tech: { icon: '💻', color: '#4ecdc4' },
-    business: { icon: '💼', color: '#ffd93d' },
-    economy: { icon: '🏦', color: '#ff8548' },
-    local: { icon: '🏙️', color: '#a855f7' },
-    personal: { icon: '👤', color: '#ff6b9d' }
+    market: { icon: '', color: '#6bcb77' },
+    tech: { icon: '', color: '#4ecdc4' },
+    business: { icon: '', color: '#ffd93d' },
+    economy: { icon: '', color: '#ff8548' },
+    local: { icon: '', color: '#a855f7' },
+    personal: { icon: '', color: '#ff6b9d' }
 };
 
 // News templates
@@ -125,7 +125,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'referral_bonus',
         type: 'positive',
-        title: '🎉 Referral Bonus!',
+        title: ' Referral Bonus!',
         description: 'A satisfied client referred you to a colleague. +$500 bonus!',
         probability: 0.05,
         requirements: { completedJobs: 5 },
@@ -134,7 +134,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'viral_chart',
         type: 'positive',
-        title: '📊 Your Chart Went Viral!',
+        title: ' Your Chart Went Viral!',
         description: 'One of your visualizations got shared widely on LinkedIn!',
         probability: 0.03,
         requirements: { analytics: 30 },
@@ -143,7 +143,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'mentor_gift',
         type: 'positive',
-        title: '🎁 Mentor\'s Gift',
+        title: ' Mentor\'s Gift',
         description: 'A mentor gave you their old professional reference books.',
         probability: 0.04,
         requirements: { hasMetMentor: true },
@@ -152,7 +152,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'lucky_investment',
         type: 'positive',
-        title: '🍀 Lucky Break!',
+        title: ' Lucky Break!',
         description: 'That risky investment paid off! Your portfolio is up.',
         probability: 0.02,
         requirements: { hasInvestments: true },
@@ -161,7 +161,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'award_nomination',
         type: 'positive',
-        title: '🏆 Award Nomination!',
+        title: ' Award Nomination!',
         description: 'You\'ve been nominated for an industry award!',
         probability: 0.02,
         requirements: { reputation: 500 },
@@ -172,7 +172,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'coffee_meeting',
         type: 'neutral',
-        title: '☕ Chance Encounter',
+        title: ' Chance Encounter',
         description: 'You bumped into someone interesting at the coffee shop.',
         probability: 0.08,
         requirements: {},
@@ -181,7 +181,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'industry_insight',
         type: 'neutral',
-        title: '💡 Industry Insight',
+        title: ' Industry Insight',
         description: 'You read an interesting article about emerging trends.',
         probability: 0.10,
         requirements: {},
@@ -190,7 +190,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'networking_lead',
         type: 'neutral',
-        title: '🤝 Networking Lead',
+        title: ' Networking Lead',
         description: 'Someone at a meetup mentioned they might need help.',
         probability: 0.06,
         requirements: {},
@@ -201,7 +201,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'car_trouble',
         type: 'negative',
-        title: '🚗 Car Trouble',
+        title: ' Car Trouble',
         description: 'Your car needs repairs. -$200',
         probability: 0.04,
         requirements: { hasCar: true },
@@ -210,7 +210,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'sick_day',
         type: 'negative',
-        title: '🤒 Under the Weather',
+        title: ' Under the Weather',
         description: 'You\'re not feeling well. Energy reduced today.',
         probability: 0.05,
         requirements: {},
@@ -219,7 +219,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'difficult_client',
         type: 'negative',
-        title: '😤 Difficult Client',
+        title: ' Difficult Client',
         description: 'A client is being unreasonable with demands.',
         probability: 0.06,
         requirements: { hasActiveJobs: true },
@@ -228,7 +228,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'market_crash',
         type: 'negative',
-        title: '📉 Market Dip',
+        title: ' Market Dip',
         description: 'Your investments took a hit today.',
         probability: 0.03,
         requirements: { hasInvestments: true },
@@ -237,7 +237,7 @@ export const RANDOM_EVENTS = [
     {
         id: 'competitor_steal',
         type: 'negative',
-        title: '😠 Lost a Client',
+        title: ' Lost a Client',
         description: 'A competitor poached one of your potential clients.',
         probability: 0.04,
         requirements: { reputation: 100 },
@@ -274,7 +274,7 @@ export class NewsManager {
      */
     generateDailyNews() {
         this.dailyPaper = {
-            date: this.gameState.timeManager.getDateString(),
+            date: this.gameState.timeManager?.getDateString() || '',
             headline: null,
             articles: [],
             weather: 'Clear', // To be linked with EnvironmentManager
@@ -433,8 +433,10 @@ export class NewsManager {
             results.xp = effects.xp;
         }
 
-        if (effects.energyPenalty) {
-            this.gameState.timeManager.energy -= effects.energyPenalty;
+        if (effects.energyPenalty && this.gameState.timeManager) {
+            if (this.gameState?.timeManager) {
+                this.gameState.timeManager.energy = (this.gameState.timeManager.energy || 0) - (effects.energyPenalty || 0);
+            }
             results.energyLost = effects.energyPenalty;
         }
 

@@ -12,6 +12,7 @@ export class EnvironmentManager {
         this.currentWeather = null;
         this.activeEvent = null;
         this.eventTimeout = null;
+        this.timeUpdateInterval = null;
     }
 
     /**
@@ -25,7 +26,7 @@ export class EnvironmentManager {
             this.startEventTimer();
 
             // Update every minute
-            setInterval(() => {
+            this.timeUpdateInterval = setInterval(() => {
                 this.updateTimeOfDay();
             }, 60000);
         } catch (error) {
@@ -107,10 +108,10 @@ export class EnvironmentManager {
         const container = document.body;
         const elements = this.currentLocation.elements;
 
-        elements.forEach((emoji, index) => {
+        elements.forEach((element, index) => {
             const el = document.createElement('div');
             el.className = 'env-floating-element';
-            el.textContent = emoji;
+            el.textContent = element;
             el.style.cssText = `
                 position: fixed;
                 font-size: ${2 + Math.random() * 2}rem;
@@ -178,7 +179,7 @@ export class EnvironmentManager {
      */
     updateGreeting() {
         const dialogueEl = document.getElementById('boss-dialogue');
-        if (dialogueEl && this.gameState.currentTask === null) {
+        if (dialogueEl && this.gameState.currentTask === null && this.currentTimeOfDay) {
             // Only update if no active task
             const p = dialogueEl.querySelector('p');
             if (p) {
@@ -213,11 +214,12 @@ export class EnvironmentManager {
         // Remove existing weather effects
         document.querySelectorAll('.weather-effect').forEach(el => el.remove());
 
-        if (this.currentWeather.id === 'rainy') {
-            this.createRainEffect();
-        } else if (this.currentWeather.id === 'snowy') {
-            this.createSnowEffect();
-        }
+        // Rain and snow effects disabled per user request
+        // if (this.currentWeather.id === 'rainy') {
+        //     this.createRainEffect();
+        // } else if (this.currentWeather.id === 'snowy') {
+        //     this.createSnowEffect();
+        // }
 
         // Update weather indicator
         let indicator = document.getElementById('weather-indicator');
@@ -381,7 +383,7 @@ export class EnvironmentManager {
     showLocationUnlock(location) {
         // Similar to event notification but more celebratory
         if (window.game?.showToast) {
-            window.game.showToast(`🎉 New Location Unlocked: ${location.name}!`, 'success');
+            window.game.showToast(` New Location Unlocked: ${location.name}!`, 'success');
         }
     }
 
@@ -403,6 +405,9 @@ export class EnvironmentManager {
     destroy() {
         if (this.eventTimeout) {
             clearTimeout(this.eventTimeout);
+        }
+        if (this.timeUpdateInterval) {
+            clearInterval(this.timeUpdateInterval);
         }
         document.querySelectorAll('.env-floating-element, .weather-effect').forEach(el => el.remove());
     }

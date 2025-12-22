@@ -1,0 +1,741 @@
+{
+  "theme": "low_poly",
+  "locations": {
+    "office": {
+      "count": 10,
+      "files": [
+        "office_backdrop_01.png",
+        "office_backdrop_00.png",
+        "office_backdrop_02.png",
+        "office_backdrop_03.png",
+        "office_backdrop_07.png",
+        "office_backdrop_06.png",
+        "office_backdrop_04.png",
+        "office_backdrop_05.png",
+        "office_backdrop_08.png",
+        "office_backdrop_09.png"
+      ]
+    },
+    "home": {
+      "count": 10,
+      "files": [
+        "home_backdrop_08.png",
+        "home_backdrop_09.png",
+        "home_backdrop_02.png",
+        "home_backdrop_03.png",
+        "home_backdrop_01.png",
+        "home_backdrop_00.png",
+        "home_backdrop_04.png",
+        "home_backdrop_05.png",
+        "home_backdrop_07.png",
+        "home_backdrop_06.png"
+      ]
+    },
+    "apartment": {
+      "count": 10,
+      "files": [
+        "apartment_backdrop_09.png",
+        "apartment_backdrop_08.png",
+        "apartment_backdrop_00.png",
+        "apartment_backdrop_01.png",
+        "apartment_backdrop_03.png",
+        "apartment_backdrop_02.png",
+        "apartment_backdrop_06.png",
+        "apartment_backdrop_07.png",
+        "apartment_backdrop_05.png",
+        "apartment_backdrop_04.png"
+      ]
+    },
+    "coffee_shop": {
+      "count": 10,
+      "files": [
+        "coffee_shop_backdrop_08.png",
+        "coffee_shop_backdrop_09.png",
+        "coffee_shop_backdrop_01.png",
+        "coffee_shop_backdrop_00.png",
+        "coffee_shop_backdrop_02.png",
+        "coffee_shop_backdrop_03.png",
+        "coffee_shop_backdrop_07.png",
+        "coffee_shop_backdrop_06.png",
+        "coffee_shop_backdrop_04.png",
+        "coffee_shop_backdrop_05.png"
+      ]
+    },
+    "cafe": {
+      "count": 10,
+      "files": [
+        "cafe_backdrop_02.png",
+        "cafe_backdrop_03.png",
+        "cafe_backdrop_01.png",
+        "cafe_backdrop_00.png",
+        "cafe_backdrop_04.png",
+        "cafe_backdrop_05.png",
+        "cafe_backdrop_07.png",
+        "cafe_backdrop_06.png",
+        "cafe_backdrop_08.png",
+        "cafe_backdrop_09.png"
+      ]
+    },
+    "library": {
+      "count": 10,
+      "files": [
+        "library_backdrop_02.png",
+        "library_backdrop_03.png",
+        "library_backdrop_01.png",
+        "library_backdrop_00.png",
+        "library_backdrop_04.png",
+        "library_backdrop_05.png",
+        "library_backdrop_07.png",
+        "library_backdrop_06.png",
+        "library_backdrop_08.png",
+        "library_backdrop_09.png"
+      ]
+    },
+    "gym": {
+      "count": 10,
+      "files": [
+        "gym_backdrop_09.png",
+        "gym_backdrop_08.png",
+        "gym_backdrop_06.png",
+        "gym_backdrop_07.png",
+        "gym_backdrop_05.png",
+        "gym_backdrop_04.png",
+        "gym_backdrop_00.png",
+        "gym_backdrop_01.png",
+        "gym_backdrop_03.png",
+        "gym_backdrop_02.png"
+      ]
+    },
+    "park": {
+      "count": 10,
+      "files": [
+        "park_backdrop_09.png",
+        "park_backdrop_08.png",
+        "park_backdrop_00.png",
+        "park_backdrop_01.png",
+        "park_backdrop_03.png",
+        "park_backdrop_02.png",
+        "park_backdrop_06.png",
+        "park_backdrop_07.png",
+        "park_backdrop_05.png",
+        "park_backdrop_04.png"
+      ]
+    },
+    "mall": {
+      "count": 10,
+      "files": [
+        "mall_backdrop_04.png",
+        "mall_backdrop_05.png",
+        "mall_backdrop_07.png",
+        "mall_backdrop_06.png",
+        "mall_backdrop_02.png",
+        "mall_backdrop_03.png",
+        "mall_backdrop_01.png",
+        "mall_backdrop_00.png",
+        "mall_backdrop_08.png",
+        "mall_backdrop_09.png"
+      ]
+    },
+    "university": {
+      "count": 10,
+      "files": [
+        "university_backdrop_09.png",
+        "university_backdrop_08.png",
+        "university_backdrop_05.png",
+        "university_backdrop_04.png",
+        "university_backdrop_06.png",
+        "university_backdrop_07.png",
+        "university_backdrop_03.png",
+        "university_backdrop_02.png",
+        "university_backdrop_00.png",
+        "university_backdrop_01.png"
+      ]
+    },
+    "tech_hub": {
+      "count": 10,
+      "files": [
+        "tech_hub_backdrop_01.png",
+        "tech_hub_backdrop_00.png",
+        "tech_hub_backdrop_02.png",
+        "tech_hub_backdrop_03.png",
+        "tech_hub_backdrop_07.png",
+        "tech_hub_backdrop_06.png",
+        "tech_hub_backdrop_04.png",
+        "tech_hub_backdrop_05.png",
+        "tech_hub_backdrop_08.png",
+        "tech_hub_backdrop_09.png"
+      ]
+    },
+    "downtown": {
+      "count": 10,
+      "files": [
+        "downtown_backdrop_05.png",
+        "downtown_backdrop_04.png",
+        "downtown_backdrop_06.png",
+        "downtown_backdrop_07.png",
+        "downtown_backdrop_03.png",
+        "downtown_backdrop_02.png",
+        "downtown_backdrop_00.png",
+        "downtown_backdrop_01.png",
+        "downtown_backdrop_09.png",
+        "downtown_backdrop_08.png"
+      ]
+    },
+    "networking_bar": {
+      "count": 10,
+      "files": [
+        "networking_bar_backdrop_08.png",
+        "networking_bar_backdrop_09.png",
+        "networking_bar_backdrop_04.png",
+        "networking_bar_backdrop_05.png",
+        "networking_bar_backdrop_07.png",
+        "networking_bar_backdrop_06.png",
+        "networking_bar_backdrop_02.png",
+        "networking_bar_backdrop_03.png",
+        "networking_bar_backdrop_01.png",
+        "networking_bar_backdrop_00.png"
+      ]
+    },
+    "stock_exchange": {
+      "count": 10,
+      "files": [
+        "stock_exchange_backdrop_09.png",
+        "stock_exchange_backdrop_08.png",
+        "stock_exchange_backdrop_06.png",
+        "stock_exchange_backdrop_07.png",
+        "stock_exchange_backdrop_05.png",
+        "stock_exchange_backdrop_04.png",
+        "stock_exchange_backdrop_00.png",
+        "stock_exchange_backdrop_01.png",
+        "stock_exchange_backdrop_03.png",
+        "stock_exchange_backdrop_02.png"
+      ]
+    },
+    "luxury_district": {
+      "count": 10,
+      "files": [
+        "luxury_district_backdrop_02.png",
+        "luxury_district_backdrop_03.png",
+        "luxury_district_backdrop_01.png",
+        "luxury_district_backdrop_00.png",
+        "luxury_district_backdrop_04.png",
+        "luxury_district_backdrop_05.png",
+        "luxury_district_backdrop_07.png",
+        "luxury_district_backdrop_06.png",
+        "luxury_district_backdrop_08.png",
+        "luxury_district_backdrop_09.png"
+      ]
+    },
+    "bank": {
+      "count": 10,
+      "files": [
+        "bank_backdrop_01.png",
+        "bank_backdrop_00.png",
+        "bank_backdrop_02.png",
+        "bank_backdrop_03.png",
+        "bank_backdrop_07.png",
+        "bank_backdrop_06.png",
+        "bank_backdrop_04.png",
+        "bank_backdrop_05.png",
+        "bank_backdrop_08.png",
+        "bank_backdrop_09.png"
+      ]
+    },
+    "city_hall": {
+      "count": 10,
+      "files": [
+        "city_hall_backdrop_04.png",
+        "city_hall_backdrop_05.png",
+        "city_hall_backdrop_07.png",
+        "city_hall_backdrop_06.png",
+        "city_hall_backdrop_02.png",
+        "city_hall_backdrop_03.png",
+        "city_hall_backdrop_01.png",
+        "city_hall_backdrop_00.png",
+        "city_hall_backdrop_08.png",
+        "city_hall_backdrop_09.png"
+      ]
+    },
+    "car_dealership": {
+      "count": 10,
+      "files": [
+        "car_dealership_backdrop_09.png",
+        "car_dealership_backdrop_08.png",
+        "car_dealership_backdrop_03.png",
+        "car_dealership_backdrop_02.png",
+        "car_dealership_backdrop_00.png",
+        "car_dealership_backdrop_01.png",
+        "car_dealership_backdrop_05.png",
+        "car_dealership_backdrop_04.png",
+        "car_dealership_backdrop_06.png",
+        "car_dealership_backdrop_07.png"
+      ]
+    },
+    "donut_shop": {
+      "count": 10,
+      "files": [
+        "donut_shop_backdrop_00.png",
+        "donut_shop_backdrop_01.png",
+        "donut_shop_backdrop_03.png",
+        "donut_shop_backdrop_02.png",
+        "donut_shop_backdrop_06.png",
+        "donut_shop_backdrop_07.png",
+        "donut_shop_backdrop_05.png",
+        "donut_shop_backdrop_04.png",
+        "donut_shop_backdrop_09.png",
+        "donut_shop_backdrop_08.png"
+      ]
+    },
+    "bagel_shop": {
+      "count": 10,
+      "files": [
+        "bagel_shop_backdrop_00.png",
+        "bagel_shop_backdrop_01.png",
+        "bagel_shop_backdrop_03.png",
+        "bagel_shop_backdrop_02.png",
+        "bagel_shop_backdrop_06.png",
+        "bagel_shop_backdrop_07.png",
+        "bagel_shop_backdrop_05.png",
+        "bagel_shop_backdrop_04.png",
+        "bagel_shop_backdrop_09.png",
+        "bagel_shop_backdrop_08.png"
+      ]
+    },
+    "flower_store": {
+      "count": 10,
+      "files": [
+        "flower_store_backdrop_00.png",
+        "flower_store_backdrop_01.png",
+        "flower_store_backdrop_03.png",
+        "flower_store_backdrop_02.png",
+        "flower_store_backdrop_06.png",
+        "flower_store_backdrop_07.png",
+        "flower_store_backdrop_05.png",
+        "flower_store_backdrop_04.png",
+        "flower_store_backdrop_09.png",
+        "flower_store_backdrop_08.png"
+      ]
+    },
+    "real_estate": {
+      "count": 10,
+      "files": [
+        "real_estate_backdrop_02.png",
+        "real_estate_backdrop_03.png",
+        "real_estate_backdrop_01.png",
+        "real_estate_backdrop_00.png",
+        "real_estate_backdrop_04.png",
+        "real_estate_backdrop_05.png",
+        "real_estate_backdrop_07.png",
+        "real_estate_backdrop_06.png",
+        "real_estate_backdrop_08.png",
+        "real_estate_backdrop_09.png"
+      ]
+    },
+    "beach": {
+      "count": 10,
+      "files": [
+        "beach_backdrop_06.png",
+        "beach_backdrop_07.png",
+        "beach_backdrop_05.png",
+        "beach_backdrop_04.png",
+        "beach_backdrop_00.png",
+        "beach_backdrop_01.png",
+        "beach_backdrop_03.png",
+        "beach_backdrop_02.png",
+        "beach_backdrop_09.png",
+        "beach_backdrop_08.png"
+      ]
+    },
+    "mountain": {
+      "count": 10,
+      "files": [
+        "mountain_backdrop_03.png",
+        "mountain_backdrop_02.png",
+        "mountain_backdrop_00.png",
+        "mountain_backdrop_01.png",
+        "mountain_backdrop_05.png",
+        "mountain_backdrop_04.png",
+        "mountain_backdrop_06.png",
+        "mountain_backdrop_07.png",
+        "mountain_backdrop_09.png",
+        "mountain_backdrop_08.png"
+      ]
+    },
+    "forest": {
+      "count": 10,
+      "files": [
+        "forest_backdrop_08.png",
+        "forest_backdrop_09.png",
+        "forest_backdrop_01.png",
+        "forest_backdrop_00.png",
+        "forest_backdrop_02.png",
+        "forest_backdrop_03.png",
+        "forest_backdrop_07.png",
+        "forest_backdrop_06.png",
+        "forest_backdrop_04.png",
+        "forest_backdrop_05.png"
+      ]
+    },
+    "suburb": {
+      "count": 10,
+      "files": [
+        "suburb_backdrop_06.png",
+        "suburb_backdrop_07.png",
+        "suburb_backdrop_05.png",
+        "suburb_backdrop_04.png",
+        "suburb_backdrop_00.png",
+        "suburb_backdrop_01.png",
+        "suburb_backdrop_03.png",
+        "suburb_backdrop_02.png",
+        "suburb_backdrop_09.png",
+        "suburb_backdrop_08.png"
+      ]
+    },
+    "restaurant": {
+      "count": 10,
+      "files": [
+        "restaurant_backdrop_04.png",
+        "restaurant_backdrop_05.png",
+        "restaurant_backdrop_07.png",
+        "restaurant_backdrop_06.png",
+        "restaurant_backdrop_02.png",
+        "restaurant_backdrop_03.png",
+        "restaurant_backdrop_01.png",
+        "restaurant_backdrop_00.png",
+        "restaurant_backdrop_08.png",
+        "restaurant_backdrop_09.png"
+      ]
+    },
+    "bar": {
+      "count": 10,
+      "files": [
+        "bar_backdrop_08.png",
+        "bar_backdrop_09.png",
+        "bar_backdrop_07.png",
+        "bar_backdrop_06.png",
+        "bar_backdrop_04.png",
+        "bar_backdrop_05.png",
+        "bar_backdrop_01.png",
+        "bar_backdrop_00.png",
+        "bar_backdrop_02.png",
+        "bar_backdrop_03.png"
+      ]
+    },
+    "club": {
+      "count": 10,
+      "files": [
+        "club_backdrop_01.png",
+        "club_backdrop_00.png",
+        "club_backdrop_02.png",
+        "club_backdrop_03.png",
+        "club_backdrop_07.png",
+        "club_backdrop_06.png",
+        "club_backdrop_04.png",
+        "club_backdrop_05.png",
+        "club_backdrop_08.png",
+        "club_backdrop_09.png"
+      ]
+    },
+    "hospital": {
+      "count": 10,
+      "files": [
+        "hospital_backdrop_09.png",
+        "hospital_backdrop_08.png",
+        "hospital_backdrop_05.png",
+        "hospital_backdrop_04.png",
+        "hospital_backdrop_06.png",
+        "hospital_backdrop_07.png",
+        "hospital_backdrop_03.png",
+        "hospital_backdrop_02.png",
+        "hospital_backdrop_00.png",
+        "hospital_backdrop_01.png"
+      ]
+    },
+    "school": {
+      "count": 10,
+      "files": [
+        "school_backdrop_01.png",
+        "school_backdrop_00.png",
+        "school_backdrop_02.png",
+        "school_backdrop_03.png",
+        "school_backdrop_07.png",
+        "school_backdrop_06.png",
+        "school_backdrop_04.png",
+        "school_backdrop_05.png",
+        "school_backdrop_08.png",
+        "school_backdrop_09.png"
+      ]
+    },
+    "warehouse": {
+      "count": 10,
+      "files": [
+        "warehouse_backdrop_09.png",
+        "warehouse_backdrop_08.png",
+        "warehouse_backdrop_00.png",
+        "warehouse_backdrop_01.png",
+        "warehouse_backdrop_03.png",
+        "warehouse_backdrop_02.png",
+        "warehouse_backdrop_06.png",
+        "warehouse_backdrop_07.png",
+        "warehouse_backdrop_05.png",
+        "warehouse_backdrop_04.png"
+      ]
+    },
+    "factory": {
+      "count": 10,
+      "files": [
+        "factory_backdrop_00.png",
+        "factory_backdrop_01.png",
+        "factory_backdrop_03.png",
+        "factory_backdrop_02.png",
+        "factory_backdrop_06.png",
+        "factory_backdrop_07.png",
+        "factory_backdrop_05.png",
+        "factory_backdrop_04.png",
+        "factory_backdrop_09.png",
+        "factory_backdrop_08.png"
+      ]
+    },
+    "airport": {
+      "count": 10,
+      "files": [
+        "airport_backdrop_07.png",
+        "airport_backdrop_06.png",
+        "airport_backdrop_04.png",
+        "airport_backdrop_05.png",
+        "airport_backdrop_01.png",
+        "airport_backdrop_00.png",
+        "airport_backdrop_02.png",
+        "airport_backdrop_03.png",
+        "airport_backdrop_08.png",
+        "airport_backdrop_09.png"
+      ]
+    },
+    "train_station": {
+      "count": 10,
+      "files": [
+        "train_station_backdrop_08.png",
+        "train_station_backdrop_09.png",
+        "train_station_backdrop_07.png",
+        "train_station_backdrop_06.png",
+        "train_station_backdrop_04.png",
+        "train_station_backdrop_05.png",
+        "train_station_backdrop_01.png",
+        "train_station_backdrop_00.png",
+        "train_station_backdrop_02.png",
+        "train_station_backdrop_03.png"
+      ]
+    },
+    "hotel": {
+      "count": 10,
+      "files": [
+        "hotel_backdrop_04.png",
+        "hotel_backdrop_05.png",
+        "hotel_backdrop_07.png",
+        "hotel_backdrop_06.png",
+        "hotel_backdrop_02.png",
+        "hotel_backdrop_03.png",
+        "hotel_backdrop_01.png",
+        "hotel_backdrop_00.png",
+        "hotel_backdrop_08.png",
+        "hotel_backdrop_09.png"
+      ]
+    },
+    "museum": {
+      "count": 10,
+      "files": [
+        "museum_backdrop_05.png",
+        "museum_backdrop_04.png",
+        "museum_backdrop_06.png",
+        "museum_backdrop_07.png",
+        "museum_backdrop_03.png",
+        "museum_backdrop_02.png",
+        "museum_backdrop_00.png",
+        "museum_backdrop_01.png",
+        "museum_backdrop_09.png",
+        "museum_backdrop_08.png"
+      ]
+    },
+    "theater": {
+      "count": 10,
+      "files": [
+        "theater_backdrop_09.png",
+        "theater_backdrop_08.png",
+        "theater_backdrop_05.png",
+        "theater_backdrop_04.png",
+        "theater_backdrop_06.png",
+        "theater_backdrop_07.png",
+        "theater_backdrop_03.png",
+        "theater_backdrop_02.png",
+        "theater_backdrop_00.png",
+        "theater_backdrop_01.png"
+      ]
+    },
+    "stadium": {
+      "count": 10,
+      "files": [
+        "stadium_backdrop_02.png",
+        "stadium_backdrop_03.png",
+        "stadium_backdrop_01.png",
+        "stadium_backdrop_00.png",
+        "stadium_backdrop_04.png",
+        "stadium_backdrop_05.png",
+        "stadium_backdrop_07.png",
+        "stadium_backdrop_06.png",
+        "stadium_backdrop_08.png",
+        "stadium_backdrop_09.png"
+      ]
+    },
+    "courthouse": {
+      "count": 10,
+      "files": [
+        "courthouse_backdrop_08.png",
+        "courthouse_backdrop_09.png",
+        "courthouse_backdrop_07.png",
+        "courthouse_backdrop_06.png",
+        "courthouse_backdrop_04.png",
+        "courthouse_backdrop_05.png",
+        "courthouse_backdrop_01.png",
+        "courthouse_backdrop_00.png",
+        "courthouse_backdrop_02.png",
+        "courthouse_backdrop_03.png"
+      ]
+    },
+    "police_station": {
+      "count": 10,
+      "files": [
+        "police_station_backdrop_06.png",
+        "police_station_backdrop_07.png",
+        "police_station_backdrop_05.png",
+        "police_station_backdrop_04.png",
+        "police_station_backdrop_00.png",
+        "police_station_backdrop_01.png",
+        "police_station_backdrop_03.png",
+        "police_station_backdrop_02.png",
+        "police_station_backdrop_09.png",
+        "police_station_backdrop_08.png"
+      ]
+    },
+    "fire_station": {
+      "count": 10,
+      "files": [
+        "fire_station_backdrop_09.png",
+        "fire_station_backdrop_08.png",
+        "fire_station_backdrop_05.png",
+        "fire_station_backdrop_04.png",
+        "fire_station_backdrop_06.png",
+        "fire_station_backdrop_07.png",
+        "fire_station_backdrop_03.png",
+        "fire_station_backdrop_02.png",
+        "fire_station_backdrop_00.png",
+        "fire_station_backdrop_01.png"
+      ]
+    },
+    "post_office": {
+      "count": 10,
+      "files": [
+        "post_office_backdrop_02.png",
+        "post_office_backdrop_03.png",
+        "post_office_backdrop_01.png",
+        "post_office_backdrop_00.png",
+        "post_office_backdrop_04.png",
+        "post_office_backdrop_05.png",
+        "post_office_backdrop_07.png",
+        "post_office_backdrop_06.png",
+        "post_office_backdrop_08.png",
+        "post_office_backdrop_09.png"
+      ]
+    },
+    "grocery_store": {
+      "count": 10,
+      "files": [
+        "grocery_store_backdrop_01.png",
+        "grocery_store_backdrop_00.png",
+        "grocery_store_backdrop_02.png",
+        "grocery_store_backdrop_03.png",
+        "grocery_store_backdrop_07.png",
+        "grocery_store_backdrop_06.png",
+        "grocery_store_backdrop_04.png",
+        "grocery_store_backdrop_05.png",
+        "grocery_store_backdrop_08.png",
+        "grocery_store_backdrop_09.png"
+      ]
+    },
+    "pharmacy": {
+      "count": 10,
+      "files": [
+        "pharmacy_backdrop_08.png",
+        "pharmacy_backdrop_09.png",
+        "pharmacy_backdrop_01.png",
+        "pharmacy_backdrop_00.png",
+        "pharmacy_backdrop_02.png",
+        "pharmacy_backdrop_03.png",
+        "pharmacy_backdrop_07.png",
+        "pharmacy_backdrop_06.png",
+        "pharmacy_backdrop_04.png",
+        "pharmacy_backdrop_05.png"
+      ]
+    },
+    "bookstore": {
+      "count": 10,
+      "files": [
+        "bookstore_backdrop_00.png",
+        "bookstore_backdrop_01.png",
+        "bookstore_backdrop_03.png",
+        "bookstore_backdrop_02.png",
+        "bookstore_backdrop_06.png",
+        "bookstore_backdrop_07.png",
+        "bookstore_backdrop_05.png",
+        "bookstore_backdrop_04.png",
+        "bookstore_backdrop_09.png",
+        "bookstore_backdrop_08.png"
+      ]
+    },
+    "electronics_store": {
+      "count": 10,
+      "files": [
+        "electronics_store_backdrop_09.png",
+        "electronics_store_backdrop_08.png",
+        "electronics_store_backdrop_05.png",
+        "electronics_store_backdrop_04.png",
+        "electronics_store_backdrop_06.png",
+        "electronics_store_backdrop_07.png",
+        "electronics_store_backdrop_03.png",
+        "electronics_store_backdrop_02.png",
+        "electronics_store_backdrop_00.png",
+        "electronics_store_backdrop_01.png"
+      ]
+    },
+    "clothing_store": {
+      "count": 10,
+      "files": [
+        "clothing_store_backdrop_00.png",
+        "clothing_store_backdrop_01.png",
+        "clothing_store_backdrop_03.png",
+        "clothing_store_backdrop_02.png",
+        "clothing_store_backdrop_06.png",
+        "clothing_store_backdrop_07.png",
+        "clothing_store_backdrop_05.png",
+        "clothing_store_backdrop_04.png",
+        "clothing_store_backdrop_09.png",
+        "clothing_store_backdrop_08.png"
+      ]
+    },
+    "jewelry_store": {
+      "count": 10,
+      "files": [
+        "jewelry_store_backdrop_02.png",
+        "jewelry_store_backdrop_03.png",
+        "jewelry_store_backdrop_01.png",
+        "jewelry_store_backdrop_00.png",
+        "jewelry_store_backdrop_04.png",
+        "jewelry_store_backdrop_05.png",
+        "jewelry_store_backdrop_07.png",
+        "jewelry_store_backdrop_06.png",
+        "jewelry_store_backdrop_08.png",
+        "jewelry_store_backdrop_09.png"
+      ]
+    }
+  },
+  "total_backdrops": 490
+}

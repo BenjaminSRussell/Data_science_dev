@@ -13,7 +13,7 @@ export const SHOP_ITEMS = [
         category: "tools",
         type: "tool",
         toolId: "data_filter",
-        icon: "🔍",
+        icon: "",
         price: 300
     },
     {
@@ -23,7 +23,7 @@ export const SHOP_ITEMS = [
         category: "tools",
         type: "tool",
         toolId: "data_sort",
-        icon: "🔢",
+        icon: "",
         price: 250
     },
     {
@@ -33,7 +33,7 @@ export const SHOP_ITEMS = [
         category: "tools",
         type: "tool",
         toolId: "aggregation",
-        icon: "📦",
+        icon: "",
         price: 600
     },
     {
@@ -43,7 +43,7 @@ export const SHOP_ITEMS = [
         category: "tools",
         type: "tool",
         toolId: "annotations",
-        icon: "📝",
+        icon: "",
         price: 400
     },
     {
@@ -53,7 +53,7 @@ export const SHOP_ITEMS = [
         category: "tools",
         type: "tool",
         toolId: "export",
-        icon: "💾",
+        icon: "",
         price: 350
     },
 
@@ -65,7 +65,7 @@ export const SHOP_ITEMS = [
         category: "perks",
         type: "perk",
         perkId: "time_bonus",
-        icon: "⏱️",
+        icon: "⏱",
         price: 700
     },
     {
@@ -75,7 +75,7 @@ export const SHOP_ITEMS = [
         category: "perks",
         type: "perk",
         perkId: "boss_favor",
-        icon: "☕",
+        icon: "/assets/icons/items/coffee.png",
         price: 500
     },
     {
@@ -85,7 +85,7 @@ export const SHOP_ITEMS = [
         category: "perks",
         type: "perk",
         perkId: "bonus_multiplier",
-        icon: "💰",
+        icon: "/assets/icons/ui/money.png",
         price: 1000
     },
     {
@@ -95,7 +95,7 @@ export const SHOP_ITEMS = [
         category: "perks",
         type: "perk",
         perkId: "rep_boost",
-        icon: "🤝",
+        icon: "",
         price: 800
     },
     {
@@ -105,7 +105,7 @@ export const SHOP_ITEMS = [
         category: "perks",
         type: "perk",
         perkId: "second_chance",
-        icon: "🔄",
+        icon: "",
         price: 1500
     },
     {
@@ -115,7 +115,7 @@ export const SHOP_ITEMS = [
         category: "perks",
         type: "perk",
         perkId: "insight",
-        icon: "💡",
+        icon: "",
         price: 600
     },
 
@@ -127,7 +127,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "ide_pro",
-        icon: "💻",
+        icon: "",
         price: 250
     },
     {
@@ -137,7 +137,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "automl",
-        icon: "🤖",
+        icon: "",
         price: 800
     },
     {
@@ -147,7 +147,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "cloud_basic",
-        icon: "☁️",
+        icon: "",
         price: 400
     },
     {
@@ -157,7 +157,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "ent_db",
-        icon: "🗄️",
+        icon: "",
         price: 1200
     },
     {
@@ -167,7 +167,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "nas_tool",
-        icon: "🧠",
+        icon: "",
         price: 2500
     }
 ];

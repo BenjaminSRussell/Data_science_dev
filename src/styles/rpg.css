@@ -136,12 +136,14 @@
     width: 100%;
     height: 600px;
     min-height: 600px;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-    border: 3px solid rgba(167, 139, 250, 0.2);
+    background: #0a0e14;
+    border: 4px solid rgba(100, 100, 120, 0.6);
     border-radius: var(--radius-xl);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    border: 4px solid rgba(0, 0, 0, 0.4);
-    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5), 0 8px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 
+        inset 0 0 120px rgba(0, 0, 0, 0.8),
+        0 10px 0 rgba(0, 0, 0, 0.5),
+        0 0 0 2px rgba(255, 255, 255, 0.15),
+        0 0 40px rgba(0, 0, 0, 0.6);
     overflow: hidden;
     margin-bottom: var(--space-6);
 }
@@ -149,8 +151,37 @@
 .map-background {
     position: absolute;
     inset: 0;
-    background:
-        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(100, 149, 237, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 50%, rgba(0, 0, 0, 0.2) 100%);
+    z-index: 0;
+}
+
+.map-background-city {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(180deg, #1a1a2e 0%, #2d3436 30%, #1a1a2e 100%),
+        repeating-linear-gradient(
+            0deg,
+            transparent 0px,
+            transparent 20px,
+            rgba(255, 255, 255, 0.015) 20px,
+            rgba(255, 255, 255, 0.015) 40px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 20px,
+            rgba(255, 255, 255, 0.015) 20px,
+            rgba(255, 255, 255, 0.015) 40px
+        ),
+        radial-gradient(circle at 20% 30%, rgba(100, 149, 237, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+    z-index: 0;
 }
 
 /* Road Network */
@@ -347,6 +378,15 @@
     font-size: 1.8rem;
     box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
     transition: all 0.2s;
+    overflow: hidden;
+}
+
+.map-location .location-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+    image-rendering: auto;
 }
 
 .map-location:hover .location-icon {
@@ -428,15 +468,23 @@
 }
 
 @keyframes playerBounce {
-
-    0%,
-    100% {
+    0%, 100% {
         transform: translateY(0);
     }
-
     50% {
         transform: translateY(-5px);
     }
+}
+
+/* Map Building Block Styles */
+.map-building-block {
+    transition: all 0.2s ease;
+}
+
+.map-building-block:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    z-index: 4;
 }
 
 /* Vehicle bar */
@@ -718,6 +766,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center center;
     border-radius: 50%;
     transition: transform 0.3s ease;
 }
@@ -844,11 +893,91 @@
 /* =====================================================
    STOCK MARKET SCREEN
    ===================================================== */
+
+/* Quotron Ticker */
+.quotron-ticker-wrapper {
+    width: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #00ff88;
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
+    margin-bottom: var(--space-4);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    overflow: hidden;
+    position: relative;
+}
+
+.quotron-ticker-container {
+    width: 100%;
+    height: 50px;
+    overflow: hidden;
+    position: relative;
+}
+
+.quotron-ticker-scroll {
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.quotron-ticker-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.quotron-ticker-content {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+    gap: var(--space-6);
+    padding: 0 var(--space-4);
+}
+
+.quotron-ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: #ffffff;
+    min-width: 200px;
+}
+
+.quotron-ticker-item .ticker-ticker {
+    font-weight: 700;
+    color: #00ff88;
+    font-size: var(--font-size-base);
+}
+
+.quotron-ticker-item .ticker-price {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.quotron-ticker-item .ticker-change {
+    font-weight: 600;
+}
+
+.quotron-ticker-item .ticker-market {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+}
+
+/* Market Overview */
 .market-overview {
     display: flex;
     justify-content: space-around;
     padding: var(--space-4);
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-4);
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
@@ -872,9 +1001,221 @@
     font-family: var(--font-mono);
 }
 
+/* Market Indices Section */
+.market-indices-section {
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    margin-bottom: var(--space-3);
+    color: var(--color-text-primary);
+}
+
+.market-indices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-3);
+}
+
+.market-index {
+    padding: var(--space-3);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.market-index .index-name {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-1);
+}
+
+.market-index .index-value {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.market-index .index-change {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.market-index .index-change.positive {
+    color: #00ff88;
+}
+
+.market-index .index-change.negative {
+    color: #ff4444;
+}
+
+.market-index .index-change-amount {
+    font-size: var(--font-size-xs);
+    opacity: 0.8;
+}
+
+/* Market Summaries Section */
+.market-summaries-section {
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.market-summaries-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-3);
+}
+
+.market-summary {
+    padding: var(--space-3);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.market-summary .summary-market {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-primary);
+}
+
+.market-summary .summary-trend {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin-bottom: var(--space-1);
+}
+
+.market-summary .summary-trend.positive {
+    color: #00ff88;
+}
+
+.market-summary .summary-trend.negative {
+    color: #ff4444;
+}
+
+.market-summary .summary-stats {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+}
+
+/* World Events Display */
+.world-events-section {
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.world-event-alert {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    margin-bottom: var(--space-2);
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid rgba(255, 193, 7, 0.5);
+    border-radius: var(--radius-md);
+    animation: pulse 2s infinite;
+}
+
+.world-event-alert .event-icon {
+    font-size: var(--font-size-2xl);
+}
+
+.world-event-alert .event-content {
+    flex: 1;
+}
+
+.world-event-alert .event-title {
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.world-event-alert .event-impact {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.world-event-alert .event-impact.positive {
+    color: #00ff88;
+}
+
+.world-event-alert .event-impact.negative {
+    color: #ff4444;
+}
+
+.no-events {
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    padding: var(--space-4);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Market Section Headers */
+.market-section-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    margin: var(--space-4) 0 var(--space-2) 0;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 200, 255, 0.1) 100%);
+    border-left: 4px solid var(--cartoon-accent-blue);
+    border-radius: var(--radius-md);
+}
+
+.market-section-header .market-name {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.market-section-header .market-trend {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+}
+
+.market-section-header .market-trend.positive {
+    background: rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+}
+
+.market-section-header .market-trend.negative {
+    background: rgba(255, 68, 68, 0.2);
+    color: #ff4444;
+}
+
+.market-section-header .market-stats {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-left: auto;
+}
+
+/* Enhanced Stock Cards */
 .stock-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--space-4);
     padding-bottom: var(--space-12);
 }
@@ -976,18 +1317,92 @@
     flex-direction: column;
     gap: var(--space-2);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s;
+    transition: transform 0.2s, border-color 0.2s;
+    position: relative;
 }
 
 .stock-card:hover {
     transform: translateY(-4px);
     border-color: var(--cartoon-accent-blue);
+    box-shadow: 0 6px 12px rgba(0, 200, 255, 0.3);
+}
+
+.stock-card[data-market="US"] {
+    border-left: 4px solid #3b82f6;
+}
+
+.stock-card[data-market="EU"] {
+    border-left: 4px solid #8b5cf6;
+}
+
+.stock-card[data-market="ASIA"] {
+    border-left: 4px solid #f59e0b;
+}
+
+.stock-card[data-market="EMERGING"] {
+    border-left: 4px solid #ef4444;
 }
 
 .stock-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.stock-market-badge {
+    font-size: var(--font-size-xs);
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.stock-name {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+}
+
+.stock-sector {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stock-price-large {
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    margin: var(--space-1) 0;
+}
+
+.stock-change {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+.stock-change.positive {
+    color: #00ff88;
+}
+
+.stock-change.negative {
+    color: #ff4444;
+}
+
+.stock-change-amount {
+    font-size: var(--font-size-sm);
+    opacity: 0.8;
+    margin-left: var(--space-1);
+}
+
+.stock-volume {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
 }
 
 .stock-ticker {
@@ -1171,6 +1586,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    object-position: center bottom;
     filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
     transition: transform 0.3s ease;
 }
@@ -1238,6 +1654,12 @@
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    text-align: center;
+    min-width: 0;
 }
 
 .npc-action-btn:hover {
@@ -1281,7 +1703,12 @@
     overflow: hidden;
 }
 
-.conversation-npc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.conversation-npc-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+}
 .conversation-npc-info { flex: 1; }
 .conversation-npc-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
 .conversation-npc-title { color: rgba(255, 255, 255, 0.7); font-size: 0.875rem; }
@@ -1353,6 +1780,11 @@
     transition: all 0.2s ease;
     text-align: left;
     color: rgba(255, 255, 255, 0.9);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    min-width: 0;
 }
 
 .conversation-choice:hover {
@@ -1383,6 +1815,12 @@
     color: white;
     cursor: pointer;
     transition: all 0.2s ease;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    text-align: center;
+    min-width: 0;
 }
 
 .conversation-action-btn:hover {
@@ -1396,6 +1834,12 @@
     border-radius: 8px;
     color: white;
     cursor: pointer;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    text-align: center;
+    min-width: 0;
 }
 
 /* =====================================================

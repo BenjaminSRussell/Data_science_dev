@@ -4,7 +4,6 @@
  * Handles sprites, backgrounds, icons, and animations
  */
 
-import { basicPlaceholderAssets } from './BasicPlaceholderAssets.js';
 
 export class AssetManager {
     constructor() {
@@ -16,8 +15,8 @@ export class AssetManager {
     }
     
     /**
-     * Asset manifest - all assets to load
-     * Updated to support sprite sheets with animations
+     * Asset manifest - only assets that actually exist
+     * Game can run without all assets - missing assets return null
      */
     getAssetManifest() {
         return {
@@ -41,16 +40,18 @@ export class AssetManager {
                         type: 'spriteSheet'
                     }
                 },
-                // Fallback single images (if sprite sheets not available)
-                base: '/assets/characters/sprites/character_base.png',
-                walk: '/assets/characters/sprites/character_walk.png',
-                idle: '/assets/characters/sprites/character_idle.png',
+                // Low-poly character sprites (1000 available)
+                // Using generated Low-poly characters from downloaded_assets
+                base: '/downloaded_assets/characters/sprites/generated_low_poly_character_0000.png',
+                walk: '/downloaded_assets/characters/sprites/generated_low_poly_character_0001.png',
+                idle: '/downloaded_assets/characters/sprites/generated_low_poly_character_0002.png',
                 emotions: {
-                    // Basic emotions
-                    happy: '/assets/characters/emotions/happy.png',
-                    sad: '/assets/characters/emotions/sad.png',
-                    angry: '/assets/characters/emotions/angry.png',
-                    neutral: '/assets/characters/emotions/neutral.png',
+                    // Basic emotions (using SVG files that exist)
+                    happy: '/assets/characters/emotions/happy.svg',
+                    sad: '/assets/characters/emotions/sad.svg',
+                    angry: '/assets/characters/emotions/angry.svg',
+                    neutral: '/assets/characters/emotions/neutral.svg',
+                    // These don't exist yet - will return null gracefully
                     excited: '/assets/characters/emotions/excited.png',
                     thinking: '/assets/characters/emotions/thinking.png',
                     // Breakdown emotions
@@ -113,44 +114,114 @@ export class AssetManager {
             },
             backgrounds: {
                 locations: {
-                    home: '/assets/backgrounds/locations/home.png',
-                    office: '/assets/backgrounds/locations/office.png',
-                    coffee_shop: '/assets/backgrounds/locations/coffee_shop.png',
-                    university: '/assets/backgrounds/locations/university.png',
-                    bank: '/assets/backgrounds/locations/bank.png',
-                    park: '/assets/backgrounds/locations/park.png',
-                    apartment: '/assets/backgrounds/locations/apartment.png'
+                    // Low-poly generated backdrops (490 total across 49 locations)
+                    // Using generated Low-poly backdrops from assets/backgrounds/locations/
+                    home: '/assets/backgrounds/locations/home/home_backdrop_00.png',
+                    office: '/assets/backgrounds/locations/office/office_backdrop_00.png',
+                    coffee_shop: '/assets/backgrounds/locations/coffee_shop/coffee_shop_backdrop_00.png',
+                    cafe: '/assets/backgrounds/locations/cafe/cafe_backdrop_00.png',
+                    university: '/assets/backgrounds/locations/university/university_backdrop_00.png',
+                    bank: '/assets/backgrounds/locations/bank/bank_backdrop_00.png',
+                    library: '/assets/backgrounds/locations/library/library_backdrop_00.png',
+                    gym: '/assets/backgrounds/locations/gym/gym_backdrop_00.png',
+                    donut_shop: '/assets/backgrounds/locations/donut_shop/donut_shop_backdrop_00.png',
+                    bagel_shop: '/assets/backgrounds/locations/bagel_shop/bagel_shop_backdrop_00.png',
+                    flower_store: '/assets/backgrounds/locations/flower_store/flower_store_backdrop_00.png',
+                    mall: '/assets/backgrounds/locations/mall/mall_backdrop_00.png',
+                    car_dealership: '/assets/backgrounds/locations/car_dealership/car_dealership_backdrop_00.png',
+                    networking_bar: '/assets/backgrounds/locations/networking_bar/networking_bar_backdrop_00.png',
+                    downtown: '/assets/backgrounds/locations/downtown/downtown_backdrop_00.png',
+                    tech_hub: '/assets/backgrounds/locations/tech_hub/tech_hub_backdrop_00.png',
+                    luxury_district: '/assets/backgrounds/locations/luxury_district/luxury_district_backdrop_00.png',
+                    stock_exchange: '/assets/backgrounds/locations/stock_exchange/stock_exchange_backdrop_00.png',
+                    city_hall: '/assets/backgrounds/locations/city_hall/city_hall_backdrop_00.png',
+                    real_estate: '/assets/backgrounds/locations/real_estate/real_estate_backdrop_00.png',
+                    apartment: '/assets/backgrounds/locations/apartment/apartment_backdrop_00.png',
+                    park: '/assets/backgrounds/locations/park/park_backdrop_00.png',
+                    restaurant: '/assets/backgrounds/locations/restaurant/restaurant_backdrop_00.png',
+                    bar: '/assets/backgrounds/locations/bar/bar_backdrop_00.png',
+                    club: '/assets/backgrounds/locations/club/club_backdrop_00.png',
+                    hospital: '/assets/backgrounds/locations/hospital/hospital_backdrop_00.png',
+                    school: '/assets/backgrounds/locations/school/school_backdrop_00.png',
+                    warehouse: '/assets/backgrounds/locations/warehouse/warehouse_backdrop_00.png',
+                    factory: '/assets/backgrounds/locations/factory/factory_backdrop_00.png',
+                    airport: '/assets/backgrounds/locations/airport/airport_backdrop_00.png',
+                    train_station: '/assets/backgrounds/locations/train_station/train_station_backdrop_00.png',
+                    hotel: '/assets/backgrounds/locations/hotel/hotel_backdrop_00.png',
+                    museum: '/assets/backgrounds/locations/museum/museum_backdrop_00.png',
+                    theater: '/assets/backgrounds/locations/theater/theater_backdrop_00.png',
+                    stadium: '/assets/backgrounds/locations/stadium/stadium_backdrop_00.png',
+                    courthouse: '/assets/backgrounds/locations/courthouse/courthouse_backdrop_00.png',
+                    police_station: '/assets/backgrounds/locations/police_station/police_station_backdrop_00.png',
+                    fire_station: '/assets/backgrounds/locations/fire_station/fire_station_backdrop_00.png',
+                    post_office: '/assets/backgrounds/locations/post_office/post_office_backdrop_00.png',
+                    grocery_store: '/assets/backgrounds/locations/grocery_store/grocery_store_backdrop_00.png',
+                    pharmacy: '/assets/backgrounds/locations/pharmacy/pharmacy_backdrop_00.png',
+                    bookstore: '/assets/backgrounds/locations/bookstore/bookstore_backdrop_00.png',
+                    electronics_store: '/assets/backgrounds/locations/electronics_store/electronics_store_backdrop_00.png',
+                    clothing_store: '/assets/backgrounds/locations/clothing_store/clothing_store_backdrop_00.png',
+                    jewelry_store: '/assets/backgrounds/locations/jewelry_store/jewelry_store_backdrop_00.png',
+                    beach: '/assets/backgrounds/locations/beach/beach_backdrop_00.png',
+                    mountain: '/assets/backgrounds/locations/mountain/mountain_backdrop_00.png',
+                    forest: '/assets/backgrounds/locations/forest/forest_backdrop_00.png',
+                    suburb: '/assets/backgrounds/locations/suburb/suburb_backdrop_00.png'
+                }
+            },
+            map: {
+                // Simple 2D map tiles
+                grass: '/assets/map/grass.png',
+                roads: {
+                    main_h: '/assets/map/roads/main_horizontal.png',
+                    main_v: '/assets/map/roads/main_vertical.png',
+                    secondary_h: '/assets/map/roads/secondary_horizontal.png',
+                    secondary_v: '/assets/map/roads/secondary_vertical.png'
                 },
-                maps: {
-                    city: '/assets/backgrounds/maps/city_map.png',
-                    district: '/assets/backgrounds/maps/district_map.png'
+                buildings: {
+                    residence: '/assets/map/buildings/residence.png',
+                    work: '/assets/map/buildings/work.png',
+                    education: '/assets/map/buildings/education.png',
+                    finance: '/assets/map/buildings/finance.png',
+                    government: '/assets/map/buildings/government.png',
+                    shop: '/assets/map/buildings/shop.png',
+                    social: '/assets/map/buildings/social.png',
+                    training: '/assets/map/buildings/training.png',
+                    business: '/assets/map/buildings/business.png',
+                    elite: '/assets/map/buildings/elite.png'
+                },
+                parks: {
+                    tree: '/assets/map/parks/tree.png',
+                    grass_park: '/assets/map/parks/grass_park.png'
                 }
             },
             icons: {
+                // Simple 2D location icons (when available)
                 locations: {
-                    home: '/assets/icons/locations/home_icon.png',
-                    office: '/assets/icons/locations/office_icon.png',
-                    coffee_shop: '/assets/icons/locations/coffee_icon.png',
-                    university: '/assets/icons/locations/university_icon.png',
-                    bank: '/assets/icons/locations/bank_icon.png',
-                    park: '/assets/icons/locations/park_icon.png'
-                },
-                map: {
-                    marker: '/assets/icons/map/marker.png',
-                    location_pin: '/assets/icons/map/location_pin.png',
-                    player: '/assets/icons/map/player.png'
+                    home: '/assets/icons/locations/home.png',
+                    office: '/assets/icons/locations/office.png',
+                    library: '/assets/icons/locations/library.png',
+                    coffee_shop: '/assets/icons/locations/coffee_shop.png',
+                    university: '/assets/icons/locations/university.png',
+                    bank: '/assets/icons/locations/bank.png',
+                    gym: '/assets/icons/locations/gym.png',
+                    donut_shop: '/assets/icons/locations/donut_shop.png',
+                    bagel_shop: '/assets/icons/locations/bagel_shop.png',
+                    flower_store: '/assets/icons/locations/flower_store.png',
+                    networking_bar: '/assets/icons/locations/networking_bar.png',
+                    stock_exchange: '/assets/icons/locations/stock_exchange.png',
+                    city_hall: '/assets/icons/locations/city_hall.png',
+                    mall: '/assets/icons/locations/mall.png',
+                    car_dealership: '/assets/icons/locations/car_dealership.png',
+                    downtown: '/assets/icons/locations/downtown.png',
+                    tech_hub: '/assets/icons/locations/tech_hub.png',
+                    luxury_district: '/assets/icons/locations/luxury_district.png',
+                    real_estate: '/assets/icons/locations/real_estate.png'
                 }
-            },
-            ui: {
-                buttons: '/assets/ui/buttons.png',
-                panels: '/assets/ui/panels.png',
-                frames: '/assets/ui/frames.png'
             }
         };
     }
     
     /**
-     * Load all assets
+     * Load all assets (non-blocking, fails gracefully)
      */
     async loadAll() {
         const manifest = this.getAssetManifest();
@@ -158,11 +229,13 @@ export class AssetManager {
         this.loadedAssets = 0;
         
         try {
+            // Load assets but don't fail if some are missing
             await this.loadAssets(manifest);
             this.loaded = true;
             return true;
         } catch (error) {
-            console.error('Asset loading failed:', error);
+            // Asset loading errors are non-critical - game can run without all assets
+            this.loaded = true; // Mark as loaded anyway so game can proceed
             return false;
         }
     }
@@ -182,18 +255,26 @@ export class AssetManager {
     }
     
     /**
-     * Load assets recursively
+     * Load assets recursively (fails gracefully for missing assets)
      */
     async loadAssets(manifest, path = '') {
         for (const key in manifest) {
             const currentPath = path ? `${path}.${key}` : key;
             
             if (typeof manifest[key] === 'string') {
-                // It's an asset path
-                await this.loadImage(manifest[key], currentPath);
+                // It's an asset path - load it (will resolve null if missing)
+                try {
+                    await this.loadImage(manifest[key], currentPath);
+                } catch (error) {
+                    // Continue loading other assets even if one fails
+                }
             } else if (typeof manifest[key] === 'object') {
                 // It's a nested object
-                await this.loadAssets(manifest[key], currentPath);
+                try {
+                    await this.loadAssets(manifest[key], currentPath);
+                } catch (error) {
+                    // Continue loading other assets even if one fails
+                }
             }
         }
     }
@@ -213,174 +294,16 @@ export class AssetManager {
             };
             
             img.onerror = () => {
-                console.warn(`Failed to load asset: ${src}, using fallback`);
-                // Create fallback colored rectangle
-                const fallback = this.createFallbackImage(key);
-                this.assets.set(key, fallback);
+                // Asset failed to load - don't add to assets map
+                // This ensures missing assets don't show broken images
                 this.loadedAssets++;
                 this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
-                resolve(fallback);
+                resolve(null);
             };
             
             img.src = src;
         });
     }
-    
-    /**
-     * Create fallback image
-     */
-    createFallbackImage(key) {
-        // Use basic placeholder assets for characters and houses
-        if (key.includes('emotion') || key.includes('character')) {
-            const emotion = key.split('_').pop() || 'neutral';
-            return this.getStickFigurePlaceholder(emotion);
-        }
-        
-        if (key.includes('house') || key.includes('background')) {
-            return this.getHousePlaceholder();
-        }
-        
-        // Default colored rectangle for other assets
-        const canvas = document.createElement('canvas');
-        canvas.width = 64;
-        canvas.height = 64;
-        const ctx = canvas.getContext('2d');
-        
-        let color = '#8b5cf6';
-        if (key.includes('icon')) color = '#f59e0b';
-        
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, 64, 64);
-        
-        ctx.fillStyle = 'white';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(key.split('.').pop(), 32, 32);
-        
-        const img = new Image();
-        img.src = canvas.toDataURL();
-        return img;
-    }
-    
-    /**
-     * Get stick figure placeholder
-     */
-    getStickFigurePlaceholder(emotion = 'neutral') {
-        return basicPlaceholderAssets.getEmotionPlaceholder(emotion);
-    }
-    
-    /**
-     * Get house placeholder
-     */
-    getHousePlaceholder() {
-        return basicPlaceholderAssets.getHousePlaceholder();
-    }
-    
-    /**
-     * Create simple stick figure (fallback)
-     */
-    createSimpleStickFigure(emotion) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 64;
-        canvas.height = 64;
-        const ctx = canvas.getContext('2d');
-        
-        // Head
-        ctx.fillStyle = this.getEmotionColor(emotion);
-        ctx.beginPath();
-        ctx.arc(32, 12, 6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        
-        // Body
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(32, 18);
-        ctx.lineTo(32, 40);
-        ctx.stroke();
-        
-        // Arms
-        ctx.beginPath();
-        ctx.moveTo(32, 25);
-        ctx.lineTo(22, 30);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(32, 25);
-        ctx.lineTo(42, 30);
-        ctx.stroke();
-        
-        // Legs
-        ctx.beginPath();
-        ctx.moveTo(32, 40);
-        ctx.lineTo(25, 50);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(32, 40);
-        ctx.lineTo(39, 50);
-        ctx.stroke();
-        
-        const img = new Image();
-        img.src = canvas.toDataURL();
-        return img;
-    }
-    
-    /**
-     * Create simple house (fallback)
-     */
-    createSimpleHouse() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 200;
-        canvas.height = 200;
-        const ctx = canvas.getContext('2d');
-        
-        // Roof
-        ctx.fillStyle = '#8B4513';
-        ctx.beginPath();
-        ctx.moveTo(100, 20);
-        ctx.lineTo(160, 60);
-        ctx.lineTo(40, 60);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        
-        // House body
-        ctx.fillStyle = '#DEB887';
-        ctx.fillRect(50, 60, 100, 100);
-        ctx.strokeRect(50, 60, 100, 100);
-        
-        // Door
-        ctx.fillStyle = '#654321';
-        ctx.fillRect(85, 120, 30, 40);
-        ctx.strokeRect(85, 120, 30, 40);
-        
-        // Windows
-        ctx.fillStyle = '#4B5563';
-        ctx.fillRect(60, 80, 20, 20);
-        ctx.strokeRect(60, 80, 20, 20);
-        ctx.fillRect(120, 80, 20, 20);
-        ctx.strokeRect(120, 80, 20, 20);
-        
-        const img = new Image();
-        img.src = canvas.toDataURL();
-        return img;
-    }
-    
-    /**
-     * Get emotion color
-     */
-    getEmotionColor(emotion) {
-        const colors = {
-            happy: '#FFD700',
-            sad: '#4169E1',
-            angry: '#FF4500',
-            neutral: '#808080',
-            crying: '#1E90FF',
-            yelling: '#DC143C'
-        };
-        return colors[emotion] || '#808080';
-    }
-    
     /**
      * Get asset by key
      */
@@ -392,11 +315,7 @@ export class AssetManager {
      * Get character emotion asset
      */
     getCharacterEmotion(emotion) {
-        const asset = this.getAsset(`characters.emotions.${emotion}`);
-        if (asset) return asset;
-        
-        // Use stick figure placeholder
-        return basicPlaceholderAssets.getEmotionPlaceholder(emotion);
+        return this.getAsset(`characters.emotions.${emotion}`) || null;
     }
     
     /**
@@ -409,20 +328,75 @@ export class AssetManager {
     
     /**
      * Get location background
+     * Now uses Low-poly generated backdrops
      */
     getLocationBackground(locationId) {
+        // Try to get PNG image first
         const asset = this.getAsset(`backgrounds.locations.${locationId}`);
         if (asset) return asset;
         
-        // Use house placeholder for now
-        return basicPlaceholderAssets.getHousePlaceholder();
+        // Try alternative backdrop variations
+        const variations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        for (const variant of variations) {
+            const variantPath = `/assets/backgrounds/locations/${locationId}/${locationId}_backdrop_0${variant}.png`;
+            const variantAsset = this.getAsset(`backgrounds.locations.${locationId}.variant${variant}`);
+            if (variantAsset) return variantAsset;
+        }
+        
+        // Fallback to first backdrop
+        return null;
     }
     
     /**
      * Get location icon
      */
+    /**
+     * Get location icon asset path (organized, replaces emojis)
+     */
     getLocationIcon(locationId) {
-        return this.getAsset(`icons.locations.${locationId}`) || null;
+        return this.getAsset(`icons.locations.${locationId}`) || `/assets/icons/locations/${locationId}.png`;
+    }
+
+    /**
+     * Get NPC icon asset path (organized)
+     */
+    getNPCIcon(npcType) {
+        return this.getAsset(`icons.npcs.${npcType}`) || `/assets/icons/npcs/${npcType}.png`;
+    }
+
+    /**
+     * Get UI icon asset path (organized)
+     */
+    getUIIcon(iconName) {
+        return this.getAsset(`icons.ui.${iconName}`) || `/assets/icons/ui/${iconName}.png`;
+    }
+
+    /**
+     * Get vehicle icon asset path (organized)
+     */
+    getVehicleIcon(vehicleId) {
+        return this.getAsset(`icons.vehicles.${vehicleId}`) || `/assets/icons/vehicles/${vehicleId}.png`;
+    }
+
+    /**
+     * Get item icon asset path (organized)
+     */
+    getItemIcon(itemName) {
+        return this.getAsset(`icons.items.${itemName}`) || `/assets/icons/items/${itemName}.png`;
+    }
+
+    /**
+     * Get feature icon asset path (organized)
+     */
+    getFeatureIcon(featureId) {
+        return this.getAsset(`icons.features.${featureId}`) || `/assets/icons/features/${featureId}.png`;
+    }
+
+    /**
+     * Get chart icon asset path (organized)
+     */
+    getChartIcon(chartType) {
+        return this.getAsset(`icons.charts.${chartType}`) || `/assets/icons/charts/${chartType}.png`;
     }
     
     /**

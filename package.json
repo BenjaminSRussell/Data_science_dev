@@ -11,10 +11,19 @@
     "build:all": "npm run build:wasm && npm run build"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.7.4",
+    "@pixi/particle-emitter": "^5.0.8",
     "chart.js": "^4.4.1",
-    "howler": "^2.2.4"
+    "gsap": "^3.14.2",
+    "howler": "^2.2.4",
+    "interactjs": "^1.10.27",
+    "lit": "^3.3.1",
+    "pixi.js": "^8.14.3",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "vite": "^5.0.0"
   },
   "keywords": [

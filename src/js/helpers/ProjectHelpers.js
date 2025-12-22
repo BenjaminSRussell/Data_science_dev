@@ -25,12 +25,12 @@ export function handleWorkOnProject(game) {
     if (!game.projectSystem || !game.projectSystem.activeProject) return;
 
     const energyCost = 15;
-    if (!game.timeManager.hasEnergy(energyCost)) {
+    if (!game.timeManager?.hasEnergy(energyCost)) {
         game.showError("You are too exhausted to code. Go sleep!");
         return;
     }
 
-    game.timeManager.useEnergy(energyCost);
+    game.timeManager?.useEnergy(energyCost);
     startWorkingSession(game, 3);
 }
 
@@ -114,7 +114,7 @@ export function finishWorkingSession(game, ticks, totalTicks) {
 export function simulateWorkTick(game) {
     let basePower = 5;
     if (game.characterStats) {
-        basePower += (game.characterStats.getStat('intelligence') * 0.5);
+        basePower += (game.characterStats?.getStat('intelligence') || 0) * 0.5;
     }
 
     let tickPower = basePower * 0.1;
@@ -130,7 +130,7 @@ export function handleTrainAI(game) {
     const energyCost = 20;
     const moneyCost = 50;
 
-    if (!game.timeManager.hasEnergy(energyCost)) {
+    if (!game.timeManager?.hasEnergy(energyCost)) {
         game.showError("Too tired to train AI!");
         return;
     }
@@ -140,7 +140,7 @@ export function handleTrainAI(game) {
         return;
     }
 
-    game.timeManager.useEnergy(energyCost);
+    game.timeManager?.useEnergy(energyCost);
     game.gameState.money -= moneyCost;
     game.handleTimeAdvance(2);
 
@@ -164,7 +164,7 @@ export function handleTrainAI(game) {
 export function updateOfficeScreen(game) {
     // Update office badge
     const officeNames = ['Bedroom Corner', 'Home Office', 'Co-working Space', 'Small Office', 'Office Floor', 'Company HQ'];
-    const officeIcons = ['🛏️', '🏠', '👥', '🏢', '🏛️', '🏰'];
+    const officeIcons = ['', '', '', '', '', ''];
     const currentOffice = game.gameState.officeIndex || 0;
 
     const officeNameEl = document.getElementById('current-office-name');
@@ -253,7 +253,7 @@ export function updateStatsScreen(game) {
     if (statsNameEl) statsNameEl.textContent = charName;
 
     // Update stat bars
-    game.characterStats.getAllStats().forEach(stat => {
+    game.characterStats?.getAllStats()?.forEach(stat => {
         const el = document.querySelector(`.stat-card[data-stat="${stat.id}"]`);
         if (el) {
             const valueEl = el.querySelector('.stat-value');
@@ -267,7 +267,7 @@ export function updateStatsScreen(game) {
     });
 
     // Calculate total level
-    const totalLevel = game.characterStats.getAllStats().reduce((sum, s) => sum + s.value, 0);
+    const totalLevel = game.characterStats?.getAllStats()?.reduce((sum, s) => sum + s.value, 0) || 0;
     const totalLevelEl = document.getElementById('total-level');
     if (totalLevelEl) totalLevelEl.textContent = totalLevel;
 }
@@ -292,17 +292,18 @@ export function checkForCharacterEvolution(game) {
 export function updatePlayerAvatar(game) {
     if (!game.gameState.characterStats) return;
 
-    const stage = game.gameState.characterStats.visualStage;
-    let icon = '👤';
+    const stage = game.gameState.characterStats?.visualStage;
+    let icon = '';
 
-    if (stage === 'level_2_good') icon = '🤵';
-    if (stage === 'level_2_evil') icon = '😎';
-    if (stage === 'level_3_good') icon = '🦸';
-    if (stage === 'level_3_evil') icon = '🦹';
+    if (stage === 'level_2_good') icon = '';
+    if (stage === 'level_2_evil') icon = '';
+    if (stage === 'level_3_good') icon = '';
+    if (stage === 'level_3_evil') icon = '';
 
     const markers = document.querySelectorAll('.player-icon');
     markers.forEach(el => el.textContent = icon);
 }
+
 
 
 

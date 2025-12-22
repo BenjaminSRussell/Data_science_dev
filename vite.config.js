@@ -6,10 +6,12 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: true
+    sourcemap: true,
+    target: 'esnext'
   },
   server: {
-    port: 5173,
+    host: '127.0.0.1',
+    port: 5176,
     open: true,
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
@@ -17,6 +19,10 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    exclude: ['wasm']
+    exclude: ['wasm'],
+    include: ['zustand', 'react', 'react-dom']
+  },
+  resolve: {
+    conditions: ['import', 'module', 'browser', 'default']
   }
 });

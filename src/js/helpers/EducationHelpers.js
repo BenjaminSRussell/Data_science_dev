@@ -99,34 +99,62 @@ export function handleAnswerQuestion(game, answerIndex) {
  * Finish the exam and show results
  */
 export function finishExam(game) {
+    if (!game || !game.currentExam) return;
+    
     const exam = game.currentExam;
+    if (!exam.questions || !Array.isArray(exam.questions)) return;
+    
     const total = exam.questions.length;
-    const pct = Math.round((exam.score / total) * 100);
+    const score = exam.score || 0;
+    const pct = total > 0 ? Math.round((score / total) * 100) : 0;
     const passed = pct >= 70;
 
-    document.getElementById('exam-questions').classList.add('hidden');
-    document.getElementById('exam-results').classList.remove('hidden');
-
-    document.getElementById('exam-score').textContent = pct;
+    const questionsEl = document.getElementById('exam-questions');
+    const resultsEl = document.getElementById('exam-results');
+    const scoreEl = document.getElementById('exam-score');
     const statusEl = document.getElementById('exam-status');
-    statusEl.textContent = passed ? "PASSED!" : "FAILED";
-    statusEl.className = passed ? 'success-text' : 'error-text';
-
-    if (passed) {
-        game.gameState.educationSystem.completeCourse(exam.courseId);
-        game.audioManager.play('kaching');
-        game.showToast(`Passed ${exam.courseId}!`, 'success');
-    } else {
-        game.audioManager.play('error');
-        game.showToast('Failed the exam.', 'error');
+    
+    if (questionsEl) questionsEl.classList.add('hidden');
+    if (resultsEl) resultsEl.classList.remove('hidden');
+    if (scoreEl) scoreEl.textContent = pct;
+    
+    if (statusEl) {
+        statusEl.textContent = passed ? "PASSED!" : "FAILED";
+        statusEl.className = passed ? 'success-text' : 'error-text';
     }
 
-    document.getElementById('btn-close-exam').onclick = () => {
-        const modal = document.getElementById('modal-exam');
-        modal.classList.remove('active');
-        modal.classList.add('hidden');
-        game.updateMapScreen();
-    };
+    if (passed && game.gameState?.educationSystem && exam.courseId) {
+        if (game.gameState.educationSystem.completeCourse) {
+            game.gameState.educationSystem.completeCourse(exam.courseId);
+        }
+        if (game.audioManager?.play) {
+            game.audioManager.play('kaching');
+        }
+        if (game.showToast) {
+            game.showToast(`Passed ${exam.courseId}!`, 'success');
+        }
+    } else if (!passed) {
+        if (game.audioManager?.play) {
+            game.audioManager.play('error');
+        }
+        if (game.showToast) {
+            game.showToast('Failed the exam.', 'error');
+        }
+    }
+
+    const closeBtn = document.getElementById('btn-close-exam');
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            const modal = document.getElementById('modal-exam');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.classList.add('hidden');
+            }
+            if (game.updateMapScreen) {
+                game.updateMapScreen();
+            }
+        };
+    }
 }
 
 /**
@@ -168,6 +196,7 @@ export function handleLearnLibrary(game, libId, LIBRARY_CONTENT) {
     game.uiUpdater.updateAllUI();
     game.uiUpdater.updateLibraryScreen();
 }
+
 
 
 

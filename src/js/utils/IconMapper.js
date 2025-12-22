@@ -5,61 +5,61 @@
 
 export const ICON_MAP = {
     // Professors/Teachers
-    '👨‍🏫': 'Prof',
-    '👩‍🏫': 'Prof',
+    '': 'Prof',
+    '': 'Prof',
     
     // Business/Professional
-    '👩‍💼': 'Biz',
-    '👔': 'Exec',
-    '💼': 'Invest',
-    '🏢': 'Corp',
+    '': 'Biz',
+    '': 'Exec',
+    '': 'Invest',
+    '': 'Corp',
     
     // Tech/Development
-    '🧑‍💻': 'Dev',
-    '👨‍💻': 'Dev',
-    '👩‍💻': 'Dev',
-    '💻': 'Tech',
-    '🖥️': 'Tech',
+    '': 'Dev',
+    '': 'Dev',
+    '': 'Dev',
+    '': 'Tech',
+    '': 'Tech',
     
     // Science/Research
-    '👩‍🔬': 'Sci',
-    '👨‍🔬': 'Sci',
+    '': 'Sci',
+    '': 'Sci',
     
     // Food/Service
-    '👩‍🍳': 'Chef',
-    '👨‍🍳': 'Chef',
-    '👩‍🌾': 'Grow',
+    '': 'Chef',
+    '': 'Chef',
+    '': 'Grow',
     
     // Fitness/Health
-    '💪': 'Fit',
-    '🏥': 'Health',
+    '': 'Fit',
+    '': 'Health',
     
     // Social/Relationships
-    '📚': 'Book',
-    '💎': 'Lux',
-    '🎨': 'Art',
-    '📱': 'Social',
+    '': 'Book',
+    '': 'Lux',
+    '': 'Art',
+    '': 'Social',
     
     // Criminal/Shady
-    '🦈': 'Shark',
-    '🕶️': 'Broker',
-    '🌑': 'Shadow',
+    '': 'Shark',
+    '': 'Broker',
+    '': 'Shadow',
     
     // Rivals/Competition
-    '😏': 'Rival',
-    '😤': 'Compete',
-    '⚔️': 'Fight',
+    '': 'Rival',
+    '': 'Compete',
+    '': 'Fight',
     
     // Authority
-    '👮': 'Agent',
-    '⚖️': 'Judge',
-    '🛡️': 'Shield',
+    '': 'Agent',
+    '': 'Judge',
+    '': 'Shield',
     
     // Other
-    '🚀': 'Startup',
-    '💰': 'Money',
-    '👸': 'VC',
-    '📖': 'Read'
+    '': 'Startup',
+    '': 'Money',
+    '': 'VC',
+    '': 'Read'
 };
 
 /**
@@ -76,6 +76,9 @@ export function getIconClass(emoji) {
     const text = getTextIcon(emoji);
     return `icon-${text.toLowerCase()}`;
 }
+
+
+
 
 
 

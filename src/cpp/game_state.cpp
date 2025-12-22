@@ -71,7 +71,63 @@ std::string GameState::toJSON() const {
 }
 
 void GameState::fromJSON(const std::string &json) {
-  // Simple JSON parsing (in production, use a proper JSON library)
-  // For now, this is a placeholder
+  // Basic JSON parsing - extracts numeric values from JSON string
+  // For production, consider using a proper JSON library like nlohmann/json
   reset();
+  
+  // Find and extract values using simple string parsing
+  size_t pos = json.find("\"money\":");
+  if (pos != std::string::npos) {
+    size_t start = json.find_first_of("0123456789-", pos);
+    size_t end = json.find_first_not_of("0123456789", start);
+    if (start != std::string::npos && end != std::string::npos) {
+      money = std::stoi(json.substr(start, end - start));
+    }
+  }
+  
+  pos = json.find("\"reputation\":");
+  if (pos != std::string::npos) {
+    size_t start = json.find_first_of("0123456789-", pos);
+    size_t end = json.find_first_not_of("0123456789", start);
+    if (start != std::string::npos && end != std::string::npos) {
+      reputation = std::stoi(json.substr(start, end - start));
+    }
+  }
+  
+  pos = json.find("\"rankIndex\":");
+  if (pos != std::string::npos) {
+    size_t start = json.find_first_of("0123456789-", pos);
+    size_t end = json.find_first_not_of("0123456789", start);
+    if (start != std::string::npos && end != std::string::npos) {
+      int idx = std::stoi(json.substr(start, end - start));
+      setRankIndex(idx);
+    }
+  }
+  
+  pos = json.find("\"tasksCompleted\":");
+  if (pos != std::string::npos) {
+    size_t start = json.find_first_of("0123456789-", pos);
+    size_t end = json.find_first_not_of("0123456789", start);
+    if (start != std::string::npos && end != std::string::npos) {
+      tasksCompleted = std::stoi(json.substr(start, end - start));
+    }
+  }
+  
+  pos = json.find("\"perfectScores\":");
+  if (pos != std::string::npos) {
+    size_t start = json.find_first_of("0123456789-", pos);
+    size_t end = json.find_first_not_of("0123456789", start);
+    if (start != std::string::npos && end != std::string::npos) {
+      perfectScores = std::stoi(json.substr(start, end - start));
+    }
+  }
+  
+  pos = json.find("\"totalEarned\":");
+  if (pos != std::string::npos) {
+    size_t start = json.find_first_of("0123456789-", pos);
+    size_t end = json.find_first_not_of("0123456789", start);
+    if (start != std::string::npos && end != std::string::npos) {
+      totalEarned = std::stoi(json.substr(start, end - start));
+    }
+  }
 }

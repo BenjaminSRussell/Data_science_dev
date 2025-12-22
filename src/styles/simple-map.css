@@ -1,0 +1,369 @@
+/* =====================================================
+   SIMPLE MAP - Comforting 2D Style
+   Grass base, parks, realistic roads, no people
+   ===================================================== */
+
+.simple-map-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    min-height: 600px;
+    background: #8bc34a; /* Grass base */
+    border: 2px solid #66bb6a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+/* =====================================================
+   UNIFIED MAP SYSTEM (PixiJS)
+   Phase 1: Code Reduction - Replaces all map renderers
+   ===================================================== */
+
+.unified-map-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    min-height: 600px;
+    border: 2px solid #66bb6a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    background: #7cb342; /* Grass base fallback */
+}
+
+.unified-map-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* =====================================================
+   GRASS BASE
+   ===================================================== */
+
+.map-grass-base {
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(124, 179, 66, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(139, 195, 74, 0.3) 0%, transparent 50%),
+        repeating-linear-gradient(
+            0deg,
+            #6a9a3a 0px,
+            #6a9a3a 15px,
+            #7cb342 15px,
+            #7cb342 30px,
+            #8bc34a 30px,
+            #8bc34a 45px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            #6a9a3a 0px,
+            #6a9a3a 15px,
+            #7cb342 15px,
+            #7cb342 30px,
+            #8bc34a 30px,
+            #8bc34a 45px
+        );
+    background-color: #7cb342;
+    z-index: 0;
+}
+
+/* =====================================================
+   ZONES (Subtle grass variations)
+   ===================================================== */
+
+.map-zones-container {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.map-zone {
+    position: absolute;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.map-zone-residential {
+    background: #d4a574; /* Brown/tan - distinct */
+}
+
+.map-zone-commercial {
+    background: #f59e0b; /* Orange - distinct */
+}
+
+.map-zone-education {
+    background: #8b5cf6; /* Purple - distinct */
+}
+
+.map-zone-finance {
+    background: #10b981; /* Green - distinct */
+}
+
+.map-zone-government {
+    background: #64748b; /* Gray-blue - distinct */
+}
+
+.map-zone-park {
+    background: #66bb6a; /* Dark green - distinct */
+    opacity: 0.2;
+}
+
+/* =====================================================
+   ROADS (Realistic, simple)
+   ===================================================== */
+
+.map-roads-container {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.map-road {
+    position: absolute;
+}
+
+.map-road-main {
+    background: 
+        linear-gradient(to bottom, #3a3a3a 0%, #2a2a2a 50%, #3a3a3a 100%),
+        repeating-linear-gradient(
+            90deg,
+            #424242 0px,
+            #424242 20px,
+            #3a3a3a 20px,
+            #3a3a3a 40px
+        );
+    border-top: 1px solid rgba(255, 215, 0, 0.6);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.6);
+    box-shadow: 
+        inset 0 1px 2px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.map-road-secondary {
+    background: 
+        linear-gradient(to bottom, #555 0%, #4a4a4a 50%, #555 100%),
+        repeating-linear-gradient(
+            90deg,
+            #616161 0px,
+            #616161 20px,
+            #555 20px,
+            #555 40px
+        );
+    box-shadow: 
+        inset 0 1px 2px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Curved roads for organic flow */
+.map-road-curved {
+    position: absolute;
+    border: 3px solid #424242;
+    background: 
+        linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 50%, #3a3a3a 100%);
+    box-shadow: 
+        inset 0 0 10px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+.map-road-horizontal {
+    width: 100%;
+}
+
+.map-road-vertical {
+    height: 100%;
+}
+
+/* =====================================================
+   PARKS (Trees and green spaces)
+   ===================================================== */
+
+.map-parks-container {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.map-tree {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #2e7d32;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* =====================================================
+   BUILDINGS (Simple, no overlays)
+   ===================================================== */
+
+.map-buildings-container {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+}
+
+.map-building {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.map-building:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    z-index: 5;
+}
+
+.map-building img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+}
+
+/* Building type colors */
+.map-building-residence {
+    background: #d4a574;
+}
+
+.map-building-work {
+    background: #7a8ba3;
+}
+
+.map-building-education {
+    background: #8b5cf6;
+}
+
+.map-building-finance {
+    background: #10b981;
+}
+
+.map-building-government {
+    background: #607d8b;
+}
+
+.map-building-shop {
+    background: #f59e0b;
+}
+
+.map-building-social {
+    background: #a855f7;
+}
+
+.map-building-training {
+    background: #ef4444;
+}
+
+.map-building-business {
+    background: #64748b;
+}
+
+.map-building-elite {
+    background: #ffd700;
+    box-shadow: 0 6px 16px rgba(255, 215, 0, 0.4);
+}
+
+/* =====================================================
+   LOCATIONS (Simple icons, no overlays)
+   ===================================================== */
+
+.map-locations-container {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+}
+
+.map-location {
+    position: absolute;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.map-location:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    z-index: 11;
+}
+
+.map-location-icon {
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.map-location-icon img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}
+
+/* Location Labels - Realistic Map Style */
+.map-location-label {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    padding: 2px 6px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: 3px;
+    pointer-events: none;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 0.3px;
+}
+
+.map-location:hover .map-location-label {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateX(-50%) scale(1.05);
+}
+
+.map-location.current .map-location-icon {
+    border-color: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.map-location.current .map-location-label {
+    opacity: 1;
+    background: rgba(16, 185, 129, 0.85);
+    border-color: rgba(16, 185, 129, 0.5);
+    font-weight: 700;
+}
+
+/* =====================================================
+   PLAYER MARKER
+   ===================================================== */
+
+.map-player-marker {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #3b82f6;
+    border: 2px solid white;
+    border-radius: 50%;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}

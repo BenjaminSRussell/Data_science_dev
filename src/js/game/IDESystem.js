@@ -25,8 +25,11 @@ export class IDESystem {
                 basePay: 200,
                 skills: ['intelligence'],
                 language: 'python',
-                codeTemplate: `# TODO: Write automation script
-def automate_data_entry():
+                codeTemplate: `def automate_data_entry():
+    """
+    Automate data entry process.
+    Read input file, process data, and write output file.
+    """
     # Your code here
     pass`,
                 tests: [
@@ -189,9 +192,9 @@ function createDashboard(data) {
 
         // XP rewards
         if (project.skills) {
-            project.skills.forEach(skill => {
+            project.skills?.forEach(skill => {
                 const xp = project.difficulty * 10 * quality;
-                this.gameState.characterStats?.addXP(skill, Math.floor(xp));
+                this.gameState.characterStats?.addExperience(skill, Math.floor(xp));
             });
         }
 
@@ -279,6 +282,7 @@ function createDashboard(data) {
         return { success: true, message: 'Project cancelled.' };
     }
 }
+
 
 
 

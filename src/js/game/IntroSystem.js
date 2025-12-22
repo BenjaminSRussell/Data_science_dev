@@ -43,6 +43,8 @@ export class IntroSystem {
                     <p>You found a small apartment and a <span class="intro-highlight">roommate</span> to split the rent. It's not much, but it's a start.</p>
                     <p>The streets are filled with opportunity - tech startups, Fortune 500 companies, and eccentric millionaires looking for the next big thing.</p>
                     <p>But first, you need a <span class="intro-highlight">job</span>. Rent is due in 7 days, and your savings won't last forever.</p>
+                    <p><strong>Your Journey:</strong> Start as a Data Entry Clerk, complete tasks to earn money and reputation, build relationships with NPCs, make choices that shape your story, and climb from entry-level to Chief Data Officer.</p>
+                    <p><strong>The Story:</strong> Every decision matters. Your ethics, relationships, and choices create a unique narrative. Will you take the high road or cut corners? Will you build genuine connections or use people? The city responds to who you become.</p>
                     <p>Build your skills. Make connections. Rise through the ranks. Maybe even start your own empire.</p>
                     <p><span class="intro-highlight">Your story starts now.</span></p>
                 </div>
@@ -65,11 +67,21 @@ export class IntroSystem {
                     </div>
                 </div>
                 
-                <button class="intro-btn" onclick="game.introSystem.showJobApplication()">
+                <button class="intro-btn" id="btn-intro-find-job">
                     Find a Job →
                 </button>
             </div>
         `;
+        
+        // Add event listener for the button
+        setTimeout(() => {
+            const btn = screen.querySelector('#btn-intro-find-job');
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    this.showJobApplication();
+                });
+            }
+        }, 0);
         
         return screen;
     }
@@ -104,14 +116,36 @@ export class IntroSystem {
         
         screen.innerHTML = `
             <div class="job-app-header">
-                <h2 class="job-app-title">📋 Job Board</h2>
+                <h2 class="job-app-title"> Job Board</h2>
                 <p class="job-app-subtitle">Choose your first position - everyone has to start somewhere!</p>
             </div>
             
-            <div class="job-listings">
+            <div class="job-listings" id="job-listings-container">
                 ${jobs.map(job => this.renderJobCard(job)).join('')}
             </div>
         `;
+        
+        // Add event listeners after creating the screen
+        setTimeout(() => {
+            // Add click handlers for job cards
+            screen.querySelectorAll('.job-card').forEach(card => {
+                const jobId = card.dataset.jobId;
+                card.addEventListener('click', () => {
+                    this.selectJob(jobId);
+                });
+            });
+            
+            // Add click handlers for apply buttons
+            screen.querySelectorAll('.job-card-apply').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const jobId = btn.closest('.job-card')?.dataset.jobId;
+                    if (jobId) {
+                        this.applyForJob(jobId);
+                    }
+                });
+            });
+        }, 0);
         
         return screen;
     }
@@ -125,7 +159,7 @@ export class IntroSystem {
                 id: 'data_entry_clerk',
                 title: 'Data Entry Clerk',
                 company: 'DataFlow Inc.',
-                icon: '📝',
+                icon: '',
                 salary: '$400/week',
                 salaryNum: 400,
                 hours: '9-5',
@@ -138,7 +172,7 @@ export class IntroSystem {
                 id: 'junior_analyst',
                 title: 'Junior Data Analyst',
                 company: 'Analytics Pro',
-                icon: '📊',
+                icon: '',
                 salary: '$600/week',
                 salaryNum: 600,
                 hours: '9-6',
@@ -151,7 +185,7 @@ export class IntroSystem {
                 id: 'freelance',
                 title: 'Freelance Data Work',
                 company: 'Self-Employed',
-                icon: '💼',
+                icon: '',
                 salary: 'Variable',
                 salaryNum: 300,
                 hours: 'Flexible',
@@ -164,7 +198,7 @@ export class IntroSystem {
                 id: 'intern',
                 title: 'Data Science Intern',
                 company: 'TechCorp',
-                icon: '🎓',
+                icon: '',
                 salary: '$200/week',
                 salaryNum: 200,
                 hours: 'Part-time',
@@ -181,7 +215,7 @@ export class IntroSystem {
      */
     renderJobCard(job) {
         return `
-            <div class="job-card" data-job-id="${job.id}" onclick="game.introSystem.selectJob('${job.id}')">
+            <div class="job-card" data-job-id="${job.id}">
                 <div class="job-card-header">
                     <div class="job-card-icon">${job.icon}</div>
                     <div>
@@ -206,7 +240,7 @@ export class IntroSystem {
                         <span class="job-card-value">${job.difficulty}</span>
                     </div>
                 </div>
-                <button class="job-card-apply" onclick="event.stopPropagation(); game.introSystem.applyForJob('${job.id}')">
+                <button class="job-card-apply" data-job-id="${job.id}">
                     Apply for This Job
                 </button>
             </div>
@@ -265,7 +299,7 @@ export class IntroSystem {
         overlay.className = 'intro-screen active';
         overlay.innerHTML = `
             <div class="intro-content">
-                <h1 class="intro-title">🎉 Congratulations!</h1>
+                <h1 class="intro-title"> Congratulations!</h1>
                 <p class="intro-subtitle">You've been hired!</p>
                 
                 <div class="intro-story">
@@ -275,13 +309,23 @@ export class IntroSystem {
                     <p>Remember: <span class="intro-highlight">rent is due every 7 days</span>. Don't forget to save money!</p>
                 </div>
                 
-                <button class="intro-btn" onclick="game.introSystem.startGame()">
+                <button class="intro-btn" id="btn-intro-start-game">
                     Start Your New Life →
                 </button>
             </div>
         `;
         
         document.body.appendChild(overlay);
+        
+        // Add event listener for start button
+        setTimeout(() => {
+            const btn = overlay.querySelector('#btn-intro-start-game');
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    this.startGame();
+                });
+            }
+        }, 0);
         
         // Store reference to remove later
         this.welcomeOverlay = overlay;

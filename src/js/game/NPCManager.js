@@ -9,7 +9,7 @@ import { dialogueTreeSystem } from './dialogue/DialogueTreeSystem.js';
 // Initialize all NPC images - ensures every NPC has a visual
 function initializeNPCImages() {
     // This will be called after NPCs array is defined
-    if (typeof NPCs !== 'undefined') {
+    if (typeof NPCs !== 'undefined' && Array.isArray(NPCs)) {
         NPCs.forEach(npc => {
             if (!npc.image) {
                 npc.image = getNPCImage(npc);
@@ -37,7 +37,8 @@ export const NPCs = [
         id: 'professor_higgins',
         name: 'Professor Higgins',
         title: 'University Professor',
-        icon: '👨‍🏫',
+        icon: '',
+        image: '/assets/npcs/mentor_0.png',
         type: 'mentor',
         personality: 'generous',
         location: 'university',
@@ -55,7 +56,8 @@ export const NPCs = [
         id: 'sarah_martinez',
         name: 'Sarah Martinez',
         title: 'Senior Data Analyst',
-        icon: '👩‍💼',
+        icon: '',
+        image: '/assets/npcs/mentor_1.png',
         type: 'mentor',
         personality: 'professional',
         location: 'coffee_shop',
@@ -75,7 +77,8 @@ export const NPCs = [
         id: 'mike_johnson',
         name: 'Mike Johnson',
         title: 'Marketing Director',
-        icon: '👔',
+        icon: '',
+        image: '/assets/npcs/business_0.png',
         type: 'business',
         personality: 'friendly',
         location: 'networking_bar',
@@ -93,7 +96,8 @@ export const NPCs = [
         id: 'lisa_wong',
         name: 'Lisa Wong',
         title: 'Startup Founder',
-        icon: '🚀',
+        icon: '',
+        image: '/assets/npcs/business_1.png',
         type: 'business',
         personality: 'competitive',
         location: 'tech_hub',
@@ -109,7 +113,8 @@ export const NPCs = [
         id: 'david_chen',
         name: 'David Chen',
         title: 'Angel Investor',
-        icon: '💰',
+        icon: '',
+        image: '/assets/npcs/investor_0.png',
         type: 'investor',
         personality: 'mysterious',
         location: 'downtown',
@@ -127,7 +132,8 @@ export const NPCs = [
         id: 'victoria_sterling',
         name: 'Victoria Sterling',
         title: 'VC Partner',
-        icon: '👸',
+        icon: '',
+        image: '/assets/npcs/investor_1.png',
         type: 'investor',
         personality: 'professional',
         location: 'luxury_district',
@@ -143,7 +149,8 @@ export const NPCs = [
         id: 'donna_delight',
         name: 'Donna',
         title: 'Donut Shop Owner',
-        icon: '👩‍🍳',
+        icon: '',
+        image: '/assets/npcs/shopkeeper_0.png',
         type: 'shopkeeper',
         personality: 'friendly',
         location: 'donut_shop',
@@ -161,7 +168,8 @@ export const NPCs = [
         id: 'bob_bagel',
         name: 'Bob',
         title: 'Bagel Expert',
-        icon: '👨‍🍳',
+        icon: '',
+        image: '/assets/npcs/shopkeeper_1.png',
         type: 'shopkeeper',
         personality: 'generous',
         location: 'bagel_shop',
@@ -179,7 +187,8 @@ export const NPCs = [
         id: 'flora_bloom',
         name: 'Flora',
         title: 'Florist',
-        icon: '👩‍🌾',
+        icon: '',
+        image: '/assets/npcs/shopkeeper_2.png',
         type: 'shopkeeper',
         personality: 'friendly',
         location: 'flower_store',
@@ -200,7 +209,7 @@ export const NPCs = [
         id: 'alex_rivera',
         name: 'Alex Rivera',
         title: 'Fellow Freelancer',
-        icon: '🧑‍💻',
+        icon: '',
         image: '/assets/npcs/alex_young.png', // New Young Asset
         type: 'friend',
         personality: 'friendly',
@@ -219,7 +228,8 @@ export const NPCs = [
         id: 'jordan_kim',
         name: 'Jordan Kim',
         title: 'Gym Buddy',
-        icon: '💪',
+        icon: '',
+        image: '/assets/npcs/friend_1.png',
         type: 'friend',
         personality: 'friendly',
         location: 'gym',
@@ -239,7 +249,8 @@ export const NPCs = [
         id: 'brad_sterling',
         name: 'Brad Sterling',
         title: 'Competing Analyst',
-        icon: '😏',
+        icon: '',
+        image: '/assets/npcs/rival_0.png',
         type: 'rival',
         personality: 'competitive',
         location: 'networking_bar',
@@ -255,7 +266,7 @@ export const NPCs = [
         id: 'vinnie_shark',
         name: 'Vinnie "The Shark"',
         title: 'Loan Consultant',
-        icon: '🦈',
+        icon: '',
         image: '/assets/npcs/loan_shark.png',
         type: 'criminal',
         personality: 'aggressive',
@@ -270,7 +281,7 @@ export const NPCs = [
         id: 'the_broker',
         name: 'Gordon "The Broker"',
         title: 'Stock Operator',
-        icon: '🕶️',
+        icon: '',
         image: '/assets/npcs/the_broker.png',
         type: 'criminal',
         personality: 'greedy',
@@ -285,7 +296,7 @@ export const NPCs = [
         id: 'zero_cool',
         name: 'Zero',
         title: 'Info Broker',
-        icon: '💻',
+        icon: '',
         image: '/assets/npcs/the_hacker.png',
         type: 'criminal',
         personality: 'mysterious',
@@ -301,7 +312,7 @@ export const NPCs = [
         id: 'emma_bloom',
         name: 'Emma Bloom',
         title: 'Librarian & Teacher',
-        icon: '📚',
+        icon: '',
         image: '/assets/npcs/npc_good_character_1765747743170.png',
         type: 'romance',
         personality: 'friendly',
@@ -321,7 +332,8 @@ export const NPCs = [
         id: 'bella_lux',
         name: 'Bella Lux',
         title: 'Influencer',
-        icon: '💎',
+        icon: '',
+        image: '/assets/npcs/romance_1.png',
         type: 'romance',
         personality: 'high_maintenance', // Custom handling
         location: 'luxury_district',
@@ -338,7 +350,7 @@ export const NPCs = [
         id: 'dr_amara_patel',
         name: 'Dr. Amara Patel',
         title: 'Machine Learning Expert',
-        icon: '👩‍🔬',
+        icon: '',
         type: 'mentor',
         personality: 'professional',
         location: 'university',
@@ -352,7 +364,7 @@ export const NPCs = [
         id: 'marcus_thompson',
         name: 'Marcus Thompson',
         title: 'Data Engineering Lead',
-        icon: '👨‍💻',
+        icon: '',
         type: 'mentor',
         personality: 'generous',
         location: 'tech_hub',
@@ -368,7 +380,7 @@ export const NPCs = [
         id: 'rachel_green',
         name: 'Rachel Green',
         title: 'Product Manager',
-        icon: '👩‍💼',
+        icon: '',
         type: 'business',
         personality: 'friendly',
         location: 'coffee_shop',
@@ -382,7 +394,7 @@ export const NPCs = [
         id: 'james_wilson',
         name: 'James Wilson',
         title: 'Consulting Director',
-        icon: '👔',
+        icon: '',
         type: 'business',
         personality: 'professional',
         location: 'downtown',
@@ -396,7 +408,7 @@ export const NPCs = [
         id: 'priya_sharma',
         name: 'Priya Sharma',
         title: 'Data Privacy Officer',
-        icon: '🛡️',
+        icon: '',
         type: 'business',
         personality: 'professional',
         location: 'city_hall',
@@ -412,7 +424,7 @@ export const NPCs = [
         id: 'sam_taylor',
         name: 'Sam Taylor',
         title: 'Freelance Designer',
-        icon: '🎨',
+        icon: '',
         type: 'friend',
         personality: 'friendly',
         location: 'coffee_shop',
@@ -426,7 +438,7 @@ export const NPCs = [
         id: 'taylor_morgan',
         name: 'Taylor Morgan',
         title: 'Software Developer',
-        icon: '💻',
+        icon: '',
         type: 'friend',
         personality: 'friendly',
         location: 'coffee_shop',
@@ -440,7 +452,7 @@ export const NPCs = [
         id: 'casey_lee',
         name: 'Casey Lee',
         title: 'Marketing Specialist',
-        icon: '📱',
+        icon: '',
         type: 'friend',
         personality: 'friendly',
         location: 'coffee_shop',
@@ -456,7 +468,7 @@ export const NPCs = [
         id: 'carlos_tech',
         name: 'Carlos',
         title: 'Tech Store Owner',
-        icon: '🖥️',
+        icon: '',
         type: 'shopkeeper',
         personality: 'friendly',
         location: 'mall',
@@ -470,7 +482,7 @@ export const NPCs = [
         id: 'luna_bookstore',
         name: 'Luna',
         title: 'Bookstore Owner',
-        icon: '📖',
+        icon: '',
         type: 'shopkeeper',
         personality: 'generous',
         location: 'library',
@@ -486,7 +498,7 @@ export const NPCs = [
         id: 'robert_kim',
         name: 'Robert Kim',
         title: 'Seed Investor',
-        icon: '💼',
+        icon: '',
         type: 'investor',
         personality: 'professional',
         location: 'tech_hub',
@@ -500,7 +512,7 @@ export const NPCs = [
         id: 'sophia_zhang',
         name: 'Sophia Zhang',
         title: 'Corporate Investor',
-        icon: '🏢',
+        icon: '',
         type: 'investor',
         personality: 'professional',
         location: 'downtown',
@@ -516,7 +528,7 @@ export const NPCs = [
         id: 'chloe_competitor',
         name: 'Chloe Martinez',
         title: 'Rival Analyst',
-        icon: '😤',
+        icon: '',
         type: 'rival',
         personality: 'competitive',
         location: 'networking_bar',
@@ -530,7 +542,7 @@ export const NPCs = [
         id: 'tyler_rival',
         name: 'Tyler Brooks',
         title: 'Competing Freelancer',
-        icon: '⚔️',
+        icon: '',
         type: 'rival',
         personality: 'competitive',
         location: 'coffee_shop',
@@ -546,7 +558,7 @@ export const NPCs = [
         id: 'shadow_broker',
         name: 'Shadow',
         title: 'Information Broker',
-        icon: '🌑',
+        icon: '',
         type: 'criminal',
         personality: 'mysterious',
         location: 'networking_bar',
@@ -562,7 +574,7 @@ export const NPCs = [
         id: 'maya_engineer',
         name: 'Maya Chen',
         title: 'Software Engineer',
-        icon: '👩‍💻',
+        icon: '',
         type: 'romance',
         personality: 'friendly',
         location: 'tech_hub',
@@ -577,7 +589,7 @@ export const NPCs = [
         id: 'noah_artist',
         name: 'Noah Williams',
         title: 'Visual Artist',
-        icon: '🎨',
+        icon: '',
         type: 'romance',
         personality: 'friendly',
         location: 'coffee_shop',
@@ -594,7 +606,7 @@ export const NPCs = [
         id: 'agent_smith',
         name: 'Agent Smith',
         title: 'IRS Investigator',
-        icon: '👮',
+        icon: '',
         type: 'authority',
         personality: 'professional',
         location: 'city_hall',
@@ -608,7 +620,7 @@ export const NPCs = [
         id: 'judge_roberts',
         name: 'Judge Roberts',
         title: 'City Judge',
-        icon: '⚖️',
+        icon: '',
         type: 'authority',
         personality: 'professional',
         location: 'city_hall',
@@ -624,7 +636,7 @@ export const NPCs = [
         id: 'dr_wellness',
         name: 'Dr. Wellness',
         title: 'Health Coach',
-        icon: '🏥',
+        icon: '',
         type: 'service',
         personality: 'generous',
         location: 'gym',
@@ -638,7 +650,7 @@ export const NPCs = [
         id: 'coach_motivation',
         name: 'Coach Motivation',
         title: 'Life Coach',
-        icon: '💪',
+        icon: '',
         type: 'service',
         personality: 'friendly',
         location: 'gym',
@@ -1010,7 +1022,7 @@ export class NPCManager {
     }
 
     initializeRelationships() {
-        if (!NPCs) return; // Saftey check
+        if (!NPCs || !Array.isArray(NPCs)) return; // Safety check
         NPCs.forEach(npc => {
             if (this.relationships[npc.id] === undefined) {
                 this.relationships[npc.id] = 0;
@@ -1063,8 +1075,8 @@ export class NPCManager {
             // Check unlock requirements
             if (npc.unlockRequirement) {
                 const req = npc.unlockRequirement;
-                if (req.day && this.gameState.timeManager.totalDays < req.day) return false;
-                if (req.stat && this.gameState.characterStats.getStat(req.stat) < req.value) return false;
+                if (req.day && this.gameState.timeManager?.totalDays < req.day) return false;
+                if (req.stat && this.gameState.characterStats?.getStat(req.stat) < req.value) return false;
                 if (req.reputation && this.gameState.reputation < req.reputation) return false;
                 if (req.relationship) {
                     for (const [npcId, level] of Object.entries(req.relationship)) {
@@ -1178,6 +1190,14 @@ export class NPCManager {
 
         if (isFirstMeeting) {
             this.markNPCAsMet(npcId);
+            
+            // Check for story beat (first NPC met)
+            if (this.metNPCs.length === 1 && this.gameState.mainGame && this.gameState.mainGame.storyBeatsSystem) {
+                const beat = this.gameState.mainGame.storyBeatsSystem?.getBeat('meet_first_npc');
+                if (beat) {
+                    this.gameState.mainGame.handleStoryBeat?.(beat);
+                }
+            }
         }
 
         // Progressive relationship: Just talking increases relationship slightly
@@ -1195,12 +1215,24 @@ export class NPCManager {
         let dialogueText = null;
         if (this.gameState.relationshipDialogueSystem) {
             try {
-                dialogueText = await this.gameState.relationshipDialogueSystem.getDialogue(npcId, relationship);
+                dialogueText = await this.gameState.relationshipDialogueSystem?.getDialogue(npcId, relationship);
             } catch (error) {
                 console.warn(`Could not load dialogue for ${npcId}:`, error);
             }
         }
         
+        // Check for memory-based dialogue (NPCs remember player choices)
+        let memoryDialogue = null;
+        if (this.gameState.npcMemorySystem && !isFirstMeeting) {
+            memoryDialogue = this.gameState.npcMemorySystem?.getMemoryDialogue(npcId, relationship);
+            if (memoryDialogue) {
+                // Apply relationship change from memory
+                if (memoryDialogue.relationshipChange) {
+                    this.modifyRelationship(npcId, memoryDialogue.relationshipChange);
+                }
+            }
+        }
+
         // Fallback to dialogue tree system
         const dialogueTree = dialogueTreeSystem.getTree(npcId, relationship);
         const rootNode = dialogueTree ? dialogueTree.getRootNode() : null;
@@ -1208,7 +1240,9 @@ export class NPCManager {
         // Get greeting based on relationship level
         // Use relationship variable already declared above
         let greetingText;
-        if (dialogueText) {
+        if (memoryDialogue) {
+            greetingText = memoryDialogue.text;
+        } else if (dialogueText) {
             greetingText = dialogueText;
         } else if (rootNode) {
             greetingText = this.getDynamicGreeting(npc, relationship, rootNode);
@@ -1244,7 +1278,7 @@ export class NPCManager {
         }
 
         // Add "Ask on Date" if eligible and single
-        if (!this.gameState.romanceSystem.partnerId && npc.romanceOptions && relationship >= 30) {
+        if (!this.gameState.romanceSystem?.partnerId && npc.romanceOptions && relationship >= 30) {
             choices.push({
                 text: "Would you like to go on a date?",
                 action: 'date_ask',
@@ -1253,13 +1287,13 @@ export class NPCManager {
         }
 
         // Add Date Night choices if partner
-        if (this.gameState.romanceSystem.partnerId === npc.id) {
+        if (this.gameState.romanceSystem?.partnerId === npc.id) {
             choices = [
                 { text: "Let's grab a coffee ($20)", action: 'date_coffee', effect: { relationship: 0 } },
                 { text: "Dinner tonight? ($100)", action: 'date_dinner', effect: { relationship: 0 } },
                 { text: "Weekend Trip! ($2000)", action: 'date_vacation', effect: { relationship: 0 } }
             ];
-            if (this.gameState.romanceSystem.relationshipStatus === 'dating' && this.gameState.romanceSystem.relationshipScore > 80) {
+            if (this.gameState.romanceSystem?.relationshipStatus === 'dating' && this.gameState.romanceSystem?.relationshipScore > 80) {
                 choices.push({ text: "I have a question... (Propose)", action: 'date_propose', effect: { relationship: 0 } });
             }
         }
@@ -1370,7 +1404,7 @@ export class NPCManager {
 
         // Dynamic Choices injection logic
         // 1. Ask Date (if single)
-        if (!this.gameState.romanceSystem.partnerId &&
+        if (!this.gameState.romanceSystem?.partnerId &&
             this.currentConversation.npc.romanceOptions &&
             this.currentConversation.relationship >= 30) {
             choices.push({
@@ -1381,14 +1415,14 @@ export class NPCManager {
         }
 
         // 2. Date Night (if partner)
-        if (this.gameState.romanceSystem.partnerId === this.currentConversation.npc.id) {
+        if (this.gameState.romanceSystem?.partnerId === this.currentConversation.npc.id) {
             choices.push(
                 { text: "Let's grab a coffee ($20)", action: 'date_coffee', effect: { relationship: 0 } },
                 { text: "Dinner tonight? ($100)", action: 'date_dinner', effect: { relationship: 0 } },
                 { text: "Weekend Trip! ($2000)", action: 'date_vacation', effect: { relationship: 0 } }
             );
             // Propose logic
-            if (this.gameState.romanceSystem.relationshipStatus === 'dating' && this.gameState.romanceSystem.relationshipScore > 80) {
+            if (this.gameState.romanceSystem?.relationshipStatus === 'dating' && this.gameState.romanceSystem?.relationshipScore > 80) {
                 choices.push({ text: "I have a question... (Propose)", action: 'date_propose', effect: { relationship: 0 } });
             }
         }
@@ -1398,7 +1432,7 @@ export class NPCManager {
 
         // Handle special actions
         if (choice.action === 'date_ask') {
-            const result = this.gameState.romanceSystem.askOnDate(this.currentConversation.npc.id);
+            const result = this.gameState.romanceSystem?.askOnDate(this.currentConversation.npc.id);
             return {
                 success: result.success,
                 text: result.message,
@@ -1412,10 +1446,10 @@ export class NPCManager {
         if (choice.action && choice.action.startsWith('date_')) {
             let result;
             if (choice.action === 'date_propose') {
-                result = this.gameState.romanceSystem.propose();
+                result = this.gameState.romanceSystem?.propose();
             } else {
                 const type = choice.action.replace('date_', '');
-                result = this.gameState.romanceSystem.goOnDate(type);
+                result = this.gameState.romanceSystem?.goOnDate(type);
             }
 
             return {
@@ -1456,12 +1490,12 @@ export class NPCManager {
         // XP rewards
         if (effects.xp) {
             const amount = effects.xpAmount || 20;
-            this.gameState.characterStats.addXP(effects.xp, amount);
+            this.gameState.characterStats?.addExperience(effects.xp, amount);
         }
 
         // Ethics change
         if (effects.ethics) {
-            this.gameState.characterStats.modifyEthics(effects.ethics);
+            this.gameState.characterStats?.modifyEthics(effects.ethics);
         }
 
         // Money change

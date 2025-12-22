@@ -436,8 +436,28 @@ export class ContractSystem {
      * Check bonus condition
      */
     checkBonusCondition(condition) {
-        // Implement bonus condition checking
-        return false;
+        if (!condition || !this.gameState) return false;
+        
+        switch (condition.type) {
+            case 'early_completion':
+                // Already handled in completeContract
+                return false;
+            case 'perfect_quality':
+                // Check if contract was completed with perfect quality
+                return condition.achieved || false;
+            case 'skill_requirement':
+                // Check if player has required skill level
+                if (this.gameState.characterStats) {
+                    const skill = this.gameState.characterStats.getStat?.(condition.skill);
+                    return skill >= (condition.value || 0);
+                }
+                return false;
+            case 'reputation_threshold':
+                // Check if player has required reputation
+                return (this.gameState.reputation || 0) >= (condition.value || 0);
+            default:
+                return false;
+        }
     }
     
     /**

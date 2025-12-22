@@ -260,7 +260,7 @@ export class AITrainingStoryline {
         // Show notification
         if (window.game && window.game.showToast) {
             window.game.showToast(
-                `🎓 New Era: ${phase.name}! ${phase.description}`,
+                ` New Era: ${phase.name}! ${phase.description}`,
                 'info'
             );
         }

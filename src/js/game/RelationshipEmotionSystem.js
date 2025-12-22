@@ -24,7 +24,7 @@ export class RelationshipEmotionSystem {
         if (!npc) return;
 
         const currentRel = this.gameState.npcManager?.getRelationship(npcId) || 0;
-        const ethics = this.gameState.characterStats?.getStat('ethics') || 0;
+        const ethics = this.gameState.characterStats?.ethics || 0;
         const relationship = this.getRelationshipState(npcId);
 
         // Track emotional state
@@ -35,7 +35,7 @@ export class RelationshipEmotionSystem {
 
         // Apply change
         if (this.gameState.npcManager) {
-            this.gameState.npcManager.modifyRelationship(npcId, change);
+            this.gameState.npcManager?.modifyRelationship(npcId, change);
         }
 
         // Check for relationship events (breakup, etc.)
@@ -217,7 +217,7 @@ export class RelationshipEmotionSystem {
             const dialogue = dialogueSystem.generateBreakupDialogue(relationship, reason);
 
             // NPC might turn evil if player is very unethical
-            if (reason === 'ethics' && this.gameState.characterStats?.getStat('ethics') < -40) {
+            if (reason === 'ethics' && this.gameState.characterStats?.ethics < -40) {
                 // NPC becomes antagonist
                 this.makeNPCAntagonist(npcId);
             }
@@ -247,7 +247,7 @@ export class RelationshipEmotionSystem {
 
         // Drop relationship significantly
         if (this.gameState.npcManager) {
-            this.gameState.npcManager.modifyRelationship(npcId, -50);
+            this.gameState.npcManager?.modifyRelationship(npcId, -50);
         }
 
         // Update emotional state
@@ -267,7 +267,7 @@ export class RelationshipEmotionSystem {
         const metNPCs = this.gameState.npcManager?.getMetNPCs() || [];
         const currentDay = this.gameState.timeManager?.totalDays || 0;
 
-        metNPCs.forEach(npc => {
+        metNPCs?.forEach(npc => {
             const lastInteraction = this.relationshipHistory[npc.id]?.lastInteraction || 0;
             const daysSince = currentDay - lastInteraction;
 

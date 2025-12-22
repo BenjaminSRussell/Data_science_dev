@@ -31,7 +31,7 @@ export class WorldEventManager {
                     // Transform Library to Innovation Hub
                     game.worldMap.updateLocation('library', {
                         name: "Innovation Hub",
-                        icon: "💡",
+                        icon: "",
                         description: "Co-working space for tech founders.",
                         background: 'linear-gradient(180deg, #2196F3 0%, #0D47A1 100%)'
                     });
@@ -61,9 +61,10 @@ export class WorldEventManager {
     }
 
     triggerEvent(event) {
-        console.log(`🌍 World Event Triggered: ${event.name}`);
+        console.log(` World Event Triggered: ${event.name}`);
         event.effect(this.gameState);
-        this.events.push({ id: event.id, day: this.gameState.timeManager.totalDays });
+        const days = this.gameState?.timeManager?.totalDays || 0;
+        this.events.push({ id: event.id, day: days });
     }
 
     // Serialization

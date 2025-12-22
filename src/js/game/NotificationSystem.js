@@ -31,7 +31,7 @@ export class NotificationSystem {
         if (!this.gameState.timeManager) return;
         
         const currentTime = this.gameState.dayNightCycle?.getTimeOfDay() || 'morning';
-        const currentSlot = this.gameState.timeManager.timeSlot;
+        const currentSlot = this.gameState.timeManager?.timeSlot;
         
         // Check scheduled notifications
         this.scheduledNotifications.forEach(notif => {

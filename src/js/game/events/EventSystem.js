@@ -117,9 +117,9 @@ export class EventSystem {
         if (!this.gameState.timeManager) return [];
         
         const today = {
-            day: this.gameState.timeManager.day,
-            month: this.gameState.timeManager.month,
-            year: this.gameState.timeManager.year
+            day: this.gameState.timeManager?.day || 1,
+            month: this.gameState.timeManager?.month || 0,
+            year: this.gameState.timeManager?.year || 1
         };
         
         const todayEvents = this.upcomingEvents.filter(event => {
@@ -201,7 +201,7 @@ export class EventSystem {
         if (!this.gameState.stockMarket) return null;
         
         const crashAmount = event.severity || 30;
-        this.gameState.stockMarket.crash(crashAmount);
+        this.gameState.stockMarket?.crash(crashAmount);
         
         return {
             type: 'crash',
@@ -222,7 +222,7 @@ export class EventSystem {
         if (!this.gameState.stockMarket) return null;
         
         const boostAmount = event.boost || 20;
-        this.gameState.stockMarket.boost(boostAmount);
+        this.gameState.stockMarket?.boost(boostAmount);
         
         return {
             type: 'bull',
@@ -242,7 +242,7 @@ export class EventSystem {
     getUpcomingEvents(days = 7) {
         if (!this.gameState.timeManager) return [];
         
-        const currentDay = this.gameState.timeManager.totalDays || 1;
+        const currentDay = this.gameState.timeManager?.totalDays || 1;
         const futureDay = currentDay + days;
         
         return this.upcomingEvents.filter(event => {

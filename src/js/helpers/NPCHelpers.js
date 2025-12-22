@@ -1,11 +1,14 @@
 /**
  * NPCHelpers.js
  * Helper functions for NPC interactions, dialogues, and relationships
+ * Cleanup: Uses centralized utilities
  */
 
 import { getTextIcon } from '../utils/IconMapper.js';
 import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
 import { DialogueUI } from '../ui/DialogueUI.js';
+import { DOMUtils } from '../utils/DOMUtils.js';
+import { logger } from '../utils/Logger.js';
 
 /**
  * Handle visiting an NPC (opens clean dialogue interface)
@@ -28,13 +31,10 @@ export function handleVisitNPC(game, npcId) {
     const npcImage = getNPCImage(npc);
     const fallbackIcon = getNPCFallback(npc);
 
-    let modal = document.getElementById('npc-modal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'npc-modal';
-        modal.className = 'npc-modal-overlay';
-        document.body.appendChild(modal);
-    }
+    let modal = DOMUtils.getOrCreate('#npc-modal', 'div', {
+        className: 'npc-modal-overlay',
+        parent: document.body
+    });
 
     modal.className = 'npc-modal-overlay active';
 
@@ -42,7 +42,7 @@ export function handleVisitNPC(game, npcId) {
     modal.innerHTML = `
         <div class="npc-modal-container">
             <button class="npc-modal-close" onclick="document.getElementById('npc-modal').classList.remove('active')">
-                <span>✕</span>
+                <span></span>
             </button>
             
             <div class="npc-modal-header">
@@ -59,6 +59,7 @@ export function handleVisitNPC(game, npcId) {
                     <img src="${npcImage}" 
                          class="npc-character-image char-alive ${npc.id === game.currentTalkingNPC ? 'char-talking' : ''}" 
                          alt="${npc.name}"
+                         style="object-position: center bottom;"
                          onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div class="npc-avatar-fallback" style="display:none;">
                         <div class="npc-avatar-text-large">${getTextIcon(fallbackIcon)}</div>
@@ -75,10 +76,10 @@ export function handleVisitNPC(game, npcId) {
             
             <div class="npc-modal-actions">
                  <button class="npc-action-btn" onclick="game.handleNPCTalk('${npc.id}')">
-                     <span>💬</span> Chat
+                     <span></span> Chat
                  </button>
                  <button class="npc-action-btn secondary" onclick="game.handleNPCGift('${npc.id}')">
-                     <span>🎁</span> Gift
+                     <span></span> Gift
                  </button>
                  <button class="npc-action-btn secondary" onclick="document.getElementById('npc-modal').classList.remove('active')">
                      Leave
@@ -130,11 +131,15 @@ export async function handleNPCTalk(game, npcId) {
  */
 export function handleNPCResponse(game, result) {
     if (!result) return;
-    const dialogArea = document.getElementById('npc-dialogue-area');
-    dialogArea.innerHTML = "Interesting... (Relationship Changed)";
+    DOMUtils.updateElement('#npc-dialogue-area', {
+        innerHTML: "Interesting... (Relationship Changed)"
+    });
 
     setTimeout(() => {
-        document.getElementById('npc-modal').className = 'modal hidden';
+        const modal = DOMUtils.query('#npc-modal');
+        if (modal) {
+            modal.className = 'modal hidden';
+        }
         game.showToast('Conversation finished.', 'success');
     }, 1500);
 }
@@ -143,10 +148,10 @@ export function handleNPCResponse(game, result) {
  * Handle giving a gift to an NPC
  */
 export function handleNPCGift(game, npcId) {
-    const result = game.gameState.npcManager.giveGift(npcId, 'coffee');
-    const dialogArea = document.getElementById('npc-dialogue-area');
-    if (result.liked) dialogArea.innerHTML = "Wow! I love this! Thanks!";
-    else dialogArea.innerHTML = "Oh... thanks, I guess.";
+    const result = game.gameState.npcManager?.giveGift(npcId, 'coffee');
+    DOMUtils.updateElement('#npc-dialogue-area', {
+        innerHTML: result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess."
+    });
 }
 
 /**
@@ -161,7 +166,7 @@ export function updateRelationshipsScreen(game) {
         return;
     }
 
-    const npcs = npcManager.getMetNPCs();
+    const npcs = npcManager?.getMetNPCs() || [];
     console.log('DEBUG updateRelationshipsScreen: npcs =', npcs);
     const grid = document.getElementById('npc-grid');
     console.log('DEBUG updateRelationshipsScreen: grid element =', grid);
@@ -183,27 +188,57 @@ export function updateRelationshipsScreen(game) {
         const npcImage = getNPCImage(npc);
         const fallbackIcon = getNPCFallback(npc);
         
-        const avatarContent = `<img src="${npcImage}" alt="${npc.name}" class="npc-avatar-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                               <div class="npc-avatar-text" style="display:none;">${getTextIcon(fallbackIcon)}</div>`;
+        const avatarImg = DOMUtils.createElement('img', {
+            attributes: {
+                src: npcImage,
+                alt: npc.name
+            },
+            className: 'npc-avatar-image',
+            style: { objectPosition: 'center center' },
+            listeners: {
+                error: function() {
+                    this.style.display = 'none';
+                    if (this.nextElementSibling) {
+                        this.nextElementSibling.style.display = 'flex';
+                    }
+                }
+            }
+        });
         
-        card.innerHTML = `
-            <div class="npc-avatar">${avatarContent}</div>
-            <div class="npc-info">
-                <div class="npc-name">${npc.name}</div>
-                <div class="npc-title">${npc.title}</div>
-            </div>
-            <div class="relationship-bar">
-                <div class="relationship-fill" style="width: ${npc.relationship}%"></div>
-            </div>
-            <div class="relationship-tier">${npc.tier.label}</div>
-        `;
-
+        const avatarText = DOMUtils.createElement('div', {
+            className: 'npc-avatar-text',
+            innerHTML: getTextIcon(fallbackIcon),
+            style: { display: 'none' }
+        });
+        
+        const avatar = DOMUtils.createContainer({ className: 'npc-avatar' }, avatarImg, avatarText);
+        const info = DOMUtils.createContainer(
+            { className: 'npc-info' },
+            DOMUtils.createContainer({ className: 'npc-name' }, npc.name),
+            DOMUtils.createContainer({ className: 'npc-title' }, npc.title)
+        );
+        const relationshipBar = DOMUtils.createContainer(
+            { className: 'relationship-bar' },
+            DOMUtils.createElement('div', {
+                className: 'relationship-fill',
+                style: { width: `${npc.relationship}%` }
+            })
+        );
+        const tier = DOMUtils.createContainer({ className: 'relationship-tier' }, npc.tier.label);
+        
+        card.appendChild(avatar);
+        card.appendChild(info);
+        card.appendChild(relationshipBar);
+        card.appendChild(tier);
+        
         card.addEventListener('click', () => {
             handleVisitNPC(game, npc.id);
         });
-
-        grid.appendChild(card);
+        
+        return card;
     });
+    
+    grid.appendChild(DOMUtils.batch(cards));
 }
 
 /**

@@ -8,7 +8,7 @@ export const STATS = {
     intelligence: {
         id: 'intelligence',
         name: 'Intelligence',
-        icon: '💡',
+        icon: '',
         color: '#4ecdc4',
         description: 'Affects chart quality and complex analysis',
         maxLevel: 100,
@@ -21,7 +21,7 @@ export const STATS = {
     charisma: {
         id: 'charisma',
         name: 'Charisma',
-        icon: '🎭',
+        icon: '',
         color: '#a855f7',
         description: 'Better negotiations and relationships',
         maxLevel: 100,
@@ -34,7 +34,7 @@ export const STATS = {
     stamina: {
         id: 'stamina',
         name: 'Stamina',
-        icon: '💪',
+        icon: '',
         color: '#ff6b9d',
         description: 'Work more hours without fatigue',
         maxLevel: 100,
@@ -47,7 +47,7 @@ export const STATS = {
     focus: {
         id: 'focus',
         name: 'Focus',
-        icon: '🎯',
+        icon: '',
         color: '#ffd93d',
         description: 'Complete tasks faster',
         maxLevel: 100,
@@ -60,7 +60,7 @@ export const STATS = {
     luck: {
         id: 'luck',
         name: 'Luck',
-        icon: '🍀',
+        icon: '',
         color: '#6bcb77',
         description: 'Random bonuses and market wins',
         maxLevel: 50, // Luck caps lower
@@ -73,7 +73,7 @@ export const STATS = {
     analytics: {
         id: 'analytics',
         name: 'Analytics',
-        icon: '📊',
+        icon: '',
         color: '#ff8548',
         description: 'Unlock advanced chart types and tools',
         maxLevel: 100,
@@ -90,7 +90,7 @@ export const TRAINING_ACTIVITIES = [
     {
         id: 'study_books',
         name: 'Study Books',
-        icon: '📚',
+        icon: '',
         location: 'library',
         stats: { intelligence: 2, analytics: 1 },
         cost: 0,
@@ -101,7 +101,7 @@ export const TRAINING_ACTIVITIES = [
     {
         id: 'online_course',
         name: 'Online Course',
-        icon: '💻',
+        icon: '',
         location: 'home',
         stats: { intelligence: 3, analytics: 2 },
         cost: 50,
@@ -112,7 +112,7 @@ export const TRAINING_ACTIVITIES = [
     {
         id: 'gym_workout',
         name: 'Gym Workout',
-        icon: '🏋️',
+        icon: '',
         location: 'gym',
         stats: { stamina: 3, focus: 1 },
         cost: 20,
@@ -123,7 +123,7 @@ export const TRAINING_ACTIVITIES = [
     {
         id: 'meditation',
         name: 'Meditation',
-        icon: '🧘',
+        icon: '',
         location: 'home',
         stats: { focus: 3, stamina: 1 },
         cost: 0,
@@ -134,7 +134,7 @@ export const TRAINING_ACTIVITIES = [
     {
         id: 'networking_event',
         name: 'Networking Event',
-        icon: '🍸',
+        icon: '',
         location: 'networking_bar',
         stats: { charisma: 3, luck: 1 },
         cost: 30,
@@ -145,7 +145,7 @@ export const TRAINING_ACTIVITIES = [
     {
         id: 'presentation_practice',
         name: 'Presentation Practice',
-        icon: '🎤',
+        icon: '',
         location: 'home',
         stats: { charisma: 2, intelligence: 1 },
         cost: 0,
@@ -156,7 +156,7 @@ export const TRAINING_ACTIVITIES = [
     {
         id: 'data_challenges',
         name: 'Data Challenges',
-        icon: '🧩',
+        icon: '',
         location: 'home',
         stats: { analytics: 3, intelligence: 1 },
         cost: 0,
@@ -167,7 +167,7 @@ export const TRAINING_ACTIVITIES = [
     {
         id: 'coffee_network',
         name: 'Coffee Meetup',
-        icon: '☕',
+        icon: '',
         location: 'coffee_shop',
         stats: { charisma: 1, luck: 1 },
         cost: 10,
@@ -178,7 +178,7 @@ export const TRAINING_ACTIVITIES = [
     {
         id: 'certification_study',
         name: 'Certification Study',
-        icon: '📜',
+        icon: '',
         location: 'university',
         stats: { analytics: 4, intelligence: 2 },
         cost: 100,
@@ -207,12 +207,8 @@ export class CharacterStats {
         // -100: Pure Evil (Wolf of Wall Street)
         // 0: Neutral
         // +100: Saint
-        this.ethics = 0;
-
-        // Experience points for each stat
-        this.xp = 0;
-        this.level = 1;
         this.ethics = 50; // 0 (Evil) to 100 (Saint)
+        this.level = 1;
         this.visualStage = 'level_1'; // level_1, level_2_good, level_2_evil, etc.
 
         // Define Skills
@@ -298,7 +294,7 @@ export class CharacterStats {
     getStatDetails(statId) {
         const stat = STATS[statId];
         const value = this.stats[statId];
-        const xp = this.experience[statId];
+        const xp = this.xp[statId] || 0;
         const xpNeeded = this.getXPForNextLevel(statId);
 
         return {
@@ -325,19 +321,20 @@ export class CharacterStats {
     addExperience(statId, amount) {
         if (!STATS[statId]) return { leveled: false };
 
-        this.experience[statId] += amount;
+        if (!this.xp[statId]) this.xp[statId] = 0;
+        this.xp[statId] += amount;
 
         let leveled = false;
         let levelsGained = 0;
 
         // Check for level ups
-        while (this.experience[statId] >= this.getXPForNextLevel(statId)) {
+        while (this.xp[statId] >= this.getXPForNextLevel(statId)) {
             if (this.stats[statId] >= STATS[statId].maxLevel) {
-                this.experience[statId] = this.getXPForNextLevel(statId);
+                this.xp[statId] = this.getXPForNextLevel(statId);
                 break;
             }
 
-            this.experience[statId] -= this.getXPForNextLevel(statId);
+            this.xp[statId] -= this.getXPForNextLevel(statId);
             this.stats[statId]++;
             leveled = true;
             levelsGained++;
@@ -426,7 +423,8 @@ export class CharacterStats {
     toJSON() {
         return {
             stats: this.stats,
-            experience: this.experience
+            xp: this.xp,
+            experience: this.xp // Keep for backward compatibility
         };
     }
 
@@ -436,6 +434,11 @@ export class CharacterStats {
     fromJSON(data) {
         if (!data) return;
         this.stats = { ...this.stats, ...data.stats };
-        this.experience = { ...this.experience, ...data.experience };
+        // Handle both xp (new) and experience (old saves) for backward compatibility
+        if (data.xp) {
+            this.xp = { ...this.xp, ...data.xp };
+        } else if (data.experience) {
+            this.xp = { ...this.xp, ...data.experience };
+        }
     }
 }

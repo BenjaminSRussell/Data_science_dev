@@ -25,6 +25,7 @@ export class BankSystem {
     deposit(amount) {
         if (amount <= 0) return { success: false, message: "Invalid amount" };
         if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
+        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
 
         this.gameState.money -= amount;
         this.gameState.bank.savings += amount;
@@ -38,6 +39,7 @@ export class BankSystem {
      */
     withdraw(amount) {
         if (amount <= 0) return { success: false, message: "Invalid amount" };
+        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
         if (this.gameState.bank.savings < amount) return { success: false, message: "Insufficient savings" };
 
         this.gameState.bank.savings -= amount;
@@ -51,6 +53,7 @@ export class BankSystem {
      * Take out a loan
      */
     takeLoan(amount) {
+        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
         const maxLoan = this.calculateMaxLoan();
         if (amount > maxLoan) return { success: false, message: `Loan limit exceeded (Max: $${maxLoan})` };
 
@@ -66,6 +69,7 @@ export class BankSystem {
      */
     repayLoan(amount) {
         if (amount <= 0) return { success: false, message: "Invalid amount" };
+        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
         if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
         if (this.gameState.bank.loan <= 0) return { success: false, message: "No active loan" };
 
@@ -86,6 +90,8 @@ export class BankSystem {
             loanInterest: 0
         };
 
+        if (!this.gameState.bank) return results;
+
         // Savings interest
         if (this.gameState.bank.savings > 0) {
             results.savingsInterest = Math.floor(this.gameState.bank.savings * this.gameState.bank.savingsInterestRate);
@@ -105,8 +111,11 @@ export class BankSystem {
      * Calculate max loan based on reputation and credit score
      */
     calculateMaxLoan() {
+        if (!this.gameState.bank) return 0;
+        
         // Base $1000 + $100 per reputation point
-        let limit = 1000 + (this.gameState.reputation * 100);
+        const reputation = this.gameState.reputation || 0;
+        let limit = 1000 + (reputation * 100);
 
         // Multiplier based on credit score (simplified)
         const creditMultiplier = this.gameState.bank.creditScore / 500;
@@ -115,6 +124,11 @@ export class BankSystem {
     }
 
     logTransaction(type, amount) {
+        if (!this.gameState.bank) return;
+        if (!this.gameState.bank.transactionHistory) {
+            this.gameState.bank.transactionHistory = [];
+        }
+        
         this.gameState.bank.transactionHistory.unshift({
             date: new Date().toISOString(), // In-game date would be better if passed, using real time for now unique ID
             type,

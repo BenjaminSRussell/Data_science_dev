@@ -25,7 +25,7 @@ export class DayNightCycle {
             return TIME_OF_DAY.MORNING;
         }
         
-        const slot = this.gameState.timeManager.timeSlot;
+        const slot = this.gameState.timeManager?.timeSlot;
         
         // Morning: slots 0-1 (early morning, late morning)
         if (slot <= 1) {

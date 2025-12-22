@@ -125,7 +125,7 @@ export class DirtyDataSystem {
         
         // Legal trouble
         if (this.gameState.legalSystem) {
-            this.gameState.legalSystem.addLegalIssue({
+            this.gameState.legalSystem?.addLegalIssue({
                 type: 'data_violation',
                 severity: action.consequences.legal,
                 description: `Caught performing ${action.name}`
@@ -151,7 +151,7 @@ export class DirtyDataSystem {
         
         // Update game state
         if (this.gameState.reputationSystem) {
-            this.gameState.reputationSystem.updateReputation(consequences.reputation);
+            this.gameState.reputationSystem?.updateReputation(consequences.reputation);
         }
     }
     

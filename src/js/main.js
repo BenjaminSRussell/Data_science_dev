@@ -3,11 +3,26 @@
  * Initializes the game and manages global state
  */
 
+// Import utilities first
+import { logger } from './utils/Logger.js';
+import { DOMUtils } from './utils/DOMUtils.js';
+
+logger.debug('main.js module starting to load', {timestamp: Date.now()});
+
+// Phase 4: Use Zustand for state management
+import { useGameStore } from './store/gameStore.js';
+
+logger.debug('useGameStore imported successfully', {hasStore: typeof useGameStore !== 'undefined'});
+// Keep GameState import for backward compatibility during migration
 import { GameState } from './game/GameState.js';
 import { ScreenManager } from './ui/ScreenManager.js';
 import { ChartManager } from './charts/ChartManager.js';
 import { AudioManager } from './audio/AudioManager.js';
 import { SaveManager } from './save/SaveManager.js';
+import { SaveSlotManager } from './ui/SaveSlotManager.js';
+import { MenuThemeSystem } from './game/MenuThemeSystem.js';
+import { MenuLogoDisplay } from './ui/MenuLogoDisplay.js';
+import { StatisticsAggregator } from './ui/StatisticsAggregator.js';
 import { TaskSystem } from './game/TaskSystem.js';
 import { EconomySystem } from './game/EconomySystem.js';
 import { BankSystem } from './game/BankSystem.js';
@@ -53,13 +68,23 @@ import { RelationshipEmotionSystem } from './game/RelationshipEmotionSystem.js';
 import { WorldEvolutionSystem } from './game/WorldEvolutionSystem.js';
 import { InvestmentEcommerceSystem } from './game/InvestmentEcommerceSystem.js';
 import { StorylineManager } from './game/StorylineManager.js';
+import { StoryBeatsSystem } from './game/StoryBeatsSystem.js';
+import { CharacterArcSystem } from './game/CharacterArcSystem.js';
+import { NPCMemorySystem } from './game/NPCMemorySystem.js';
+import { StoryUI } from './ui/StoryUI.js';
+import { ActTransitionScreen } from './ui/ActTransitionScreen.js';
 import { IDESystem } from './game/IDESystem.js';
 import { LocationBackgroundSystem } from './game/LocationBackgroundSystem.js';
 import { WeeklyNewsSystem } from './game/WeeklyNewsSystem.js';
 import { ScreenThemeManager } from './game/ScreenThemeManager.js';
 import { MapCoordinateSystem } from './game/MapCoordinateSystem.js';
+import { GameEndingSystem } from './game/GameEndingSystem.js';
+import { NarrativeClaritySystem } from './game/NarrativeClaritySystem.js';
 import { VisualSystem } from './visual/VisualSystem.js';
-import { AnimationManager } from './animation/AnimationManager.js';
+// Phase 3: Use GSAP instead of custom AnimationManager
+import { GSAPAnimationManager } from './animation/GSAPAnimationManager.js';
+// Phase 4: Use PixiJS Assets and new interaction libraries (optional - wrapped in try-catch)
+// Keep old imports for fallback
 import { AssetManager } from './assets/AssetManager.js';
 import { PerformanceManager } from './performance/PerformanceManager.js';
 import { UILayerManager } from './ui/UILayerManager.js';
@@ -75,6 +100,12 @@ import { ProjectSystem } from './game/ProjectSystem.js';
 import { AISystem } from './game/AISystem.js';
 import { HardwareManager } from './game/HardwareSystems.js'; // NEW
 import { LIBRARY_CONTENT, CATEGORIES } from './game/LibraryDatabase.js';
+import { RANKS } from './data/ranks.js';
+import { SHOP_ITEMS } from './data/shopItems.js';
+import { SpriteSheetManager } from './assets/SpriteSheetManager.js';
+import { AnimatedCharacterRenderer } from './characters/AnimatedCharacterRenderer.js';
+import { CharacterAnimationSystem } from './characters/CharacterAnimationSystem.js';
+import { LocationView } from './ui/LocationView.js';
 
 // Helper modules - split from main.js for easier debugging
 import * as MapHelpers from './helpers/MapHelpers.js';
@@ -85,19 +116,78 @@ import * as ProjectHelpers from './helpers/ProjectHelpers.js';
 
 let game = null; // Declare game instance
 
+logger.debug('Module loaded - all imports successful');
+
+// Display visible debug info on page (wait for DOM) - only in development
+if (typeof document !== 'undefined' && process.env.NODE_ENV !== 'production') {
+    const showDebug = () => {
+        if (document.body) {
+            const debugDiv = document.createElement('div');
+            debugDiv.id = 'debug-loader-info';
+            debugDiv.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;font-family:monospace;font-size:12px;z-index:99999;border:2px solid #0f0;border-radius:5px;max-width:300px;';
+            debugDiv.innerHTML = 'main.js module loaded';
+            document.body.appendChild(debugDiv);
+            setTimeout(() => debugDiv.remove(), 5000);
+        } else {
+            setTimeout(showDebug, 100);
+        }
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', showDebug);
+    } else {
+        showDebug();
+    }
+}
+// #endregion
+
 export class MainGame {
     constructor() {
-        this.gameState = new GameState();
+        logger.debug('MainGame constructor entry');
+        
+        // Phase 4: Use Zustand store for state management
+        try {
+            logger.debug('Attempting to access Zustand store...');
+            this.gameStore = useGameStore;
+            logger.debug('Zustand store accessed successfully', {storeType: typeof this.gameStore, hasGetState: typeof this.gameStore?.getState});
+        } catch (e) {
+            logger.error('Zustand store access failed:', e);
+            throw e;
+        }
+        
+        // Keep GameState for backward compatibility during migration
+        try {
+            logger.debug('Attempting to create GameState...');
+            this.gameState = new GameState();
+            logger.debug('GameState created successfully', {money: this.gameState.money, reputation: this.gameState.reputation});
+        } catch (e) {
+            logger.error('GameState creation failed:', e);
+            throw e;
+        }
+        
+        // Sync GameState with Zustand store
+        try {
+            this.syncGameStateToStore();
+        } catch (e) {
+            logger.error('GameState sync failed:', e);
+            throw e;
+        }
+        
         this.saveManager = new SaveManager();
+        this.saveSlotManager = null; // Will be initialized in initMenu
+        this.currentSaveSlot = 0; // Default to slot 0
+        this.menuThemeSystem = new MenuThemeSystem();
+        this.menuLogoDisplay = null; // Will be initialized in initMenu
+        this.statisticsAggregator = new StatisticsAggregator(this.saveManager);
         this.taskSystem = new TaskSystem(this.gameState);
         this.uiUpdater = new UIUpdater(this);
+        this.storyUI = new StoryUI(this);
         this.screenManager = new ScreenManager(this);
         this.chartManager = new ChartManager(this);
         this.environmentManager = new EnvironmentManager(this.gameState);
         this.audioManager = new AudioManager();
         this.gameLoopId = null;
         this.lastTime = 0;
-        this.bankSystem = null; // Initialize placeholder
+        this.bankSystem = null; // Will be initialized when needed
 
         // Bind methods
         this.gameLoop = this.gameLoop.bind(this);
@@ -106,56 +196,505 @@ export class MainGame {
         this.startNewGame = this.startNewGame.bind(this);
         this.continueGame = this.continueGame.bind(this);
 
+        logger.debug('MainGame constructor exit - all initialization complete', {hasSaveManager: !!this.saveManager, hasTaskSystem: !!this.taskSystem, hasScreenManager: !!this.screenManager});
+
         // this.init(); // Init is called in DOMContentLoaded
+    }
+
+    /**
+     * Sync GameState with Zustand store (Phase 4)
+     * Maintains backward compatibility during migration
+     */
+    syncGameStateToStore() {
+        const store = this.gameStore.getState();
+        
+        // Sync Zustand store values to GameState
+        this.gameState.money = store.money;
+        this.gameState.reputation = store.reputation;
+        this.gameState.rankIndex = store.rankIndex;
+        this.gameState.rent = store.rent;
+        this.gameState.bank = store.bank;
+        this.gameState.tasksCompleted = store.tasksCompleted;
+        this.gameState.perfectScores = store.perfectScores;
+        this.gameState.totalEarned = store.totalEarned;
+        this.gameState.weeklyIncome = store.weeklyIncome;
+        this.gameState.totalRatings = store.totalRatings;
+        this.gameState.ratingSum = store.ratingSum;
+        this.gameState.unlockedChartTypes = store.unlockedChartTypes;
+        this.gameState.purchasedItems = store.purchasedItems;
+        this.gameState.unlockedTools = store.unlockedTools;
+        this.gameState.unlockedLibraries = store.unlockedLibraries;
+        this.gameState.isGameStarted = store.isGameStarted;
+        this.gameState.tutorialCompleted = store.tutorialCompleted;
+        this.gameState.soundEnabled = store.soundEnabled;
+        this.gameState.musicEnabled = store.musicEnabled;
+        this.gameState.currentLocation = store.currentLocation;
+        this.gameState.chartConfig = store.chartConfig;
+        
+        // Subscribe to store changes to keep GameState in sync
+        this.gameStore.subscribe((state) => {
+            this.gameState.money = state.money;
+            this.gameState.reputation = state.reputation;
+            this.gameState.rankIndex = state.rankIndex;
+            this.gameState.rent = state.rent;
+            this.gameState.bank = state.bank;
+            this.gameState.tasksCompleted = state.tasksCompleted;
+            this.gameState.perfectScores = state.perfectScores;
+            this.gameState.totalEarned = state.totalEarned;
+            this.gameState.weeklyIncome = state.weeklyIncome;
+            this.gameState.totalRatings = state.totalRatings;
+            this.gameState.ratingSum = state.ratingSum;
+            this.gameState.unlockedChartTypes = state.unlockedChartTypes;
+            this.gameState.purchasedItems = state.purchasedItems;
+            this.gameState.unlockedTools = state.unlockedTools;
+            this.gameState.unlockedLibraries = state.unlockedLibraries;
+            this.gameState.isGameStarted = state.isGameStarted;
+            this.gameState.tutorialCompleted = state.tutorialCompleted;
+            this.gameState.soundEnabled = state.soundEnabled;
+            this.gameState.musicEnabled = state.musicEnabled;
+            this.gameState.currentLocation = state.currentLocation;
+            this.gameState.chartConfig = state.chartConfig;
+        });
     }
 
     /**
      * Initialize the game
      */
     async init() {
-        console.log('🎮 Initializing Data Science Tycoon...');
+        logger.debug('init() method entry', {hasSaveManager: !!this.saveManager, hasGameState: !!this.gameState});
+        
+        // Show diagnostic overlay
+        this.showDiagnostic('init() started');
+        
+            logger.info('Initializing Data Science Tycoon...');
 
         try {
-            console.log('DEBUG: Attempting to load game...');
+            logger.debug('Attempting to load game...');
             // Load saved game if exists
-            const hasSave = this.saveManager.loadGame(this.gameState);
-            console.log('DEBUG: Game loaded (save found: ' + hasSave + ')');
+            // Check for saves in any slot
+            const hasSave = this.saveManager.hasSave();
+            if (hasSave) {
+                // Try to load most recent slot, or slot 0
+                const mostRecentSlot = this.saveManager.getMostRecentSlot() || 0;
+                this.currentSaveSlot = mostRecentSlot;
+                this.saveManager.loadGame(this.gameState, mostRecentSlot);
+            }
+            
+            logger.debug(`Game loaded (save found: ${hasSave})`);
 
-            console.log('DEBUG: Initializing ScreenManager...');
             // Initialize UI
             this.screenManager.init();
 
-            console.log('DEBUG: Initializing ChartManager...');
+            logger.debug('Initializing ChartManager...');
             this.chartManager.init();
 
-            console.log('DEBUG: Initializing EnvironmentManager...');
+            logger.debug('Initializing EnvironmentManager...');
+            
             // Initialize environment (backgrounds, weather, etc.)
             this.environmentManager.init();
-            console.log('DEBUG: EnvironmentManager initialized');
+            
+            logger.debug('EnvironmentManager initialized');
 
-            // Enable continue button if save exists
-            if (hasSave) {
-                const continueBtn = document.getElementById('btn-continue');
-                if (continueBtn) {
-                    continueBtn.disabled = false;
-                }
-            }
+            // Initialize menu
+            this.initMenu(hasSave);
 
-            console.log('DEBUG: Setting up event listeners...');
+            logger.debug('Setting up event listeners...');
             // Setup event listeners
             this.setupEventListeners();
-            console.log('DEBUG: Event listeners set up');
+            logger.debug('Event listeners set up');
 
             // Hide loading screen, show game
-            this.showGame();
-
-            console.log('✅ Game initialized successfully!');
+            // Always show game, even if there were minor errors
+            try {
+                this.showGame();
+            } catch (showError) {
+                logger.error('Error in showGame():', showError);
+                // Fallback: manually show game container
+                const gameContainer = document.getElementById('game-container');
+                const loadingScreen = document.getElementById('loading-screen');
+                if (gameContainer) gameContainer.classList.remove('hidden');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                    loadingScreen.classList.add('hidden');
+                }
+            }
+            
+            logger.info('Game initialized successfully!');
 
         } catch (error) {
-            console.error('❌ Failed to initialize game:', error);
-            console.error('Stack trace:', error.stack);
-            this.showError('Failed to initialize game. Please refresh the page.');
+            logger.error('init() method error caught:', error);
+            
+            logger.error('Failed to initialize game:', error);
+            logger.error('Stack trace:', error.stack);
+            
+            // Try to show game anyway so user can see something
+            try {
+                const gameContainer = document.getElementById('game-container');
+                const loadingScreen = document.getElementById('loading-screen');
+                if (gameContainer) gameContainer.classList.remove('hidden');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                    loadingScreen.classList.add('hidden');
+                }
+            } catch (e) {
+                logger.error('Failed to show game container:', e);
+            }
+            
+            this.showError('Failed to initialize game: ' + error.message + '. Some features may not work.');
         }
+    }
+
+    /**
+     * Initialize main menu
+     */
+    initMenu(hasSave) {
+        try {
+            // Initialize theme system
+            if (this.menuThemeSystem) {
+                this.menuThemeSystem.init();
+                
+                // Check theme unlocks from most recent save
+                if (hasSave) {
+                    try {
+                        const mostRecentSlot = this.saveManager.getMostRecentSlot();
+                        if (mostRecentSlot !== null) {
+                            const saveData = this.saveManager.getSaveData(mostRecentSlot);
+                            if (saveData && saveData.state) {
+                                // Create temporary gameState to check unlocks
+                                const tempState = { ...saveData.state };
+                                this.menuThemeSystem.checkThemeUnlocks(tempState);
+                                this.menuThemeSystem.updateFromGameState(tempState);
+                            }
+                        }
+                    } catch (e) {
+                        logger.warn('Failed to check theme unlocks:', e);
+                    }
+                }
+            }
+            
+            // Particle system disabled
+            // this.initMenuParticles();
+            
+            // Initialize save slot manager
+            try {
+                this.saveSlotManager = new SaveSlotManager(
+                    this.saveManager,
+                    (slotIndex, isNewGame) => {
+                        this.handleSlotSelection(slotIndex, isNewGame);
+                    }
+                );
+                this.saveSlotManager.init();
+            } catch (e) {
+                logger.error('Failed to initialize save slot manager:', e);
+                // Fallback: show old continue button
+                const continueBtn = document.getElementById('btn-continue');
+                if (continueBtn) {
+                    continueBtn.style.display = '';
+                }
+            }
+            
+            // Initialize logo display with statistics
+            try {
+                if (this.menuLogoDisplay) {
+                    this.menuLogoDisplay.init();
+                }
+            } catch (e) {
+                logger.warn('Failed to initialize logo display:', e);
+            }
+            
+            // Initialize and render statistics dashboard
+            try {
+                this.renderStatisticsDashboard();
+            } catch (e) {
+                logger.warn('Failed to render statistics dashboard:', e);
+            }
+            
+            // Initialize essential menu enhancements (non-repetitive, unique)
+            try {
+                this.initMenuEnhancements();
+            } catch (e) {
+                logger.warn('Failed to initialize menu enhancements:', e);
+            }
+            
+            // Keep old continue button hidden/disabled for backward compatibility
+            const continueBtn = document.getElementById('btn-continue');
+            if (continueBtn) {
+                continueBtn.style.display = 'none';
+            }
+        } catch (error) {
+            logger.error('Error in initMenu:', error);
+            // Ensure game can still start even if menu enhancements fail
+            const continueBtn = document.getElementById('btn-continue');
+            if (continueBtn) {
+                continueBtn.style.display = '';
+            }
+        }
+    }
+
+    /**
+     * Initialize essential menu enhancements (unique, non-repetitive)
+     */
+    initMenuEnhancements() {
+        const menuBackground = document.querySelector('.menu-background');
+        const menuContainer = document.querySelector('.menu-container');
+        
+        if (!menuBackground || !menuContainer) return;
+
+        // Time-of-day background (subtle, not repetitive)
+        const hour = new Date().getHours();
+        let timeOfDay = 'evening';
+        if (hour >= 6 && hour < 12) timeOfDay = 'morning';
+        else if (hour >= 12 && hour < 18) timeOfDay = 'afternoon';
+        else if (hour >= 18 && hour < 22) timeOfDay = 'evening';
+        else timeOfDay = 'night';
+        menuBackground.setAttribute('data-time', timeOfDay);
+
+        // Enhanced keyboard navigation
+        this.setupMenuKeyboardNavigation();
+        
+        // Enhanced focus management
+        this.setupMenuFocusManagement();
+        
+        // Accessibility improvements
+        this.setupMenuAccessibility();
+    }
+
+    setupMenuKeyboardNavigation() {
+        const buttons = document.querySelectorAll('.menu-btn');
+        buttons.forEach((btn, index) => {
+            btn.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown' && index < buttons.length - 1) {
+                    e.preventDefault();
+                    buttons[index + 1].focus();
+                } else if (e.key === 'ArrowUp' && index > 0) {
+                    e.preventDefault();
+                    buttons[index - 1].focus();
+                }
+            });
+        });
+    }
+
+    setupMenuFocusManagement() {
+        const menuScreen = document.getElementById('screen-menu');
+        if (menuScreen) {
+            menuScreen.setAttribute('role', 'main');
+            menuScreen.setAttribute('aria-label', 'Main menu');
+        }
+
+        const buttons = document.querySelectorAll('.menu-btn');
+        buttons.forEach(btn => {
+            if (!btn.getAttribute('aria-label')) {
+                const text = btn.querySelector('.btn-text')?.textContent || 'Menu button';
+                btn.setAttribute('aria-label', text);
+            }
+        });
+    }
+
+    setupMenuAccessibility() {
+        // Respect reduced motion
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) {
+            document.documentElement.setAttribute('data-reduced-motion', 'true');
+        }
+
+        // Enhanced focus indicators
+        const focusableElements = document.querySelectorAll('button, a, input, select, textarea');
+        focusableElements.forEach(el => {
+            el.addEventListener('focus', () => {
+                el.style.outline = '2px solid rgba(139, 92, 246, 0.6)';
+                el.style.outlineOffset = '2px';
+            });
+            el.addEventListener('blur', () => {
+                el.style.outline = '';
+                el.style.outlineOffset = '';
+            });
+        });
+    }
+
+    /**
+     * Render statistics dashboard
+     */
+    renderStatisticsDashboard() {
+        const dashboard = document.getElementById('menu-stats-dashboard');
+        if (!dashboard) {
+            logger.warn('Statistics dashboard element not found');
+            return;
+        }
+
+        if (!this.statisticsAggregator) {
+            logger.warn('Statistics aggregator not initialized');
+            return;
+        }
+
+        const stats = this.statisticsAggregator.calculate();
+
+        // Only show if there's meaningful data
+        if (stats.totalPlaytime === 0 && stats.gamesCompleted === 0) {
+            dashboard.style.display = 'none';
+            return;
+        }
+
+        dashboard.style.display = 'grid';
+        dashboard.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-icon">Time</div>
+                <div class="stat-content">
+                    <div class="stat-label">Total Playtime</div>
+                    <div class="stat-value">${this.statisticsAggregator.formatPlaytime(stats.totalPlaytime)}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">Trophy</div>
+                <div class="stat-content">
+                    <div class="stat-label">Games Completed</div>
+                    <div class="stat-value">${stats.gamesCompleted}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">Chart</div>
+                <div class="stat-content">
+                    <div class="stat-label">Highest Rank</div>
+                    <div class="stat-value">${stats.highestRankName}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">Money</div>
+                <div class="stat-content">
+                    <div class="stat-label">Total Money</div>
+                    <div class="stat-value">${this.statisticsAggregator.formatMoney(stats.totalMoney)}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Handle save slot selection
+     */
+    handleSlotSelection(slotIndex, isNewGame) {
+        this.currentSaveSlot = slotIndex;
+        
+        if (isNewGame) {
+            this.startNewGame();
+        } else {
+            this.continueGame(slotIndex);
+        }
+    }
+
+    /**
+     * Initialize particle system for menu background
+     */
+    initMenuParticles() {
+        const canvas = DOMUtils.query('#menu-particles-canvas');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const particles = [];
+        const particleCount = 50;
+
+        // Set canvas size
+        const resizeCanvas = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Get theme color from CSS or use default
+        const getThemeColor = () => {
+            try {
+                const root = document.documentElement;
+                const color = getComputedStyle(root).getPropertyValue('--color-primary') || 
+                             getComputedStyle(root).getPropertyValue('--primary-color') ||
+                             'rgb(139, 92, 246)'; // Default purple
+                return color.trim();
+            } catch (e) {
+                return 'rgb(139, 92, 246)'; // Default purple
+            }
+        };
+        
+        const themeColor = getThemeColor();
+
+        // Create particles
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2 + 0.5,
+                speedX: (Math.random() - 0.5) * 0.5,
+                speedY: (Math.random() - 0.5) * 0.5,
+                opacity: Math.random() * 0.5 + 0.2,
+                color: themeColor, // Add color property
+            });
+        }
+
+        // Animation loop
+        const animate = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                // Update position
+                particle.x += particle.speedX;
+                particle.y += particle.speedY;
+
+                // Wrap around edges
+                if (particle.x < 0) particle.x = canvas.width;
+                if (particle.x > canvas.width) particle.x = 0;
+                if (particle.y < 0) particle.y = canvas.height;
+                if (particle.y > canvas.height) particle.y = 0;
+
+                // Draw particle with theme color
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                // Extract color and apply opacity
+                if (particle.color) {
+                    const colorMatch = particle.color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                    if (colorMatch) {
+                        const r = colorMatch[1];
+                        const g = colorMatch[2];
+                        const b = colorMatch[3];
+                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${particle.opacity})`;
+                    } else {
+                        ctx.fillStyle = `rgba(139, 92, 246, ${particle.opacity})`;
+                    }
+                } else {
+                    ctx.fillStyle = `rgba(139, 92, 246, ${particle.opacity})`;
+                }
+                ctx.fill();
+
+                // Draw connections
+                particles.forEach(otherParticle => {
+                    const dx = particle.x - otherParticle.x;
+                    const dy = particle.y - otherParticle.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(particle.x, particle.y);
+                        ctx.lineTo(otherParticle.x, otherParticle.y);
+                        // Use theme color for connections
+                        if (particle.color) {
+                            const colorMatch = particle.color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                            if (colorMatch) {
+                                const r = colorMatch[1];
+                                const g = colorMatch[2];
+                                const b = colorMatch[3];
+                                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${0.1 * (1 - distance / 150)})`;
+                            } else {
+                                ctx.strokeStyle = `rgba(139, 92, 246, ${0.1 * (1 - distance / 150)})`;
+                            }
+                        } else {
+                            ctx.strokeStyle = `rgba(139, 92, 246, ${0.1 * (1 - distance / 150)})`;
+                        }
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            requestAnimationFrame(animate);
+        };
+
+        animate();
     }
 
     /**
@@ -164,15 +703,45 @@ export class MainGame {
     setupEventListeners() {
         // Main Menu buttons
         document.getElementById('btn-new-game')?.addEventListener('click', () => {
-            this.startNewGame();
+            // Show save slots for new game selection
+            if (this.saveSlotManager) {
+                // Find first empty slot or use slot 0
+                let emptySlot = null;
+                for (let i = 0; i < 5; i++) {
+                    if (!this.saveManager.hasSave(i)) {
+                        emptySlot = i;
+                        break;
+                    }
+                }
+                // If no empty slot, use slot 0 (will overwrite)
+                const slotToUse = emptySlot !== null ? emptySlot : 0;
+                this.handleSlotSelection(slotToUse, true);
+            } else {
+                // Fallback: start game directly if SaveSlotManager not initialized
+                this.startNewGame();
+            }
         });
 
+        // Continue button is now handled by SaveSlotManager
+        // Keep for backward compatibility but hide it
         document.getElementById('btn-continue')?.addEventListener('click', () => {
-            this.continueGame();
+            const mostRecentSlot = this.saveManager.getMostRecentSlot();
+            if (mostRecentSlot !== null) {
+                this.continueGame(mostRecentSlot);
+            }
         });
 
         document.getElementById('btn-tutorial')?.addEventListener('click', () => {
             this.showTutorial();
+        });
+
+        // New menu buttons
+        document.getElementById('btn-settings-menu')?.addEventListener('click', () => {
+            this.showSettings();
+        });
+
+        document.getElementById('btn-credits')?.addEventListener('click', () => {
+            this.showCredits();
         });
 
         // Game screen buttons
@@ -226,11 +795,13 @@ export class MainGame {
             this.updateStaffScreen();
         });
 
-        // RPG Navigation
-        document.getElementById('btn-nav-map')?.addEventListener('click', () => {
-            this.screenManager.showScreen('screen-game');
+        // RPG Navigation - Map buttons (multiple buttons with same functionality)
+        const mapButtonHandler = () => {
+            this.screenManager.showScreen('screen-map');
             this.updateMapScreen();
-        });
+        };
+        document.getElementById('btn-nav-map')?.addEventListener('click', mapButtonHandler);
+        document.getElementById('btn-nav-map-quick')?.addEventListener('click', mapButtonHandler);
 
         document.getElementById('btn-nav-stats')?.addEventListener('click', () => {
             this.screenManager.showScreen('screen-stats');
@@ -258,15 +829,12 @@ export class MainGame {
             this.screenManager.showScreen('screen-game');
         });
 
+        document.getElementById('btn-back-library')?.addEventListener('click', () => {
+            this.screenManager.showScreen('screen-game');
+        });
+
         document.getElementById('btn-back-map')?.addEventListener('click', () => {
-            const loc = this.worldMap.currentLocation;
-            const locData = this.worldMap.getLocation(loc);
-            if (locData && locData.type === 'shop') {
-                this.screenManager.showScreen('screen-office');
-                this.updateOfficeScreen();
-            } else {
-                this.screenManager.showScreen('screen-game');
-            }
+            this.screenManager.showScreen('screen-game');
         });
 
         document.getElementById('btn-back-stats')?.addEventListener('click', () => {
@@ -294,6 +862,10 @@ export class MainGame {
 
         // Map Interactions
         document.getElementById('btn-sleep')?.addEventListener('click', () => {
+            if (!this.worldMap || !this.timeManager) {
+                this.showError("Game systems not ready yet.");
+                return;
+            }
             if (this.worldMap.currentLocation !== 'home') {
                 this.showError("You can only sleep at home! Travel home first.");
                 return;
@@ -307,6 +879,9 @@ export class MainGame {
         const mapContainer = document.getElementById('world-map');
         if (mapContainer) {
             mapContainer.addEventListener('click', (e) => {
+                if (!this.worldMap) {
+                    return;
+                }
                 const locationEl = e.target.closest('.map-location');
                 if (locationEl && !locationEl.classList.contains('locked')) {
                     this.handleTravel(locationEl.dataset.location);
@@ -327,17 +902,25 @@ export class MainGame {
         const vehicleOptions = document.getElementById('vehicle-options');
         if (vehicleOptions) {
             vehicleOptions.addEventListener('click', (e) => {
+                if (!this.worldMap) {
+                    this.showError("Game systems not ready yet.");
+                    return;
+                }
                 const option = e.target.closest('.vehicle-option');
                 if (!option) return;
 
                 const vehicleId = option.dataset.vehicle;
-                // Check if owned
-                if (this.worldMap.ownedVehicles.includes(vehicleId)) {
+                // Check if owned (ownedVehicles is a Set, use .has() not .includes())
+                if (this.worldMap.ownedVehicles && this.worldMap.ownedVehicles.has(vehicleId)) {
                     this.worldMap.switchVehicle(vehicleId);
                     this.updateMapScreen();
                 } else {
                     // Try to buy
                     const vehicle = this.worldMap.getVehicle(vehicleId);
+                    if (!vehicle) {
+                        this.showError("Vehicle not found.");
+                        return;
+                    }
                     if (confirm(`Buy ${vehicle.name} for $${vehicle.price}?`)) {
                         const result = this.worldMap.buyVehicle(vehicleId);
                         if (result.success) {
@@ -406,6 +989,28 @@ export class MainGame {
             this.toggleSound();
         });
 
+        // Music Radio
+        this.initMusicRadio();
+
+        // Research inbox button
+        const researchInboxHandler = () => {
+            if (this.researchInboxUI) {
+                this.researchInboxUI.toggle();
+            } else {
+                this.showToast('Research system not initialized yet', 'warning');
+            }
+        };
+        // Try to attach immediately, and also on DOMContentLoaded if needed
+        const researchInboxBtn = document.getElementById('btn-research-inbox');
+        if (researchInboxBtn) {
+            researchInboxBtn.addEventListener('click', researchInboxHandler);
+        } else {
+            // Button might not exist yet, try again when DOM is ready
+            document.addEventListener('DOMContentLoaded', () => {
+                document.getElementById('btn-research-inbox')?.addEventListener('click', researchInboxHandler);
+            });
+        }
+
         // Shop category buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -461,37 +1066,114 @@ export class MainGame {
         // Auto-save on visibility change
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && this.gameState.isGameStarted) {
-                this.saveManager.saveGame(this.gameState);
+                this.saveManager.saveGame(this.gameState, this.currentSaveSlot);
             }
+        });
+
+        // Listen for promotion events
+        window.addEventListener('promotion', (e) => {
+            const rank = e.detail.rank;
+            this.showToast(`Promoted to ${rank.title}!`, 'success');
+            this.audioManager.play('success');
+            this.uiUpdater.updateAllUI();
         });
     }
 
     /**
-     * Hide loading screen and show the game
+     * Hide loading screen and show the game - Instant, no delays
      */
     showGame() {
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loading-screen');
-            const gameContainer = document.getElementById('game-container');
+        logger.debug('showGame() called');
+        this.showDiagnostic('showGame() called');
+        
+        const loadingScreen = document.getElementById('loading-screen');
+        const gameContainer = document.getElementById('game-container');
 
-            if (loadingScreen) {
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.classList.add('hidden');
-                }, 300);
-            }
+        logger.debug('Loading screen element:', loadingScreen);
+        logger.debug('Game container element:', gameContainer);
 
-            if (gameContainer) {
-                gameContainer.classList.remove('hidden');
+        if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            loadingScreen.classList.add('hidden');
+            logger.debug('Loading screen hidden');
+            this.showDiagnostic('Loading screen hidden');
+        } else {
+            logger.warn('Loading screen element not found!');
+            this.showDiagnostic('ERROR: Loading screen not found!');
+        }
+
+        if (gameContainer) {
+            gameContainer.classList.remove('hidden');
+            logger.debug('Game container shown');
+            this.showDiagnostic('Game container shown - SUCCESS!');
+        } else {
+            logger.warn('Game container element not found!');
+            this.showDiagnostic('ERROR: Game container not found!');
+        }
+        
+        // Update status indicator
+        DOMUtils.updateElement('#js-status-indicator', {
+            innerHTML: 'Game Initialized',
+            style: { background: 'rgba(0,255,0,0.8)' }
+        });
+    }
+    
+    showDiagnostic(message) {
+        let diag = document.getElementById('diagnostic-overlay');
+        if (!diag) {
+            diag = document.createElement('div');
+            diag.id = 'diagnostic-overlay';
+            diag.style.cssText = 'position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.9);color:#0f0;padding:15px;font-family:monospace;font-size:11px;z-index:99998;border:2px solid #0f0;border-radius:5px;max-width:400px;max-height:300px;overflow:auto;';
+            document.body.appendChild(diag);
+        }
+        const time = new Date().toLocaleTimeString();
+        diag.innerHTML += `<div>[${time}] ${message}</div>`;
+        diag.scrollTop = diag.scrollHeight;
+    }
+    
+    showError(message) {
+        logger.error('Game Error:', message);
+        this.showDiagnostic('ERROR: ' + message);
+        const errDiv = DOMUtils.createElement('div', {
+            innerHTML: `<h2>Game Error</h2><p>${message}</p><button onclick="this.parentElement.remove()" style="padding:10px;margin-top:10px;">Close</button>`,
+            style: {
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: 'rgba(255,0,0,0.95)',
+                color: 'white',
+                padding: '20px',
+                fontFamily: 'monospace',
+                zIndex: '99999',
+                border: '3px solid #f00',
+                borderRadius: '10px',
+                maxWidth: '600px'
             }
-        }, 2000); // Show loading screen for 2 seconds
+        });
+        document.body.appendChild(errDiv);
     }
 
     /**
      * Start a new game (optimized for fast loading)
      */
-    startNewGame() {
-        console.log('🚀 Starting new game...');
+    startNewGame(slotIndex = null) {
+        // Use provided slot or find first empty slot, default to 0
+        if (slotIndex === null) {
+            // Find first empty slot
+            for (let i = 0; i < 5; i++) {
+                if (!this.saveManager.hasSave(i)) {
+                    slotIndex = i;
+                    break;
+                }
+            }
+            if (slotIndex === null) {
+                slotIndex = 0; // Default to slot 0 if all are full
+            }
+        }
+        
+        this.currentSaveSlot = slotIndex;
+        console.log('Starting new game...');
         
         // Show loading indicator
         this.showLoadingProgress('Initializing game...', 0);
@@ -500,7 +1182,7 @@ export class MainGame {
             // Reset game state
             this.gameState.reset();
             this.gameState.isGameStarted = true;
-            console.log('DEBUG [startNewGame]: gameState reset');
+            logger.debug('gameState reset');
 
             // CRITICAL SYSTEMS - Load immediately (required for game to start)
             this.showLoadingProgress('Loading core systems...', 10);
@@ -526,7 +1208,7 @@ export class MainGame {
                     this.gameState.worldEventManager = new WorldEventManager(this.gameState);
                     this.gameState.projectSystem = new ProjectSystem(this.gameState);
                 } catch (error) {
-                    console.warn('Error loading medium priority systems:', error);
+                    logger.warn('Error loading medium priority systems:', error);
                 }
             }, 0);
             
@@ -536,9 +1218,10 @@ export class MainGame {
                     this.gameState.aiSystem = new AISystem(this.gameState);
                     this.gameState.hardwareManager = new HardwareManager(this.gameState);
                     this.gameState.contractSystem = new ContractSystem(this.gameState);
-                    this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
+                    // NOTE: mapProgressionSystem is initialized later in startNewGame, don't duplicate here
+                    // this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
                 } catch (error) {
-                    console.warn('Error loading low priority systems:', error);
+                    logger.warn('Error loading low priority systems:', error);
                 }
             }, 100);
             
@@ -560,16 +1243,87 @@ export class MainGame {
             // DEFER ALL OTHER SYSTEMS - Load in background
             setTimeout(() => this.loadDeferredSystems(), 50);
             
-            // Asset systems - Initialize but don't load assets yet
+            // Asset systems - Phase 4: Use PixiJS Assets
             this.showLoadingProgress('Preparing assets...', 70);
+            
+            // Phase 4: Use PixiJS AssetManager (with fallback - lazy load to avoid breaking game)
             this.assetManager = new AssetManager();
             this.gameState.assetManager = this.assetManager;
             
+            // Try to load new managers asynchronously (non-blocking)
+            Promise.all([
+                import('./assets/PixiAssetManager.js').catch(() => null),
+                import('./assets/PixiSpriteManager.js').catch(() => null),
+                import('./interaction/InteractionManager.js').catch(() => null),
+                import('./ui/TooltipManager.js').catch(() => null)
+            ]).then(([PixiAssetManagerModule, PixiSpriteManagerModule, InteractionManagerModule, TooltipManagerModule]) => {
+                // Initialize PixiAssetManager if available
+                if (PixiAssetManagerModule?.PixiAssetManager) {
+                    try {
+                        this.pixiAssetManager = new PixiAssetManagerModule.PixiAssetManager();
+                        this.gameState.pixiAssetManager = this.pixiAssetManager;
+                    } catch (error) {
+                        logger.warn('PixiAssetManager initialization failed:', error);
+                    }
+                }
+                
+                // Initialize PixiSpriteManager if available
+                if (PixiSpriteManagerModule?.PixiSpriteManager) {
+                    try {
+                        this.pixiSpriteManager = new PixiSpriteManagerModule.PixiSpriteManager();
+                        this.gameState.pixiSpriteManager = this.pixiSpriteManager;
+                    } catch (error) {
+                        logger.warn('PixiSpriteManager initialization failed:', error);
+                    }
+                }
+                
+                // Initialize InteractionManager if available
+                if (InteractionManagerModule?.InteractionManager) {
+                    try {
+                        this.interactionManager = new InteractionManagerModule.InteractionManager();
+                        this.gameState.interactionManager = this.interactionManager;
+                    } catch (error) {
+                        logger.warn('InteractionManager initialization failed:', error);
+                    }
+                }
+                
+                // Initialize TooltipManager if available
+                if (TooltipManagerModule?.TooltipManager) {
+                    try {
+                        this.tooltipManager = new TooltipManagerModule.TooltipManager();
+                        this.gameState.tooltipManager = this.tooltipManager;
+                    } catch (error) {
+                        logger.warn('TooltipManager initialization failed:', error);
+                    }
+                }
+            }).catch(error => {
+                logger.warn('Phase 4 managers failed to load (non-critical):', error);
+            });
+            
+            // Keep old SpriteSheetManager for compatibility
             this.spriteSheetManager = new SpriteSheetManager();
             this.gameState.spriteSheetManager = this.spriteSheetManager;
             
-            this.animatedCharacterRenderer = new AnimatedCharacterRenderer(this.spriteSheetManager);
+            // Particle effects will be initialized when PixiJS app is ready
+            this.particleEffectManager = null;
+            
+            // Use PixiSpriteManager if available, fallback to legacy SpriteSheetManager
+            const spriteManager = this.pixiSpriteManager || this.spriteSheetManager;
+            this.animatedCharacterRenderer = new AnimatedCharacterRenderer(spriteManager);
             this.gameState.animatedCharacterRenderer = this.animatedCharacterRenderer;
+            
+            // Initialize filter manager
+            import('./visual/FilterManager.js').then(({ FilterManager }) => {
+                try {
+                    this.filterManager = new FilterManager();
+                    this.filterManager.initialize();
+                    this.gameState.filterManager = this.filterManager;
+                } catch (error) {
+                    logger.warn('FilterManager initialization failed:', error);
+                }
+            }).catch(error => {
+                logger.warn('FilterManager not available:', error);
+            });
             
             this.characterAnimationSystem = new CharacterAnimationSystem(this.assetManager);
             this.gameState.characterAnimationSystem = this.characterAnimationSystem;
@@ -578,16 +1332,35 @@ export class MainGame {
             this.gameState.locationView = this.locationView;
             
             // Load assets in background (non-blocking, low priority)
-            setTimeout(() => {
-                this.assetManager.loadAll().then(success => {
-                    if (success) {
-                        console.log('Assets loaded successfully');
-                    } else {
-                        console.warn('Some assets failed to load, using fallbacks');
+            // Phase 4: Try PixiJS Assets first, fallback to old AssetManager
+            setTimeout(async () => {
+                if (this.pixiAssetManager) {
+                    try {
+                        const manifest = this.assetManager.getAssetManifest();
+                        await this.pixiAssetManager.init(manifest);
+                        await this.pixiAssetManager.loadAll();
+                        logger.info('Assets loaded successfully (PixiJS)');
+                    } catch (error) {
+                        logger.warn('PixiJS Assets failed, using fallback:', error);
+                        // Fallback to old AssetManager
+                        this.assetManager.loadAll().then(success => {
+                            if (success) {
+                                logger.info('Assets loaded successfully (fallback)');
+                            }
+                        }).catch(err => {
+                            logger.warn('Asset loading error:', err);
+                        });
                     }
-                }).catch(err => {
-                    console.warn('Asset loading error (using fallbacks):', err);
-                });
+                } else {
+                    // Fallback to old AssetManager
+                    this.assetManager.loadAll().then(success => {
+                        if (success) {
+                            logger.info('Assets loaded successfully');
+                        }
+                    }).catch(err => {
+                        logger.warn('Asset loading error:', err);
+                    });
+                }
             }, 500);
             
             // Make game accessible globally for intro callbacks
@@ -601,49 +1374,65 @@ export class MainGame {
             this.gameState.worldEvolutionSystem = new WorldEvolutionSystem(this.gameState);
             this.gameState.investmentEcommerceSystem = new InvestmentEcommerceSystem(this.gameState);
             this.gameState.storylineManager = new StorylineManager(this.gameState);
+            this.gameState.storyBeatsSystem = new StoryBeatsSystem(this.gameState);
+            this.gameState.characterArcSystem = new CharacterArcSystem(this.gameState);
+            this.gameState.npcMemorySystem = new NPCMemorySystem(this.gameState);
             this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
             this.gameState.ideSystem = new IDESystem(this.gameState);
             this.gameState.locationBackgroundSystem = new LocationBackgroundSystem(this.gameState);
             this.gameState.weeklyNewsSystem = new WeeklyNewsSystem(this.gameState);
             this.gameState.screenThemeManager = new ScreenThemeManager();
             this.gameState.mapCoordinateSystem = new MapCoordinateSystem();
+            this.gameState.gameEndingSystem = new GameEndingSystem(this.gameState);
+            this.gameState.gameEndingSystem.gameState.mainGame = this;
+            this.gameState.narrativeClaritySystem = new NarrativeClaritySystem(this.gameState);
             
             // DEFER Phase 1 Visual Systems - Load in background
             setTimeout(() => {
                 try {
                     this.gameState.visualSystem = new VisualSystem(this.gameState);
-                    this.gameState.animationManager = new AnimationManager();
+                    // Phase 3: Use GSAP instead of custom AnimationManager
+                    this.gameState.animationManager = new GSAPAnimationManager();
+                    // Also store as gsapAnimator for easy access
+                    this.gameState.gsapAnimator = this.gameState.animationManager;
+                    // Phase 4: Initialize particle effects (will be set up when PixiJS app is ready)
+                    this.gameState.particleEffectManager = null;
                     this.gameState.performanceManager = new PerformanceManager();
                     this.gameState.uiLayerManager = new UILayerManager();
+                    
+                    // Register visual subsystems (moved inside setTimeout to avoid null reference)
+                    if (this.gameState.visualSystem && this.gameState.animationManager) {
+                        this.gameState.visualSystem.registerRenderer('animation', this.gameState.animationManager);
+                    }
+                    
+                    // Detect hardware and set quality (moved inside setTimeout to avoid null reference)
+                    if (this.gameState.performanceManager) {
+                        try {
+                            this.gameState.performanceManager.detectHardware();
+                            // Start monitoring after a short delay to ensure game loop is running
+                            setTimeout(() => {
+                                if (this.gameState.performanceManager) {
+                                    this.gameState.performanceManager.startMonitoring();
+                                }
+                            }, 100);
+                        } catch (error) {
+                            logger.warn('Performance manager initialization failed:', error);
+                        }
+                    }
                 } catch (error) {
-                    console.warn('Error loading visual systems:', error);
+                    logger.warn('Error loading visual systems:', error);
                 }
             }, 300);
-            
-            // Register visual subsystems
-            this.gameState.visualSystem.registerRenderer('animation', this.gameState.animationManager);
-            
-            // Detect hardware and set quality
-            try {
-                this.gameState.performanceManager.detectHardware();
-                // Start monitoring after a short delay to ensure game loop is running
-                setTimeout(() => {
-                    if (this.gameState.performanceManager) {
-                        this.gameState.performanceManager.startMonitoring();
-                    }
-                }, 100);
-            } catch (error) {
-                console.warn('Performance manager initialization failed:', error);
-            }
             
             // Link mainGame reference for systems that need it
             this.gameState.mainGame = this;
             
-            console.log('DEBUG [startNewGame]: all systems initialized');
+            logger.debug('[startNewGame]: all systems initialized');
 
             // Link managers to main class for easy access
             this.characterStats = this.gameState.characterStats;
             this.timeManager = this.gameState.timeManager;
+            this.economySystem = this.gameState.economySystem;
             this.worldMap = this.gameState.worldMap;
             this.npcManager = this.gameState.npcManager;
             this.newsManager = this.gameState.newsManager;
@@ -667,7 +1456,8 @@ export class MainGame {
             this.worldEvolutionSystem = this.gameState.worldEvolutionSystem;
             this.investmentEcommerceSystem = this.gameState.investmentEcommerceSystem;
             this.storylineManager = this.gameState.storylineManager;
-            this.mapProgressionSystem = this.gameState.mapProgressionSystem;
+            this.storyBeatsSystem = this.gameState.storyBeatsSystem;
+            // NOTE: mapProgressionSystem already linked above, don't duplicate
             this.ideSystem = this.gameState.ideSystem;
             this.locationBackgroundSystem = this.gameState.locationBackgroundSystem;
             this.weeklyNewsSystem = this.gameState.weeklyNewsSystem;
@@ -677,7 +1467,16 @@ export class MainGame {
             // Link Phase 1 Visual Systems
             this.visualSystem = this.gameState.visualSystem;
             this.animationManager = this.gameState.animationManager;
+            // Phase 3: Also expose as gsapAnimator for easy access
+            this.gsapAnimator = this.gameState.gsapAnimator || this.gameState.animationManager;
+            // Phase 4: Use PixiJS AssetManager (with fallback - may be undefined if lazy load failed)
+            this.pixiAssetManager = this.gameState.pixiAssetManager || null;
             this.assetManager = this.gameState.assetManager;
+            this.pixiSpriteManager = this.gameState.pixiSpriteManager || null;
+            this.spriteSheetManager = this.gameState.spriteSheetManager;
+            // Phase 4: Interaction and tooltip managers (may be undefined if lazy load failed)
+            this.interactionManager = this.gameState.interactionManager || null;
+            this.tooltipManager = this.gameState.tooltipManager || null;
             this.performanceManager = this.gameState.performanceManager;
             this.uiLayerManager = this.gameState.uiLayerManager;
             
@@ -685,7 +1484,31 @@ export class MainGame {
             // Camera will be initialized in updateMapScreen() when needed
             
             // Initialize storyline
-            this.storylineManager.initialize();
+            if (this.storylineManager) {
+                this.storylineManager.initialize();
+            } else {
+                logger.warn('StorylineManager not initialized, skipping initialization');
+            }
+            
+            // Initialize story beats system
+            if (this.storyBeatsSystem) {
+                this.storyBeatsSystem.initialize();
+            }
+            
+            // Initialize character arc system
+            if (this.characterArcSystem) {
+                this.characterArcSystem.initialize();
+            }
+            
+            // Initialize NPC memory system
+            if (this.npcMemorySystem) {
+                this.npcMemorySystem.initialize();
+            }
+            
+            // Initialize story UI
+            if (this.storyUI) {
+                this.storyUI.initialize();
+            }
             
             // Initialize map coordinate system with existing locations
             if (this.worldMap) {
@@ -693,9 +1516,9 @@ export class MainGame {
                 this.mapCoordinateSystem.initializeWithLocations(locations);
             }
             
-            console.log('DEBUG [startNewGame]: managers linked');
+            logger.debug('[startNewGame]: managers linked');
             this.showLoadingProgress('Ready!', 100);
-            console.log('DEBUG [startNewGame]: core systems initialized, showing intro');
+            logger.debug('[startNewGame]: core systems initialized, showing intro');
             
             // Hide loading, show intro
             setTimeout(() => {
@@ -704,8 +1527,8 @@ export class MainGame {
                 this.introSystem.showIntro();
             }, 100);
         } catch (error) {
-            console.error('❌ startNewGame ERROR:', error);
-            console.error('Stack:', error.stack);
+            logger.error(' startNewGame ERROR:', error);
+            logger.error('Stack:', error.stack);
             this.showError('Failed to start game. Please refresh the page.');
         }
     }
@@ -716,38 +1539,76 @@ export class MainGame {
      */
     finishGameStart() {
         try {
-            console.log('DEBUG [finishGameStart]: completing game initialization');
+                logger.debug('[finishGameStart]: completing game initialization');
             
             // Generate first task
+            if (!this.taskSystem) {
+                throw new Error('TaskSystem not initialized');
+            }
             this.taskSystem.generateNewTask();
-            console.log('DEBUG [finishGameStart]: first task generated');
+                logger.debug('[finishGameStart]: first task generated');
+            
+            // Update task display
+            if (this.uiUpdater) {
+                this.uiUpdater.updateTaskDisplay();
+            }
 
             // Generate initial news
-            this.newsManager.generateDailyNews();
-            console.log('DEBUG [finishGameStart]: news generated');
+            if (!this.newsManager) {
+                logger.warn('NewsManager not initialized, skipping news generation');
+            } else {
+                this.newsManager.generateDailyNews();
+                logger.debug('[finishGameStart]: news generated');
+            }
 
             // Update UI
-            this.uiUpdater.updateAllUI();
-            console.log('DEBUG [finishGameStart]: UI updated');
+            if (!this.uiUpdater) {
+                logger.warn('UIUpdater not initialized');
+            } else {
+                this.uiUpdater.updateAllUI();
+                logger.debug('[finishGameStart]: UI updated');
+            }
 
-            this.updateMapScreen();
-            console.log('DEBUG [finishGameStart]: map updated');
+            if (this.worldMap) {
+                this.updateMapScreen();
+                logger.debug('[finishGameStart]: map updated');
+            } else {
+                logger.warn('WorldMap not initialized, skipping map update');
+            }
 
             // Update environment
-            this.environmentManager.updateLocation();
-            console.log('DEBUG [finishGameStart]: environment updated');
+            if (this.environmentManager) {
+                this.environmentManager.updateLocation();
+                logger.debug('[finishGameStart]: environment updated');
+            } else {
+                logger.warn('EnvironmentManager not initialized');
+            }
 
             // Show map screen as main area
-            this.screenManager.showScreen('screen-game');
-            console.log('DEBUG [finishGameStart]: showScreen called (map)');
+            if (this.screenManager) {
+                this.screenManager.showScreen('screen-game');
+                logger.debug('[finishGameStart]: showScreen called (map)');
+            } else {
+                logger.error('ScreenManager not initialized');
+            }
 
             // Play sound
-            this.audioManager.play('start');
+            if (this.audioManager) {
+                this.audioManager.play('start');
+            }
 
             // Show toast with job info
             const job = this.gameState.currentJob;
             if (job) {
                 this.showToast(`Day 1 at ${job.company}. Let's do this!`, 'success');
+                
+                // Check for story beat (first job)
+                if (this.storyBeatsSystem) {
+                    const beat = this.storyBeatsSystem.getBeat('first_job');
+                    if (beat) {
+                        this.handleStoryBeat(beat);
+                    }
+                }
             } else {
                 this.showToast('Welcome to your new career!', 'success');
             }
@@ -755,12 +1616,12 @@ export class MainGame {
             // Start game loop
             if (!this.gameLoopId) {
                 this.gameLoopId = requestAnimationFrame(this.gameLoop);
-                console.log('DEBUG [finishGameStart]: Game loop started');
+                logger.debug('[finishGameStart]: Game loop started');
             }
             
-            console.log('DEBUG [finishGameStart]: COMPLETE');
+            logger.debug('[finishGameStart]: COMPLETE');
         } catch (error) {
-            console.error('❌ finishGameStart ERROR:', error);
+            logger.error('finishGameStart ERROR:', error);
             this.showError('Failed to start game. Please refresh.');
         }
     }
@@ -769,7 +1630,7 @@ export class MainGame {
      * Continue saved game
      */
     continueGame() {
-        console.log('💼 Continuing saved game...');
+        logger.debug('Continuing saved game...');
 
         // Initialize RPG systems if they don't exist (migration)
         if (!this.gameState.characterStats) this.gameState.characterStats = new CharacterStats();
@@ -870,8 +1731,8 @@ export class MainGame {
         // Link specific bank state if needed, but BankSystem constructor uses gameState directly
 
         // Reload save data now that subsystems are initialized
-        console.log("DEBUG: Reloading save data for subsystems...");
-        this.saveManager.loadGame(this.gameState);
+        logger.debug("Reloading save data for subsystems...");
+        this.saveManager.loadGame(this.gameState, this.currentSaveSlot);
 
         // Generate a new task if none exists
         if (!this.gameState.currentTask) {
@@ -891,7 +1752,7 @@ export class MainGame {
         // Start game loop if not already running
         if (!this.gameLoopId) {
             this.gameLoopId = requestAnimationFrame(this.gameLoop);
-            console.log('DEBUG [continueGame]: Game loop started');
+            logger.debug('[continueGame]: Game loop started');
         }
 
         // Show toast
@@ -962,55 +1823,8 @@ export class MainGame {
         ProjectHelpers.updateStatsScreen(this);
     }
 
-    // Updated time advance to update market
-    handleTimeAdvance(hours) {
-        if (!this.timeManager) return;
-
-        const dayBefore = this.timeManager.totalDays;
-        this.timeManager.advanceTime(hours);
-        const dayAfter = this.timeManager.totalDays;
-
-        // New Day Check for RPG systems
-        if (dayAfter > dayBefore) {
-            // New Day Logic
-            this.showToast('A new day has begun!', 'info');
-
-            // 1. News
-            this.newsManager.generateDailyNews();
-            const dailyNews = this.newsManager.getRecentNews(3);
-
-            // 2. World Events
-            if (this.worldEventManager) {
-                this.worldEventManager.processDay();
-            }
-
-            // 3. Stock Market
-            if (this.stockMarket) {
-                this.stockMarket.update(dailyNews);
-            }
-
-            // 4. Expenses
-            // Marketing
-            if (this.gameState.dailyMarketingCost) {
-                this.gameState.money -= this.gameState.dailyMarketingCost;
-            }
-            // Salaries
-            if (this.gameState.staff) {
-                const salaries = this.gameState.staff.reduce((sum, s) => sum + (s.salary || 0), 0);
-                this.gameState.money -= salaries;
-            }
-
-            if (this.gameState.money < 0) {
-                this.showToast('Warning: You are in debt!', 'warning');
-            }
-
-            // 5. Character Evolution Check
-            this.checkForCharacterEvolution();
-        }
-
-        this.updateMapScreen(); // Update visuals
-        this.uiUpdater.updateAllUI(); // Update money/date
-    }
+    // NOTE: handleTimeAdvance is defined later in the file (line ~1595)
+    // This duplicate definition has been removed to prevent method override bugs
 
     /**
      * Open the chart studio
@@ -1047,7 +1861,9 @@ export class MainGame {
         this.updateChartPreview();
 
         // Play sound
-        this.audioManager.play('click');
+        if (this.audioManager) {
+            this.audioManager.play('click');
+        }
     }
 
     /**
@@ -1094,7 +1910,17 @@ export class MainGame {
      * Submit the chart for boss review
      */
     submitChart() {
-        console.log('📤 Submitting chart for review...');
+        console.log(' Submitting chart for review...');
+
+        if (!this.economySystem) {
+            this.showError('Economy system not initialized. Please refresh the page.');
+            return;
+        }
+
+        if (!this.gameState.currentTask) {
+            this.showError('No task available. Please start a new game.');
+            return;
+        }
 
         // Calculate score
         const score = this.economySystem.evaluateChart(
@@ -1120,18 +1946,19 @@ export class MainGame {
      */
     animateReview(score) {
         const bossReactions = {
-            1: { emoji: '😠', text: "This is completely wrong! Did you even look at the data?" },
-            2: { emoji: '😕', text: "I expected better. This needs a lot of work." },
-            3: { emoji: '😐', text: "It's okay, but nothing special. Keep practicing." },
-            4: { emoji: '😊', text: "Good job! This clearly shows the trends." },
-            5: { emoji: '🤩', text: "Excellent work! This is exactly what I needed!" }
+            1: { text: "This is completely wrong! Did you even look at the data?" },
+            2: { text: "I expected better. This needs a lot of work." },
+            3: { text: "It's okay, but nothing special. Keep practicing." },
+            4: { text: "Good job! This clearly shows the trends." },
+            5: { text: "Excellent work! This is exactly what I needed!" }
         };
 
         const reaction = bossReactions[score.stars] || bossReactions[3];
 
         // Animate feedback
         setTimeout(() => {
-            document.getElementById('reaction-emoji').textContent = reaction.emoji;
+            const emojiEl = document.getElementById('reaction-emoji');
+            if (emojiEl) emojiEl.textContent = '';
             document.getElementById('boss-feedback').querySelector('.feedback-text').textContent = reaction.text;
         }, 500);
 
@@ -1141,10 +1968,10 @@ export class MainGame {
         stars.forEach((star, i) => {
             setTimeout(() => {
                 if (i < score.stars) {
-                    star.textContent = '★';
+                    star.textContent = '';
                     star.classList.add('filled');
                 } else {
-                    star.textContent = '☆';
+                    star.textContent = '';
                     star.classList.remove('filled');
                 }
             }, 800 + (i * 200));
@@ -1166,12 +1993,64 @@ export class MainGame {
             // Apply rewards to game state
             this.gameState.money += score.moneyEarned;
             this.gameState.reputation += score.repEarned;
+            
+            // Show money particle effect if significant amount
+            if (score.moneyEarned > 100 && this.unifiedMapSystem?.particleManager) {
+                // Get screen center or task completion location
+                const screenCenterX = window.innerWidth / 2;
+                const screenCenterY = window.innerHeight / 2;
+                this.unifiedMapSystem.particleManager.createMoneyEffect(
+                    screenCenterX,
+                    screenCenterY,
+                    score.moneyEarned
+                );
+            }
+            const oldTaskCount = this.gameState.tasksCompleted || 0;
             this.gameState.tasksCompleted++;
             this.gameState.totalEarned += score.moneyEarned;
             this.gameState.weeklyIncome += score.moneyEarned; // Track for taxes
 
+            // Check for story beats (task completion)
+            if (this.storyBeatsSystem && oldTaskCount === 0) {
+                const beat = this.storyBeatsSystem.getBeat('first_task_complete');
+                if (beat) {
+                    this.handleStoryBeat(beat);
+                }
+            }
+
             // Check for promotion
-            this.economySystem.checkPromotion();
+            if (this.economySystem) {
+                const oldRank = this.gameState.rankIndex;
+                const promoted = this.economySystem.checkPromotion();
+                if (promoted) {
+                    const newRank = this.gameState.currentRank;
+                    this.showToast(`PROMOTED to ${newRank.title}!`, 'success');
+                    this.audioManager.play('success');
+                    this.uiUpdater.updateAllUI();
+                    
+                    // Check for story beats (promotion)
+                    if (this.storyBeatsSystem) {
+                        if (oldRank === 0) {
+                            const beat = this.storyBeatsSystem.getBeat('first_promotion');
+                            if (beat) this.handleStoryBeat(beat);
+                        }
+                        // Check for other promotion beats
+                        const newRankIndex = this.gameState.rankIndex;
+                        if (newRankIndex >= 2 && newRankIndex < 3) {
+                            const beat = this.storyBeatsSystem.getBeat('mid_career');
+                            if (beat) this.handleStoryBeat(beat);
+                        }
+                        if (newRankIndex >= 4 && newRankIndex < 5) {
+                            const beat = this.storyBeatsSystem.getBeat('senior_position');
+                            if (beat) this.handleStoryBeat(beat);
+                        }
+                        if (newRankIndex >= 6) {
+                            const beat = this.storyBeatsSystem.getBeat('final_rank');
+                            if (beat) this.handleStoryBeat(beat);
+                        }
+                    }
+                }
+            }
 
             // Update top bar
             this.uiUpdater.updateTopBar();
@@ -1200,6 +2079,7 @@ export class MainGame {
 
         // Update UI
         this.uiUpdater.updateTaskDisplay();
+        this.uiUpdater.updateAllUI();
 
         // Show game screen
         this.screenManager.showScreen('screen-game');
@@ -1211,40 +2091,40 @@ export class MainGame {
     showTutorial() {
         const modalContent = `
             <div class="tutorial-modal">
-                <h2>📚 How to Play</h2>
+                <h2>How to Play</h2>
                 <div class="tutorial-steps">
                     <div class="tutorial-step">
                         <span class="step-number">1</span>
                         <div class="step-content">
-                            <h4>📋 Get Your Task</h4>
+                            <h4> Get Your Task</h4>
                             <p>Your boss will give you data and specific requirements for a visualization.</p>
                         </div>
                     </div>
                     <div class="tutorial-step">
                         <span class="step-number">2</span>
                         <div class="step-content">
-                            <h4>📊 Analyze the Data</h4>
+                            <h4>Analyze the Data</h4>
                             <p>Look at the data table and understand what story it tells.</p>
                         </div>
                     </div>
                     <div class="tutorial-step">
                         <span class="step-number">3</span>
                         <div class="step-content">
-                            <h4>🎨 Create Your Chart</h4>
+                            <h4>Create Your Chart</h4>
                             <p>Choose the right chart type and customize it to clearly present the data.</p>
                         </div>
                     </div>
                     <div class="tutorial-step">
                         <span class="step-number">4</span>
                         <div class="step-content">
-                            <h4>⭐ Get Rated</h4>
+                            <h4>Get Rated</h4>
                             <p>Your boss will rate your work. Better ratings mean more money and reputation!</p>
                         </div>
                     </div>
                     <div class="tutorial-step">
                         <span class="step-number">5</span>
                         <div class="step-content">
-                            <h4>📈 Climb the Ladder</h4>
+                            <h4>Climb the Ladder</h4>
                             <p>Earn reputation to get promoted. Unlock new chart types and tools in the shop!</p>
                         </div>
                     </div>
@@ -1257,12 +2137,40 @@ export class MainGame {
     }
 
     /**
+     * Show credits modal
+     */
+    showCredits() {
+        const modalContent = `
+            <div class="credits-modal">
+                <h2>Credits</h2>
+                <div class="credits-content">
+                    <div class="credits-section">
+                        <h3>Data Science Tycoon</h3>
+                        <p>A game about climbing the corporate ladder through data visualization mastery.</p>
+                    </div>
+                    <div class="credits-section">
+                        <h3>Version 1.0.0</h3>
+                        <p>Built with passion for data science enthusiasts.</p>
+                    </div>
+                    <div class="credits-section">
+                        <h3>Technologies</h3>
+                        <p>Vanilla JavaScript • Chart.js • CSS3 • WebAssembly</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="game.closeModal()">Close</button>
+            </div>
+        `;
+
+        this.showModal(modalContent);
+    }
+
+    /**
      * Show settings modal
      */
     showSettings() {
         const modalContent = `
             <div class="settings-modal">
-                <h2>⚙️ Settings</h2>
+                <h2>Settings</h2>
                 <div class="settings-options">
                     <div class="option-group">
                         <label>Sound Effects</label>
@@ -1295,7 +2203,66 @@ export class MainGame {
     toggleSound() {
         this.audioManager.toggleSound();
         const btn = document.getElementById('btn-sound');
-        btn.textContent = this.audioManager.soundEnabled ? '🔊' : '🔇';
+        btn.textContent = this.audioManager.soundEnabled ? '' : '';
+    }
+
+    /**
+     * Initialize music radio interface
+     */
+    initMusicRadio() {
+        const radioBtn = document.getElementById('btn-music-radio');
+        const radioMenu = document.getElementById('music-radio-menu');
+        const radioStations = radioMenu?.querySelectorAll('.radio-station');
+
+        if (!radioBtn || !radioMenu) return;
+
+        // Toggle menu visibility
+        radioBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            radioMenu.classList.toggle('hidden');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!radioBtn.contains(e.target) && !radioMenu.contains(e.target)) {
+                radioMenu.classList.add('hidden');
+            }
+        });
+
+        // Handle station selection
+        radioStations?.forEach(station => {
+            station.addEventListener('click', () => {
+                const stationId = station.dataset.station;
+                this.switchMusicStation(stationId);
+                this.updateRadioUI();
+                radioMenu.classList.add('hidden');
+            });
+        });
+
+        // Initialize UI
+        this.updateRadioUI();
+    }
+
+    /**
+     * Switch music station
+     */
+    switchMusicStation(stationId) {
+        this.audioManager.switchStation(stationId);
+    }
+
+    /**
+     * Update radio UI to reflect current station
+     */
+    updateRadioUI() {
+        const radioStations = document.querySelectorAll('.radio-station');
+        const currentStation = this.audioManager.currentStation;
+
+        radioStations.forEach(station => {
+            station.classList.remove('active');
+            if (station.dataset.station === currentStation) {
+                station.classList.add('active');
+            }
+        });
     }
 
     /**
@@ -1303,7 +2270,7 @@ export class MainGame {
      */
     resetProgress() {
         if (confirm('Are you sure? This will delete all your progress!')) {
-            this.saveManager.clearSave();
+            this.saveManager.clearSave(this.currentSaveSlot);
             this.gameState.reset();
             this.closeModal();
             this.screenManager.showScreen('screen-menu');
@@ -1349,26 +2316,52 @@ export class MainGame {
             'senior': 5000,
             'expert': 15000
         };
-        // ... rest of logic
+        
+        const cost = staffCosts[role];
+        if (!cost) {
+            this.showError('Invalid staff role');
+            return;
+        }
+        
+        if (this.gameState.money < cost) {
+            this.showError(`Not enough money! Need $${cost.toLocaleString()}`);
+            return;
+        }
+        
+        // Deduct cost and show success
+        this.gameState.money -= cost;
+        this.uiUpdater.updateAllUI();
+        this.showToast(`Hired ${role} staff member!`, 'success');
     }
 
     /**
      * Show toast notification
      */
     showToast(message, type = 'success') {
+        // Guard against undefined messages
+        if (!message || message === undefined || message === 'undefined') {
+            logger.warn('showToast called with undefined message');
+            return;
+        }
+
         const container = document.getElementById('toast-container');
+        if (!container) {
+            logger.warn('Toast container not found');
+            return;
+        }
 
         const icons = {
-            success: '✅',
-            warning: '⚠️',
-            error: '❌'
+            success: 'Success',
+            warning: 'Warning',
+            error: 'Error',
+            info: 'Info'
         };
 
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         toast.innerHTML = `
-            <span class="toast-icon">${icons[type]}</span>
-            <span class="toast-message">${message}</span>
+            <span class="toast-icon">${icons[type] || ''}</span>
+            <span class="toast-message">${String(message)}</span>
         `;
 
         container.appendChild(toast);
@@ -1384,7 +2377,11 @@ export class MainGame {
      * Show error message
      */
     showError(message) {
-        this.showToast(message, 'error');
+        if (!message || message === undefined || message === 'undefined') {
+            logger.warn('showError called with undefined message');
+            return;
+        }
+        this.showToast(String(message), 'error');
     }
 
     /**
@@ -1402,6 +2399,60 @@ export class MainGame {
             this.uiUpdater.updateTopBar(); // Update money
         } else {
             this.showToast(result.message, 'error');
+            this.audioManager.play('error');
+        }
+    }
+
+    /**
+     * Handle office upgrade
+     */
+    handleUpgradeOffice() {
+        const officePrices = [0, 5000, 15000, 50000, 200000, 1000000];
+        const currentOffice = this.gameState.officeIndex || 0;
+        const nextOfficePrice = officePrices[currentOffice + 1];
+
+        if (!nextOfficePrice) {
+            this.showError('Office is already maxed out!');
+            return;
+        }
+
+        if (this.gameState.money < nextOfficePrice) {
+            this.showError(`Not enough money! Need $${nextOfficePrice.toLocaleString()}`);
+            return;
+        }
+
+        this.gameState.money -= nextOfficePrice;
+        this.gameState.officeIndex = currentOffice + 1;
+
+        this.showToast(`Office upgraded!`, 'success');
+        this.audioManager.play('kaching');
+        this.updateOfficeScreen();
+        this.uiUpdater.updateAllUI();
+    }
+
+    /**
+     * Purchase a shop item
+     */
+    purchaseItem(itemId) {
+        const item = SHOP_ITEMS.find(i => i.id === itemId);
+        
+        if (!item) {
+            this.showError('Item not found');
+            return;
+        }
+
+        const success = this.gameState.purchaseItem(item);
+        if (success) {
+            this.showToast(`Purchased ${item.name}!`, 'success');
+            this.audioManager.play('kaching');
+            this.uiUpdater.updateShopScreen();
+            this.uiUpdater.updateAllUI();
+        } else {
+            if (!this.gameState.canAfford(item.price)) {
+                this.showError('Not enough money!');
+            } else {
+                this.showError('Item already owned or cannot be purchased');
+            }
             this.audioManager.play('error');
         }
     }
@@ -1430,9 +2481,12 @@ export class MainGame {
         const activeCount = this.gameState.activeJobs?.length || 0;
         const completedCount = this.gameState.completedJobs || 0;
 
-        document.getElementById('pending-jobs-count').textContent = pendingCount;
-        document.getElementById('active-jobs-count').textContent = activeCount;
-        document.getElementById('completed-jobs-count').textContent = completedCount;
+        const pendingEl = document.getElementById('pending-jobs-count');
+        const activeEl = document.getElementById('active-jobs-count');
+        const completedEl = document.getElementById('completed-jobs-count');
+        if (pendingEl) pendingEl.textContent = pendingCount;
+        if (activeEl) activeEl.textContent = activeCount;
+        if (completedEl) completedEl.textContent = completedCount;
 
         // Update client badge on nav
         const badge = document.getElementById('clients-badge');
@@ -1477,13 +2531,7 @@ export class MainGame {
         MapHelpers.updateMapScreen(this);
     }
 
-    renderMapBuildings() {
-        MapHelpers.renderMapBuildings(this);
-    }
-
-    renderNPCHouses() {
-        MapHelpers.renderNPCHouses(this);
-    }
+    // Map rendering handled by SimpleMapRenderer - no separate building/house rendering needed
 
     handleBuyLicense(licenseId) {
         EducationHelpers.handleBuyLicense(this, licenseId);
@@ -1528,6 +2576,9 @@ export class MainGame {
     }
 
     handleTimeAdvance(slots) {
+        if (!this.timeManager) {
+            return;
+        }
         if (slots <= 0) return;
 
         const events = this.timeManager.advanceTime(slots);
@@ -1535,18 +2586,27 @@ export class MainGame {
         // Handle events (new day, etc)
         events.forEach(event => {
             if (event.type === 'new_day') {
-                this.newsManager.generateDailyNews();
+                if (!this.newsManager) {
+                } else {
+                    this.newsManager.generateDailyNews();
+                }
                 this.showToast('A new day has begun!', 'info');
 
                 // Expenses
-                const { expenses } = this.gameState.economySystem.processDailyFinances();
-                // Salaries
-                const salaries = (this.gameState.staff || []).reduce((sum, s) => sum + (s.salary || 0), 0);
-                this.gameState.money -= salaries;
+                if (this.gameState.economySystem) {
+                    const { expenses } = this.gameState.economySystem.processDailyFinances();
+                    // Salaries
+                    const salaries = (this.gameState.staff || []).reduce((sum, s) => sum + (s.salary || 0), 0);
+                    this.gameState.money -= salaries;
 
-                if (expenses > 0) {
-                    // Don't toast every day for small expenses, maybe log it or update a ticker?
-                    // For now, let's just silently deduct or show if significant
+                    if (expenses > 0) {
+                        // Don't toast every day for small expenses, maybe log it or update a ticker?
+                        // For now, let's just silently deduct or show if significant
+                    }
+                } else {
+                    // Fallback if economySystem not initialized
+                    const salaries = (this.gameState.staff || []).reduce((sum, s) => sum + (s.salary || 0), 0);
+                    this.gameState.money -= salaries;
                 }
 
                 if (this.gameState.money < 0) {
@@ -1558,7 +2618,7 @@ export class MainGame {
 
                 // Calculate and deduct taxes based on previous week's income
                 const weeklyIncome = this.gameState.weeklyIncome || 0;
-                if (weeklyIncome > 0) {
+                if (weeklyIncome > 0 && this.economySystem) {
                     const tax = this.economySystem.calculateTax(weeklyIncome);
                     if (tax > 0) {
                         this.gameState.money -= tax;
@@ -1583,13 +2643,130 @@ export class MainGame {
                 this.showToast(`Paid weekly rent: -$${rent}`, 'warning');
                 this.audioManager.play('kaching'); // Or a sad sound?
 
+                // Check for story beat (first rent payment)
+                if (this.storyBeatsSystem) {
+                    const timeManager = this.gameState.timeManager;
+                    const weeks = timeManager ? Math.floor((timeManager.totalDays || 0) / 7) : 0;
+                    if (weeks === 1) {
+                        const beat = this.storyBeatsSystem.getBeat('rent_due_first');
+                        if (beat) {
+                            this.handleStoryBeat(beat);
+                        }
+                    }
+                }
+
                 if (this.gameState.money < -1000) {
                     this.showToast('CRITICAL: Eviction imminent! Earn money fast!', 'error');
+                }
+
+                // Check for game ending conditions
+                if (this.gameState.gameEndingSystem) {
+                    const ending = this.gameState.gameEndingSystem.checkVictoryConditions();
+                    if (ending) {
+                        this.gameState.gameEndingSystem.triggerEnding(ending);
+                    }
                 }
             }
         });
 
+        this.updateMapScreen(); // Update visuals
         this.uiUpdater.updateAllUI(); // Money updated
+    }
+
+    /**
+     * Show game ending screen
+     */
+    showGameEnding(endingData) {
+        if (!endingData) return;
+
+        // Create ending modal
+        const modal = document.createElement('div');
+        modal.id = 'game-ending-modal';
+        modal.className = 'modal active';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        `;
+
+        const stats = this.gameState.gameEndingSystem?.getEndingStats() || {};
+
+        modal.innerHTML = `
+            <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 40px; border-radius: 20px; max-width: 600px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                <h1 style="font-size: 48px; margin: 0 0 20px 0; color: #fbbf24; text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);">
+                    ${endingData.title || 'Victory!'}
+                </h1>
+                <p style="font-size: 20px; margin: 0 0 30px 0; color: #e2e8f0;">
+                    ${endingData.message || 'Congratulations on completing your journey!'}
+                </p>
+                <div style="background: rgba(15, 23, 42, 0.8); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
+                    <h3 style="margin-top: 0; color: #fbbf24;">Career Statistics</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                        <div><strong>Final Rank:</strong> ${stats.rankTitle || 'Unknown'}</div>
+                        <div><strong>Days Played:</strong> ${stats.days || 0}</div>
+                        <div><strong>Total Money:</strong> $${(stats.money || 0).toLocaleString()}</div>
+                        <div><strong>Reputation:</strong> ${stats.reputation || 0}</div>
+                        <div><strong>Tasks Completed:</strong> ${stats.tasksCompleted || 0}</div>
+                        <div><strong>Perfect Scores:</strong> ${stats.perfectScores || 0}</div>
+                        <div><strong>Contracts:</strong> ${stats.contractsCompleted || 0}</div>
+                        <div><strong>Projects:</strong> ${stats.projectsCompleted || 0}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px;">
+                    <button id="btn-ending-new-game" style="
+                        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                        color: white;
+                        border: none;
+                        padding: 15px 30px;
+                        font-size: 18px;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        margin: 0 10px;
+                        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+                    ">New Game</button>
+                    <button id="btn-ending-continue" style="
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        color: white;
+                        border: none;
+                        padding: 15px 30px;
+                        font-size: 18px;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        margin: 0 10px;
+                        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+                    ">Continue Playing</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Button handlers
+        document.getElementById('btn-ending-new-game').onclick = () => {
+            if (confirm('Start a new game? Your current progress will be lost.')) {
+                this.startNewGame();
+                modal.remove();
+            }
+        };
+
+        document.getElementById('btn-ending-continue').onclick = () => {
+            modal.remove();
+            // Allow player to continue playing even after ending
+        };
+
+        // Play victory sound
+        if (this.audioManager?.play) {
+            this.audioManager.play('kaching');
+        }
     }
 
     handleTraining(activityId) {
@@ -1612,6 +2789,10 @@ export class MainGame {
 
         // Do training
         this.timeManager.useEnergy(activity.energyCost);
+        if (!this.characterStats) {
+            this.showError('Character stats not initialized');
+            return;
+        }
         const results = this.characterStats.train(activityId);
 
         this.handleTimeAdvance(activity.timeSlots);
@@ -1670,6 +2851,21 @@ export class MainGame {
             this.dayNightCycle.update();
         }
         
+        // Check for major story decisions (throttled by StorylineManager's cooldown)
+        if (this.storylineManager) {
+            this.storylineManager.triggerDecisionIfAvailable();
+        }
+        
+        // Check for story beats (every 10 seconds, throttled)
+        const seconds = Math.floor(timestamp / 1000);
+        if (this.storyBeatsSystem && seconds % 10 === 0 && seconds !== (this.lastBeatCheckSecond || -1)) {
+            this.lastBeatCheckSecond = seconds;
+            const triggeredBeats = this.storyBeatsSystem.checkForTriggeredBeats();
+            triggeredBeats.forEach(beat => {
+                this.handleStoryBeat(beat);
+            });
+        }
+        
         // Check notifications
         if (this.notificationSystem) {
             this.notificationSystem.checkNotifications();
@@ -1705,7 +2901,7 @@ export class MainGame {
                 // Update inbox button badge
                 this.updateInboxBadge();
             } catch (error) {
-                console.error('Error checking research papers:', error);
+                logger.error('Error checking research papers:', error);
             }
         }
 
@@ -1725,10 +2921,45 @@ export class MainGame {
                 this.animatedCharacterRenderer.updateAll(deltaTime);
             }
         } catch (error) {
-            console.error('Error updating visual systems:', error);
+            logger.error('Error updating visual systems:', error);
         }
 
         this.gameLoopId = requestAnimationFrame(this.gameLoop);
+    }
+
+    /**
+     * Handle story beat trigger
+     */
+    handleStoryBeat(beat) {
+        if (!beat) return;
+
+        // Check if already completed
+        if (this.storyBeatsSystem && this.storyBeatsSystem.completedBeats.includes(beat.id)) {
+            return;
+        }
+
+        // Complete the beat
+        if (this.storyBeatsSystem) {
+            this.storyBeatsSystem.completeBeat(beat.id);
+        }
+
+        // Show notification with description
+        if (this.showToast) {
+            this.showToast(`Story Beat: ${beat.title} - ${beat.description}`, 'info');
+        }
+
+        // Update story UI if open
+        if (this.storyUI && this.storyUI.isOpen) {
+            this.storyUI.updateStoryDisplay();
+        }
+
+        // Check for phase transition after beat
+        if (this.storylineManager) {
+            const transition = this.storylineManager.checkPhaseTransition();
+            if (transition.phaseChanged) {
+                // Phase transition will show act transition screen automatically
+            }
+        }
     }
     
     /**
@@ -1758,7 +2989,7 @@ export class MainGame {
                 this.researchInboxUI.updateUnreadCount();
             }
         } catch (error) {
-            console.error('Error updating inbox badge:', error);
+            logger.error('Error updating inbox badge:', error);
         }
     }
 
@@ -1912,7 +3143,7 @@ export class MainGame {
                     this.researchInboxUI = new ResearchInboxUI(this.researchPaperSystem);
                     this.gameState.researchInboxUI = this.researchInboxUI;
                 } catch (error) {
-                    console.error('Error initializing research paper system:', error);
+                    logger.error('Error initializing research paper system:', error);
                     this.researchPaperSystem = null;
                     this.researchInboxUI = null;
                 }
@@ -1937,34 +3168,78 @@ export class MainGame {
             setTimeout(async () => {
                 try {
                     await this.comprehensiveSpriteSystem.initialize();
-                    console.log('✅ Comprehensive sprite system loaded');
+                    console.log('Comprehensive sprite system loaded');
                 } catch (error) {
-                    console.warn('Sprite system initialization error:', error);
+                    logger.warn('Sprite system initialization error:', error);
                 }
             }, 1000);
             
-            console.log('✅ Deferred systems loaded');
+            logger.debug('Deferred systems loaded');
         } catch (error) {
-            console.error('Error loading deferred systems:', error);
+            logger.error('Error loading deferred systems:', error);
         }
     }
 }
 
 // Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
+
+const initGame = () => {
+    
     try {
-        console.log('🚀 DOM Content Loaded. Starting Game...');
+        logger.debug('DOM Content Loaded. Starting Game...');
+        
+        logger.debug('Before MainGame instantiation');
+        
         game = new MainGame();
+        
         window.game = game; // Expose for modal buttons
-        console.log('✅ MainGame instantiated. Calling init()...');
-        game.init();
+        logger.debug('MainGame instantiated. Calling init()...');
+        
+        // Show diagnostic
+        if (game.showDiagnostic) {
+            game.showDiagnostic('About to call game.init()');
+        }
+        
+        // Call init and handle any errors
+        game.init().catch(err => {
+            logger.error('init() promise rejected:', err);
+            if (game.showError) {
+                game.showError('init() failed: ' + err.message);
+            }
+        });
+        
+        // Fallback: If game doesn't show after 3 seconds, force it
+        setTimeout(() => {
+            const gameContainer = document.getElementById('game-container');
+            const loadingScreen = document.getElementById('loading-screen');
+            if (gameContainer && gameContainer.classList.contains('hidden')) {
+                logger.warn('Fallback: Forcing game to show after timeout');
+                gameContainer.classList.remove('hidden');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                    loadingScreen.classList.add('hidden');
+                }
+                if (game.showDiagnostic) {
+                    game.showDiagnostic('Fallback: Game forced to show');
+                }
+            }
+        }, 3000);
     } catch (e) {
-        console.error('CRITICAL BOOT ERROR:', e);
+        logger.error('CRITICAL BOOT ERROR:', e);
         const errDiv = document.createElement('div');
         errDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,0,0,0.9);color:white;z-index:99999;padding:20px;font-family:monospace;white-space:pre-wrap;overflow:auto;pointer-events:all;';
         errDiv.innerHTML = '<h1>CRITICAL BOOT ERROR</h1><h3>' + e.toString() + '</h3><pre>' + e.stack + '</pre>';
         document.body.appendChild(errDiv);
     }
-});
+};
+
+// Handle both cases: DOM already loaded or still loading
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGame);
+} else {
+    // DOM already loaded, call immediately
+    initGame();
+}
+
 
 export { game };

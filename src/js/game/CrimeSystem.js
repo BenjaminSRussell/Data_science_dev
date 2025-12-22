@@ -89,7 +89,6 @@ export class CrimeSystem {
 
     executePumpAndDump(stockId, risk, luck) {
         // Logic: Boost stock price temporarily, allowing player to sell high
-        // Requires owning stock first? 
         // For simplicity: The action effectively boosts the stock immediately
 
         const roll = Math.random() * 100;
@@ -105,7 +104,7 @@ export class CrimeSystem {
         // Success
         // Notify StockMarket to bump price
         if (this.gameState.stockMarket) {
-            this.gameState.stockMarket.manipulateStock(stockId, 'pump', 1.5); // 50% boost
+            this.gameState.stockMarket?.manipulateStock(stockId, 'pump', 1.5); // 50% boost
         }
 
         return { success: true, message: 'You successfully hyped the stock! Price is surging!' };
@@ -123,7 +122,7 @@ export class CrimeSystem {
         // Success: Immediate knowledge (or guaranteed profit next turn)
         // Let's implement as: Stock WILL go up next turn significantly
         if (this.gameState.stockMarket) {
-            this.gameState.stockMarket.manipulateStock(stockId, 'insider_pump', 1.3);
+            this.gameState.stockMarket?.manipulateStock(stockId, 'insider_pump', 1.3);
         }
 
         return { success: true, message: 'Insider info acquired. The stock is guaranteed to jump.' };

@@ -1,7 +1,7 @@
 /**
  * LocationView.js
  * Renders location with background and interactive features
- * Uses cartoonish backgrounds and character animations
+ * Phase 2: Now uses Lit component (LocationViewComponent) with fallback
  */
 
 export class LocationView {
@@ -11,10 +11,12 @@ export class LocationView {
         this.characterAnimationSystem = characterAnimationSystem;
         this.currentLocation = null;
         this.container = null;
+        this.litComponent = null;
     }
     
     /**
      * Show location view
+     * Phase 2: Uses Lit component if available
      */
     showLocation(locationId) {
         const locationDetails = this.game.locationDetailSystem?.getLocationDetails(locationId);
@@ -25,7 +27,29 @@ export class LocationView {
         
         this.currentLocation = locationId;
         
-        // Create or get container
+        // Try to use Lit component first
+        if (this.game?.uiUpdater?.litUIManager) {
+            const background = this.assetManager?.getLocationBackground(locationId);
+            const backgroundImage = background?.src && 
+                                   typeof background.src === 'string' &&
+                                   !background.src.includes('data:') && 
+                                   !background.src.includes('canvas')
+                                   ? background.src : '';
+            const timeOfDay = this.game.dayNightCycle?.getTimeOfDay() || 'noon';
+            
+            this.game.uiUpdater?.litUIManager?.updateLocationView(
+                locationId, 
+                locationDetails, 
+                backgroundImage, 
+                timeOfDay
+            );
+            
+            // Still render characters (not yet migrated to Lit)
+            this.renderCharacters(locationId);
+            return;
+        }
+        
+        // Fallback to old DOM method
         let container = document.getElementById('location-view');
         if (!container) {
             container = this.createContainer();
@@ -47,15 +71,23 @@ export class LocationView {
     }
     
     /**
-     * Render location
+     * Render location (fallback method using DOM)
      */
     renderLocation(locationId, details) {
         const background = this.assetManager?.getLocationBackground(locationId);
         const timeOfDay = this.game.dayNightCycle?.getTimeOfDay() || 'noon';
         
+        // Only set inline background-image if we have a valid asset
+        const backgroundStyle = background && background.src && 
+                                typeof background.src === 'string' &&
+                                !background.src.includes('data:') && 
+                                !background.src.includes('canvas') 
+                                ? `background-image: url('${background.src}');` 
+                                : '';
+        
         this.container.innerHTML = `
             <div class="location-background ${locationId} time-${timeOfDay}" 
-                 style="${background ? `background-image: url('${background.src}');` : ''}">
+                 style="${backgroundStyle}">
                 <div class="location-content">
                     <h2 class="location-title">${details.name}</h2>
                     <p class="location-description">${details.description}</p>
@@ -81,14 +113,19 @@ export class LocationView {
         
         featuresContainer.innerHTML = '';
         
-        features.forEach((feature, index) => {
+        features?.forEach((feature, index) => {
             const featureEl = document.createElement('div');
             featureEl.className = 'location-feature';
             featureEl.dataset.featureId = feature.id;
             featureEl.style.left = `${20 + (index % 5) * 15}%`;
             featureEl.style.top = `${30 + Math.floor(index / 5) * 20}%`;
+            // Use icon image if available, otherwise use emoji
+            const iconEl = feature.icon && feature.icon.startsWith('/')
+                ? `<img src="${feature.icon}" alt="${feature.name}" style="width: 32px; height: 32px; object-fit: contain; object-position: center center;">`
+                : `<span>${feature.icon || ''}</span>`;
+            
             featureEl.innerHTML = `
-                <span>${feature.icon || '📦'}</span>
+                ${iconEl}
                 <div class="location-feature-label">${feature.name}</div>
             `;
             
@@ -111,7 +148,7 @@ export class LocationView {
         const npcs = this.game.gameState.npcManager?.getAllNPCs() || [];
         const locationNPCs = npcs.filter(npc => npc.location === locationId);
         
-        locationNPCs.forEach((npc, index) => {
+        locationNPCs?.forEach((npc, index) => {
             // Register character if not already
             if (!this.characterAnimationSystem.characters.has(npc.id)) {
                 this.characterAnimationSystem.registerCharacter(npc.id, {

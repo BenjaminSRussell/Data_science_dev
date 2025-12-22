@@ -16,16 +16,20 @@
         rel="stylesheet">
 
     <!-- Styles -->
-  <script type="module" crossorigin src="/assets/index-B9x8vuNT.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DnkaUIc0.css">
+  <script type="module" crossorigin src="/assets/index-BekOX-t1.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/preload-helper-CLcXU_4U.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-DsqrgSKH.css">
 </head>
 
 <body>
+    <!-- Simple test indicator -->
+    <div style="position:fixed;top:0;left:0;background:red;color:white;padding:5px;z-index:99999;font-size:10px;">HTML LOADED</div>
+    
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
         <div class="loading-content">
             <div class="loading-logo">
-                <span class="logo-icon">📊</span>
+                <span class="logo-icon"></span>
                 <h1>Data Science Tycoon</h1>
             </div>
             <div class="loading-bar">
@@ -41,31 +45,46 @@
         <!-- Top Navigation Bar -->
         <header id="top-bar" class="top-bar">
             <div class="top-bar-left">
-                <span class="game-logo">📊 Data Science Tycoon</span>
+                <span class="game-logo"> Data Science Tycoon</span>
             </div>
             <div class="top-bar-center">
                 <div class="stat-pill" id="stat-money">
-                    <span class="stat-icon">💰</span>
+                    <span class="stat-icon"></span>
                     <span class="stat-value" id="money-value">$0</span>
                 </div>
                 <div class="stat-pill" id="stat-reputation">
-                    <span class="stat-icon">⭐</span>
+                    <span class="stat-icon"></span>
                     <span class="stat-value" id="reputation-value">0</span>
                 </div>
                 <div class="stat-pill" id="stat-rank">
-                    <span class="stat-icon">📈</span>
+                    <span class="stat-icon"></span>
                     <span class="stat-value" id="rank-value">Data Entry Clerk</span>
                 </div>
             </div>
             <div class="top-bar-right">
                 <button class="icon-btn inbox-button" id="btn-research-inbox" aria-label="Research Papers" title="Research Papers Inbox">
-                    📚
+                    
                     <span class="inbox-unread-badge hidden" id="inbox-unread-badge"></span>
                 </button>
-                <button class="icon-btn" id="btn-nav-map" aria-label="City Map">🗺️</button>
-                <button class="icon-btn" id="btn-nav-bank" aria-label="City Bank">🏦</button>
-                <button class="icon-btn" id="btn-settings" aria-label="Settings">⚙️</button>
-                <button class="icon-btn" id="btn-sound" aria-label="Toggle Sound">🔊</button>
+                <button class="icon-btn" id="btn-nav-map" aria-label="City Map"></button>
+                <button class="icon-btn" id="btn-nav-bank" aria-label="City Bank"></button>
+                <button class="icon-btn" id="btn-settings" aria-label="Settings"></button>
+                <!-- Music Radio Selector -->
+                <div class="music-radio-container" id="music-radio-container">
+                    <button class="icon-btn music-radio-btn" id="btn-music-radio" aria-label="Music Radio" title="Music Radio">
+                        
+                    </button>
+                    <div class="music-radio-menu hidden" id="music-radio-menu">
+                        <div class="radio-station" data-station="lofi_beats">
+                            <span class="radio-indicator">●</span>
+                            <span class="radio-label">Lofi Beats</span>
+                        </div>
+                        <div class="radio-station" data-station="off">
+                            <span class="radio-indicator"></span>
+                            <span class="radio-label">Off</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -74,39 +93,80 @@
 
             <!-- Main Menu Screen -->
             <section id="screen-menu" class="screen screen-menu active">
-                <div class="menu-content">
-                    <div class="menu-header">
-                        <div class="menu-logo-large">
-                            <span class="logo-chart animate-float">📊</span>
-                            <span class="logo-chart animate-float delay-1">📈</span>
-                            <span class="logo-chart animate-float delay-2">📉</span>
-                        </div>
-                        <h1 class="menu-title">Data Science Tycoon</h1>
-                        <p class="menu-tagline">Master Data. Impress Bosses. Climb the Ladder.</p>
-                    </div>
-                    <nav class="menu-buttons">
-                        <button class="btn btn-primary btn-lg" id="btn-new-game">
-                            <span class="btn-icon">🚀</span>
-                            New Career
-                        </button>
-                        <button class="btn btn-secondary btn-lg" id="btn-continue" disabled>
-                            <span class="btn-icon">💼</span>
-                            Continue
-                        </button>
-                        <button class="btn btn-ghost btn-lg" id="btn-tutorial">
-                            <span class="btn-icon">📚</span>
-                            How to Play
-                        </button>
-                    </nav>
-                    <div class="menu-footer">
-                        <p class="version">v1.0.0</p>
-                    </div>
-                </div>
+                <!-- Animated Background -->
                 <div class="menu-background">
-                    <div class="floating-chart chart-1">📊</div>
-                    <div class="floating-chart chart-2">📈</div>
-                    <div class="floating-chart chart-3">🥧</div>
-                    <div class="floating-chart chart-4">📉</div>
+                    <!-- Particles disabled -->
+                    <div class="menu-gradient-overlay"></div>
+                    <div class="menu-grid-pattern"></div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="menu-container">
+                    <!-- Hero Section -->
+                    <div class="menu-hero">
+                        <div class="menu-logo-wrapper">
+                            <div class="menu-logo-glow"></div>
+                            <div class="menu-logo-icon"></div>
+                            <div class="menu-logo-particles">
+                                <span class="particle-dot"></span>
+                                <span class="particle-dot"></span>
+                                <span class="particle-dot"></span>
+                            </div>
+                        </div>
+                        <h1 class="menu-title">
+                            <span class="title-line">Data Science</span>
+                            <span class="title-line">Tycoon</span>
+                        </h1>
+                        <p class="menu-subtitle" id="menu-contextual-info">Transform data into destiny. Build your empire from the ground up.</p>
+                        
+                        <!-- Statistics Dashboard -->
+                        <div class="menu-stats-dashboard" id="menu-stats-dashboard"></div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <nav class="menu-navigation">
+                        <button class="menu-btn menu-btn-primary" id="btn-new-game">
+                            <div class="btn-content">
+                                <span class="btn-icon"></span>
+                                <div class="btn-text-group">
+                                    <span class="btn-text">New Career</span>
+                                    <span class="btn-subtext">Start your journey</span>
+                                </div>
+                            </div>
+                            <div class="btn-ripple"></div>
+                        </button>
+
+                        <button class="menu-btn menu-btn-secondary" id="btn-continue" disabled>
+                            <div class="btn-content">
+                                <span class="btn-icon"></span>
+                                <div class="btn-text-group">
+                                    <span class="btn-text">Continue</span>
+                                    <span class="btn-subtext" id="continue-subtext">No saved game</span>
+                                </div>
+                            </div>
+                            <div class="btn-ripple"></div>
+                        </button>
+
+                        <div class="menu-btn-group">
+                            <button class="menu-btn menu-btn-tertiary" id="btn-tutorial">
+                                <span class="btn-icon"></span>
+                                <span class="btn-text">Tutorial</span>
+                            </button>
+                            <button class="menu-btn menu-btn-tertiary" id="btn-settings-menu">
+                                <span class="btn-icon"></span>
+                                <span class="btn-text">Settings</span>
+                            </button>
+                        </div>
+                    </nav>
+
+                    <!-- Footer -->
+                    <footer class="menu-footer">
+                        <div class="footer-content">
+                            <span class="version">v1.0.0</span>
+                            <span class="footer-divider">•</span>
+                            <button class="footer-link" id="btn-credits">Credits</button>
+                        </div>
+                    </footer>
                 </div>
             </section>
 
@@ -117,12 +177,12 @@
                     <aside class="panel panel-left">
                         <div class="boss-section glass-card">
                             <div class="boss-header">
-                                <div class="boss-avatar" id="boss-avatar">👔</div>
+                                <div class="boss-avatar" id="boss-avatar"></div>
                                 <div class="boss-info">
                                     <h3 class="boss-name" id="boss-name">Mr. Anderson</h3>
                                     <span class="boss-title" id="boss-title">Department Head</span>
                                 </div>
-                                <div class="boss-mood" id="boss-mood">😐</div>
+                                <div class="boss-mood" id="boss-mood"></div>
                             </div>
                             <div class="boss-dialogue">
                                 <div class="dialogue-bubble" id="boss-dialogue">
@@ -133,9 +193,9 @@
 
                         <div class="task-section glass-card">
                             <div class="task-header">
-                                <h3>📋 Current Task</h3>
+                                <h3>Current Task</h3>
                                 <div class="task-timer hidden" id="task-timer">
-                                    <span class="timer-icon">⏱️</span>
+                                    <span class="timer-icon"></span>
                                     <span class="timer-value">5:00</span>
                                 </div>
                             </div>
@@ -143,8 +203,8 @@
                                 <p class="task-description">Create a visualization showing quarterly sales performance.
                                 </p>
                                 <div class="task-requirements">
-                                    <span class="requirement-tag">📊 Chart Required</span>
-                                    <span class="requirement-tag">📈 Show Trends</span>
+                                    <span class="requirement-tag">Chart Required</span>
+                                    <span class="requirement-tag">Show Trends</span>
                                 </div>
                             </div>
                             <div class="task-reward">
@@ -158,7 +218,7 @@
                     <div class="panel panel-center">
                         <div class="data-section glass-card">
                             <div class="data-header">
-                                <h3>📄 Dataset</h3>
+                                <h3> Dataset</h3>
                                 <div class="data-actions">
                                     <button class="btn btn-sm btn-ghost" id="btn-sort">Sort</button>
                                     <button class="btn btn-sm btn-ghost" id="btn-filter">Filter</button>
@@ -211,7 +271,7 @@
 
                         <div class="action-bar">
                             <button class="btn btn-primary btn-lg" id="btn-create-chart">
-                                <span class="btn-icon">🎨</span>
+                                <span class="btn-icon"></span>
                                 Create Visualization
                             </button>
                         </div>
@@ -220,7 +280,7 @@
                     <!-- Right Panel: Quick Stats & Navigation -->
                     <aside class="panel panel-right">
                         <div class="progress-section glass-card">
-                            <h3>📈 Career Progress</h3>
+                            <h3>Career Progress</h3>
                             <div class="rank-display">
                                 <span class="current-rank" id="current-rank">Data Entry Clerk</span>
                                 <div class="rank-progress-bar">
@@ -231,37 +291,37 @@
                         </div>
 
                         <div class="quick-nav glass-card">
-                            <button class="nav-btn" id="btn-nav-map">
-                                <span class="nav-icon">🗺️</span>
+                            <button class="nav-btn" id="btn-nav-map-quick">
+                                <span class="nav-icon"></span>
                                 <span class="nav-label">City</span>
                             </button>
                             <button class="nav-btn" id="btn-nav-clients">
-                                <span class="nav-icon">📬</span>
+                                <span class="nav-icon"></span>
                                 <span class="nav-label">Inbox</span>
                                 <span class="notification-badge hidden" id="clients-badge">0</span>
                             </button>
                             <button class="nav-btn" id="btn-nav-office">
-                                <span class="nav-icon">🏢</span>
+                                <span class="nav-icon"></span>
                                 <span class="nav-label">Office</span>
                             </button>
                             <button class="nav-btn" id="btn-nav-stats">
-                                <span class="nav-icon">📊</span>
+                                <span class="nav-icon"></span>
                                 <span class="nav-label">Stats</span>
                             </button>
                             <button class="nav-btn" id="btn-nav-staff">
-                                <span class="nav-icon">👥</span>
+                                <span class="nav-icon"></span>
                                 <span class="nav-label">Team</span>
                             </button>
                             <button class="nav-btn" id="btn-nav-career">
-                                <span class="nav-icon">🏆</span>
+                                <span class="nav-icon"></span>
                                 <span class="nav-label">Career</span>
                             </button>
                             <button class="nav-btn" id="btn-nav-shop">
-                                <span class="nav-icon">🛒</span>
+                                <span class="nav-icon"></span>
                                 <span class="nav-label">Shop</span>
                             </button>
                             <button class="nav-btn" id="btn-nav-newspaper">
-                                <span class="nav-icon">📰</span>
+                                <span class="nav-icon"></span>
                                 <span class="nav-label">Paper</span>
                             </button>
                         </div>
@@ -274,34 +334,34 @@
                 <div class="studio-layout">
                     <!-- Chart Type Selection -->
                     <aside class="studio-sidebar glass-card">
-                        <h3>📊 Chart Types</h3>
+                        <h3> Chart Types</h3>
                         <div class="chart-type-grid" id="chart-type-grid">
                             <button class="chart-type-btn active" data-type="bar">
-                                <span class="chart-icon">📊</span>
+                                <span class="chart-icon"></span>
                                 <span class="chart-name">Bar</span>
                             </button>
                             <button class="chart-type-btn" data-type="line">
-                                <span class="chart-icon">📈</span>
+                                <span class="chart-icon"></span>
                                 <span class="chart-name">Line</span>
                             </button>
                             <button class="chart-type-btn" data-type="pie">
-                                <span class="chart-icon">🥧</span>
+                                <span class="chart-icon"></span>
                                 <span class="chart-name">Pie</span>
                             </button>
                             <button class="chart-type-btn" data-type="scatter">
-                                <span class="chart-icon">⚬</span>
+                                <span class="chart-icon"></span>
                                 <span class="chart-name">Scatter</span>
                             </button>
                             <button class="chart-type-btn" data-type="doughnut">
-                                <span class="chart-icon">🍩</span>
+                                <span class="chart-icon"></span>
                                 <span class="chart-name">Donut</span>
                             </button>
                             <button class="chart-type-btn" data-type="radar">
-                                <span class="chart-icon">📡</span>
+                                <span class="chart-icon"></span>
                                 <span class="chart-name">Radar</span>
                             </button>
                             <button class="chart-type-btn" data-type="area">
-                                <span class="chart-icon">📉</span>
+                                <span class="chart-icon"></span>
                                 <span class="chart-name">Area</span>
                             </button>
                             <button class="chart-type-btn" data-type="bubble">
@@ -309,13 +369,13 @@
                                 <span class="chart-name">Bubble</span>
                             </button>
                             <button class="chart-type-btn" data-type="polarArea">
-                                <span class="chart-icon">🧭</span>
+                                <span class="chart-icon"></span>
                                 <span class="chart-name">Polar</span>
                             </button>
                         </div>
 
                         <div class="software-status" id="software-status">
-                            <h4>💻 Active Software</h4>
+                            <h4> Active Software</h4>
                             <div id="software-list">
                                 <p class="software-none">No software purchased</p>
                             </div>
@@ -348,11 +408,11 @@
 
                         <div class="studio-actions">
                             <button class="btn btn-ghost btn-lg" id="btn-back-to-office">
-                                <span class="btn-icon">↩️</span>
+                                <span class="btn-icon">↩</span>
                                 Back to Office
                             </button>
                             <button class="btn btn-primary btn-lg" id="btn-submit-chart">
-                                <span class="btn-icon">✅</span>
+                                <span class="btn-icon"></span>
                                 Submit to Boss
                             </button>
                         </div>
@@ -360,7 +420,7 @@
 
                     <!-- Customization Options -->
                     <aside class="studio-options glass-card">
-                        <h3>🎨 Customize</h3>
+                        <h3> Customize</h3>
                         <div class="option-group">
                             <label>Color Palette</label>
                             <div class="color-palette-picker" id="color-palette">
@@ -400,8 +460,8 @@
                 <div class="review-content">
                     <div class="review-boss glass-card">
                         <div class="boss-reaction" id="boss-reaction">
-                            <div class="boss-avatar-large">👔</div>
-                            <div class="reaction-emoji" id="reaction-emoji">🤔</div>
+                            <div class="boss-avatar-large"></div>
+                            <div class="reaction-emoji" id="reaction-emoji"></div>
                         </div>
                         <div class="boss-feedback" id="boss-feedback">
                             <p class="feedback-text">Analyzing your work...</p>
@@ -418,11 +478,11 @@
                     <div class="review-score glass-card" id="review-score">
                         <h3>Performance Rating</h3>
                         <div class="stars-container" id="stars-container">
-                            <span class="star">☆</span>
-                            <span class="star">☆</span>
-                            <span class="star">☆</span>
-                            <span class="star">☆</span>
-                            <span class="star">☆</span>
+                            <span class="star"></span>
+                            <span class="star"></span>
+                            <span class="star"></span>
+                            <span class="star"></span>
+                            <span class="star"></span>
                         </div>
                         <div class="score-breakdown">
                             <div class="score-item">
@@ -447,21 +507,21 @@
                     </div>
 
                     <div class="review-rewards glass-card" id="review-rewards">
-                        <h3>💰 Rewards Earned</h3>
+                        <h3> Rewards Earned</h3>
                         <div class="reward-display">
                             <div class="reward-item">
-                                <span class="reward-icon">💵</span>
+                                <span class="reward-icon"></span>
                                 <span class="reward-amount" id="reward-money">+$0</span>
                             </div>
                             <div class="reward-item">
-                                <span class="reward-icon">⭐</span>
+                                <span class="reward-icon"></span>
                                 <span class="reward-amount" id="reward-rep">+0 Rep</span>
                             </div>
                         </div>
                     </div>
 
                     <button class="btn btn-primary btn-lg" id="btn-next-task">
-                        <span class="btn-icon">➡️</span>
+                        <span class="btn-icon"></span>
                         Next Task
                     </button>
                 </div>
@@ -471,7 +531,7 @@
             <section id="screen-career" class="screen screen-career">
                 <div class="career-content">
                     <button class="btn btn-ghost back-btn" id="btn-back-career">← Back</button>
-                    <h2 class="screen-title">📜 Contracts & Projects</h2>
+                    <h2 class="screen-title"> Contracts & Projects</h2>
 
                     <!-- Active Project Section -->
                     <div id="active-project-container" class="glass-card hidden">
@@ -533,7 +593,7 @@
 
                         <div class="paper-extras">
                             <div class="weather-box">
-                                <span class="weather-icon">☀️</span>
+                                <span class="weather-icon"></span>
                                 <span class="weather-text" id="paper-weather">Clear, 72°F</span>
                             </div>
                             <div class="horoscope-box">
@@ -552,7 +612,7 @@
             <section id="screen-bank" class="screen screen-bank hidden">
                 <div class="bank-layout">
                     <header class="bank-header">
-                        <h2>🏦 City Bank & Trust</h2>
+                        <h2> City Bank & Trust</h2>
                         <div class="net-worth-display">
                             <span class="label">Net Worth</span>
                             <span class="value" id="bank-net-worth">$0</span>
@@ -564,7 +624,7 @@
                         <!-- Savings Account -->
                         <div class="bank-card savings-card">
                             <div class="card-header">
-                                <h3>🐖 Savings Account</h3>
+                                <h3> Savings Account</h3>
                                 <span class="rate-badge">0.5% Weekly APY</span>
                             </div>
                             <div class="card-balance">
@@ -586,7 +646,7 @@
                         <!-- Loan Management -->
                         <div class="bank-card loan-card">
                             <div class="card-header">
-                                <h3>💸 Loan Management</h3>
+                                <h3> Loan Management</h3>
                                 <span class="rate-badge warning">10% Weekly Interest</span>
                             </div>
                             <div class="card-balance">
@@ -616,12 +676,12 @@
             <section id="screen-shop" class="screen screen-shop">
                 <div class="shop-content">
                     <button class="btn btn-ghost back-btn" id="btn-back-shop">← Back</button>
-                    <h2 class="screen-title">🛒 Upgrade Shop</h2>
+                    <h2 class="screen-title"> Upgrade Shop</h2>
 
                     <div class="shop-categories">
-                        <button class="category-btn active" data-category="tools">🔧 Tools</button>
-                        <button class="category-btn" data-category="software">💻 Software</button>
-                        <button class="category-btn" data-category="perks">✨ Perks</button>
+                        <button class="category-btn active" data-category="tools"> Tools</button>
+                        <button class="category-btn" data-category="software"> Software</button>
+                        <button class="category-btn" data-category="perks"> Perks</button>
                     </div>
 
                     <div class="shop-grid" id="shop-grid">
@@ -633,10 +693,14 @@
             <!-- Stock Market Screen -->
             <section id="screen-stock-market" class="screen hidden">
                 <div class="top-bar-screens">
-                    <button class="btn-icon" id="btn-back-market">⬅️ Back</button>
-                    <h2 class="screen-title">📈 Stock Exchange</h2>
+                    <button class="btn-icon" id="btn-back-market">⬅ Back</button>
+                    <h2 class="screen-title"> Stock Exchange</h2>
                 </div>
 
+                <!-- Quotron Ticker Display -->
+                <div id="quotron-ticker" class="quotron-ticker-wrapper"></div>
+
+                <!-- Market Overview -->
                 <div class="market-overview glass-card">
                     <div class="market-stat">
                         <span class="label">Portfolio Value</span>
@@ -648,6 +712,31 @@
                     </div>
                 </div>
 
+                <!-- Market Indices -->
+                <div class="market-indices-section glass-card">
+                    <h3 class="section-title">Market Indices</h3>
+                    <div class="market-indices-grid" id="market-indices">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Market Summaries -->
+                <div class="market-summaries-section glass-card">
+                    <h3 class="section-title">Regional Markets</h3>
+                    <div class="market-summaries-grid" id="market-summaries">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- World Events Display -->
+                <div class="world-events-section glass-card" id="world-events-display">
+                    <h3 class="section-title"> World Events</h3>
+                    <div id="world-events-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Stock Grid -->
                 <div class="stock-grid" id="stock-grid">
                     <!-- Populated by JS -->
                 </div>
@@ -657,7 +746,7 @@
             <section id="screen-office" class="screen screen-office">
                 <div class="office-content">
                     <button class="btn btn-ghost back-btn" id="btn-back-office">← Back</button>
-                    <h2 class="screen-title">🏢 Your Office</h2>
+                    <h2 class="screen-title"> Your Office</h2>
 
                     <!-- Office Scene Visualization -->
                     <div class="office-scene-container" id="office-scene">
@@ -667,21 +756,21 @@
 
                             <!-- Desk with equipment -->
                             <div class="office-desk">
-                                <div class="office-computer" id="office-computer">💻</div>
-                                <div class="office-monitor" id="office-monitor">🖥️</div>
+                                <div class="office-computer" id="office-computer"></div>
+                                <div class="office-monitor" id="office-monitor"></div>
                             </div>
 
                             <!-- Chair -->
-                            <div class="office-chair" id="office-chair">🪑</div>
+                            <div class="office-chair" id="office-chair"></div>
 
                             <!-- Character at desk -->
                             <div class="office-character" id="office-character">
-                                <div class="character-avatar char-working">👨‍💻</div>
+                                <div class="character-avatar char-working"></div>
                             </div>
 
                             <!-- Office name badge -->
                             <div class="office-badge">
-                                <span class="office-icon">🛏️</span>
+                                <span class="office-icon"></span>
                                 <span class="office-name" id="current-office-name">Bedroom Corner</span>
                             </div>
                         </div>
@@ -693,7 +782,7 @@
                         <p class="location-desc" id="location-desc">Welcome!</p>
 
                         <div class="shop-keeper-area">
-                            <div class="shop-keeper-avatar" id="shop-keeper-avatar">👩‍🍳</div>
+                            <div class="shop-keeper-avatar" id="shop-keeper-avatar"></div>
                             <div class="shop-keeper-bubble" id="shop-keeper-saying">Fresh donuts!</div>
                         </div>
 
@@ -704,10 +793,10 @@
 
                     <!-- Equipment Grid -->
                     <div id="office-equipment-section">
-                        <h3 class="section-title">⚡ Equipment</h3>
+                        <h3 class="section-title"> Equipment</h3>
                         <div class="equipment-grid" id="equipment-grid">
                             <div class="equipment-card" data-type="computer">
-                                <div class="equipment-icon">💻</div>
+                                <div class="equipment-icon"></div>
                                 <div class="equipment-name">Computer</div>
                                 <div class="equipment-level" id="computer-level">Old Laptop</div>
                                 <div class="equipment-bonus">Speed: 1.0x</div>
@@ -716,7 +805,7 @@
                                 </button>
                             </div>
                             <div class="equipment-card" data-type="desk">
-                                <div class="equipment-icon">🪑</div>
+                                <div class="equipment-icon"></div>
                                 <div class="equipment-name">Desk</div>
                                 <div class="equipment-level" id="desk-level">Folding Table</div>
                                 <div class="equipment-bonus">Comfort: 1.0x</div>
@@ -725,7 +814,7 @@
                                 </button>
                             </div>
                             <div class="equipment-card" data-type="monitor">
-                                <div class="equipment-icon">🖥️</div>
+                                <div class="equipment-icon"></div>
                                 <div class="equipment-name">Monitor</div>
                                 <div class="equipment-level" id="monitor-level">Laptop Screen</div>
                                 <div class="equipment-bonus">Clarity: 1.0x</div>
@@ -734,7 +823,7 @@
                                 </button>
                             </div>
                             <div class="equipment-card" data-type="chair">
-                                <div class="equipment-icon">💺</div>
+                                <div class="equipment-icon"></div>
                                 <div class="equipment-name">Chair</div>
                                 <div class="equipment-level" id="chair-level">Kitchen Chair</div>
                                 <div class="equipment-bonus">Stamina: 1.0x</div>
@@ -743,7 +832,7 @@
                                 </button>
                             </div>
                             <div class="equipment-card" data-type="software">
-                                <div class="equipment-icon">📊</div>
+                                <div class="equipment-icon"></div>
                                 <div class="equipment-name">Software</div>
                                 <div class="equipment-level" id="software-level">Spreadsheets</div>
                                 <div class="equipment-bonus">Capability: 1.0x</div>
@@ -756,9 +845,9 @@
 
                     <!-- Office Upgrade -->
                     <div class="office-upgrade-section glass-card">
-                        <h3>🏠 Upgrade Office Space</h3>
+                        <h3> Upgrade Office Space</h3>
                         <div class="office-preview">
-                            <div class="next-office-icon" id="next-office-icon">🏠</div>
+                            <div class="next-office-icon" id="next-office-icon"></div>
                             <div class="next-office-info">
                                 <div class="next-office-name" id="next-office-name">Home Office</div>
                                 <div class="next-office-bonus">+10% client attraction</div>
@@ -771,10 +860,10 @@
                     </div>
                     <!-- AI Server Rack -->
                     <div class="ai-console-section glass-card">
-                        <h3>🤖 AI Server Rack</h3>
+                        <h3> AI Server Rack</h3>
                         <div class="ai-console-layout">
                             <div class="ai-visual">
-                                <div class="ai-avatar-large">🧠</div>
+                                <div class="ai-avatar-large"></div>
                                 <div class="ai-status-light pulse"></div>
                             </div>
                             <div class="ai-info">
@@ -808,12 +897,12 @@
             <section id="screen-clients" class="screen screen-clients">
                 <div class="clients-content">
                     <button class="btn btn-ghost back-btn" id="btn-back-clients">← Back</button>
-                    <h2 class="screen-title">📬 Client Inbox</h2>
+                    <h2 class="screen-title"> Client Inbox</h2>
 
                     <!-- Client Stats -->
                     <div class="client-stats">
                         <div class="stat-card">
-                            <div class="stat-icon">📬</div>
+                            <div class="stat-icon"></div>
                             <div class="stat-info">
                                 <span class="stat-number" id="pending-jobs-count">0</span>
                                 <span class="stat-label">Pending</span>
@@ -827,7 +916,7 @@
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">✅</div>
+                            <div class="stat-icon"></div>
                             <div class="stat-info">
                                 <span class="stat-number" id="completed-jobs-count">0</span>
                                 <span class="stat-label">Completed</span>
@@ -837,11 +926,11 @@
 
                     <!-- Job Listings -->
                     <div class="jobs-container">
-                        <h3>📋 Available Jobs</h3>
+                        <h3> Available Jobs</h3>
                         <div class="jobs-list" id="pending-jobs-list">
                             <!-- Pending jobs populated by JS -->
                             <div class="empty-state">
-                                <div class="empty-icon">📭</div>
+                                <div class="empty-icon"></div>
                                 <p>No client requests yet!</p>
                                 <p class="empty-hint">Invest in marketing to attract clients</p>
                             </div>
@@ -851,7 +940,7 @@
                         <div class="jobs-list" id="active-jobs-list">
                             <!-- Active jobs populated by JS -->
                             <div class="empty-state">
-                                <div class="empty-icon">💼</div>
+                                <div class="empty-icon"></div>
                                 <p>No active jobs</p>
                                 <p class="empty-hint">Accept a job to get started!</p>
                             </div>
@@ -860,28 +949,28 @@
 
                     <!-- Marketing Section -->
                     <div class="marketing-section glass-card">
-                        <h3>📣 Marketing Channels</h3>
+                        <h3> Marketing Channels</h3>
                         <div class="marketing-grid" id="marketing-grid">
                             <div class="marketing-card active" data-channel="word_of_mouth">
-                                <div class="marketing-icon">🗣️</div>
+                                <div class="marketing-icon"></div>
                                 <div class="marketing-name">Word of Mouth</div>
                                 <div class="marketing-cost">Free</div>
                                 <div class="marketing-leads">+0.5 leads/day</div>
                             </div>
                             <div class="marketing-card" data-channel="linkedin">
-                                <div class="marketing-icon">💼</div>
+                                <div class="marketing-icon"></div>
                                 <div class="marketing-name">LinkedIn</div>
                                 <div class="marketing-cost">$20/day</div>
                                 <div class="marketing-leads">+1 lead/day</div>
                             </div>
                             <div class="marketing-card locked" data-channel="website">
-                                <div class="marketing-icon">🌐</div>
+                                <div class="marketing-icon"></div>
                                 <div class="marketing-name">Website</div>
                                 <div class="marketing-cost">$50/day</div>
                                 <div class="marketing-leads">+2 leads/day</div>
                             </div>
                             <div class="marketing-card locked" data-channel="ads">
-                                <div class="marketing-icon">📢</div>
+                                <div class="marketing-icon"></div>
                                 <div class="marketing-name">Online Ads</div>
                                 <div class="marketing-cost">$100/day</div>
                                 <div class="marketing-leads">+4 leads/day</div>
@@ -895,7 +984,7 @@
             <section id="screen-staff" class="screen screen-staff">
                 <div class="staff-content">
                     <button class="btn btn-ghost back-btn" id="btn-back-staff">← Back</button>
-                    <h2 class="screen-title">👥 Team Management</h2>
+                    <h2 class="screen-title"> Team Management</h2>
 
                     <!-- Office Capacity -->
                     <div class="capacity-bar glass-card">
@@ -909,20 +998,20 @@
                     </div>
 
                     <!-- Current Staff -->
-                    <h3 class="section-title">🏢 Your Team</h3>
+                    <h3 class="section-title"> Your Team</h3>
                     <div class="staff-grid" id="current-staff-grid">
                         <div class="empty-state">
-                            <div class="empty-icon">👤</div>
+                            <div class="empty-icon"></div>
                             <p>No employees yet!</p>
                             <p class="empty-hint">Upgrade your office to hire staff</p>
                         </div>
                     </div>
 
                     <!-- Hire Staff -->
-                    <h3 class="section-title">➕ Hire New Staff</h3>
+                    <h3 class="section-title"> Hire New Staff</h3>
                     <div class="hire-grid" id="hire-staff-grid">
                         <div class="staff-card hire-card" data-type="intern">
-                            <div class="staff-avatar">👶</div>
+                            <div class="staff-avatar"></div>
                             <div class="staff-name">Intern</div>
                             <div class="staff-role">Entry Level</div>
                             <div class="staff-efficiency">Efficiency: 0.5x</div>
@@ -932,7 +1021,7 @@
                             </button>
                         </div>
                         <div class="staff-card hire-card" data-type="junior_analyst">
-                            <div class="staff-avatar">🧑‍💼</div>
+                            <div class="staff-avatar"></div>
                             <div class="staff-name">Junior Analyst</div>
                             <div class="staff-role">Basic Charts</div>
                             <div class="staff-efficiency">Efficiency: 0.8x</div>
@@ -942,7 +1031,7 @@
                             </button>
                         </div>
                         <div class="staff-card hire-card" data-type="analyst">
-                            <div class="staff-avatar">👨‍💻</div>
+                            <div class="staff-avatar"></div>
                             <div class="staff-name">Data Analyst</div>
                             <div class="staff-role">All-Rounder</div>
                             <div class="staff-efficiency">Efficiency: 1.0x</div>
@@ -952,7 +1041,7 @@
                             </button>
                         </div>
                         <div class="staff-card hire-card locked" data-type="data_scientist">
-                            <div class="staff-avatar">🧙</div>
+                            <div class="staff-avatar"></div>
                             <div class="staff-name">Data Scientist</div>
                             <div class="staff-role">ML & Stats</div>
                             <div class="staff-efficiency">Efficiency: 2.0x</div>
@@ -965,7 +1054,7 @@
 
                     <!-- Daily Expenses -->
                     <div class="expenses-summary glass-card">
-                        <h3>💸 Daily Expenses</h3>
+                        <h3> Daily Expenses</h3>
                         <div class="expense-row">
                             <span>Staff Salaries</span>
                             <span class="money-display expense" id="daily-salaries">$0</span>
@@ -986,14 +1075,14 @@
             <section id="screen-library" class="screen screen-library">
                 <div class="library-content">
                     <button class="btn btn-ghost back-btn" id="btn-back-library">← Back</button>
-                    <h2 class="screen-title">📚 The Data Grimoire</h2>
+                    <h2 class="screen-title"> The Data Grimoire</h2>
 
                     <div class="library-categories">
                         <button class="lib-cat-btn active" data-cat="all">All</button>
-                        <button class="lib-cat-btn" data-cat="scraping">🕷️ Scraping</button>
-                        <button class="lib-cat-btn" data-cat="cleaning">🧹 Cleaning</button>
-                        <button class="lib-cat-btn" data-cat="modeling">📊 Modeling</button>
-                        <button class="lib-cat-btn" data-cat="ai">🧠 AI</button>
+                        <button class="lib-cat-btn" data-cat="scraping"> Scraping</button>
+                        <button class="lib-cat-btn" data-cat="cleaning"> Cleaning</button>
+                        <button class="lib-cat-btn" data-cat="modeling"> Modeling</button>
+                        <button class="lib-cat-btn" data-cat="ai"> AI</button>
                     </div>
 
                     <div class="library-grid" id="library-grid">
@@ -1003,30 +1092,30 @@
             </section>
 
             <!-- World Map Screen -->
-            <section id="screen-map" class="screen screen-map">
+            <section id="screen-map" class="screen screen-map hidden">
                 <div class="map-content">
                     <button class="btn btn-ghost back-btn" id="btn-back-map">← Back</button>
 
                     <!-- Time and Date Display -->
                     <div class="time-display-bar">
                         <div class="date-display">
-                            <span class="time-icon" id="time-slot-icon">☀️</span>
+                            <span class="time-icon" id="time-slot-icon"></span>
                             <span class="time-text" id="current-time-slot">Late Morning</span>
                             <span class="date-text" id="current-date">Monday, January 1, Year 1</span>
                         </div>
                         <div class="energy-display">
-                            <span class="energy-label">⚡ Energy</span>
+                            <span class="energy-label"> Energy</span>
                             <div class="energy-bar">
                                 <div class="energy-fill" id="energy-fill" style="width: 100%"></div>
                             </div>
                             <span class="energy-text" id="energy-text">100/100</span>
                         </div>
-                        <button class="btn-cartoon" id="btn-sleep">🛏️ Sleep</button>
+                        <button class="btn-cartoon" id="btn-sleep"> Sleep</button>
                     </div>
 
                     <!-- News Ticker -->
                     <div class="news-ticker-container glass-card">
-                        <div class="news-label">📰 NEWS:</div>
+                        <div class="news-label"> NEWS:</div>
                         <div class="news-content-wrapper">
                             <div class="news-content" id="news-ticker-content">
                                 Welcome to Data Science Tycoon! Market is stable.
@@ -1034,98 +1123,11 @@
                         </div>
                     </div>
 
-                    <h2 class="screen-title">🗺️ City Map</h2>
+                    <h2 class="screen-title"> City Map</h2>
 
                     <!-- Map Visualization -->
                     <div class="map-container" id="world-map">
-                        <div class="map-background"></div>
-                        
-                        <!-- Road Network -->
-                        <svg class="map-roads" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <!-- Main roads connecting key locations -->
-                            <!-- Horizontal main road (top) -->
-                            <path class="road major" d="M 20,25 L 80,25" stroke-width="0.8"/>
-                            <!-- Vertical main road (center) -->
-                            <path class="road major" d="M 50,10 L 50,85" stroke-width="0.8"/>
-                            <!-- Diagonal road (library to gym) -->
-                            <path class="road minor" d="M 30,40 L 60,35" stroke-width="0.5"/>
-                            <!-- Residential area road -->
-                            <path class="road minor" d="M 40,50 L 55,60" stroke-width="0.5"/>
-                            <!-- Coffee shop area -->
-                            <path class="road minor" d="M 45,55 L 48,58" stroke-width="0.4"/>
-                            <!-- Office to home -->
-                            <path class="road minor" d="M 40,50 L 50,70" stroke-width="0.5"/>
-                        </svg>
-
-                        <!-- Map locations will be positioned here -->
-                        <div class="map-location" data-location="home" style="left: 50%; top: 70%;">
-                            <div class="location-icon">🏠</div>
-                            <div class="location-name">Home</div>
-                        </div>
-                        <div class="map-location" data-location="office" style="left: 40%; top: 50%;">
-                            <div class="location-icon">🏢</div>
-                            <div class="location-name">Office</div>
-                        </div>
-                        <div class="map-location" data-location="library" style="left: 30%; top: 40%;">
-                            <div class="location-icon">📚</div>
-                            <div class="location-name">Library</div>
-                        </div>
-                        <div class="map-location" data-location="gym" style="left: 60%; top: 35%;">
-                            <div class="location-icon">🏋️</div>
-                            <div class="location-name">Gym</div>
-                        </div>
-                        <div class="map-location" data-location="coffee_shop" style="left: 45%; top: 55%;">
-                            <div class="location-icon">☕</div>
-                            <div class="location-name">Coffee Shop</div>
-                        </div>
-                        <div class="map-location locked" data-location="networking_bar" style="left: 70%; top: 45%;">
-                            <div class="location-icon">🍸</div>
-                            <div class="location-name">Data Lounge</div>
-                            <div class="lock-badge">🔒</div>
-                        </div>
-                        <div class="map-location" data-location="university" style="left: 25%; top: 25%;">
-                            <div class="location-icon">🏛️</div>
-                            <div class="location-name">University</div>
-                        </div>
-                        <div class="map-location locked" data-location="bank" style="left: 55%; top: 20%;">
-                            <div class="location-icon">🏦</div>
-                            <div class="location-name">Bank</div>
-                            <div class="lock-badge">🚌</div>
-                        </div>
-                        <div class="map-location locked" data-location="stock_exchange" style="left: 75%; top: 25%;">
-                            <div class="location-icon">📈</div>
-                            <div class="location-name">Stock Exchange</div>
-                            <div class="lock-badge">🚌</div>
-                        </div>
-                        <div class="map-location locked" data-location="mall" style="left: 80%; top: 60%;">
-                            <div class="location-icon">🏪</div>
-                            <div class="location-name">Mall</div>
-                            <div class="lock-badge">🚌</div>
-                        </div>
-
-                        <!-- New Shops -->
-                        <div class="map-location" data-location="donut_shop" style="left: 48%; top: 58%;">
-                            <div class="location-icon">🍩</div>
-                            <div class="location-name">Donuts</div>
-                        </div>
-                        <div class="map-location" data-location="bagel_shop" style="left: 42%; top: 52%;">
-                            <div class="location-icon">🥯</div>
-                            <div class="location-name">Bagels</div>
-                        </div>
-                        <div class="map-location" data-location="flower_store" style="left: 55%; top: 60%;">
-                            <div class="location-icon">💐</div>
-                            <div class="location-name">Flowers</div>
-                        </div>
-                        <div class="map-location locked" data-location="downtown" style="left: 50%; top: 15%;">
-                            <div class="location-icon">🏙️</div>
-                            <div class="location-name">Downtown</div>
-                            <div class="lock-badge">🚗</div>
-                        </div>
-
-                        <!-- Dynamic Player Marker -->
-                        <div class="player-marker" id="player-marker" style="left: 50%; top: 70%;">
-                            <div class="player-icon">👤</div>
-                        </div>
+                        <!-- Map will be rendered dynamically by MapRenderer -->
                     </div>
 
                     <!-- Location Actions -->
@@ -1135,19 +1137,19 @@
 
                     <!-- Vehicle selector -->
                     <div class="vehicle-bar glass-card">
-                        <h3>🚗 Transportation</h3>
+                        <h3> Transportation</h3>
                         <div class="vehicle-options" id="vehicle-options">
                             <div class="vehicle-option active" data-vehicle="walking">
-                                <span class="vehicle-icon">🚶</span>
+                                <span class="vehicle-icon"></span>
                                 <span class="vehicle-name">Walking</span>
                             </div>
                             <div class="vehicle-option locked" data-vehicle="bus_pass">
-                                <span class="vehicle-icon">🚌</span>
+                                <span class="vehicle-icon"></span>
                                 <span class="vehicle-name">Bus Pass</span>
                                 <span class="vehicle-price">$50/mo</span>
                             </div>
                             <div class="vehicle-option locked" data-vehicle="used_car">
-                                <span class="vehicle-icon">🚗</span>
+                                <span class="vehicle-icon"></span>
                                 <span class="vehicle-name">Used Car</span>
                                 <span class="vehicle-price">$5,000</span>
                             </div>
@@ -1161,14 +1163,14 @@
                 <div class="stats-content">
                     <button class="btn btn-ghost back-btn" id="btn-back-stats">← Back</button>
                     <div class="screen-header-row">
-                        <h2 class="screen-title">📊 Character Stats</h2>
-                        <button class="btn-cartoon" id="btn-view-relationships">👥 Relationships</button>
+                        <h2 class="screen-title"> Character Stats</h2>
+                        <button class="btn-cartoon" id="btn-view-relationships"> Relationships</button>
                     </div>
 
                     <!-- Character Overview -->
                     <div class="character-overview glass-card">
                         <div class="character-avatar large" id="stats-avatar">
-                            <span class="avatar-emoji">👨‍💻</span>
+                            <span class="avatar-emoji"></span>
                         </div>
                         <div class="character-info">
                             <h3 class="character-name" id="stats-name">New Player</h3>
@@ -1183,7 +1185,7 @@
                     <!-- Stats Grid -->
                     <div class="stats-grid" id="stats-grid">
                         <div class="stat-card" data-stat="intelligence">
-                            <div class="stat-icon">💡</div>
+                            <div class="stat-icon"></div>
                             <div class="stat-info">
                                 <div class="stat-name">Intelligence</div>
                                 <div class="stat-value" id="stat-intelligence">10</div>
@@ -1194,7 +1196,7 @@
                             <div class="stat-xp">XP: 0/100</div>
                         </div>
                         <div class="stat-card" data-stat="charisma">
-                            <div class="stat-icon">🎭</div>
+                            <div class="stat-icon"></div>
                             <div class="stat-info">
                                 <div class="stat-name">Charisma</div>
                                 <div class="stat-value" id="stat-charisma">10</div>
@@ -1205,7 +1207,7 @@
                             <div class="stat-xp">XP: 0/100</div>
                         </div>
                         <div class="stat-card" data-stat="stamina">
-                            <div class="stat-icon">💪</div>
+                            <div class="stat-icon"></div>
                             <div class="stat-info">
                                 <div class="stat-name">Stamina</div>
                                 <div class="stat-value" id="stat-stamina">10</div>
@@ -1216,7 +1218,7 @@
                             <div class="stat-xp">XP: 0/100</div>
                         </div>
                         <div class="stat-card" data-stat="focus">
-                            <div class="stat-icon">🎯</div>
+                            <div class="stat-icon"></div>
                             <div class="stat-info">
                                 <div class="stat-name">Focus</div>
                                 <div class="stat-value" id="stat-focus">10</div>
@@ -1227,7 +1229,7 @@
                             <div class="stat-xp">XP: 0/100</div>
                         </div>
                         <div class="stat-card" data-stat="luck">
-                            <div class="stat-icon">🍀</div>
+                            <div class="stat-icon"></div>
                             <div class="stat-info">
                                 <div class="stat-name">Luck</div>
                                 <div class="stat-value" id="stat-luck">5</div>
@@ -1238,7 +1240,7 @@
                             <div class="stat-xp">XP: 0/50</div>
                         </div>
                         <div class="stat-card" data-stat="analytics">
-                            <div class="stat-icon">📊</div>
+                            <div class="stat-icon"></div>
                             <div class="stat-info">
                                 <div class="stat-name">Analytics</div>
                                 <div class="stat-value" id="stat-analytics">5</div>
@@ -1251,34 +1253,34 @@
                     </div>
 
                     <!-- Training Section -->
-                    <h3 class="section-title">🏋️ Training Activities</h3>
+                    <h3 class="section-title"> Training Activities</h3>
                     <div class="training-grid" id="training-grid">
                         <div class="training-card" data-activity="study_books">
-                            <div class="training-icon">📚</div>
+                            <div class="training-icon"></div>
                             <div class="training-name">Study Books</div>
-                            <div class="training-effects">+💡 +📊</div>
-                            <div class="training-cost">Free • 2 slots • 15⚡</div>
+                            <div class="training-effects">+ +</div>
+                            <div class="training-cost">Free • 2 slots • 15</div>
                             <button class="btn-cartoon btn-cartoon-success">Train</button>
                         </div>
                         <div class="training-card" data-activity="gym_workout">
-                            <div class="training-icon">🏋️</div>
+                            <div class="training-icon"></div>
                             <div class="training-name">Gym Workout</div>
-                            <div class="training-effects">+💪 +🎯</div>
-                            <div class="training-cost">$20 • 1 slot • 25⚡</div>
+                            <div class="training-effects">+ +</div>
+                            <div class="training-cost">$20 • 1 slot • 25</div>
                             <button class="btn-cartoon btn-cartoon-success">Train</button>
                         </div>
                         <div class="training-card" data-activity="meditation">
-                            <div class="training-icon">🧘</div>
+                            <div class="training-icon"></div>
                             <div class="training-name">Meditation</div>
-                            <div class="training-effects">+🎯 +💪</div>
-                            <div class="training-cost">Free • 1 slot • +10⚡</div>
+                            <div class="training-effects">+ +</div>
+                            <div class="training-cost">Free • 1 slot • +10</div>
                             <button class="btn-cartoon btn-cartoon-success">Train</button>
                         </div>
                         <div class="training-card" data-activity="networking_event">
-                            <div class="training-icon">🍸</div>
+                            <div class="training-icon"></div>
                             <div class="training-name">Networking</div>
-                            <div class="training-effects">+🎭 +🍀</div>
-                            <div class="training-cost">$30 • 2 slots • 20⚡</div>
+                            <div class="training-effects">+ +</div>
+                            <div class="training-cost">$30 • 2 slots • 20</div>
                             <button class="btn-cartoon btn-cartoon-success">Train</button>
                         </div>
                     </div>
@@ -1289,12 +1291,12 @@
             <section id="screen-relationships" class="screen screen-relationships">
                 <div class="relationships-content">
                     <button class="btn btn-ghost back-btn" id="btn-back-relationships">← Back</button>
-                    <h2 class="screen-title">👥 Relationships</h2>
+                    <h2 class="screen-title"> Relationships</h2>
 
                     <!-- NPC Grid -->
                     <div class="npc-grid" id="npc-grid">
                         <div class="npc-card" data-npc="alex_rivera">
-                            <div class="npc-avatar">🧑‍💻</div>
+                            <div class="npc-avatar"></div>
                             <div class="npc-info">
                                 <div class="npc-name">Alex Rivera</div>
                                 <div class="npc-title">Fellow Freelancer</div>
@@ -1305,7 +1307,7 @@
                             <div class="relationship-tier">Acquaintance</div>
                         </div>
                         <div class="npc-card" data-npc="professor_chen">
-                            <div class="npc-avatar">👨‍🏫</div>
+                            <div class="npc-avatar"></div>
                             <div class="npc-info">
                                 <div class="npc-name">Professor Chen</div>
                                 <div class="npc-title">University Professor</div>
@@ -1316,20 +1318,20 @@
                             <div class="relationship-tier">Stranger</div>
                         </div>
                         <div class="npc-card locked" data-npc="mike_johnson">
-                            <div class="npc-avatar">👔</div>
+                            <div class="npc-avatar"></div>
                             <div class="npc-info">
                                 <div class="npc-name">???</div>
-                                <div class="npc-title">Unlock with 🎭 20</div>
+                                <div class="npc-title">Unlock with  20</div>
                             </div>
-                            <div class="lock-overlay">🔒</div>
+                            <div class="lock-overlay"></div>
                         </div>
                         <div class="npc-card locked" data-npc="david_chen">
-                            <div class="npc-avatar">💰</div>
+                            <div class="npc-avatar"></div>
                             <div class="npc-info">
                                 <div class="npc-name">???</div>
                                 <div class="npc-title">Unlock with 1000 Rep</div>
                             </div>
-                            <div class="lock-overlay">🔒</div>
+                            <div class="lock-overlay"></div>
                         </div>
                     </div>
                 </div>
@@ -1369,13 +1371,13 @@
             <!-- Fast Forward Working Overlay -->
             <div id="working-overlay" class="working-overlay hidden">
                 <div class="working-container glass-card">
-                    <h2 class="animate-pulse">👨‍💻 Coding...</h2>
+                    <h2 class="animate-pulse"> Coding...</h2>
                     <div class="working-visuals">
                         <div class="code-stream" id="code-stream">
                             // Analyzing Data...
                         </div>
                         <div class="clock-spinner" id="work-clock">
-                            🕒
+                            
                         </div>
                     </div>
                     <div class="working-stats">
@@ -1397,7 +1399,7 @@
 
             <!-- Jail Screen -->
             <section id="screen-jail" class="screen hidden" style="text-align: center; background-color: #2c3e50;">
-                <div class="jail-bars" style="font-size: 100px; margin-top: 50px;">⛓️</div>
+                <div class="jail-bars" style="font-size: 100px; margin-top: 50px;"></div>
                 <h1 style="color: #e74c3c; font-size: 3rem;">BUSTED!</h1>
                 <p style="color: #bdc3c7; font-size: 1.2rem;">You have been arrested for financial crimes.</p>
 
@@ -1425,6 +1427,99 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Scripts -->
+    <script>
+        // EARLY TEST - This should run immediately
+        (function() {
+            const earlyTest = document.createElement('div');
+            earlyTest.id = 'early-js-test';
+            earlyTest.style.cssText = 'position:fixed;top:0;left:0;background:lime;color:black;padding:10px;z-index:99999;font-weight:bold;font-size:16px;';
+            earlyTest.textContent = ' JAVASCRIPT IS RUNNING';
+            document.body.appendChild(earlyTest);
+            console.log(' EARLY SCRIPT EXECUTED - JavaScript is working!');
+        })();
+        
+        // Unregister any service workers that might be caching old resources
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let registration of registrations) {
+                    registration.unregister().then(() => {
+                        console.log('Service worker unregistered');
+                    });
+                }
+            });
+        }
+        
+        // Clear all caches
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => {
+                    caches.delete(name);
+                });
+            });
+        }
+        
+        // Global error handler to catch any unhandled errors
+        window.addEventListener('error', (event) => {
+            console.error('Global error caught:', event.error);
+            const errDiv = document.createElement('div');
+            errDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,0,0,0.95);color:white;z-index:99999;padding:20px;font-family:monospace;white-space:pre-wrap;overflow:auto;';
+            errDiv.innerHTML = '<h1> GLOBAL ERROR CAUGHT</h1><h3>' + (event.error?.message || event.message) + '</h3><pre>' + (event.error?.stack || event.filename + ':' + event.lineno) + '</pre><button onclick="this.parentElement.remove()" style="padding:10px;margin-top:20px;font-size:16px;">Close</button>';
+            document.body.appendChild(errDiv);
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            const errDiv = document.createElement('div');
+            errDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,165,0,0.95);color:white;z-index:99999;padding:20px;font-family:monospace;white-space:pre-wrap;overflow:auto;';
+            errDiv.innerHTML = '<h1> UNHANDLED PROMISE REJECTION</h1><h3>' + (event.reason?.message || String(event.reason)) + '</h3><pre>' + (event.reason?.stack || '') + '</pre><button onclick="this.parentElement.remove()" style="padding:10px;margin-top:20px;font-size:16px;">Close</button>';
+            document.body.appendChild(errDiv);
+        });
+        
+        // Test if page loaded
+        console.log(' HTML loaded, about to load main.js module');
+        
+        // Add visible indicator that JavaScript is running
+        const jsIndicator = document.createElement('div');
+        jsIndicator.id = 'js-status-indicator';
+        jsIndicator.style.cssText = 'position:fixed;bottom:10px;right:10px;background:rgba(0,255,0,0.8);color:black;padding:10px;font-family:monospace;font-size:12px;z-index:99999;border:2px solid #0f0;border-radius:5px;';
+        jsIndicator.innerHTML = ' JavaScript Loaded';
+        document.body.appendChild(jsIndicator);
+        
+        // Create a large diagnostic panel
+        const diagPanel = document.createElement('div');
+        diagPanel.id = 'diagnostic-panel';
+        diagPanel.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.95);color:#0f0;padding:15px;font-family:monospace;font-size:12px;z-index:99999;border:3px solid #0f0;border-radius:5px;min-width:300px;max-height:80vh;overflow:auto;';
+        diagPanel.innerHTML = '<h3 style="margin-top:0;color:#0f0;"> DIAGNOSTIC PANEL</h3><div id="diag-content">Initializing...</div>';
+        document.body.appendChild(diagPanel);
+        
+        const updateDiag = (msg) => {
+            const content = document.getElementById('diag-content');
+            if (content) {
+                content.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + msg + '</div>';
+                diagPanel.scrollTop = diagPanel.scrollHeight;
+            }
+        };
+        window.__updateDiag = updateDiag;
+        updateDiag('Page loaded, waiting for module...');
+        
+        // Update indicator when module loads
+        window.addEventListener('load', () => {
+            const indicator = document.getElementById('js-status-indicator');
+            if (indicator) {
+                indicator.innerHTML = ' Page Fully Loaded';
+            }
+        });
+    </script>
+    <script>
+        // Listen for module load
+        window.addEventListener('module-loaded', () => {
+            const indicator = document.getElementById('js-status-indicator');
+            if (indicator) {
+                indicator.innerHTML = ' main.js Module Loaded';
+                indicator.style.background = 'rgba(0,255,255,0.8)';
+            }
+        });
+    </script>
 </body>
 
 </html>

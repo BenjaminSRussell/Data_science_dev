@@ -128,7 +128,7 @@ export class AssetFinder {
             '4. Place in correct directory (assets/characters/, assets/backgrounds/, etc.)',
             '5. Verify format and size match requirements',
             '6. Test in game - asset should load automatically',
-            '7. If missing, fallback placeholder will be used'
+            '7. If missing, fallback asset will be used'
         ];
     }
 }

@@ -1,0 +1,24 @@
+{
+  "downloaded": [
+    {
+      "source": "Universal LPC (GitHub)",
+      "url": "https://github.com/jrconway3/Universal-LPC-Spritesheet/archive/refs/heads/master.zip",
+      "path": "downloaded_assets/characters/universal_lpc.zip",
+      "license": "CC-BY-SA 3.0"
+    },
+    {
+      "source": "Intersect Assets (GitHub)",
+      "url": "https://github.com/AscensionGameDev/Intersect-Assets/archive/refs/heads/main.zip",
+      "path": "downloaded_assets/characters/intersect_assets.zip",
+      "license": "Free for commercial use"
+    },
+    {
+      "source": "LPC Base Assets",
+      "url": "https://github.com/jrconway3/Universal-LPC-Spritesheet/archive/refs/heads/master.zip",
+      "path": "downloaded_assets/characters/lpc_base/lpc_base_assets.zip",
+      "license": "CC-BY-SA 3.0"
+    }
+  ],
+  "count": 3,
+  "timestamp": 1766339232.200238
+}

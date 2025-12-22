@@ -154,7 +154,7 @@ export class EmotionalBreakdownSystem {
         overlay.innerHTML = `
             <div class="breakdown-container">
                 <div class="breakdown-character ${emotion}">
-                    <div class="character-visual">${npc.icon || '👤'}</div>
+                    <div class="character-visual">${npc.icon || ''}</div>
                     <div class="emotion-indicator ${emotion}"></div>
                 </div>
                 <div class="breakdown-dialogue">

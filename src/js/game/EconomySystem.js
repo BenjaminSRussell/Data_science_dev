@@ -241,7 +241,7 @@ export class EconomySystem {
      */
     showPromotionNotification(newRank) {
         // This will be handled by the main game class through toast/modal
-        console.log(`🎉 Promoted to ${newRank.title}!`);
+        console.log(` Promoted to ${newRank.title}!`);
 
         // Dispatch custom event
         window.dispatchEvent(new CustomEvent('promotion', {
@@ -256,7 +256,7 @@ export class EconomySystem {
         let price = item.price;
 
         // Check for discount perks
-        if (this.gameState.unlockedTools.includes('bargain_hunter')) {
+        if (this.gameState.unlockedTools?.includes('bargain_hunter')) {
             price = Math.round(price * 0.9); // 10% discount
         }
 
@@ -267,7 +267,7 @@ export class EconomySystem {
      * Calculate salary bonus for current rank
      */
     getSalaryMultiplier() {
-        return this.gameState.currentRank.salaryMultiplier;
+        return this.gameState.currentRank?.salaryMultiplier || 1;
     }
 
     /**
@@ -335,7 +335,7 @@ export class EconomySystem {
     getTransportationCost() {
         if (!this.gameState.worldMap) return 0;
 
-        const vehicle = this.gameState.worldMap.currentVehicle || 'walking';
+        const vehicle = this.gameState.worldMap?.currentVehicle || 'walking';
         
         if (vehicle === 'walking') {
             return 0; // Free

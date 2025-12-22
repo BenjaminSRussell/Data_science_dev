@@ -1,0 +1,224 @@
+/* =====================================================
+   MAP ROAD SYSTEM STYLES
+   Road network rendering for blocky city map
+   ===================================================== */
+
+/* Road Container */
+.map-roads-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Road tiles rendered by MapRoadRenderer */
+.map-road-tile {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+/* Road Base Styles */
+.map-road-tile {
+    position: absolute;
+    background: #4a4a4a;
+    border: 1px solid #2a2a2a;
+    box-sizing: border-box;
+}
+
+/* Main Roads (4 lanes) */
+.map-road-tile.main {
+    background: #2a2a2a;
+    border: 1px solid #1a1a1a;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+.map-road-tile.main.horizontal::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: repeating-linear-gradient(
+        90deg,
+        #ffff00 0px,
+        #ffff00 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    transform: translateY(-50%);
+    opacity: 0.7;
+}
+
+.map-road-tile.main.vertical::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: repeating-linear-gradient(
+        0deg,
+        #ffff00 0px,
+        #ffff00 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    transform: translateX(-50%);
+    opacity: 0.7;
+}
+
+/* Secondary Roads (2 lanes) */
+.map-road-tile.secondary {
+    background: #3a3a3a;
+    border: 1px solid #2a2a2a;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.map-road-tile.secondary.horizontal::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #4a4a4a;
+    transform: translateY(-50%);
+    opacity: 0.5;
+}
+
+.map-road-tile.secondary.vertical::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #4a4a4a;
+    transform: translateX(-50%);
+    opacity: 0.5;
+}
+
+/* Local Roads (1 lane) */
+.map-road-tile.local {
+    background: #3a3a3a;
+    border: 1px solid #2a2a2a;
+    opacity: 0.8;
+}
+
+/* Road Directions */
+.map-road-tile.horizontal {
+    width: 100%;
+}
+
+.map-road-tile.vertical {
+    height: 100%;
+}
+
+/* Intersections */
+.map-intersection {
+    position: absolute;
+    background: #3a3a3a;
+    border: 2px solid #2a2a2a;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+}
+
+.map-intersection::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        linear-gradient(0deg, transparent 45%, #ffff00 45%, #ffff00 55%, transparent 55%),
+        linear-gradient(90deg, transparent 45%, #ffff00 45%, #ffff00 55%, transparent 55%);
+    opacity: 0.6;
+}
+
+/* Road Markings */
+.map-road-marking {
+    position: absolute;
+    background: #ffff00;
+    opacity: 0.6;
+}
+
+.map-road-marking.center-line {
+    width: 2px;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.map-road-marking.center-line.horizontal {
+    width: 100%;
+    height: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Road Textures */
+.map-road-tile.asphalt {
+    background: 
+        repeating-linear-gradient(
+            45deg,
+            #3a3a3a 0px,
+            #3a3a3a 2px,
+            #2a2a2a 2px,
+            #2a2a2a 4px
+        );
+}
+
+.map-road-tile.concrete {
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            #4a4a4a 0px,
+            #4a4a4a 4px,
+            #3a3a3a 4px,
+            #3a3a3a 8px
+        );
+}
+
+/* Road Hover Effects */
+.map-road-tile:hover {
+    filter: brightness(1.2);
+}
+
+/* Day/Night Road Variations */
+.map-container.time-night .map-road-tile {
+    background: #2a2a2a;
+    border-color: #1a1a1a;
+}
+
+.map-container.time-night .map-road-tile.main {
+    background: #1a1a1a;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+.map-container.time-night .map-intersection {
+    background: #1a1a1a;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+/* Road Animation (optional) */
+@keyframes roadFlow {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 20px 0;
+    }
+}
+
+.map-road-tile.animated {
+    background-image: 
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 8px,
+            rgba(255, 255, 255, 0.1) 8px,
+            rgba(255, 255, 255, 0.1) 16px
+        );
+    animation: roadFlow 2s linear infinite;
+}

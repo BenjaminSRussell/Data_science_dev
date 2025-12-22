@@ -347,9 +347,9 @@ export class TaskVisualRenderer {
                         <tr><th>ID</th><th>Name</th><th>Value</th><th>Status</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>1</td><td>Data Point 1</td><td>42.5</td><td class="valid">✓</td></tr>
-                        <tr class="scanning"><td>2</td><td>Data Point 2</td><td>null</td><td class="invalid">✗</td></tr>
-                        <tr><td>3</td><td>Data Point 3</td><td>78.2</td><td class="valid">✓</td></tr>
+                        <tr><td>1</td><td>Data Point 1</td><td>42.5</td><td class="valid"></td></tr>
+                        <tr class="scanning"><td>2</td><td>Data Point 2</td><td>null</td><td class="invalid"></td></tr>
+                        <tr><td>3</td><td>Data Point 3</td><td>78.2</td><td class="valid"></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -399,13 +399,13 @@ export class TaskVisualRenderer {
         return `
             <div class="github-visual">
                 <div class="github-header">
-                    <div class="github-logo">🐙</div>
+                    <div class="github-logo"></div>
                     <div class="github-title">GitHub</div>
                 </div>
                 <div class="github-content">
                     ${type === 'github_issue' ? `
                         <div class="issue-card">
-                            <div class="issue-title">🐛 Bug: Data processing fails on null values</div>
+                            <div class="issue-title"> Bug: Data processing fails on null values</div>
                             <div class="issue-body">
                                 <p>When processing data with null values, the pipeline crashes.</p>
                                 <div class="issue-labels">
@@ -416,7 +416,7 @@ export class TaskVisualRenderer {
                         </div>
                     ` : type === 'github_feature' ? `
                         <div class="feature-card">
-                            <div class="feature-title">✨ Feature: Add data validation</div>
+                            <div class="feature-title"> Feature: Add data validation</div>
                             <div class="feature-body">
                                 <p>Implement comprehensive data validation pipeline.</p>
                                 <div class="pr-status">Pull Request #42</div>
@@ -466,12 +466,12 @@ export class TaskVisualRenderer {
      */
     getStageIcon(stage) {
         const icons = {
-            'Extract': '📥',
-            'Transform': '⚙️',
-            'Load': '📤',
-            'Source': '📊',
-            'Process': '🔄',
-            'Destination': '💾'
+            'Extract': '',
+            'Transform': '',
+            'Load': '',
+            'Source': '',
+            'Process': '',
+            'Destination': ''
         };
         return icons[stage] || '●';
     }
@@ -481,13 +481,13 @@ export class TaskVisualRenderer {
      */
     getVisualIcon(type) {
         const icons = {
-            'data_loading': '📥',
-            'statistics': '📊',
-            'pattern_analysis': '🔍',
-            'documentation': '📝',
-            'architecture': '🏗️'
+            'data_loading': '',
+            'statistics': '',
+            'pattern_analysis': '',
+            'documentation': '',
+            'architecture': ''
         };
-        return icons[type] || '⚙️';
+        return icons[type] || '';
     }
     
     /**

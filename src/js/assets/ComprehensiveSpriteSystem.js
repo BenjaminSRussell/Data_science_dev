@@ -16,49 +16,69 @@ export class ComprehensiveSpriteSystem {
     }
     
     /**
-     * Initialize sprite system
+     * Initialize sprite system (fails gracefully)
      */
     async initialize() {
-        console.log('🎨 Initializing comprehensive sprite system...');
-        
-        // Load all emotion sprites
-        await this.loadEmotionSprites();
-        
-        // Load all body language sprites
-        await this.loadBodyLanguageSprites();
-        
-        // Register sprite sheets
-        await this.registerSpriteSheets();
-        
-        console.log('✅ Sprite system initialized');
+        try {
+            // Load all emotion sprites
+            await this.loadEmotionSprites();
+            
+            // Load all body language sprites
+            await this.loadBodyLanguageSprites();
+            
+            // Register sprite sheets
+            await this.registerSpriteSheets();
+        } catch (error) {
+            // Sprite system can work without all sprites loaded
+        }
     }
     
     /**
-     * Load all emotion sprites
+     * Load all emotion sprites (fails gracefully)
      */
     async loadEmotionSprites() {
-        const emotions = emotionSpriteMapper.getAllEmotions();
-        const promises = emotions.map(emotion => {
-            const config = emotionSpriteMapper.getEmotion(emotion);
-            return this.loadSprite(config.sprite, `emotion_${emotion}`);
-        });
-        
-        await Promise.allSettled(promises);
-        console.log(`✅ Loaded ${emotions.length} emotion sprites`);
+        try {
+            const emotions = emotionSpriteMapper.getAllEmotions();
+            const promises = emotions.map(emotion => {
+                try {
+                    const config = emotionSpriteMapper.getEmotion(emotion);
+                    if (config && config.sprite) {
+                        return this.loadSprite(config.sprite, `emotion_${emotion}`);
+                    }
+                } catch (error) {
+                    // Skip this emotion if config is invalid
+                }
+                return Promise.resolve(null);
+            });
+            
+            await Promise.allSettled(promises);
+        } catch (error) {
+            // Continue even if emotion loading fails
+        }
     }
     
     /**
      * Load all body language sprites
      */
     async loadBodyLanguageSprites() {
-        const poses = bodyLanguageMapper.getAllPoses();
-        const promises = poses.map(pose => {
-            const config = bodyLanguageMapper.getBodyLanguage(pose);
-            return this.loadSprite(config.sprite, `pose_${pose}`);
-        });
-        
-        await Promise.allSettled(promises);
-        console.log(`✅ Loaded ${poses.length} body language sprites`);
+        try {
+            const poses = bodyLanguageMapper.getAllPoses();
+            const promises = poses.map(pose => {
+                try {
+                    const config = bodyLanguageMapper.getBodyLanguage(pose);
+                    if (config && config.sprite) {
+                        return this.loadSprite(config.sprite, `pose_${pose}`);
+                    }
+                } catch (error) {
+                    // Skip this pose if config is invalid
+                }
+                return Promise.resolve(null);
+            });
+            
+            await Promise.allSettled(promises);
+        } catch (error) {
+            // Continue even if pose loading fails
+        }
     }
     
     /**
@@ -74,10 +94,8 @@ export class ComprehensiveSpriteSystem {
             };
             
             img.onerror = () => {
-                console.warn(`Failed to load sprite: ${url}, using fallback`);
-                const fallback = this.createFallbackSprite(key);
-                this.loadedSprites.set(key, fallback);
-                resolve(fallback);
+                // Sprite failed to load - don't add fallback
+                resolve(null);
             };
             
             img.src = url;
@@ -85,37 +103,10 @@ export class ComprehensiveSpriteSystem {
     }
     
     /**
-     * Create fallback sprite
+     * Get sprite (returns null if not loaded)
      */
-    createFallbackSprite(key) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 64;
-        canvas.height = 64;
-        const ctx = canvas.getContext('2d');
-        
-        // Determine color based on key
-        let color = '#8b5cf6';
-        if (key.includes('emotion')) {
-            const emotion = key.replace('emotion_', '');
-            const emotionConfig = emotionSpriteMapper.getEmotion(emotion);
-            color = emotionConfig.color;
-        } else if (key.includes('pose')) {
-            color = '#10b981';
-        }
-        
-        // Draw colored rectangle
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, 64, 64);
-        
-        // Draw text
-        ctx.fillStyle = 'white';
-        ctx.font = '10px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(key.split('_').pop().substring(0, 6), 32, 32);
-        
-        const img = new Image();
-        img.src = canvas.toDataURL();
-        return img;
+    getSprite(key) {
+        return this.loadedSprites.get(key) || null;
     }
     
     /**
@@ -165,7 +156,7 @@ export class ComprehensiveSpriteSystem {
                     });
                 });
                 
-                console.log('✅ Registered sprite sheets');
+                console.log(' Registered sprite sheets');
             } catch (error) {
                 console.warn('Could not register sprite sheets:', error);
             }
@@ -173,25 +164,34 @@ export class ComprehensiveSpriteSystem {
     }
     
     /**
-     * Get sprite for emotion
+     * Get sprite for emotion (returns null if not loaded)
      */
     getEmotionSprite(emotion) {
         const key = `emotion_${emotion}`;
-        return this.loadedSprites.get(key) || this.createFallbackSprite(key);
+        return this.loadedSprites.get(key) || null;
     }
     
     /**
-     * Get sprite for body language
+     * Get sprite for body language (returns null if not loaded)
      */
     getBodyLanguageSprite(pose) {
         const key = `pose_${pose}`;
-        return this.loadedSprites.get(key) || this.createFallbackSprite(key);
+        return this.loadedSprites.get(key) || null;
     }
     
     /**
      * Get combined sprite (emotion + body language)
+     * Returns null if either sprite is missing
      */
     getCombinedSprite(emotion, pose) {
+        const poseSprite = this.getBodyLanguageSprite(pose);
+        const emotionSprite = this.getEmotionSprite(emotion);
+        
+        // Return null if either sprite is missing
+        if (!poseSprite || !emotionSprite) {
+            return null;
+        }
+        
         const cacheKey = `${emotion}_${pose}`;
         
         if (this.spriteCache.has(cacheKey)) {
@@ -203,9 +203,6 @@ export class ComprehensiveSpriteSystem {
         canvas.width = 64;
         canvas.height = 64;
         const ctx = canvas.getContext('2d');
-        
-        const poseSprite = this.getBodyLanguageSprite(pose);
-        const emotionSprite = this.getEmotionSprite(emotion);
         
         // Draw pose first
         ctx.drawImage(poseSprite, 0, 0);

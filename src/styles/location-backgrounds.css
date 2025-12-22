@@ -92,6 +92,188 @@
     background: linear-gradient(180deg, rgba(168, 192, 144, 0.2) 0%, rgba(168, 192, 144, 0.1) 100%);
 }
 
+/* Library Background */
+.location-background.library {
+    background-image: url('/assets/backgrounds/locations/library.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #8b5a2b;
+}
+
+.location-background.library::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(139, 90, 43, 0.3) 0%, rgba(60, 42, 20, 0.1) 100%);
+}
+
+/* Gym Background */
+.location-background.gym {
+    background-image: url('/assets/backgrounds/locations/gym.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #ff6b9d;
+}
+
+.location-background.gym::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 107, 157, 0.2) 0%, rgba(196, 69, 105, 0.1) 100%);
+}
+
+/* Donut Shop Background */
+.location-background.donut_shop {
+    background-image: url('/assets/backgrounds/locations/donut_shop.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #ff9ff3;
+}
+
+.location-background.donut_shop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 159, 243, 0.2) 0%, rgba(243, 104, 224, 0.1) 100%);
+}
+
+/* Bagel Shop Background */
+.location-background.bagel_shop {
+    background-image: url('/assets/backgrounds/locations/bagel_shop.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #feca57;
+}
+
+.location-background.bagel_shop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(254, 202, 87, 0.2) 0%, rgba(255, 159, 67, 0.1) 100%);
+}
+
+/* Flower Store Background */
+.location-background.flower_store {
+    background-image: url('/assets/backgrounds/locations/flower_store.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #54a0ff;
+}
+
+.location-background.flower_store::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(84, 160, 255, 0.2) 0%, rgba(46, 134, 222, 0.1) 100%);
+}
+
+/* Networking Bar Background */
+.location-background.networking_bar {
+    background-image: url('/assets/backgrounds/locations/networking_bar.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #a855f7;
+}
+
+.location-background.networking_bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(168, 85, 247, 0.2) 0%, rgba(124, 58, 237, 0.1) 100%);
+}
+
+/* Stock Exchange Background */
+.location-background.stock_exchange {
+    background-image: url('/assets/backgrounds/locations/stock_exchange.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #00c853;
+}
+
+.location-background.stock_exchange::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 200, 83, 0.2) 0%, rgba(0, 150, 36, 0.1) 100%);
+}
+
+/* City Hall Background */
+.location-background.city_hall {
+    background-image: url('/assets/backgrounds/locations/city_hall.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #607d8b;
+}
+
+.location-background.city_hall::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(96, 125, 139, 0.2) 0%, rgba(69, 90, 100, 0.1) 100%);
+}
+
+/* Mall Background */
+.location-background.mall {
+    background-image: url('/assets/backgrounds/locations/mall.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #ff8548;
+}
+
+.location-background.mall::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 133, 72, 0.2) 0%, rgba(230, 81, 0, 0.1) 100%);
+}
+
+/* Car Dealership Background */
+.location-background.car_dealership {
+    background-image: url('/assets/backgrounds/locations/car_dealership.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #3498db;
+}
+
+.location-background.car_dealership::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(52, 152, 219, 0.2) 0%, rgba(41, 128, 185, 0.1) 100%);
+}
+
+/* Downtown Background */
+.location-background.downtown {
+    background-image: url('/assets/backgrounds/locations/downtown.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #2c3e50;
+}
+
+.location-background.downtown::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(44, 62, 80, 0.2) 0%, rgba(26, 37, 47, 0.1) 100%);
+}
+
+/* Tech Hub Background */
+.location-background.tech_hub {
+    background-image: url('/assets/backgrounds/locations/tech_hub.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #9c27b0;
+}
+
+.location-background.tech_hub::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(156, 39, 176, 0.2) 0%, rgba(123, 31, 162, 0.1) 100%);
+}
+
+/* Luxury District Background */
+.location-background.luxury_district {
+    background-image: url('/assets/backgrounds/locations/luxury_district.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #ffd700;
+}
+
+.location-background.luxury_district::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.2) 0%, rgba(184, 134, 11, 0.1) 100%);
+}
+
+/* Real Estate Background */
+.location-background.real_estate {
+    background-image: url('/assets/backgrounds/locations/real_estate.png'), url('/assets/backgrounds/locations/house_simple.svg');
+    background-color: #795548;
+}
+
+.location-background.real_estate::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(121, 85, 72, 0.2) 0%, rgba(93, 64, 55, 0.1) 100%);
+}
+
 /* Fallback Backgrounds (if images don't load) */
 .location-background::after {
     content: '';

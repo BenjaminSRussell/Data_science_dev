@@ -1,5 +1,7 @@
 /**
  * UIUpdater - Updates all UI elements based on game state
+ * Phase 2: Now uses LitUIManager for component-based updates
+ * Cleanup: Uses centralized utilities
  */
 
 import { RANKS } from '../data/ranks.js';
@@ -7,11 +9,19 @@ import { SHOP_ITEMS } from '../data/shopItems.js';
 import { LIBRARY_CONTENT, CATEGORIES } from '../game/LibraryDatabase.js';
 import { OFFICE_LOCATIONS } from '../data/locations.js';
 import { LOCATIONS } from '../game/WorldMap.js';
-import { HARDWARE_PARTS, HARDWARE_TYPES } from '../game/HardwareSystems.js'; // NEW
+import { HARDWARE_PARTS, HARDWARE_TYPES } from '../game/HardwareSystems.js';
+import { LitUIManager } from './LitUIManager.js';
+import { useGameStore } from '../store/gameStore.js';
+import { DOMUtils } from '../utils/DOMUtils.js';
+import { CommonUtils } from '../utils/CommonUtils.js';
+import { logger } from '../utils/Logger.js';
 
 export class UIUpdater {
     constructor(game) {
         this.game = game;
+        // Phase 2: Use LitUIManager for component-based UI
+        this.litUIManager = new LitUIManager(game);
+        this.litUIManager.initialize();
     }
 
     // Helper to get gameState safely
@@ -32,47 +42,67 @@ export class UIUpdater {
 
     /**
      * Update top bar stats
+     * Phase 2: Uses LitUIManager (with fallback to DOM)
+     * Phase 4: Uses Zustand store
      */
     updateTopBar() {
-        const moneyEl = document.getElementById('money-value');
-        const repEl = document.getElementById('reputation-value');
-        const rankEl = document.getElementById('rank-value');
-
-        if (moneyEl && this.gameState) {
-            moneyEl.textContent = `$${(this.gameState.money ?? 0).toLocaleString()}`;
-        }
-
-        if (repEl && this.gameState) {
-            repEl.textContent = (this.gameState.reputation ?? 0).toLocaleString();
-        }
-
-        if (rankEl && this.gameState?.currentRank) {
-            rankEl.textContent = this.gameState.currentRank.title;
+        // Phase 4: Get state from Zustand store
+        const gameStore = this.game?.gameStore || useGameStore;
+        const state = gameStore.getState();
+        
+        // Try Lit component first
+        if (this.litUIManager) {
+            this.litUIManager.updateTopBar();
+        } else {
+            // Fallback to DOM manipulation (using DOMUtils)
+            DOMUtils.updateElement('#money-value', {
+                textContent: CommonUtils.formatCurrency(state.money ?? 0)
+            });
+            DOMUtils.updateElement('#reputation-value', {
+                textContent: CommonUtils.formatNumber(state.reputation ?? 0)
+            });
+            if (state.currentRank) {
+                DOMUtils.updateElement('#rank-value', {
+                    textContent: state.currentRank.title
+                });
+            }
         }
     }
 
 
     /**
      * Update rank progress display
+     * Phase 2: Uses LitUIManager (with fallback to DOM)
+     * Phase 4: Uses Zustand store
      */
     updateRankProgress() {
-        const currentRankEl = document.getElementById('current-rank');
-        const progressEl = document.getElementById('rank-progress');
-        const nextRankEl = document.querySelector('.next-rank');
+        // Phase 4: Get state from Zustand store
+        const gameStore = this.game?.gameStore || useGameStore;
+        const state = gameStore.getState();
+        
+        // Try Lit component first
+        if (this.litUIManager) {
+            this.litUIManager.updateRankProgress();
+        } else {
+            // Fallback to DOM manipulation
+            const currentRankEl = document.getElementById('current-rank');
+            const progressEl = document.getElementById('rank-progress');
+            const nextRankEl = document.querySelector('.next-rank');
 
-        if (currentRankEl) {
-            currentRankEl.textContent = this.gameState.currentRank.title;
-        }
+            if (currentRankEl && state.currentRank) {
+                currentRankEl.textContent = state.currentRank.title || 'None';
+            }
 
-        if (progressEl) {
-            progressEl.style.width = `${this.gameState.progressToNextRank}%`;
-        }
+            if (progressEl) {
+                progressEl.style.width = `${state.progressToNextRank || 0}%`;
+            }
 
-        if (nextRankEl) {
-            if (this.gameState.nextRank) {
-                nextRankEl.textContent = `Next: ${this.gameState.nextRank.title}`;
-            } else {
-                nextRankEl.textContent = 'Max Rank Achieved!';
+            if (nextRankEl) {
+                if (state.nextRank) {
+                    nextRankEl.textContent = `Next: ${state.nextRank.title}`;
+                } else {
+                    nextRankEl.textContent = 'Max Rank Achieved!';
+                }
             }
         }
     }
@@ -81,15 +111,20 @@ export class UIUpdater {
      * Update chart type availability in studio
      */
     updateChartTypeGrid() {
-        document.querySelectorAll('.chart-type-btn').forEach(btn => {
+        DOMUtils.queryAll('.chart-type-btn').forEach(btn => {
             const type = btn.dataset.type;
+            const iconEl = btn.querySelector('.chart-icon');
 
             if (this.gameState.isChartTypeUnlocked(type)) {
-                btn.classList.remove('locked');
-                btn.querySelector('.chart-icon').textContent = this.getChartIcon(type);
+                DOMUtils.toggleClass(btn, 'locked', false);
+                if (iconEl) {
+                    iconEl.textContent = this.getChartIcon(type);
+                }
             } else {
-                btn.classList.add('locked');
-                btn.querySelector('.chart-icon').textContent = '🔒';
+                DOMUtils.toggleClass(btn, 'locked', true);
+                if (iconEl) {
+                    iconEl.textContent = '';
+                }
             }
         });
     }
@@ -98,39 +133,39 @@ export class UIUpdater {
      * Get icon for chart type
      */
     getChartIcon(type) {
-        const icons = {
-            bar: '📊',
-            line: '📈',
-            pie: '🥧',
-            scatter: '⚬',
-            doughnut: '🍩',
-            radar: '📡',
-            area: '📉',
-            bubble: '⭕',
-            polarArea: '🧭'
+        // Return icon path instead of emoji
+        const iconPaths = {
+            bar: '/assets/icons/charts/bar.png',
+            line: '/assets/icons/charts/line.png',
+            pie: '/assets/icons/charts/pie.png',
+            scatter: '/assets/icons/charts/scatter.png',
+            doughnut: '/assets/icons/charts/doughnut.png',
+            area: '/assets/icons/charts/area.png'
         };
-        return icons[type] || '📊';
+        return iconPaths[type] || '/assets/icons/charts/bar.png';
     }
 
     /**
      * Update software display in chart studio
      */
     updateSoftwareDisplay() {
-        const softwareList = document.getElementById('software-list');
+        const softwareList = DOMUtils.query('#software-list');
         if (!softwareList) return;
 
         const purchasedSoftware = SHOP_ITEMS.filter(item => 
-            item.type === 'software' && this.gameState.purchasedItems.includes(item.id)
+            item.type === 'software' && this.gameState.purchasedItems?.includes(item.id)
         );
 
         if (purchasedSoftware.length === 0) {
-            softwareList.innerHTML = '<p class="software-none">No software purchased</p>';
+            DOMUtils.updateElement(softwareList, {
+                innerHTML: '<p class="software-none">No software purchased</p>'
+            });
             return;
         }
 
-        const multipliers = this.gameState.getSoftwareQualityMultiplier();
+        const multipliers = this.gameState.getSoftwareQualityMultiplier?.() || {};
         
-        softwareList.innerHTML = purchasedSoftware.map(item => {
+        const softwareHTML = purchasedSoftware.map(item => {
             const bonuses = [];
             if (item.id === 'soft_ide_pro') {
                 bonuses.push('+5% Visual Clarity', '+3% Data Accuracy');
@@ -144,9 +179,13 @@ export class UIUpdater {
                 bonuses.push('+10% Visual Clarity', '+8% Chart Appropriateness', '+5% Data Accuracy');
             }
 
+            const iconHTML = item.icon && item.icon.startsWith('/') 
+                ? `<img src="${item.icon}" alt="${item.name}" style="width: 24px; height: 24px; object-fit: contain; object-position: center center;">` 
+                : item.icon;
+
             return `
                 <div class="software-item">
-                    <span class="software-icon">${item.icon}</span>
+                    <span class="software-icon">${iconHTML}</span>
                     <div class="software-info">
                         <div class="software-name">${item.name}</div>
                         <div class="software-bonuses">${bonuses.join(', ')}</div>
@@ -154,6 +193,10 @@ export class UIUpdater {
                 </div>
             `;
         }).join('');
+
+        DOMUtils.updateElement(softwareList, {
+            innerHTML: softwareHTML
+        });
     }
 
     /**
@@ -163,8 +206,132 @@ export class UIUpdater {
         const task = this.gameState.currentTask;
         if (!task) return;
 
-        // Update via TaskSystem's method
-        // This is called after task generation
+        // Update task description
+        if (task.template) {
+            DOMUtils.updateElement('#task-content .task-description', {
+                textContent: task.template.description || 'Create a visualization for your boss.'
+            });
+        }
+
+        // Update task requirements
+        const requirementsContainer = DOMUtils.query('.task-requirements');
+        if (requirementsContainer && task.requirements) {
+            const requirementsHTML = task.requirements.map(req => {
+                return `<span class="requirement-tag">${req}</span>`;
+            }).join('');
+            DOMUtils.updateElement(requirementsContainer, {
+                innerHTML: requirementsHTML
+            });
+        }
+
+        // Update task reward
+        if (task.potentialReward) {
+            DOMUtils.updateElement('#task-reward', {
+                textContent: CommonUtils.formatCurrency(task.potentialReward)
+            });
+        }
+
+        // Update boss info
+        if (task.boss) {
+            DOMUtils.updateElement('#boss-name', {
+                textContent: task.boss.name || 'Mr. Anderson'
+            });
+            DOMUtils.updateElement('#boss-title', {
+                textContent: task.boss.title || 'Department Head'
+            });
+            if (task.boss.greeting) {
+                const bossDialogue = DOMUtils.query('#boss-dialogue');
+                if (bossDialogue) {
+                    const p = bossDialogue.querySelector('p');
+                    if (p) p.textContent = task.boss.greeting;
+                }
+            }
+        }
+
+        // Note: TaskSystem.updateBossDialogue() already calls updateDataTable() which sets up sorting/filtering
+        // So we don't need to update the table here - it's already done
+        // But we can call it again if needed for safety
+        if (this.game && this.game.taskSystem && task.data) {
+            // Ensure table data is stored for sorting/filtering
+            if (!this.game.taskSystem.currentTableData) {
+                this.game.taskSystem.currentTableData = JSON.parse(JSON.stringify(task.data));
+                this.game.taskSystem.originalTableData = JSON.parse(JSON.stringify(task.data));
+                if (typeof this.game.taskSystem.updateDataTable === 'function') {
+                    this.game.taskSystem.updateDataTable(task.data);
+                }
+            }
+        } else {
+            // Fallback to simple update if TaskSystem not available
+            this.updateDataTableSimple(task.data);
+        }
+    }
+
+    /**
+     * Update data table with task data (simple version without sorting/filtering)
+     */
+    updateDataTableSimple(data) {
+        const tableBody = document.querySelector('#data-table tbody');
+        const tableHead = document.querySelector('#data-table thead tr');
+        if (!tableBody || !data) return;
+
+        // Clear existing rows
+        tableBody.innerHTML = '';
+
+        // Handle TaskSystem data format (has columns and rows)
+        if (data.columns && data.rows) {
+            // Update table headers
+            if (tableHead) {
+                DOMUtils.updateElement(tableHead, {
+                    innerHTML: data.columns.map(col => `<th>${col}</th>`).join('')
+                });
+            }
+
+            // Add data rows
+            data.rows?.forEach(row => {
+                const tr = document.createElement('tr');
+                row?.forEach((value, i) => {
+                    const td = document.createElement('td');
+                    if (typeof value === 'number') {
+                        // Format numbers with commas and $ if it's likely currency
+                        if (i > 0 && (data.columns[i]?.includes('Revenue') || data.columns[i]?.includes('Expenses') || data.columns[i]?.includes('Profit') || data.columns[i]?.includes('Sales'))) {
+                            td.textContent = `$${value.toLocaleString()}`;
+                        } else {
+                            td.textContent = value.toLocaleString();
+                        }
+                    } else {
+                        td.textContent = value;
+                    }
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        } else if (Array.isArray(data)) {
+            // Array of objects
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                Object.values(row).forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = typeof value === 'number' ? value.toLocaleString() : value;
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        } else if (data.labels && data.datasets) {
+            // Chart.js format - convert to table
+            const labels = data.labels;
+            const dataset = data.datasets[0];
+            labels.forEach((label, i) => {
+                const tr = document.createElement('tr');
+                const td1 = document.createElement('td');
+                td1.textContent = label;
+                tr.appendChild(td1);
+                
+                const td2 = document.createElement('td');
+                td2.textContent = dataset.data[i]?.toLocaleString() || '0';
+                tr.appendChild(td2);
+                tableBody.appendChild(tr);
+            });
+        }
     }
 
     /**
@@ -214,7 +381,7 @@ export class UIUpdater {
                     <div class="contract-card glass-card">
                         <div class="contract-header">
                             <span class="contract-client">${c.client}</span>
-                            <span class="contract-difficulty">${'⭐'.repeat(c.difficulty)}</span>
+                            <span class="contract-difficulty">${'*'.repeat(c.difficulty)}</span>
                         </div>
                         <h4 class="contract-title">${c.title}</h4>
                         <p class="contract-desc">${c.description}</p>
@@ -241,9 +408,9 @@ export class UIUpdater {
 
         const items = SHOP_ITEMS.filter(item => item.category === category);
 
-        grid.innerHTML = items.map(item => {
-            const owned = this.gameState.purchasedItems.includes(item.id);
-            const canAfford = this.gameState.canAfford(item.price);
+        const shopHTML = items.map(item => {
+            const owned = this.gameState.purchasedItems?.includes(item.id) || false;
+            const canAfford = this.gameState.canAfford?.(item.price) || false;
 
             return `
                 <div class="shop-item-card ${owned ? 'owned' : ''}" data-id="${item.id}">
@@ -261,6 +428,7 @@ export class UIUpdater {
                 </div>
             `;
         }).join('');
+        grid.innerHTML = shopHTML;
     }
 
     /**
@@ -286,7 +454,7 @@ export class UIUpdater {
         overlay.className = 'promotion-overlay';
         overlay.innerHTML = `
             <div class="promotion-content animate-scale-in">
-                <div class="promotion-icon">🎉</div>
+                <div class="promotion-icon"></div>
                 <h2>Promotion!</h2>
                 <p>You've been promoted to</p>
                 <div class="new-rank">${rank.title}</div>
@@ -327,10 +495,11 @@ export class UIUpdater {
             btn.onclick = () => this.updateLibraryScreen(btn.dataset.cat);
         });
 
-        grid.innerHTML = items.map(lib => {
+        const libraryHTML = items.map(lib => {
             const owned = (this.gameState.unlockedLibraries || []).includes(lib.id);
             const canAfford = this.gameState.money >= lib.cost;
-            const reqMet = true; // reqLevel check TODO
+            const currentRank = this.gameState.rankIndex || 0;
+            const reqMet = currentRank >= (lib.reqLevel - 1);
 
             return `
                 <div class="library-card glass-card ${owned ? 'owned' : ''}">
@@ -345,7 +514,7 @@ export class UIUpdater {
                     <div class="lib-footer">
                         <div class="lib-cost">$${lib.cost}</div>
                         ${owned
-                    ? '<button class="btn btn-sm btn-ghost disabled">Learned ✅</button>'
+                    ? '<button class="btn btn-sm btn-ghost disabled">Learned</button>'
                     : `<button class="btn btn-sm btn-primary" 
                                       onclick="game.handleLearnLibrary('${lib.id}')" 
                                       ${(!canAfford || !reqMet) ? 'disabled' : ''}>
@@ -356,13 +525,15 @@ export class UIUpdater {
                 </div>
             `;
         }).join('');
+        grid.innerHTML = libraryHTML;
+        grid.innerHTML = libraryHTML;
     }
 
     /**
      * Update Newspaper Screen
      */
     updateNewspaperScreen() {
-        const paper = this.game.newsManager.getDailyPaper();
+        const paper = this.game?.newsManager?.getDailyPaper();
         if (!paper) {
             console.warn("No paper found!");
             return;
@@ -385,7 +556,7 @@ export class UIUpdater {
         if (horoscopeEl) horoscopeEl.textContent = paper.horoscope || 'Stars align.';
 
         // Side stories
-        paper.articles.forEach((article, index) => {
+        paper?.articles?.forEach((article, index) => {
             const titleEl = document.getElementById(`paper-sub-${index + 1}-title`);
             const textEl = document.getElementById(`paper-sub-${index + 1}-text`);
             if (titleEl) titleEl.textContent = article.title;
@@ -409,7 +580,21 @@ export class UIUpdater {
         const theme = OFFICE_LOCATIONS.find(l => l.id === locationId) || OFFICE_LOCATIONS[0];
 
         // Find map data for activities
-        const locationData = LOCATIONS.find(l => l.id === locationId);
+        let locationData = null;
+        if (this.game && this.game.worldMap) {
+            locationData = this.game.worldMap?.getLocation(locationId);
+        }
+        
+        // If no location data, create minimal fallback
+        if (!locationData) {
+            locationData = {
+                id: locationId,
+                name: locationId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                description: 'Welcome!',
+                icon: '',
+                activities: []
+            };
+        }
 
         // Update Background
         const officeBg = document.querySelector('.office-background');
@@ -456,9 +641,54 @@ export class UIUpdater {
                 const descEl = document.getElementById('location-desc');
                 const avatarEl = document.getElementById('shop-keeper-avatar');
 
-                if (titleEl) titleEl.textContent = locationData.name;
-                if (descEl) descEl.textContent = locationData.description;
-                if (avatarEl) avatarEl.textContent = locationData.icon || '🏪';
+                if (titleEl) titleEl.textContent = locationData.name || 'Location';
+                if (descEl) {
+                    // Ensure description is not an icon path
+                    const desc = locationData.description || '';
+                    if (desc && !desc.startsWith('/') && !desc.startsWith('http')) {
+                        descEl.textContent = desc;
+                    } else {
+                        // Fallback description if description is missing or is a path
+                        const fallbackDesc = {
+                            'donut_shop': 'Sweet treats to boost your mood and energy.',
+                            'bagel_shop': 'Hearty bagels for serious work sessions.',
+                            'flower_store': 'Fresh flowers. Perfect for gifts.',
+                            'coffee_shop': 'Grab coffee, meet people, boost focus.'
+                        };
+                        descEl.textContent = fallbackDesc[locationId] || 'Welcome!';
+                    }
+                }
+                if (avatarEl) {
+                    // Use icon image if it's a path, otherwise use emoji
+                    if (locationData.icon && locationData.icon.startsWith('/')) {
+                        avatarEl.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = locationData.icon;
+                        img.alt = locationData.name;
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'contain';
+                        img.style.objectPosition = 'center center';
+                        img.onerror = () => {
+                            avatarEl.textContent = '';
+                        };
+                        avatarEl.appendChild(img);
+                    } else {
+                        avatarEl.textContent = locationData.icon || '';
+                    }
+                }
+
+                // Update shop keeper saying
+                const sayingEl = document.getElementById('shop-keeper-saying');
+                if (sayingEl) {
+                    const sayings = {
+                        'donut_shop': 'Fresh donuts!',
+                        'bagel_shop': 'Hearty bagels for serious work sessions!',
+                        'flower_store': 'Beautiful flowers for any occasion!',
+                        'coffee_shop': 'Best coffee in town!'
+                    };
+                    sayingEl.textContent = sayings[locationId] || 'Welcome!';
+                }
 
                 // Populate Interaction Buttons
                 const grid = document.getElementById('interaction-grid');
@@ -512,7 +742,7 @@ export class UIUpdater {
         // Map through hardware types to show current status and upgrade options
         const types = [HARDWARE_TYPES.COOLING, HARDWARE_TYPES.CASE, HARDWARE_TYPES.MONITOR, HARDWARE_TYPES.GPU];
 
-        grid.innerHTML = types.map(type => {
+        const equipmentHTML = types.map(type => {
             const currentPartId = equipped[type];
             const partList = HARDWARE_PARTS[type];
             const currentPart = partList.find(p => p.id === currentPartId) || partList[0];
@@ -538,19 +768,20 @@ export class UIUpdater {
                 </div>
             `;
         }).join('');
+        grid.innerHTML = equipmentHTML;
     }
 
     getHardwareIcon(type) {
         const icons = {
-            [HARDWARE_TYPES.COOLING]: '❄️',
-            [HARDWARE_TYPES.CASE]: '🖥️',
-            [HARDWARE_TYPES.MONITOR]: '📺',
-            [HARDWARE_TYPES.GPU]: '🎮',
-            [HARDWARE_TYPES.CPU]: '🧠',
-            [HARDWARE_TYPES.RAM]: '💾',
-            [HARDWARE_TYPES.STORAGE]: '💿'
+            [HARDWARE_TYPES.COOLING]: '',
+            [HARDWARE_TYPES.CASE]: '',
+            [HARDWARE_TYPES.MONITOR]: '',
+            [HARDWARE_TYPES.GPU]: '',
+            [HARDWARE_TYPES.CPU]: '',
+            [HARDWARE_TYPES.RAM]: '',
+            [HARDWARE_TYPES.STORAGE]: ''
         };
-        return icons[type] || '⚙️';
+        return icons[type] || '';
     }
 
     getHardwareName(type) {
@@ -595,9 +826,9 @@ export class UIUpdater {
         const loanLimitEl = document.getElementById('bank-loan-limit');
         const netWorthEl = document.getElementById('bank-net-worth');
 
-        const savings = this.gameState.bank.savings || 0;
-        const loan = this.gameState.bank.loan || 0;
-        const creditScore = this.gameState.bank.creditScore || 500;
+        const savings = this.gameState.bank?.savings || 0;
+        const loan = this.gameState.bank?.loan || 0;
+        const creditScore = this.gameState.bank?.creditScore || 500;
 
         // Calculate dynamic loan limit
         const limit = 1000 + (this.gameState.reputation * 100);

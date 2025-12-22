@@ -35,7 +35,7 @@ export class NPCDialogueLoader {
             this.loadingPromises.delete(npcId);
             return dialogue;
         } catch (error) {
-            console.warn(`Failed to load dialogue for ${npcId}, using fallback:`, error);
+            // Failed to load dialogue
             this.loadingPromises.delete(npcId);
             return this.getFallbackDialogue(npcId);
         }
@@ -47,7 +47,7 @@ export class NPCDialogueLoader {
     async loadDialogueFile(npcId) {
         // Try .js file first
         try {
-            const jsModule = await import(`/src/js/game/dialogue/npcs/${npcId}.js`);
+            const jsModule = await import(/* @vite-ignore */ `./npcs/${npcId}.js`);
             if (jsModule && jsModule.default) {
                 return jsModule.default;
             }
@@ -57,7 +57,7 @@ export class NPCDialogueLoader {
         
         // Try .json file
         try {
-            const response = await fetch(`/src/js/game/dialogue/npcs/${npcId}.json`);
+            const response = await fetch(new URL(`./npcs/${npcId}.json`, import.meta.url).href);
             if (response.ok) {
                 return await response.json();
             }

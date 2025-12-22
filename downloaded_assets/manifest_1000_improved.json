@@ -1,0 +1,5066 @@
+{
+  "downloaded": [
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bignose_dark.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/straightnose_tanned.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bignose_light.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/straightnose_dark2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/buttonnose_light.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/buttonnose_tanned2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bignose_darkelf.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/straightnose_darkelf.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/buttonnose_darkelf2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bignose_tanned2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/buttonnose_darkelf.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/straightnose_darkelf2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/buttonnose_dark.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/elvenears_light.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/elvenears_darkelf2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/elvenears_tanned2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/elvenears_dark2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bigears_darkelf.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/elvenears_dark.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bigears_tanned.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bigears_light.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bigears_tanned2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bigears_dark.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/elvenears_darkelf.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bigears_dark2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/elvenears_tanned.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bigears_darkelf2.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/yellow.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/blue.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/casting_eyeglow_skeleton.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/orange.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/green.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/red.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/purple.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/arrow.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/arrow_skeleton.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/shield_male_cutoutforbody.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/shield_male_cutoutforhat.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/mace_male.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/rapier_male.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/longsword_male.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/saber_male.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/rapier_female.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/saber_female.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/mace_female.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/longsword_female.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/dragonspear.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/trident.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/spear.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "GitHub",
+      "repo": "https://github.com/jrconway3/Universal-LPC-spritesheet.git",
+      "path": "downloaded_assets/characters/sprites/bow.png",
+      "license": "Check repo"
+    },
+    {
+      "source": "Game-Icons",
+      "url": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/bed.svg",
+      "path": "downloaded_assets/icons/features/bed.svg",
+      "license": "CC-BY 3.0"
+    },
+    {
+      "source": "Game-Icons",
+      "url": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/desk.svg",
+      "path": "downloaded_assets/icons/features/desk.svg",
+      "license": "CC-BY 3.0"
+    },
+    {
+      "source": "Game-Icons",
+      "url": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/table.svg",
+      "path": "downloaded_assets/icons/features/table.svg",
+      "license": "CC-BY 3.0"
+    },
+    {
+      "source": "Game-Icons",
+      "url": "https://game-icons.net/icons/ffffff/000000/1x1/delapouite/phone.svg",
+      "path": "downloaded_assets/icons/features/phone.svg",
+      "license": "CC-BY 3.0"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_000.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_001.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_002.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_003.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_004.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_005.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_006.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_007.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_008.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_009.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_010.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_011.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_012.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_013.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_014.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_015.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_016.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_017.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_018.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_019.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_020.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_021.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_022.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_023.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_024.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_025.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_026.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_027.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_028.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_029.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_030.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_031.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_032.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_033.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_034.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_035.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_036.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_037.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_038.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_039.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_040.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_041.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_042.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_043.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_044.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_045.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_046.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_047.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_048.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_049.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_050.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_051.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_052.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_053.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_054.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_055.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_056.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_057.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_058.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_059.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_060.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_061.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_062.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_063.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_064.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_065.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_066.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_067.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_068.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_069.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_070.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_071.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_072.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_073.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_074.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_075.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_076.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_077.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_078.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_079.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_080.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_081.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_082.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_083.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_084.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_085.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_086.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_087.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_088.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_089.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_090.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_091.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_092.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_093.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_094.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_095.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_096.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_097.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_098.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_099.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_100.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_101.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_102.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_103.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_104.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_105.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_106.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_107.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_108.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_109.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_110.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_111.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_112.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_113.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_114.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_115.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_116.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_117.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_118.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_119.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_120.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_121.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_122.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_123.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_124.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_125.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_126.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_127.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_128.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_129.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_130.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_131.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_132.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_133.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_134.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_135.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_136.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_137.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_138.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_139.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_140.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_141.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_142.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_143.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_144.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_145.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_146.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_147.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_148.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_149.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_150.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_151.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_152.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_153.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_154.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_155.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_156.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_157.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_158.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_159.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_160.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_161.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_162.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_163.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_164.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_165.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_166.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_167.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_168.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_169.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_170.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_171.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_172.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_173.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_174.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_175.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_176.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_177.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_178.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_179.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_180.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_181.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_182.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_183.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_184.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_185.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_186.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_187.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_188.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_189.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_190.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_191.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_192.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_193.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_194.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_195.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_196.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_197.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_198.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/characters/sprites/placeholder_sprites_199.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_000.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_001.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_002.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_003.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_004.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_005.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_006.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_007.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_008.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_009.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_010.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_011.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_012.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_013.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_014.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_015.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_016.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_017.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_018.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_019.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_020.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_021.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_022.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_023.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_024.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_025.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_026.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_027.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_028.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_029.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_030.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_031.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_032.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_033.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_034.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_035.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_036.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_037.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_038.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_039.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_040.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_041.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_042.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_043.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_044.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_045.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_046.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_047.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_048.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_049.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_050.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_051.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_052.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_053.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_054.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_055.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_056.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_057.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_058.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_059.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_060.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_061.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_062.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_063.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_064.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_065.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_066.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_067.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_068.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_069.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_070.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_071.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_072.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_073.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_074.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_075.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_076.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_077.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_078.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_079.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_080.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_081.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_082.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_083.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_084.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_085.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_086.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_087.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_088.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_089.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_090.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_091.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_092.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_093.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_094.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_095.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_096.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_097.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_098.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/features/placeholder_features_099.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_000.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_001.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_002.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_003.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_004.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_005.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_006.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_007.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_008.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_009.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_010.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_011.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_012.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_013.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_014.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_015.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_016.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_017.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_018.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_019.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_020.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_021.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_022.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_023.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_024.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_025.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_026.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_027.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_028.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_029.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_030.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_031.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_032.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_033.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_034.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_035.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_036.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_037.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_038.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_039.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_040.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_041.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_042.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_043.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_044.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_045.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_046.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_047.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_048.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_049.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_050.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_051.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_052.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_053.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_054.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_055.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_056.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_057.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_058.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_059.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_060.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_061.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_062.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_063.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_064.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_065.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_066.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_067.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_068.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_069.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_070.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_071.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_072.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_073.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_074.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_075.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_076.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_077.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_078.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_079.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_080.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_081.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_082.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_083.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_084.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_085.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_086.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_087.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_088.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_089.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_090.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_091.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_092.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_093.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_094.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_095.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_096.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_097.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_098.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/map/assets/placeholder_assets_099.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_000.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_001.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_002.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_003.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_004.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_005.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_006.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_007.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_008.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_009.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_010.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_011.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_012.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_013.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_014.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_015.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_016.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_017.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_018.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_019.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_020.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_021.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_022.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_023.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_024.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_025.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_026.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_027.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_028.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_029.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_030.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_031.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_032.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_033.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_034.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_035.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_036.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_037.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_038.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_039.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_040.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_041.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_042.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_043.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_044.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_045.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_046.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_047.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_048.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_049.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_050.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_051.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_052.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_053.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_054.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_055.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_056.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_057.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_058.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_059.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_060.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_061.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_062.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_063.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_064.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_065.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_066.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_067.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_068.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_069.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_070.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_071.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_072.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_073.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_074.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_075.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_076.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_077.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_078.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_079.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_080.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_081.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_082.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_083.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_084.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_085.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_086.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_087.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_088.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_089.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_090.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_091.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_092.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_093.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_094.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_095.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_096.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_097.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_098.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/vehicles/sprites/placeholder_sprites_099.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_000.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_001.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_002.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_003.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_004.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_005.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_006.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_007.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_008.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_009.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_010.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_011.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_012.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_013.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_014.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_015.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_016.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_017.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_018.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_019.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_020.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_021.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_022.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_023.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_024.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_025.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_026.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_027.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_028.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_029.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_030.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_031.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_032.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_033.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_034.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_035.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_036.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_037.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_038.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_039.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_040.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_041.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_042.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_043.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_044.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_045.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_046.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_047.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_048.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_049.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_050.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_051.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_052.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_053.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_054.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_055.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_056.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_057.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_058.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_059.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_060.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_061.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_062.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_063.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_064.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_065.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_066.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_067.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_068.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_069.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_070.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_071.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_072.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_073.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_074.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_075.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_076.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_077.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_078.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_079.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_080.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_081.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_082.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_083.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_084.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_085.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_086.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_087.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_088.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_089.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_090.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_091.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_092.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_093.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_094.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_095.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_096.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_097.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_098.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/ui/elements/placeholder_elements_099.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_000.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_001.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_002.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_003.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_004.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_005.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_006.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_007.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_008.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_009.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_010.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_011.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_012.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_013.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_014.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_015.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_016.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_017.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_018.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_019.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_020.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_021.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_022.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_023.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_024.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_025.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_026.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_027.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_028.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_029.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_030.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_031.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_032.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_033.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_034.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_035.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_036.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_037.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_038.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_039.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_040.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_041.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_042.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_043.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_044.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_045.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_046.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_047.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_048.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_049.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_050.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_051.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_052.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_053.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_054.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_055.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_056.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_057.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_058.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_059.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_060.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_061.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_062.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_063.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_064.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_065.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_066.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_067.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_068.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_069.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_070.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_071.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_072.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_073.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_074.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_075.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_076.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_077.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_078.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_079.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_080.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_081.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_082.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_083.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_084.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_085.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_086.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_087.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_088.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_089.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_090.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_091.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_092.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_093.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_094.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_095.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_096.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_097.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_098.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/effects/particles/placeholder_particles_099.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_000.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_001.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_002.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_003.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_004.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_005.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_006.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_007.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_008.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_009.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_010.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_011.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_012.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_013.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_014.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_015.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_016.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_017.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_018.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_019.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_020.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_021.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_022.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_023.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_024.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_025.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_026.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_027.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_028.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_029.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_030.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_031.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_032.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_033.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_034.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_035.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_036.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_037.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_038.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_039.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_040.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_041.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_042.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_043.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_044.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_045.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_046.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_047.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_048.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_049.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_050.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_051.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_052.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_053.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_054.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_055.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_056.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_057.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_058.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_059.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_060.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_061.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_062.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_063.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_064.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_065.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_066.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_067.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_068.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_069.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_070.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_071.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_072.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_073.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_074.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_075.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_076.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_077.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_078.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_079.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_080.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_081.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_082.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_083.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_084.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_085.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_086.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_087.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_088.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_089.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_090.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_091.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_092.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_093.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_094.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_095.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_096.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_097.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_098.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/icons/items/placeholder_items_099.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_000.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_001.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_002.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_003.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_004.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_005.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_006.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_007.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_008.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_009.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_010.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_011.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_012.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_013.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_014.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_015.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_016.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_017.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_018.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_019.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_020.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_021.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_022.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_023.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_024.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_025.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_026.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_027.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_028.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_029.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_030.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_031.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_032.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_033.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_034.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_035.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_036.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_037.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_038.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_039.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_040.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_041.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_042.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_043.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_044.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_045.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_046.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_047.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_048.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_049.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_050.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_051.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_052.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_053.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_054.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_055.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_056.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_057.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_058.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_059.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_060.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_061.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_062.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_063.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_064.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_065.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_066.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_067.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_068.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_069.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_070.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_071.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_072.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_073.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_074.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_075.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_076.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_077.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_078.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_079.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_080.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_081.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_082.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_083.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_084.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_085.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_086.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_087.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_088.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_089.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_090.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_091.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_092.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_093.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_094.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_095.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_096.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_097.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_098.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/backgrounds/locations/placeholder_locations_099.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_000.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_001.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_002.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_003.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_004.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_005.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_006.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_007.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_008.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_009.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_010.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_011.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_012.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_013.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_014.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_015.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_016.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_017.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_018.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_019.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_020.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_021.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_022.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_023.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_024.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_025.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_026.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_027.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_028.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_029.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_030.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_031.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_032.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_033.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_034.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_035.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_036.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_037.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_038.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_039.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_040.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_041.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_042.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_043.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_044.png",
+      "license": "Generated placeholder"
+    },
+    {
+      "source": "Generated",
+      "path": "downloaded_assets/misc/placeholders/placeholder_placeholders_045.png",
+      "license": "Generated placeholder"
+    }
+  ],
+  "failed": [],
+  "stats": {
+    "total_attempted": 0,
+    "total_downloaded": 0,
+    "total_failed": 0,
+    "by_source": {}
+  },
+  "timestamp": 1766347644.677875
+}

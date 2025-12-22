@@ -276,7 +276,7 @@ export class JobSystem {
         // Apply XP rewards
         if (task.xpReward) {
             for (const [stat, amount] of Object.entries(task.xpReward)) {
-                this.gameState.characterStats?.addXP(stat, Math.floor(amount * quality));
+                this.gameState.characterStats?.addExperience(stat, Math.floor(amount * quality));
             }
         }
 

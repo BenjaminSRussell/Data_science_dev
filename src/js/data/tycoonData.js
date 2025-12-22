@@ -8,7 +8,7 @@ export const EQUIPMENT = {
     computer: {
         id: "computer",
         name: "Computer",
-        icon: "💻",
+        icon: "",
         levels: [
             { name: "Old Laptop", speed: 1.0, price: 0, description: "A beat-up laptop that barely runs Excel" },
             { name: "Desktop PC", speed: 1.3, price: 500, description: "A decent workstation" },
@@ -20,7 +20,7 @@ export const EQUIPMENT = {
     desk: {
         id: "desk",
         name: "Desk",
-        icon: "🪑",
+        icon: "",
         levels: [
             { name: "Folding Table", comfort: 1.0, price: 0, description: "It wobbles, but it works" },
             { name: "Basic Desk", comfort: 1.2, price: 300, description: "A proper desk at last" },
@@ -32,7 +32,7 @@ export const EQUIPMENT = {
     monitor: {
         id: "monitor",
         name: "Monitor",
-        icon: "🖥️",
+        icon: "",
         levels: [
             { name: "Laptop Screen", clarity: 1.0, price: 0, description: "Squinting at 13 inches" },
             { name: "24\" Monitor", clarity: 1.3, price: 250, description: "Now we're talking" },
@@ -44,7 +44,7 @@ export const EQUIPMENT = {
     chair: {
         id: "chair",
         name: "Chair",
-        icon: "🪑",
+        icon: "",
         levels: [
             { name: "Kitchen Chair", stamina: 1.0, price: 0, description: "Your back hurts" },
             { name: "Office Chair", stamina: 1.3, price: 200, description: "Basic lumbar support" },
@@ -56,7 +56,7 @@ export const EQUIPMENT = {
     software: {
         id: "software",
         name: "Software",
-        icon: "📊",
+        icon: "",
         levels: [
             { name: "Spreadsheets", capability: 1.0, price: 0, description: "Excel and Google Sheets" },
             { name: "Basic BI Tools", capability: 1.4, price: 500, description: "Tableau Public, Power BI free" },
@@ -72,7 +72,7 @@ export const OFFICES = [
     {
         id: "bedroom",
         name: "Bedroom Corner",
-        icon: "🛏️",
+        icon: "",
         price: 0,
         capacity: 1,
         clientBonus: 0,
@@ -82,7 +82,7 @@ export const OFFICES = [
     {
         id: "home_office",
         name: "Home Office",
-        icon: "🏠",
+        icon: "",
         price: 2000,
         capacity: 1,
         clientBonus: 0.1,
@@ -92,7 +92,7 @@ export const OFFICES = [
     {
         id: "coworking",
         name: "Co-working Space",
-        icon: "👥",
+        icon: "",
         price: 5000,
         capacity: 2,
         clientBonus: 0.2,
@@ -102,7 +102,7 @@ export const OFFICES = [
     {
         id: "small_office",
         name: "Small Office",
-        icon: "🏢",
+        icon: "",
         price: 15000,
         capacity: 4,
         clientBonus: 0.35,
@@ -112,7 +112,7 @@ export const OFFICES = [
     {
         id: "office_floor",
         name: "Office Floor",
-        icon: "🏛️",
+        icon: "",
         price: 50000,
         capacity: 10,
         clientBonus: 0.5,
@@ -122,7 +122,7 @@ export const OFFICES = [
     {
         id: "headquarters",
         name: "Company HQ",
-        icon: "🏰",
+        icon: "",
         price: 200000,
         capacity: 25,
         clientBonus: 0.75,
@@ -136,7 +136,7 @@ export const STAFF_TYPES = [
     {
         id: "intern",
         name: "Intern",
-        icon: "👶",
+        icon: "",
         baseSalary: 50,
         efficiency: 0.5,
         description: "Eager to learn, needs supervision",
@@ -145,7 +145,7 @@ export const STAFF_TYPES = [
     {
         id: "junior_analyst",
         name: "Junior Analyst",
-        icon: "🧑‍💼",
+        icon: "",
         baseSalary: 150,
         efficiency: 0.8,
         description: "Can handle basic charts independently",
@@ -154,7 +154,7 @@ export const STAFF_TYPES = [
     {
         id: "analyst",
         name: "Data Analyst",
-        icon: "👨‍💻",
+        icon: "",
         baseSalary: 300,
         efficiency: 1.0,
         description: "Solid all-around performer",
@@ -163,7 +163,7 @@ export const STAFF_TYPES = [
     {
         id: "senior_analyst",
         name: "Senior Analyst",
-        icon: "👩‍🔬",
+        icon: "",
         baseSalary: 500,
         efficiency: 1.5,
         description: "Expert-level work, can mentor others",
@@ -172,7 +172,7 @@ export const STAFF_TYPES = [
     {
         id: "data_scientist",
         name: "Data Scientist",
-        icon: "🧙",
+        icon: "",
         baseSalary: 800,
         efficiency: 2.0,
         description: "ML, statistics, the works",
@@ -181,7 +181,7 @@ export const STAFF_TYPES = [
     {
         id: "project_manager",
         name: "Project Manager",
-        icon: "📋",
+        icon: "",
         baseSalary: 400,
         efficiency: 0,
         description: "Manages client relationships, +20% client satisfaction",
@@ -191,7 +191,7 @@ export const STAFF_TYPES = [
     {
         id: "sales",
         name: "Sales Rep",
-        icon: "🤝",
+        icon: "",
         baseSalary: 350,
         efficiency: 0,
         description: "+1 client lead per day",
@@ -205,7 +205,7 @@ export const CLIENT_TYPES = [
     {
         id: "small_business",
         name: "Small Business",
-        icon: "🏪",
+        icon: "",
         minPay: 50,
         maxPay: 200,
         dataComplexity: 1,
@@ -215,7 +215,7 @@ export const CLIENT_TYPES = [
     {
         id: "startup",
         name: "Startup",
-        icon: "🚀",
+        icon: "",
         minPay: 150,
         maxPay: 500,
         dataComplexity: 2,
@@ -225,7 +225,7 @@ export const CLIENT_TYPES = [
     {
         id: "agency",
         name: "Marketing Agency",
-        icon: "📣",
+        icon: "",
         minPay: 200,
         maxPay: 600,
         dataComplexity: 2,
@@ -235,7 +235,7 @@ export const CLIENT_TYPES = [
     {
         id: "enterprise",
         name: "Enterprise",
-        icon: "🏢",
+        icon: "",
         minPay: 500,
         maxPay: 2000,
         dataComplexity: 3,
@@ -245,7 +245,7 @@ export const CLIENT_TYPES = [
     {
         id: "government",
         name: "Government",
-        icon: "🏛️",
+        icon: "",
         minPay: 400,
         maxPay: 1500,
         dataComplexity: 3,
@@ -255,7 +255,7 @@ export const CLIENT_TYPES = [
     {
         id: "fortune500",
         name: "Fortune 500",
-        icon: "💎",
+        icon: "",
         minPay: 2000,
         maxPay: 10000,
         dataComplexity: 4,
@@ -269,7 +269,7 @@ export const MARKETING_CHANNELS = [
     {
         id: "word_of_mouth",
         name: "Word of Mouth",
-        icon: "🗣️",
+        icon: "",
         costPerDay: 0,
         leadsPerDay: 0.5,
         description: "Free but slow - happy clients refer others"
@@ -277,7 +277,7 @@ export const MARKETING_CHANNELS = [
     {
         id: "linkedin",
         name: "LinkedIn Presence",
-        icon: "💼",
+        icon: "",
         costPerDay: 20,
         leadsPerDay: 1,
         description: "Professional networking pays off"
@@ -285,7 +285,7 @@ export const MARKETING_CHANNELS = [
     {
         id: "website",
         name: "Company Website",
-        icon: "🌐",
+        icon: "",
         costPerDay: 50,
         leadsPerDay: 2,
         description: "SEO and content marketing"
@@ -293,7 +293,7 @@ export const MARKETING_CHANNELS = [
     {
         id: "ads",
         name: "Online Ads",
-        icon: "📢",
+        icon: "",
         costPerDay: 100,
         leadsPerDay: 4,
         description: "Pay-per-click advertising"
@@ -301,7 +301,7 @@ export const MARKETING_CHANNELS = [
     {
         id: "conference",
         name: "Industry Events",
-        icon: "🎪",
+        icon: "",
         costPerDay: 200,
         leadsPerDay: 6,
         description: "Networking at conferences and meetups"
@@ -309,7 +309,7 @@ export const MARKETING_CHANNELS = [
     {
         id: "enterprise_sales",
         name: "Enterprise Sales Team",
-        icon: "🤵",
+        icon: "",
         costPerDay: 500,
         leadsPerDay: 3,
         description: "Fewer leads, but they're high value"

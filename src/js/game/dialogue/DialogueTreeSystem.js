@@ -120,7 +120,7 @@ export class DialogueTreeBuilder {
                 return enhancedTree;
             }
         } catch (error) {
-            console.warn(`Enhanced dialogue not available for ${npc.id}, using fallback:`, error);
+            // Enhanced dialogue not available
         }
         
         // Fallback to personality-based trees

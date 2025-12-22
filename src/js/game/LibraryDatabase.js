@@ -77,8 +77,8 @@ export const LIBRARY_CONTENT = [
 ];
 
 export const CATEGORIES = {
-    scraping: '🕷️ Scraping',
-    cleaning: '🧹 Cleaning',
-    modeling: '📊 Modeling',
-    ai: '🧠 Deep Learning'
+    scraping: ' Scraping',
+    cleaning: ' Cleaning',
+    modeling: ' Modeling',
+    ai: ' Deep Learning'
 };

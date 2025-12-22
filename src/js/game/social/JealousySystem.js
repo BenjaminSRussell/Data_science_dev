@@ -17,7 +17,7 @@ export class JealousySystem {
     checkJealousy(playerSuccess) {
         if (!this.gameState.npcManager) return;
         
-        const npcs = this.gameState.npcManager.getAllNPCs();
+        const npcs = this.gameState.npcManager?.getAllNPCs() || [];
         
         npcs.forEach(npc => {
             if (this.shouldBeJealous(npc, playerSuccess)) {
@@ -69,8 +69,8 @@ export class JealousySystem {
     affectRelationship(npcId, change) {
         if (!this.gameState.npcManager) return;
         
-        const current = this.gameState.npcManager.getRelationship(npcId) || 0;
-        this.gameState.npcManager.setRelationship(npcId, Math.max(0, current + change));
+        const current = this.gameState.npcManager?.getRelationship(npcId) || 0;
+        this.gameState.npcManager?.setRelationship(npcId, Math.max(0, current + change));
         
         // Track the change
         this.relationshipChanges.set(npcId, (this.relationshipChanges.get(npcId) || 0) + change);

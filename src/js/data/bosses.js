@@ -7,8 +7,8 @@ export const BOSSES = [
         id: "anderson",
         name: "Mr. Anderson",
         title: "Department Head",
-        avatar: "👔",
-        mood: "😐",
+        avatar: "",
+        mood: "",
         personality: "traditional",
         strictness: 1.0,
         preferences: {
@@ -33,8 +33,8 @@ export const BOSSES = [
         id: "chen",
         name: "Dr. Sarah Chen",
         title: "Head of Analytics",
-        avatar: "👩‍🔬",
-        mood: "🧐",
+        avatar: "",
+        mood: "",
         personality: "perfectionist",
         strictness: 1.3,
         preferences: {
@@ -59,8 +59,8 @@ export const BOSSES = [
         id: "martinez",
         name: "Carlos Martinez",
         title: "Marketing Director",
-        avatar: "📊",
-        mood: "😄",
+        avatar: "",
+        mood: "",
         personality: "creative",
         strictness: 0.8,
         preferences: {
@@ -72,7 +72,7 @@ export const BOSSES = [
         taskIntro: "Make it pop! I want something that grabs attention.",
         successResponses: [
             "Love it! This will look great in the campaign.",
-            "Now THAT'S what I'm talking about! 🔥",
+            "Now THAT'S what I'm talking about! ",
             "Perfect for social media. Great work!"
         ],
         failResponses: [
@@ -85,8 +85,8 @@ export const BOSSES = [
         id: "johnson",
         name: "Patricia Johnson",
         title: "CFO",
-        avatar: "💼",
-        mood: "🤨",
+        avatar: "",
+        mood: "",
         personality: "numbers-focused",
         strictness: 1.2,
         preferences: {
@@ -111,8 +111,8 @@ export const BOSSES = [
         id: "kim",
         name: "Alex Kim",
         title: "Product Manager",
-        avatar: "🚀",
-        mood: "😊",
+        avatar: "",
+        mood: "",
         personality: "fast-paced",
         strictness: 0.9,
         preferences: {
@@ -137,8 +137,8 @@ export const BOSSES = [
         id: "williams",
         name: "Dr. James Williams",
         title: "Research Director",
-        avatar: "🔬",
-        mood: "🤔",
+        avatar: "",
+        mood: "",
         personality: "academic",
         strictness: 1.15,
         preferences: {

@@ -27,7 +27,7 @@ export class ProjectSystem {
             // Check requirements
             if (contract.requirements) {
                 if (contract.requirements.stat &&
-                    this.gameState.characterStats.getStat(contract.requirements.stat) < contract.requirements.value) {
+                    this.gameState.characterStats?.getStat(contract.requirements.stat) < contract.requirements.value) {
                     return false;
                 }
                 if (contract.requirements.reputation &&
@@ -71,7 +71,7 @@ export class ProjectSystem {
         // AI Bonus Check
         let aiBonus = 0;
         if (this.gameState.aiSystem) {
-            aiBonus = this.gameState.aiSystem.processingPower;
+            aiBonus = this.gameState.aiSystem?.processingPower || 0;
 
             // Intelligence Bonus for specific stages?
             // e.g. Cleaning is faster with high AI Int
@@ -99,14 +99,19 @@ export class ProjectSystem {
      * Complete the current stage
      */
     completeStage() {
-        const stage = this.activeProject.stages[this.activeProject.currentStageIndex];
+        if (!this.activeProject || !this.activeProject.stages) return null;
+        
+        const currentIndex = this.activeProject.currentStageIndex || 0;
+        const stage = this.activeProject.stages[currentIndex];
+        
+        if (!stage) return null;
 
         // If there was a challenge, we assume it was passed (UI handles the challenge interaction before working)
         // Or we pause here if challenge not met? 
         // Design Decision: Challenges pause the "Fast Forward".
 
         // Move to next stage
-        this.activeProject.currentStageIndex++;
+        this.activeProject.currentStageIndex = (currentIndex + 1);
         this.activeProject.stageProgress = 0;
 
         // Check if Project is fully complete
@@ -114,9 +119,10 @@ export class ProjectSystem {
             return this.completeProject();
         }
 
+        const nextStage = this.activeProject.stages[this.activeProject.currentStageIndex];
         return {
             status: 'stage_complete',
-            nextStage: this.activeProject.stages[this.activeProject.currentStageIndex]
+            nextStage: nextStage || null
         };
     }
 
@@ -124,32 +130,54 @@ export class ProjectSystem {
      * Complete the entire project
      */
     completeProject() {
+        if (!this.activeProject) return null;
+        
         const project = this.activeProject;
 
         // Rewards
-        this.gameState.money += project.reward;
-        if (project.xpReward) {
-            Object.entries(project.xpReward).forEach(([skill, amount]) => {
-                this.gameState.characterStats.addXP(skill, amount);
+        if (project.reward) {
+            this.gameState.money = (this.gameState.money || 0) + project.reward;
+        }
+        
+        if (project.xpReward && this.gameState?.characterStats) {
+            Object.entries(project.xpReward || {}).forEach(([skill, amount]) => {
+                if (this.gameState.characterStats?.addExperience && typeof amount === 'number') {
+                    try {
+                        this.gameState.characterStats.addExperience(skill, amount);
+                    } catch (error) {
+                        console.warn('Failed to add experience:', error);
+                    }
+                }
             });
         }
-        if (project.ethics) {
-            this.gameState.characterStats.modifyEthics(project.ethics);
+        
+        if (project.ethics && this.gameState?.characterStats?.modifyEthics) {
+            try {
+                this.gameState.characterStats.modifyEthics(project.ethics);
+            } catch (error) {
+                console.warn('Failed to modify ethics:', error);
+            }
         }
 
         // Reputation
-        this.gameState.reputation += (project.difficulty * 10);
+        if (project.difficulty) {
+            this.gameState.reputation = (this.gameState.reputation || 0) + (project.difficulty * 10);
+        }
 
         // Track history
-        this.completedProjects.push(project.id);
-        this.projectHistory[project.id] = (this.projectHistory[project.id] || 0) + 1;
+        if (project.id) {
+            if (!this.completedProjects) this.completedProjects = [];
+            this.completedProjects.push(project.id);
+            if (!this.projectHistory) this.projectHistory = {};
+            this.projectHistory[project.id] = (this.projectHistory[project.id] || 0) + 1;
+        }
 
         this.activeProject = null;
 
         return {
             status: 'project_complete',
             project: project,
-            reward: project.reward
+            reward: project.reward || 0
         };
     }
 

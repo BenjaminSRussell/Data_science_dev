@@ -84,7 +84,7 @@ export class EducationSystem {
         for (const [key, degree] of Object.entries(this.degrees)) {
             if (!degree.acquired && degree.reqs.every(r => this.completedCourses.includes(r))) {
                 degree.acquired = true;
-                this.gameState.newsManager.addNews({ text: `Player earned a ${degree.name}!`, category: 'career', sentiment: 'positive' });
+                this.gameState.newsManager?.addNews({ text: `Player earned a ${degree.name}!`, category: 'career', sentiment: 'positive' });
                 // Add credential to character?
             }
         }

@@ -22,7 +22,7 @@ export const PERSONALITY = {
         name: 'friendly',
         defaultMood: MOOD.HAPPY,
         color: '#10b981',
-        emoji: '😊',
+        emoji: '',
         greetings: {
             stranger: ["Hey there! New face around here!", "Oh hi! I don't think we've met!"],
             acquaintance: ["Hey! Good to see you again!", "Oh hey you! What's up?"],
@@ -30,16 +30,16 @@ export const PERSONALITY = {
             close: ["I was just thinking about you!", "Finally! I've been waiting to see you!"]
         },
         reactions: {
-            happy: { emoji: '😄', text: 'lights up' },
-            annoyed: { emoji: '😅', text: 'looks a bit uncomfortable' },
-            excited: { emoji: '🤩', text: 'bounces excitedly' }
+            happy: { emoji: '', text: 'lights up' },
+            annoyed: { emoji: '', text: 'looks a bit uncomfortable' },
+            excited: { emoji: '', text: 'bounces excitedly' }
         }
     },
     PROFESSIONAL: {
         name: 'professional',
         defaultMood: MOOD.NEUTRAL,
         color: '#8b5cf6',
-        emoji: '💼',
+        emoji: '',
         greetings: {
             stranger: ["Good day. How can I help you?", "Hello. What brings you here?"],
             acquaintance: ["Ah, good to see you. What's on your mind?", "Hello again. Business as usual?"],
@@ -47,16 +47,16 @@ export const PERSONALITY = {
             close: ["Perfect timing as always. Come in.", "I've been expecting you."]
         },
         reactions: {
-            happy: { emoji: '🙂', text: 'nods approvingly' },
-            annoyed: { emoji: '😐', text: 'checks their watch' },
-            excited: { emoji: '📈', text: 'leans forward with interest' }
+            happy: { emoji: '', text: 'nods approvingly' },
+            annoyed: { emoji: '', text: 'checks their watch' },
+            excited: { emoji: '', text: 'leans forward with interest' }
         }
     },
     COMPETITIVE: {
         name: 'competitive',
         defaultMood: MOOD.NEUTRAL,
         color: '#f59e0b',
-        emoji: '🏆',
+        emoji: '',
         greetings: {
             stranger: ["Who are you? Another competitor?", "New blood, huh? Think you can keep up?"],
             acquaintance: ["Back for more? Glutton for punishment.", "Oh, it's you. Ready to lose again?"],
@@ -64,16 +64,16 @@ export const PERSONALITY = {
             close: ["The only person worth competing against.", "Ready for our rematch?"]
         },
         reactions: {
-            happy: { emoji: '😏', text: 'smirks confidently' },
-            annoyed: { emoji: '😤', text: 'scoffs' },
-            excited: { emoji: '🔥', text: 'gets fired up' }
+            happy: { emoji: '', text: 'smirks confidently' },
+            annoyed: { emoji: '', text: 'scoffs' },
+            excited: { emoji: '', text: 'gets fired up' }
         }
     },
     MYSTERIOUS: {
         name: 'mysterious',
         defaultMood: MOOD.NEUTRAL,
         color: '#8b5cf6',
-        emoji: '🔮',
+        emoji: '',
         greetings: {
             stranger: ["...", "Interesting. You found me."],
             acquaintance: ["You again. The threads of fate intertwine.", "Back so soon? Curious."],
@@ -81,16 +81,16 @@ export const PERSONALITY = {
             close: ["*smiles knowingly* Right on time.", "Some things are meant to be."]
         },
         reactions: {
-            happy: { emoji: '✨', text: 'eyes glimmer' },
-            annoyed: { emoji: '🌑', text: 'shadows seem to deepen' },
-            excited: { emoji: '🌟', text: 'aura intensifies' }
+            happy: { emoji: '', text: 'eyes glimmer' },
+            annoyed: { emoji: '', text: 'shadows seem to deepen' },
+            excited: { emoji: '', text: 'aura intensifies' }
         }
     },
     GRUMPY: {
         name: 'grumpy',
         defaultMood: MOOD.ANNOYED,
         color: '#ef4444',
-        emoji: '😠',
+        emoji: '',
         greetings: {
             stranger: ["What do you want?", "Ugh, another one. What?"],
             acquaintance: ["Oh, it's you. Make it quick.", "Back again? *sighs* Fine."],
@@ -98,16 +98,16 @@ export const PERSONALITY = {
             close: ["...glad you're here. Don't make a big deal of it.", "*actually smiles* Hey."]
         },
         reactions: {
-            happy: { emoji: '😊', text: 'softens slightly' },
-            annoyed: { emoji: '💢', text: 'vein pops on forehead' },
-            excited: { emoji: '😲', text: 'eyebrows raise in surprise' }
+            happy: { emoji: '', text: 'softens slightly' },
+            annoyed: { emoji: '', text: 'vein pops on forehead' },
+            excited: { emoji: '', text: 'eyebrows raise in surprise' }
         }
     },
     GENEROUS: {
         name: 'generous',
         defaultMood: MOOD.HAPPY,
         color: '#ec4899',
-        emoji: '🎁',
+        emoji: '',
         greetings: {
             stranger: ["Welcome! Can I get you anything?", "Hello dear! How can I help?"],
             acquaintance: ["So lovely to see you! Tea?", "Oh wonderful! Just in time for cookies!"],
@@ -115,9 +115,9 @@ export const PERSONALITY = {
             close: ["Come here, let me hug you!", "I've been saving something special for you!"]
         },
         reactions: {
-            happy: { emoji: '💝', text: 'beams warmly' },
-            annoyed: { emoji: '😟', text: 'looks concerned' },
-            excited: { emoji: '🤗', text: 'claps hands together' }
+            happy: { emoji: '', text: 'beams warmly' },
+            annoyed: { emoji: '', text: 'looks concerned' },
+            excited: { emoji: '', text: 'claps hands together' }
         }
     }
 };

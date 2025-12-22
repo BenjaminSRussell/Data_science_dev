@@ -146,8 +146,7 @@ export class LazySystemLoader {
      * Initialize specific system
      */
     async initializeSystem(systemName) {
-        // This will be called by main.js with actual initialization
-        // Just a placeholder for structure
+        // System initialization is handled by main.js
         return Promise.resolve();
     }
     

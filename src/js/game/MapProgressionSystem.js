@@ -4,67 +4,37 @@
  * Includes travel animations
  */
 
-// TravelAnimationSystem - handles travel between locations
+// TravelAnimationSystem - Optimized: instant travel, no delays
 class TravelAnimationSystem {
     constructor() {
         this.currentAnimation = null;
     }
     
+    // Instant travel - no animation delays
     async animateTravel(fromLocation, toLocation, vehicle, onComplete) {
-        const overlay = document.createElement('div');
-        overlay.className = 'travel-overlay';
-        overlay.innerHTML = `
-            <div class="travel-content">
-                <div class="travel-vehicle">${this.getVehicleIcon(vehicle)}</div>
-                <div class="travel-route">
-                    <div class="travel-from">${fromLocation?.name || 'Here'}</div>
-                    <div class="travel-path"></div>
-                    <div class="travel-to">${toLocation?.name || 'There'}</div>
-                </div>
-                <div class="travel-progress">
-                    <div class="travel-progress-bar">
-                        <div class="travel-progress-fill"></div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(overlay);
-        
-        return new Promise((resolve) => {
-            const progressBar = overlay.querySelector('.travel-progress-fill');
-            const duration = this.getTravelDuration(fromLocation, toLocation, vehicle);
-            let progress = 0;
-            
-            const interval = setInterval(() => {
-                progress += 100 / (duration / 50);
-                progressBar.style.width = `${Math.min(progress, 100)}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    overlay.remove();
-                    if (onComplete) onComplete();
-                    resolve();
-                }
-            }, 50);
-        });
+        // Execute immediately, no animation overlay
+        if (onComplete) {
+            onComplete();
+        }
+        return Promise.resolve();
     }
     
     getVehicleIcon(vehicle) {
         const icons = {
-            'walking': '🚶', 'bus_pass': '🚌', 'used_car': '🚗',
-            'sedan': '🚙', 'sports_car': '🏎️', 'luxury_car': '🚘'
+            'walking': '/assets/icons/vehicles/walking.png',
+            'bus_pass': '/assets/icons/vehicles/bus_pass.png',
+            'used_car': '/assets/icons/vehicles/used_car.png',
+            'luxury_car': '/assets/icons/vehicles/luxury_car.png',
+            'sedan': '/assets/icons/vehicles/used_car.png',
+            'sports_car': '/assets/icons/vehicles/used_car.png',
+            'luxury_car': '/assets/icons/vehicles/luxury_car.png'
         };
-        return icons[vehicle] || '🚶';
+        return icons[vehicle] || '/assets/icons/vehicles/walking.png';
     }
     
     getTravelDuration(fromLocation, toLocation, vehicle) {
-        if (!fromLocation?.position || !toLocation?.position) return 1000;
-        const dx = fromLocation.position.x - toLocation.position.x;
-        const dy = fromLocation.position.y - toLocation.position.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const speeds = { 'walking': 1, 'bus_pass': 2, 'used_car': 3, 'sedan': 4, 'sports_car': 5, 'luxury_car': 5 };
-        return Math.max(1000, distance * 200 / (speeds[vehicle] || 1));
+        // Not used anymore, but kept for compatibility
+        return 0;
     }
 }
 
@@ -138,14 +108,16 @@ export class MapProgressionSystem {
      * Check if map should unlock
      */
     checkMapUnlocks() {
+        if (!this.gameState || !this.mapData) return { unlocked: false };
+        
         const days = this.gameState.timeManager?.totalDays || 0;
         const reputation = this.gameState.reputation || 0;
         const money = this.gameState.money || 0;
 
         // Check mid-game map
-        if (!this.unlockedMaps.includes('mid_game')) {
+        if (!this.unlockedMaps.includes('mid_game') && this.mapData.mid_game?.unlockRequirement) {
             const req = this.mapData.mid_game.unlockRequirement;
-            if (days >= req.days && reputation >= req.reputation) {
+            if (days >= (req.days || 0) && reputation >= (req.reputation || 0)) {
                 this.unlockMap('mid_game');
                 return {
                     unlocked: true,
@@ -156,9 +128,9 @@ export class MapProgressionSystem {
         }
 
         // Check end-game map
-        if (!this.unlockedMaps.includes('end_game')) {
+        if (!this.unlockedMaps.includes('end_game') && this.mapData.end_game?.unlockRequirement) {
             const req = this.mapData.end_game.unlockRequirement;
-            if (days >= req.days && reputation >= req.reputation && money >= req.money) {
+            if (days >= (req.days || 0) && reputation >= (req.reputation || 0) && money >= (req.money || 0)) {
                 this.unlockMap('end_game');
                 return {
                     unlocked: true,
@@ -212,7 +184,7 @@ export class MapProgressionSystem {
      */
     updateWorldMapLocations(map) {
         // This would integrate with WorldMap to add/update locations
-        map.locations.forEach(loc => {
+        map?.locations?.forEach(loc => {
             // Add location to world map if it doesn't exist
             // Implementation depends on WorldMap structure
         });
@@ -225,11 +197,11 @@ export class MapProgressionSystem {
         const npcManager = this.gameState.npcManager;
         if (!npcManager) return [];
 
-        const metNPCs = npcManager.getMetNPCs();
+        const metNPCs = npcManager?.getMetNPCs() || [];
         const followingNPCs = [];
 
-        metNPCs.forEach(npc => {
-            const relationship = npcManager.getRelationship(npc.id);
+        metNPCs?.forEach(npc => {
+            const relationship = npcManager?.getRelationship(npc.id) || 0;
             
             // NPCs with high relationship might follow
             if (relationship > 70) {
@@ -259,26 +231,20 @@ export class MapProgressionSystem {
     }
     
     /**
-     * Travel to location with animation
+     * Travel to location - instant, no animation delays
      */
     async travelToLocation(locationId, vehicle) {
-        const fromLocation = this.gameState.worldMap?.getCurrentLocation();
-        const toLocation = this.gameState.worldMap?.getLocation(locationId);
+        if (!this.gameState?.worldMap) return;
+        
+        const fromLocation = this.gameState.worldMap.getCurrentLocation?.();
+        const toLocation = this.gameState.worldMap.getLocation?.(locationId);
         
         if (!fromLocation || !toLocation) return;
         
-        // Show travel animation
-        await this.travelAnimation.animateTravel(
-            fromLocation,
-            toLocation,
-            vehicle || 'walking',
-            () => {
-                // Travel complete
-                if (this.gameState.worldMap) {
-                    this.gameState.worldMap.travelTo(locationId);
-                }
-            }
-        );
+        // Instant travel - no animation
+        if (this.gameState.worldMap && typeof this.gameState.worldMap.travelTo === 'function') {
+            this.gameState.worldMap.travelTo(locationId);
+        }
     }
     
     /**

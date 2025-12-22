@@ -288,8 +288,8 @@ export class ResearchPaperNotificationSystem {
     checkForNewPapers() {
         if (!this.gameState || !this.gameState.timeManager) return;
         
-        const currentDay = this.gameState.timeManager.totalDays || 1;
-        const currentPhase = (this.gameState.aiTrainingStoryline && this.gameState.aiTrainingStoryline.currentPhase) 
+        const currentDay = this.gameState.timeManager?.totalDays || 1;
+        const currentPhase = (this.gameState.aiTrainingStoryline && this.gameState.aiTrainingStoryline?.currentPhase) 
             ? this.gameState.aiTrainingStoryline.currentPhase 
             : 'pre_attention';
         
@@ -332,8 +332,8 @@ export class ResearchPaperNotificationSystem {
         try {
             if (window.game && window.game.showToast && typeof window.game.showToast === 'function') {
                 const message = paper.isBreakthrough 
-                    ? `📄 BREAKTHROUGH: ${paper.title} published!`
-                    : `📄 New Research Paper: ${paper.title}`;
+                    ? ` BREAKTHROUGH: ${paper.title} published!`
+                    : ` New Research Paper: ${paper.title}`;
                 window.game.showToast(message, 'info');
             }
         } catch (error) {

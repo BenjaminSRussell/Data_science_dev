@@ -86,18 +86,18 @@ export class VisualProgressionSystem {
         
         // Count relationships
         if (this.gameState.npcManager) {
-            const metNPCs = this.gameState.npcManager.getMetNPCs() || [];
+            const metNPCs = this.gameState.npcManager?.getMetNPCs() || [];
             stats.relationships = metNPCs.length;
         }
         
         // Get days played
         if (this.gameState.timeManager) {
-            stats.days = this.gameState.timeManager.totalDays || 0;
+            stats.days = this.gameState.timeManager?.totalDays || 0;
         }
         
         // Get job level
         if (this.gameState.jobSystem && this.gameState.jobSystem.currentJob) {
-            stats.jobLevel = this.gameState.jobSystem.currentJob.level || 0;
+            stats.jobLevel = this.gameState.jobSystem?.currentJob?.level || 0;
         }
         
         // Calculate total skills
@@ -157,7 +157,7 @@ export class VisualProgressionSystem {
      * Upgrade sprite sheets based on tier
      */
     upgradeSpriteSheets(tier) {
-        const spriteSheetManager = this.gameState.spriteSheetManager;
+        const spriteSheetManager = this.gameState?.spriteSheetManager;
         if (!spriteSheetManager) return;
         
         // Register better sprite sheets for higher tiers
@@ -260,8 +260,8 @@ export class VisualProgressionSystem {
         };
         
         const messages = {
-            mid: '🎨 Visual Upgrade! The world is looking better!',
-            premium: '✨ Premium Visuals Unlocked! Everything looks amazing!'
+            mid: ' Visual Upgrade! The world is looking better!',
+            premium: ' Premium Visuals Unlocked! Everything looks amazing!'
         };
         
         const message = messages[tier] || `Visual upgrade to ${tierNames[tier]} tier!`;

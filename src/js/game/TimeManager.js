@@ -5,12 +5,12 @@
 
 // Time slot definitions
 export const TIME_SLOTS = [
-    { id: 'early_morning', name: 'Early Morning', icon: '🌅', hours: '6:00 - 9:00', index: 0 },
-    { id: 'late_morning', name: 'Late Morning', icon: '☀️', hours: '9:00 - 12:00', index: 1 },
-    { id: 'afternoon', name: 'Afternoon', icon: '🌤️', hours: '12:00 - 15:00', index: 2 },
-    { id: 'late_afternoon', name: 'Late Afternoon', icon: '🌇', hours: '15:00 - 18:00', index: 3 },
-    { id: 'evening', name: 'Evening', icon: '🌆', hours: '18:00 - 21:00', index: 4 },
-    { id: 'night', name: 'Night', icon: '🌙', hours: '21:00 - 00:00', index: 5 }
+    { id: 'early_morning', name: 'Early Morning', icon: '', hours: '6:00 - 9:00', index: 0 },
+    { id: 'late_morning', name: 'Late Morning', icon: '', hours: '9:00 - 12:00', index: 1 },
+    { id: 'afternoon', name: 'Afternoon', icon: '', hours: '12:00 - 15:00', index: 2 },
+    { id: 'late_afternoon', name: 'Late Afternoon', icon: '', hours: '15:00 - 18:00', index: 3 },
+    { id: 'evening', name: 'Evening', icon: '', hours: '18:00 - 21:00', index: 4 },
+    { id: 'night', name: 'Night', icon: '', hours: '21:00 - 00:00', index: 5 }
 ];
 
 // Days of the week

@@ -12,7 +12,7 @@ const PALETTES = {
         'rgba(16, 185, 129, 0.8)',   // Green
         'rgba(245, 158, 11, 0.8)',   // Orange
         'rgba(239, 68, 68, 0.8)',    // Red
-        'rgba(6, 182, 212, 0.8)'     // Cyan
+        'rgba(168, 85, 247, 0.8)'    // Indigo
     ],
     vibrant: [
         'rgba(255, 99, 132, 0.8)',
@@ -41,7 +41,8 @@ const PALETTES = {
 };
 
 export class ChartManager {
-    constructor() {
+    constructor(game) {
+        this.game = game;
         this.previewChart = null;
         this.reviewChart = null;
     }
@@ -55,7 +56,7 @@ export class ChartManager {
         Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
         Chart.defaults.font.family = "'Inter', sans-serif";
 
-        console.log('📊 Chart Manager initialized');
+        console.log(' Chart Manager initialized');
     }
 
     /**
@@ -105,10 +106,26 @@ export class ChartManager {
         const palette = PALETTES[config.palette] || PALETTES.corporate;
         const type = this.mapChartType(config.type);
 
-        // Get the first dataset key
+        // Get the first dataset key with non-empty data
         const datasetKeys = Object.keys(data.datasets || {});
-        const primaryKey = datasetKeys[0] || 'Value';
-        const values = data.datasets?.[primaryKey] || data.rows?.map(r => r[1]) || [];
+        let primaryKey = 'Value';
+        let values = [];
+        
+        // Find first dataset with data
+        for (const key of datasetKeys) {
+            const datasetValues = data.datasets?.[key];
+            if (Array.isArray(datasetValues) && datasetValues.length > 0) {
+                primaryKey = key;
+                values = datasetValues;
+                break;
+            }
+        }
+        
+        // Fallback to rows if no dataset found
+        if (values.length === 0 && data.rows && data.rows.length > 0) {
+            values = data.rows.map(r => r[1] || 0);
+            primaryKey = data.columns?.[1] || 'Value';
+        }
 
         return {
             type: type,
@@ -144,6 +161,7 @@ export class ChartManager {
             scatter: 'scatter',
             radar: 'radar',
             area: 'line',
+            bubble: 'bubble',
             polarArea: 'polarArea'
         };
         return mapping[type] || 'bar';

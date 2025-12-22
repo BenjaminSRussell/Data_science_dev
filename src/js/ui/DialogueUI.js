@@ -1,15 +1,17 @@
 /**
  * DialogueUI.js
  * Clean dialogue interface using dialogue trees
- * No emojis - text only
+ * Phase 2: Now uses Lit component (DialogueComponent) with fallback
  */
 
 import { dialogueTreeSystem } from '../game/dialogue/DialogueTreeSystem.js';
+import { STATS } from '../game/CharacterStats.js';
 
 export class DialogueUI {
     constructor(game) {
         this.game = game;
         this.container = null;
+        this.litComponent = null;
         this.isOpen = false;
         this.currentNPC = null;
         this.currentTree = null;
@@ -21,8 +23,35 @@ export class DialogueUI {
     
     /**
      * Create the dialogue container element
+     * Phase 2: Uses Lit component if available
      */
     createContainer() {
+        // Try to use Lit component first
+        try {
+            if (customElements.get('dialogue-component')) {
+                let container = document.getElementById('dialogue-ui-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'dialogue-ui-container';
+                    document.body.appendChild(container);
+                }
+                
+                this.litComponent = document.createElement('dialogue-component');
+                this.litComponent.game = this.game;
+                this.litComponent.addEventListener('dialogue-choice', (e) => {
+                    this.handleChoice(e.detail.choice.id);
+                });
+                this.litComponent.addEventListener('dialogue-close', () => {
+                    this.close();
+                });
+                container.appendChild(this.litComponent);
+                return;
+            }
+        } catch (err) {
+            console.warn('Lit component not available, using fallback:', err);
+        }
+        
+        // Fallback to DOM method
         if (document.getElementById('dialogue-ui')) {
             this.container = document.getElementById('dialogue-ui');
             return;
@@ -79,6 +108,7 @@ export class DialogueUI {
     
     /**
      * Open dialogue with an NPC
+     * Phase 2: Uses Lit component if available
      */
     open(npc, relationshipLevel = 0) {
         if (!npc) return;
@@ -86,7 +116,6 @@ export class DialogueUI {
         this.currentNPC = npc;
         
         // Build dialogue tree for this NPC
-        // Use relationshipLevel parameter or get from game state
         const relLevel = relationshipLevel || this.game?.gameState?.npcManager?.getRelationship?.(npc.id) || 0;
         const dialogueTreeSystem = this.game?.gameState?.dialogueTreeSystem || this.game?.dialogueTreeSystem;
         if (dialogueTreeSystem) {
@@ -104,34 +133,57 @@ export class DialogueUI {
         }
         this.currentNode = this.currentTree.getRootNode();
         
-        // Update avatar
-        const avatar = this.container.querySelector('#dialogue-avatar');
-        const initial = this.container.querySelector('#dialogue-avatar-initial');
+        // Use Lit component if available
+        if (this.litComponent) {
+            this.litComponent.open(npc, this.currentNode);
+            this.isOpen = true;
+            return;
+        }
         
-        const personality = npc.personality || 'friendly';
-        avatar.setAttribute('data-personality', personality);
-        initial.textContent = npc.name?.[0]?.toUpperCase() || '?';
+        // Fallback to DOM method
+        const avatar = this.container?.querySelector('#dialogue-avatar');
+        const initial = this.container?.querySelector('#dialogue-avatar-initial');
+        
+        if (avatar && initial) {
+            const personality = npc.personality || 'friendly';
+            avatar.setAttribute('data-personality', personality);
+            initial.textContent = npc.name?.[0]?.toUpperCase() || '?';
+        }
         
         // Update NPC info
-        this.container.querySelector('#dialogue-npc-name').textContent = npc.name || 'Unknown';
-        this.container.querySelector('#dialogue-npc-title').textContent = npc.title || npc.type || '???';
+        if (this.container) {
+            const nameEl = this.container.querySelector('#dialogue-npc-name');
+            const titleEl = this.container.querySelector('#dialogue-npc-title');
+            if (nameEl) nameEl.textContent = npc.name || 'Unknown';
+            if (titleEl) titleEl.textContent = npc.title || npc.type || '???';
+        }
         
         // Show root node
         this.showNode(this.currentNode);
         
         // Show container
-        this.container.classList.add('active');
+        if (this.container) {
+            this.container.classList.add('active');
+        }
         this.isOpen = true;
     }
     
     /**
      * Show a dialogue node
+     * Phase 2: Uses Lit component if available
      */
     showNode(node) {
         if (!node) return;
         
         this.currentNode = node;
         
+        // Use Lit component if available
+        if (this.litComponent) {
+            this.litComponent.showNode(node);
+            return;
+        }
+        
+        // Fallback to DOM method
         // Type out text
         this.typeText(node.text);
         
@@ -175,7 +227,7 @@ export class DialogueUI {
         const choicesEl = this.container.querySelector('#dialogue-choices');
         choicesEl.innerHTML = '';
         
-        choices.forEach(choice => {
+        choices?.forEach(choice => {
             const btn = document.createElement('button');
             btn.className = 'dialogue-choice';
             btn.textContent = choice.text;
@@ -240,9 +292,14 @@ export class DialogueUI {
         }
         
         if (effects.statBoost && this.game?.gameState?.characterStats) {
-            // Boost stat
-            const current = this.game.gameState.characterStats[effects.statBoost] || 0;
-            this.game.gameState.characterStats[effects.statBoost] = current + 1;
+            // Boost stat - use getStat to read and directly modify stats object
+            const stats = this.game.gameState.characterStats;
+            const current = stats.getStat(effects.statBoost) || 0;
+            if (stats.stats && STATS[effects.statBoost]) {
+                // Directly modify the stat value (cap at maxLevel)
+                const maxLevel = STATS[effects.statBoost].maxLevel || 100;
+                stats.stats[effects.statBoost] = Math.min(maxLevel, current + 1);
+            }
         }
         
         if (effects.item && this.game?.gameState) {
@@ -253,9 +310,16 @@ export class DialogueUI {
     
     /**
      * Close dialogue
+     * Phase 2: Uses Lit component if available
      */
     close() {
-        this.container.classList.remove('active');
+        // Use Lit component if available
+        if (this.litComponent) {
+            this.litComponent.close();
+        } else if (this.container) {
+            this.container.classList.remove('active');
+        }
+        
         this.isOpen = false;
         this.currentNPC = null;
         this.currentTree = null;

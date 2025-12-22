@@ -292,12 +292,12 @@ export class OfficeManager {
                 <div class="office-floor"></div>
                 
                 <div class="office-desk">
-                    <div class="office-computer">💻</div>
+                    <div class="office-computer"></div>
                 </div>
                 
                 <div class="office-character">
                     <div class="character-avatar char-working">
-                        ${this.gameState.character?.getEmoji() || '👨‍💻'}
+                        ${this.gameState.character?.getEmoji() || ''}
                     </div>
                 </div>
                 

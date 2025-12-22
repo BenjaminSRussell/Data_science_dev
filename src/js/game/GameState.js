@@ -105,6 +105,10 @@ export class GameState {
         this.worldEvolutionSystem = null;
         this.investmentEcommerceSystem = null;
         this.storylineManager = null;
+        this.storyBeatsSystem = null;
+        this.characterArcSystem = null;
+        this.npcMemorySystem = null;
+        this.filterManager = null;
         this.mapProgressionSystem = null;
         this.ideSystem = null;
         this.locationBackgroundSystem = null;
@@ -113,6 +117,8 @@ export class GameState {
         this.mapCoordinateSystem = null;
         this.contractSystem = null; // New contract system
         this.bankSystem = null; // Bank system
+        this.gameEndingSystem = null; // Game ending system
+        this.gameEnding = null; // Current ending state
         
         // Phase 1 Visual Systems
         this.visualSystem = null;
@@ -133,7 +139,7 @@ export class GameState {
      * Get current rank info
      */
     get currentRank() {
-        return RANKS[this.rankIndex];
+        return RANKS[this.rankIndex] || RANKS[0];
     }
 
     /**

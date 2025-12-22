@@ -18,7 +18,7 @@ export class ConversationScreen {
      * Show conversation screen for NPC
      */
     showConversation(npcId) {
-        const npc = this.game.npcManager.getNPC(npcId);
+        const npc = this.game.npcManager?.getNPC(npcId);
         if (!npc) return;
         
         this.currentNPC = npc;
@@ -51,13 +51,13 @@ export class ConversationScreen {
      * Start conversation
      */
     async startConversation() {
-        const conversation = await this.game.npcManager.startConversation(this.currentNPC.id);
+        const conversation = await this.game.npcManager?.startConversation(this.currentNPC.id);
         if (!conversation) return;
         
         const npcImage = getNPCImage(this.currentNPC);
         const fallbackIcon = getNPCFallback(this.currentNPC);
-        const relationship = this.game.npcManager.getRelationship(this.currentNPC.id);
-        const tier = this.game.npcManager.getRelationshipTier(this.currentNPC.id);
+        const relationship = this.game.npcManager?.getRelationship(this.currentNPC.id) || 0;
+        const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || 0;
         
         // Build conversation screen HTML
         this.screenElement.innerHTML = `
@@ -65,6 +65,7 @@ export class ConversationScreen {
                 <div class="conversation-npc-avatar">
                     <img src="${npcImage}" 
                          alt="${this.currentNPC.name}"
+                         style="object-position: center center;"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div class="npc-avatar-fallback" style="display:none;">
                         <div style="font-size: 3rem;">${fallbackIcon}</div>
@@ -97,10 +98,10 @@ export class ConversationScreen {
             <div class="conversation-footer">
                 <div class="conversation-actions">
                     <button class="conversation-action-btn" onclick="game.conversationScreen.handleGift()">
-                        🎁 Gift
+                        Gift
                     </button>
                     <button class="conversation-action-btn" onclick="game.conversationScreen.handleTopic()">
-                        💬 Topic
+                        Topic
                     </button>
                 </div>
                 <button class="conversation-close-btn" onclick="game.conversationScreen.close()">
@@ -124,7 +125,7 @@ export class ConversationScreen {
         return choices.map((choice, index) => {
             const disabled = choice.conditions && 
                 choice.conditions.relationship && 
-                this.game.npcManager.getRelationship(this.currentNPC.id) < choice.conditions.relationship;
+                (this.game.npcManager?.getRelationship(this.currentNPC.id) || 0) < choice.conditions.relationship;
             
             return `
                 <button class="conversation-choice ${disabled ? 'disabled' : ''}" 
@@ -153,7 +154,7 @@ export class ConversationScreen {
      * Handle player choice
      */
     handleChoice(choiceIndex) {
-        const result = this.game.npcManager.makeChoice(choiceIndex);
+        const result = this.game.npcManager?.makeChoice(choiceIndex);
         if (!result) return;
         
         // Update dialogue text
@@ -164,10 +165,10 @@ export class ConversationScreen {
         
         // Get next node if using dialogue tree
         if (result.isTreeAction && this.currentNPC) {
-            const relationship = this.game.npcManager.relationships[this.currentNPC.id] || 0;
+            const relationship = this.game.npcManager?.relationships?.[this.currentNPC.id] || 0;
             const dialogueTree = dialogueTreeSystem.getTree(this.currentNPC.id, relationship);
             if (dialogueTree) {
-                const currentNode = this.game.npcManager.currentConversation?.currentNode || 'root';
+                const currentNode = this.game.npcManager?.currentConversation?.currentNode || 'root';
                 const node = dialogueTree.getNode(currentNode);
                 if (node && node.choices) {
                     // Update choices
@@ -181,8 +182,8 @@ export class ConversationScreen {
         }
         
         // Update relationship display
-        const relationship = this.game.npcManager.getRelationship(this.currentNPC.id);
-        const tier = this.game.npcManager.getRelationshipTier(this.currentNPC.id);
+        const relationship = this.game.npcManager?.getRelationship(this.currentNPC.id) || 0;
+        const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || 0;
         const relationshipEl = this.screenElement.querySelector('.conversation-relationship');
         if (relationshipEl) {
             relationshipEl.innerHTML = `
@@ -203,7 +204,7 @@ export class ConversationScreen {
     showEffects(effects) {
         if (effects.relationship) {
             const change = effects.relationship > 0 ? '+' : '';
-            this.game.showToast(`Relationship ${change}${effects.relationship}`, 'info');
+            this.game.showToast?.(`Relationship ${change}${effects.relationship}`, 'info');
         }
         if (effects.xp) {
             this.game.showToast(`Gained ${effects.xp} XP`, 'success');
@@ -214,16 +215,26 @@ export class ConversationScreen {
      * Handle gift giving
      */
     handleGift() {
-        // Show gift selection modal
-        this.game.showToast('Gift feature coming soon', 'info');
+        // Disable gift button for now - feature not implemented
+        const giftBtn = this.screenElement?.querySelector('.conversation-action-btn');
+        if (giftBtn) {
+            giftBtn.disabled = true;
+            giftBtn.style.opacity = '0.5';
+            giftBtn.style.cursor = 'not-allowed';
+        }
     }
     
     /**
      * Handle topic discussion
      */
     handleTopic() {
-        // Show topic selection
-        this.game.showToast('Topic feature coming soon', 'info');
+        // Disable topic button for now - feature not implemented
+        const topicBtn = this.screenElement?.querySelectorAll('.conversation-action-btn')[1];
+        if (topicBtn) {
+            topicBtn.disabled = true;
+            topicBtn.style.opacity = '0.5';
+            topicBtn.style.cursor = 'not-allowed';
+        }
     }
     
     /**

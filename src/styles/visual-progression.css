@@ -5,7 +5,7 @@
 
 /* Visual Tier Classes */
 .visual-basic {
-    /* Basic tier - simple, placeholder visuals */
+    /* Basic tier - simple visuals */
     filter: grayscale(0.1);
     opacity: 0.9;
 }

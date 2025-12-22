@@ -48,7 +48,6 @@ export class TaskSystem {
             requirements: taskTemplate.requirements,
             optimalChartTypes: taskTemplate.optimalChartTypes,
             potentialReward: potentialReward,
-            potentialReward: potentialReward,
             startTime: Date.now()
         };
 
@@ -295,8 +294,8 @@ export class TaskSystem {
         }
         if (nameEl) nameEl.textContent = task.boss.name;
         if (titleEl) titleEl.textContent = task.boss.title;
-        if (avatarEl) avatarEl.textContent = task.boss.avatar || '👔';
-        if (moodEl) moodEl.textContent = task.boss.mood || '😐';
+        if (avatarEl) avatarEl.textContent = task.boss.avatar || '';
+        if (moodEl) moodEl.textContent = task.boss.mood || '';
 
         // Update task display
         const taskDesc = document.querySelector('.task-description');
@@ -336,15 +335,36 @@ export class TaskSystem {
         // Update header
         const thead = table.querySelector('thead tr');
         thead.innerHTML = data.columns.map((c, i) =>
-            `<th class="sortable-header" onclick="game.gameState.taskSystem.handleTableSort(${i})">${c} ↕️</th>`
+            `<th class="sortable-header" onclick="game.gameState.taskSystem.handleTableSort(${i})">${c} ↕</th>`
         ).join('');
 
         // Update body
         const tbody = table.querySelector('tbody');
         tbody.innerHTML = data.rows.map(row =>
-            `<tr>${row.map(cell =>
-                `<td>${typeof cell === 'number' ? (cell >= 1000 ? '$' + cell.toLocaleString() : cell) : cell}</td>`
-            ).join('')}</tr>`
+            `<tr>${row.map((cell, cellIndex) => {
+                if (typeof cell !== 'number') return `<td>${cell}</td>`;
+                
+                // Check column name to determine formatting
+                const columnName = data.columns[cellIndex]?.toLowerCase() || '';
+                const isCurrency = columnName.includes('revenue') || 
+                                 columnName.includes('expense') || 
+                                 columnName.includes('profit') || 
+                                 columnName.includes('money') ||
+                                 columnName.includes('cost') ||
+                                 columnName.includes('price') ||
+                                 columnName.includes('salary') ||
+                                 columnName.includes('budget');
+                
+                // Format based on column type
+                if (isCurrency) {
+                    return `<td class="currency-cell">$${cell.toLocaleString()}</td>`;
+                } else if (columnName.includes('percentage') || columnName.includes('percent')) {
+                    return `<td class="percentage-cell">${cell}%</td>`;
+                } else {
+                    // Regular number (users, count, etc.)
+                    return `<td class="number-cell">${cell.toLocaleString()}</td>`;
+                }
+            }).join('')}</tr>`
         ).join('');
     }
 

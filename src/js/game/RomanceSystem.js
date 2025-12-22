@@ -34,10 +34,10 @@ export class RomanceSystem {
         if (rel < 30) return { success: false, message: "We don't know each other well enough." };
 
         // Check Compatibility/Ethics
-        if (npc.romanceOptions.minEthics && this.gameState.characterStats.ethics < npc.romanceOptions.minEthics) {
+        if (npc.romanceOptions.minEthics && this.gameState.characterStats?.ethics < npc.romanceOptions.minEthics) {
             return { success: false, message: "I don't date criminals." };
         }
-        if (npc.romanceOptions.maxEthics && this.gameState.characterStats.ethics > npc.romanceOptions.maxEthics) {
+        if (npc.romanceOptions.maxEthics && this.gameState.characterStats?.ethics > npc.romanceOptions.maxEthics) {
             return { success: false, message: "You're too much of a 'goody two-shoes' for me." };
         }
 
@@ -109,7 +109,7 @@ export class RomanceSystem {
         this.relationshipStatus = 'married';
         this.modifyHappiness(100); // Max happy
 
-        return { success: true, message: "Just married! 🎉" };
+        return { success: true, message: "Just married! " };
     }
 
     toJSON() {

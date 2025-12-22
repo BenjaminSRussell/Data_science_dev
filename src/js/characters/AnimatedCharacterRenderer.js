@@ -55,7 +55,9 @@ export class AnimatedCharacterRenderer {
         
         // Get animation config
         const sheetId = state.spriteSheetId;
-        const animation = this.spriteSheetManager.getAnimationFrames(sheetId, animationName);
+        // Support both PixiSpriteManager and legacy SpriteSheetManager
+        const animation = this.spriteSheetManager?.getAnimationFrames?.(sheetId, animationName) ||
+                         this.spriteSheetManager?.getAnimation?.(sheetId, animationName);
         
         if (!animation) {
             console.warn(`Animation not found: ${animationName} for ${characterId}`);

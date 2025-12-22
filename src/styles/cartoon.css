@@ -517,6 +517,12 @@
     transition: transform 0.1s, box-shadow 0.1s;
     text-transform: uppercase;
     letter-spacing: 1px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    text-align: center;
+    min-width: 0;
 }
 
 .btn-cartoon:hover {

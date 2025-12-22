@@ -6,7 +6,7 @@ export const CHART_TYPES = [
     {
         id: "bar",
         name: "Bar Chart",
-        icon: "📊",
+        icon: "",
         description: "Compare values across categories",
         unlockRank: 0,
         bestFor: ["comparisons", "categories", "rankings"]
@@ -14,7 +14,7 @@ export const CHART_TYPES = [
     {
         id: "line",
         name: "Line Chart",
-        icon: "📈",
+        icon: "",
         description: "Show trends over time",
         unlockRank: 0,
         bestFor: ["trends", "time series", "changes"]
@@ -22,7 +22,7 @@ export const CHART_TYPES = [
     {
         id: "pie",
         name: "Pie Chart",
-        icon: "🥧",
+        icon: "",
         description: "Show proportions of a whole",
         unlockRank: 0,
         bestFor: ["proportions", "percentages", "distributions"]
@@ -30,7 +30,7 @@ export const CHART_TYPES = [
     {
         id: "scatter",
         name: "Scatter Plot",
-        icon: "⚬",
+        icon: "",
         description: "Show relationships between variables",
         unlockRank: 2,
         bestFor: ["correlations", "distributions", "outliers"]
@@ -38,7 +38,7 @@ export const CHART_TYPES = [
     {
         id: "doughnut",
         name: "Donut Chart",
-        icon: "🍩",
+        icon: "",
         description: "Proportions with center space",
         unlockRank: 2,
         bestFor: ["proportions", "progress", "comparisons"]
@@ -46,7 +46,7 @@ export const CHART_TYPES = [
     {
         id: "radar",
         name: "Radar Chart",
-        icon: "📡",
+        icon: "",
         description: "Compare multiple variables",
         unlockRank: 3,
         bestFor: ["multi-dimensional", "performance", "profiles"]
@@ -54,7 +54,7 @@ export const CHART_TYPES = [
     {
         id: "area",
         name: "Area Chart",
-        icon: "📉",
+        icon: "",
         description: "Show volume over time",
         unlockRank: 3,
         bestFor: ["cumulative", "volume", "trends"]
@@ -70,7 +70,7 @@ export const CHART_TYPES = [
     {
         id: "polarArea",
         name: "Polar Area",
-        icon: "🧭",
+        icon: "",
         description: "Radial proportional chart",
         unlockRank: 5,
         bestFor: ["cyclical data", "comparisons", "proportions"]

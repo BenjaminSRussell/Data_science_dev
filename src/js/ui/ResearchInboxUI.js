@@ -1,19 +1,47 @@
 /**
  * ResearchInboxUI.js
  * UI for viewing research paper notifications
+ * Phase 2: Now uses Lit component (ResearchInboxComponent) with fallback
  */
 
 export class ResearchInboxUI {
     constructor(researchPaperSystem) {
         this.researchPaperSystem = researchPaperSystem;
         this.container = null;
+        this.litComponent = null;
         this.isOpen = false;
     }
     
     /**
      * Create inbox UI
+     * Phase 2: Uses Lit component if available
      */
     createInboxUI() {
+        // Try to use Lit component first
+        try {
+            if (customElements.get('research-inbox-component')) {
+                let container = document.getElementById('research-inbox-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'research-inbox-container';
+                    document.body.appendChild(container);
+                }
+                
+                this.litComponent = document.createElement('research-inbox-component');
+                this.litComponent.addEventListener('paper-click', (e) => {
+                    this.showPaperDetails(e.detail.notification.id);
+                });
+                this.litComponent.addEventListener('inbox-close', () => {
+                    this.close();
+                });
+                container.appendChild(this.litComponent);
+                return container;
+            }
+        } catch (err) {
+            console.warn('Lit component not available, using fallback:', err);
+        }
+        
+        // Fallback to DOM method
         const container = document.createElement('div');
         container.id = 'research-inbox-container';
         container.className = 'research-inbox-container';
@@ -21,7 +49,7 @@ export class ResearchInboxUI {
         
         container.innerHTML = `
             <div class="research-inbox-header">
-                <h2>📚 Research Papers Inbox</h2>
+                <h2> Research Papers Inbox</h2>
                 <button class="inbox-close-btn" id="inbox-close-btn">×</button>
             </div>
             <div class="research-inbox-tabs">
@@ -120,7 +148,7 @@ export class ResearchInboxUI {
                  data-notification-id="${notification.id}">
                 <div class="paper-card-header">
                     <div class="paper-badge ${isBreakthrough ? 'breakthrough-badge' : ''}">
-                        ${isBreakthrough ? '🌟 BREAKTHROUGH' : '📄'}
+                        ${isBreakthrough ? ' BREAKTHROUGH' : ''}
                     </div>
                     ${isUnread ? '<div class="unread-indicator"></div>' : ''}
                 </div>
@@ -172,7 +200,7 @@ export class ResearchInboxUI {
                         <div class="meta-item">
                             <strong>Venue:</strong> ${paper.venue}
                         </div>
-                        ${paper.isBreakthrough ? '<div class="breakthrough-banner">🌟 BREAKTHROUGH PAPER</div>' : ''}
+                        ${paper.isBreakthrough ? '<div class="breakthrough-banner"> BREAKTHROUGH PAPER</div>' : ''}
                     </div>
                     <div class="paper-detail-description">
                         <h3>Description</h3>
@@ -191,7 +219,7 @@ export class ResearchInboxUI {
                     ${paper.url ? `
                         <div class="paper-detail-link">
                             <a href="${paper.url}" target="_blank" class="paper-link-btn">
-                                📖 Read Paper
+                                 Read Paper
                             </a>
                         </div>
                     ` : ''}
@@ -227,6 +255,7 @@ export class ResearchInboxUI {
     
     /**
      * Open inbox
+     * Phase 2: Uses Lit component if available
      */
     open() {
         if (!this.researchPaperSystem) {
@@ -234,10 +263,20 @@ export class ResearchInboxUI {
             return;
         }
         
-        if (!this.container) {
+        if (!this.litComponent && !this.container) {
             this.createInboxUI();
         }
         
+        // Use Lit component if available
+        if (this.litComponent) {
+            const papers = this.researchPaperSystem.getInbox();
+            const unreadCount = this.researchPaperSystem.getUnreadCount();
+            this.litComponent.open(papers, unreadCount);
+            this.isOpen = true;
+            return;
+        }
+        
+        // Fallback to DOM method
         if (!this.container) {
             console.error('Failed to create inbox UI');
             return;
@@ -253,8 +292,17 @@ export class ResearchInboxUI {
     
     /**
      * Close inbox
+     * Phase 2: Uses Lit component if available
      */
     close() {
+        // Use Lit component if available
+        if (this.litComponent) {
+            this.litComponent.close();
+            this.isOpen = false;
+            return;
+        }
+        
+        // Fallback to DOM method
         if (this.container) {
             this.container.style.display = 'none';
             this.isOpen = false;

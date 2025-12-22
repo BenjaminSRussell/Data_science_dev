@@ -57,7 +57,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_1',
                 number: 42,
-                title: '🐛 Data processing fails on null values',
+                title: ' Data processing fails on null values',
                 body: 'When processing data with null values, the pipeline crashes with a KeyError. Need to handle missing data gracefully.',
                 labels: ['bug', 'high-priority', 'data-pipeline'],
                 assignee: null,
@@ -70,7 +70,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_2',
                 number: 43,
-                title: '✨ Add data validation pipeline',
+                title: ' Add data validation pipeline',
                 body: 'Implement comprehensive data validation to catch errors early in the pipeline. Should include schema validation, type checking, and range validation.',
                 labels: ['enhancement', 'feature', 'data-pipeline'],
                 assignee: null,
@@ -83,7 +83,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_3',
                 number: 44,
-                title: '🐛 Memory leak in large dataset processing',
+                title: ' Memory leak in large dataset processing',
                 body: 'Processing large datasets (>10GB) causes memory issues. Need to implement chunking or streaming processing.',
                 labels: ['bug', 'performance', 'ml_models'],
                 assignee: null,
@@ -96,7 +96,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_4',
                 number: 45,
-                title: '📊 Add support for time series analysis',
+                title: ' Add support for time series analysis',
                 body: 'Add time series analysis capabilities to the data analysis tools. Should include trend analysis, seasonality detection, and forecasting.',
                 labels: ['enhancement', 'feature', 'data_analysis'],
                 assignee: null,
@@ -109,7 +109,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_5',
                 number: 46,
-                title: '🔧 Improve model training pipeline',
+                title: ' Improve model training pipeline',
                 body: 'The current training pipeline is slow and inefficient. Need to optimize data loading, add distributed training support, and implement checkpointing.',
                 labels: ['enhancement', 'performance', 'ml_models'],
                 assignee: null,
@@ -272,25 +272,25 @@ export class GitHubIssuesSystem {
     generateNewIssue() {
         const issueTemplates = [
             {
-                title: '🐛 Bug in data transformation',
+                title: ' Bug in data transformation',
                 body: 'Data transformation step produces incorrect results for edge cases.',
                 labels: ['bug', 'data-pipeline'],
                 difficulty: 'medium'
             },
             {
-                title: '✨ Add new visualization type',
+                title: ' Add new visualization type',
                 body: 'Request to add support for heatmap visualizations in the analysis tools.',
                 labels: ['enhancement', 'feature', 'data_analysis'],
                 difficulty: 'medium'
             },
             {
-                title: '📚 Improve documentation',
+                title: ' Improve documentation',
                 body: 'Documentation is outdated. Need to update examples and add more tutorials.',
                 labels: ['documentation', 'enhancement'],
                 difficulty: 'easy'
             },
             {
-                title: '⚡ Performance optimization needed',
+                title: ' Performance optimization needed',
                 body: 'Current implementation is too slow for production use. Need optimization.',
                 labels: ['performance', 'enhancement'],
                 difficulty: 'hard'

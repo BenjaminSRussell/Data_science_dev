@@ -1,0 +1,106 @@
+/* =====================================================
+   MAP ENVIRONMENT SYSTEM STYLES
+   Trees, parks, green spaces, decorative elements
+   ===================================================== */
+
+/* Environment Container */
+.map-environment-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Tree Elements */
+.map-tree {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+.map-tree::before {
+    content: '🌳';
+    font-size: 18px;
+    display: block;
+    text-align: center;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Park Elements */
+.map-park-element {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+.map-park-bench {
+    width: 16px;
+    height: 12px;
+}
+
+.map-park-bench::before {
+    content: '🪑';
+    font-size: 14px;
+    display: block;
+    text-align: center;
+}
+
+.map-park-fountain {
+    width: 18px;
+    height: 18px;
+}
+
+.map-park-fountain::before {
+    content: '⛲';
+    font-size: 16px;
+    display: block;
+    text-align: center;
+}
+
+/* Commercial Decorations */
+.map-decoration {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    opacity: 0.6;
+}
+
+.map-decoration.lamp {
+    width: 12px;
+    height: 16px;
+}
+
+.map-decoration.lamp::before {
+    content: '';
+    font-size: 12px;
+    display: block;
+    text-align: center;
+}
+
+.map-decoration.sign {
+    width: 14px;
+    height: 14px;
+}
+
+.map-decoration.sign::before {
+    content: '';
+    font-size: 12px;
+    display: block;
+    text-align: center;
+}
+
+/* Day/Night Variations */
+.map-container.time-night .map-tree::before {
+    filter: brightness(0.7) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.map-container.time-night .map-decoration.lamp::before {
+    filter: brightness(1.5);
+    opacity: 0.9;
+}

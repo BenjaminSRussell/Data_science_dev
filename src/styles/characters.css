@@ -382,6 +382,9 @@
     flex-direction: column;
     padding: 2rem;
     overflow-y: auto;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100vw;
 }
 
 .job-application-screen.active {
@@ -405,10 +408,11 @@
 
 .job-listings {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
+    width: 100%;
 }
 
 .job-card {
@@ -418,6 +422,15 @@
     padding: 1.5rem;
     transition: all 0.3s ease;
     cursor: pointer;
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .job-card:hover {
@@ -433,34 +446,74 @@
 
 .job-card-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 1rem;
     margin-bottom: 1rem;
+    min-width: 0;
+    width: 100%;
 }
 
 .job-card-icon {
     font-size: 2.5rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.job-card-header > div:last-child {
+    min-width: 0;
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
 }
 
 .job-card-title {
     font-size: 1.25rem;
     font-weight: 700;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    white-space: normal;
 }
 
 .job-card-company {
     font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.6);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    white-space: normal;
+}
+
+.job-card p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.5;
+    margin: 0;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .job-card-details {
     margin-bottom: 1rem;
+    width: 100%;
+    min-width: 0;
 }
 
 .job-card-detail {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     padding: 0.5rem 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 1rem;
+    min-width: 0;
+    width: 100%;
 }
 
 .job-card-detail:last-child {
@@ -469,10 +522,20 @@
 
 .job-card-label {
     color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .job-card-value {
     font-weight: 600;
+    text-align: right;
+    min-width: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    white-space: normal;
 }
 
 .job-card-value.money {
@@ -489,6 +552,12 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    text-align: center;
+    min-width: 0;
 }
 
 .job-card-apply:hover {

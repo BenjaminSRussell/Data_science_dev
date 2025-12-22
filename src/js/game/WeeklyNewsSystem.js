@@ -92,22 +92,60 @@ export class WeeklyNewsSystem {
 
     /**
      * Generate main story with evolving narrative
+     * Now references player's specific choices
      */
     generateMainStory() {
         const week = this.weekNumber;
-        const ethics = this.gameState.characterStats?.getStat('ethics') || 0;
+        const ethics = this.gameState.characterStats?.ethics || 0;
+        const storylineManager = this.gameState.storylineManager;
         
-        // Story changes based on player's ethical choices
+        // Get player's recent decisions
+        const recentDecisions = this.getRecentDecisions(storylineManager);
+        
+        // Story changes based on player's ethical choices AND specific decisions
         if (ethics < -20) {
-            return this.generateCriminalStory(week);
+            return this.generateCriminalStory(week, recentDecisions);
         } else if (ethics > 20) {
-            return this.generateEthicalStory(week);
+            return this.generateEthicalStory(week, recentDecisions);
         } else {
-            return this.generateNeutralStory(week);
+            return this.generateNeutralStory(week, recentDecisions);
         }
     }
 
-    generateCriminalStory(week) {
+    /**
+     * Get recent major decisions
+     */
+    getRecentDecisions(storylineManager) {
+        if (!storylineManager || !storylineManager.majorDecisions) return [];
+        
+        const decisions = storylineManager.majorDecisions || [];
+        const timeManager = this.gameState.timeManager;
+        const currentWeek = timeManager ? Math.floor((timeManager.totalDays || 0) / 7) : 0;
+        
+        // Get decisions from last 2 weeks
+        return decisions.filter(d => {
+            const decisionWeek = d.week || 0;
+            return currentWeek - decisionWeek <= 2;
+        });
+    }
+
+    generateCriminalStory(week, recentDecisions) {
+        // Reference specific player decisions
+        if (recentDecisions.length > 0) {
+            const lastDecision = recentDecisions[recentDecisions.length - 1];
+            const storylineManager = this.gameState.storylineManager;
+            const decisionData = storylineManager?.getDecision?.(lastDecision.decisionId);
+            
+            if (decisionData) {
+                if (lastDecision.choice === 'accept' && decisionData.id === 'criminal_opportunity') {
+                    return "Reports surface of illegal data trading operations. Authorities are investigating...";
+                }
+                if (lastDecision.choice === 'stay_quiet' && decisionData.id === 'whistleblower') {
+                    return "A major data scandal remains hidden. Those who know stay silent...";
+                }
+            }
+        }
+        
         const stories = [
             "Underground data markets see increased activity as regulations tighten...",
             "Whistleblower reports emerge about data manipulation schemes...",
@@ -117,7 +155,23 @@ export class WeeklyNewsSystem {
         return stories[(week - 1) % stories.length];
     }
 
-    generateEthicalStory(week) {
+    generateEthicalStory(week, recentDecisions) {
+        // Reference specific player decisions
+        if (recentDecisions.length > 0) {
+            const lastDecision = recentDecisions[recentDecisions.length - 1];
+            const storylineManager = this.gameState.storylineManager;
+            const decisionData = storylineManager?.getDecision?.(lastDecision.decisionId);
+            
+            if (decisionData) {
+                if (lastDecision.choice === 'expose' && decisionData.id === 'whistleblower') {
+                    return "A brave data scientist exposed unethical practices, sparking industry-wide reform...";
+                }
+                if (lastDecision.choice === 'reject' && decisionData.id === 'first_job_offer') {
+                    return "Professionals who stand by their ethics are gaining recognition in the industry...";
+                }
+            }
+        }
+        
         const stories = [
             "Ethical data practices gain recognition in the industry...",
             "Transparency initiatives show positive results...",
@@ -127,7 +181,23 @@ export class WeeklyNewsSystem {
         return stories[(week - 1) % stories.length];
     }
 
-    generateNeutralStory(week) {
+    generateNeutralStory(week, recentDecisions) {
+        // Reference specific player decisions
+        if (recentDecisions.length > 0) {
+            const lastDecision = recentDecisions[recentDecisions.length - 1];
+            const storylineManager = this.gameState.storylineManager;
+            const decisionData = storylineManager?.getDecision?.(lastDecision.decisionId);
+            
+            if (decisionData) {
+                if (lastDecision.choice === 'negotiate' && decisionData.id === 'first_job_offer') {
+                    return "Professionals are finding creative ways to balance ethics and opportunity...";
+                }
+                if (lastDecision.choice === 'internal_report' && decisionData.id === 'whistleblower') {
+                    return "Companies are handling ethical concerns internally, with mixed results...";
+                }
+            }
+        }
+        
         const stories = [
             "The data science industry continues to evolve rapidly...",
             "New tools and technologies reshape the landscape...",
@@ -276,6 +346,7 @@ export class WeeklyNewsSystem {
         this.weeklyHeadlines = data.weeklyHeadlines || [];
     }
 }
+
 
 
 

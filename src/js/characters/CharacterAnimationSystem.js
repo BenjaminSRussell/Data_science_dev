@@ -1,14 +1,18 @@
 /**
  * CharacterAnimationSystem.js
  * Manages character animations, emotions, and body language
- * Non-static characters with dynamic expressions
+ * Phase 3: Now uses GSAP for animations
  */
+
+import { GSAPAnimationManager } from '../animation/GSAPAnimationManager.js';
 
 export class CharacterAnimationSystem {
     constructor(assetManager) {
         this.assetManager = assetManager;
         this.characters = new Map();
         this.animations = new Map();
+        // Phase 3: Use GSAP for animations
+        this.gsapAnimator = new GSAPAnimationManager();
     }
     
     /**
@@ -107,6 +111,7 @@ export class CharacterAnimationSystem {
     
     /**
      * Animate character talking
+     * Phase 3: Uses GSAP for smooth animation
      */
     animateTalking(characterId, duration = 2000) {
         const character = this.characters.get(characterId);
@@ -115,11 +120,21 @@ export class CharacterAnimationSystem {
         character.animationState = 'talking';
         this.setPose(characterId, 'talking');
         
-        // Animate mouth movement
+        // Animate mouth movement using GSAP
         const element = document.getElementById(`character-${characterId}`);
-        if (element) {
+        if (element && this.gsapAnimator) {
+            // Pulse animation for talking
+            this.gsapAnimator.pulse(element, {
+                scale: 1.05,
+                duration: duration / 1000,
+                repeat: Math.floor(duration / 500),
+                onComplete: () => {
+                    character.animationState = 'idle';
+                }
+            });
+        } else if (element) {
+            // Fallback to CSS class
             element.classList.add('talking');
-            
             setTimeout(() => {
                 element.classList.remove('talking');
                 character.animationState = 'idle';
@@ -129,6 +144,7 @@ export class CharacterAnimationSystem {
     
     /**
      * Animate character thinking
+     * Phase 3: Uses GSAP for smooth animation
      */
     animateThinking(characterId, duration = 3000) {
         const character = this.characters.get(characterId);
@@ -139,9 +155,19 @@ export class CharacterAnimationSystem {
         this.setPose(characterId, 'thinking');
         
         const element = document.getElementById(`character-${characterId}`);
-        if (element) {
+        if (element && this.gsapAnimator) {
+            // Rotate animation for thinking
+            this.gsapAnimator.rotate(element, 5, {
+                duration: duration / 1000,
+                yoyo: true,
+                repeat: Math.floor(duration / 600),
+                onComplete: () => {
+                    character.animationState = 'idle';
+                }
+            });
+        } else if (element) {
+            // Fallback to CSS class
             element.classList.add('thinking');
-            
             setTimeout(() => {
                 element.classList.remove('thinking');
                 character.animationState = 'idle';
@@ -151,15 +177,24 @@ export class CharacterAnimationSystem {
     
     /**
      * Animate emotion change
+     * Phase 3: Uses GSAP for smooth animation
      */
     animateEmotionChange(characterId, emotion, duration = 1000) {
         const character = this.characters.get(characterId);
         if (!character) return;
         
         const element = document.getElementById(`character-${characterId}`);
-        if (element) {
+        if (element && this.gsapAnimator) {
+            // Use GSAP to animate emotion change
+            this.gsapAnimator.animateCharacterEmotion(element, emotion, {
+                duration: duration / 1000,
+                onComplete: () => {
+                    this.setEmotion(characterId, emotion);
+                }
+            });
+        } else if (element) {
+            // Fallback to CSS class
             element.classList.add('emotion-changing');
-            
             setTimeout(() => {
                 this.setEmotion(characterId, emotion);
                 element.classList.remove('emotion-changing');
@@ -181,8 +216,8 @@ export class CharacterAnimationSystem {
         const emotionAsset = this.assetManager?.getCharacterEmotion(character.currentEmotion);
         const poseAsset = this.assetManager?.getCharacterBodyLanguage(character.currentPose);
         
-        // Update image source
-        if (emotionAsset && element.tagName === 'IMG') {
+        // Update image source only if asset exists
+        if (emotionAsset && emotionAsset.src && element.tagName === 'IMG') {
             element.src = emotionAsset.src;
         }
         
@@ -201,15 +236,18 @@ export class CharacterAnimationSystem {
         element.id = `character-${characterId}`;
         element.className = `character character-${characterId} emotion-${character.currentEmotion} pose-${character.currentPose}`;
         
-        // Get asset
+        // Get asset (may be null if not loaded)
         const emotionAsset = this.assetManager?.getCharacterEmotion(character.currentEmotion);
         const poseAsset = this.assetManager?.getCharacterBodyLanguage(character.currentPose);
         
-        if (emotionAsset) {
+        // Only add image if asset exists
+        if (emotionAsset && emotionAsset.src) {
             const img = document.createElement('img');
             img.src = emotionAsset.src;
             img.alt = character.name;
             img.className = 'character-sprite';
+            img.style.objectFit = 'contain';
+            img.style.objectPosition = 'center bottom';
             element.appendChild(img);
         }
         

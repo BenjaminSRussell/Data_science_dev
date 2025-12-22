@@ -1,0 +1,402 @@
+/**
+ * City Map Styles
+ * Professional, clean city map based on Cities: Skylines approach
+ * Unified styling system replacing all previous map styles
+ */
+
+/* =====================================================
+   CONTAINER
+   ===================================================== */
+
+/* Support both old and new class names */
+.city-map-container,
+.map-container.city-map-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    min-height: 600px;
+    background: #0a0e14;
+    border: 3px solid rgba(100, 100, 120, 0.6);
+    border-radius: 12px;
+    box-shadow: 
+        inset 0 0 120px rgba(0, 0, 0, 0.8),
+        0 10px 0 rgba(0, 0, 0, 0.5),
+        0 0 0 2px rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+/* Legacy map-container support */
+.map-container:not(.city-map-container) {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    min-height: 600px;
+    background: #0a0e14;
+    border: 3px solid rgba(100, 100, 120, 0.6);
+    border-radius: 12px;
+    box-shadow: 
+        inset 0 0 120px rgba(0, 0, 0, 0.8),
+        0 10px 0 rgba(0, 0, 0, 0.5),
+        0 0 0 2px rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+/* =====================================================
+   BACKGROUND
+   ===================================================== */
+
+.city-map-background {
+    position: absolute;
+    inset: 0;
+    background: 
+        linear-gradient(180deg, #0a0e14 0%, #1a1a2e 25%, #2d3436 50%, #1a1a2e 75%, #0a0e14 100%),
+        repeating-linear-gradient(
+            0deg,
+            transparent 0px,
+            transparent 20px,
+            rgba(255, 255, 255, 0.02) 20px,
+            rgba(255, 255, 255, 0.02) 40px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 20px,
+            rgba(255, 255, 255, 0.02) 20px,
+            rgba(255, 255, 255, 0.02) 40px
+        ),
+        radial-gradient(ellipse at 20% 30%, rgba(100, 149, 237, 0.1) 0%, transparent 70%),
+        radial-gradient(ellipse at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+    z-index: 0;
+}
+
+/* =====================================================
+   ZONES
+   ===================================================== */
+
+.city-zones-container {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.city-zone {
+    position: absolute;
+    border: 2px solid;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+/* Zone Type Colors - Clear and Distinct */
+.city-zone-residential {
+    background: rgba(74, 85, 104, 0.25);
+    border-color: rgba(74, 85, 104, 0.6);
+}
+
+.city-zone-commercial {
+    background: rgba(245, 158, 11, 0.25);
+    border-color: rgba(245, 158, 11, 0.6);
+}
+
+.city-zone-education {
+    background: rgba(139, 92, 246, 0.25);
+    border-color: rgba(139, 92, 246, 0.6);
+}
+
+.city-zone-finance {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: rgba(16, 185, 129, 0.6);
+}
+
+.city-zone-government {
+    background: rgba(96, 125, 139, 0.25);
+    border-color: rgba(96, 125, 139, 0.6);
+}
+
+.city-zone-park {
+    background: rgba(34, 197, 94, 0.3);
+    border-color: rgba(34, 197, 94, 0.7);
+}
+
+.city-zone-industrial {
+    background: rgba(100, 116, 139, 0.25);
+    border-color: rgba(100, 116, 139, 0.6);
+}
+
+.city-zone-mixed {
+    background: rgba(167, 139, 250, 0.25);
+    border-color: rgba(167, 139, 250, 0.6);
+}
+
+/* =====================================================
+   ROADS
+   ===================================================== */
+
+.city-roads-container {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.city-road {
+    position: absolute;
+    background: #2a2a2a;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Main Roads - Wide and Dark */
+.city-road-main {
+    background: #1a1a1a;
+    border: 2px solid rgba(0, 0, 0, 0.5);
+    box-shadow: 
+        0 0 12px rgba(0, 0, 0, 0.6),
+        inset 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+.city-road-main::after {
+    content: '';
+    position: absolute;
+    background: repeating-linear-gradient(
+        90deg,
+        #ffff00 0px,
+        #ffff00 12px,
+        transparent 12px,
+        transparent 24px
+    );
+    opacity: 0.6;
+}
+
+.city-road-main.horizontal::after {
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    transform: translateY(-50%);
+}
+
+.city-road-main.vertical::after {
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    transform: translateX(-50%);
+}
+
+/* Secondary Roads - Medium */
+.city-road-secondary {
+    background: #2a2a2a;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+.city-road-secondary::after {
+    content: '';
+    position: absolute;
+    background: #3a3a3a;
+    opacity: 0.5;
+}
+
+.city-road-secondary.horizontal::after {
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    transform: translateY(-50%);
+}
+
+.city-road-secondary.vertical::after {
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    transform: translateX(-50%);
+}
+
+/* =====================================================
+   BUILDINGS
+   ===================================================== */
+
+.city-buildings-container {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.city-building {
+    position: absolute;
+    border-radius: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.5),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+.city-building:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    z-index: 5;
+    box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.6),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Building Type Colors */
+.city-building-residence {
+    background: linear-gradient(135deg, #d4a574 0%, #b8956a 100%);
+}
+
+.city-building-work {
+    background: linear-gradient(135deg, #7a8ba3 0%, #5a6b83 100%);
+}
+
+.city-building-education {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.city-building-finance {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.city-building-government {
+    background: linear-gradient(135deg, #607d8b 0%, #455a64 100%);
+}
+
+.city-building-shop {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.city-building-social {
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+}
+
+.city-building-training {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+/* =====================================================
+   LOCATIONS
+   ===================================================== */
+
+.city-locations-container {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+}
+
+.city-location {
+    position: absolute;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.city-location:hover {
+    transform: translate(-50%, -50%) scale(1.15);
+    z-index: 11;
+}
+
+.city-location-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--cartoon-bg-secondary);
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 
+        0 4px 0 rgba(0, 0, 0, 0.4),
+        0 0 12px rgba(139, 92, 246, 0.4);
+    transition: all 0.2s ease;
+}
+
+.city-location:hover .city-location-icon {
+    box-shadow: 
+        0 6px 0 rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(139, 92, 246, 0.6);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.city-location-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.city-location-name {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    text-shadow: 
+        1px 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 8px rgba(0, 0, 0, 0.6);
+    white-space: nowrap;
+    text-align: center;
+}
+
+.city-location.current .city-location-icon {
+    border-color: #10b981;
+    box-shadow: 
+        0 4px 0 rgba(0, 0, 0, 0.4),
+        0 0 16px rgba(16, 185, 129, 0.6);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 
+            0 4px 0 rgba(0, 0, 0, 0.4),
+            0 0 16px rgba(16, 185, 129, 0.6);
+    }
+    50% {
+        box-shadow: 
+            0 4px 0 rgba(0, 0, 0, 0.4),
+            0 0 24px rgba(16, 185, 129, 0.8);
+    }
+}
+
+/* =====================================================
+   PLAYER MARKER
+   ===================================================== */
+
+.city-player-marker {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    z-index: 100;
+}
+
+.city-player-marker::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border: 3px solid white;
+    box-shadow: 
+        0 4px 0 rgba(0, 0, 0, 0.4),
+        0 0 16px rgba(139, 92, 246, 0.6);
+    animation: player-bounce 1s ease-in-out infinite;
+}
+
+@keyframes player-bounce {
+    0%, 100% {
+        transform: translate(-50%, -50%) translateY(0);
+    }
+    50% {
+        transform: translate(-50%, -50%) translateY(-5px);
+    }
+}

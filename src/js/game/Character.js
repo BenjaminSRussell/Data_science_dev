@@ -5,21 +5,21 @@
 
 // Player character appearance options
 export const CHARACTER_OPTIONS = {
-    skinTones: ['🏻', '🏼', '🏽', '🏾', '🏿'],
+    skinTones: ['', '', '', '', ''],
 
     hairstyles: [
-        { id: 'short', name: 'Short Hair', male: '👨', female: '👩' },
-        { id: 'curly', name: 'Curly Hair', male: '👨‍🦱', female: '👩‍🦱' },
-        { id: 'bald', name: 'Bald', male: '👨‍🦲', female: '👩‍🦲' },
-        { id: 'red', name: 'Red Hair', male: '👨‍🦰', female: '👩‍🦰' },
-        { id: 'white', name: 'White Hair', male: '👨‍🦳', female: '👩‍🦳' }
+        { id: 'short', name: 'Short Hair', male: '', female: '' },
+        { id: 'curly', name: 'Curly Hair', male: '', female: '' },
+        { id: 'bald', name: 'Bald', male: '', female: '' },
+        { id: 'red', name: 'Red Hair', male: '', female: '' },
+        { id: 'white', name: 'White Hair', male: '', female: '' }
     ],
 
     accessories: [
         { id: 'none', name: 'None', icon: '' },
-        { id: 'glasses', name: 'Glasses', icon: '👓' },
-        { id: 'sunglasses', name: 'Sunglasses', icon: '🕶️' },
-        { id: 'headphones', name: 'Headphones', icon: '🎧' }
+        { id: 'glasses', name: 'Glasses', icon: '' },
+        { id: 'sunglasses', name: 'Sunglasses', icon: '' },
+        { id: 'headphones', name: 'Headphones', icon: '' }
     ],
 
     outfits: [
@@ -33,12 +33,12 @@ export const CHARACTER_OPTIONS = {
 
 // Character mood states (affect dialogue and reactions)
 export const MOODS = {
-    excited: { emoji: '😄', energyBonus: 1.2 },
-    happy: { emoji: '😊', energyBonus: 1.1 },
-    neutral: { emoji: '😐', energyBonus: 1.0 },
-    tired: { emoji: '😴', energyBonus: 0.8 },
-    stressed: { emoji: '😰', energyBonus: 0.7 },
-    frustrated: { emoji: '😤', energyBonus: 0.6 }
+    excited: { emoji: '', energyBonus: 1.2 },
+    happy: { emoji: '', energyBonus: 1.1 },
+    neutral: { emoji: '', energyBonus: 1.0 },
+    tired: { emoji: '', energyBonus: 0.8 },
+    stressed: { emoji: '', energyBonus: 0.7 },
+    frustrated: { emoji: '', energyBonus: 0.6 }
 };
 
 // Character animations (CSS-based)
@@ -89,7 +89,7 @@ export class Character {
      * Get mood emoji
      */
     getMoodEmoji() {
-        return MOODS[this.mood]?.emoji || '😐';
+        return MOODS[this.mood]?.emoji || '';
     }
 
     /**
