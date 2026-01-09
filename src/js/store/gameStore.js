@@ -9,7 +9,7 @@ import { persist } from 'zustand/middleware';
 import { RANKS } from '../data/ranks.js';
 
 // #region agent log
-console.log('[DEBUG] gameStore.js: Module loading, about to create store...');
+
 
 // Display visible debug info on page (wait for DOM)
 if (typeof document !== 'undefined') {
@@ -40,7 +40,7 @@ try {
             if (errDiv) errDiv.innerHTML = 'localStorage unavailable!';
         }
     } else {
-        console.log('[DEBUG] localStorage is available');
+
     }
 } catch (e) {
     console.error('[DEBUG] Error checking localStorage:', e);
@@ -49,208 +49,17 @@ try {
 
 let useGameStore;
 try {
-    console.log('[DEBUG] Creating Zustand store with persist middleware...');
+
     useGameStore = create(
-    persist(
-        (set, get) => ({
-            // Player stats
-            money: 100,
-            reputation: 0,
-            rankIndex: 0,
-            rent: 500, // Weekly rent
-
-            // Progress tracking
-            tasksCompleted: 0,
-            perfectScores: 0,
-            totalEarned: 0,
-            totalSpent: 0,
-            weeklyIncome: 0,
-            startTime: Date.now(),
-            totalRatings: 0,
-            ratingSum: 0,
-
-            // Current state
-            currentTask: null,
-            currentLocation: 'apartment',
-            bank: null,
-
-            // Unlocked content
-            unlockedChartTypes: ['bar', 'line', 'pie'],
-            purchasedItems: [],
-            unlockedThemes: ['default'],
-            unlockedTools: [],
-            unlockedLibraries: [],
-
-            // Game configuration
-            chartConfig: {
-                type: 'bar',
-                palette: 'corporate',
-                showLegend: true,
-                showGrid: true,
-                showDataLabels: false,
-                title: ''
-            },
-
-            lastScore: null,
-
-            // Game flags
-            isGameStarted: false,
-            tutorialCompleted: false,
-
-            // Settings
-            soundEnabled: true,
-            musicEnabled: true,
-            settings: {
-                soundEnabled: true,
-                autoSave: true,
-                theme: 'dark'
-            },
-
-            // Computed values (getters)
-            get currentRank() {
-                return RANKS[get().rankIndex];
-            },
-
-            get nextRank() {
-                return RANKS[get().rankIndex + 1] || null;
-            },
-
-            get progressToNextRank() {
-                const state = get();
-                if (!state.nextRank) return 100;
-                const currentReq = state.currentRank.repRequired;
-                const nextReq = state.nextRank.repRequired;
-                const progress = ((state.reputation - currentReq) / (nextReq - currentReq)) * 100;
-                return Math.min(100, Math.max(0, progress));
-            },
-
-            get averageRating() {
-                const state = get();
-                if (state.totalRatings === 0) return 0;
-                return (state.ratingSum / state.totalRatings).toFixed(1);
-            },
-
-            // Actions
-            setMoney: (amount) => set({ money: amount }),
-            addMoney: (amount) => set((state) => ({ money: state.money + amount })),
-            subtractMoney: (amount) => set((state) => ({ money: Math.max(0, state.money - amount) })),
-
-            setReputation: (amount) => set({ reputation: amount }),
-            addReputation: (amount) => set((state) => ({ reputation: state.reputation + amount })),
-
-            setRankIndex: (index) => set({ rankIndex: index }),
-            incrementRank: () => set((state) => ({ rankIndex: Math.min(state.rankIndex + 1, RANKS.length - 1) })),
-
-            setCurrentTask: (task) => set({ currentTask: task }),
-            setCurrentLocation: (location) => set({ currentLocation: location }),
-
-            setBank: (bankData) => set({ bank: bankData }),
-
-            unlockChartType: (type) => set((state) => {
-                if (!state.unlockedChartTypes.includes(type)) {
-                    return { unlockedChartTypes: [...state.unlockedChartTypes, type] };
-                }
-                return state;
-            }),
-
-            isChartTypeUnlocked: (type) => {
-                // Liberalization: All charts unlocked by default!
-                return true;
-            },
-
-            canAfford: (price) => {
-                return get().money >= price;
-            },
-
-            purchaseItem: (item) => {
-                const state = get();
-                if (!state.canAfford(item.price)) return false;
-                if (state.purchasedItems.includes(item.id)) return false;
-
-                set({
-                    money: state.money - item.price,
-                    purchasedItems: [...state.purchasedItems, item.id]
-                });
-
-                // Apply item effect
-                if (item.type === 'chart') {
-                    get().unlockChartType(item.chartType);
-                } else if (item.type === 'tool') {
-                    set((s) => ({
-                        unlockedTools: [...s.unlockedTools, item.toolId]
-                    }));
-                }
-
-                return true;
-            },
-
-            incrementTasksCompleted: () => set((state) => ({ tasksCompleted: state.tasksCompleted + 1 })),
-            incrementPerfectScores: () => set((state) => ({ perfectScores: state.perfectScores + 1 })),
-            addToTotalEarned: (amount) => set((state) => ({ totalEarned: state.totalEarned + amount })),
-            addToTotalSpent: (amount) => set((state) => ({ totalSpent: state.totalSpent + amount })),
-
-            addRating: (rating) => set((state) => ({
-                totalRatings: state.totalRatings + 1,
-                ratingSum: state.ratingSum + rating
-            })),
-
-            setLastScore: (score) => set({ lastScore: score }),
-
-            setGameStarted: (started) => set({ isGameStarted: started }),
-            setTutorialCompleted: (completed) => set({ tutorialCompleted: completed }),
-
-            setSoundEnabled: (enabled) => set({ soundEnabled: enabled }),
-            setMusicEnabled: (enabled) => set({ musicEnabled: enabled }),
-
-            updateSettings: (newSettings) => set((state) => ({
-                settings: { ...state.settings, ...newSettings }
-            })),
-
-            updateChartConfig: (config) => set((state) => ({
-                chartConfig: { ...state.chartConfig, ...config }
-            })),
-
-            // Get software quality multiplier
-            getSoftwareQualityMultiplier: () => {
-                const state = get();
-                const multipliers = {
-                    visualClarity: 1.0,
-                    dataAccuracy: 1.0,
-                    chartAppropriateness: 1.0,
-                    speedBonus: 0
-                };
-
-                if (state.purchasedItems.includes('soft_ide_pro')) {
-                    multipliers.visualClarity += 0.05;
-                    multipliers.dataAccuracy += 0.03;
-                }
-                if (state.purchasedItems.includes('soft_automl')) {
-                    multipliers.speedBonus += 0.10;
-                    multipliers.chartAppropriateness += 0.03;
-                }
-                if (state.purchasedItems.includes('soft_cloud_basic')) {
-                    multipliers.dataAccuracy += 0.05;
-                    multipliers.speedBonus += 0.05;
-                }
-                if (state.purchasedItems.includes('soft_enterprise_db')) {
-                    multipliers.dataAccuracy += 0.08;
-                    multipliers.chartAppropriateness += 0.02;
-                }
-                if (state.purchasedItems.includes('soft_neural_arch')) {
-                    multipliers.visualClarity += 0.10;
-                    multipliers.chartAppropriateness += 0.08;
-                    multipliers.dataAccuracy += 0.05;
-                }
-
-                return multipliers;
-            },
-
-            // Reset game state
-            reset: () => set({
+        persist(
+            (set, get) => ({
+                // Player stats
                 money: 100,
                 reputation: 0,
                 rankIndex: 0,
-                rent: 500,
+                rent: 500, // Weekly rent
+
+                // Progress tracking
                 tasksCompleted: 0,
                 perfectScores: 0,
                 totalEarned: 0,
@@ -259,14 +68,20 @@ try {
                 startTime: Date.now(),
                 totalRatings: 0,
                 ratingSum: 0,
+
+                // Current state
                 currentTask: null,
                 currentLocation: 'apartment',
                 bank: null,
+
+                // Unlocked content
                 unlockedChartTypes: ['bar', 'line', 'pie'],
                 purchasedItems: [],
                 unlockedThemes: ['default'],
                 unlockedTools: [],
                 unlockedLibraries: [],
+
+                // Game configuration
                 chartConfig: {
                     type: 'bar',
                     palette: 'corporate',
@@ -275,46 +90,231 @@ try {
                     showDataLabels: false,
                     title: ''
                 },
+
                 lastScore: null,
+
+                // Game flags
                 isGameStarted: false,
                 tutorialCompleted: false,
+
+                // Settings
                 soundEnabled: true,
                 musicEnabled: true,
                 settings: {
                     soundEnabled: true,
                     autoSave: true,
                     theme: 'dark'
-                }
-            })
-        }),
-        {
-            name: 'game-storage',
-            // Only persist certain fields (exclude system references)
-            partialize: (state) => ({
-                money: state.money,
-                reputation: state.reputation,
-                rankIndex: state.rankIndex,
-                rent: state.rent,
-                bank: state.bank,
-                tasksCompleted: state.tasksCompleted,
-                perfectScores: state.perfectScores,
-                totalEarned: state.totalEarned,
-                weeklyIncome: state.weeklyIncome,
-                totalRatings: state.totalRatings,
-                ratingSum: state.ratingSum,
-                unlockedChartTypes: state.unlockedChartTypes,
-                unlockedTools: state.unlockedTools,
-                purchasedItems: state.purchasedItems,
-                isGameStarted: state.isGameStarted,
-                tutorialCompleted: state.tutorialCompleted,
-                soundEnabled: state.soundEnabled,
-                musicEnabled: state.musicEnabled,
-                unlockedLibraries: state.unlockedLibraries
-            })
-        }
-    )
+                },
+
+                // Computed values (getters)
+                get currentRank() {
+                    return RANKS[get().rankIndex];
+                },
+
+                get nextRank() {
+                    return RANKS[get().rankIndex + 1] || null;
+                },
+
+                get progressToNextRank() {
+                    const state = get();
+                    if (!state.nextRank) return 100;
+                    const currentReq = state.currentRank.repRequired;
+                    const nextReq = state.nextRank.repRequired;
+                    const progress = ((state.reputation - currentReq) / (nextReq - currentReq)) * 100;
+                    return Math.min(100, Math.max(0, progress));
+                },
+
+                get averageRating() {
+                    const state = get();
+                    if (state.totalRatings === 0) return 0;
+                    return (state.ratingSum / state.totalRatings).toFixed(1);
+                },
+
+                // Actions
+                setMoney: (amount) => set({ money: amount }),
+                addMoney: (amount) => set((state) => ({ money: state.money + amount })),
+                subtractMoney: (amount) => set((state) => ({ money: Math.max(0, state.money - amount) })),
+
+                setReputation: (amount) => set({ reputation: amount }),
+                addReputation: (amount) => set((state) => ({ reputation: state.reputation + amount })),
+
+                setRankIndex: (index) => set({ rankIndex: index }),
+                incrementRank: () => set((state) => ({ rankIndex: Math.min(state.rankIndex + 1, RANKS.length - 1) })),
+
+                setCurrentTask: (task) => set({ currentTask: task }),
+                setCurrentLocation: (location) => set({ currentLocation: location }),
+
+                setBank: (bankData) => set({ bank: bankData }),
+
+                unlockChartType: (type) => set((state) => {
+                    if (!state.unlockedChartTypes.includes(type)) {
+                        return { unlockedChartTypes: [...state.unlockedChartTypes, type] };
+                    }
+                    return state;
+                }),
+
+                isChartTypeUnlocked: (type) => {
+                    // Liberalization: All charts unlocked by default!
+                    return true;
+                },
+
+                canAfford: (price) => {
+                    return get().money >= price;
+                },
+
+                purchaseItem: (item) => {
+                    const state = get();
+                    if (!state.canAfford(item.price)) return false;
+                    if (state.purchasedItems.includes(item.id)) return false;
+
+                    set({
+                        money: state.money - item.price,
+                        purchasedItems: [...state.purchasedItems, item.id]
+                    });
+
+                    // Apply item effect
+                    if (item.type === 'chart') {
+                        get().unlockChartType(item.chartType);
+                    } else if (item.type === 'tool') {
+                        set((s) => ({
+                            unlockedTools: [...s.unlockedTools, item.toolId]
+                        }));
+                    }
+
+                    return true;
+                },
+
+                incrementTasksCompleted: () => set((state) => ({ tasksCompleted: state.tasksCompleted + 1 })),
+                incrementPerfectScores: () => set((state) => ({ perfectScores: state.perfectScores + 1 })),
+                addToTotalEarned: (amount) => set((state) => ({ totalEarned: state.totalEarned + amount })),
+                addToTotalSpent: (amount) => set((state) => ({ totalSpent: state.totalSpent + amount })),
+
+                addRating: (rating) => set((state) => ({
+                    totalRatings: state.totalRatings + 1,
+                    ratingSum: state.ratingSum + rating
+                })),
+
+                setLastScore: (score) => set({ lastScore: score }),
+
+                setGameStarted: (started) => set({ isGameStarted: started }),
+                setTutorialCompleted: (completed) => set({ tutorialCompleted: completed }),
+
+                setSoundEnabled: (enabled) => set({ soundEnabled: enabled }),
+                setMusicEnabled: (enabled) => set({ musicEnabled: enabled }),
+
+                updateSettings: (newSettings) => set((state) => ({
+                    settings: { ...state.settings, ...newSettings }
+                })),
+
+                updateChartConfig: (config) => set((state) => ({
+                    chartConfig: { ...state.chartConfig, ...config }
+                })),
+
+                // Get software quality multiplier
+                getSoftwareQualityMultiplier: () => {
+                    const state = get();
+                    const multipliers = {
+                        visualClarity: 1.0,
+                        dataAccuracy: 1.0,
+                        chartAppropriateness: 1.0,
+                        speedBonus: 0
+                    };
+
+                    if (state.purchasedItems.includes('soft_ide_pro')) {
+                        multipliers.visualClarity += 0.05;
+                        multipliers.dataAccuracy += 0.03;
+                    }
+                    if (state.purchasedItems.includes('soft_automl')) {
+                        multipliers.speedBonus += 0.10;
+                        multipliers.chartAppropriateness += 0.03;
+                    }
+                    if (state.purchasedItems.includes('soft_cloud_basic')) {
+                        multipliers.dataAccuracy += 0.05;
+                        multipliers.speedBonus += 0.05;
+                    }
+                    if (state.purchasedItems.includes('soft_enterprise_db')) {
+                        multipliers.dataAccuracy += 0.08;
+                        multipliers.chartAppropriateness += 0.02;
+                    }
+                    if (state.purchasedItems.includes('soft_neural_arch')) {
+                        multipliers.visualClarity += 0.10;
+                        multipliers.chartAppropriateness += 0.08;
+                        multipliers.dataAccuracy += 0.05;
+                    }
+
+                    return multipliers;
+                },
+
+                // Reset game state
+                reset: () => set({
+                    money: 100,
+                    reputation: 0,
+                    rankIndex: 0,
+                    rent: 500,
+                    tasksCompleted: 0,
+                    perfectScores: 0,
+                    totalEarned: 0,
+                    totalSpent: 0,
+                    weeklyIncome: 0,
+                    startTime: Date.now(),
+                    totalRatings: 0,
+                    ratingSum: 0,
+                    currentTask: null,
+                    currentLocation: 'apartment',
+                    bank: null,
+                    unlockedChartTypes: ['bar', 'line', 'pie'],
+                    purchasedItems: [],
+                    unlockedThemes: ['default'],
+                    unlockedTools: [],
+                    unlockedLibraries: [],
+                    chartConfig: {
+                        type: 'bar',
+                        palette: 'corporate',
+                        showLegend: true,
+                        showGrid: true,
+                        showDataLabels: false,
+                        title: ''
+                    },
+                    lastScore: null,
+                    isGameStarted: false,
+                    tutorialCompleted: false,
+                    soundEnabled: true,
+                    musicEnabled: true,
+                    settings: {
+                        soundEnabled: true,
+                        autoSave: true,
+                        theme: 'dark'
+                    }
+                })
+            }),
+            {
+                name: 'game-storage',
+                // Only persist certain fields (exclude system references)
+                partialize: (state) => ({
+                    money: state.money,
+                    reputation: state.reputation,
+                    rankIndex: state.rankIndex,
+                    rent: state.rent,
+                    bank: state.bank,
+                    tasksCompleted: state.tasksCompleted,
+                    perfectScores: state.perfectScores,
+                    totalEarned: state.totalEarned,
+                    weeklyIncome: state.weeklyIncome,
+                    totalRatings: state.totalRatings,
+                    ratingSum: state.ratingSum,
+                    unlockedChartTypes: state.unlockedChartTypes,
+                    unlockedTools: state.unlockedTools,
+                    purchasedItems: state.purchasedItems,
+                    isGameStarted: state.isGameStarted,
+                    tutorialCompleted: state.tutorialCompleted,
+                    soundEnabled: state.soundEnabled,
+                    musicEnabled: state.musicEnabled,
+                    unlockedLibraries: state.unlockedLibraries
+                })
+            }
+        )
     );
-    console.log('[DEBUG] Zustand store created successfully');
+
     // #region agent log
     if (typeof document !== 'undefined') {
         const debugDiv = document.getElementById('debug-store-info');
@@ -344,7 +344,7 @@ try {
     }
     // #endregion
     // Create a fallback store without persist
-    console.log('[DEBUG] Attempting to create fallback store without persist...');
+
     useGameStore = create((set, get) => ({
         money: 100,
         reputation: 0,
@@ -493,7 +493,7 @@ try {
             }
         })
     }));
-    console.log('[DEBUG] Fallback store created successfully');
+
     // #region agent log
     if (typeof document !== 'undefined') {
         const debugDiv = document.getElementById('debug-store-info');

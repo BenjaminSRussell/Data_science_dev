@@ -23,12 +23,14 @@ export class EnvironmentManager {
             this.updateLocation();
             this.updateTimeOfDay();
             this.updateWeather();
-            this.startEventTimer();
+            // DISABLED: Auto-progression removed - game requires manual button clicks
+            // this.startEventTimer();
 
-            // Update every minute
-            this.timeUpdateInterval = setInterval(() => {
-                this.updateTimeOfDay();
-            }, 60000);
+            // DISABLED: Automatic time updates - game should not auto-progress
+            // User must manually advance time
+            // this.timeUpdateInterval = setInterval(() => {
+            //     this.updateTimeOfDay();
+            // }, 60000);
         } catch (error) {
             console.error('EnvironmentManager init failed:', error);
         }

@@ -1,0 +1,55 @@
+
+# James Wilson - The Strategy Consultant
+**Role:** Consulting Director
+**Personality:** Professional, Polished, Expensive
+
+## Character Profile
+**Background:** Runs a top consulting firm. Former Ivy League, former Wall Street. Knows how to wear a suit and bill by the hour.
+**Motivation:** Solving high-level problems for the world's biggest companies (and getting paid well for it).
+**Secret:** He's burned out. The travel, the hotels, the PowerPoint decks... he sometimes dreams of quitting to run a quiet bookstore.
+**Dream:** To retire to a vineyard in Italy.
+**Fear:** Becoming irrelevant.
+**Relationship Status:** Divorced three times. "Married to the firm."
+**Turning Point:** Winning a massive government contract that saved his firm from bankruptcy.
+**Philosophy:** "Perception is reality. If you look like the expert, you are the expert."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I've been in boardrooms you only read about in the news. The stakes are always high."
+*   **Rel > 25 (Philosophy):** "It's not just about the data. It's about the narrative. Can you tell a story that justifies a billion-dollar decision?"
+*   **Rel > 40 (Burnout):** "Another airport lounge. Another hotel. Sometimes the glamour wears thin, you know?"
+*   **Rel > 60 (Secret Dream):** "Italy. A vineyard. No phones. No clients. Just grapes and time. That's the exit strategy."
+*   **Rel > 80 (Regret):** "I've sacrificed a lot for this career. Families. Friends. Make sure you don't lose yourself in the hustle."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "James Wilson. Consulting.", "Good day.", "Do you have an appointment?"
+*   *Topics:* Strategy, markets, enterprise solutions.
+
+### Friendly
+*   *Greetings:* "Good to see you.", "Hello.", "How is business?"
+*   *Topics:* High-profile clients, "synergy".
+
+### Acquaintance
+*   *Greetings:* "Hello! Good to connect.", "James here.", "What's the word?"
+*   *Topics:* The art of the pitch, billing rates.
+
+### Friend
+*   *Greetings:* "My friend! Join me.", "Hey! Good to see you outside the office."
+*   *Topics:* Exhaustion ("The grind never stops"), Italy dream.
+
+### Close Friend
+*   *Greetings:* "James. Honest talk?", "Hey! Always a pleasure."
+*   *Topics:* Regret over lost relationships, mentoring you to avoid his mistakes.
+
+---
+
+## Actions & Gifts
+*   **Fine Wine:** "Excellent vintage. You have taste."
+*   **Business Cards:** "Sharp. Very sharp."
+*   **Compliment:** "Flattery will get you everywhere."

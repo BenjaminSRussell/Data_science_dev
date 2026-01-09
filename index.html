@@ -18,32 +18,15 @@
     <!-- Styles -->
     <link rel="stylesheet" href="/src/styles/main.css">
     <link rel="stylesheet" href="/src/styles/components.css">
-    <link rel="stylesheet" href="/src/styles/animations.css">
-    <link rel="stylesheet" href="/src/styles/environment.css">
-    <link rel="stylesheet" href="/src/styles/cartoon.css">
-    <link rel="stylesheet" href="/src/styles/tycoon.css">
-    <link rel="stylesheet" href="/src/styles/rpg.css">
-    <link rel="stylesheet" href="/src/styles/characters.css">
-    <link rel="stylesheet" href="/src/styles/daynight.css">
-    <link rel="stylesheet" href="/src/styles/character-animations.css">
-    <link rel="stylesheet" href="/src/styles/location-backgrounds.css">
-    <link rel="stylesheet" href="/src/styles/world-map.css">
-    <link rel="stylesheet" href="/src/styles/simple-map.css">
-    <link rel="stylesheet" href="/src/styles/map-icons.css">
-    <link rel="stylesheet" href="/src/styles/visual-progression.css">
-    <link rel="stylesheet" href="/src/styles/task-visuals.css">
     <link rel="stylesheet" href="/src/styles/research-inbox.css">
     <link rel="stylesheet" href="/src/styles/emotional-breakdown.css">
     <link rel="stylesheet" href="/src/styles/patches.css">
-    <link rel="stylesheet" href="/src/styles/visual-effects.css">
     <link rel="stylesheet" href="/src/styles/story-ui.css">
-    <link rel="stylesheet" href="/src/styles/act-transition.css">
+    <link rel="stylesheet" href="/src/styles/text-ui.css">
 </head>
 
 <body>
-    <!-- Simple test indicator -->
-    <div style="position:fixed;top:0;left:0;background:red;color:white;padding:5px;z-index:99999;font-size:10px;">HTML LOADED</div>
-    
+
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
         <div class="loading-content">
@@ -62,47 +45,45 @@
     <div id="game-container" class="game-container hidden">
 
         <!-- Top Navigation Bar -->
-        <header id="top-bar" class="top-bar">
+        <!-- Top Navigation Bar (Text Mode) -->
+        <header id="top-bar" class="text-stat-row"
+            style="background: #2d2d2d; padding: 0.5rem; justify-content: space-between; border-bottom: 1px solid #444;">
             <div class="top-bar-left">
-                <span class="game-logo"> Data Science Tycoon</span>
+                <span class="text-ui-heading" style="font-size: 1.2rem; margin: 0;">[ DATA SCIENCE TYCOON ]</span>
             </div>
-            <div class="top-bar-center">
-                <div class="stat-pill" id="stat-money">
-                    <span class="stat-icon"></span>
-                    <span class="stat-value" id="money-value">$0</span>
-                </div>
-                <div class="stat-pill" id="stat-reputation">
-                    <span class="stat-icon"></span>
-                    <span class="stat-value" id="reputation-value">0</span>
-                </div>
-                <div class="stat-pill" id="stat-rank">
-                    <span class="stat-icon"></span>
-                    <span class="stat-value" id="rank-value">Data Entry Clerk</span>
-                </div>
+            <div class="top-bar-center" style="display: flex; gap: 1rem;">
+                <div id="stat-money" style="color: #66cc66;">$ <span id="money-value">0</span></div>
+                <div id="stat-reputation" style="color: #66ccff;">REP: <span id="reputation-value">0</span></div>
+                <div id="stat-rank" style="color: #cca300;">RANK: <span id="rank-value">Data Entry Clerk</span></div>
             </div>
-            <div class="top-bar-right">
-                <button class="icon-btn inbox-button" id="btn-research-inbox" aria-label="Research Papers" title="Research Papers Inbox">
-                    
-                    <span class="inbox-unread-badge hidden" id="inbox-unread-badge"></span>
-                </button>
-                <button class="icon-btn" id="btn-nav-map" aria-label="City Map"></button>
-                <button class="icon-btn" id="btn-nav-bank" aria-label="City Bank"></button>
-                <button class="icon-btn" id="btn-settings" aria-label="Settings"></button>
-                <!-- Music Radio Selector -->
-                <div class="music-radio-container" id="music-radio-container">
-                    <button class="icon-btn music-radio-btn" id="btn-music-radio" aria-label="Music Radio" title="Music Radio">
-                        
-                    </button>
-                    <div class="music-radio-menu hidden" id="music-radio-menu">
-                        <div class="radio-station" data-station="lofi_beats">
-                            <span class="radio-indicator">●</span>
-                            <span class="radio-label">Lofi Beats</span>
-                        </div>
-                        <div class="radio-station" data-station="off">
-                            <span class="radio-indicator"></span>
-                            <span class="radio-label">Off</span>
-                        </div>
-                    </div>
+            <div class="top-bar-right" style="display: flex; gap: 0.5rem; position: relative;">
+                <button class="btn-grey" id="btn-research-inbox" title="Inbox">INBOX <span
+                        id="inbox-unread-badge"></span></button>
+                <button class="btn-grey" id="btn-nav-map" title="Map">MAP</button>
+                <button class="btn-grey" id="btn-nav-bank" title="Bank">BANK</button>
+                <button class="btn-grey" id="btn-settings" title="Settings">OPTS</button>
+                <button class="btn-grey" id="btn-theme-toggle" title="Theme">LIGHT</button>
+                <button class="btn-grey" id="btn-music-radio" title="Radio">MUSIC: OFF</button>
+                <!-- Radio Menu -->
+                <div id="music-radio-menu" class="hidden"
+                    style="display: grid; position: absolute; top: 100%; right: 0; background: #2d2d2d; border: 1px solid #444; padding: 0.5rem; z-index: 1000; min-width: 150px; gap: 0.25rem;">
+                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                        data-station="lofi_beats">Lofi Beats</button>
+                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                        data-station="folk_radio">Folk Radio</button>
+                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                        data-station="jazz_fm">Jazz FM</button>
+                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                        data-station="synthwave">Synthwave</button>
+                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                        data-station="space_rock">Space Rock</button>
+                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                        data-station="glitch_stream">Glitch Stream</button>
+                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                        data-station="zen_garden">Zen Garden</button>
+                    <div style="border-top: 1px dashed #555; margin: 0.25rem 0;"></div>
+                    <button class="radio-station btn-grey" style="text-align: left; width: 100%; color: #aaa;"
+                        data-station="off">Turn Off</button>
                 </div>
             </div>
         </header>
@@ -110,125 +91,84 @@
         <!-- Screen Container -->
         <main id="screen-container" class="screen-container">
 
-            <!-- Main Menu Screen -->
-            <section id="screen-menu" class="screen screen-menu active">
-                <!-- Animated Background -->
-                <div class="menu-background">
-                    <!-- Particles disabled -->
-                    <div class="menu-gradient-overlay"></div>
-                    <div class="menu-grid-pattern"></div>
-                </div>
-
-                <!-- Main Content -->
-                <div class="menu-container">
-                    <!-- Hero Section -->
-                    <div class="menu-hero">
-                        <div class="menu-logo-wrapper">
-                            <div class="menu-logo-glow"></div>
-                            <div class="menu-logo-icon"></div>
-                            <div class="menu-logo-particles">
-                                <span class="particle-dot"></span>
-                                <span class="particle-dot"></span>
-                                <span class="particle-dot"></span>
-                            </div>
-                        </div>
-                        <h1 class="menu-title">
-                            <span class="title-line">Data Science</span>
-                            <span class="title-line">Tycoon</span>
-                        </h1>
-                        <p class="menu-subtitle" id="menu-contextual-info">Transform data into destiny. Build your empire from the ground up.</p>
-                        
-                        <!-- Statistics Dashboard -->
-                        <div class="menu-stats-dashboard" id="menu-stats-dashboard"></div>
+            <!-- Intro Video Screen (New) -->
+            <section id="screen-intro-video" class="screen hidden text-ui"
+                style="background: #000; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 10000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
+                <div class="video-container" style="width: 100%; height: 100%; position: relative;">
+                    <video id="intro-video" style="width: 100%; height: 100%; object-fit: cover;">
+                        <source src="/assets/videos/intro.mp4" type="video/mp4">
+                    </video>
+                    <div class="video-overlay"
+                        style="position: absolute; bottom: 2rem; right: 2rem; display: flex; gap: 1rem;">
+                        <button class="btn-grey" id="btn-skip-video">[ SKIP VIDEO ]</button>
                     </div>
+                </div>
+            </section>
 
-                    <!-- Navigation Buttons -->
-                    <nav class="menu-navigation">
-                        <button class="menu-btn menu-btn-primary" id="btn-new-game">
-                            <div class="btn-content">
-                                <span class="btn-icon"></span>
-                                <div class="btn-text-group">
-                                    <span class="btn-text">New Career</span>
-                                    <span class="btn-subtext">Start your journey</span>
-                                </div>
-                            </div>
-                            <div class="btn-ripple"></div>
+            <!-- Main Menu Screen -->
+            <!-- Main Menu Screen (Text Mode) -->
+            <section id="screen-menu" class="screen menu-screen active text-ui"
+                style="display: flex; align-items: center; justify-content: center;">
+                <div class="menu-content ascii-box" style="max-width: 600px; width: 100%;">
+                    <header class="menu-header" style="text-align: center; margin-bottom: 2rem;">
+                        <pre style="font-family: monospace; color: #66cc66; font-weight: bold;">
+  ==== DATA SCIENCE TYCOON ====
+  Transform data into destiny.
+                        </pre>
+                    </header>
+
+                    <nav class="menu-nav" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <button class="btn-manual-action" id="btn-new-game">
+                            [ 1. NEW CAREER ]
                         </button>
 
-                        <button class="menu-btn menu-btn-secondary" id="btn-continue" disabled>
-                            <div class="btn-content">
-                                <span class="btn-icon"></span>
-                                <div class="btn-text-group">
-                                    <span class="btn-text">Continue</span>
-                                    <span class="btn-subtext" id="continue-subtext">No saved game</span>
-                                </div>
-                            </div>
-                            <div class="btn-ripple"></div>
+                        <button class="btn-manual-action" id="btn-continue" disabled>
+                            [ 2. CONTINUE GAME ] <span id="continue-subtext">(No Save)</span>
                         </button>
 
-                        <div class="menu-btn-group">
-                            <button class="menu-btn menu-btn-tertiary" id="btn-tutorial">
-                                <span class="btn-icon"></span>
-                                <span class="btn-text">Tutorial</span>
-                            </button>
-                            <button class="menu-btn menu-btn-tertiary" id="btn-settings-menu">
-                                <span class="btn-icon"></span>
-                                <span class="btn-text">Settings</span>
-                            </button>
-                        </div>
+                        <button class="btn-manual-action" id="btn-settings-menu">
+                            [ 9. SETTINGS ]
+                        </button>
                     </nav>
 
-                    <!-- Footer -->
-                    <footer class="menu-footer">
-                        <div class="footer-content">
-                            <span class="version">v1.0.0</span>
-                            <span class="footer-divider">•</span>
-                            <button class="footer-link" id="btn-credits">Credits</button>
-                        </div>
+                    <!-- Stats Dashboard -->
+                    <div id="menu-stats-dashboard" class="text-stat-row"
+                        style="margin-top: 2rem; border-top: 1px dashed #555; padding-top: 1rem; display: none;"></div>
+
+                    <footer class="menu-footer" style="margin-top: 2rem; text-align: center; color: #555;">
+                        <span>v1.0.0</span> • <button id="btn-credits" class="btn-grey"
+                            style="padding: 0 0.5rem; font-size: 0.8rem;">CREDITS</button>
                     </footer>
                 </div>
             </section>
 
             <!-- Game Screen (Office View) -->
-            <section id="screen-game" class="screen screen-game">
-                <div class="office-layout">
+            <!-- Game Screen (Office View) - Text Mode -->
+            <section id="screen-game" class="screen screen-game text-game-area">
+                <div class="modular-panel">
                     <!-- Left Panel: Boss & Task -->
-                    <aside class="panel panel-left">
-                        <div class="boss-section glass-card">
-                            <div class="boss-header">
-                                <div class="boss-avatar" id="boss-avatar"></div>
-                                <div class="boss-info">
-                                    <h3 class="boss-name" id="boss-name">Mr. Anderson</h3>
-                                    <span class="boss-title" id="boss-title">Department Head</span>
-                                </div>
-                                <div class="boss-mood" id="boss-mood"></div>
-                            </div>
-                            <div class="boss-dialogue">
-                                <div class="dialogue-bubble" id="boss-dialogue">
-                                    <p>Welcome to the team! Let's see what you can do with some data.</p>
-                                </div>
+                    <aside class="text-ui">
+                        <div class="ascii-box" style="margin-bottom: 1rem;">
+                            <div class="text-ui-heading">BOSS: <span id="boss-name">Mr. Anderson</span></div>
+                            <div id="boss-title" style="color: #888; margin-bottom: 0.5rem;">Department Head</div>
+                            <div id="boss-dialogue" style="font-style: italic; color: #aaa;">
+                                <p>"Welcome to the team. Get to work."</p>
                             </div>
                         </div>
 
-                        <div class="task-section glass-card">
-                            <div class="task-header">
-                                <h3>Current Task</h3>
-                                <div class="task-timer hidden" id="task-timer">
-                                    <span class="timer-icon"></span>
-                                    <span class="timer-value">5:00</span>
-                                </div>
+                        <div class="ascii-box">
+                            <div class="text-ui-heading">CURRENT TASK</div>
+                            <div class="text-stat-row">
+                                <span class="text-stat-label">Deadline:</span>
+                                <span class="text-stat-value hidden" id="task-timer">5:00</span>
                             </div>
-                            <div class="task-content" id="task-content">
-                                <p class="task-description">Create a visualization showing quarterly sales performance.
-                                </p>
-                                <div class="task-requirements">
-                                    <span class="requirement-tag">Chart Required</span>
-                                    <span class="requirement-tag">Show Trends</span>
-                                </div>
+                            <div id="task-content">
+                                <p class="task-description">No active task.</p>
+                                <div class="task-requirements" style="margin-top: 0.5rem; font-size: 0.8rem;"></div>
                             </div>
-                            <div class="task-reward">
-                                <span class="reward-label">Potential Reward:</span>
-                                <span class="reward-value" id="task-reward">$150</span>
+                            <div class="text-stat-row" style="margin-top: 0.5rem; border-top: 1px dashed #444;">
+                                <span class="text-stat-label">Reward:</span>
+                                <span class="text-stat-value" id="task-reward">$0</span>
                             </div>
                         </div>
                     </aside>
@@ -296,118 +236,77 @@
                         </div>
                     </div>
 
-                    <!-- Right Panel: Quick Stats & Navigation -->
-                    <aside class="panel panel-right">
-                        <div class="progress-section glass-card">
-                            <h3>Career Progress</h3>
+                    <!-- Right Panel: Quick Stats & Navigation (Text Mode) -->
+                    <aside class="text-ui" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="progress-section ascii-box">
+                            <div class="text-ui-heading">CAREER PROGRESS</div>
                             <div class="rank-display">
                                 <span class="current-rank" id="current-rank">Data Entry Clerk</span>
-                                <div class="rank-progress-bar">
-                                    <div class="rank-progress-fill" id="rank-progress" style="width: 0%"></div>
+                                <div class="text-progress-bar" style="margin: 0.5rem 0;">
+                                    <div class="text-progress-filled" id="rank-progress" style="width: 0%"></div>
                                 </div>
-                                <span class="next-rank">Next: Junior Analyst</span>
+                                <span class="next-rank" style="font-size: 0.8rem; color: #888;">Next: Junior
+                                    Analyst</span>
                             </div>
                         </div>
 
-                        <div class="quick-nav glass-card">
-                            <button class="nav-btn" id="btn-nav-map-quick">
-                                <span class="nav-icon"></span>
-                                <span class="nav-label">City</span>
-                            </button>
-                            <button class="nav-btn" id="btn-nav-clients">
-                                <span class="nav-icon"></span>
-                                <span class="nav-label">Inbox</span>
-                                <span class="notification-badge hidden" id="clients-badge">0</span>
-                            </button>
-                            <button class="nav-btn" id="btn-nav-office">
-                                <span class="nav-icon"></span>
-                                <span class="nav-label">Office</span>
-                            </button>
-                            <button class="nav-btn" id="btn-nav-stats">
-                                <span class="nav-icon"></span>
-                                <span class="nav-label">Stats</span>
-                            </button>
-                            <button class="nav-btn" id="btn-nav-staff">
-                                <span class="nav-icon"></span>
-                                <span class="nav-label">Team</span>
-                            </button>
-                            <button class="nav-btn" id="btn-nav-career">
-                                <span class="nav-icon"></span>
-                                <span class="nav-label">Career</span>
-                            </button>
-                            <button class="nav-btn" id="btn-nav-shop">
-                                <span class="nav-icon"></span>
-                                <span class="nav-label">Shop</span>
-                            </button>
-                            <button class="nav-btn" id="btn-nav-newspaper">
-                                <span class="nav-icon"></span>
-                                <span class="nav-label">Paper</span>
-                            </button>
+                        <div class="quick-nav ascii-box">
+                            <div class="text-ui-heading">NAVIGATION</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                <button class="btn-grey" id="btn-nav-map-quick">CITY</button>
+                                <button class="btn-grey" id="btn-nav-clients">INBOX <span id="clients-badge"
+                                        class="hidden">0</span></button>
+                                <button class="btn-grey" id="btn-nav-office">OFFICE</button>
+                                <button class="btn-grey" id="btn-nav-stats">STATS</button>
+                                <button class="btn-grey" id="btn-nav-staff">TEAM</button>
+                                <button class="btn-grey" id="btn-nav-career">CAREER</button>
+                                <button class="btn-grey" id="btn-nav-shop">SHOP</button>
+                                <button class="btn-grey" id="btn-nav-newspaper">PAPER</button>
+                            </div>
                         </div>
                     </aside>
                 </div>
             </section>
 
             <!-- Chart Studio Screen -->
-            <section id="screen-chart-studio" class="screen screen-chart-studio">
-                <div class="studio-layout">
+            <!-- Chart Studio Screen (Text Mode) -->
+            <section id="screen-chart-studio" class="screen screen-chart-studio text-ui">
+                <div class="studio-layout"
+                    style="display: grid; grid-template-columns: 250px 1fr 250px; gap: 1rem; padding: 1rem;">
                     <!-- Chart Type Selection -->
-                    <aside class="studio-sidebar glass-card">
-                        <h3> Chart Types</h3>
-                        <div class="chart-type-grid" id="chart-type-grid">
-                            <button class="chart-type-btn active" data-type="bar">
-                                <span class="chart-icon"></span>
-                                <span class="chart-name">Bar</span>
-                            </button>
-                            <button class="chart-type-btn" data-type="line">
-                                <span class="chart-icon"></span>
-                                <span class="chart-name">Line</span>
-                            </button>
-                            <button class="chart-type-btn" data-type="pie">
-                                <span class="chart-icon"></span>
-                                <span class="chart-name">Pie</span>
-                            </button>
-                            <button class="chart-type-btn" data-type="scatter">
-                                <span class="chart-icon"></span>
-                                <span class="chart-name">Scatter</span>
-                            </button>
-                            <button class="chart-type-btn" data-type="doughnut">
-                                <span class="chart-icon"></span>
-                                <span class="chart-name">Donut</span>
-                            </button>
-                            <button class="chart-type-btn" data-type="radar">
-                                <span class="chart-icon"></span>
-                                <span class="chart-name">Radar</span>
-                            </button>
-                            <button class="chart-type-btn" data-type="area">
-                                <span class="chart-icon"></span>
-                                <span class="chart-name">Area</span>
-                            </button>
-                            <button class="chart-type-btn" data-type="bubble">
-                                <span class="chart-icon">⭕</span>
-                                <span class="chart-name">Bubble</span>
-                            </button>
-                            <button class="chart-type-btn" data-type="polarArea">
-                                <span class="chart-icon"></span>
-                                <span class="chart-name">Polar</span>
-                            </button>
+                    <aside class="studio-sidebar ascii-box">
+                        <div class="text-ui-heading">CHART TYPES</div>
+                        <div class="chart-type-grid" id="chart-type-grid"
+                            style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- Buttons will be styled via CSS, ensuring we remove icon dependencies -->
+                            <button class="btn-grey chart-type-btn active" data-type="bar">BAR</button>
+                            <button class="btn-grey chart-type-btn" data-type="line">LINE</button>
+                            <button class="btn-grey chart-type-btn" data-type="pie">PIE</button>
+                            <button class="btn-grey chart-type-btn" data-type="scatter">SCATTER</button>
+                            <button class="btn-grey chart-type-btn" data-type="doughnut">DONUT</button>
+                            <button class="btn-grey chart-type-btn" data-type="radar">RADAR</button>
+                            <button class="btn-grey chart-type-btn" data-type="area">AREA</button>
+                            <button class="btn-grey chart-type-btn" data-type="bubble">BUBBLE</button>
+                            <button class="btn-grey chart-type-btn" data-type="polarArea">POLAR</button>
                         </div>
 
-                        <div class="software-status" id="software-status">
-                            <h4> Active Software</h4>
+                        <div class="software-status ascii-box" id="software-status" style="margin-top: 1rem;">
+                            <div class="text-ui-heading">SOFTWARE</div>
                             <div id="software-list">
-                                <p class="software-none">No software purchased</p>
+                                <p class="software-none" style="color: #888;">No software.</p>
                             </div>
                         </div>
 
-                        <div class="data-mapping">
-                            <h4>Data Columns</h4>
-                            <div class="mapping-dropzone" id="x-axis-drop">
-                                <span class="dropzone-label">X-Axis</span>
+                        <div class="data-mapping ascii-box" style="margin-top: 1rem;">
+                            <div class="text-ui-heading">MAPPING</div>
+                            <div class="mapping-dropzone" id="x-axis-drop"
+                                style="border: 1px dashed #555; padding: 0.5rem; margin-bottom: 0.5rem;">
+                                <span class="dropzone-label" style="color: #888;">X-Axis:</span>
                                 <span class="dropzone-value" id="x-axis-value">Quarter</span>
                             </div>
-                            <div class="mapping-dropzone" id="y-axis-drop">
-                                <span class="dropzone-label">Y-Axis</span>
+                            <div class="mapping-dropzone" id="y-axis-drop"
+                                style="border: 1px dashed #555; padding: 0.5rem;">
+                                <span class="dropzone-label" style="color: #888;">Y-Axis:</span>
                                 <span class="dropzone-value" id="y-axis-value">Revenue</span>
                             </div>
                         </div>
@@ -415,275 +314,282 @@
 
                     <!-- Chart Preview -->
                     <div class="studio-main">
-                        <div class="chart-preview glass-card">
-                            <div class="chart-header">
-                                <input type="text" class="chart-title-input" id="chart-title"
-                                    placeholder="Enter chart title..." value="Quarterly Revenue Performance">
+                        <div class="chart-preview ascii-box" style="height: 100%;">
+                            <div class="chart-header" style="margin-bottom: 1rem;">
+                                <input type="text" class="text-ui-input" id="chart-title"
+                                    placeholder="Enter chart title..." value="Quarterly Revenue Performance"
+                                    style="width: 100%; background: #222; border: 1px solid #444; color: #ddd; padding: 0.5rem;">
                             </div>
-                            <div class="chart-canvas-container">
+                            <div class="chart-canvas-container"
+                                style="background: #1a1a1a; padding: 1rem; border: 1px solid #333;">
                                 <canvas id="preview-chart"></canvas>
                             </div>
                         </div>
 
-                        <div class="studio-actions">
-                            <button class="btn btn-ghost btn-lg" id="btn-back-to-office">
-                                <span class="btn-icon">↩</span>
-                                Back to Office
-                            </button>
-                            <button class="btn btn-primary btn-lg" id="btn-submit-chart">
-                                <span class="btn-icon"></span>
-                                Submit to Boss
+                        <div class="studio-actions" style="margin-top: 1rem; display: flex; gap: 1rem;">
+                            <button class="btn-grey" id="btn-back-to-office">
+                                &lt; BACK </button>
+                            <button class="btn-manual-action" id="btn-submit-chart" style="flex: 1;">
+                                [ SUBMIT TO BOSS ]
                             </button>
                         </div>
                     </div>
 
                     <!-- Customization Options -->
-                    <aside class="studio-options glass-card">
-                        <h3> Customize</h3>
-                        <div class="option-group">
-                            <label>Color Palette</label>
-                            <div class="color-palette-picker" id="color-palette">
-                                <button class="palette-btn active" data-palette="corporate"></button>
-                                <button class="palette-btn" data-palette="vibrant"></button>
-                                <button class="palette-btn" data-palette="pastel"></button>
-                                <button class="palette-btn" data-palette="monochrome"></button>
+                    <aside class="studio-options ascii-box">
+                        <div class="text-ui-heading">CUSTOMIZE</div>
+                        <div class="option-group" style="margin-bottom: 1rem;">
+                            <label style="display: block; color: #888;">Palette</label>
+                            <div class="color-palette-picker" id="color-palette" style="display: flex; gap: 0.5rem;">
+                                <button class="palette-btn active" data-palette="corporate"
+                                    style="width: 20px; height: 20px; background: #888; border: none;"></button>
+                                <button class="palette-btn" data-palette="monochrome"
+                                    style="width: 20px; height: 20px; background: #444; border: none;"></button>
                             </div>
                         </div>
-                        <div class="option-group">
+                        <div class="option-group" style="margin-bottom: 0.5rem;">
                             <label>Show Legend</label>
-                            <label class="toggle">
-                                <input type="checkbox" id="show-legend" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
+                            <input type="checkbox" id="show-legend" checked>
                         </div>
-                        <div class="option-group">
+                        <div class="option-group" style="margin-bottom: 0.5rem;">
                             <label>Show Grid</label>
-                            <label class="toggle">
-                                <input type="checkbox" id="show-grid" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
+                            <input type="checkbox" id="show-grid" checked>
                         </div>
                         <div class="option-group">
                             <label>Data Labels</label>
-                            <label class="toggle">
-                                <input type="checkbox" id="show-data-labels">
-                                <span class="toggle-slider"></span>
-                            </label>
+                            <input type="checkbox" id="show-data-labels">
                         </div>
                     </aside>
                 </div>
             </section>
 
             <!-- Boss Review Screen -->
-            <section id="screen-review" class="screen screen-review">
-                <div class="review-content">
-                    <div class="review-boss glass-card">
-                        <div class="boss-reaction" id="boss-reaction">
-                            <div class="boss-avatar-large"></div>
-                            <div class="reaction-emoji" id="reaction-emoji"></div>
-                        </div>
+            <!-- Boss Review Screen (Text Mode) -->
+            <section id="screen-review" class="screen screen-review text-ui">
+                <div class="review-content"
+                    style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="review-boss ascii-box">
+                        <div class="text-ui-heading">BOSS FEEDBACK</div>
                         <div class="boss-feedback" id="boss-feedback">
-                            <p class="feedback-text">Analyzing your work...</p>
+                            <p class="feedback-text" style="font-family: monospace; color: #ddd;">Analyzing your work...
+                            </p>
                         </div>
                     </div>
 
-                    <div class="review-chart glass-card">
-                        <h3>Your Submission</h3>
-                        <div class="submitted-chart">
+                    <div class="review-chart ascii-box">
+                        <div class="text-ui-heading">YOUR SUBMISSION</div>
+                        <div class="submitted-chart" style="border: 1px solid #444; padding: 0.5rem; background: #000;">
                             <canvas id="submitted-chart"></canvas>
                         </div>
                     </div>
 
-                    <div class="review-score glass-card" id="review-score">
-                        <h3>Performance Rating</h3>
-                        <div class="stars-container" id="stars-container">
-                            <span class="star"></span>
-                            <span class="star"></span>
-                            <span class="star"></span>
-                            <span class="star"></span>
-                            <span class="star"></span>
+                    <div class="review-score ascii-box" id="review-score">
+                        <div class="text-ui-heading">PERFORMANCE RATING</div>
+                        <div class="stars-container" id="stars-container"
+                            style="color: #ffd700; font-size: 1.5rem; margin-bottom: 1rem;">
+                            ★★★★★
                         </div>
                         <div class="score-breakdown">
                             <div class="score-item">
-                                <span class="score-label">Chart Appropriateness</span>
-                                <div class="score-bar">
-                                    <div class="score-fill" style="width:0%"></div>
+                                <span class="score-label">Appropriateness:</span>
+                                <div class="text-progress-bar">
+                                    <div class="text-progress-filled" style="width:0%"></div>
                                 </div>
                             </div>
                             <div class="score-item">
-                                <span class="score-label">Visual Clarity</span>
-                                <div class="score-bar">
-                                    <div class="score-fill" style="width:0%"></div>
+                                <span class="score-label">Clarity:</span>
+                                <div class="text-progress-bar">
+                                    <div class="text-progress-filled" style="width:0%"></div>
                                 </div>
                             </div>
                             <div class="score-item">
-                                <span class="score-label">Data Accuracy</span>
-                                <div class="score-bar">
-                                    <div class="score-fill" style="width:0%"></div>
+                                <span class="score-label">Accuracy:</span>
+                                <div class="text-progress-bar">
+                                    <div class="text-progress-filled" style="width:0%"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="review-rewards glass-card" id="review-rewards">
-                        <h3> Rewards Earned</h3>
-                        <div class="reward-display">
+                    <div class="review-rewards ascii-box" id="review-rewards">
+                        <div class="text-ui-heading">REWARDS</div>
+                        <div class="reward-display" style="display: flex; gap: 2rem;">
                             <div class="reward-item">
-                                <span class="reward-icon"></span>
-                                <span class="reward-amount" id="reward-money">+$0</span>
+                                <span class="reward-amount" id="reward-money"
+                                    style="color: #66cc66; font-weight: bold;">+$0</span>
                             </div>
                             <div class="reward-item">
-                                <span class="reward-icon"></span>
-                                <span class="reward-amount" id="reward-rep">+0 Rep</span>
+                                <span class="reward-amount" id="reward-rep"
+                                    style="color: #66ccff; font-weight: bold;">+0 REP</span>
                             </div>
                         </div>
                     </div>
 
-                    <button class="btn btn-primary btn-lg" id="btn-next-task">
-                        <span class="btn-icon"></span>
-                        Next Task
+                    <button class="btn-manual-action" id="btn-next-task">
+                        [ NEXT TASK ]
                     </button>
                 </div>
             </section>
 
-            <!-- Career Screen -->
-            <section id="screen-career" class="screen screen-career">
-                <div class="career-content">
-                    <button class="btn btn-ghost back-btn" id="btn-back-career">← Back</button>
-                    <h2 class="screen-title"> Contracts & Projects</h2>
+            <!-- Career Screen (Text Mode) -->
+            <section id="screen-career" class="screen screen-career text-ui">
+                <div class="career-content ascii-box">
+                    <button class="btn-grey back-btn" id="btn-back-career" style="margin-bottom: 1rem;">
+                        &lt; BACK </button>
+                    <div class="text-ui-heading">CONTRACTS & PROJECTS</div>
 
                     <!-- Active Project Section -->
-                    <div id="active-project-container" class="glass-card hidden">
+                    <div id="active-project-container" class="ascii-box hidden"
+                        style="border: 1px dashed #555; margin-bottom: 1rem;">
                         <div class="project-header">
-                            <h3 id="active-project-title">Project Title</h3>
-                            <span class="badge" id="active-project-stage">Stage 1/3</span>
+                            <h3 id="active-project-title" style="margin: 0;">Project Title</h3>
+                            <span class="badge" id="active-project-stage" style="color: #888;">Stage 1/3</span>
                         </div>
                         <div class="stage-info">
-                            <h4 id="current-stage-name">Stage Name</h4>
+                            <h4 id="current-stage-name" style="color: #aaa;">Stage Name</h4>
                             <p id="current-stage-desc">Description of current task...</p>
                         </div>
-                        <div class="progress-bar-container">
-                            <div class="progress-fill" id="project-progress-fill" style="width: 0%"></div>
+                        <div class="text-progress-bar">
+                            <div class="text-progress-filled" id="project-progress-fill" style="width: 0%">
+                            </div>
                         </div>
-                        <div class="project-actions">
-                            <button class="btn btn-primary" id="btn-work-project">Work on Project</button>
+                        <div class="project-actions" style="margin-top: 1rem;">
+                            <button class="btn-manual-action" id="btn-work-project">[ WORK ON PROJECT ]</button>
                         </div>
                     </div>
 
                     <!-- Available Contracts Grid -->
-                    <h3>Available Contracts</h3>
-                    <div class="contracts-grid" id="contracts-grid">
+                    <h3>AVAILABLE CONTRACTS</h3>
+                    <div class="contracts-grid" id="contracts-grid" style="display: grid; gap: 1rem;">
                         <!-- Populated by JS -->
                     </div>
                 </div>
             </section>
 
             <!-- Daily Newspaper Screen -->
-            <section id="screen-newspaper" class="screen screen-newspaper hidden">
-                <div class="newspaper-content glass-card">
-                    <div class="newspaper-header">
-                        <div class="header-top">
+            <!-- Daily Newspaper Screen (Text Mode) -->
+            <section id="screen-newspaper" class="screen screen-newspaper hidden text-ui">
+                <div class="newspaper-content ascii-box" style="max-width: 600px; margin: 0 auto;">
+                    <div class="newspaper-header"
+                        style="border-bottom: 2px double #888; margin-bottom: 1rem; padding-bottom: 0.5rem; text-align: center;">
+                        <div class="header-top"
+                            style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #888;">
                             <span class="paper-date" id="paper-date">January 1, 2024</span>
                             <span class="paper-price">$2.00</span>
                         </div>
-                        <h1 class="paper-title"> The Daily Data </h1>
+                        <h1 class="paper-title" style="font-family: serif; font-size: 2rem; margin: 0.5rem 0;">THE DAILY
+                            DATA</h1>
                         <div class="header-sub">
-                            <span class="sub-item">Vol. 1</span>
-                            <span class="sub-item">City Edition</span>
+                            <span class="sub-item">Vol. 1 - City Edition</span>
                         </div>
                     </div>
 
                     <div class="newspaper-body">
-                        <div class="main-story">
-                            <h2 class="story-headline" id="paper-headline">Market Crash Imminent?</h2>
-                            <p class="story-text" id="paper-story">Details about the main story go here...</p>
+                        <div class="main-story" style="margin-bottom: 1.5rem;">
+                            <h2 class="story-headline" id="paper-headline"
+                                style="font-size: 1.5rem; border-bottom: 1px solid #444;">Market Crash Imminent?</h2>
+                            <p class="story-text" id="paper-story" style="font-family: serif; line-height: 1.4;">Details
+                                about the main story go here...</p>
                         </div>
 
-                        <div class="side-stories">
+                        <div class="side-stories"
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; border-top: 1px dashed #444; padding-top: 1rem;">
                             <div class="side-story">
-                                <h3 id="paper-sub-1-title">Tech Sector Booms</h3>
-                                <p id="paper-sub-1-text">Small blurb.</p>
+                                <h3 id="paper-sub-1-title" style="font-size: 1rem;">Tech Sector Booms</h3>
+                                <p id="paper-sub-1-text" style="font-size: 0.8rem;">Small blurb.</p>
                             </div>
                             <div class="side-story">
-                                <h3 id="paper-sub-2-title">Coffee Prices Up</h3>
-                                <p id="paper-sub-2-text">Small blurb.</p>
+                                <h3 id="paper-sub-2-title" style="font-size: 1rem;">Coffee Prices Up</h3>
+                                <p id="paper-sub-2-text" style="font-size: 0.8rem;">Small blurb.</p>
                             </div>
                         </div>
 
-                        <div class="paper-extras">
+                        <div class="paper-extras"
+                            style="margin-top: 1rem; background: #222; padding: 0.5rem; display: flex; justify-content: space-between;">
                             <div class="weather-box">
-                                <span class="weather-icon"></span>
                                 <span class="weather-text" id="paper-weather">Clear, 72°F</span>
                             </div>
                             <div class="horoscope-box">
-                                <strong>Horoscope:</strong> <span id="paper-horoscope">Good luck today.</span>
+                                <strong>Horoscope:</strong> <span id="paper-horoscope">Good luck.</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="newspaper-actions">
-                        <button class="btn btn-primary btn-lg" id="btn-close-paper">Read & Close</button>
+                    <div class="newspaper-actions" style="margin-top: 1.5rem; text-align: center;">
+                        <button class="btn-manual-action" id="btn-close-paper">[ READ & CLOSE ]</button>
                     </div>
                 </div>
             </section>
 
             <!-- Bank Screen -->
-            <section id="screen-bank" class="screen screen-bank hidden">
-                <div class="bank-layout">
-                    <header class="bank-header">
-                        <h2> City Bank & Trust</h2>
+            <!-- Bank Screen (Text Mode) -->
+            <section id="screen-bank" class="screen screen-bank hidden text-ui">
+                <div class="bank-layout ascii-box" style="max-width: 800px; margin: 0 auto;">
+                    <header class="bank-header"
+                        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 1rem; margin-bottom: 1rem;">
+                        <h2 style="margin: 0; font-family: monospace;">CITY BANK & TRUST</h2>
                         <div class="net-worth-display">
-                            <span class="label">Net Worth</span>
-                            <span class="value" id="bank-net-worth">$0</span>
+                            <span class="label" style="color: #888;">NET WORTH:</span>
+                            <span class="value" id="bank-net-worth" style="color: #66cc66;">$0</span>
                         </div>
-                        <button class="btn-close-bank" id="btn-close-bank">Exit Bank</button>
+                        <button class="btn-grey" id="btn-close-bank">[ EXIT ]</button>
                     </header>
 
-                    <div class="bank-grid">
+                    <div class="bank-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <!-- Savings Account -->
-                        <div class="bank-card savings-card">
-                            <div class="card-header">
-                                <h3> Savings Account</h3>
-                                <span class="rate-badge">0.5% Weekly APY</span>
+                        <div class="bank-card savings-card ascii-box" style="border: 1px dashed #555;">
+                            <div class="card-header" style="margin-bottom: 1rem;">
+                                <h3 style="margin: 0; color: #66cc66;">SAVINGS</h3>
+                                <span class="rate-badge" style="font-size: 0.8rem; color: #888;">0.5% Weekly APY</span>
                             </div>
-                            <div class="card-balance">
-                                <span class="label">Balance</span>
-                                <span class="amount" id="bank-savings-balance">$0</span>
+                            <div class="card-balance" style="margin-bottom: 1rem;">
+                                <span class="label" style="display: block; color: #888;">BALANCE:</span>
+                                <span class="amount" id="bank-savings-balance" style="font-size: 1.5rem;">$0</span>
                             </div>
-                            <div class="card-actions">
-                                <div class="input-group">
-                                    <input type="number" id="bank-deposit-input" placeholder="Amount">
-                                    <button class="btn btn-primary" id="btn-bank-deposit">Deposit</button>
+                            <div class="card-actions" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <div class="input-group" style="display: flex; gap: 0.5rem;">
+                                    <input type="number" class="text-ui-input" id="bank-deposit-input"
+                                        placeholder="Amount"
+                                        style="flex: 1; background: #222; border: 1px solid #444; color: #ddd; padding: 0.5rem;">
+                                    <button class="btn-grey" id="btn-bank-deposit">DEPOSIT</button>
                                 </div>
-                                <div class="input-group">
-                                    <input type="number" id="bank-withdraw-input" placeholder="Amount">
-                                    <button class="btn btn-secondary" id="btn-bank-withdraw">Withdraw</button>
+                                <div class="input-group" style="display: flex; gap: 0.5rem;">
+                                    <input type="number" class="text-ui-input" id="bank-withdraw-input"
+                                        placeholder="Amount"
+                                        style="flex: 1; background: #222; border: 1px solid #444; color: #ddd; padding: 0.5rem;">
+                                    <button class="btn-grey" id="btn-bank-withdraw">WITHDRAW</button>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Loan Management -->
-                        <div class="bank-card loan-card">
-                            <div class="card-header">
-                                <h3> Loan Management</h3>
-                                <span class="rate-badge warning">10% Weekly Interest</span>
+                        <div class="bank-card loan-card ascii-box" style="border: 1px dashed #555;">
+                            <div class="card-header" style="margin-bottom: 1rem;">
+                                <h3 style="margin: 0; color: #ff6666;">LOANS</h3>
+                                <span class="rate-badge warning" style="font-size: 0.8rem; color: #888;">10% Weekly
+                                    Interest</span>
                             </div>
-                            <div class="card-balance">
-                                <span class="label">Owed</span>
-                                <span class="amount negative" id="bank-loan-balance">$0</span>
+                            <div class="card-balance" style="margin-bottom: 1rem;">
+                                <span class="label" style="display: block; color: #888;">OWED:</span>
+                                <span class="amount negative" id="bank-loan-balance"
+                                    style="font-size: 1.5rem; color: #ff6666;">$0</span>
                             </div>
-                            <div class="credit-score">
-                                <span>Credit Score: <strong id="bank-credit-score">500</strong></span>
-                                <span class="limit-text">Max Loan: <span id="bank-loan-limit">$1,000</span></span>
+                            <div class="credit-score" style="margin-bottom: 1rem; font-size: 0.9rem;">
+                                <div style="margin-bottom: 0.2rem;">CREDIT SCORE: <strong
+                                        id="bank-credit-score">500</strong></div>
+                                <span class="limit-text">MAX LOAN: <span id="bank-loan-limit">$1,000</span></span>
                             </div>
-                            <div class="card-actions">
-                                <div class="input-group">
-                                    <input type="number" id="bank-loan-input" placeholder="Amount">
-                                    <button class="btn btn-warning" id="btn-bank-take-loan">Take Loan</button>
+                            <div class="card-actions" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <div class="input-group" style="display: flex; gap: 0.5rem;">
+                                    <input type="number" class="text-ui-input" id="bank-loan-input" placeholder="Amount"
+                                        style="flex: 1; background: #222; border: 1px solid #444; color: #ddd; padding: 0.5rem;">
+                                    <button class="btn-grey" id="btn-bank-take-loan">BORROW</button>
                                 </div>
-                                <div class="input-group">
-                                    <input type="number" id="bank-repay-input" placeholder="Amount">
-                                    <button class="btn btn-success" id="btn-bank-repay">Repay</button>
+                                <div class="input-group" style="display: flex; gap: 0.5rem;">
+                                    <input type="number" class="text-ui-input" id="bank-repay-input"
+                                        placeholder="Amount"
+                                        style="flex: 1; background: #222; border: 1px solid #444; color: #ddd; padding: 0.5rem;">
+                                    <button class="btn-grey" id="btn-bank-repay">REPAY</button>
                                 </div>
                             </div>
                         </div>
@@ -691,189 +597,209 @@
                 </div>
             </section>
 
-            <!-- Shop Screen -->
-            <section id="screen-shop" class="screen screen-shop">
-                <div class="shop-content">
-                    <button class="btn btn-ghost back-btn" id="btn-back-shop">← Back</button>
-                    <h2 class="screen-title"> Upgrade Shop</h2>
+            <!-- Shop Screen (Text Mode) -->
+            <section id="screen-shop" class="screen screen-shop text-ui">
+                <div class="shop-content ascii-box">
+                    <button class="btn-grey back-btn" id="btn-back-shop" style="margin-bottom: 1rem;">
+                        &lt; BACK </button>
+                    <div class="text-ui-heading">UPGRADE SHOP</div>
 
-                    <div class="shop-categories">
-                        <button class="category-btn active" data-category="tools"> Tools</button>
-                        <button class="category-btn" data-category="software"> Software</button>
-                        <button class="category-btn" data-category="perks"> Perks</button>
+                    <div class="shop-categories"
+                        style="display: flex; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #444; padding-bottom: 0.5rem;">
+                        <button class="btn-grey category-btn active" data-category="tools">TOOLS</button>
+                        <button class="btn-grey category-btn" data-category="software">SOFTWARE</button>
+                        <button class="btn-grey category-btn" data-category="perks">PERKS</button>
                     </div>
 
-                    <div class="shop-grid" id="shop-grid">
+                    <div class="shop-grid" id="shop-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                         <!-- Shop items will be populated by JS -->
                     </div>
                 </div>
             </section>
 
             <!-- Stock Market Screen -->
-            <section id="screen-stock-market" class="screen hidden">
-                <div class="top-bar-screens">
-                    <button class="btn-icon" id="btn-back-market">⬅ Back</button>
-                    <h2 class="screen-title"> Stock Exchange</h2>
+            <!-- Stock Market Screen (Text Mode) -->
+            <section id="screen-stock-market" class="screen hidden text-ui">
+                <div class="top-bar-screens"
+                    style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <button class="btn-grey" id="btn-back-market">
+                        &lt; BACK </button>
+                    <h2 class="screen-title" style="margin: 0;">STOCK EXCHANGE</h2>
                 </div>
 
                 <!-- Quotron Ticker Display -->
-                <div id="quotron-ticker" class="quotron-ticker-wrapper"></div>
+                <div id="quotron-ticker" class="quotron-ticker-wrapper"
+                    style="background: #000; color: #66cc66; font-family: monospace; padding: 0.5rem; margin-bottom: 1rem; overflow: hidden; white-space: nowrap;">
+                </div>
 
                 <!-- Market Overview -->
-                <div class="market-overview glass-card">
+                <div class="market-overview ascii-box"
+                    style="display: flex; justify-content: space-around; margin-bottom: 1rem;">
                     <div class="market-stat">
-                        <span class="label">Portfolio Value</span>
-                        <span class="value" id="portfolio-value">$0.00</span>
+                        <span class="label" style="color: #888; display: block;">PORTFOLIO VALUE</span>
+                        <span class="value" id="portfolio-value" style="font-size: 1.2rem;">$0.00</span>
                     </div>
                     <div class="market-stat">
-                        <span class="label">Liquid Cash</span>
-                        <span class="value" id="liquid-cash">$0.00</span>
+                        <span class="label" style="color: #888; display: block;">LIQUID CASH</span>
+                        <span class="value" id="liquid-cash" style="font-size: 1.2rem;">$0.00</span>
                     </div>
                 </div>
 
                 <!-- Market Indices -->
-                <div class="market-indices-section glass-card">
-                    <h3 class="section-title">Market Indices</h3>
-                    <div class="market-indices-grid" id="market-indices">
+                <div class="market-indices-section ascii-box" style="margin-bottom: 1rem;">
+                    <h3 class="section-title" style="margin-top: 0;">INDICES</h3>
+                    <div class="market-indices-grid" id="market-indices"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
                 <!-- Market Summaries -->
-                <div class="market-summaries-section glass-card">
-                    <h3 class="section-title">Regional Markets</h3>
-                    <div class="market-summaries-grid" id="market-summaries">
+                <div class="market-summaries-section ascii-box" style="margin-bottom: 1rem;">
+                    <h3 class="section-title" style="margin-top: 0;">REGIONAL MARKETS</h3>
+                    <div class="market-summaries-grid" id="market-summaries" style="display: grid; gap: 0.5rem;">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
                 <!-- World Events Display -->
-                <div class="world-events-section glass-card" id="world-events-display">
-                    <h3 class="section-title"> World Events</h3>
+                <div class="world-events-section ascii-box" id="world-events-display" style="margin-bottom: 1rem;">
+                    <h3 class="section-title" style="margin-top: 0;">NEWS WIRE</h3>
                     <div id="world-events-list">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
                 <!-- Stock Grid -->
-                <div class="stock-grid" id="stock-grid">
-                    <!-- Populated by JS -->
+                <div class="ascii-box">
+                    <h3 class="section-title" style="margin-top: 0;">LISTED EQUITIES</h3>
+                    <div class="stock-grid" id="stock-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </section>
 
             <!-- Office Screen (Tycoon Upgrades) -->
-            <section id="screen-office" class="screen screen-office">
+            <!-- Office Screen (Tycoon Upgrades) - Text Mode -->
+            <section id="screen-office" class="screen screen-office text-ui">
                 <div class="office-content">
-                    <button class="btn btn-ghost back-btn" id="btn-back-office">← Back</button>
-                    <h2 class="screen-title"> Your Office</h2>
+                    <button class="btn-grey back-btn" id="btn-back-office" style="margin-bottom: 1rem;">
+                        &lt; BACK </button>
+                    <div class="text-ui-heading">YOUR OFFICE</div>
 
-                    <!-- Office Scene Visualization -->
-                    <div class="office-scene-container" id="office-scene">
-                        <div class="office-scene">
-                            <div class="office-background"></div>
-                            <div class="office-floor"></div>
-
-                            <!-- Desk with equipment -->
-                            <div class="office-desk">
-                                <div class="office-computer" id="office-computer"></div>
-                                <div class="office-monitor" id="office-monitor"></div>
-                            </div>
-
-                            <!-- Chair -->
-                            <div class="office-chair" id="office-chair"></div>
-
-                            <!-- Character at desk -->
-                            <div class="office-character" id="office-character">
-                                <div class="character-avatar char-working"></div>
-                            </div>
-
-                            <!-- Office name badge -->
-                            <div class="office-badge">
-                                <span class="office-icon"></span>
-                                <span class="office-name" id="current-office-name">Bedroom Corner</span>
-                            </div>
+                    <!-- Office Status (Replaces Scene) -->
+                    <div class="ascii-box" style="margin-bottom: 1rem;">
+                        <div class="text-stat-row">
+                            <span class="text-stat-label">LOCATION:</span>
+                            <span class="text-stat-value" id="current-office-name">Bedroom Corner</span>
                         </div>
+                        <div class="text-stat-row">
+                            <span class="text-stat-label">STATUS:</span>
+                            <span class="text-stat-value" style="color: #66cc66;">OPERATIONAL</span>
+                        </div>
+                        <!-- We keep these IDs hidden or repurposed to avoid JS errors if they are updated -->
+                        <div id="office-scene" class="hidden"></div>
+                        <div id="office-computer" class="hidden"></div>
+                        <div id="office-monitor" class="hidden"></div>
+                        <div id="office-chair" class="hidden"></div>
+                        <div id="office-character" class="hidden"></div>
                     </div>
 
-                    <!-- Location Interactions (Replaces Equipment/Upgrades when not in office) -->
-                    <div class="location-interactions hidden" id="location-interactions">
-                        <h3 class="section-title" id="location-name-title">Donut Shop</h3>
+                    <!-- Location Interactions -->
+                    <div class="location-interactions hidden ascii-box" id="location-interactions"
+                        style="margin-bottom: 1rem;">
+                        <h3 class="section-title" id="location-name-title" style="margin-top: 0;">Donut Shop
+                        </h3>
                         <p class="location-desc" id="location-desc">Welcome!</p>
 
-                        <div class="shop-keeper-area">
-                            <div class="shop-keeper-avatar" id="shop-keeper-avatar"></div>
-                            <div class="shop-keeper-bubble" id="shop-keeper-saying">Fresh donuts!</div>
+                        <div class="shop-keeper-area"
+                            style="margin-bottom: 1rem; border-left: 2px solid #888; padding-left: 0.5rem;">
+                            <div class="shop-keeper-bubble" id="shop-keeper-saying"
+                                style="font-style: italic; color: #aaa;">Fresh donuts!</div>
+                            <!-- Hidden avatar -->
+                            <div id="shop-keeper-avatar" class="hidden"></div>
                         </div>
 
-                        <div class="interaction-grid" id="interaction-grid">
+                        <div class="interaction-grid" id="interaction-grid" style="display: grid; gap: 0.5rem;">
                             <!-- Populated by JS -->
                         </div>
                     </div>
 
                     <!-- Equipment Grid -->
-                    <div id="office-equipment-section">
-                        <h3 class="section-title"> Equipment</h3>
-                        <div class="equipment-grid" id="equipment-grid">
-                            <div class="equipment-card" data-type="computer">
-                                <div class="equipment-icon"></div>
-                                <div class="equipment-name">Computer</div>
-                                <div class="equipment-level" id="computer-level">Old Laptop</div>
+                    <div id="office-equipment-section" class="ascii-box">
+                        <h3 class="section-title" style="margin-top: 0;">EQUIPMENT UPGRADES</h3>
+                        <div class="equipment-grid" id="equipment-grid"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                            <!-- Items will be populated (or are static below, we replace static to ensure style) -->
+                            <!-- We replace the static HTML with just the container if the JS populates it, 
+                                but looking at lines 737+, it seems hardcoded in HTML. 
+                                I will refactor the static blocks to text style. -->
+                            <div class="equipment-card modular-panel" data-type="computer">
+                                <div class="equipment-name text-ui-heading">COMPUTER</div>
+                                <div class="equipment-level" id="computer-level" style="color: #888;">Old Laptop
+                                </div>
                                 <div class="equipment-bonus">Speed: 1.0x</div>
-                                <button class="equipment-upgrade-btn" id="upgrade-computer">
-                                    Upgrade - $500
+                                <button class="btn-manual-action" id="upgrade-computer" style="margin-top: 0.5rem;">
+                                    [ UPGRADE $500 ]
                                 </button>
                             </div>
-                            <div class="equipment-card" data-type="desk">
-                                <div class="equipment-icon"></div>
-                                <div class="equipment-name">Desk</div>
-                                <div class="equipment-level" id="desk-level">Folding Table</div>
+                            <div class="equipment-card modular-panel" data-type="desk">
+                                <div class="equipment-name text-ui-heading">DESK</div>
+                                <div class="equipment-level" id="desk-level" style="color: #888;">Folding Table
+                                </div>
                                 <div class="equipment-bonus">Comfort: 1.0x</div>
-                                <button class="equipment-upgrade-btn" id="upgrade-desk">
-                                    Upgrade - $300
+                                <button class="btn-manual-action" id="upgrade-desk" style="margin-top: 0.5rem;">
+                                    [ UPGRADE $300 ]
                                 </button>
                             </div>
-                            <div class="equipment-card" data-type="monitor">
-                                <div class="equipment-icon"></div>
-                                <div class="equipment-name">Monitor</div>
-                                <div class="equipment-level" id="monitor-level">Laptop Screen</div>
+                            <div class="equipment-card modular-panel" data-type="monitor">
+                                <div class="equipment-name text-ui-heading">MONITOR</div>
+                                <div class="equipment-level" id="monitor-level" style="color: #888;">Laptop
+                                    Screen</div>
                                 <div class="equipment-bonus">Clarity: 1.0x</div>
-                                <button class="equipment-upgrade-btn" id="upgrade-monitor">
-                                    Upgrade - $250
+                                <button class="btn-manual-action" id="upgrade-monitor" style="margin-top: 0.5rem;">
+                                    [ UPGRADE $250 ]
                                 </button>
                             </div>
-                            <div class="equipment-card" data-type="chair">
-                                <div class="equipment-icon"></div>
-                                <div class="equipment-name">Chair</div>
-                                <div class="equipment-level" id="chair-level">Kitchen Chair</div>
+                            <div class="equipment-card modular-panel" data-type="chair">
+                                <div class="equipment-name text-ui-heading">CHAIR</div>
+                                <div class="equipment-level" id="chair-level" style="color: #888;">Kitchen Chair
+                                </div>
                                 <div class="equipment-bonus">Stamina: 1.0x</div>
-                                <button class="equipment-upgrade-btn" id="upgrade-chair">
-                                    Upgrade - $200
+                                <button class="btn-manual-action" id="upgrade-chair" style="margin-top: 0.5rem;">
+                                    [ UPGRADE $200 ]
                                 </button>
                             </div>
-                            <div class="equipment-card" data-type="software">
-                                <div class="equipment-icon"></div>
-                                <div class="equipment-name">Software</div>
-                                <div class="equipment-level" id="software-level">Spreadsheets</div>
+                            <div class="equipment-card modular-panel" data-type="software">
+                                <div class="equipment-name text-ui-heading">SOFTWARE</div>
+                                <div class="equipment-level" id="software-level" style="color: #888;">
+                                    Spreadsheets</div>
                                 <div class="equipment-bonus">Capability: 1.0x</div>
-                                <button class="equipment-upgrade-btn" id="upgrade-software">
-                                    Upgrade - $500
+                                <button class="btn-manual-action" id="upgrade-software" style="margin-top: 0.5rem;">
+                                    [ UPGRADE $500 ]
                                 </button>
                             </div>
                         </div>
-                    </div> <!-- End of office-equipment-section -->
+                    </div>
 
                     <!-- Office Upgrade -->
-                    <div class="office-upgrade-section glass-card">
-                        <h3> Upgrade Office Space</h3>
+                    <div class="office-upgrade-section ascii-box" style="margin-top: 1rem;">
+                        <h3 style="margin-top: 0;">RELOCATE OFFICE</h3>
                         <div class="office-preview">
-                            <div class="next-office-icon" id="next-office-icon"></div>
-                            <div class="next-office-info">
-                                <div class="next-office-name" id="next-office-name">Home Office</div>
-                                <div class="next-office-bonus">+10% client attraction</div>
-                                <div class="next-office-capacity">Capacity: 1 employee</div>
+                            <!-- Hidden icon -->
+                            <div class="next-office-icon hidden" id="next-office-icon"></div>
+                            <div class="next-office-info" style="margin-bottom: 1rem;">
+                                <div class="next-office-name text-ui-heading" id="next-office-name">Home Office
+                                </div>
+                                <div class="next-office-bonus" style="color: #66cc66;">+10% Client Attraction
+                                </div>
+                                <div class="next-office-capacity" style="color: #888;">Capacity: 1 Employee
+                                </div>
                             </div>
-                            <button class="btn-cartoon" id="btn-upgrade-office">
-                                $2,000
+                            <button class="btn-manual-action" id="btn-upgrade-office">
+                                [ RENT: $2,000 ]
                             </button>
                         </div>
                     </div>
@@ -1340,7 +1266,7 @@
                             <div class="npc-avatar"></div>
                             <div class="npc-info">
                                 <div class="npc-name">???</div>
-                                <div class="npc-title">Unlock with  20</div>
+                                <div class="npc-title">Unlock with 20</div>
                             </div>
                             <div class="lock-overlay"></div>
                         </div>
@@ -1396,7 +1322,7 @@
                             // Analyzing Data...
                         </div>
                         <div class="clock-spinner" id="work-clock">
-                            
+
                         </div>
                     </div>
                     <div class="working-stats">
@@ -1448,7 +1374,7 @@
     <!-- Scripts -->
     <script>
         // EARLY TEST - This should run immediately
-        (function() {
+        (function () {
             const earlyTest = document.createElement('div');
             earlyTest.id = 'early-js-test';
             earlyTest.style.cssText = 'position:fixed;top:0;left:0;background:lime;color:black;padding:10px;z-index:99999;font-weight:bold;font-size:16px;';
@@ -1456,7 +1382,7 @@
             document.body.appendChild(earlyTest);
             console.log(' EARLY SCRIPT EXECUTED - JavaScript is working!');
         })();
-        
+
         // Unregister any service workers that might be caching old resources
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -1467,7 +1393,7 @@
                 }
             });
         }
-        
+
         // Clear all caches
         if ('caches' in window) {
             caches.keys().then(names => {
@@ -1476,7 +1402,7 @@
                 });
             });
         }
-        
+
         // Global error handler to catch any unhandled errors
         window.addEventListener('error', (event) => {
             console.error('Global error caught:', event.error);
@@ -1485,7 +1411,7 @@
             errDiv.innerHTML = '<h1> GLOBAL ERROR CAUGHT</h1><h3>' + (event.error?.message || event.message) + '</h3><pre>' + (event.error?.stack || event.filename + ':' + event.lineno) + '</pre><button onclick="this.parentElement.remove()" style="padding:10px;margin-top:20px;font-size:16px;">Close</button>';
             document.body.appendChild(errDiv);
         });
-        
+
         window.addEventListener('unhandledrejection', (event) => {
             console.error('Unhandled promise rejection:', event.reason);
             const errDiv = document.createElement('div');
@@ -1493,24 +1419,24 @@
             errDiv.innerHTML = '<h1> UNHANDLED PROMISE REJECTION</h1><h3>' + (event.reason?.message || String(event.reason)) + '</h3><pre>' + (event.reason?.stack || '') + '</pre><button onclick="this.parentElement.remove()" style="padding:10px;margin-top:20px;font-size:16px;">Close</button>';
             document.body.appendChild(errDiv);
         });
-        
+
         // Test if page loaded
         console.log(' HTML loaded, about to load main.js module');
-        
+
         // Add visible indicator that JavaScript is running
         const jsIndicator = document.createElement('div');
         jsIndicator.id = 'js-status-indicator';
         jsIndicator.style.cssText = 'position:fixed;bottom:10px;right:10px;background:rgba(0,255,0,0.8);color:black;padding:10px;font-family:monospace;font-size:12px;z-index:99999;border:2px solid #0f0;border-radius:5px;';
         jsIndicator.innerHTML = ' JavaScript Loaded';
         document.body.appendChild(jsIndicator);
-        
+
         // Create a large diagnostic panel
         const diagPanel = document.createElement('div');
         diagPanel.id = 'diagnostic-panel';
         diagPanel.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.95);color:#0f0;padding:15px;font-family:monospace;font-size:12px;z-index:99999;border:3px solid #0f0;border-radius:5px;min-width:300px;max-height:80vh;overflow:auto;';
         diagPanel.innerHTML = '<h3 style="margin-top:0;color:#0f0;"> DIAGNOSTIC PANEL</h3><div id="diag-content">Initializing...</div>';
         document.body.appendChild(diagPanel);
-        
+
         const updateDiag = (msg) => {
             const content = document.getElementById('diag-content');
             if (content) {
@@ -1520,7 +1446,7 @@
         };
         window.__updateDiag = updateDiag;
         updateDiag('Page loaded, waiting for module...');
-        
+
         // Update indicator when module loads
         window.addEventListener('load', () => {
             const indicator = document.getElementById('js-status-indicator');
@@ -1534,20 +1460,20 @@
         console.log('[DEBUG HYPOTHESIS A] Script tag executing, about to import main.js');
         window.__DEBUG_IMPORT_STARTED = true;
         window.__DEBUG_IMPORT_TIME = Date.now();
-        
+
         // Show import status immediately
         const importStatusDiv = document.createElement('div');
         importStatusDiv.id = 'import-status';
         importStatusDiv.style.cssText = 'position:fixed;top:130px;left:10px;background:rgba(255,165,0,0.9);color:black;padding:10px;font-size:14px;z-index:99999;font-family:monospace;border:2px solid orange;';
         importStatusDiv.textContent = ' Importing main.js...';
         document.body.appendChild(importStatusDiv);
-        
+
         // Write to localStorage for debugging
         try {
             localStorage.setItem('__DEBUG_IMPORT_START', Date.now().toString());
-        } catch(e) {}
+        } catch (e) { }
         // #endregion
-        
+
         try {
             if (window.__updateDiag) window.__updateDiag('Starting import of main.js...');
             await import('/src/js/main.js');
@@ -1556,7 +1482,7 @@
             window.__DEBUG_IMPORT_SUCCESS = true;
             try {
                 localStorage.setItem('__DEBUG_IMPORT_SUCCESS', Date.now().toString());
-            } catch(e) {}
+            } catch (e) { }
             if (window.__updateDiag) window.__updateDiag(' main.js imported successfully');
             if (importStatusDiv) {
                 importStatusDiv.style.background = 'rgba(0,255,0,0.9)';
@@ -1564,6 +1490,18 @@
             }
             // #endregion
             window.dispatchEvent(new CustomEvent('module-loaded', { detail: { module: 'main.js' } }));
+
+            // Auto-start continuous tests in development mode (can be disabled via localStorage)
+            if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+                try {
+                    import('/test/integration/auto-start-continuous-tests.js').catch(e => {
+                        // Silently fail if test runner not available
+                        console.debug('Continuous test runner not available:', e.message);
+                    });
+                } catch (e) {
+                    // Ignore if module not found
+                }
+            }
         } catch (error) {
             // #region agent log
             console.error('[DEBUG HYPOTHESIS A] CRITICAL: Failed to import main.js module:', error);
@@ -1578,7 +1516,7 @@
                     stack: error.stack,
                     time: Date.now()
                 }));
-            } catch(e) {}
+            } catch (e) { }
             if (importStatusDiv) {
                 importStatusDiv.style.background = 'rgba(255,0,0,0.9)';
                 importStatusDiv.textContent = ' Import failed: ' + error.message;

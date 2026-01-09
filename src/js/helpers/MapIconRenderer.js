@@ -10,7 +10,7 @@ export function updateMapLocationIcons(game) {
     if (!game.worldMap) return;
 
     const locationElements = document.querySelectorAll('.map-location');
-    
+
     locationElements.forEach(el => {
         const locationId = el.dataset.location;
         if (!locationId) return;
@@ -53,13 +53,13 @@ export function updateMapLocationIcons(game) {
  */
 export function updateLockBadges() {
     const lockBadges = document.querySelectorAll('.lock-badge');
-    
+
     lockBadges.forEach(badge => {
         const text = badge.textContent.trim();
-        
+
         // Replace emoji lock with icon
         if (text === '') {
-            badge.innerHTML = '';
+            badge.textContent = '';
             const img = document.createElement('img');
             img.src = '/assets/icons/ui/lock.png';
             img.style.width = '16px';
@@ -67,10 +67,10 @@ export function updateLockBadges() {
             img.onerror = () => badge.textContent = '';
             badge.appendChild(img);
         }
-        
+
         // Replace vehicle emojis with icons
         if (text === '') {
-            badge.innerHTML = '';
+            badge.textContent = '';
             const img = document.createElement('img');
             img.src = '/assets/icons/vehicles/bus_pass.png';
             img.style.width = '16px';
@@ -81,9 +81,9 @@ export function updateLockBadges() {
             };
             badge.appendChild(img);
         }
-        
+
         if (text === '') {
-            badge.innerHTML = '';
+            badge.textContent = '';
             const img = document.createElement('img');
             img.src = '/assets/icons/vehicles/used_car.png';
             img.style.width = '16px';

@@ -24,7 +24,7 @@ export class SaveSlotManager {
 
         // Create save slots container
         this.createSlotsContainer();
-        
+
         // Render all slots
         this.renderSlots();
     }
@@ -50,7 +50,7 @@ export class SaveSlotManager {
     migrateOldSave() {
         const oldSaveKey = 'data_science_tycoon_save';
         const oldSave = localStorage.getItem(oldSaveKey);
-        
+
         if (oldSave) {
             try {
                 const parsed = JSON.parse(oldSave);
@@ -67,7 +67,7 @@ export class SaveSlotManager {
                         }
                     };
                     localStorage.setItem('data_science_tycoon_save_0', JSON.stringify(newSaveData));
-                    console.log('Migrated old save to slot 0');
+
                 }
                 // Remove old save key
                 localStorage.removeItem(oldSaveKey);
@@ -111,7 +111,7 @@ export class SaveSlotManager {
         if (!dropdownBtn) {
             dropdownBtn = document.createElement('button');
             dropdownBtn.id = 'btn-continue-dropdown';
-            dropdownBtn.className = 'menu-btn menu-btn-secondary';
+            dropdownBtn.className = 'btn-grey btn-grey-secondary';
             dropdownBtn.innerHTML = `
                 <div class="btn-content">
                     <span class="btn-icon"></span>
@@ -122,7 +122,7 @@ export class SaveSlotManager {
                 </div>
                 <div class="btn-ripple"></div>
             `;
-            
+
             // Insert after new game button (replace the old continue button position)
             const newGameBtn = document.getElementById('btn-new-game');
             const oldContinueBtn = document.getElementById('btn-continue');
@@ -169,7 +169,7 @@ export class SaveSlotManager {
 
         const slots = this.saveManager.getAllSlotsInfo();
         const hasSaves = slots.some(s => !s.isEmpty);
-        
+
         // Update button subtext
         if (subtext) {
             if (hasSaves) {
@@ -199,12 +199,12 @@ export class SaveSlotManager {
         // Create slots list
         const slotsList = document.createElement('div');
         slotsList.className = 'save-slots-list';
-        
+
         slots.forEach((slotInfo, index) => {
             const slotItem = this.createSlotItem(slotInfo, index);
             slotsList.appendChild(slotItem);
         });
-        
+
         dropdown.appendChild(slotsList);
 
         // Add new game option at bottom
@@ -231,9 +231,9 @@ export class SaveSlotManager {
     toggleDropdown() {
         const dropdown = document.getElementById('save-slots-dropdown');
         if (!dropdown) return;
-        
+
         dropdown.classList.toggle('hidden');
-        
+
         // Re-render to get latest save data
         if (!dropdown.classList.contains('hidden')) {
             this.renderSlots();
@@ -246,7 +246,7 @@ export class SaveSlotManager {
     handleNewGame() {
         const dropdown = document.getElementById('save-slots-dropdown');
         if (dropdown) dropdown.classList.add('hidden');
-        
+
         // Find first empty slot or use slot 0
         const slots = this.saveManager.getAllSlotsInfo();
         let emptySlot = 0;
@@ -256,7 +256,7 @@ export class SaveSlotManager {
                 break;
             }
         }
-        
+
         if (this.onSlotSelected) {
             this.onSlotSelected(emptySlot, true);
         }
@@ -278,7 +278,7 @@ export class SaveSlotManager {
 
         // Add click handler
         item.addEventListener('click', (e) => {
-            if (e.target.closest('.slot-menu-btn') || e.target.closest('.slot-menu')) return;
+            if (e.target.closest('.slot-btn-grey') || e.target.closest('.slot-menu')) return;
             this.handleSlotClick(slotIndex, slotInfo.isEmpty);
         });
 
@@ -315,7 +315,7 @@ export class SaveSlotManager {
         const daysPlayed = slotInfo.daysPlayed || 0;
         const lastPlayed = slotInfo.metadata?.lastPlayed || slotInfo.timestamp;
         const slotName = slotInfo.metadata?.name || `Save Slot ${slotInfo.slotIndex + 1}`;
-        
+
         // Calculate completion percentage (assuming 6 ranks total)
         const completion = Math.min(100, Math.round((slotInfo.rank / 6) * 100));
 
@@ -339,7 +339,7 @@ export class SaveSlotManager {
             <div class="slot-item-content">
                 <div class="slot-item-header">
                     <div class="slot-item-rank">${rank.title}</div>
-                    <button class="slot-menu-btn" aria-label="Slot options">⋯</button>
+                    <button class="slot-btn-grey" aria-label="Slot options">⋯</button>
                 </div>
                 <div class="slot-item-title">${slotName}</div>
                 <div class="slot-item-stats">
@@ -360,7 +360,7 @@ export class SaveSlotManager {
      * Add context menu to slot card
      */
     addSlotMenu(card, slotInfo, slotIndex) {
-        const menuBtn = card.querySelector('.slot-menu-btn');
+        const menuBtn = card.querySelector('.slot-btn-grey');
         if (!menuBtn) return;
 
         let menu = card.querySelector('.slot-menu');
@@ -469,7 +469,7 @@ export class SaveSlotManager {
     renameSlot(slotIndex, slotInfo) {
         const currentName = slotInfo.metadata?.name || `Save Slot ${slotIndex + 1}`;
         const newName = prompt('Enter new name for this save:', currentName);
-        
+
         if (newName && newName.trim()) {
             if (this.saveManager.setSlotName(slotIndex, newName.trim())) {
                 this.renderSlots();
@@ -491,7 +491,11 @@ export class SaveSlotManager {
         }
 
         if (targetSlot === null) {
-            alert('No empty slots available. Please delete a save first.');
+            if (this.saveManager.game && this.saveManager.game.showError) {
+                this.saveManager.game.showError('No empty slots available. Please delete a save first.');
+            } else {
+                console.warn('No empty slots available');
+            }
             return;
         }
 
@@ -506,7 +510,9 @@ export class SaveSlotManager {
     exportSlot(slotIndex) {
         const encoded = this.saveManager.exportSave(slotIndex);
         if (!encoded) {
-            alert('Failed to export save.');
+            if (this.saveManager.game && this.saveManager.game.showError) {
+                this.saveManager.game.showError('Failed to export save.');
+            }
             return;
         }
 
@@ -521,7 +527,9 @@ export class SaveSlotManager {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        alert('Save exported successfully!');
+        if (this.saveManager.game && this.saveManager.game.showToast) {
+            this.saveManager.game.showToast('Save exported successfully!', 'success');
+        }
     }
 
     /**
@@ -530,7 +538,7 @@ export class SaveSlotManager {
     deleteSlot(slotIndex) {
         const slotInfo = this.saveManager.getSaveInfo(slotIndex);
         const slotName = slotInfo?.metadata?.name || `Save Slot ${slotIndex + 1}`;
-        
+
         if (confirm(`Are you sure you want to delete "${slotName}"?\n\nThis action cannot be undone.`)) {
             if (this.saveManager.clearSave(slotIndex)) {
                 this.renderSlots();

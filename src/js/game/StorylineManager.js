@@ -154,6 +154,31 @@ export class StorylineManager {
                     }
                 });
             }
+            // [NEW] Hiring Decision
+            const hasHiringDecision = this.majorDecisions.some(d => d.decisionId === 'hire_friend');
+            if (!hasHiringDecision) {
+                decisions.push({
+                    id: 'hire_friend',
+                    title: 'Hiring Decision',
+                    description: 'An old college friend asks for a job. They are fun but unqualified. A stranger with a perfect resume also applied.',
+                    context: 'Your team needs help. Your friend needs a break. But the project is critical.',
+                    phase: 'early',
+                    choices: {
+                        hire_friend: {
+                            message: 'You hire your friend. Morale is up, but work is slow. You spend late nights fixing their mistakes.',
+                            consequences: { ethics: 5, money: -2000, reputation: 10 },
+                            progress: 8,
+                            storyImpact: 'You chose loyalty over efficiency. Your team is tight-knit but chaotic.'
+                        },
+                        hire_pro: {
+                            message: 'You hire the pro. The work is flawless. Your friend stops calling. Business is business.',
+                            consequences: { ethics: -5, money: 5000, reputation: 30 },
+                            progress: 10,
+                            storyImpact: 'You chose competence over connection. The company runs like a machine.'
+                        }
+                    }
+                });
+            }
         }
 
         // Mid game decisions
@@ -184,6 +209,31 @@ export class StorylineManager {
                             consequences: { ethics: 5, reputation: 30 },
                             progress: 10,
                             storyImpact: 'You\'ve found a balanced approach. You did the right thing while working within the system. Your reputation grows among those who value both ethics and professionalism.'
+                        }
+                    }
+                });
+            }
+            // [NEW] Investment Decision
+            const hasInvestmentDecision = this.majorDecisions.some(d => d.decisionId === 'startup_investment');
+            if (!hasInvestmentDecision && this.gameState.money > 20000) {
+                decisions.push({
+                    id: 'startup_investment',
+                    title: 'Risky Investment',
+                    description: 'A charismatic founder pitches you a "revolutionary" AI startup. It sounds like vaporware, but if it hits, it hits big.',
+                    context: 'You have some cash reserves. Do you gamble on the future?',
+                    phase: 'mid',
+                    choices: {
+                        invest: {
+                            message: 'You write the check. Six months later, the tech fails, but the IP is bought out. You break even, but learn a lot.',
+                            consequences: { money: 0, reputation: 50 },
+                            progress: 12,
+                            storyImpact: 'You took a shot at the moon. You missed, but people respect the ambition.'
+                        },
+                        decline: {
+                            message: 'You pass. The startup folds a month later. You saved your money, but feel a bit boring.',
+                            consequences: { money: 5000 }, // Saved money logic effectively
+                            progress: 5,
+                            storyImpact: 'You played it safe. Your empire is built on solid ground, not dreams.'
                         }
                     }
                 });
@@ -251,13 +301,13 @@ export class StorylineManager {
             const oldPhase = this.storylinePhase;
             this.storylinePhase = newPhase;
             this.currentArc = this.getCurrentArc();
-            
+
             // Show act transition screen
             if (this.gameState.mainGame && this.gameState.mainGame.actTransitionScreen) {
                 const summary = this.gameState.mainGame.actTransitionScreen.generateSummary(oldPhase);
                 this.gameState.mainGame.actTransitionScreen.showActTransition(oldPhase, newPhase, summary);
             }
-            
+
             // Trigger phase transition event
             return {
                 phaseChanged: true,
@@ -266,6 +316,35 @@ export class StorylineManager {
                 arc: this.currentArc
             };
         }
+
+        // Endgame decisions
+        if (phase === 'endgame') {
+            const hasSellDecision = this.majorDecisions.some(d => d.decisionId === 'sell_company');
+            if (!hasSellDecision) {
+                decisions.push({
+                    id: 'sell_company',
+                    title: 'The Exit Strategy',
+                    description: 'A tech giant offers to buy your entire operation. It is enough money to retire on an island. But they will dismantle your brand.',
+                    context: 'You built this from nothing. Is this the end, or just payday?',
+                    phase: 'endgame',
+                    choices: {
+                        sell: {
+                            message: 'You sign the papers. The wire transfer hits. You are rich, but unemployed. Was it worth it?',
+                            consequences: { money: 1000000, reputation: 200 },
+                            progress: 100,
+                            storyImpact: 'You sold out. You won capitalism, but lost your baby.'
+                        },
+                        keep: {
+                            message: 'You tear up the contract. You are in this for the long haul. The tech giant vows to crush you.',
+                            consequences: { reputation: 500, ethics: 50 },
+                            progress: 100,
+                            storyImpact: 'You stood tall. You are a titan now, independent and feared.'
+                        }
+                    }
+                });
+            }
+        }
+
         return { phaseChanged: false };
     }
 
@@ -287,11 +366,11 @@ export class StorylineManager {
      */
     checkForAvailableDecisions() {
         const available = this.getAvailableDecisions();
-        
+
         // Filter out decisions that have already been made
         const madeDecisionIds = this.majorDecisions.map(d => d.decisionId);
         const newDecisions = available.filter(d => !madeDecisionIds.includes(d.id));
-        
+
         return newDecisions.length > 0 ? newDecisions[0] : null;
     }
 
@@ -301,14 +380,14 @@ export class StorylineManager {
      */
     triggerDecisionIfAvailable() {
         const now = Date.now();
-        
+
         // Cooldown check - don't check too frequently
         if (now - this.lastDecisionCheck < this.decisionCooldown) {
             return false;
         }
-        
+
         this.lastDecisionCheck = now;
-        
+
         const decision = this.checkForAvailableDecisions();
         if (!decision) return false;
 

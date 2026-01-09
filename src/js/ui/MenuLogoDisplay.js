@@ -67,7 +67,6 @@ export class MenuLogoDisplay {
         }
 
         // Get rank name
-        const { RANKS } = require('../data/ranks.js');
         const rankName = RANKS[highestRank]?.title || 'Data Entry Clerk';
 
         // Format stats

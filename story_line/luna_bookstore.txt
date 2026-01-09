@@ -1,0 +1,55 @@
+
+# Luna - The Bookstore Owner
+**Role:** Bookstore Owner
+**Personality:** Generous, Dreamy, Bibliophile
+
+## Character Profile
+**Background:** Inherited an old bookstore and refused to let it die in the digital age. Loves books more than anything.
+**Motivation:** preserving the magic of physical books.
+**Secret:** She writes fantasy novels under a pen name that are surprisingly popular online.
+**Dream:** A library that contains every story ever told.
+**Fear:** The death of print.
+**Relationship Status:** In love with fictional characters.
+**Turning Point:** Finding a first edition of her favorite childhood book in a bargain bin.
+**Philosophy:** "A room without books is like a body without a soul."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "People say print is dead. I say they just haven't found the right book yet."
+*   **Rel > 25 (Philosophy):** "The smell of old paper... it's the smell of history. Of thoughts preserved in time."
+*   **Rel > 40 (Secret):** "I live a thousand lives. One in this shop, and 999 others in the pages."
+*   **Rel > 60 (Dream):** "I want this place to be a sanctuary. Where the wifi is weak but the coffee is strong."
+*   **Rel > 80 (Identity):** "Stories are real. Sometimes, I think they're more real than we are."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Welcome, traveler.", "Looking for a story?", "Hello."
+*   *Topics:* Fiction, non-fiction, the smell of books.
+
+### Friendly
+*   *Greetings:* "Ah, a fellow reader.", "Luna here.", "Found anything good?"
+*   *Topics:* Recommendations, reading nooks.
+
+### Acquaintance
+*   *Greetings:* "Hello! The new arrivals are here.", "Good to see you.", "Read this!"
+*   *Topics:* The secret writing hint, literary debates.
+
+### Friend
+*   *Greetings:* "My favorite reader!", "Hey! I saved this for you."
+*   *Topics:* The sanctuary dream, the "Soul of the Shop".
+
+### Close Friend
+*   *Greetings:* "Welcome home.", "Hey! Let's talk plot twists."
+*   *Topics:* Sharing her own writing, trust.
+
+---
+
+## Actions & Gifts
+*   **Coffee:** "Perfect for reading. Thanks."
+*   **Bookmarks:** "Oh, lovely! I lose mine constantly."
+*   **Compliment:** "You're very kind."

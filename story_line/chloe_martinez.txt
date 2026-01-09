@@ -1,0 +1,55 @@
+
+# Chloe Martinez - The Rival Analyst
+**Role:** Rival Analyst
+**Personality:** Competitive, Sharp, Unapologetic
+
+## Character Profile
+**Background:** Started around the same time as you. Always trying to steal your clients. Top of her class at university.
+**Motivation:** Being Number One.
+**Secret:** She admires your work ethic, but sees it as a threat she must neutralize.
+**Dream:** To be the CEO of a data empire.
+**Fear:** Mediocrity.
+**Relationship Status:** Married to her ambition.
+**Turning Point:** Losing a major competition in college. She vowed never to lose again.
+**Philosophy:** "There is no second place. You win, or you learn."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I graduated Summa Cum Laude. You? Just checking the competition."
+*   **Rel > 25 (Philosophy):** "Clients don't want 'good'. They want the best. That's me."
+*   **Rel > 40 (Secret Respect):** "I saw your latest report. Not terrible. I would have used a different model, but... decent."
+*   **Rel > 60 (Drive):** "I don't sleep. I optimize. That's why I'll always be one step ahead."
+*   **Rel > 80 (Goal):** "CEO. That's the title I want. And I'm not asking for permission."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Oh. You.", "Still in business?", "Chloe."
+*   *Topics:* Market share, your mistakes.
+
+### Friendly
+*   *Greetings:* "Up for a challenge?", "Hello, rival.", "Nice suit."
+*   *Topics:* "Healthy" competition, industry gossip.
+
+### Acquaintance
+*   *Greetings:* "I saw your numbers.", "Trying to keep up?", "Hello."
+*   *Topics:* Her academic records, standards.
+
+### Friend
+*   *Greetings:* "You're decent opposition.", "Hey! Good fight.", "Let's compare notes."
+*   *Topics:* Admitting you're a worthy adversary.
+
+### Close Friend
+*   *Greetings:* "Only the best.", "Hey! Watch your back (kidding)."
+*   *Topics:* The shared drive for excellence.
+
+---
+
+## Actions & Gifts
+*   **Gifts:** "Startled? I don't need charity."
+*   **Challenge:** "You're on."
+*   **Compliment:** "I know."

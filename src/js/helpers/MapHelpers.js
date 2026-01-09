@@ -79,7 +79,7 @@ export function updateMapScreen(game) {
     updateEnergyDisplay(game);
     updateNewsTicker(game);
     updateLocationActions(game);
-    
+
     // Use UnifiedMapSystem (PixiJS-based, replaces all old renderers)
     if (!game.unifiedMapSystem && domCache.mapContainer) {
         try {
@@ -87,7 +87,7 @@ export function updateMapScreen(game) {
                 game.unifiedMapSystem = new UnifiedMapSystem(domCache.mapContainer, game);
                 // Initialize map system
                 game.unifiedMapSystem.initialize().then(() => {
-                    console.log(' UnifiedMapSystem initialized');
+
                 }).catch(err => {
                     console.error('UnifiedMapSystem initialization failed:', err);
                     // Fallback disabled - WorldMapRenderer causes import errors
@@ -120,9 +120,9 @@ export function updateMapScreen(game) {
         // Fallback to old simple map renderer
         game.simpleMapRenderer.update();
     }
-    
+
     updateVehicleDisplay(game);
-    
+
     // Update icons to use image assets
     updateMapLocationIcons(game);
     updateLockBadges();
@@ -156,7 +156,7 @@ function updateEnergyDisplay(game) {
  */
 function updateNewsTicker(game) {
     if (!game.newsManager || !domCache.newsEl) return;
-    
+
     const latestNews = game.newsManager.getRecentNews(5);
     if (latestNews.length > 0) {
         const newsText = latestNews.map(n => `[${n.category}] ${n.text}`).join('    •    ');
@@ -180,7 +180,7 @@ function updateLocationActions(game) {
     }
 
     const buttons = [];
-    
+
     if (locId === 'stock_exchange') {
         buttons.push(DOMUtils.createElement('button', {
             className: 'btn-cartoon',
@@ -224,7 +224,7 @@ function updateLocationActions(game) {
         createCityHallActions(game, domCache.actionsEl);
         return; // createCityHallActions handles its own buttons
     }
-    
+
     // Batch append buttons
     if (buttons.length > 0) {
         domCache.actionsEl.appendChild(DOMUtils.batch(buttons));
@@ -285,13 +285,13 @@ export function renderMapEnvironment(game) {
                 objectPosition: 'center center'
             },
             listeners: {
-                error: function() {
+                error: function () {
                     this.style.background = 'linear-gradient(135deg, #228B22 0%, #006400 100%)';
                     this.style.borderRadius = '50% 50% 50% 50% / 60% 60% 40% 40%';
                 }
             }
         });
-        
+
         return DOMUtils.createElement('div', {
             className: 'map-tree',
             style: {
@@ -301,7 +301,7 @@ export function renderMapEnvironment(game) {
             children: [treeImg]
         });
     });
-    
+
     const fragment = DOMUtils.batch(treeElements);
 
     // Road segments
@@ -319,7 +319,7 @@ export function renderMapEnvironment(game) {
         roadTile.style.top = `${segment.y}%`;
         roadTile.style.width = `${segment.width}%`;
         roadTile.style.height = `${segment.height}%`;
-        
+
         const roadImg = document.createElement('img');
         const roadIndex = index % 10;
         roadImg.src = `/assets/map/roads/road_${String(roadIndex).padStart(2, '0')}.png`;
@@ -408,7 +408,7 @@ function updatePlayerMarker(game) {
 function updateVehicleDisplay(game) {
     const vehicleElements = DOMUtils.queryAll('.vehicle-option');
     const ownedSet = game.worldMap.ownedVehicles; // Already a Set
-    
+
     for (const el of vehicleElements) {
         const id = el.dataset.vehicle;
         if (!id) continue;
@@ -436,7 +436,7 @@ export function handleTravel(game, locationId) {
     if (result.success) {
         // Advance time immediately
         game.handleTimeAdvance(result.timeCost);
-        
+
         // Update immediately (no setTimeout)
         updateMapScreen(game);
         updateEnvironmentForLocation(game, locationId);

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continuous Test Runner</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #1a1a1a;
+            color: #0f0;
+            padding: 20px;
+            margin: 0;
+        }
+        #status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #status.running { border-color: #0f0; }
+        #status.stopped { border-color: #f00; background: rgba(255, 0, 0, 0.1); }
+        .log {
+            background: #000;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            max-height: 500px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 5px;
+        }
+        .log-entry.error { color: #f00; }
+        .log-entry.warn { color: #ff0; }
+        .log-entry.info { color: #0f0; }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover { background: #0c0; }
+        button.stop { background: #f00; color: #fff; }
+        button.stop:hover { background: #c00; }
+        #summary {
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid #0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="status" class="stopped">Status: Stopped</div>
+    <h1>Continuous Production Readiness Test Runner</h1>
+    <p>This will run comprehensive tests on all game systems continuously.</p>
+    
+    <div>
+        <button id="startBtn" onclick="startTests()">Start Tests</button>
+        <button id="stopBtn" class="stop" onclick="stopTests()" disabled>Stop Tests</button>
+        <button onclick="clearLog()">Clear Log</button>
+        <button onclick="showReport()">Show Report</button>
+    </div>
+    
+    <div id="summary">
+        <h3>Summary</h3>
+        <div id="summaryContent">Not started yet</div>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <script type="module">
+        import { BrowserContinuousTestRunner } from './browser-test-runner.js';
+        
+        let testRunner = null;
+        const logEl = document.getElementById('log');
+        const statusEl = document.getElementById('status');
+        const summaryEl = document.getElementById('summaryContent');
+        
+        function addLog(message, level = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${level}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        // Override console.log to capture test runner logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = (...args) => {
+            originalLog.apply(console, args);
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('[')) {
+                const level = args[0].includes('[ERROR]') ? 'error' : args[0].includes('[WARN]') ? 'warn' : 'info';
+                addLog(args.join(' '), level);
+            }
+        };
+        
+        console.error = (...args) => {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        console.warn = (...args) => {
+            originalWarn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+        
+        window.startTests = function() {
+            if (!window.game) {
+                addLog('Game not found! Make sure the game is loaded first.', 'error');
+                return;
+            }
+            
+            testRunner = new BrowserContinuousTestRunner(window.game);
+            
+            // Hook into test runner's log method
+            const originalRunnerLog = testRunner.log.bind(testRunner);
+            testRunner.log = function(message, level) {
+                originalRunnerLog(message, level);
+                addLog(message, level);
+            };
+            
+            testRunner.start(30000); // Run every 30 seconds
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            statusEl.textContent = 'Status: Running';
+            statusEl.className = 'running';
+            
+            addLog('Test runner started', 'info');
+            
+            // Update summary periodically
+            setInterval(() => {
+                if (testRunner) {
+                    const report = testRunner.getReport();
+                    updateSummary(report);
+                }
+            }, 5000);
+        };
+        
+        window.stopTests = function() {
+            if (testRunner) {
+                const finalReport = testRunner.stop();
+                testRunner = null;
+                
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                statusEl.textContent = 'Status: Stopped';
+                statusEl.className = 'stopped';
+                
+                addLog('Test runner stopped', 'info');
+                updateSummary(finalReport);
+            }
+        };
+        
+        window.clearLog = function() {
+            logEl.innerHTML = '';
+        };
+        
+        window.showReport = function() {
+            if (testRunner) {
+                const report = testRunner.getReport();
+                alert(JSON.stringify(report, null, 2));
+            } else {
+                const saved = localStorage.getItem('continuousTestFinalReport');
+                if (saved) {
+                    alert(saved);
+                } else {
+                    alert('No report available');
+                }
+            }
+        };
+        
+        function updateSummary(report) {
+            if (!report) return;
+            
+            const critical = report.issues ? report.issues.filter(i => i.severity === 'critical').length : 0;
+            const high = report.issues ? report.issues.filter(i => i.severity === 'high').length : 0;
+            const total = report.totalIssues || report.issues?.length || 0;
+            
+            summaryEl.innerHTML = `
+                <strong>Iteration:</strong> ${report.iteration || report.totalIterations || 0}<br>
+                <strong>Elapsed:</strong> ${report.elapsedMinutes || 0} minutes<br>
+                <strong>Total Issues:</strong> ${total}<br>
+                <strong>Critical:</strong> <span style="color: #f00;">${critical}</span><br>
+                <strong>High:</strong> <span style="color: #ff0;">${high}</span>
+            `;
+        }
+        
+        // Auto-start if game is ready
+        if (window.game) {
+            addLog('Game found, ready to start tests', 'info');
+        } else {
+            addLog('Waiting for game to load...', 'warn');
+            const checkGame = setInterval(() => {
+                if (window.game) {
+                    clearInterval(checkGame);
+                    addLog('Game loaded, ready to start tests', 'info');
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
+

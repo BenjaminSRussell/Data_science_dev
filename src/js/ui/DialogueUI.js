@@ -17,10 +17,10 @@ export class DialogueUI {
         this.currentTree = null;
         this.currentNode = null;
         this.onClose = null;
-        
+
         this.createContainer();
     }
-    
+
     /**
      * Create the dialogue container element
      * Phase 2: Uses Lit component if available
@@ -35,7 +35,7 @@ export class DialogueUI {
                     container.id = 'dialogue-ui-container';
                     document.body.appendChild(container);
                 }
-                
+
                 this.litComponent = document.createElement('dialogue-component');
                 this.litComponent.game = this.game;
                 this.litComponent.addEventListener('dialogue-choice', (e) => {
@@ -50,13 +50,13 @@ export class DialogueUI {
         } catch (err) {
             console.warn('Lit component not available, using fallback:', err);
         }
-        
+
         // Fallback to DOM method
         if (document.getElementById('dialogue-ui')) {
             this.container = document.getElementById('dialogue-ui');
             return;
         }
-        
+
         this.container = document.createElement('div');
         this.container.id = 'dialogue-ui';
         this.container.className = 'dialogue-container';
@@ -78,7 +78,7 @@ export class DialogueUI {
                 <div class="dialogue-choices" id="dialogue-choices"></div>
             </div>
         `;
-        
+
         const style = document.createElement('style');
         style.textContent = `
             .dialogue-close {
@@ -98,23 +98,23 @@ export class DialogueUI {
             }
         `;
         document.head.appendChild(style);
-        
+
         document.body.appendChild(this.container);
-        
+
         this.container.querySelector('#dialogue-close').addEventListener('click', () => {
             this.close();
         });
     }
-    
+
     /**
      * Open dialogue with an NPC
      * Phase 2: Uses Lit component if available
      */
     open(npc, relationshipLevel = 0) {
         if (!npc) return;
-        
+
         this.currentNPC = npc;
-        
+
         // Build dialogue tree for this NPC
         const relLevel = relationshipLevel || this.game?.gameState?.npcManager?.getRelationship?.(npc.id) || 0;
         const dialogueTreeSystem = this.game?.gameState?.dialogueTreeSystem || this.game?.dialogueTreeSystem;
@@ -132,24 +132,24 @@ export class DialogueUI {
             };
         }
         this.currentNode = this.currentTree.getRootNode();
-        
+
         // Use Lit component if available
         if (this.litComponent) {
             this.litComponent.open(npc, this.currentNode);
             this.isOpen = true;
             return;
         }
-        
+
         // Fallback to DOM method
         const avatar = this.container?.querySelector('#dialogue-avatar');
         const initial = this.container?.querySelector('#dialogue-avatar-initial');
-        
+
         if (avatar && initial) {
             const personality = npc.personality || 'friendly';
             avatar.setAttribute('data-personality', personality);
             initial.textContent = npc.name?.[0]?.toUpperCase() || '?';
         }
-        
+
         // Update NPC info
         if (this.container) {
             const nameEl = this.container.querySelector('#dialogue-npc-name');
@@ -157,36 +157,36 @@ export class DialogueUI {
             if (nameEl) nameEl.textContent = npc.name || 'Unknown';
             if (titleEl) titleEl.textContent = npc.title || npc.type || '???';
         }
-        
+
         // Show root node
         this.showNode(this.currentNode);
-        
+
         // Show container
         if (this.container) {
             this.container.classList.add('active');
         }
         this.isOpen = true;
     }
-    
+
     /**
      * Show a dialogue node
      * Phase 2: Uses Lit component if available
      */
     showNode(node) {
         if (!node) return;
-        
+
         this.currentNode = node;
-        
+
         // Use Lit component if available
         if (this.litComponent) {
             this.litComponent.showNode(node);
             return;
         }
-        
+
         // Fallback to DOM method
         // Type out text
         this.typeText(node.text);
-        
+
         // Show choices
         if (node.choices && node.choices.length > 0) {
             this.showChoices(node.choices);
@@ -198,7 +198,7 @@ export class DialogueUI {
             ]);
         }
     }
-    
+
     /**
      * Type out text with animation
      */
@@ -206,7 +206,7 @@ export class DialogueUI {
         const textEl = this.container.querySelector('#dialogue-text');
         textEl.textContent = '';
         textEl.classList.add('typing');
-        
+
         let i = 0;
         const type = () => {
             if (i < text.length) {
@@ -219,14 +219,14 @@ export class DialogueUI {
         };
         type();
     }
-    
+
     /**
      * Show dialogue choices
      */
     showChoices(choices) {
         const choicesEl = this.container.querySelector('#dialogue-choices');
         choicesEl.innerHTML = '';
-        
+
         choices?.forEach(choice => {
             const btn = document.createElement('button');
             btn.className = 'dialogue-choice';
@@ -235,7 +235,7 @@ export class DialogueUI {
             choicesEl.appendChild(btn);
         });
     }
-    
+
     /**
      * Handle player choice
      */
@@ -244,7 +244,7 @@ export class DialogueUI {
             this.close();
             return;
         }
-        
+
         if (choiceId === 'continue') {
             // Try to find next node
             if (this.currentNode.nextNode) {
@@ -255,20 +255,20 @@ export class DialogueUI {
             }
             return;
         }
-        
+
         // Find choice in current node
         const choice = this.currentNode.choices?.find(c => c.id === choiceId);
         if (!choice) return;
-        
+
         // Apply effects
         if (this.currentNode.effects) {
             this.applyEffects(this.currentNode.effects);
         }
-        
+
         // Find next node
         const nextNodeId = choice.nextNode || choiceId;
         const nextNode = this.currentTree.getNode(nextNodeId);
-        
+
         if (nextNode) {
             this.showNode(nextNode);
         } else {
@@ -278,7 +278,7 @@ export class DialogueUI {
             }, 1000);
         }
     }
-    
+
     /**
      * Apply dialogue effects
      */
@@ -286,11 +286,11 @@ export class DialogueUI {
         if (effects.relationship && this.game?.gameState?.npcManager) {
             const currentRel = this.game.gameState.npcManager.getRelationship?.(this.currentNPC.id) || 0;
             this.game.gameState.npcManager.setRelationship?.(
-                this.currentNPC.id, 
+                this.currentNPC.id,
                 currentRel + effects.relationship
             );
         }
-        
+
         if (effects.statBoost && this.game?.gameState?.characterStats) {
             // Boost stat - use getStat to read and directly modify stats object
             const stats = this.game.gameState.characterStats;
@@ -301,13 +301,13 @@ export class DialogueUI {
                 stats.stats[effects.statBoost] = Math.min(maxLevel, current + 1);
             }
         }
-        
+
         if (effects.item && this.game?.gameState) {
             // Give item
-            console.log('Received item:', effects.item);
+
         }
     }
-    
+
     /**
      * Close dialogue
      * Phase 2: Uses Lit component if available
@@ -319,17 +319,17 @@ export class DialogueUI {
         } else if (this.container) {
             this.container.classList.remove('active');
         }
-        
+
         this.isOpen = false;
         this.currentNPC = null;
         this.currentTree = null;
         this.currentNode = null;
-        
+
         if (this.onClose) {
             this.onClose();
         }
     }
-    
+
     setOnClose(callback) {
         this.onClose = callback;
     }

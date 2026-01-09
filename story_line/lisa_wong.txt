@@ -1,0 +1,24 @@
+
+# Lisa Wong - The Startup Founder
+**Role:** AI Tech Entrepreneur
+**Personality:** Intense, Driven, Visionary
+
+## Character Profile
+**Background:** Dropped out of college to start her first company at 19. Failed twice before succeeding. Now runs a successful AI startup. Known for her intensity and drive.
+**Motivation:** Wants to prove that failure is just data. Each failure taught her something valuable. Now she's unstoppable.
+**Secret:** She still talks to her first failed startup's co-founder. They're best friends. That failure brought them closer than success ever could.
+**Dream:** To build a company that changes the world, not just makes money. Wants to use AI for social good.
+**Fear:** That she'll fail again, that this success is temporary, that she'll lose everything.
+**Relationship Status:** Single, by choice. Says relationships are a distraction. But secretly, she's lonely. Her work is her life.
+**Turning Point:** When her third startup got its first million in funding. She didn't celebrate - she just worked harder. That's when she knew she was different.
+**Philosophy:** "Failure isn't the opposite of success - it's part of success. Every failure is data. Learn from it, iterate, improve."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I dropped out of college at 19. Started my first company. Failed. Started another. Failed again. But I learned. And now? Now I'm here. Failure is just data."
+*   **Rel > 25 (Intensity):** "People say I'm intense. They're right. But intensity gets results. I don't have time for half-measures. Either you're all in, or you're out."
+*   **Rel > 40 (Secret Friendship):** "My first startup's co-founder? We're still friends. Best friends, actually. That failure... it taught us more than success ever could. We learned who we really are."
+*   **Rel > 60 (Fear):** "I'm terrified of failing again. Every day, I wake up wondering if this is the day it all falls apart. But that fear? It drives me. It makes me better."
+*   **Rel > 80 (Dream):** "I don't just want to make money. I want to change the world. Use AI for good. Help people. That's the real goal. The money? That's just a byproduct."

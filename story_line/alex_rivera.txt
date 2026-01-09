@@ -1,0 +1,61 @@
+
+# Alex Rivera - The Ethical Hacker
+**Age:** 26
+**Role:** Security Consultant / Former Hacker
+**Personality:** Friendly, Edgy, Redemption-Seeking
+
+## Character Profile
+**Background:** Former hacker turned security consultant. Got caught hacking as a teenager, but instead of jail, a judge gave him community service at a tech company. That second chance changed his life.
+**Motivation:** Wants to prove that people can change, that mistakes don't define you. Uses his skills for good now.
+**Secret:** He still hacks, but legally (bug bounties, audits). The thrill never left, but now he channels it productively.
+**Dream:** To start a program that teaches at-risk youth to code and hack ethically. Wants to give others the second chance he got.
+**Fear:** That people will always see him as a criminal, that he'll never fully escape his past.
+**Relationship Status:** Married to a cybersecurity lawyer who understands and supports him.
+**Turning Point:** When he prevented a major data breach at his first job. That's when he realized he could use his skills for good, not just for himself.
+**Philosophy:** "Your past doesn't define you, but it shapes you. Use what you've learned to help others."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I used to hack. Got caught when I was 17. But instead of jail, a judge gave me community service at a tech company. Changed my whole life. Sometimes second chances are everything."
+*   **Rel > 25 (Change):** "People think you can't change. That once a hacker, always a hacker. But I did. I use my skills for good now. I help companies secure their systems. I protect people."
+*   **Rel > 40 (Secret):** "I still hack. Legally, of course. Bug bounties, security audits. The thrill never left. But now I channel it productively. I use it to help, not hurt."
+*   **Rel > 60 (Fear):** "I'm always afraid people will see me as a criminal. That my past will follow me. But I can't let that stop me. I have to prove that people can change."
+*   **Rel > 80 (Dream):** "I want to start a program. Teach at-risk youth to code, to hack ethically. Give them the second chance I got. Show them they can use their skills for good. That's my mission."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hey.", "What's up?", "Hey there."
+*   *Topics:* Freelance life, "Trying to make it work."
+
+### Friendly
+*   *Greetings:* "Hey! Good to see you.", "What's up?"
+*   *Topics:* Freelancing is tough, hint at past ("I used to hack").
+
+### Acquaintance
+*   *Greetings:* "Hey! Always good to catch up.", "What's up? How's it going?"
+*   *Topics:* The judge's decision (Community service > Jail), using skills for good.
+
+### Friend
+*   *Greetings:* "My friend! Hey!", "What's up? Good to see you!"
+*   *Topics:* Secret legal hacking (Bug bounties), fear of stigma.
+
+### Close Friend
+*   *Greetings:* "Bro! My friend!", "Hey! I needed to talk to you."
+*   *Topics:* Dream of the youth program, philosophy of redemption.
+
+---
+
+## Emotional Triggers
+*   **Defensive (Mention Past + Judgment):** "That's not who I am anymore." (Tense)
+*   **Gratitude (Support):** "Thanks for believing in me." (Relief)
+*   **Meltdown (Past Judgment):** "You're judging me for my past?! I thought you understood! I'm not that person anymore!"
+
+## Actions & Gifts
+*   **Coffee:** "Thanks, man. I needed this."
+*   **Snacks:** "Appreciate it!"
+*   **Compliment:** "Thanks. That means a lot."

@@ -39,7 +39,7 @@ export class SaveManager {
 
             const saveKey = SAVE_KEY_PREFIX + slotIndex;
             localStorage.setItem(saveKey, JSON.stringify(saveData));
-            console.log(`Game saved successfully to slot ${slotIndex}`);
+
             return true;
         } catch (error) {
             console.error('Failed to save game:', error);
@@ -64,7 +64,7 @@ export class SaveManager {
             const saveData = localStorage.getItem(saveKey);
 
             if (!saveData) {
-                console.log(` No save data found in slot ${slotIndex}`);
+
                 return false;
             }
 
@@ -77,14 +77,14 @@ export class SaveManager {
             }
 
             gameState.fromJSON(parsed.state);
-            
+
             // Update last played timestamp
             if (parsed.metadata) {
                 parsed.metadata.lastPlayed = Date.now();
                 localStorage.setItem(saveKey, JSON.stringify(parsed));
             }
-            
-            console.log(`Game loaded successfully from slot ${slotIndex}`);
+
+
             return true;
         } catch (error) {
             console.error('Failed to load game:', error);
@@ -102,7 +102,7 @@ export class SaveManager {
             const saveKey = SAVE_KEY_PREFIX + slotIndex;
             return localStorage.getItem(saveKey) !== null;
         }
-        
+
         // Check all slots
         for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
             if (localStorage.getItem(SAVE_KEY_PREFIX + i) !== null) {
@@ -148,7 +148,7 @@ export class SaveManager {
 
             const saveKey = SAVE_KEY_PREFIX + slotIndex;
             localStorage.removeItem(saveKey);
-            console.log(`Save data cleared from slot ${slotIndex}`);
+
             return true;
         } catch (error) {
             console.error('Failed to clear save:', error);
@@ -195,7 +195,7 @@ export class SaveManager {
             localStorage.setItem(saveKey, JSON.stringify(saveData));
             gameState.fromJSON(parsed.state);
 
-            console.log(`Save imported successfully to slot ${slotIndex}`);
+
             return true;
         } catch (error) {
             console.error('Failed to import save:', error);
@@ -218,7 +218,7 @@ export class SaveManager {
             }
         }, intervalMs);
 
-        console.log(`⏰ Auto-save enabled (every ${intervalMs / 1000}s) to slot ${slotIndex}`);
+
     }
 
     /**
@@ -351,7 +351,7 @@ export class SaveManager {
             const clonedData = JSON.parse(JSON.stringify(sourceData));
             clonedData.slotIndex = targetSlot;
             clonedData.timestamp = Date.now();
-            
+
             if (!clonedData.metadata) {
                 clonedData.metadata = {};
             }
@@ -360,7 +360,7 @@ export class SaveManager {
 
             const saveKey = SAVE_KEY_PREFIX + targetSlot;
             localStorage.setItem(saveKey, JSON.stringify(clonedData));
-            console.log(`Save duplicated from slot ${sourceSlot} to slot ${targetSlot}`);
+
             return true;
         } catch (error) {
             console.error('Failed to duplicate save:', error);

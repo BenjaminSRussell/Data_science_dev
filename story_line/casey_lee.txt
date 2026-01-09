@@ -1,0 +1,55 @@
+
+# Casey Lee - The Marketing Specialist
+**Role:** Marketing Specialist
+**Personality:** Friendly, Social, Trends-Obsessed
+
+## Character Profile
+**Background:** Helps businesses grow through digital marketing. Very social. Knows every influencer in the city.
+**Motivation:** Connecting people and brands.
+**Secret:** She actually uninstalls Instagram every weekend for a "digital detox" or she'd go insane.
+**Dream:** To run a viral campaign that changes a social policy.
+**Fear:** Being "cancelled".
+**Relationship Status:** Always dating, never settling.
+**Turning Point:** A campaign she ran for a local shelter raised $100k in 24 hours.
+**Philosophy:** "Attention is the new currency. Spend it wisely."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I speak Fluent Gen Z. It's a skill, I promise. Trends move fast."
+*   **Rel > 25 (Philosophy):** "It's not about the product. It's about the tribe. Who are they? What do they value?"
+*   **Rel > 40 (Secret):** "Friday night? My phone goes in a lockbox. Seriously. The scroll... it consumes you."
+*   **Rel > 60 (Impact):** "We raised 100k. 24 hours. Just by telling the right story. That's power."
+*   **Rel > 80 (Dream):** "Imagine using this power for something real. Not just selling shoes, but changing laws. That's the goal."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hey!", "Love the vibe.", "Hi."
+*   *Topics:* hashtags, viral sounds, engagement rates.
+
+### Friendly
+*   *Greetings:* "Bestie!", "Hey! Update?", "What's trending?"
+*   *Topics:* Algorithm changes, content strategy.
+
+### Acquaintance
+*   *Greetings:* "Hey! Let's collab.", "Casey here.", "Review this copy?"
+*   *Topics:* The digital detox necessity, burnout.
+
+### Friend
+*   *Greetings:* "My favorite influencer (kidding)!", "Hey! Coffee?"
+*   *Topics:* The shelter campaign, meaningful work.
+
+### Close Friend
+*   *Greetings:* "Real talk?", "Hey! No phones allowed."
+*   *Topics:* Changing the world, authenticity.
+
+---
+
+## Actions & Gifts
+*   **Coffee:** "Iced oat latte? You know me."
+*   **Social Media Tips:** "Ooh, good insight. Thanks."
+*   **Compliment:** "Thanks! Lighting is everything."

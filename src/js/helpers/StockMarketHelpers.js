@@ -33,7 +33,7 @@ export function updateStockMarketScreen(game) {
     const grid = document.getElementById('stock-grid');
     if (!grid) return;
 
-    grid.innerHTML = '';
+    grid.textContent = '';
 
     // Group stocks by market
     const stocksByMarket = {};
@@ -68,10 +68,10 @@ export function updateStockMarketScreen(game) {
             card.setAttribute('data-sector', stock.sector);
 
             // Use lastChangePct if available, otherwise calculate from history
-            const changePct = stock.lastChangePct !== undefined 
-                ? stock.lastChangePct * 100 
-                : (stock.history.length > 1 
-                    ? ((stock.price - stock.history[stock.history.length - 2]) / stock.history[stock.history.length - 2]) * 100 
+            const changePct = stock.lastChangePct !== undefined
+                ? stock.lastChangePct * 100
+                : (stock.history.length > 1
+                    ? ((stock.price - stock.history[stock.history.length - 2]) / stock.history[stock.history.length - 2]) * 100
                     : 0);
             const changeClass = changePct >= 0 ? 'positive' : 'negative';
             const changeSymbol = changePct >= 0 ? '▲' : '▼';
@@ -123,12 +123,12 @@ function updateMarketIndices(game) {
     const indicesContainer = document.getElementById('market-indices');
     if (!indicesContainer || !game.stockMarket.indices) return;
 
-    indicesContainer.innerHTML = '';
-    
+    indicesContainer.textContent = '';
+
     Object.keys(game.stockMarket.indices).forEach(indexKey => {
         const index = game.stockMarket.indices[indexKey];
-        const prevValue = index.history && index.history.length > 1 
-            ? index.history[index.history.length - 2] 
+        const prevValue = index.history && index.history.length > 1
+            ? index.history[index.history.length - 2]
             : index.value;
         const change = index.value - prevValue;
         const changePct = prevValue > 0 ? (change / prevValue) * 100 : 0;
@@ -157,11 +157,11 @@ function updateMarketSummaries(game) {
     if (!summariesContainer) return;
 
     const summaries = game.stockMarket?.getAllMarketSummaries() || [];
-    summariesContainer.innerHTML = '';
+    summariesContainer.textContent = '';
 
     summaries.forEach(summary => {
         if (!summary) return;
-        
+
         const summaryElement = document.createElement('div');
         summaryElement.className = 'market-summary';
         const trendClass = summary.avgChange >= 0 ? 'positive' : 'negative';
@@ -191,7 +191,7 @@ function updateWorldEventsDisplay(game) {
         return;
     }
 
-    eventsContainer.innerHTML = '';
+    eventsContainer.textContent = '';
     events.forEach(event => {
         const eventElement = document.createElement('div');
         eventElement.className = 'world-event-alert';

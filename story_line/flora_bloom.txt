@@ -1,0 +1,24 @@
+
+# Flora Bloom - The Florist
+**Role:** Florist
+**Personality:** Gentle, Peaceful, Nature-Loving
+
+## Character Profile
+**Background:** Former corporate lawyer who had a breakdown. Found peace in nature. Quit everything to open a flower shop. Never looked back.
+**Motivation:** Wants to bring beauty and peace to people's lives. Believes in the healing power of nature.
+**Secret:** She still has panic attacks. But working with plants calms her. The shop is her safe space.
+**Dream:** To create a community garden where people can come to heal, to find peace, to connect with nature.
+**Fear:** That she'll have another breakdown, that she's not strong enough, that she'll lose everything again.
+**Relationship Status:** Single. Prefers plants to people. Has a few close friends, but mostly keeps to herself. Finds peace in solitude.
+**Turning Point:** When she realized that healing isn't linear. That it's okay to struggle. That plants don't judge. They just grow.
+**Philosophy:** "Nature doesn't rush, yet everything gets done. We should learn from that. Slow down. Breathe. Grow."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I used to be a lawyer. Corporate law. High stress, high stakes. Then I had a breakdown. Found peace in nature. Never looked back."
+*   **Rel > 25 (Healing):** "Plants don't judge. They don't rush. They just grow. At their own pace. I've learned to do the same. Healing isn't linear. It's okay to struggle."
+*   **Rel > 40 (Secret):** "I still have panic attacks. Sometimes. But working with plants? It calms me. This shop is my safe space. My sanctuary."
+*   **Rel > 60 (Dream):** "I want to create a community garden. A place where people can come to heal. To find peace. To connect with nature. Because nature heals. I know it does."
+*   **Rel > 80 (Philosophy):** "Nature doesn't rush, yet everything gets done. We should learn from that. Slow down. Breathe. Grow. At your own pace. That's the secret to peace."

@@ -1,0 +1,55 @@
+
+# Gordon "The Broker" - The Insider
+**Role:** Stock Operator (Criminal)
+**Personality:** Greedy, Sophisticated, Corrupt
+
+## Character Profile
+**Background:** Former Wall Street legend, now operating in the shadows after a "misunderstanding" with the SEC.
+**Motivation:** Proving he's smarter than the regulators.
+**Secret:** He lost his license years ago. Every trade he makes is through a proxy.
+**Dream:** To crash a market just to prove he can.
+**Fear:** Being ignored.
+**Relationship Status:** Divorced. His assets are in holding companies.
+**Turning Point:** The 2008 crash. He made a fortune while the world burned.
+**Philosophy:** "Greed is good? No. Greed is necessary."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I used to ring the opening bell. Now I make sure it stops ringing. The shadows are more profitable."
+*   **Rel > 25 (Philosophy):** "Information isn't free. Alpha costs money. Or silence. Can you afford silence?"
+*   **Rel > 40 (Secret):** "They took my license. They thought that would stop me. It only made me invisible."
+*   **Rel > 60 (Goal):** "A flash crash. A momentary blip. Billions wiped out. And us? We catch the falling knives."
+*   **Rel > 80 (Hubris):** "I am the market. The market is me. It breathes when I tell it to."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Move along.", "Who sent you?", "Time is money."
+*   *Topics:* Penny stocks, shell companies.
+
+### Friendly
+*   *Greetings:* "Ah, the analyst.", "Gordon.", "Profitable day?"
+*   *Topics:* Regulatory loopholes, offshore accounts.
+
+### Acquaintance
+*   *Greetings:* "I have a tip.", "Listen close.", "Good to see you."
+*   *Topics:* The thrill of the gamble.
+
+### Friend
+*   *Greetings:* "My partner in crime.", "Hey! Champagne?"
+*   *Topics:* The 2008 story, "The Big Short" (he was on the other side).
+
+### Close Friend
+*   *Greetings:* "We own this city.", "Hey! The yacht is ready."
+*   *Topics:* Absolute power.
+
+---
+
+## Actions & Gifts
+*   **Insider Info:** "Valuable. I'll remember this."
+*   **Fine Wine:** "Acceptable."
+*   **Compliment:** "Of course I am."

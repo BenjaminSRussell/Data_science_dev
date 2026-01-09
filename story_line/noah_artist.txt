@@ -1,0 +1,55 @@
+
+# Noah Williams - The Visual Artist
+**Role:** Visual Artist
+**Personality:** Friendly, Expressive, Emotional
+
+## Character Profile
+**Background:** Creates beautiful visualizations. Values creativity and expression. Sees data as a medium for art.
+**Motivation:** Making people feel something.
+**Secret:** He is colorblind but hides it by memorizing hex codes.
+**Dream:** To paint a mural on the moon.
+**Fear:** Being misunderstood.
+**Relationship Status:** Romantic. Sends handwritten letters.
+**Turning Point:** Seeing a sunset and realizing it could be plotted on a graph.
+**Philosophy:** "Life isn't black and white. It's a spectrum."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I see the world in shapes and flows. Data isn't just numbers. It's a landscape."
+*   **Rel > 25 (Philosophy):** "Art isn't about what you see. It's about what you make others see."
+*   **Rel > 40 (Secret):** "Colors... they're tricky for me. I memorize the codes. #FF0000 is red. I know it, even if I don't see it."
+*   **Rel > 60 (Goal):** "The moon. A blank canvas. Imagine the contrast. That's the ultimate installation."
+*   **Rel > 80 (Romance):** "You are my favorite subject. The one variable I can't predict."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hello.", "Like the art?", "Noah."
+*   *Topics:* Aesthetics, composition.
+
+### Friendly
+*   *Greetings:* "Hey! Inspired?", "Noah here.", "Nice colors."
+*   *Topics:* Creative blocks, museums.
+
+### Acquaintance
+*   *Greetings:* "Hey! Look at this.", "I made this.", "Beautiful day."
+*   *Topics:* The colorblind secret (hint).
+
+### Friend
+*   *Greetings:* "Muse!", "Hey! Portrait time?"
+*   *Topics:* The Moon Mural.
+
+### Close Friend
+*   *Greetings:* "My love.", "Hey! Let's create."
+*   *Topics:* Emotional connection.
+
+---
+
+## Actions & Gifts
+*   **Art Supplies:** "Perfect. I needed these."
+*   **Coffee:** "Warmth. Thanks."
+*   **Compliment:** "You have a beautiful soul."

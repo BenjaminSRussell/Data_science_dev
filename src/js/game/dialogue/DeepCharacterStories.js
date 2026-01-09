@@ -44,7 +44,7 @@ export const CHARACTER_STORIES = {
             }
         ]
     },
-    
+
     sarah_martinez: {
         personalStory: {
             background: "Started as a barista, taught herself Python at night. Worked her way up from data entry to senior analyst. Single mother of two, works 60-hour weeks to provide for her kids.",
@@ -84,7 +84,7 @@ export const CHARACTER_STORIES = {
             }
         ]
     },
-    
+
     mike_johnson: {
         personalStory: {
             background: "Former athlete, injured his knee in college. Had to pivot from sports to business. Uses his competitive drive in marketing. Known for his networking skills.",
@@ -124,7 +124,7 @@ export const CHARACTER_STORIES = {
             }
         ]
     },
-    
+
     lisa_wong: {
         personalStory: {
             background: "Dropped out of college to start her first company at 19. Failed twice before succeeding. Now runs a successful AI startup. Known for her intensity and drive.",
@@ -164,7 +164,7 @@ export const CHARACTER_STORIES = {
             }
         ]
     },
-    
+
     emma_bloom: {
         personalStory: {
             background: "Quiet librarian who loves books and data. Has a master's in library science and a passion for information architecture. Spends her free time reading research papers.",
@@ -202,9 +202,115 @@ export const CHARACTER_STORIES = {
                 topic: 'philosophy',
                 dialogue: "Information is power, but only if people can access it. My job isn't just to organize books - it's to be a bridge. Between information and people. Between the past and the future."
             }
+        ],
+        phases: [
+            {
+                id: 'phase_1',
+                title: 'The Intellectual Connection',
+                trigger: { relationship: 15 },
+                dialogue: "I... I have something to show you. These are some papers I've been reading. I don't usually share them.",
+                options: [
+                    {
+                        text: "I'd love to read your research papers properly.",
+                        flag: 'emma_support_academic',
+                        response: "You... you would? Most people find the bibliography sections boring. I'll bring some for you next time.",
+                        effects: { intelligence: 5, relationship: 5 }
+                    },
+                    {
+                        text: "You have so much to offer, Emma. You shouldn't stay hidden.",
+                        flag: 'emma_support_social',
+                        response: "I feel safe here, surrounded by history. But maybe... maybe a little change wouldn't hurt.",
+                        effects: { relationship: 10 }
+                    },
+                    {
+                        text: "This library is a treasure trove. We could modernize it.",
+                        flag: 'emma_support_library',
+                        response: "I've always thought so. Information shouldn't be static. It should be alive.",
+                        effects: { ethics: 5, relationship: 5 }
+                    }
+                ]
+            },
+            {
+                id: 'phase_2',
+                title: 'The Secret Revealed',
+                trigger: { relationship: 35, flag: 'phase_1_complete' }, // flag check logic handled in system
+                dialogue: "I have to make a choice. A journal wants to interview 'E.B.' about my latest paper. They don't know it's me.",
+                options: [
+                    {
+                        text: "Your research is vital. Keep publishing anonymously.",
+                        flag: 'emma_choice_pseudonym',
+                        response: "You're right. The work is what matters, not the fame. Thank you for understanding.",
+                        effects: { ethics: 5, relationship: 10 }
+                    },
+                    {
+                        text: "It's time the world knew who 'E.B.' really is.",
+                        flag: 'emma_choice_public',
+                        response: "It's terrifying... but maybe you're right. Maybe it's time to step into the light.",
+                        effects: { karma: 10, relationship: 5 } // karma mapped to charisma context in plan, using closest simple stat or ignoring if not present
+                    },
+                    {
+                        text: "Let's work together. My data science, your history.",
+                        flag: 'emma_choice_collab',
+                        response: "A collaboration? That... that sounds wonderful. We could do so much together.",
+                        effects: { intelligence: 5, relationship: 15 }
+                    }
+                ]
+            },
+            {
+                id: 'phase_3',
+                title: 'The Digitization Project',
+                trigger: { relationship: 55, flag: 'phase_2_complete' },
+                dialogue: "The project has been approved! We're starting the digitization. But I need your advice on the priority.",
+                options: [
+                    {
+                        text: "Focus on speed and efficiency. Get it done fast.",
+                        flag: 'emma_project_efficiency',
+                        response: "Efficiency... yes. We have so much to get through. Scaling it up is the logical choice.",
+                        effects: { logic: 5, relationship: 5 }
+                    },
+                    {
+                        text: "Preserve the notes and human touches. The context.",
+                        flag: 'emma_project_human',
+                        response: "I was hoping you'd say that. The margin notes are where the real stories are.",
+                        effects: { ethics: 5, relationship: 10 }
+                    },
+                    {
+                        text: "Make it free and accessible to everyone.",
+                        flag: 'emma_project_access',
+                        response: "Yes! Universal access. That's the whole point of a library, isn't it?",
+                        effects: { reputation: 10, relationship: 5 }
+                    }
+                ]
+            },
+            {
+                id: 'phase_4',
+                title: 'The Final Choice',
+                trigger: { relationship: 80, flag: 'phase_3_complete' },
+                dialogue: "It's done. The project is a success. And... I've been offered a position at the University. Or I could stay.",
+                options: [
+                    {
+                        text: "Take the University job. You're a professor at heart.",
+                        flag: 'emma_final_professor',
+                        response: "Professor Bloom... it has a nice ring to it. I think I will. Thank you for pushing me.",
+                        effects: { relationship: 10, final_outcome: 'professor' }
+                    },
+                    {
+                        text: "Stay here. Make this library the city's info hub.",
+                        flag: 'emma_final_librarian',
+                        response: "You're right. My heart is here. We can transform this place into something amazing.",
+                        effects: { relationship: 10, final_outcome: 'tech_librarian' }
+                    },
+                    {
+                        text: "Whatever you do, I want to be by your side.",
+                        flag: 'emma_final_partner',
+                        response: "That's all I wanted to hear. Past, future... it doesn't matter as long as we're together.",
+                        effects: { relationship: 20, final_outcome: 'partner' }
+                    }
+                ]
+            }
         ]
     },
-    
+
     alex_rivera: {
         personalStory: {
             background: "Former hacker turned security consultant. Got caught hacking as a teenager, but instead of jail, a judge gave him community service at a tech company. Changed his life.",
@@ -244,7 +350,7 @@ export const CHARACTER_STORIES = {
             }
         ]
     },
-    
+
     david_chen: {
         personalStory: {
             background: "Immigrant who came to the country with $50 in his pocket. Built a tech company from scratch, sold it for millions. Now invests in others' dreams.",
@@ -284,7 +390,7 @@ export const CHARACTER_STORIES = {
             }
         ]
     },
-    
+
     donna_delight: {
         personalStory: {
             background: "Former corporate executive who quit to follow her passion. Always loved baking. Opened the donut shop after her mother passed away - it was her mother's dream.",
@@ -324,7 +430,7 @@ export const CHARACTER_STORIES = {
             }
         ]
     },
-    
+
     brad_sterling: {
         personalStory: {
             background: "Grew up wealthy, everything handed to him. Never had to work for anything. Now he's terrified of failure because he's never experienced it.",
@@ -364,7 +470,7 @@ export const CHARACTER_STORIES = {
             }
         ]
     },
-    
+
     jordan_kim: {
         personalStory: {
             background: "Former athlete who had to retire due to injury. Found purpose in helping others achieve their fitness goals. Uses exercise as therapy.",
@@ -404,7 +510,7 @@ export const CHARACTER_STORIES = {
             }
         ]
     },
-    
+
     flora_bloom: {
         personalStory: {
             background: "Former corporate lawyer who had a breakdown. Found peace in nature. Quit everything to open a flower shop. Never looked back.",
@@ -452,17 +558,17 @@ export const CHARACTER_STORIES = {
 export function getStoryReveal(npcId, relationshipLevel, topic = null) {
     const story = CHARACTER_STORIES[npcId];
     if (!story) return null;
-    
+
     // Find the highest relationship level reveal that's been unlocked
     const reveals = story.storyReveals
         .filter(reveal => relationshipLevel >= reveal.relationshipLevel)
         .sort((a, b) => b.relationshipLevel - a.relationshipLevel);
-    
+
     if (topic) {
         const topicReveal = reveals.find(r => r.topic === topic);
         if (topicReveal) return topicReveal;
     }
-    
+
     return reveals[0] || null;
 }
 
@@ -472,7 +578,7 @@ export function getStoryReveal(npcId, relationshipLevel, topic = null) {
 export function getCharacterStory(npcId, element) {
     const story = CHARACTER_STORIES[npcId];
     if (!story || !story.personalStory) return null;
-    
+
     return story.personalStory[element] || null;
 }
 

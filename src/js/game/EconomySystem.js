@@ -241,7 +241,7 @@ export class EconomySystem {
      */
     showPromotionNotification(newRank) {
         // This will be handled by the main game class through toast/modal
-        console.log(` Promoted to ${newRank.title}!`);
+
 
         // Dispatch custom event
         window.dispatchEvent(new CustomEvent('promotion', {
@@ -279,7 +279,7 @@ export class EconomySystem {
         if (income <= 0) return 0;
 
         let tax = 0;
-        
+
         // Progressive tax brackets (based on weekly income)
         // $0-$10k/year = $0-$192/week: 0%
         // $10k-$50k/year = $192-$962/week: 10%
@@ -336,7 +336,7 @@ export class EconomySystem {
         if (!this.gameState.worldMap) return 0;
 
         const vehicle = this.gameState.worldMap?.currentVehicle || 'walking';
-        
+
         if (vehicle === 'walking') {
             return 0; // Free
         } else if (vehicle === 'bus_pass') {

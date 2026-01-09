@@ -1,0 +1,55 @@
+
+# Vinnie "The Shark" - The Loan Consultant
+**Role:** Loan Consultant (Criminal)
+**Personality:** Aggressive, Charismatic, Dangerous
+
+## Character Profile
+**Background:** Runs a "consulting" business. Lending money at high rates.
+**Motivation:** Control and Profit.
+**Secret:** He actually has a soft spot for his nonna's cooking and funds a local bakery (anonymously).
+**Dream:** To be legitimate. Just not yet.
+**Fear:** Federal Prison.
+**Relationship Status:** "It's handled."
+**Turning Point:** The day he realized people fear debt more than violence.
+**Philosophy:** "Interest is the only thing that grows without rain."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I help people. People with... cash flow issues. Banks say no. Vinnie says yes."
+*   **Rel > 25 (Philosophy):** "A contract is a promise. You break a promise, you break trust. I don't like broken trust."
+*   **Rel > 40 (Secret):** "My nonna... she makes the best cannoli. I send a box to the orphanage every Sunday. Don't tell no one."
+*   **Rel > 60 (Goal):** "One day, I wear a suit. A real suit. Board of Directors. No more back alleys."
+*   **Rel > 80 (Warning):** "You're a good kid. Don't borrow what you can't earn. Keep it that way."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "You lost?", "Need cash?", "Walk away."
+*   *Topics:* Interest rates, kneecaps (implied).
+
+### Friendly
+*   *Greetings:* "Hey kid.", "Vinnie.", "Business is good."
+*   *Topics:* Reliable payers, loyalty.
+
+### Acquaintance
+*   *Greetings:* "My favorite investment.", "Hey! Envelope ready?", "Good to see ya."
+*   *Topics:* The legitimate dream, local gossip.
+
+### Friend
+*   *Greetings:* "Come, eat.", "Hey! You're good people."
+*   *Topics:* Nonna's recipes, protection.
+
+### Close Friend
+*   *Greetings:* "Family.", "Hey! Anyone bothering you?"
+*   *Topics:* True loyalty, the "Family" business.
+
+---
+
+## Actions & Gifts
+*   **Cash:** "Back at ya."
+*   **Fancy Cigar:** "Now we're talking. Cuban?"
+*   **Compliment:** "Watch it."

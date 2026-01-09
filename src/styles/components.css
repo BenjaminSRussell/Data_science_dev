@@ -40,7 +40,7 @@
     height: 100%;
     background: linear-gradient(90deg,
             transparent,
-            rgba(255, 255, 255, 0.1),
+            var(--glass-border),
             transparent);
     transition: left 0.5s ease;
 }
@@ -77,14 +77,14 @@
 
 /* Button Variants */
 .btn-primary {
-    background: var(--gradient-primary);
+    background: var(--gradient-grey-dark);
     color: white;
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    box-shadow: var(--shadow-glow);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    box-shadow: var(--shadow-glow);
 }
 
 .btn-secondary {
@@ -109,18 +109,18 @@
 }
 
 .btn-success {
-    background: var(--gradient-success);
+    background: var(--gradient-grey-mid);
     color: white;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    box-shadow: var(--shadow-glow);
 }
 
 .btn-success:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    box-shadow: var(--shadow-glow);
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: var(#444444);
     color: white;
 }
 
@@ -141,23 +141,23 @@
 }
 
 .badge-primary {
-    background: rgba(139, 92, 246, 0.2);
+    background: rgba(244, 244, 245, 0.1);
     color: var(--color-accent-primary);
 }
 
 .badge-success {
-    background: rgba(16, 185, 129, 0.2);
-    color: var(--color-accent-success);
+    background: rgba(100, 100, 100, 0.1);
+    color: var(#888888);
 }
 
 .badge-warning {
-    background: rgba(245, 158, 11, 0.2);
-    color: var(--color-accent-warning);
+    background: rgba(120, 120, 120, 0.1);
+    color: var(#666666);
 }
 
 .badge-danger {
-    background: rgba(239, 68, 68, 0.2);
-    color: var(--color-accent-danger);
+    background: rgba(80, 80, 80, 0.1);
+    color: var(#444444);
 }
 
 /* =====================================================
@@ -175,15 +175,15 @@
     height: 100%;
     border-radius: var(--radius-full);
     transition: width var(--transition-slow);
-    background: var(--gradient-primary);
+    background: var(--gradient-grey-dark);
 }
 
 .progress-fill.success {
-    background: var(--gradient-success);
+    background: var(--gradient-grey-mid);
 }
 
 .progress-fill.warning {
-    background: var(--gradient-gold);
+    background: var(--gradient-grey-light);
 }
 
 /* Animated progress bar */
@@ -200,7 +200,7 @@
     bottom: 0;
     background: linear-gradient(90deg,
             transparent,
-            rgba(255, 255, 255, 0.3),
+            var(--glass-border),
             transparent);
     animation: shimmer 2s infinite;
 }
@@ -268,7 +268,7 @@
 }
 
 .avatar-gradient {
-    background: var(--gradient-primary);
+    background: var(--gradient-grey-dark);
     color: white;
 }
 
@@ -284,7 +284,7 @@
 }
 
 .card:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--color-accent-secondary);
 }
 
 .card-interactive:hover {
@@ -334,7 +334,7 @@
 .input:focus {
     outline: none;
     border-color: var(--color-accent-primary);
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
 .input::placeholder {
@@ -437,12 +437,12 @@
    ===================================================== */
 :root {
     /* Corporate Palette */
-    --chart-color-1: #8b5cf6;
-    --chart-color-2: #8b5cf6;
-    --chart-color-3: #10b981;
-    --chart-color-4: #f59e0b;
-    --chart-color-5: #ef4444;
-    --chart-color-6: #06b6d4;
+    --chart-color-1: #f4f4f5;
+    --chart-color-2: #a1a1aa;
+    --chart-color-3: #52525b;
+    --chart-color-4: #888888;
+    --chart-color-5: #666666;
+    --chart-color-6: #444444;
 }
 
 /* =====================================================
@@ -459,7 +459,7 @@
     right: -2px;
     width: 10px;
     height: 10px;
-    background: var(--color-accent-danger);
+    background: var(#444444);
     border-radius: 50%;
     border: 2px solid var(--color-bg-secondary);
 }
@@ -478,7 +478,7 @@
 }
 
 .counter-money {
-    color: var(--color-accent-success);
+    color: var(#888888);
 }
 
 .counter-money::before {
@@ -489,15 +489,15 @@
    HIGHLIGHT & GLOW EFFECTS
    ===================================================== */
 .glow-primary {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    box-shadow: var(--shadow-glow);
 }
 
 .glow-success {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    box-shadow: var(--shadow-glow);
 }
 
 .glow-warning {
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    box-shadow: var(--shadow-glow);
 }
 
 .highlight {
@@ -531,11 +531,11 @@
 }
 
 .rating-star.filled {
-    color: var(--color-accent-warning);
+    color: var(#666666);
 }
 
 .rating-star.half {
-    background: linear-gradient(90deg, var(--color-accent-warning) 50%, var(--color-text-muted) 50%);
+    background: linear-gradient(90deg, var(#666666) 50%, var(--color-text-muted) 50%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -557,7 +557,7 @@
 
 .xp-bar-fill {
     height: 100%;
-    background: var(--gradient-gold);
+    background: var(--gradient-grey-light);
     border-radius: var(--radius-full);
     transition: width var(--transition-slow);
     position: relative;
@@ -570,7 +570,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
     animation: shimmer 2s infinite;
 }
 
@@ -598,13 +598,13 @@
 }
 
 .countdown.warning {
-    background: rgba(245, 158, 11, 0.2);
-    color: var(--color-accent-warning);
+    background: rgba(120, 120, 120, 0.1);
+    color: var(#666666);
 }
 
 .countdown.danger {
-    background: rgba(239, 68, 68, 0.2);
-    color: var(--color-accent-danger);
+    background: rgba(80, 80, 80, 0.1);
+    color: var(#444444);
     animation: pulse 1s infinite;
 }
 
@@ -629,7 +629,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--gradient-primary);
+    background: var(--gradient-grey-dark);
     transform: scaleX(0);
     transition: transform var(--transition-base);
 }
@@ -654,7 +654,7 @@
     top: var(--space-3);
     right: var(--space-3);
     padding: var(--space-1) var(--space-2);
-    background: var(--color-accent-success);
+    background: var(#888888);
     color: white;
     font-size: var(--font-size-xs);
     font-weight: 600;
@@ -690,7 +690,7 @@
 .shop-item-price {
     font-size: var(--font-size-lg);
     font-weight: 700;
-    color: var(--color-accent-warning);
+    color: var(#666666);
     font-family: var(--font-mono);
 }
 
@@ -708,8 +708,8 @@
 }
 
 .achievement.unlocked {
-    border-color: var(--color-accent-warning);
-    background: rgba(245, 158, 11, 0.1);
+    border-color: var(#666666);
+    background: rgba(120, 120, 120, 0.1);
 }
 
 .achievement-icon {
@@ -724,7 +724,7 @@
 }
 
 .achievement.unlocked .achievement-icon {
-    background: var(--gradient-gold);
+    background: var(--gradient-grey-light);
 }
 
 .achievement-info {
@@ -751,7 +751,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.6);
     z-index: var(--z-modal);
 }
 
@@ -849,7 +849,7 @@
 
 .equipment-bonus {
     font-size: var(--font-size-xs);
-    color: var(--color-accent-success);
+    color: var(#888888);
     background: rgba(16, 185, 129, 0.1);
     padding: var(--space-1) var(--space-2);
     border-radius: var(--radius-md);
@@ -894,6 +894,7 @@
 .save-slot-card {
     display: none !important;
 }
+
 .save-slots-dropdown {
     position: fixed;
     top: 50%;
@@ -906,7 +907,7 @@
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     border: 1.5px solid rgba(255, 255, 255, 0.15);
     border-radius: clamp(12px, 2vw, 18px);
-    box-shadow: 
+    box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.5),
         0 0 0 1px rgba(255, 255, 255, 0.05) inset;
     z-index: 2000;
@@ -1092,11 +1093,11 @@
 }
 
 .slot-menu .menu-item.danger {
-    color: var(--color-accent-danger);
+    color: var(#444444);
 }
 
 .slot-menu .menu-item.danger:hover {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(80, 80, 80, 0.1);
 }
 
 @keyframes dropdownSlideIn {
@@ -1104,6 +1105,7 @@
         opacity: 0;
         transform: translate(-50%, -48%);
     }
+
     to {
         opacity: 1;
         transform: translate(-50%, -50%);

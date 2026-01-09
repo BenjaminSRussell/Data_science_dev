@@ -1,0 +1,55 @@
+
+# Sam Taylor - The Freelance Designer
+**Role:** Freelance Designer
+**Personality:** Friendly, Creative, Visual
+
+## Character Profile
+**Background:** Art school grad who realized data needs to look good to be understood. Works on visual design projects.
+**Motivation:** Making complex information beautiful.
+**Secret:** He actually hates modern "millennial tech minimal" design but does it because it pays.
+**Dream:** To have a solo exhibition of his data art.
+**Fear:** Being replaced by AI image generators.
+**Relationship Status:** Dating a font designer.
+**Turning Point:** When a chart he designed went viral because it made a complex issue instantly understandable.
+**Philosophy:** "Data is the paint. I'm just holding the brush."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I went to art school. Everyone said I'd starve. Now I charge double because I know CSS."
+*   **Rel > 25 (Philosophy):** "You can have the best model in the world, but if the chart is ugly, nobody listens."
+*   **Rel > 40 (Secret):** "Between us? I hate 'flat design'. Give me texture! Give me soul! But the client pays for flat."
+*   **Rel > 60 (Fear):** "These AI generators... they're getting good. Too good. I have to stay ahead."
+*   **Rel > 80 (Dream):** "Data Art. That's the future. Not just charts, but emotion. Converting numbers into feelings."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hey.", "Cool shirt.", "Yo."
+*   *Topics:* Color theory, fonts, freelance rates.
+
+### Friendly
+*   *Greetings:* "Yo! Working hard?", "Hey Sam.", "What's the project?"
+*   *Topics:* Client horror stories, design tools.
+
+### Acquaintance
+*   *Greetings:* "Hey! Check this mock-up.", "Sam here.", "Good to see you."
+*   *Topics:* The hatred of minimalism, finding inspiration.
+
+### Friend
+*   *Greetings:* "My dude!", "Hey! Coffee release?", "Look at these pixels."
+*   *Topics:* AI anxiety, the viral chart story.
+
+### Close Friend
+*   *Greetings:* "You get it.", "Hey! Let's collab."
+*   *Topics:* The Data Art dream, true creativity.
+
+---
+
+## Actions & Gifts
+*   **Art Supplies:** "Dude, yes! Markers!"
+*   **Coffee:** "Essential fuel. Thanks."
+*   **Compliment:** "Thanks, I try."

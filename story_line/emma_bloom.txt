@@ -1,0 +1,122 @@
+
+# Emma Bloom - Librarian & Researcher
+**Age:** 28
+**Role:** Librarian
+**Personality:** Friendly, Quiet, Thoughtful
+
+## Character Profile
+**Background:** Quiet librarian who loves books and data. Has a master's in library science and a passion for information architecture. Spends her free time reading research papers.
+**Motivation:** Believes that knowledge should be accessible to everyone. Sees herself as a bridge between information and people.
+**Secret:** She's actually published three research papers under a pseudonym. She's too shy to claim them publicly, but she's proud of her work.
+**Dream:** To digitize rare historical documents and make them searchable using AI. Wants to preserve history for future generations.
+**Fear:** That she's wasting her potential, that she should be doing more, that she's too quiet to make a real impact.
+**Relationship Status:** Single, lives alone with her cat. Has a few close friends, but prefers books to people most of the time.
+**Turning Point:** When a student thanked her for helping them find the perfect research paper. That moment made her realize her work matters.
+**Philosophy:** "Information is power, but only if it's accessible. My job is to make sure everyone can find what they need."
+
+---
+
+## Story Phases & Choices
+
+### Phase 1: The Intellectual Connection
+**Trigger:** Relationship Level 15
+**Context:** Emma shares her private reading habits with the player.
+**Dialogue:** "I... I have something to show you. These are some papers I've been reading. I don't usually share them."
+
+**Player Options:**
+1.  **Academic Support:** "I'd love to read your research papers properly."
+    *   *Effect:* Intelligence +5, Relationship +5
+    *   *Result:* She feels validated intellectually.
+2.  **Personal Support:** "You have so much to offer, Emma. You shouldn't stay hidden."
+    *   *Effect:* Relationship +10
+    *   *Result:* She feels seen as a person.
+3.  **Library Visionary:** "This library is a treasure trove. We could modernize it."
+    *   *Effect:* Ethics +5, Relationship +5
+    *   *Result:* You bond over a shared vision.
+
+### Phase 2: The Secret Revealed
+**Trigger:** Relationship Level 35 & Phase 1 Complete
+**Context:** A journal wants to interview her pseudonym, 'E.B.'. She faces a crisis of identity.
+**Dialogue:** "I have to make a choice. A journal wants to interview 'E.B.' about my latest paper. They don't know it's me."
+
+**Player Options:**
+1.  **The Ghostwriter:** "Your research is vital. Keep publishing anonymously."
+    *   *Effect:* Ethics +5, Relationship +10
+    *   *Result:* She stays comfortable but successful in secret.
+2.  **The Spotlight:** "It's time the world knew who 'E.B.' really is. You deserve the credit."
+    *   *Effect:* Charisma/Karma +10, Relationship +5
+    *   *Result:* She steps into the public eye (terrifying but rewarding).
+3.  **The Collaborator:** "Let's work together. My data science, your history."
+    *   *Effect:* Intelligence +5, Relationship +15
+    *   *Result:* You form a powerful professional partnership.
+
+### Phase 3: The Digitization Project
+**Trigger:** Relationship Level 55 & Phase 2 Complete
+**Context:** The project to digitize history is approved. You must decide its direction.
+**Dialogue:** "The project has been approved! We're starting the digitization. But I need your advice on the priority."
+
+**Player Options:**
+1.  **Efficiency Focus:** "Focus on speed and efficiency. Get it done fast."
+    *   *Effect:* Logic +5, Relationship +5
+2.  **Human/Context Focus:** "Preserve the notes and human touches. The context."
+    *   *Effect:* Ethics +5, Relationship +10
+3.  **Access Focus:** "Make it free and accessible to everyone."
+    *   *Effect:* Reputation +10, Relationship +5
+
+### Phase 4: The Final Choice
+**Trigger:** Relationship Level 80 & Phase 3 Complete
+**Context:** Success leads to a career crossroads.
+**Dialogue:** "It's done. The project is a success. And... I've been offered a position at the University. Or I could stay."
+
+**Player Options:**
+1.  **The Professor:** "Take the University job. You're a professor at heart."
+    *   *Final Outcome:* Professor Bloom.
+2.  **The Tech Librarian:** "Stay here. Make this library the city's info hub."
+    *   *Final Outcome:* Tech Librarian.
+3.  **The Partner:** "Whatever you do, I want to be by your side."
+    *   *Final Outcome:* Life Partner.
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I've always loved books. Information. Knowledge. There's something beautiful about organizing information, making it accessible. That's why I became a librarian."
+*   **Rel > 25 (Quiet Nature):** "I know I'm quiet. People think that means I'm not doing anything important. But silence doesn't mean absence. I'm here, I'm working, I'm helping."
+*   **Rel > 40 (Secret):** "I've published research papers. Three of them. Under a pseudonym. I'm too shy to claim them publicly, but... I'm proud of the work. It matters to me."
+*   **Rel > 60 (Dream):** "I want to digitize historical documents. Make them searchable with AI. Preserve history for future generations. That's my real dream. Not just organizing books, but preserving knowledge."
+*   **Rel > 80 (Philosophy):** "Information is power, but only if people can access it. My job isn't just to organize books - it's to be a bridge. Between information and people. Between the past and the future."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hello.", "Hi.", "...Hello."
+*   *Topics:* Work (Librarian), Organizing info.
+
+### Friendly
+*   *Greetings:* "Hello again.", "Hi there.", "Hey."
+*   *Topics:* Beauty of data, silence vs absence.
+
+### Acquaintance
+*   *Greetings:* "Hello! Good to see you.", "Hi! How are you?", "Hey there."
+*   *Topics:* Published papers (hint), AI digitization dreams.
+
+### Friend
+*   *Greetings:* "My friend! Hello!", "Hey! I'm glad you're here.", "Hello! Come, let's talk."
+*   *Topics:* Information as power, fear of wasted potential.
+
+### Close Friend
+*   *Greetings:* "My dear friend! I'm so happy to see you.", "Hello! You're the only one who really listens."
+*   *Topics:* Pride in secret work, validity from helping students.
+
+---
+
+## Emotional Triggers
+*   **Interruption:** "..." (She goes quiet - Hurt)
+*   **Listening:** "Thank you for listening." (Gratitude)
+
+## Actions & Gifts
+*   **Books:** "Oh... thank you. This is perfect." (Loves)
+*   **Flowers:** "These are beautiful. Thank you." (Likes)
+*   **Compliment:** "You're too kind."

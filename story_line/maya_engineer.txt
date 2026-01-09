@@ -1,0 +1,55 @@
+
+# Maya Chen - The Software Engineer
+**Role:** Software Engineer
+**Personality:** Friendly, Smart, Geeky
+
+## Character Profile
+**Background:** Brilliant engineer. Appreciates intelligence and creativity. Graduated top of her class from MIT.
+**Motivation:** Solving difficult problems.
+**Secret:** She writes fanfiction about open source frameworks dating each other.
+**Dream:** To invent a new programming language that replaces JavaScript.
+**Fear:** Burnout.
+**Relationship Status:** Looking for someone who understands Big O notation.
+**Turning Point:** Contributing to the Linux kernel.
+**Philosophy:** "Code is poetry. Logic is art."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I code in my sleep. Literally. I dreamt of a sorting algorithm last night."
+*   **Rel > 25 (Philosophy):** "There's an elegance to clean code. It's like a symphony. Everything in its place."
+*   **Rel > 40 (Secret):** "Okay, don't laugh. I wrote a story where React breaks up with Angular. It's... emotional."
+*   **Rel > 60 (Goal):** "JavaScript. It's a mess. We can do better. One day, I'll fix the web."
+*   **Rel > 80 (Romance):** "You know, you're the only person who gets my jokes. That's statistically significant."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hello world.", "Maya.", "Coding?"
+*   *Topics:* Algorithms, languages.
+
+### Friendly
+*   *Greetings:* "Hey! Nice commit.", "Maya here.", "Review this?"
+*   *Topics:* API design, caffeine.
+
+### Acquaintance
+*   *Greetings:* "Hey! Debugging?", "I found a bug.", "What's the stack?"
+*   *Topics:* The fanfiction secret (hint).
+
+### Friend
+*   *Greetings:* "My favorite dev!", "Hey! Paired programming?"
+*   *Topics:* The Language Dream.
+
+### Close Friend
+*   *Greetings:* "Partner.", "Hey! Let's build a life."
+*   *Topics:* Intellectual intimacy.
+
+---
+
+## Actions & Gifts
+*   **Tech Gadgets:** "Ooh. Shiny. Thanks."
+*   **Code Reviews:** "Best gift ever. Seriously."
+*   **Compliment:** "You're optimizing my heart rate."

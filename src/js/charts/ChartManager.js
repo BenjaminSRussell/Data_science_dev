@@ -56,7 +56,7 @@ export class ChartManager {
         Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
         Chart.defaults.font.family = "'Inter', sans-serif";
 
-        console.log(' Chart Manager initialized');
+
     }
 
     /**
@@ -110,7 +110,7 @@ export class ChartManager {
         const datasetKeys = Object.keys(data.datasets || {});
         let primaryKey = 'Value';
         let values = [];
-        
+
         // Find first dataset with data
         for (const key of datasetKeys) {
             const datasetValues = data.datasets?.[key];
@@ -120,7 +120,7 @@ export class ChartManager {
                 break;
             }
         }
-        
+
         // Fallback to rows if no dataset found
         if (values.length === 0 && data.rows && data.rows.length > 0) {
             values = data.rows.map(r => r[1] || 0);

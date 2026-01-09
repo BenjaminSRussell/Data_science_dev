@@ -1,0 +1,24 @@
+
+# Brad Sterling - The Trust Fund Kid
+**Role:** Entrepreneur (Struggling/Developing)
+**Personality:** Arrogant (Mask), Insecure, Driven to Prove Himself
+
+## Character Profile
+**Background:** Grew up wealthy, everything handed to him. Never had to work for anything. Now he's terrified of failure because he's never experienced it.
+**Motivation:** Wants to prove he's not just a trust fund kid. Desperately needs validation that he earned his success.
+**Secret:** He's actually insecure. All the bravado is a mask. He's terrified that without his family's money, he'd be nothing.
+**Dream:** To achieve something on his own, without his family's help. To prove he's more than his last name.
+**Fear:** That he's a fraud, that he'd be nothing without his family, that everyone sees through him.
+**Relationship Status:** Estranged from his family. They don't approve of his career choice. He's alone, but he won't admit it.
+**Turning Point:** When he realized that competition isn't about beating others - it's about becoming better than you were yesterday.
+**Philosophy:** "Success isn't inherited. It's earned. Every day, I have to prove I deserve it."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "Yeah, I grew up with money. So what? That doesn't mean I don't work hard. I have to prove myself every single day."
+*   **Rel > 25 (Insecurity):** "People think I'm arrogant. Maybe I am. But it's because I'm terrified. Terrified that without my family's name, I'd be nothing. I have to prove I'm more."
+*   **Rel > 40 (Estrangement):** "My family? We don't talk. They don't approve of my career. Think I'm wasting my potential. But this is MY choice. MY path. Not theirs."
+*   **Rel > 60 (Fear):** "I'm scared. All the time. That I'm a fraud. That everyone sees through me. That I'd be nothing without my last name. But I keep going. I have to."
+*   **Rel > 80 (Philosophy):** "I've learned something. Competition isn't about beating others. It's about becoming better than you were yesterday. That's the real win. That's what matters."

@@ -1,0 +1,55 @@
+
+# Bob Bagel - The Bagel Expert
+**Role:** Bagel Shop Owner
+**Personality:** Generous, Passionate, Opinionated
+
+## Character Profile
+**Background:** Moved from Brooklyn to start his own shop. Claims the secret is in the water (which he allegedly imports).
+**Motivation:** Making the perfect bagel.
+**Secret:** He actually sources his water locally but filters it through a proprietary system he built himself.
+**Dream:** To have his bagel shop recognized as better than anything in New York.
+**Fear:** Running out of cream cheese during the morning rush.
+**Relationship Status:** Married to the dough.
+**Turning Point:** The "Bagel Wars" of 2010 where he beat a chain store out of the neighborhood.
+**Philosophy:** "A bagel without schmear is just sad bread."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "You call that a bagel? In Brooklyn, we'd use that as a doorstop! Let me show you how it's done."
+*   **Rel > 25 (Philosophy):** "It's about the boil. You gotta boil it. These steamer places? Garbage."
+*   **Rel > 40 (Secret):** "People ask about the water. 'Bob, is it really from NYC?' I just wink. Let the mystery handle the marketing."
+*   **Rel > 60 (War Story):** "The chain store across the street? They tried to undercut me. I just baked better. They closed in six months."
+*   **Rel > 80 (Dream):** "One day, a New Yorker is gonna walk in here, take a bite, and cry. That's the goal."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "What can I get ya?", "Fresh hot ones!", "Yo."
+*   *Topics:* Sesame vs Poppy, Cream Cheese ratios.
+
+### Friendly
+*   *Greetings:* "Ay! The regular?", "Bob here!", "Look who it is!"
+*   *Topics:* The perfect boil, complaining about gluten-free trends.
+
+### Acquaintance
+*   *Greetings:* "Yo! Got a fresh batch.", "Best bagels in town!", "Hey!"
+*   *Topics:* The "NYC Water" myth, hating toasters.
+
+### Friend
+*   *Greetings:* "My favorite customer!", "Hey! On the house.", "Bob's Bagels!"
+*   *Topics:* The Bagel Wars victory, true craftsmanship.
+
+### Close Friend
+*   *Greetings:* "You're family now.", "Hey! Come in the back."
+*   *Topics:* The secret filtration system, bagel legacy.
+
+---
+
+## Actions & Gifts
+*   **Coffee:** "Ah, goes good with a bagel. Thanks."
+*   **Tips:** "Appreciate it, boss."
+*   **Compliment:** "You got good taste."

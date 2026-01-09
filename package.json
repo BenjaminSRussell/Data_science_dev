@@ -9,10 +9,13 @@
     "preview": "vite preview",
     "build:wasm": "emcc src/cpp/main.cpp src/cpp/game_state.cpp src/cpp/data_generator.cpp src/cpp/task_system.cpp src/cpp/scorer.cpp src/cpp/economy.cpp -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 --bind -o public/wasm/game.js",
     "build:all": "npm run build:wasm && npm run build",
-    "test": "vitest",
+    "test": "vitest run",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest --watch",
+    "test:continuous": "node test/integration/continuous-test-runner.js",
+    "inventory": "node scripts/generate-file-inventory.js",
+    "inventory:full": "node scripts/generate-file-inventory.js src/js FILE_INVENTORY.md --size --date --lines --ext",
     "compress-assets": "node scripts/compress-assets-for-git.js",
     "check-sizes": "node scripts/check-file-sizes.js"
   },
@@ -25,6 +28,7 @@
     "interactjs": "^1.10.27",
     "lit": "^3.3.1",
     "pixi.js": "^8.14.3",
+    "three": "^0.182.0",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

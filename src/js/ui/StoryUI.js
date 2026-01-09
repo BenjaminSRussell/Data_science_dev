@@ -32,7 +32,7 @@ export class StoryUI {
 
         const storyBtn = document.createElement('button');
         storyBtn.id = 'btn-nav-story';
-        storyBtn.className = 'icon-btn';
+        storyBtn.className = 'btn-grey';
         storyBtn.setAttribute('aria-label', 'Your Story');
         storyBtn.setAttribute('title', 'Your Story');
         storyBtn.innerHTML = '';

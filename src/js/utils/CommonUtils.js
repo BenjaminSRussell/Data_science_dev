@@ -203,7 +203,7 @@ export class CommonUtils {
      * Check if value is empty
      */
     static isEmpty(value) {
-        if (value == null) return true;
+        if (value === null || value === undefined) return true;
         if (typeof value === 'string') return value.trim().length === 0;
         if (Array.isArray(value)) return value.length === 0;
         if (typeof value === 'object') return Object.keys(value).length === 0;
@@ -217,7 +217,7 @@ export class CommonUtils {
         const keys = path.split('.');
         let result = obj;
         for (const key of keys) {
-            if (result == null) return defaultValue;
+            if (result === null || result === undefined) return defaultValue;
             result = result[key];
         }
         return result !== undefined ? result : defaultValue;
@@ -299,5 +299,6 @@ export class CommonUtils {
         return array.flat(depth);
     }
 }
+
 
 

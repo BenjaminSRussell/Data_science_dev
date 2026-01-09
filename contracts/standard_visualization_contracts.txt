@@ -1,0 +1,37 @@
+
+# Standard Visualization Contracts
+These are the core charting and visualization tasks available in the game, categorized by difficulty.
+
+## Difficulty 1: Entry Level
+**Reward:** Low | **Time:** 300s
+*   **Quarterly Sales Report:** Create a chart showing our quarterly sales performance. (Bar/Line)
+*   **Sales by Category:** Visualize how sales are distributed across product categories. (Pie/Doughnut)
+*   **Monthly Revenue Trend:** Show how our revenue has changed over the past year. (Line)
+*   **Website Traffic Overview:** Show our website visitor trends for the team meeting. (Line)
+*   **Department Budget Allocation:** Visualize how our budget is split across Departments. (Pie/Doughnut)
+
+## Difficulty 2: Mid Level
+**Reward:** Medium | **Time:** 240s
+*   **Product Performance Analysis:** Compare our top products by sales and customer ratings. (Bar)
+*   **User Growth Analysis:** Analyze user growth patterns over the past quarter. (Line/Area)
+*   **Customer Demographics:** Visualize our customer base by age group distribution. (Pie/Bar)
+*   **Marketing Campaign ROI:** Show the return on investment for our marketing channels. (Bar)
+*   **Employee Satisfaction Survey:** Visualize results from the annual employee satisfaction survey. (Bar/Radar)
+*   **Regional Sales Comparison:** Compare sales performance across different regions. (Bar)
+
+## Difficulty 3: Senior Level
+**Reward:** High | **Time:** 200s
+*   **Team Performance Metrics:** Create a comprehensive view of team performance across key metrics. (Radar)
+*   **Executive Summary Chart:** Create a board-ready visualization of quarterly financial performance. (Bar/Line)
+*   **Growth Trend Presentation:** Visualize user growth for investor presentation. (Line)
+*   **Competitive Landscape Analysis:** Compare our performance against key competitors. (Bar/Radar)
+*   **Customer Conversion Funnel:** Visualize the customer journey from awareness to purchase. (Bar)
+*   **KPI Dashboard Overview:** Create a comprehensive view of our key performance indicators. (Bar/Radar)
+
+## Difficulty 4: Expert Level
+**Reward:** Very High | **Time:** 180s - 150s
+*   **Comprehensive Market Analysis:** Create publication-quality visualization for the annual report. (Bar/Scatter)
+*   **C-Suite Financial Dashboard:** Create a visualization for the CEO's quarterly business review. (Bar/Line)
+*   **Series B Investor Pitch:** Create the key metrics visualization for our funding round. (Line)
+*   **Board of Directors Report:** Prepare the annual performance visualization for the board. (Bar/Line)
+*   **5-Year Strategic Outlook:** Visualize our strategic roadmap for executive leadership. (Line/Area)

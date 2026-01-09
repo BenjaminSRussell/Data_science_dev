@@ -15,7 +15,7 @@ export class PerformanceManager {
         this.lastFrameTime = performance.now();
         this.fpsHistory = [];
         this.hardwareTier = 'unknown';
-        
+
         // Quality presets
         this.presets = {
             low: {
@@ -59,14 +59,14 @@ export class PerformanceManager {
     detectHardware() {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        
+
         let tier = 'low';
-        
+
         if (gl) {
             const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
             if (debugInfo) {
                 const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                
+
                 // Detect GPU tier
                 if (renderer.includes('NVIDIA') || renderer.includes('AMD') || renderer.includes('Intel Iris')) {
                     tier = 'high';
@@ -94,7 +94,7 @@ export class PerformanceManager {
         }
 
         this.hardwareTier = tier;
-        
+
         // Auto-set quality based on hardware
         if (this.quality === 'auto') {
             if (tier === 'high') {
@@ -119,7 +119,7 @@ export class PerformanceManager {
         }
 
         this.quality = level;
-        
+
         // Apply preset if not auto
         if (level !== 'auto') {
             const preset = this.presets[level];
@@ -142,7 +142,7 @@ export class PerformanceManager {
         root.style.setProperty('--quality-particles', preset.particles || 'none');
         root.style.setProperty('--quality-shadows', preset.shadows || 'none');
         root.style.setProperty('--quality-resolution', preset.resolution);
-        
+
         // Update frame rate limit
         this.targetFPS = preset.frameRateLimit;
     }
@@ -152,12 +152,12 @@ export class PerformanceManager {
      */
     startMonitoring() {
         if (this.monitoring) return;
-        
+
         this.monitoring = true;
         this.frameCount = 0;
         this.lastFrameTime = performance.now();
         this.fpsHistory = [];
-        
+
         this.monitor();
     }
 
@@ -169,14 +169,14 @@ export class PerformanceManager {
 
         const currentTime = performance.now();
         const deltaTime = currentTime - this.lastFrameTime;
-        
+
         this.frameCount++;
-        
+
         // Calculate FPS every second
         if (deltaTime >= 1000) {
             this.fps = Math.round((this.frameCount * 1000) / deltaTime);
             this.frameTime = deltaTime / this.frameCount;
-            
+
             this.fpsHistory.push(this.fps);
             if (this.fpsHistory.length > 60) {
                 this.fpsHistory.shift(); // Keep last 60 seconds
@@ -227,15 +227,15 @@ export class PerformanceManager {
      */
     autoOptimize() {
         const avgFPS = this.getAverageFPS();
-        
+
         if (avgFPS < 30 && this.quality !== 'low') {
-            console.log('Performance low, reducing quality to low');
+
             this.setQuality('low');
         } else if (avgFPS < 45 && this.quality === 'high') {
-            console.log('Performance moderate, reducing quality to medium');
+
             this.setQuality('medium');
         } else if (avgFPS >= 55 && this.quality === 'low') {
-            console.log('Performance good, increasing quality to medium');
+
             this.setQuality('medium');
         }
     }

@@ -10,21 +10,54 @@ export class IntroSystem {
         this.currentStep = 0;
         this.selectedJob = null;
     }
-    
+
     /**
-     * Show intro screen
+     * Show intro flow (video -> text)
      */
     showIntro() {
+        const videoScreen = document.getElementById('screen-intro-video');
+        const video = document.getElementById('intro-video');
+        const skipBtn = document.getElementById('btn-skip-video');
+
+        if (!videoScreen || !video) {
+            this.showIntroText();
+            return;
+        }
+
+        // Show video screen
+        videoScreen.classList.remove('hidden');
+
+        const finishVideo = () => {
+            video.pause();
+            videoScreen.classList.add('hidden');
+            this.showIntroText();
+        };
+
+        // Setup listeners
+        video.onended = finishVideo;
+        if (skipBtn) skipBtn.onclick = finishVideo;
+
+        // Start playback
+        video.play().catch(err => {
+            logger.warn('Video playback failed, skipping to text:', err);
+            finishVideo();
+        });
+    }
+
+    /**
+     * Show intro text screen
+     */
+    showIntroText() {
         // Create intro screen if not exists
         let intro = document.getElementById('intro-screen');
         if (!intro) {
             intro = this.createIntroScreen();
             document.body.appendChild(intro);
         }
-        
+
         intro.classList.add('active');
     }
-    
+
     /**
      * Create intro screen HTML
      */
@@ -32,7 +65,7 @@ export class IntroSystem {
         const screen = document.createElement('div');
         screen.id = 'intro-screen';
         screen.className = 'intro-screen';
-        
+
         screen.innerHTML = `
             <div class="intro-content">
                 <h1 class="intro-title">Welcome to Data City</h1>
@@ -72,7 +105,7 @@ export class IntroSystem {
                 </button>
             </div>
         `;
-        
+
         // Add event listener for the button
         setTimeout(() => {
             const btn = screen.querySelector('#btn-intro-find-job');
@@ -82,10 +115,10 @@ export class IntroSystem {
                 });
             }
         }, 0);
-        
+
         return screen;
     }
-    
+
     /**
      * Hide intro and show job application
      */
@@ -93,17 +126,17 @@ export class IntroSystem {
         // Hide intro
         const intro = document.getElementById('intro-screen');
         if (intro) intro.classList.remove('active');
-        
+
         // Create job application screen
         let jobScreen = document.getElementById('job-application-screen');
         if (!jobScreen) {
             jobScreen = this.createJobApplicationScreen();
             document.body.appendChild(jobScreen);
         }
-        
+
         jobScreen.classList.add('active');
     }
-    
+
     /**
      * Create job application screen
      */
@@ -111,9 +144,9 @@ export class IntroSystem {
         const screen = document.createElement('div');
         screen.id = 'job-application-screen';
         screen.className = 'job-application-screen';
-        
+
         const jobs = this.getStarterJobs();
-        
+
         screen.innerHTML = `
             <div class="job-app-header">
                 <h2 class="job-app-title"> Job Board</h2>
@@ -124,7 +157,7 @@ export class IntroSystem {
                 ${jobs.map(job => this.renderJobCard(job)).join('')}
             </div>
         `;
-        
+
         // Add event listeners after creating the screen
         setTimeout(() => {
             // Add click handlers for job cards
@@ -134,7 +167,7 @@ export class IntroSystem {
                     this.selectJob(jobId);
                 });
             });
-            
+
             // Add click handlers for apply buttons
             screen.querySelectorAll('.job-card-apply').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -146,10 +179,10 @@ export class IntroSystem {
                 });
             });
         }, 0);
-        
+
         return screen;
     }
-    
+
     /**
      * Get starter job options
      */
@@ -159,7 +192,6 @@ export class IntroSystem {
                 id: 'data_entry_clerk',
                 title: 'Data Entry Clerk',
                 company: 'DataFlow Inc.',
-                icon: '',
                 salary: '$400/week',
                 salaryNum: 400,
                 hours: '9-5',
@@ -172,7 +204,6 @@ export class IntroSystem {
                 id: 'junior_analyst',
                 title: 'Junior Data Analyst',
                 company: 'Analytics Pro',
-                icon: '',
                 salary: '$600/week',
                 salaryNum: 600,
                 hours: '9-6',
@@ -185,7 +216,6 @@ export class IntroSystem {
                 id: 'freelance',
                 title: 'Freelance Data Work',
                 company: 'Self-Employed',
-                icon: '',
                 salary: 'Variable',
                 salaryNum: 300,
                 hours: 'Flexible',
@@ -198,7 +228,6 @@ export class IntroSystem {
                 id: 'intern',
                 title: 'Data Science Intern',
                 company: 'TechCorp',
-                icon: '',
                 salary: '$200/week',
                 salaryNum: 200,
                 hours: 'Part-time',
@@ -209,7 +238,7 @@ export class IntroSystem {
             }
         ];
     }
-    
+
     /**
      * Render job card HTML
      */
@@ -217,7 +246,6 @@ export class IntroSystem {
         return `
             <div class="job-card" data-job-id="${job.id}">
                 <div class="job-card-header">
-                    <div class="job-card-icon">${job.icon}</div>
                     <div>
                         <div class="job-card-title">${job.title}</div>
                         <div class="job-card-company">${job.company}</div>
@@ -246,7 +274,7 @@ export class IntroSystem {
             </div>
         `;
     }
-    
+
     /**
      * Select a job (highlight)
      */
@@ -255,7 +283,7 @@ export class IntroSystem {
         document.querySelectorAll('.job-card').forEach(card => {
             card.classList.remove('selected');
         });
-        
+
         // Add selection to clicked card
         const card = document.querySelector(`[data-job-id="${jobId}"]`);
         if (card) {
@@ -263,16 +291,16 @@ export class IntroSystem {
             this.selectedJob = jobId;
         }
     }
-    
+
     /**
      * Apply for job and start game
      */
     applyForJob(jobId) {
         const jobs = this.getStarterJobs();
         const job = jobs.find(j => j.id === jobId);
-        
+
         if (!job) return;
-        
+
         // Set job in game state
         this.game.gameState.currentJob = {
             id: job.id,
@@ -281,15 +309,15 @@ export class IntroSystem {
             salary: job.salaryNum,
             startDate: Date.now()
         };
-        
+
         // Close job application screen
         const jobScreen = document.getElementById('job-application-screen');
         if (jobScreen) jobScreen.classList.remove('active');
-        
+
         // Show welcome message
         this.showJobWelcome(job);
     }
-    
+
     /**
      * Show welcome message after getting job
      */
@@ -314,9 +342,9 @@ export class IntroSystem {
                 </button>
             </div>
         `;
-        
+
         document.body.appendChild(overlay);
-        
+
         // Add event listener for start button
         setTimeout(() => {
             const btn = overlay.querySelector('#btn-intro-start-game');
@@ -326,11 +354,11 @@ export class IntroSystem {
                 });
             }
         }, 0);
-        
+
         // Store reference to remove later
         this.welcomeOverlay = overlay;
     }
-    
+
     /**
      * Start the actual game
      */
@@ -339,11 +367,11 @@ export class IntroSystem {
         if (this.welcomeOverlay) {
             this.welcomeOverlay.remove();
         }
-        
+
         // Remove intro screen
         const intro = document.getElementById('intro-screen');
         if (intro) intro.remove();
-        
+
         // Continue with normal game start
         this.game.finishGameStart();
     }

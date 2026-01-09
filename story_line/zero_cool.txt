@@ -1,0 +1,55 @@
+
+# Zero - The Info Broker
+**Role:** Info Broker (Criminal)
+**Personality:** Mysterious, Paranoiac, Tech-Savvy
+
+## Character Profile
+**Background:** A ghost in the machine. Can find dirt on anyone. Nobody knows their real name.
+**Motivation:** Information is the only currency that matters.
+**Secret:** "Zero" is actually a collective of three different people sharing one identity.
+**Dream:** Total information awareness.
+**Fear:** Being doxxed.
+**Relationship Status:** Encrypted.
+**Turning Point:** The day they erased their own legal existence.
+**Philosophy:** "Data wants to be free. Secrets want to be sold."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I don't exist. You're talking to a packet stream. A glitch."
+*   **Rel > 25 (Philosophy):** "Everyone has a dirty secret. Everyone. I just index them."
+*   **Rel > 40 (Secret):** "You think I'm one person? Cute. We are legion. Or maybe I'm just bored."
+*   **Rel > 60 (Goal):** "The Panopticon. Looking back at the watchers. That's the game."
+*   **Rel > 80 (Warning):** "Once you know, you can't unknow. Are you sure you want to open this file?"
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "...", "Encrypt your comms.", "Who asks?"
+*   *Topics:* Zero-days, exploits.
+
+### Friendly
+*   *Greetings:* "Connection secure.", "Zero.", "Data received."
+*   *Topics:* Corporate leaks, insecure passwords.
+
+### Acquaintance
+*   *Greetings:* "I found something.", "Hey. Look.", "Upload complete."
+*   *Topics:* The fragility of privacy.
+
+### Friend
+*   *Greetings:* "User authenticated.", "Hey! Nice firewall."
+*   *Topics:* The collective identity hint.
+
+### Close Friend
+*   *Greetings:* "Access Level: Audit.", "Hey! We trust you."
+*   *Topics:* The ultimate leak.
+
+---
+
+## Actions & Gifts
+*   **Crypto:** "Received. Confirmed."
+*   **Exploits:** "Juicy. Thanks."
+*   **Compliment:** "Irrelevant."

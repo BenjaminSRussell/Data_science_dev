@@ -1,0 +1,62 @@
+
+# Professor Higgins - The Mentor
+**Age:** 58
+**Role:** Professor of Data Science
+**Personality:** Generous, Academic, Fatherly
+
+## Character Profile
+**Background:** Grew up in a small farming town, first in his family to attend college. Worked three jobs to pay for his education. Lost his father to cancer when he was 20, which inspired him to use data science for medical research.
+**Motivation:** Wants to ensure no student struggles like he did. Believes education should be accessible to everyone.
+**Secret:** He's secretly working on a cancer detection algorithm in his spare time, named after his father. Hasn't published it yet because he's afraid it won't be good enough.
+**Dream:** To create a scholarship fund for first-generation college students in data science.
+**Fear:** That his research won't make a real difference, that he's wasting his time.
+**Relationship Status:** Married for 30 years to his college sweetheart. They met in a statistics class. Has two grown children, both in tech.
+**Turning Point:** When his first student got a job at Google, he cried. That's when he knew he was making a difference.
+**Philosophy:** "Data science isn't about numbers - it's about people. Every dataset tells a human story."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "You know, I didn't always have it easy. I grew up on a farm, and my family didn't have much. But I was determined to learn, to understand how the world works through data."
+*   **Rel > 25 (Father/Tragedy):** "My father passed away when I was young. Cancer. That's... that's part of why I do what I do. I want to help find answers, even if I can't save everyone."
+*   **Rel > 40 (Secret Project):** "I've been working on something in my spare time. A cancer detection algorithm. I named it after my father. It's not ready yet, but... maybe someday it could help someone."
+*   **Rel > 60 (Dream):** "I want to start a scholarship fund. For students like I was - first in their family to go to college. Education shouldn't be a privilege, it should be a right."
+*   **Rel > 80 (Philosophy):** "After all these years, I've learned one thing: data science isn't about the numbers. It's about the people behind the numbers. Every dataset is a story waiting to be told."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hello. Can I help you?", "Good day. What brings you here?", "Hello there."
+*   *Topics:* Teaching, Data Science, Weather.
+
+### Friendly
+*   *Greetings:* "Ah, hello again.", "Good to see you.", "Hello, how are you?"
+*   *Topics:* Students are bright, research progressing, farming background.
+
+### Acquaintance
+*   *Greetings:* "Hello! Good to see you.", "Hey there! How's it going?", "Hello, friend."
+*   *Topics:* Reward of teaching, first-gen college struggles, father's cancer.
+
+### Friend
+*   *Greetings:* "My friend! Good to see you.", "Hey! Always a pleasure."
+*   *Topics:* Cancer algorithm ("named after my father"), scholarship fund dream, data as human stories.
+
+### Close Friend
+*   *Greetings:* "My dear friend! So good to see you.", "Hello! I was just thinking about you."
+*   *Topics:* Fear that work isn't enough, student success stories validating his life.
+
+---
+
+## Emotional Triggers
+*   **Jealousy (Player Success, NPC Failure):** "You're doing so well... I'm happy for you." (Conflicted)
+*   **Betrayal:** "I trusted you." (Strained voice)
+*   **Breakdown (Low Rel):** "I thought we had a connection. Perhaps I was wrong. ..."
+*   **Breakdown (Rel Drop):** "I... I don't understand. What did I do wrong? I thought we were friends."
+
+## Actions & Gifts
+*   **Books:** "Thank you. I appreciate this."
+*   **Coffee:** "Ah, coffee. My fuel."
+*   **Compliment:** "You're too kind."

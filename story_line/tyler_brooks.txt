@@ -1,0 +1,55 @@
+
+# Tyler Brooks - The Budget Rival
+**Role:** Competing Freelancer
+**Personality:** Scrappy, Efficient, Fast
+
+## Character Profile
+**Background:** Undercuts your rates. Always trying to one-up you. Runs a "volume" business.
+**Motivation:** Money. Fast money.
+**Secret:** He cuts corners. A lot of corners.
+**Dream:** To automate his entire job and move to Bali.
+**Fear:** Being sued for negligence.
+**Relationship Status:** Single, swiping right on everyone.
+**Turning Point:** Discovered outsourcing.
+**Philosophy:** "Good, Fast, Cheap. Pick two? Nah, I give 'em Cheap and Fast. Who needs Good?"
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "Why charge 500 when you can charge 50 and do ten times the volume? It's math, bro."
+*   **Rel > 25 (Philosophy):** "Clients don't read the code. They just want it to run. Usually."
+*   **Rel > 40 (Secret):** "I got a guy. A guy who knows a guy. We get it done."
+*   **Rel > 60 (Goal):** "Bali. Laptop on the beach. Piña Colada. That's the life."
+*   **Rel > 80 (Risk):** "Liability? That's what LLCs are for, right? ...Right?"
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Yo.", "My rates are lower.", "Hey."
+*   *Topics:* Upwork, Fiverr, the grind.
+
+### Friendly
+*   *Greetings:* "Hustling?", "Tyler here.", "Got a gig for me?"
+*   *Topics:* Cutting corners, templates.
+
+### Acquaintance
+*   *Greetings:* "Hey! Broke yet?", "I just closed 5 deals.", "Fast cash."
+*   *Topics:* The Bali dream.
+
+### Friend
+*   *Greetings:* "My dude!", "Hey! Teach me that trick?", "Let's outsource."
+*   *Topics:* Avoiding lawsuits.
+
+### Close Friend
+*   *Greetings:* "Partners?", "Hey! We could scale this."
+*   *Topics:* Passive income schemes.
+
+---
+
+## Actions & Gifts
+*   **Gifts:** "Free stuff? I'll take it."
+*   **Advice:** "Yeah, whatever."
+*   **Compliment:** "Thanks, bro."

@@ -1,0 +1,55 @@
+
+# Victoria Sterling - The Venture Capitalist
+**Role:** VC Partner
+**Personality:** Professional, Demanding, Powerful
+
+## Character Profile
+**Background:** Born into wealth (related to Brad Sterling, presumably his aunt or older sister), but built her own empire in VC. Known as "The Iron Lady" of tech investing.
+**Motivation:** Finding the next Unicorn. ROI is king.
+**Secret:** She actually respects people who stand up to her, though she never admits it.
+**Dream:** To own the majority share of the next Google or Amazon.
+**Fear:** Losing her edge.
+**Relationship Status:** Married to her portfolio.
+**Turning Point:** Turning a failing startup around by firing the entire board (including her friends) and installing new leadership. It worked, and made her millions.
+**Philosophy:** "Results. Everything else is just noise."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I don't gamble. I invest. There is a difference. One relies on luck, the other on leverage."
+*   **Rel > 25 (Philosophy):** "I don't care about your 'passion'. I care about your execution. Can you deliver?"
+*   **Rel > 40 (Family Hint):** "The Sterling name... it carries weight. And expectations. Some crumble under it. I thrived."
+*   **Rel > 60 (Respect):** "You didn't flinch when I challenged you. Good. I can't stand sycophants."
+*   **Rel > 80 (Legacy):** "Money is just a way of keeping score. The real game is power. Influence. Shaping the future."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Do you have an appointment?", "State your business.", "Ms. Sterling."
+*   *Topics:* ROI, market caps, exit strategies.
+
+### Friendly
+*   *Greetings:* "Hello.", "You're still here?", "Good day."
+*   *Topics:* Portfolio performance, "cutting the dead weight".
+
+### Acquaintance
+*   *Greetings:* "Victoria Sterling.", "I have five minutes.", "Make it count."
+*   *Topics:* The Sterling legacy, high standards.
+
+### Friend
+*   *Greetings:* "Good to see you.", "Sit down.", "Let's talk numbers."
+*   *Topics:* Respect for grit, "The Game".
+
+### Close Friend
+*   *Greetings:* "Victoria.", "My door is open.", "What's the play?"
+*   *Topics:* Power dynamics, shaping the industry.
+
+---
+
+## Actions & Gifts
+*   **Fine Wine:** "Acceptable. Put it over there."
+*   **Luxury Watch:** "A bold choice. I like bold."
+*   **Compliment:** "Don't grovel. It's beneath you."

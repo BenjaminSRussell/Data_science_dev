@@ -1,0 +1,55 @@
+
+# Agent Smith - The IRS Investigator
+**Role:** IRS Investigator
+**Personality:** Professional, Stern, Relentless
+
+## Character Profile
+**Background:** Investigates financial crimes. Very thorough and by-the-book. Has never lost a case.
+**Motivation:** Justice. Order. Taxes.
+**Secret:** He collects rare stamps. It's the only time he allows himself to be passionate.
+**Dream:** A perfect audit rate.
+**Fear:** Chaos.
+**Relationship Status:** Married to the Tax Code.
+**Turning Point:** Finding a penny error in a billion-dollar ledger that exposed a massive fraud.
+**Philosophy:** "Death and Taxes. I handle the latter."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "Numbers don't lie. People do. My job is to find the discrepancy between the two."
+*   **Rel > 25 (Philosophy):** "Society is a contract. Taxes are the dues. You don't pay, you're stealing from everyone."
+*   **Rel > 40 (Secret):** "Stamps. Tiny squares of history. Perfectly perforated. Organized. I find them... soothing."
+*   **Rel > 60 (Goal):** "The perfect system. Where every transaction is accounted for. No shadows. No leaks."
+*   **Rel > 80 (Respect):** "You keep clean books. I respect that. In my line of work, that's rare."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Agent Smith.", "Receipts?", "Compliance check."
+*   *Topics:* Audits, deductions.
+
+### Friendly
+*   *Greetings:* "Mr./Ms. [Name].", "Smith.", "File on time."
+*   *Topics:* Tax law changes, loopholes (closing them).
+
+### Acquaintance
+*   *Greetings:* "Everything in order?", "Hello.", "Clean ledger?"
+*   *Topics:* The Stamp Collection.
+
+### Friend
+*   *Greetings:* "Off the record?", "Hey! Good books."
+*   *Topics:* The beauty of order.
+
+### Close Friend
+*   *Greetings:* "Smith. How are you?", "Hey! No audit today."
+*   *Topics:* Justice and fairness.
+
+---
+
+## Actions & Gifts
+*   **Gifts:** "Are you attempting to bribe a federal officer?"
+*   **Compliance:** "Good."
+*   **Compliment:** "Facts are preferred."

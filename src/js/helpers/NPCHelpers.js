@@ -21,7 +21,7 @@ export function handleVisitNPC(game, npcId) {
     if (!game.dialogueUI) {
         game.dialogueUI = new DialogueUI(game);
     }
-    
+
     const relationshipLevel = game.gameState.npcManager.getRelationship?.(npcId) || 0;
     game.dialogueUI.open(npc, relationshipLevel);
     return;
@@ -112,7 +112,7 @@ export async function handleNPCTalk(game, npcId) {
 
     // Update actions to choices
     const actionsDiv = document.querySelector('#npc-modal .npc-actions');
-    actionsDiv.innerHTML = '';
+    actionsDiv.textContent = '';
 
     convo.choices.forEach((choice, index) => {
         const btn = document.createElement('button');
@@ -159,35 +159,35 @@ export function handleNPCGift(game, npcId) {
  */
 export function updateRelationshipsScreen(game) {
     const npcManager = game.npcManager || game.gameState?.npcManager;
-    console.log('DEBUG updateRelationshipsScreen: npcManager =', npcManager);
-    
+
+
     if (!npcManager) {
         console.warn('No NPC manager found for relationships screen');
         return;
     }
 
     const npcs = npcManager?.getMetNPCs() || [];
-    console.log('DEBUG updateRelationshipsScreen: npcs =', npcs);
+
     const grid = document.getElementById('npc-grid');
-    console.log('DEBUG updateRelationshipsScreen: grid element =', grid);
-    
+
+
     if (!grid) {
         console.error('NPC grid element not found!');
         return;
     }
-    
-    grid.innerHTML = '';
+
+    grid.textContent = '';
 
     npcs.forEach(npc => {
         const card = document.createElement('div');
         card.className = 'npc-card';
         card.dataset.npc = npc.id;
-        
+
         const textIcon = getTextIcon(npc.icon);
         // Ensure NPC has image
         const npcImage = getNPCImage(npc);
         const fallbackIcon = getNPCFallback(npc);
-        
+
         const avatarImg = DOMUtils.createElement('img', {
             attributes: {
                 src: npcImage,
@@ -196,7 +196,7 @@ export function updateRelationshipsScreen(game) {
             className: 'npc-avatar-image',
             style: { objectPosition: 'center center' },
             listeners: {
-                error: function() {
+                error: function () {
                     this.style.display = 'none';
                     if (this.nextElementSibling) {
                         this.nextElementSibling.style.display = 'flex';
@@ -204,13 +204,13 @@ export function updateRelationshipsScreen(game) {
                 }
             }
         });
-        
+
         const avatarText = DOMUtils.createElement('div', {
             className: 'npc-avatar-text',
             innerHTML: getTextIcon(fallbackIcon),
             style: { display: 'none' }
         });
-        
+
         const avatar = DOMUtils.createContainer({ className: 'npc-avatar' }, avatarImg, avatarText);
         const info = DOMUtils.createContainer(
             { className: 'npc-info' },
@@ -225,19 +225,19 @@ export function updateRelationshipsScreen(game) {
             })
         );
         const tier = DOMUtils.createContainer({ className: 'relationship-tier' }, npc.tier.label);
-        
+
         card.appendChild(avatar);
         card.appendChild(info);
         card.appendChild(relationshipBar);
         card.appendChild(tier);
-        
+
         card.addEventListener('click', () => {
             handleVisitNPC(game, npc.id);
         });
-        
+
         return card;
     });
-    
+
     grid.appendChild(DOMUtils.batch(cards));
 }
 

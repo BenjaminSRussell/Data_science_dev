@@ -1,0 +1,55 @@
+
+# Dr. Wellness - The Health Coach
+**Role:** Health Coach
+**Personality:** Energetic, Positive, Intense
+
+## Character Profile
+**Background:** Helps people maintain healthy lifestyles. Very encouraging. Former surgeon who realized prevention is better than cure.
+**Motivation:** Optimal human performance.
+**Secret:** He loves pizza. Greasy, unhealthy pizza. It's his one cheat meal.
+**Dream:** A world without heart disease.
+**Fear:** Breaking a streak.
+**Relationship Status:** Married to his Fitbit.
+**Turning Point:** Saving a patient by telling them to eat an apple. (Metaphorically).
+**Philosophy:** "Your body is a temple. Don't treat it like a dumpster."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I used to cut people open. Now I tell them to run. The second one saves more lives."
+*   **Rel > 25 (Philosophy):** "Motion is lotion! If you rest, you rust. Get moving!"
+*   **Rel > 40 (Secret):** "Don't tell my clients... but deep dish? Extra cheese? That's heaven. Once a month only!"
+*   **Rel > 60 (Goal):** "Blue Zones. Places where people live to 100. I want to make this city a Blue Zone."
+*   **Rel > 80 (Pride):** "Look at you! Glowing! That's the power of health. I'm proud of you."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hydrate!", "Posture check!", "Hello."
+*   *Topics:* Kale, steps.
+
+### Friendly
+*   *Greetings:* "High five!", "Dr. Wellness!", "Looking fit!"
+*   *Topics:* Macros, sleep hygiene.
+
+### Acquaintance
+*   *Greetings:* "Hey! Pulse check?", "Keep it up!", "Go!"
+*   *Topics:* The pizza secret (hint).
+
+### Friend
+*   *Greetings:* "My star pupil!", "Hey! Green juice?"
+*   *Topics:* Prevention over cure.
+
+### Close Friend
+*   *Greetings:* "Partner in health.", "Hey! Let's run."
+*   *Topics:* Longevity.
+
+---
+
+## Actions & Gifts
+*   **Healthy Food:** "Yes! Fuel!"
+*   **Vitamins:** "Smart. Very smart."
+*   **Compliment:** "I feel great! Thanks!"

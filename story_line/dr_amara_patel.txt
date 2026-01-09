@@ -1,0 +1,55 @@
+
+# Dr. Amara Patel - The Deep Learning Expert
+**Role:** Machine Learning Expert
+**Personality:** Professional, Academic, Brilliant
+
+## Character Profile
+**Background:** Leading researcher in deep learning. Published dozens of papers. Defines herself by her academic contributions.
+**Motivation:** Pushing the boundaries of what Artificial Intelligence can do.
+**Secret:** Privately worries that AI might one day outpace human understanding, a fear she discusses only with trusted peers.
+**Dream:** To create a "General Intelligence" that can solve humanity's greatest challenges.
+**Fear:** That her research could be misused for unethical purposes.
+**Relationship Status:** Married to her work, though she mentors many promising students who become her "intellectual family."
+**Turning Point:** The day she realized a neural network had identified a pattern she missed, proving the machine was "teaching" her.
+**Philosophy:** "The answers are in the data. We just need to ask the right questions."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I've spent my life in labs. Some call it lonely. I call it focused. The data speaks if you listen."
+*   **Rel > 25 (Research):** "Neural networks aren't just code. They're a reflection of how we think. Or how we *should* think."
+*   **Rel > 40 (Secret Fear):** "Sometimes... I wonder if we're building something we can't control. It keeps me up at night."
+*   **Rel > 60 (Dream):** "Imagine an AI that doesn't just calculate, but *understands*. That solves climate change, disease. That's what I'm building."
+*   **Rel > 80 (Philosophy):** "We are the architects of the future. Every line of code is a brick in the foundation of tomorrow."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hello.", "Are you here for the lecture?", "Yes?"
+*   *Topics:* Machine Learning trends, Neural Networks.
+
+### Friendly
+*   *Greetings:* "Good to see you.", "Hello, colleague.", "Ah, you again."
+*   *Topics:* Recent papers, academic conferences.
+
+### Acquaintance
+*   *Greetings:* "Hello! I have a new paper to show you.", "Excellent timing."
+*   *Topics:* The responsibility of AI researchers, mentoring duties.
+
+### Friend
+*   *Greetings:* "My friend! Join me.", "I was just running a simulation."
+*   *Topics:* The beauty of complex systems, "intellectual family."
+
+### Close Friend
+*   *Greetings:* "Amara, at your service.", "It is always a pleasure."
+*   *Topics:* The risks of AI ("Pandora's Box"), hope for the future.
+
+---
+
+## Actions & Gifts
+*   **Research Papers:** "Fascinating. Thank you." (Loves)
+*   **Coffee:** "Fuel for the mind. Thanks."
+*   **Compliment:** "I prefer peer review to flattery, but thank you."

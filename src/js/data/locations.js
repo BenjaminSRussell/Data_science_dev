@@ -8,7 +8,7 @@ export const OFFICE_LOCATIONS = [
         name: "Home Office",
         description: "Your humble beginnings - a desk in your apartment",
         rankRequired: 0,
-        background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)",
+        background: 'url("/assets/backgrounds/locations/home.png")',
         ambiance: "",
         elements: ["", "", "", ""],
         unlockMessage: "Welcome to your home office! Time to start your data science journey."
@@ -18,7 +18,7 @@ export const OFFICE_LOCATIONS = [
         name: "Startup Bullpen",
         description: "An open floor plan at a fast-moving startup",
         rankRequired: 1,
-        background: "linear-gradient(180deg, #1e3a5f 0%, #0d2137 50%, #0a1929 100%)",
+        background: 'url("/assets/backgrounds/locations/tech_hub.png")',
         ambiance: "",
         elements: ["", "", "", ""],
         unlockMessage: "You've joined a startup! The energy is electric."
@@ -28,7 +28,7 @@ export const OFFICE_LOCATIONS = [
         name: "Corporate Tower",
         description: "A sleek office in a downtown high-rise",
         rankRequired: 3,
-        background: "linear-gradient(180deg, #1a1a3e 0%, #2d1b4e 50%, #1a0f2e 100%)",
+        background: 'url("/assets/backgrounds/locations/office.png")',
         ambiance: "",
         elements: ["", "", "", ""],
         unlockMessage: "Welcome to the big leagues - corner office views await!"
@@ -38,7 +38,7 @@ export const OFFICE_LOCATIONS = [
         name: "Innovation Lab",
         description: "A cutting-edge R&D facility",
         rankRequired: 5,
-        background: "linear-gradient(180deg, #0f2027 0%, #203a43 50%, #2c5364 100%)",
+        background: 'url("/assets/backgrounds/locations/tech_hub.png")',
         ambiance: "",
         elements: ["", "", "", ""],
         unlockMessage: "You've made it to the Innovation Lab - where data dreams come true!"
@@ -48,7 +48,7 @@ export const OFFICE_LOCATIONS = [
         name: "Executive Suite",
         description: "The penthouse office with a view of the city",
         rankRequired: 6,
-        background: "linear-gradient(180deg, #141e30 0%, #243b55 50%, #141e30 100%)",
+        background: 'url("/assets/backgrounds/locations/downtown.png")',
         ambiance: "",
         elements: ["", "", "", ""],
         unlockMessage: "You've reached the top! The C-Suite is yours."

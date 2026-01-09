@@ -1,0 +1,61 @@
+
+# Sarah Martinez - The Working Mom
+**Age:** 34
+**Role:** Senior Data Analyst
+**Personality:** Professional, Ambitious, Protective
+
+## Character Profile
+**Background:** Started as a barista, taught herself Python at night. Worked her way up from data entry to senior analyst. Single mother of two, works 60-hour weeks to provide for her kids.
+**Motivation:** Wants to prove that anyone can succeed with hard work. Determined to give her children opportunities she never had.
+**Secret:** She's been offered a C-suite position at a startup, but turned it down because it would mean less time with her kids. She struggles with this decision daily.
+**Dream:** To start her own consulting firm, work flexible hours, and be present for her children's milestones.
+**Fear:** That she's not doing enough, that she's failing as both a mother and a professional.
+**Relationship Status:** Divorced, co-parents with her ex. Her kids are 8 and 12. They're her whole world.
+**Turning Point:** When her daughter said 'Mommy, you're so smart' after seeing her present at a conference. That moment changed everything.
+**Philosophy:** "Balance is a myth. You make choices, and you live with them. But you can still be great at what you do."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I didn't go to an Ivy League school. I started as a barista, taught myself to code at night. But here I am. Hard work beats pedigree every time."
+*   **Rel > 25 (Kids/Motivation):** "My kids are my motivation. Everything I do, I do for them. I want them to see that their mom can be successful, that they can be anything."
+*   **Rel > 40 (Struggle):** "It's hard, you know? Balancing work and being a mom. Sometimes I feel like I'm failing at both. But I keep going, because I have to."
+*   **Rel > 60 (Secret):** "I was offered a C-suite position. More money, more prestige. But it would mean less time with my kids. I said no. Sometimes the right choice is the hardest one."
+*   **Rel > 80 (Dream):** "Someday, I want to start my own firm. Work on my own terms, be there for my kids. But for now, I'm building the foundation. One day at a time."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hello.", "Hi there.", "Hey."
+*   *Topics:* Data analytics work, Fortune 500 challenges.
+
+### Friendly
+*   *Greetings:* "Hey! Good to see you.", "Hello again."
+*   *Topics:* Busy work schedule, kids ("my motivation").
+
+### Acquaintance
+*   *Greetings:* "Hey! Always good to catch up.", "Hello! How's everything?"
+*   *Topics:* Self-taught coder background, struggle of work-life balance.
+
+### Friend
+*   *Greetings:* "My friend! So good to see you.", "Hey! I was hoping to see you."
+*   *Topics:* Turning down the C-suite job (Secret), dream of own consulting firm.
+
+### Close Friend
+*   *Greetings:* "My dear friend! I'm so glad you're here.", "Hello! I needed to talk to someone."
+*   *Topics:* Terror of failure, daughter's validation ("Mommy, you're so smart").
+
+---
+
+## Emotional Triggers
+*   **Jealousy (Player Success, NPC Struggle):** "You make it look so easy." (Pain in voice)
+*   **Warmth (Mention Kids):** "Thank you for asking about them." (Eyes light up)
+*   **Breakdown (Stress):** "I can't do this anymore. I'm failing at everything. I don't know what to do."
+
+## Actions & Gifts
+*   **Coffee:** "Thanks. I need this." (Caffeine is life)
+*   **Tech:** "Oh, this is nice. Thank you."
+*   **Compliment:** "That means a lot."

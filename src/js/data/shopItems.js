@@ -127,7 +127,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "ide_pro",
-        icon: "",
+        icon: "/downloaded_assets/icons/items/generated_low_poly_computer_0005.png",
         price: 250
     },
     {
@@ -137,7 +137,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "automl",
-        icon: "",
+        icon: "/downloaded_assets/icons/items/generated_low_poly_computer_0159.png",
         price: 800
     },
     {
@@ -147,7 +147,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "cloud_basic",
-        icon: "",
+        icon: "/downloaded_assets/icons/items/generated_low_poly_computer_0173.png",
         price: 400
     },
     {
@@ -157,7 +157,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "ent_db",
-        icon: "",
+        icon: "/downloaded_assets/icons/items/generated_low_poly_computer_0012.png",
         price: 1200
     },
     {
@@ -167,7 +167,7 @@ export const SHOP_ITEMS = [
         category: "software",
         type: "software",
         softwareId: "nas_tool",
-        icon: "",
+        icon: "/downloaded_assets/icons/items/generated_low_poly_computer_0166.png",
         price: 2500
     }
 ];

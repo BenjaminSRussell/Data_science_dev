@@ -1,0 +1,55 @@
+
+# Shadow - The Information Broker
+**Role:** Information Broker (Criminal)
+**Personality:** Mysterious, Silent, Dangerous
+
+## Character Profile
+**Background:** Sells information to the highest bidder. Very secretive. Operates out of the shadows.
+**Motivation:** Chaos and Profit.
+**Secret:** Operates a network of spy drones disguised as pigeons.
+**Dream:** To know everything about everyone.
+**Fear:** Silence.
+**Relationship Status:** Unknown.
+**Turning Point:** Unknown.
+**Philosophy:** "Whispers echo louder than shouts."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** " names are for friends. I have clients. You want to be a client?"
+*   **Rel > 25 (Philosophy):** "Truth is a commodity. It fluctuates. Buy low, sell high."
+*   **Rel > 40 (Secret):** "The birds... they watch. You think they're birds? Look closer."
+*   **Rel > 60 (Goal):** "A world without secrets. Except mine."
+*   **Rel > 80 (Trust):** "I never betray a client. Unless the price is right. For you? Free."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "...", "What do you want?", "Shh."
+*   *Topics:* Rumors, blackmail.
+
+### Friendly
+*   *Greetings:* "Step closer.", "Shadow.", "I hear things."
+*   *Topics:* Market manipulation.
+
+### Acquaintance
+*   *Greetings:* "I have a file.", "Hey.", "Interesting news."
+*   *Topics:* The pigeon drones.
+
+### Friend
+*   *Greetings:* "My eyes and ears.", "Hey! A secret for you."
+*   *Topics:* The value of silence.
+
+### Close Friend
+*   *Greetings:* "Partner.", "Hey! The network is yours."
+*   *Topics:* Total omniscience.
+
+---
+
+## Actions & Gifts
+*   **Crypto:** "Discreet. Good."
+*   **Anonymous Tips:** "Useful."
+*   **Compliment:** "..."

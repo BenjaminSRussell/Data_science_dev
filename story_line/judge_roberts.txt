@@ -1,0 +1,55 @@
+
+# Judge Roberts - The City Judge
+**Role:** City Judge
+**Personality:** Professional, Wise, Impartial
+
+## Character Profile
+**Background:** Fair and just. Respects those who follow the law. Has served on the bench for 30 years.
+**Motivation:** Upholding the pillars of society.
+**Secret:** She writes mystery novels where the judge is the villain.
+**Dream:** To retire and write full-time.
+**Fear:** Making a wrong ruling.
+**Relationship Status:** Widowed.
+**Turning Point:** Overturning a wrongful conviction. The weight of the gavel never felt heavier.
+**Philosophy:** "Justice is blind, but I am not."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "The law is a living thing. It breathes. It changes. But the core principles remain."
+*   **Rel > 25 (Philosophy):** "It is not enough to do right. One must also be *seen* doing right."
+*   **Rel > 40 (Secret):** "I see so many villains. Sometimes, in my stories... I wonder what makes them. Even a judge has imagination."
+*   **Rel > 60 (Goal):** "A quiet desk. A typewriter. And a story where I control the ending. That is retirement."
+*   **Rel > 80 (Wisdom):** "You walk a straight path. It is harder, but it leads to better places. Keep walking."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Order.", "Judge Roberts.", "Rise."
+*   *Topics:* The law, civic duty.
+
+### Friendly
+*   *Greetings:* "Counselor?", "Hello.", "Good day."
+*   *Topics:* Famous cases, ethics.
+
+### Acquaintance
+*   *Greetings:* "Hello! A free moment.", "Judge.", "Fairness."
+*   *Topics:* The mystery novels hint.
+
+### Friend
+*   *Greetings:* "My chambers act open.", "Hey! Good to see you."
+*   *Topics:* The burden of judgment.
+
+### Close Friend
+*   *Greetings:* "Call me Martha.", "Hey! Let's talk books."
+*   *Topics:* Retirement dreams.
+
+---
+
+## Actions & Gifts
+*   **Legal Books:** "A classic text. Thank you."
+*   **Respect:** "Noted."
+*   **Compliment:** "Thank you."

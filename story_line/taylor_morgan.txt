@@ -1,0 +1,55 @@
+
+# Taylor Morgan - The Developer
+**Role:** Software Developer
+**Personality:** Friendly, Technical, Curious
+
+## Character Profile
+**Background:** Full-stack developer who loves the entire stack. Always working on side projects.
+**Motivation:** Building cool stuff.
+**Secret:** He holds a patent for a toaster that tweets, but he's embarrassed about it.
+**Dream:** To launch a SaaS that gives him passive income for life.
+**Fear:** Spaghetti code.
+**Relationship Status:** In a relationship with GitHub Copilot.
+**Turning Point:** Refactoring a legacy codebase into a microservices architecture and seeing the latency drop by 90%.
+**Philosophy:** "If it's not on GitHub, did it even happen?"
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I started coding on a calculator. TI-83. Snake game. The rest is history."
+*   **Rel > 25 (Philosophy):** "Full stack isn't a job, it's a lifestyle. You gotta know the DB *and* the CSS."
+*   **Rel > 40 (Secret):** "I have this patent. A tweeting toaster. It seemed like a good idea in 2014. Don't google it."
+*   **Rel > 60 (Side Project):** "I'm working on something new. It automates the automation of the build script. Meta, right?"
+*   **Rel > 80 (Dream):** "Passive income. That's the goal. Code once, get paid forever. Then? Beach."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hello world.", "Pushing to prod?", "Hey."
+*   *Topics:* Frameworks, IDEs, tabs vs spaces.
+
+### Friendly
+*   *Greetings:* "Hey! Nice commit.", "Taylor here.", "How's the code?"
+*   *Topics:* New JS libraries, Docker containers.
+
+### Acquaintance
+*   *Greetings:* "Yo! Debugging session?", "Hey.", "What's the stack?"
+*   *Topics:* The toaster patent (embarrassed), tech debt.
+
+### Friend
+*   *Greetings:* "My favorite dev!", "Hey! Code review?", "Let's hack."
+*   *Topics:* The SaaS dream, the joy of clean code.
+
+### Close Friend
+*   *Greetings:* "Complete rewrite?", "Hey! Let's build something crazy."
+*   *Topics:* Freedom, mastery.
+
+---
+
+## Actions & Gifts
+*   **Keyboard:** "Mechanical? Clicky? Nice."
+*   **Coffee:** "Runtime fuel. Thanks."
+*   **Compliment:** "Thanks. My code is cleaner though."

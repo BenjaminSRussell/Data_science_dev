@@ -1,0 +1,55 @@
+
+# Rachel Green - The Product Visionary
+**Role:** Product Manager
+**Personality:** Friendly, Organized, User-Focused
+
+## Character Profile
+**Background:** Manages products at a growing startup. Pivoted from marketing to product because she wanted to "build things, not just sell them."
+**Motivation:** creating products that genuinely solve user problems.
+**Secret:** She feels like an imposter among technical engineers, despite understanding the market better than any of them.
+**Dream:** To launch a product that becomes a household name.
+**Fear:** Launching a product that nobody wants.
+**Relationship Status:** Dating, but "it's complicated" due to her startup hours.
+**Turning Point:** Her first successful feature launch—seeing users actually use and love something she designed.
+**Philosophy:** "Data tells you *what* isn't working. Empathy tells you *why*."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I used to be in marketing. But I got tired of spinning stories. I wanted to build the story."
+*   **Rel > 25 (Motivation):** "It's not about the features. It's about the feeling. Does this make the user's life easier?"
+*   **Rel > 40 (Secret Insecurity):** "Sometimes... I sit in engineering meetings and feel like a fraud. But then I remember they don't know the user like I do."
+*   **Rel > 60 (Dream):** "I want to walk down the street and see someone using my app. Just... naturally. That's the dream."
+*   **Rel > 80 (Philosophy):** "You can have all the data in the world. But if you don't have empathy, you're building in the dark."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hi there.", "Do you have a minute?", "Hey."
+*   *Topics:* Roadmaps, deadlines, user feedback.
+
+### Friendly
+*   *Greetings:* "Hey! Good to see you.", "Hi! How's it going?", "Hey."
+*   *Topics:* Recent user testing, "feature creep" (annoyance).
+
+### Acquaintance
+*   *Greetings:* "Hey! Always good to sync up.", "Hi! Catch up soon?", "What's new?"
+*   *Topics:* Balancing business needs vs user wants, startup chaos.
+
+### Friend
+*   *Greetings:* "My favorite data person!", "Hey! Coffee?", "So glad you're here."
+*   *Topics:* Imposter syndrome, "Relationship status: It's complicated."
+
+### Close Friend
+*   *Greetings:* "Rachel here. What's the plan?", "Hey! Let's build something."
+*   *Topics:* The joy of a successful launch, true product vision.
+
+---
+
+## Actions & Gifts
+*   **Coffee:** "You're a lifesaver. Thanks."
+*   **Notebooks:** "Ooh, new stationery! Love it."
+*   **Compliment:** "Thanks! I appreciate that."

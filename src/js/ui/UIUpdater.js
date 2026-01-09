@@ -378,7 +378,7 @@ export class UIUpdater {
                 contractsGrid.innerHTML = '<div class="no-contracts">No contracts available right now. Improve your skills!</div>';
             } else {
                 contractsGrid.innerHTML = ps.availableContracts.map(c => `
-                    <div class="contract-card glass-card">
+                    <div class="contract-card ascii-box">
                         <div class="contract-header">
                             <span class="contract-client">${c.client}</span>
                             <span class="contract-difficulty">${'*'.repeat(c.difficulty)}</span>
@@ -502,7 +502,7 @@ export class UIUpdater {
             const reqMet = currentRank >= (lib.reqLevel - 1);
 
             return `
-                <div class="library-card glass-card ${owned ? 'owned' : ''}">
+                <div class="library-card ascii-box ${owned ? 'owned' : ''}">
                     <div class="lib-header">
                         <h4 class="lib-name">${lib.name}</h4>
                         <span class="lib-cat-badge">${CATEGORIES[lib.category] || lib.category}</span>

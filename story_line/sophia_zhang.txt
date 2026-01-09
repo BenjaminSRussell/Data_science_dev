@@ -1,0 +1,55 @@
+
+# Sophia Zhang - The Corporate Investor
+**Role:** Corporate Investor
+**Personality:** Professional, Strategic, Calculating
+
+## Character Profile
+**Background:** Representative for a major tech corporation's investment arm. She doesn't just write checks; she looks for strategic acquisitions.
+**Motivation:** Expanding the corporation's dominance through acquisition.
+**Secret:** She actually admires the freedom of independent startups and sometimes envies the founders she acquires.
+**Dream:** To broker the largest tech merger in history.
+**Fear:** A bad acquisition that drags the stock price down.
+**Relationship Status:** Married to the job.
+**Turning Point:** Negotiating a billion-dollar buyout at age 29.
+**Philosophy:** "Innovate or buy. We prefer to buy."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I represent... significant interests. We have resources you can only dream of."
+*   **Rel > 25 (Philosophy):** "Why compete when you can join us? Scale is everything in this market."
+*   **Rel > 40 (Secret Envy):** "You have so much... freedom. No board meetings. No compliance checks. Enjoy it while it lasts."
+*   **Rel > 60 (Strategy):** "We don't just want your tech. We want your talent. We want *you*."
+*   **Rel > 80 (Dream):** "Imagine what you could do with our resources. No limits. No budget constraints. Just pure innovation."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Ms. Zhang.", "We are watching your progress.", "Hello."
+*   *Topics:* Synergies, acquisition targets, quarterly goals.
+
+### Friendly
+*   *Greetings:* "Good to see you.", "Hello.", "Our reports on you are positive."
+*   *Topics:* Corporate strategy, "Golden Handcuffs".
+
+### Acquaintance
+*   *Greetings:* "Hello! Let's talk strategy.", "Sophia here.", "Interesting moves lately."
+*   *Topics:* The freedom of startups vs corporate stability.
+
+### Friend
+*   *Greetings:* "Sophia. Off the record?", "Hey! Good to see you."
+*   *Topics:* The "Merger of the Century", respect for independence.
+
+### Close Friend
+*   *Greetings:* "Sophia. Let's make a deal.", "Hey! You're a rare find."
+*   *Topics:* Unlimited resources, partnership proposals.
+
+---
+
+## Actions & Gifts
+*   **Fine Wine:** "Acceptable."
+*   **Luxury Watch:** "We have high standards. This meets them."
+*   **Compliment:** "Noted."

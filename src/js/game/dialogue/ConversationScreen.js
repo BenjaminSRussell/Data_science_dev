@@ -5,6 +5,7 @@
 
 import { dialogueTreeSystem } from './DialogueTreeSystem.js';
 import { getNPCImage, getNPCFallback } from '../../utils/NPCImageMapper.js';
+import { ThreeCharacterRenderer } from '../../characters/ThreeCharacterRenderer.js';
 
 export class ConversationScreen {
     constructor(game) {
@@ -12,31 +13,32 @@ export class ConversationScreen {
         this.currentNPC = null;
         this.currentNode = null;
         this.screenElement = null;
+        this.threeRenderer = new ThreeCharacterRenderer();
     }
-    
+
     /**
      * Show conversation screen for NPC
      */
     showConversation(npcId) {
         const npc = this.game.npcManager?.getNPC(npcId);
         if (!npc) return;
-        
+
         this.currentNPC = npc;
-        
+
         // Create or get conversation screen
         let screen = document.getElementById('conversation-screen');
         if (!screen) {
             screen = this.createConversationScreen();
             document.body.appendChild(screen);
         }
-        
+
         this.screenElement = screen;
         screen.classList.add('active');
-        
+
         // Start conversation
         this.startConversation();
     }
-    
+
     /**
      * Create conversation screen HTML
      */
@@ -46,29 +48,25 @@ export class ConversationScreen {
         screen.className = 'conversation-screen';
         return screen;
     }
-    
+
     /**
      * Start conversation
      */
     async startConversation() {
         const conversation = await this.game.npcManager?.startConversation(this.currentNPC.id);
         if (!conversation) return;
-        
+
         const npcImage = getNPCImage(this.currentNPC);
         const fallbackIcon = getNPCFallback(this.currentNPC);
         const relationship = this.game.npcManager?.getRelationship(this.currentNPC.id) || 0;
         const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || 0;
-        
+
         // Build conversation screen HTML
         this.screenElement.innerHTML = `
             <div class="conversation-header">
                 <div class="conversation-npc-avatar">
-                    <img src="${npcImage}" 
-                         alt="${this.currentNPC.name}"
-                         style="object-position: center center;"
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div class="npc-avatar-fallback" style="display:none;">
-                        <div style="font-size: 3rem;">${fallbackIcon}</div>
+                    <div id="npc-avatar-container" style="width: 200px; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <!-- 3D Model or Image will be injected here -->
                     </div>
                 </div>
                 <div class="conversation-npc-info">
@@ -109,11 +107,35 @@ export class ConversationScreen {
                 </button>
             </div>
         `;
-        
+
+        // Render Avatar (3D or 2D)
+        const container = this.screenElement.querySelector('#npc-avatar-container');
+        if (this.currentNPC.modelPath) {
+            // Try rendering 3D model
+            const element = this.threeRenderer.create3DCharacter(this.currentNPC.id, {
+                path: this.currentNPC.modelPath,
+                width: 200,
+                height: 300
+            });
+            container.innerHTML = '';
+            container.appendChild(element);
+        } else {
+            // Fallback to 2D Image
+            container.innerHTML = `
+                <img src="${npcImage}" 
+                        alt="${this.currentNPC.name}"
+                        style="width: 100%; height: 100%; object-fit: cover;"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="npc-avatar-fallback" style="display:none; font-size: 3rem;">
+                    ${fallbackIcon}
+                </div>
+            `;
+        }
+
         // Attach choice handlers
         this.attachChoiceHandlers();
     }
-    
+
     /**
      * Render choices
      */
@@ -121,12 +143,12 @@ export class ConversationScreen {
         if (!choices || choices.length === 0) {
             return '<div class="conversation-choice disabled">No options available</div>';
         }
-        
+
         return choices.map((choice, index) => {
-            const disabled = choice.conditions && 
-                choice.conditions.relationship && 
+            const disabled = choice.conditions &&
+                choice.conditions.relationship &&
                 (this.game.npcManager?.getRelationship(this.currentNPC.id) || 0) < choice.conditions.relationship;
-            
+
             return `
                 <button class="conversation-choice ${disabled ? 'disabled' : ''}" 
                         data-choice-index="${index}"
@@ -136,7 +158,7 @@ export class ConversationScreen {
             `;
         }).join('');
     }
-    
+
     /**
      * Attach choice event handlers
      */
@@ -149,20 +171,20 @@ export class ConversationScreen {
             });
         });
     }
-    
+
     /**
      * Handle player choice
      */
     handleChoice(choiceIndex) {
         const result = this.game.npcManager?.makeChoice(choiceIndex);
         if (!result) return;
-        
+
         // Update dialogue text
         const dialogueText = this.screenElement.querySelector('#conversation-dialogue-text');
         if (dialogueText && result.text) {
             dialogueText.textContent = result.text;
         }
-        
+
         // Get next node if using dialogue tree
         if (result.isTreeAction && this.currentNPC) {
             const relationship = this.game.npcManager?.relationships?.[this.currentNPC.id] || 0;
@@ -180,7 +202,7 @@ export class ConversationScreen {
                 }
             }
         }
-        
+
         // Update relationship display
         const relationship = this.game.npcManager?.getRelationship(this.currentNPC.id) || 0;
         const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || 0;
@@ -191,13 +213,13 @@ export class ConversationScreen {
                 <span>(${relationship})</span>
             `;
         }
-        
+
         // Show effects
         if (result.effects) {
             this.showEffects(result.effects);
         }
     }
-    
+
     /**
      * Show effects of choice
      */
@@ -210,7 +232,7 @@ export class ConversationScreen {
             this.game.showToast(`Gained ${effects.xp} XP`, 'success');
         }
     }
-    
+
     /**
      * Handle gift giving
      */
@@ -223,7 +245,7 @@ export class ConversationScreen {
             giftBtn.style.cursor = 'not-allowed';
         }
     }
-    
+
     /**
      * Handle topic discussion
      */
@@ -236,11 +258,14 @@ export class ConversationScreen {
             topicBtn.style.cursor = 'not-allowed';
         }
     }
-    
+
     /**
      * Close conversation screen
      */
     close() {
+        if (this.currentNPC) {
+            this.threeRenderer.dispose(this.currentNPC.id);
+        }
         if (this.screenElement) {
             this.screenElement.classList.remove('active');
         }

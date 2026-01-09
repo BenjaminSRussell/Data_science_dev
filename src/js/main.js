@@ -7,12 +7,12 @@
 import { logger } from './utils/Logger.js';
 import { DOMUtils } from './utils/DOMUtils.js';
 
-logger.debug('main.js module starting to load', {timestamp: Date.now()});
+logger.debug('main.js module starting to load', { timestamp: Date.now() });
 
 // Phase 4: Use Zustand for state management
 import { useGameStore } from './store/gameStore.js';
 
-logger.debug('useGameStore imported successfully', {hasStore: typeof useGameStore !== 'undefined'});
+logger.debug('useGameStore imported successfully', { hasStore: typeof useGameStore !== 'undefined' });
 // Keep GameState import for backward compatibility during migration
 import { GameState } from './game/GameState.js';
 import { ScreenManager } from './ui/ScreenManager.js';
@@ -80,9 +80,9 @@ import { ScreenThemeManager } from './game/ScreenThemeManager.js';
 import { MapCoordinateSystem } from './game/MapCoordinateSystem.js';
 import { GameEndingSystem } from './game/GameEndingSystem.js';
 import { NarrativeClaritySystem } from './game/NarrativeClaritySystem.js';
-import { VisualSystem } from './visual/VisualSystem.js';
+// import { VisualSystem } from './visual/VisualSystem.js';
 // Phase 3: Use GSAP instead of custom AnimationManager
-import { GSAPAnimationManager } from './animation/GSAPAnimationManager.js';
+// import { GSAPAnimationManager } from './animation/GSAPAnimationManager.js';
 // Phase 4: Use PixiJS Assets and new interaction libraries (optional - wrapped in try-catch)
 // Keep old imports for fallback
 import { AssetManager } from './assets/AssetManager.js';
@@ -102,9 +102,11 @@ import { HardwareManager } from './game/HardwareSystems.js'; // NEW
 import { LIBRARY_CONTENT, CATEGORIES } from './game/LibraryDatabase.js';
 import { RANKS } from './data/ranks.js';
 import { SHOP_ITEMS } from './data/shopItems.js';
-import { SpriteSheetManager } from './assets/SpriteSheetManager.js';
-import { AnimatedCharacterRenderer } from './characters/AnimatedCharacterRenderer.js';
-import { CharacterAnimationSystem } from './characters/CharacterAnimationSystem.js';
+// import { SpriteSheetManager } from './assets/SpriteSheetManager.js';
+// import { AnimatedCharacterRenderer } from './characters/AnimatedCharacterRenderer.js';
+// import { ThreeCharacterRenderer } from './characters/ThreeCharacterRenderer.js';
+// import { VisualEffectsManager } from './effects/VisualEffectsManager.js';
+// import { CharacterAnimationSystem } from './characters/CharacterAnimationSystem.js';
 import { LocationView } from './ui/LocationView.js';
 
 // Helper modules - split from main.js for easier debugging
@@ -118,7 +120,8 @@ let game = null; // Declare game instance
 
 logger.debug('Module loaded - all imports successful');
 
-// Display visible debug info on page (wait for DOM) - only in development
+// Display visible debug info on page (wait for DOM) - DISABLED
+/* DISABLED - Causes clutter
 if (typeof document !== 'undefined' && process.env.NODE_ENV !== 'production') {
     const showDebug = () => {
         if (document.body) {
@@ -138,32 +141,33 @@ if (typeof document !== 'undefined' && process.env.NODE_ENV !== 'production') {
         showDebug();
     }
 }
+*/
 // #endregion
 
 export class MainGame {
     constructor() {
         logger.debug('MainGame constructor entry');
-        
+
         // Phase 4: Use Zustand store for state management
         try {
             logger.debug('Attempting to access Zustand store...');
             this.gameStore = useGameStore;
-            logger.debug('Zustand store accessed successfully', {storeType: typeof this.gameStore, hasGetState: typeof this.gameStore?.getState});
+            logger.debug('Zustand store accessed successfully', { storeType: typeof this.gameStore, hasGetState: typeof this.gameStore?.getState });
         } catch (e) {
             logger.error('Zustand store access failed:', e);
             throw e;
         }
-        
+
         // Keep GameState for backward compatibility during migration
         try {
             logger.debug('Attempting to create GameState...');
             this.gameState = new GameState();
-            logger.debug('GameState created successfully', {money: this.gameState.money, reputation: this.gameState.reputation});
+            logger.debug('GameState created successfully', { money: this.gameState.money, reputation: this.gameState.reputation });
         } catch (e) {
             logger.error('GameState creation failed:', e);
             throw e;
         }
-        
+
         // Sync GameState with Zustand store
         try {
             this.syncGameStateToStore();
@@ -171,7 +175,7 @@ export class MainGame {
             logger.error('GameState sync failed:', e);
             throw e;
         }
-        
+
         this.saveManager = new SaveManager();
         this.saveSlotManager = null; // Will be initialized in initMenu
         this.currentSaveSlot = 0; // Default to slot 0
@@ -185,6 +189,11 @@ export class MainGame {
         this.chartManager = new ChartManager(this);
         this.environmentManager = new EnvironmentManager(this.gameState);
         this.audioManager = new AudioManager();
+
+        // Critical Logic Managers
+        this.timeManager = new TimeManager(this.gameState);
+        this.characterStats = new CharacterStats(this.gameState);
+
         this.gameLoopId = null;
         this.lastTime = 0;
         this.bankSystem = null; // Will be initialized when needed
@@ -196,7 +205,7 @@ export class MainGame {
         this.startNewGame = this.startNewGame.bind(this);
         this.continueGame = this.continueGame.bind(this);
 
-        logger.debug('MainGame constructor exit - all initialization complete', {hasSaveManager: !!this.saveManager, hasTaskSystem: !!this.taskSystem, hasScreenManager: !!this.screenManager});
+        logger.debug('MainGame constructor exit - all initialization complete', { hasSaveManager: !!this.saveManager, hasTaskSystem: !!this.taskSystem, hasScreenManager: !!this.screenManager });
 
         // this.init(); // Init is called in DOMContentLoaded
     }
@@ -207,7 +216,7 @@ export class MainGame {
      */
     syncGameStateToStore() {
         const store = this.gameStore.getState();
-        
+
         // Sync Zustand store values to GameState
         this.gameState.money = store.money;
         this.gameState.reputation = store.reputation;
@@ -230,7 +239,7 @@ export class MainGame {
         this.gameState.musicEnabled = store.musicEnabled;
         this.gameState.currentLocation = store.currentLocation;
         this.gameState.chartConfig = store.chartConfig;
-        
+
         // Subscribe to store changes to keep GameState in sync
         this.gameStore.subscribe((state) => {
             this.gameState.money = state.money;
@@ -260,13 +269,51 @@ export class MainGame {
     /**
      * Initialize the game
      */
+    initTheme() {
+        const savedTheme = localStorage.getItem('dst_theme_preference');
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            this.currentTheme = 'light';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            this.currentTheme = 'dark';
+        }
+    }
+
+    toggleTheme() {
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.currentTheme = newTheme;
+
+        if (newTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('dst_theme_preference', 'light');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('dst_theme_preference', 'dark');
+        }
+
+        // Update button icon
+        const themeBtn = document.getElementById('btn-theme-toggle');
+        if (themeBtn) {
+            themeBtn.textContent = newTheme === 'light' ? '🌙' : '☀️';
+        }
+
+        // Show brief toast
+        if (this.game && this.game.showToast) {
+            this.game.showToast(`Switched to ${newTheme === 'light' ? 'Light' : 'Dark'} Mode`, 'info');
+        }
+    }
+
     async init() {
-        logger.debug('init() method entry', {hasSaveManager: !!this.saveManager, hasGameState: !!this.gameState});
-        
+        logger.debug('init() method entry', { hasSaveManager: !!this.saveManager, hasGameState: !!this.gameState });
+
         // Show diagnostic overlay
         this.showDiagnostic('init() started');
-        
-            logger.info('Initializing Data Science Tycoon...');
+
+        // Initialize Theme
+        this.initTheme();
+
+        logger.info('Initializing Data Science Tycoon...');
 
         try {
             logger.debug('Attempting to load game...');
@@ -279,7 +326,7 @@ export class MainGame {
                 this.currentSaveSlot = mostRecentSlot;
                 this.saveManager.loadGame(this.gameState, mostRecentSlot);
             }
-            
+
             logger.debug(`Game loaded (save found: ${hasSave})`);
 
             // Initialize UI
@@ -289,10 +336,10 @@ export class MainGame {
             this.chartManager.init();
 
             logger.debug('Initializing EnvironmentManager...');
-            
+
             // Initialize environment (backgrounds, weather, etc.)
             this.environmentManager.init();
-            
+
             logger.debug('EnvironmentManager initialized');
 
             // Initialize menu
@@ -318,16 +365,16 @@ export class MainGame {
                     loadingScreen.classList.add('hidden');
                 }
             }
-            
+
             logger.info('Game initialized successfully!');
 
             // Initialize developer tools (ONLY in dev mode - completely separate from main game)
             // Dev tools never interfere with normal gameplay - they're isolated
-            const isDevMode = window.location.hostname === 'localhost' || 
-                            window.location.hostname === '127.0.0.1' ||
-                            localStorage.getItem('dev_mode') === 'true' ||
-                            new URLSearchParams(window.location.search).has('dev');
-            
+            const isDevMode = window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1' ||
+                localStorage.getItem('dev_mode') === 'true' ||
+                new URLSearchParams(window.location.search).has('dev');
+
             if (isDevMode) {
                 try {
                     const { DevTools } = await import('./dev/index.js');
@@ -341,10 +388,10 @@ export class MainGame {
 
         } catch (error) {
             logger.error('init() method error caught:', error);
-            
+
             logger.error('Failed to initialize game:', error);
             logger.error('Stack trace:', error.stack);
-            
+
             // Try to show game anyway so user can see something
             try {
                 const gameContainer = document.getElementById('game-container');
@@ -357,7 +404,7 @@ export class MainGame {
             } catch (e) {
                 logger.error('Failed to show game container:', e);
             }
-            
+
             this.showError('Failed to initialize game: ' + error.message + '. Some features may not work.');
         }
     }
@@ -370,7 +417,7 @@ export class MainGame {
             // Initialize theme system
             if (this.menuThemeSystem) {
                 this.menuThemeSystem.init();
-                
+
                 // Check theme unlocks from most recent save
                 if (hasSave) {
                     try {
@@ -389,10 +436,10 @@ export class MainGame {
                     }
                 }
             }
-            
+
             // Particle system disabled
             // this.initMenuParticles();
-            
+
             // Initialize save slot manager
             try {
                 this.saveSlotManager = new SaveSlotManager(
@@ -410,7 +457,7 @@ export class MainGame {
                     continueBtn.style.display = '';
                 }
             }
-            
+
             // Initialize logo display with statistics
             try {
                 if (this.menuLogoDisplay) {
@@ -419,21 +466,21 @@ export class MainGame {
             } catch (e) {
                 logger.warn('Failed to initialize logo display:', e);
             }
-            
+
             // Initialize and render statistics dashboard
             try {
                 this.renderStatisticsDashboard();
             } catch (e) {
                 logger.warn('Failed to render statistics dashboard:', e);
             }
-            
+
             // Initialize essential menu enhancements (non-repetitive, unique)
             try {
                 this.initMenuEnhancements();
             } catch (e) {
                 logger.warn('Failed to initialize menu enhancements:', e);
             }
-            
+
             // Keep old continue button hidden/disabled for backward compatibility
             const continueBtn = document.getElementById('btn-continue');
             if (continueBtn) {
@@ -455,7 +502,7 @@ export class MainGame {
     initMenuEnhancements() {
         const menuBackground = document.querySelector('.menu-background');
         const menuContainer = document.querySelector('.menu-container');
-        
+
         if (!menuBackground || !menuContainer) return;
 
         // Time-of-day background (subtle, not repetitive)
@@ -469,16 +516,16 @@ export class MainGame {
 
         // Enhanced keyboard navigation
         this.setupMenuKeyboardNavigation();
-        
+
         // Enhanced focus management
         this.setupMenuFocusManagement();
-        
+
         // Accessibility improvements
         this.setupMenuAccessibility();
     }
 
     setupMenuKeyboardNavigation() {
-        const buttons = document.querySelectorAll('.menu-btn');
+        const buttons = document.querySelectorAll('.btn-manual-action');
         buttons.forEach((btn, index) => {
             btn.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowDown' && index < buttons.length - 1) {
@@ -499,7 +546,7 @@ export class MainGame {
             menuScreen.setAttribute('aria-label', 'Main menu');
         }
 
-        const buttons = document.querySelectorAll('.menu-btn');
+        const buttons = document.querySelectorAll('.btn-manual-action');
         buttons.forEach(btn => {
             if (!btn.getAttribute('aria-label')) {
                 const text = btn.querySelector('.btn-text')?.textContent || 'Menu button';
@@ -590,7 +637,7 @@ export class MainGame {
      */
     handleSlotSelection(slotIndex, isNewGame) {
         this.currentSaveSlot = slotIndex;
-        
+
         if (isNewGame) {
             this.startNewGame();
         } else {
@@ -621,15 +668,15 @@ export class MainGame {
         const getThemeColor = () => {
             try {
                 const root = document.documentElement;
-                const color = getComputedStyle(root).getPropertyValue('--color-primary') || 
-                             getComputedStyle(root).getPropertyValue('--primary-color') ||
-                             'rgb(139, 92, 246)'; // Default purple
+                const color = getComputedStyle(root).getPropertyValue('--color-primary') ||
+                    getComputedStyle(root).getPropertyValue('--primary-color') ||
+                    'rgb(139, 92, 246)'; // Default purple
                 return color.trim();
             } catch (e) {
                 return 'rgb(139, 92, 246)'; // Default purple
             }
         };
-        
+
         const themeColor = getThemeColor();
 
         // Create particles
@@ -719,6 +766,13 @@ export class MainGame {
      * Setup all event listeners
      */
     setupEventListeners() {
+        // Theme Toggle
+        const themeBtn = document.getElementById('btn-theme-toggle');
+        if (themeBtn) {
+            themeBtn.textContent = this.currentTheme === 'light' ? '🌙' : '☀️';
+            themeBtn.addEventListener('click', () => this.toggleTheme());
+        }
+
         // Main Menu buttons
         document.getElementById('btn-new-game')?.addEventListener('click', () => {
             // Show save slots for new game selection
@@ -1103,7 +1157,7 @@ export class MainGame {
     showGame() {
         logger.debug('showGame() called');
         this.showDiagnostic('showGame() called');
-        
+
         const loadingScreen = document.getElementById('loading-screen');
         const gameContainer = document.getElementById('game-container');
 
@@ -1128,27 +1182,19 @@ export class MainGame {
             logger.warn('Game container element not found!');
             this.showDiagnostic('ERROR: Game container not found!');
         }
-        
+
         // Update status indicator
         DOMUtils.updateElement('#js-status-indicator', {
             innerHTML: 'Game Initialized',
             style: { background: 'rgba(0,255,0,0.8)' }
         });
     }
-    
+
     showDiagnostic(message) {
-        let diag = document.getElementById('diagnostic-overlay');
-        if (!diag) {
-            diag = document.createElement('div');
-            diag.id = 'diagnostic-overlay';
-            diag.style.cssText = 'position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.9);color:#0f0;padding:15px;font-family:monospace;font-size:11px;z-index:99998;border:2px solid #0f0;border-radius:5px;max-width:400px;max-height:300px;overflow:auto;';
-            document.body.appendChild(diag);
-        }
-        const time = new Date().toLocaleTimeString();
-        diag.innerHTML += `<div>[${time}] ${message}</div>`;
-        diag.scrollTop = diag.scrollHeight;
+        // DISABLED - was creating visual clutter
+        // console.log('[DIAGNOSTIC]', message);
     }
-    
+
     showError(message) {
         logger.error('Game Error:', message);
         this.showDiagnostic('ERROR: ' + message);
@@ -1189,10 +1235,10 @@ export class MainGame {
                 slotIndex = 0; // Default to slot 0 if all are full
             }
         }
-        
+
         this.currentSaveSlot = slotIndex;
-        console.log('Starting new game...');
-        
+
+
         // Show loading indicator
         this.showLoadingProgress('Initializing game...', 0);
 
@@ -1210,12 +1256,12 @@ export class MainGame {
             this.bankSystem = new BankSystem(this.gameState);
             this.gameState.worldMap = new WorldMap(this.gameState);
             this.gameState.npcManager = new NPCManager(this.gameState);
-            
+
             // HIGH PRIORITY - Load next
             this.showLoadingProgress('Loading game systems...', 30);
             this.gameState.newsManager = new NewsManager(this.gameState);
             this.gameState.stockMarket = new StockMarket(this.gameState);
-            
+
             // MEDIUM PRIORITY - Load in background (defer)
             setTimeout(() => {
                 try {
@@ -1229,7 +1275,7 @@ export class MainGame {
                     logger.warn('Error loading medium priority systems:', error);
                 }
             }, 0);
-            
+
             // LOW PRIORITY - Load last (defer)
             setTimeout(() => {
                 try {
@@ -1242,32 +1288,32 @@ export class MainGame {
                     logger.warn('Error loading low priority systems:', error);
                 }
             }, 100);
-            
+
             // HIGH PRIORITY - Needed for intro
             this.showLoadingProgress('Loading UI systems...', 50);
             this.conversationScreen = new ConversationScreen(this);
             this.gameState.conversationScreen = this.conversationScreen;
-            
+
             this.introSystem = new IntroSystem(this);
             this.gameState.introSystem = this.introSystem;
-            
+
             this.gameState.dayNightCycle = new DayNightCycle(this.gameState);
             this.dayNightCycle = this.gameState.dayNightCycle;
-            
+
             this.gameState.notificationSystem = new NotificationSystem(this.gameState);
             this.notificationSystem = this.gameState.notificationSystem;
             this.notificationSystem.scheduleDefaultNotifications();
-            
+
             // DEFER ALL OTHER SYSTEMS - Load in background
             setTimeout(() => this.loadDeferredSystems(), 50);
-            
+
             // Asset systems - Phase 4: Use PixiJS Assets
             this.showLoadingProgress('Preparing assets...', 70);
-            
+
             // Phase 4: Use PixiJS AssetManager (with fallback - lazy load to avoid breaking game)
             this.assetManager = new AssetManager();
             this.gameState.assetManager = this.assetManager;
-            
+
             // Try to load new managers asynchronously (non-blocking)
             Promise.all([
                 import('./assets/PixiAssetManager.js').catch(() => null),
@@ -1284,7 +1330,7 @@ export class MainGame {
                         logger.warn('PixiAssetManager initialization failed:', error);
                     }
                 }
-                
+
                 // Initialize PixiSpriteManager if available
                 if (PixiSpriteManagerModule?.PixiSpriteManager) {
                     try {
@@ -1294,7 +1340,7 @@ export class MainGame {
                         logger.warn('PixiSpriteManager initialization failed:', error);
                     }
                 }
-                
+
                 // Initialize InteractionManager if available
                 if (InteractionManagerModule?.InteractionManager) {
                     try {
@@ -1304,7 +1350,7 @@ export class MainGame {
                         logger.warn('InteractionManager initialization failed:', error);
                     }
                 }
-                
+
                 // Initialize TooltipManager if available
                 if (TooltipManagerModule?.TooltipManager) {
                     try {
@@ -1317,19 +1363,21 @@ export class MainGame {
             }).catch(error => {
                 logger.warn('Phase 4 managers failed to load (non-critical):', error);
             });
-            
+
+            /*
             // Keep old SpriteSheetManager for compatibility
             this.spriteSheetManager = new SpriteSheetManager();
             this.gameState.spriteSheetManager = this.spriteSheetManager;
-            
+
             // Particle effects will be initialized when PixiJS app is ready
             this.particleEffectManager = null;
-            
+
             // Use PixiSpriteManager if available, fallback to legacy SpriteSheetManager
             const spriteManager = this.pixiSpriteManager || this.spriteSheetManager;
             this.animatedCharacterRenderer = new AnimatedCharacterRenderer(spriteManager);
             this.gameState.animatedCharacterRenderer = this.animatedCharacterRenderer;
-            
+            */
+
             // Initialize filter manager
             import('./visual/FilterManager.js').then(({ FilterManager }) => {
                 try {
@@ -1342,13 +1390,16 @@ export class MainGame {
             }).catch(error => {
                 logger.warn('FilterManager not available:', error);
             });
-            
+
+            // Legacy Visual Systems (Phase 4 Cleanup)
+            /*
             this.characterAnimationSystem = new CharacterAnimationSystem(this.assetManager);
-            this.gameState.characterAnimationSystem = this.characterAnimationSystem;
-            
-            this.locationView = new LocationView(this, this.assetManager, this.characterAnimationSystem);
+            this.characterRenderer = new AnimatedCharacterRenderer(this.visualSystem.startLoadingSpriteSheets());
+            this.threeRenderer = new ThreeCharacterRenderer(); // Shared 3D renderer manager
+            this.locationView = new LocationView(this, this.assetManager, this.characterRenderer, this.threeRenderer);
             this.gameState.locationView = this.locationView;
-            
+            */
+
             // Load assets in background (non-blocking, low priority)
             // Phase 4: Try PixiJS Assets first, fallback to old AssetManager
             setTimeout(async () => {
@@ -1380,10 +1431,10 @@ export class MainGame {
                     });
                 }
             }, 500);
-            
+
             // Make game accessible globally for intro callbacks
             window.game = this;
-            
+
             // Initialize all new integrated systems
             this.gameState.jobSystem = new JobSystem(this.gameState);
             this.gameState.workInteractionSystem = new WorkInteractionSystem(this.gameState);
@@ -1404,25 +1455,25 @@ export class MainGame {
             this.gameState.gameEndingSystem = new GameEndingSystem(this.gameState);
             this.gameState.gameEndingSystem.gameState.mainGame = this;
             this.gameState.narrativeClaritySystem = new NarrativeClaritySystem(this.gameState);
-            
+
             // DEFER Phase 1 Visual Systems - Load in background
             setTimeout(() => {
                 try {
-                    this.gameState.visualSystem = new VisualSystem(this.gameState);
+                    // this.gameState.visualSystem = new VisualSystem(this.gameState);
                     // Phase 3: Use GSAP instead of custom AnimationManager
-                    this.gameState.animationManager = new GSAPAnimationManager();
+                    // this.gameState.animationManager = new GSAPAnimationManager();
                     // Also store as gsapAnimator for easy access
                     this.gameState.gsapAnimator = this.gameState.animationManager;
                     // Phase 4: Initialize particle effects (will be set up when PixiJS app is ready)
                     this.gameState.particleEffectManager = null;
                     this.gameState.performanceManager = new PerformanceManager();
                     this.gameState.uiLayerManager = new UILayerManager();
-                    
+
                     // Register visual subsystems (moved inside setTimeout to avoid null reference)
                     if (this.gameState.visualSystem && this.gameState.animationManager) {
                         this.gameState.visualSystem.registerRenderer('animation', this.gameState.animationManager);
                     }
-                    
+
                     // Detect hardware and set quality (moved inside setTimeout to avoid null reference)
                     if (this.gameState.performanceManager) {
                         try {
@@ -1441,10 +1492,10 @@ export class MainGame {
                     logger.warn('Error loading visual systems:', error);
                 }
             }, 300);
-            
+
             // Link mainGame reference for systems that need it
             this.gameState.mainGame = this;
-            
+
             logger.debug('[startNewGame]: all systems initialized');
 
             // Link managers to main class for easy access
@@ -1465,7 +1516,7 @@ export class MainGame {
             this.hardwareManager = this.gameState.hardwareManager;
             this.contractSystem = this.gameState.contractSystem;
             this.mapProgressionSystem = this.gameState.mapProgressionSystem;
-            
+
             // Link new systems
             this.jobSystem = this.gameState.jobSystem;
             this.workInteractionSystem = this.gameState.workInteractionSystem;
@@ -1481,7 +1532,7 @@ export class MainGame {
             this.weeklyNewsSystem = this.gameState.weeklyNewsSystem;
             this.screenThemeManager = this.gameState.screenThemeManager;
             this.mapCoordinateSystem = this.gameState.mapCoordinateSystem;
-            
+
             // Link Phase 1 Visual Systems
             this.visualSystem = this.gameState.visualSystem;
             this.animationManager = this.gameState.animationManager;
@@ -1497,67 +1548,57 @@ export class MainGame {
             this.tooltipManager = this.gameState.tooltipManager || null;
             this.performanceManager = this.gameState.performanceManager;
             this.uiLayerManager = this.gameState.uiLayerManager;
-            
+
             // Initialize camera system for map (lazy initialization when map is accessed)
             // Camera will be initialized in updateMapScreen() when needed
-            
+
             // Initialize storyline
             if (this.storylineManager) {
                 this.storylineManager.initialize();
             } else {
                 logger.warn('StorylineManager not initialized, skipping initialization');
             }
-            
+
             // Initialize story beats system
             if (this.storyBeatsSystem) {
                 this.storyBeatsSystem.initialize();
             }
-            
+
             // Initialize character arc system
             if (this.characterArcSystem) {
                 this.characterArcSystem.initialize();
             }
-            
+
             // Initialize NPC memory system
             if (this.npcMemorySystem) {
                 this.npcMemorySystem.initialize();
             }
-            
+
             // Initialize story UI
             if (this.storyUI) {
                 this.storyUI.initialize();
             }
-            
+
             // Initialize map coordinate system with existing locations
             if (this.worldMap) {
                 const locations = this.worldMap.getAccessibleLocations();
                 this.mapCoordinateSystem.initializeWithLocations(locations);
             }
-            
+
             logger.debug('[startNewGame]: managers linked');
             this.showLoadingProgress('Ready!', 100);
             logger.debug('[startNewGame]: core systems initialized, showing intro');
-            
-            // Hide loading, skip intro and jump directly to game
+
+            // Hide loading and show intro flow
             setTimeout(() => {
                 this.hideLoadingProgress();
-                // Skip intro - jump directly to game with a task ready
-                this.gameState.isGameStarted = true;
-                this.gameState.tutorialCompleted = true;
-                // Auto-assign first job and generate initial task
-                if (this.jobSystem && this.gameState.rankIndex === 0) {
-                    const firstJob = this.jobSystem.getAvailableJobs()[0];
-                    if (firstJob) {
-                        this.gameState.currentJob = firstJob;
-                        this.gameState.rankIndex = firstJob.rankIndex || 0;
-                        // Generate initial task immediately
-                        if (this.taskSystem) {
-                            this.taskSystem.generateNewTask();
-                        }
-                    }
+                if (this.introSystem) {
+                    this.introSystem.showIntro();
+                } else {
+                    // Fallback if intro system not available
+                    this.gameState.isGameStarted = true;
+                    this.screenManager.showScreen('screen-game');
                 }
-                // Show game screen directly
-                this.screenManager.showScreen('game');
             }, 100);
         } catch (error) {
             logger.error(' startNewGame ERROR:', error);
@@ -1572,15 +1613,17 @@ export class MainGame {
      */
     finishGameStart() {
         try {
-                logger.debug('[finishGameStart]: completing game initialization');
-            
+            logger.debug('[finishGameStart]: completing game initialization');
+            this.gameState.isGameStarted = true;
+            this.gameState.tutorialCompleted = true;
+
             // Generate first task
             if (!this.taskSystem) {
                 throw new Error('TaskSystem not initialized');
             }
             this.taskSystem.generateNewTask();
-                logger.debug('[finishGameStart]: first task generated');
-            
+            logger.debug('[finishGameStart]: first task generated');
+
             // Update task display
             if (this.uiUpdater) {
                 this.uiUpdater.updateTaskDisplay();
@@ -1634,7 +1677,7 @@ export class MainGame {
             const job = this.gameState.currentJob;
             if (job) {
                 this.showToast(`Day 1 at ${job.company}. Let's do this!`, 'success');
-                
+
                 // Check for story beat (first job)
                 if (this.storyBeatsSystem) {
                     const beat = this.storyBeatsSystem.getBeat('first_job');
@@ -1645,13 +1688,13 @@ export class MainGame {
             } else {
                 this.showToast('Welcome to your new career!', 'success');
             }
-            
+
             // Start game loop
             if (!this.gameLoopId) {
                 this.gameLoopId = requestAnimationFrame(this.gameLoop);
                 logger.debug('[finishGameStart]: Game loop started');
             }
-            
+
             logger.debug('[finishGameStart]: COMPLETE');
         } catch (error) {
             logger.error('finishGameStart ERROR:', error);
@@ -1803,7 +1846,7 @@ export class MainGame {
     // Append this to end or inside class
 
     // ========== STOCK MARKET METHODS (delegated to StockMarketHelpers) ==========
-    
+
     updateStockMarketScreen() {
         StockMarketHelpers.updateStockMarketScreen(this);
     }
@@ -1851,7 +1894,7 @@ export class MainGame {
     }
 
     // ========== STATS SCREEN ==========
-    
+
     updateStatsScreen() {
         ProjectHelpers.updateStatsScreen(this);
     }
@@ -1943,7 +1986,7 @@ export class MainGame {
      * Submit the chart for boss review
      */
     submitChart() {
-        console.log(' Submitting chart for review...');
+
 
         if (!this.economySystem) {
             this.showError('Economy system not initialized. Please refresh the page.');
@@ -2026,7 +2069,7 @@ export class MainGame {
             // Apply rewards to game state
             this.gameState.money += score.moneyEarned;
             this.gameState.reputation += score.repEarned;
-            
+
             // Show money particle effect if significant amount
             if (score.moneyEarned > 100 && this.unifiedMapSystem?.particleManager) {
                 // Get screen center or task completion location
@@ -2060,7 +2103,7 @@ export class MainGame {
                     this.showToast(`PROMOTED to ${newRank.title}!`, 'success');
                     this.audioManager.play('success');
                     this.uiUpdater.updateAllUI();
-                    
+
                     // Check for story beats (promotion)
                     if (this.storyBeatsSystem) {
                         if (oldRank === 0) {
@@ -2349,18 +2392,18 @@ export class MainGame {
             'senior': 5000,
             'expert': 15000
         };
-        
+
         const cost = staffCosts[role];
         if (!cost) {
             this.showError('Invalid staff role');
             return;
         }
-        
+
         if (this.gameState.money < cost) {
             this.showError(`Not enough money! Need $${cost.toLocaleString()}`);
             return;
         }
-        
+
         // Deduct cost and show success
         this.gameState.money -= cost;
         this.uiUpdater.updateAllUI();
@@ -2468,7 +2511,7 @@ export class MainGame {
      */
     purchaseItem(itemId) {
         const item = SHOP_ITEMS.find(i => i.id === itemId);
-        
+
         if (!item) {
             this.showError('Item not found');
             return;
@@ -2883,12 +2926,12 @@ export class MainGame {
         if (this.dayNightCycle) {
             this.dayNightCycle.update();
         }
-        
+
         // Check for major story decisions (throttled by StorylineManager's cooldown)
         if (this.storylineManager) {
             this.storylineManager.triggerDecisionIfAvailable();
         }
-        
+
         // Check for story beats (every 10 seconds, throttled)
         const seconds = Math.floor(timestamp / 1000);
         if (this.storyBeatsSystem && seconds % 10 === 0 && seconds !== (this.lastBeatCheckSecond || -1)) {
@@ -2898,17 +2941,17 @@ export class MainGame {
                 this.handleStoryBeat(beat);
             });
         }
-        
+
         // Check notifications
         if (this.notificationSystem) {
             this.notificationSystem.checkNotifications();
         }
-        
+
         // Check for events (once per day)
         if (this.eventSystem && this.gameState.timeManager) {
             const currentDay = this.gameState.timeManager.totalDays || 1;
             const lastEventCheck = this.gameState.lastEventCheck || 0;
-            
+
             if (currentDay > lastEventCheck) {
                 const todayEvents = this.eventSystem.checkTodayEvents();
                 todayEvents.forEach(event => {
@@ -2920,17 +2963,17 @@ export class MainGame {
                 this.gameState.lastEventCheck = currentDay;
             }
         }
-        
+
         // Check visual progression milestones
         if (this.visualProgressionSystem) {
             this.visualProgressionSystem.checkMilestones();
         }
-        
+
         // Check for new research papers (only if game is started)
         if (this.researchPaperSystem && this.gameState.isGameStarted) {
             try {
                 this.researchPaperSystem.checkForNewPapers();
-                
+
                 // Update inbox button badge
                 this.updateInboxBadge();
             } catch (error) {
@@ -2938,17 +2981,18 @@ export class MainGame {
             }
         }
 
+        /*
         // Update Phase 1 Visual Systems
         try {
             if (this.visualSystem) {
                 this.visualSystem.update(deltaTime);
             }
-            
+
             // Update camera system
             if (this.cameraSystem) {
                 this.cameraSystem.update();
             }
-            
+
             // Update animated characters
             if (this.animatedCharacterRenderer) {
                 this.animatedCharacterRenderer.updateAll(deltaTime);
@@ -2956,6 +3000,7 @@ export class MainGame {
         } catch (error) {
             logger.error('Error updating visual systems:', error);
         }
+        */
 
         this.gameLoopId = requestAnimationFrame(this.gameLoop);
     }
@@ -2994,18 +3039,18 @@ export class MainGame {
             }
         }
     }
-    
+
     /**
      * Update inbox badge with unread count
      */
     updateInboxBadge() {
         try {
             if (!this.researchPaperSystem || !this.researchInboxUI) return;
-            
+
             const unreadCount = this.researchPaperSystem.getUnreadCount();
             const badge = document.getElementById('inbox-unread-badge');
             const button = document.getElementById('btn-research-inbox');
-            
+
             if (badge) {
                 if (unreadCount > 0) {
                     badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
@@ -3016,7 +3061,7 @@ export class MainGame {
                     if (button) button.classList.remove('has-unread');
                 }
             }
-            
+
             // Update inbox UI if open
             if (this.researchInboxUI && this.researchInboxUI.isOpen) {
                 this.researchInboxUI.updateUnreadCount();
@@ -3034,7 +3079,7 @@ export class MainGame {
     simulateWorkTick() {
         ProjectHelpers.simulateWorkTick(this);
     }
-    
+
     /**
      * Show loading progress
      */
@@ -3047,7 +3092,7 @@ export class MainGame {
             if (bar) bar.style.width = `${Math.min(100, Math.max(0, percent))}%`;
         }
     }
-    
+
     /**
      * Hide loading progress
      */
@@ -3060,7 +3105,7 @@ export class MainGame {
             }, 300);
         }
     }
-    
+
     /**
      * Load deferred systems in background
      */
@@ -3071,25 +3116,25 @@ export class MainGame {
                 this.gameState.locationDetailSystem = new LocationDetailSystem(this.gameState);
                 this.locationDetailSystem = this.gameState.locationDetailSystem;
             }
-            
+
             // Company management
             if (!this.gameState.companyManagement) {
                 this.gameState.companyManagement = new CompanyManagementSystem(this.gameState);
                 this.companyManagement = this.gameState.companyManagement;
             }
-            
+
             // Romance progression
             if (!this.gameState.romanceProgression) {
                 this.gameState.romanceProgression = new RomanceProgressionSystem(this.gameState);
                 this.romanceProgression = this.gameState.romanceProgression;
             }
-            
+
             // Jealousy system
             if (!this.gameState.jealousySystem) {
                 this.gameState.jealousySystem = new JealousySystem(this.gameState);
                 this.jealousySystem = this.gameState.jealousySystem;
             }
-            
+
             // Demanding boss
             if (!this.gameState.demandingBoss) {
                 this.gameState.demandingBoss = new DemandingBossSystem(this.gameState);
@@ -3100,79 +3145,79 @@ export class MainGame {
                     demandLevel: 70
                 });
             }
-            
+
             // Gameplay settings
             if (!this.gameState.gameplaySettings) {
                 this.gameState.gameplaySettings = new GameplaySettings();
                 this.gameplaySettings = this.gameState.gameplaySettings;
             }
-            
+
             // Roommate system
             if (!this.gameState.roommateSystem) {
                 this.gameState.roommateSystem = new RoommateSystem(this.gameState);
                 this.roommateSystem = this.gameState.roommateSystem;
             }
-            
+
             // Dirty data system
             if (!this.gameState.dirtyDataSystem) {
                 this.gameState.dirtyDataSystem = new DirtyDataSystem(this.gameState);
                 this.dirtyDataSystem = this.gameState.dirtyDataSystem;
             }
-            
+
             // Detailed map system
             if (!this.gameState.detailedMapSystem) {
                 this.gameState.detailedMapSystem = new DetailedMapSystem(this.gameState);
                 this.detailedMapSystem = this.gameState.detailedMapSystem;
             }
-            
+
             // Room system
             if (!this.gameState.roomSystem) {
                 this.gameState.roomSystem = new RoomSystem(this.gameState);
                 this.roomSystem = this.gameState.roomSystem;
             }
-            
+
             // Event system
             if (!this.gameState.eventSystem) {
                 this.gameState.eventSystem = new EventSystem(this.gameState);
                 this.eventSystem = this.gameState.eventSystem;
             }
-            
+
             // Visual progression system
             if (!this.gameState.visualProgressionSystem) {
                 this.gameState.visualProgressionSystem = new VisualProgressionSystem(this.gameState);
                 this.visualProgressionSystem = this.gameState.visualProgressionSystem;
             }
-            
+
             // Real-world task system
             if (!this.gameState.realWorldTaskSystem) {
                 this.gameState.realWorldTaskSystem = new RealWorldTaskSystem(this.gameState);
                 this.realWorldTaskSystem = this.gameState.realWorldTaskSystem;
             }
-            
+
             // Task visual renderer
             if (!this.gameState.taskVisualRenderer) {
                 this.taskVisualRenderer = new TaskVisualRenderer();
                 this.gameState.taskVisualRenderer = this.taskVisualRenderer;
             }
-            
+
             // AI training storyline
             if (!this.gameState.aiTrainingStoryline) {
                 this.gameState.aiTrainingStoryline = new AITrainingStoryline(this.gameState);
                 this.aiTrainingStoryline = this.gameState.aiTrainingStoryline;
             }
-            
+
             // GitHub issues system
             if (!this.gameState.githubIssuesSystem) {
                 this.gameState.githubIssuesSystem = new GitHubIssuesSystem(this.gameState);
                 this.githubIssuesSystem = this.gameState.githubIssuesSystem;
             }
-            
+
             // Research paper notification system
             if (!this.gameState.researchPaperSystem) {
                 try {
                     this.gameState.researchPaperSystem = new ResearchPaperNotificationSystem(this.gameState);
                     this.researchPaperSystem = this.gameState.researchPaperSystem;
-                    
+
                     this.researchInboxUI = new ResearchInboxUI(this.researchPaperSystem);
                     this.gameState.researchInboxUI = this.researchInboxUI;
                 } catch (error) {
@@ -3181,32 +3226,32 @@ export class MainGame {
                     this.researchInboxUI = null;
                 }
             }
-            
+
             // Initialize emotional breakdown system
             this.gameState.emotionalBreakdownSystem = new EmotionalBreakdownSystem(this.gameState);
             this.emotionalBreakdownSystem = this.gameState.emotionalBreakdownSystem;
-            
+
             // Initialize relationship dialogue system
             this.gameState.relationshipDialogueSystem = new RelationshipDialogueSystem(this.gameState);
             this.relationshipDialogueSystem = this.gameState.relationshipDialogueSystem;
-            
+
             // Initialize comprehensive sprite system
             this.comprehensiveSpriteSystem = new ComprehensiveSpriteSystem(
                 this.assetManager,
                 this.spriteSheetManager
             );
             this.gameState.comprehensiveSpriteSystem = this.comprehensiveSpriteSystem;
-            
+
             // Initialize sprite system in background
             setTimeout(async () => {
                 try {
                     await this.comprehensiveSpriteSystem.initialize();
-                    console.log('Comprehensive sprite system loaded');
+
                 } catch (error) {
                     logger.warn('Sprite system initialization error:', error);
                 }
             }, 1000);
-            
+
             logger.debug('Deferred systems loaded');
         } catch (error) {
             logger.error('Error loading deferred systems:', error);
@@ -3217,22 +3262,22 @@ export class MainGame {
 // Initialize on DOM ready
 
 const initGame = () => {
-    
+
     try {
         logger.debug('DOM Content Loaded. Starting Game...');
-        
+
         logger.debug('Before MainGame instantiation');
-        
+
         game = new MainGame();
-        
+
         window.game = game; // Expose for modal buttons
         logger.debug('MainGame instantiated. Calling init()...');
-        
+
         // Show diagnostic
         if (game.showDiagnostic) {
             game.showDiagnostic('About to call game.init()');
         }
-        
+
         // Call init and handle any errors
         game.init().catch(err => {
             logger.error('init() promise rejected:', err);
@@ -3240,7 +3285,7 @@ const initGame = () => {
                 game.showError('init() failed: ' + err.message);
             }
         });
-        
+
         // Fallback: If game doesn't show after 3 seconds, force it
         setTimeout(() => {
             const gameContainer = document.getElementById('game-container');

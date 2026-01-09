@@ -1,0 +1,55 @@
+
+# Marcus Thompson - The Scaling Guru
+**Role:** Data Engineering Lead
+**Personality:** Generous, Practical, Reliable
+
+## Character Profile
+**Background:** Built data infrastructure for major tech companies. Known for handling massive scale and crushing bottlenecks.
+**Motivation:** Building systems that last. Hates "spaghetti code" and quick fixes.
+**Secret:** He actually loves vintage analogue technology (watches, record players) because they are "mechanically honest" unlike opaque digital systems.
+**Dream:** To design a global data infrastructure that is completely completely crash-proof.
+**Fear:** A catastrophic data loss event that he can't prevent.
+**Relationship Status:** happily married, father of three. Brings "dad energy" to the team.
+**Turning Point:** Saving a startup from a Black Friday crash by rewriting their database sharding logic in real-time.
+**Philosophy:** "If it doesn't scale, it doesn't matter. Build it right, or don't build it at all."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I've seen systems crumble under pressure. It's not pretty. That's why I obsess over the foundation."
+*   **Rel > 25 (Philosophy):** "Code is easy. Architecture is hard. Anyone can write a script; few can build a system."
+*   **Rel > 40 (Secret Hobby):** "You see this watch? Mechanical. No API, no downtime. Just gears and physics. I love that honesty."
+*   **Rel > 60 (War Story):** "Black Friday, 2018. The servers were melting. I stayed up for 36 hours. But we stayed online. That was a good day."
+*   **Rel > 80 (Dream):** "One day I want to build something that outlasts me. A system so robust it runs for a hundred years."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Hey.", "Need something?", "Yo."
+*   *Topics:* Server load, uptime, latency.
+
+### Friendly
+*   *Greetings:* "Hey! How's the build?", "Good to see you.", "What's up?"
+*   *Topics:* Infrastructure challenges, scalability tips.
+
+### Acquaintance
+*   *Greetings:* "Good to see a familiar face.", "Hey, got a second?", "How's it going?"
+*   *Topics:* The annoyance of "spaghetti code", tech debt.
+
+### Friend
+*   *Greetings:* "My man!", "Hey! Grab a coffee?", "Good to see you!"
+*   *Topics:* Respect for vintage tech ("They don't make them like this anymore"), family life.
+
+### Close Friend
+*   *Greetings:* "Marcus here. Best architect in town.", "Hey! Always got time for you."
+*   *Topics:* "The Big One" (fear of crash), legacy.
+
+---
+
+## Actions & Gifts
+*   **Tech Gadgets:** "Nice build quality. Thanks."
+*   **Books:** "I'll read this later. Thanks."
+*   **Compliment:** "Just doing my job, kid."

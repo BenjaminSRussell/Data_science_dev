@@ -1,0 +1,55 @@
+
+# Bella Lux - The Influencer
+**Role:** Influencer
+**Personality:** High Maintenance, Charismatic, Materialistic
+
+## Character Profile
+**Background:** Always chasing the spotlight. Wants a partner who can fund her lifestyle. 
+**Motivation:** Fame. Likes. Views.
+**Secret:** It's all fake. The leased car, the rented clothes. She's drowning in debt.
+**Dream:** To be famous for being famous.
+**Fear:** Irrelevance.
+**Relationship Status:** "Single" (for the engagement).
+**Turning Point:** Her first viral video. She got addicted to the dopamine hit.
+**Philosophy:** "Fake it 'til you make it. Then fake it some more."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "Do you know who I am? I have 2 million followers. That's basically royalty."
+*   **Rel > 25 (Philosophy):** "Perception is reality. If it looks expensive, it is expensive."
+*   **Rel > 40 (Secret):** "This bag? Rented. The car? Leased. But the likes? Real. And that's all that matters."
+*   **Rel > 60 (Fear):** "If I stop posting, do I disappear? Sometimes I think I might."
+*   **Rel > 80 (Vulnerability):** "Maybe I want something real. Just one thing not for the 'gram. Could that be you?"
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Do I know you?", "No photos.", "Bella."
+*   *Topics:* Follower count, lighting.
+
+### Friendly
+*   *Greetings:* "Hey babe!", "Bella here.", "Love the outfit (lie)."
+*   *Topics:* Sponsorships, brand deals.
+
+### Acquaintance
+*   *Greetings:* "Hey! Collab?", "Selfie time!", "What's trending?"
+*   *Topics:* The debt stress (hidden), hustle.
+
+### Friend
+*   *Greetings:* "My favorite fan!", "Hey! VIP access."
+*   *Topics:* The fear of irrelevance.
+
+### Close Friend
+*   *Greetings:* "Babe.", "Hey! No cameras."
+*   *Topics:* True connection vs online persona.
+
+---
+
+## Actions & Gifts
+*   **Designer Bags:** "Omg. Yesss. Unboxing video time!"
+*   **Jewelry:** "You have taste. I love it."
+*   **Compliment:** "Tell me more."

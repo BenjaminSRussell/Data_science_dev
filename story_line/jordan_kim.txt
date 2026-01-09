@@ -1,0 +1,24 @@
+
+# Jordan Kim - The Fitness Coach
+**Role:** Personal Trainer
+**Personality:** Encouraging, Disciplined, Healing
+
+## Character Profile
+**Background:** Former athlete who had to retire due to injury. Found purpose in helping others achieve their fitness goals. Uses exercise as therapy.
+**Motivation:** Wants to help others overcome their limitations, both physical and mental.
+**Secret:** He still struggles with depression from losing his athletic career. The gym is his therapy, and helping others helps him heal.
+**Dream:** To open a gym that focuses on mental health as much as physical health. Combine therapy with fitness.
+**Fear:** That he'll never find purpose again, that he's just going through the motions, that he's not making a real difference.
+**Relationship Status:** Single. Focused on his work. Hasn't dated since his injury. Too afraid to let anyone see his vulnerability.
+**Turning Point:** When a client thanked him for saving their life - not just their health, but their mental health. That's when he found his purpose.
+**Philosophy:** "The body and mind are connected. You can't heal one without the other. Fitness is therapy. Movement is medicine."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I used to be an athlete. Professional level. Then I got injured. Career over, just like that. But I found a new purpose. Helping others."
+*   **Rel > 25 (Struggle):** "Losing my career? It broke me. I still struggle with it. But the gym? It's my therapy. Helping others helps me heal. It gives me purpose."
+*   **Rel > 40 (Philosophy):** "People think fitness is just about the body. It's not. It's about the mind too. You can't heal one without the other. Movement is medicine."
+*   **Rel > 60 (Dream):** "I want to open a gym. One that focuses on mental health as much as physical. Combine therapy with fitness. Because they're connected. They always have been."
+*   **Rel > 80 (Purpose):** "A client once told me I saved their life. Not just their health - their mental health. That's when I knew. This is my purpose. This is why I'm here."

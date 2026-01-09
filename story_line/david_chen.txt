@@ -1,0 +1,24 @@
+
+# David Chen - The Angel Investor
+**Role:** Investor / Philanthropist
+**Personality:** Wise, Patient, Secretly Broke
+
+## Character Profile
+**Background:** Immigrant who came to the country with $50 in his pocket. Built a tech company from scratch, sold it for millions. Now invests in others' dreams.
+**Motivation:** Wants to give others the opportunities he didn't have. Believes in paying it forward.
+**Secret:** He's actually broke. Lost everything in a bad investment. But he keeps up appearances because he doesn't want to disappoint the people who believe in him.
+**Dream:** To rebuild his fortune honestly, to prove he can succeed again without cutting corners.
+**Fear:** That people will discover he's lost everything, that he's a fraud, that he'll never recover.
+**Relationship Status:** Divorced. His ex-wife took everything. They don't speak. He's alone, but he won't admit it.
+**Turning Point:** When he realized that money doesn't define success - impact does. That's when he started investing in people, not just companies.
+**Philosophy:** "Wealth is temporary. Impact is permanent. Invest in people, not portfolios."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 15 (Background):** "I came here with nothing. Fifty dollars in my pocket. No English, no connections. But I had determination. That's all you need, really."
+*   **Rel > 30 (Philosophy):** "Money comes and goes. But impact? Impact lasts. I'd rather invest in a person with a dream than a company with a balance sheet."
+*   **Rel > 50 (The Secret):** "The truth? I've lost everything. Bad investment. But I can't let people know. They believe in me. I have to prove I can rebuild. I have to."
+*   **Rel > 70 (Fear):** "I'm terrified they'll find out. That I'm a fraud. That I'm broke. But I keep going because I have to. Because giving up isn't an option."
+*   **Rel > 90 (Dream):** "I want to rebuild. Honestly. Without cutting corners. To prove that I can succeed again. That failure isn't the end - it's just data for the next attempt."

@@ -1,0 +1,45 @@
+
+# Client Types & Contract Categories
+This file lists the different types of clients that offer contracts, their pay ranges, and expectations.
+
+## Small Business
+*   **Pay Range:** $50 - $200
+*   **Data Complexity:** Low (Level 1)
+*   **Patience:** High (0.8)
+*   **Description:** "Mom and pop shops need simple reports."
+*   **Ideal for:** Learning the basics, quick cash.
+
+## Startup
+*   **Pay Range:** $150 - $500
+*   **Data Complexity:** Medium (Level 2)
+*   **Patience:** Low (0.5)
+*   **Description:** "Fast-moving, need quick turnaround."
+*   **Ideal for:** Building reputation fast, if you can handle the stress.
+
+## Marketing Agency
+*   **Pay Range:** $200 - $600
+*   **Data Complexity:** Medium (Level 2)
+*   **Patience:** Moderate (0.7)
+*   **Description:** "Regular work, fair pay."
+*   **Ideal for:** Steady income stream.
+
+## Enterprise
+*   **Pay Range:** $500 - $2,000
+*   **Data Complexity:** High (Level 3)
+*   **Patience:** Good (0.9)
+*   **Description:** "Big contracts, complex requirements."
+*   **Ideal for:** Experienced analysts, huge portfolio boost.
+
+## Government
+*   **Pay Range:** $400 - $1,500
+*   **Data Complexity:** High (Level 3)
+*   **Patience:** Very High (1.0)
+*   **Description:** "Slow but steady, lots of red tape."
+*   **Ideal for:** Safe, low-stress income (if you don't mind forms).
+
+## Fortune 500
+*   **Pay Range:** $2,000 - $10,000
+*   **Data Complexity:** Expert (Level 4)
+*   **Patience:** Low (0.6)
+*   **Description:** "The big leagues. Don't mess up."
+*   **Ideal for:** Becoming a tycoon. High risk, high reward.

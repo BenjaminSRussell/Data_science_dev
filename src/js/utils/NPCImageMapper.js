@@ -4,6 +4,8 @@
  * Ensures every NPC has a visual representation
  */
 
+import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
+
 // Base path for NPC images
 const NPC_IMAGE_BASE = '/assets/npcs/';
 
@@ -19,18 +21,47 @@ const EXISTING_IMAGES = {
 
 // Generate image path for NPC based on type and name
 export function getNPCImage(npc) {
-    // If NPC has explicit image, use it
+    let imagePath = null;
+
+    // 1. Check explicit property
     if (npc.image) {
-        return npc.image;
+        imagePath = npc.image;
     }
-    
-    // Check if we have an existing image
-    if (EXISTING_IMAGES[npc.id]) {
-        return NPC_IMAGE_BASE + EXISTING_IMAGES[npc.id];
+    // 2. Check existing mapping
+    else if (EXISTING_IMAGES[npc.id]) {
+        imagePath = NPC_IMAGE_BASE + EXISTING_IMAGES[npc.id];
     }
-    
-    // Generate image path based on NPC type and characteristics
-    return generateImagePath(npc);
+    // 3. Generate path
+    else {
+        imagePath = generateImagePath(npc);
+    }
+
+    // FINAL CHECK: If missing, return generated SVG placeholder
+    if (imagePath && isAssetMissing(imagePath)) {
+        return generateSVGPlaceholder(npc);
+    }
+
+    return imagePath;
+}
+
+/**
+ * Generate a clean SVG placeholder for missing assets
+ */
+function generateSVGPlaceholder(npc) {
+    const initials = npc.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    // Deterministic color
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1'];
+    const hash = simpleHash(npc.name);
+    const color = colors[hash % colors.length];
+
+    // Simple SVG data URI
+    const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+        <rect width="100" height="100" fill="${color}" rx="10" ry="10"/>
+        <text x="50" y="50" dy=".35em" text-anchor="middle" fill="white" font-family="sans-serif" font-size="40" font-weight="bold">${initials}</text>
+    </svg>`;
+
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
 /**
@@ -40,7 +71,7 @@ export function getNPCImage(npc) {
 function generateImagePath(npc) {
     // Create a hash from NPC properties
     const hash = simpleHash(npc.id + npc.type + npc.personality);
-    
+
     // Map to image category based on type
     const typeMap = {
         'mentor': 'mentor',
@@ -54,12 +85,12 @@ function generateImagePath(npc) {
         'authority': 'authority',
         'service': 'service'
     };
-    
+
     const category = typeMap[npc.type] || 'friend';
-    
+
     // Use hash to select variant (0-9)
     const variant = hash % 10;
-    
+
     // Format: /assets/npcs/{category}_{variant}.png
     return NPC_IMAGE_BASE + `${category}_${variant}.png`;
 }

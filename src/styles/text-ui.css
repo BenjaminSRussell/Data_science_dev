@@ -1,0 +1,228 @@
+/* =====================================================
+   TEXT-BASED RESPONSIVE UI STYLES
+   Simplified text-focused interface that adapts to window size
+   ===================================================== */
+
+/* Text-based UI container */
+.text-ui {
+    font-family: var(--font-mono);
+    background: #1a1a1a;
+    color: #cccccc;
+    padding: 1rem;
+    border: 1px solid #404040;
+    border-radius: 4px;
+}
+
+/* Responsive text sizing */
+.text-ui-heading {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #404040;
+    padding-bottom: 0.5rem;
+}
+
+.text-ui-content {
+    font-size: clamp(0.75rem, 1.5vw, 1rem);
+    line-height: 1.6;
+}
+
+/* Modular panel system - adapts to window size */
+.modular-panel {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+/* Small screens: single column */
+@media (max-width: 600px) {
+    .modular-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .hide-on-small {
+        display: none;
+    }
+
+    .text-ui-heading {
+        font-size: 1rem;
+    }
+
+    .text-ui-content {
+        font-size: 0.75rem;
+    }
+}
+
+/* Medium screens: two columns */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .modular-panel {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .full-width-on-medium {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Large screens: three columns */
+@media (min-width: 1025px) {
+    .modular-panel {
+        grid-template-columns: 280px 1fr 280px;
+    }
+}
+
+/* Text-based progress bar */
+.text-progress {
+    font-family: var(--font-mono);
+    background: #2d2d2d;
+    padding: 0.5rem;
+    border-radius: 2px;
+}
+
+.text-progress-bar {
+    display: flex;
+    gap: 2px;
+}
+
+.text-progress-filled {
+    color: #999999;
+}
+
+.text-progress-empty {
+    color: #404040;
+}
+
+/* Text-based stats display */
+.text-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    border-bottom: 1px dotted #333333;
+}
+
+.text-stat-label {
+    color: #888888;
+}
+
+.text-stat-value {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* ASCII-style borders */
+.ascii-box {
+    border: 1px solid #555555;
+    padding: 1rem;
+    position: relative;
+}
+
+.ascii-box::before {
+    content: '┌─';
+    position: absolute;
+    top: -0.5rem;
+    left: 0.5rem;
+    background: #1a1a1a;
+    padding: 0 0.25rem;
+    color: #666666;
+}
+
+/* Phase indicator */
+.phase-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #2d2d2d;
+    border: 1px solid #404040;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+}
+
+.phase-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #666666;
+}
+
+.phase-dot.active {
+    background: #999999;
+    box-shadow: 0 0 6px #666666;
+}
+
+.phase-name {
+    color: #cccccc;
+}
+
+/* Manual action buttons - prominent */
+.btn-manual-action {
+    font-family: var(--font-mono);
+    background: #404040;
+    color: #ffffff;
+    border: 2px solid #666666;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-manual-action:hover {
+    background: #555555;
+    border-color: #888888;
+}
+
+.btn-manual-action:active {
+    transform: translateY(1px);
+}
+
+/* Disabled state */
+.btn-manual-action:disabled {
+    background: #2d2d2d;
+    color: #555555;
+    border-color: #404040;
+    cursor: not-allowed;
+}
+
+/* Text-mode game area fills available space */
+.text-game-area {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Scrollable text content */
+.text-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 60vh;
+    padding: 1rem;
+    background: #1a1a1a;
+    border: 1px solid #333333;
+}
+
+/* Simple grey button variants */
+.btn-grey {
+    background: linear-gradient(135deg, #444444 0%, #333333 100%);
+    color: #cccccc;
+    border: 1px solid #555555;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-grey:hover {
+    background: linear-gradient(135deg, #555555 0%, #444444 100%);
+    color: #ffffff;
+}
+
+.btn-grey-primary {
+    background: linear-gradient(135deg, #666666 0%, #555555 100%);
+    color: #ffffff;
+    border: 1px solid #777777;
+}
+
+.btn-grey-primary:hover {
+    background: linear-gradient(135deg, #777777 0%, #666666 100%);
+}

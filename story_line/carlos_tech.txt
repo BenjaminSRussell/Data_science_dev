@@ -1,0 +1,55 @@
+
+# Carlos - The Tech Store Owner
+**Role:** Tech Store Owner (Mall)
+**Personality:** Friendly, Knowledgeable, Geeky
+
+## Character Profile
+**Background:** Runs the best tech store in town. Knows all the latest gear because he tests it all himself. 
+**Motivation:** Helping people build their dream setups.
+**Secret:** He mines crypto on the display units at night to pay the rent.
+**Dream:** To build a supercomputer in the back room.
+**Fear:** Obsolescence.
+**Relationship Status:** In a committed relationship with his GPU cluster.
+**Turning Point:** Overclocking his first CPU at age 12 without melting it.
+**Philosophy:** "Have you tried turning it off and on again? Seriously, it works."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I don't just sell this stuff. I live it. Every GPU on this shelf? I've benchmarked it personally."
+*   **Rel > 25 (Philosophy):** "Specs aren't everything. It's about the synergy. A 4090 implies a bottleneck if your CPU is trash."
+*   **Rel > 40 (Secret):** "To be honest... the electric bill here is insane. Let's just say the display units work the night shift."
+*   **Rel > 60 (Dream):** "Imagine a Beowulf cluster made of gaming consoles. I think I can do it."
+*   **Rel > 80 (Advice):** "Hardware is temporary. Skills are forever. But a good mechanical keyboard helps."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Welcome to the future!", "Need an upgrade?", "Hey."
+*   *Topics:* GPU prices, refresh rates, RGB lighting.
+
+### Friendly
+*   *Greetings:* "Yo! Check this out.", "Carlos here.", "Ready to upgrade?"
+*   *Topics:* Benchmarks, overclocking tips.
+
+### Acquaintance
+*   *Greetings:* "Hey! Good to see you.", "What's the build status?", "Yo."
+*   *Topics:* The crypto mining secret (hint), thermal paste application.
+
+### Friend
+*   *Greetings:* "My man!", "Hey! I saved this GPU for you.", "Carlos Tech!"
+*   *Topics:* The supercomputer dream, hardware mods.
+
+### Close Friend
+*   *Greetings:* "You're VIP status.", "Hey! Come check the back room."
+*   *Topics:* True passion for tech, "family discount".
+
+---
+
+## Actions & Gifts
+*   **Tips:** "Thanks! Goes to the upgrade fund."
+*   **Tech Reviews:** "Ooh, haven't seen this one. Thanks."
+*   **Compliment:** "I know my stuff. Thanks."

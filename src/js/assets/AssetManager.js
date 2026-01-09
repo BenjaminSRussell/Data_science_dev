@@ -4,6 +4,7 @@
  * Handles sprites, backgrounds, icons, and animations
  */
 
+import { isAssetMissing } from './MissingAssetBlocklist.js';
 
 export class AssetManager {
     constructor() {
@@ -13,7 +14,7 @@ export class AssetManager {
         this.totalAssets = 0;
         this.loadedAssets = 0;
     }
-    
+
     /**
      * Asset manifest - only assets that actually exist
      * Game can run without all assets - missing assets return null
@@ -219,7 +220,7 @@ export class AssetManager {
             }
         };
     }
-    
+
     /**
      * Load all assets (non-blocking, fails gracefully)
      */
@@ -227,7 +228,7 @@ export class AssetManager {
         const manifest = this.getAssetManifest();
         this.totalAssets = this.countAssets(manifest);
         this.loadedAssets = 0;
-        
+
         try {
             // Load assets but don't fail if some are missing
             await this.loadAssets(manifest);
@@ -239,7 +240,7 @@ export class AssetManager {
             return false;
         }
     }
-    
+
     /**
      * Count total assets
      */
@@ -253,14 +254,14 @@ export class AssetManager {
         }
         return count;
     }
-    
+
     /**
      * Load assets recursively (fails gracefully for missing assets)
      */
     async loadAssets(manifest, path = '') {
         for (const key in manifest) {
             const currentPath = path ? `${path}.${key}` : key;
-            
+
             if (typeof manifest[key] === 'string') {
                 // It's an asset path - load it (will resolve null if missing)
                 try {
@@ -278,54 +279,67 @@ export class AssetManager {
             }
         }
     }
-    
+
     /**
      * Load a single image
      */
     loadImage(src, key) {
         return new Promise((resolve, reject) => {
+            // Check Blocklist first
+            if (isAssetMissing(src)) {
+                // Return a placeholder immediately
+                // Create a 1x1 transparent or colored placeholder
+                const img = new Image();
+                // Simple gray placeholder SVG
+                img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23cccccc'/%3E%3Ctext x='32' y='32' font-family='sans-serif' font-size='10' text-anchor='middle' dy='0.3em' fill='%23666666'%3EMISSING%3C/text%3E%3C/svg%3E";
+                this.assets.set(key, img);
+                this.loadedAssets++;
+                this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
+                resolve(img);
+                return;
+            }
+
             const img = new Image();
-            
+
             img.onload = () => {
                 this.assets.set(key, img);
                 this.loadedAssets++;
                 this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
                 resolve(img);
             };
-            
+
             img.onerror = () => {
-                // Asset failed to load - don't add to assets map
-                // This ensures missing assets don't show broken images
                 this.loadedAssets++;
                 this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
                 resolve(null);
             };
-            
+
             img.src = src;
         });
     }
+
     /**
      * Get asset by key
      */
     getAsset(key) {
         return this.assets.get(key) || null;
     }
-    
+
     /**
      * Get character emotion asset
      */
     getCharacterEmotion(emotion) {
         return this.getAsset(`characters.emotions.${emotion}`) || null;
     }
-    
+
     /**
      * Get character body language asset
      */
     getCharacterBodyLanguage(pose) {
-        return this.getAsset(`characters.bodyLanguage.${pose}`) || 
-               this.getAsset('characters.base');
+        return this.getAsset(`characters.bodyLanguage.${pose}`) ||
+            this.getAsset('characters.base');
     }
-    
+
     /**
      * Get location background
      * Now uses Low-poly generated backdrops
@@ -334,7 +348,7 @@ export class AssetManager {
         // Try to get PNG image first
         const asset = this.getAsset(`backgrounds.locations.${locationId}`);
         if (asset) return asset;
-        
+
         // Try alternative backdrop variations
         const variations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
         for (const variant of variations) {
@@ -342,16 +356,13 @@ export class AssetManager {
             const variantAsset = this.getAsset(`backgrounds.locations.${locationId}.variant${variant}`);
             if (variantAsset) return variantAsset;
         }
-        
+
         // Fallback to first backdrop
         return null;
     }
-    
+
     /**
      * Get location icon
-     */
-    /**
-     * Get location icon asset path (organized, replaces emojis)
      */
     getLocationIcon(locationId) {
         return this.getAsset(`icons.locations.${locationId}`) || `/assets/icons/locations/${locationId}.png`;
@@ -398,21 +409,21 @@ export class AssetManager {
     getChartIcon(chartType) {
         return this.getAsset(`icons.charts.${chartType}`) || `/assets/icons/charts/${chartType}.png`;
     }
-    
+
     /**
      * Get map icon
      */
     getMapIcon(type) {
         return this.getAsset(`icons.map.${type}`) || null;
     }
-    
+
     /**
      * Check if assets are loaded
      */
     isLoaded() {
         return this.loaded;
     }
-    
+
     /**
      * Get load progress (0-100)
      */

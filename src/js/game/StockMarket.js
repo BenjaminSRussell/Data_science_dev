@@ -30,25 +30,25 @@ export class Stock {
      */
     update(marketTrends, sectorEffects = {}, worldEvents = [], relatedStocks = []) {
         const oldPrice = this.price;
-        
+
         // Base market trend for this stock's market
         let baseTrend = marketTrends[this.market] || marketTrends['US'] || 0;
-        
+
         // Sector effect
         const sectorEffect = sectorEffects[this.sector] || 0;
-        
+
         // Correlation effects - stocks in same sector or correlated markets influence each other
         let correlationEffect = 0;
         relatedStocks.forEach(otherStock => {
             if (otherStock.id === this.id) return;
-            
+
             // Same sector correlation (0.3-0.6)
             if (otherStock.sector === this.sector) {
                 const correlation = this.correlation[otherStock.id] || 0.4;
                 const otherChange = otherStock.lastChangePct || 0;
                 correlationEffect += otherChange * correlation * 0.3;
             }
-            
+
             // Same market correlation (0.2-0.4)
             if (otherStock.market === this.market) {
                 const marketCorrelation = 0.25;
@@ -56,7 +56,7 @@ export class Stock {
                 correlationEffect += otherChange * marketCorrelation * 0.2;
             }
         });
-        
+
         // World event impacts (can cause large swings)
         let worldEventEffect = 0;
         worldEvents.forEach(event => {
@@ -70,26 +70,26 @@ export class Stock {
                 worldEventEffect += event.stockImpact || 0;
             }
         });
-        
+
         // Random daily fluctuation based on volatility
         const noise = (Math.random() - 0.5) * 2 * this.volatility;
-        
+
         // Calculate total percentage change
         const changePct = baseTrend + sectorEffect + correlationEffect + worldEventEffect + noise;
-        
+
         // Apply change
         this.price = this.price * (1 + changePct);
-        
+
         // Ensure price doesn't go below minimum (penny stock)
         if (this.price < 0.01) this.price = 0.01;
-        
+
         // Track change
         this.lastChange = this.price - oldPrice;
         this.lastChangePct = changePct;
-        
+
         // Simulate trading volume (higher on big moves)
         this.volume = Math.abs(changePct) * 1000000 + Math.random() * 500000;
-        
+
         // Add to history (keep last 100 days for better charts)
         this.history.push(this.price);
         if (this.history.length > 100) {
@@ -133,7 +133,7 @@ export class StockMarket {
         this.gameState = gameState;
         this.stocks = [];
         this.portfolio = new Portfolio();
-        
+
         // Market trends by region (can be positive or negative)
         this.marketTrends = {
             US: 0.0005,
@@ -141,7 +141,7 @@ export class StockMarket {
             ASIA: 0.0004,
             EMERGING: 0.0008 // Higher volatility
         };
-        
+
         // Market indices (like Dow, NASDAQ, etc.)
         this.indices = {
             DOW: { value: 35000, name: 'Dow Jones', market: 'US' },
@@ -151,10 +151,10 @@ export class StockMarket {
             NIKKEI: { value: 28000, name: 'Nikkei 225', market: 'ASIA' },
             HANG_SENG: { value: 18000, name: 'Hang Seng', market: 'ASIA' }
         };
-        
+
         // Active world events affecting markets
         this.activeWorldEvents = [];
-        
+
         this.initStocks();
         this.updateIndices(); // Initialize index values
     }
@@ -175,19 +175,19 @@ export class StockMarket {
             { id: 'hst', ticker: 'HST', name: 'Host Stay', price: 120.00, vol: 0.05, sector: 'Travel', market: 'US' },
             { id: 'bnk', ticker: 'BNK', name: 'Big Bank', price: 80.00, vol: 0.01, sector: 'Finance', market: 'US' },
             { id: 'bio', ticker: 'BIO', name: 'BioHealth', price: 60.00, vol: 0.08, sector: 'Health', market: 'US' },
-            
+
             // European Market
             { id: 'sap', ticker: 'SAP', name: 'SAP Systems', price: 120.00, vol: 0.025, sector: 'Tech', market: 'EU' },
             { id: 'vol', ticker: 'VOL', name: 'Volkswagen AG', price: 180.00, vol: 0.04, sector: 'Auto', market: 'EU' },
             { id: 'hsbc', ticker: 'HSBC', name: 'HSBC Bank', price: 45.00, vol: 0.015, sector: 'Finance', market: 'EU' },
             { id: 'lvmh', ticker: 'LVMH', name: 'LVMH Luxury', price: 650.00, vol: 0.02, sector: 'Retail', market: 'EU' },
-            
+
             // Asian Market
             { id: 'ali', ticker: 'ALI', name: 'Alibaba Group', price: 95.00, vol: 0.035, sector: 'Tech', market: 'ASIA' },
             { id: 'ten', ticker: 'TEN', name: 'Tencent Holdings', price: 55.00, vol: 0.04, sector: 'Tech', market: 'ASIA' },
             { id: 'toy', ticker: 'TOY', name: 'Toyota Motors', price: 180.00, vol: 0.03, sector: 'Auto', market: 'ASIA' },
             { id: 'sam', ticker: 'SAM', name: 'Samsung Electronics', price: 1200.00, vol: 0.025, sector: 'Hardware', market: 'ASIA' },
-            
+
             // Emerging Markets
             { id: 'pet', ticker: 'PET', name: 'Petrobras', price: 12.00, vol: 0.08, sector: 'Energy', market: 'EMERGING' },
             { id: 'vale', ticker: 'VALE', name: 'Vale Mining', price: 15.00, vol: 0.07, sector: 'Materials', market: 'EMERGING' }
@@ -209,7 +209,7 @@ export class StockMarket {
             return new Stock(c.id, c.ticker, c.name, c.price, c.vol, c.sector, c.market, correlations);
         });
     }
-    
+
     /**
      * Update market indices based on stock performance
      */
@@ -223,7 +223,7 @@ export class StockMarket {
                 marketPerformance[market] = avgChange;
             }
         });
-        
+
         // Update each index
         Object.keys(this.indices).forEach(indexKey => {
             const index = this.indices[indexKey];
@@ -243,14 +243,14 @@ export class StockMarket {
     update(newsEvents = [], worldEvents = []) {
         // Update active world events
         this.activeWorldEvents = worldEvents.filter(e => e.active);
-        
+
         // Update market trends for each region (random walk with mean reversion)
         Object.keys(this.marketTrends).forEach(market => {
             // Random walk
             this.marketTrends[market] += (Math.random() - 0.5) * 0.002;
             // Mean reversion
             this.marketTrends[market] *= 0.95;
-            
+
             // Cross-market influence (markets affect each other)
             Object.keys(this.marketTrends).forEach(otherMarket => {
                 if (otherMarket !== market) {
@@ -259,7 +259,7 @@ export class StockMarket {
                 }
             });
         });
-        
+
         // Process news effects on sectors
         let sectorEffects = {};
         newsEvents.forEach(news => {
@@ -275,7 +275,7 @@ export class StockMarket {
                 }
             }
         });
-        
+
         // Process world events (can cause large market movements)
         worldEvents.forEach(event => {
             if (event.type === 'market_crash') {
@@ -304,31 +304,31 @@ export class StockMarket {
                 sectorEffects['Hardware'] = (sectorEffects['Hardware'] || 0) + 0.03;
             }
         });
-        
+
         // Update each stock with correlations
         this.stocks?.forEach(stock => {
             stock.update(this.marketTrends, sectorEffects, this.activeWorldEvents, this.stocks);
         });
-        
+
         // Update market indices
         this.updateIndices();
-        
+
         // Track portfolio value
         this.trackPortfolioPerformance();
     }
-    
+
     /**
      * Get market summary for a specific region
      */
     getMarketSummary(market) {
         const marketStocks = this.stocks?.filter(s => s.market === market) || [];
         if (marketStocks.length === 0) return null;
-        
+
         const totalChange = marketStocks.reduce((sum, s) => sum + (s.lastChangePct || 0), 0);
         const avgChange = totalChange / marketStocks.length;
         const gainers = marketStocks.filter(s => s.lastChangePct > 0).length;
         const losers = marketStocks.filter(s => s.lastChangePct < 0).length;
-        
+
         return {
             market,
             trend: this.marketTrends[market],
@@ -338,14 +338,14 @@ export class StockMarket {
             totalStocks: marketStocks.length
         };
     }
-    
+
     /**
      * Get all market summaries
      */
     getAllMarketSummaries() {
         return Object.keys(this.marketTrends || {}).map(market => this.getMarketSummary(market));
     }
-    
+
     /**
      * Get recent price changes for ticker display
      */
@@ -405,7 +405,7 @@ export class StockMarket {
         // Add volatility
         stock.volatility += 0.2; // Becomes unstable
 
-        console.log(` Stock ${stock.ticker} manipulated! ${oldPrice.toFixed(2)} -> ${stock.price.toFixed(2)}`);
+
         return true;
     }
 

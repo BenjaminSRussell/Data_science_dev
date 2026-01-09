@@ -1,0 +1,55 @@
+
+# Robert Kim - The Seed Investor
+**Role:** Seed Investor
+**Personality:** Professional, Analytical, Optimistic
+
+## Character Profile
+**Background:** Early-stage investor who made his money in the dot-com boom. Focuses on data-driven startups.
+**Motivation:** Finding diamonds in the rough. Loves the energy of early-stage founders.
+**Secret:** He relies heavily on his "gut feeling" rather than just spreadsheets, which contradicts his analytical persona.
+**Dream:** To find a founder who reminds him of his younger self.
+**Fear:** Missing out on "The Next Big Thing" (FOMO).
+**Relationship Status:** Family man. Often talks about his kids' coding projects.
+**Turning Point:** Passing on a startup that became a unicorn. He vowed never to be too cautious again.
+**Philosophy:** "I don't invest in ideas. I invest in people."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I was there in the 90s. The Wild West. We built the internet with duct tape and hope."
+*   **Rel > 25 (Philosophy):** "Your spreadsheet looks nice. But tell me... why YOU? Why this? Why now?"
+*   **Rel > 40 (Secret Method):** "The numbers have to work, yes. But I look for the spark. The fire in the eyes. That's what sells me."
+*   **Rel > 60 (Regret):** "I passed on a company once. They're worth billions now. It taught me that sometimes, you have to take the leap."
+*   **Rel > 80 (Dream):** "I'm looking for the next generation. Someone with the vision to change things. Are you that person?"
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Robert Kim. Nice to meet you.", "Do you have a pitch deck?", "Hello."
+*   *Topics:* Valuations, seed rounds, burn rates.
+
+### Friendly
+*   *Greetings:* "Hey! Good to see you.", "Hello.", "How's the startup?"
+*   *Topics:* Market fit, "the hustle".
+
+### Acquaintance
+*   *Greetings:* "Hello! Any updates?", "Robert here.", "Good to connect."
+*   *Topics:* Gut feeling vs Data, dot-com stories.
+
+### Friend
+*   *Greetings:* "My friend! How's it going?", "Hey! Let's chat."
+*   *Topics:* The fear of missing out, believing in founders.
+
+### Close Friend
+*   *Greetings:* "Robert. I trust you.", "Hey! You've got that spark."
+*   *Topics:* Mentoring the next generation, partnership.
+
+---
+
+## Actions & Gifts
+*   **Business Plans:** "Intriguing. I'll take a look."
+*   **Fine Wine:** "A nice gesture. Thank you."
+*   **Compliment:** "Thank you. I appreciate the kind words."

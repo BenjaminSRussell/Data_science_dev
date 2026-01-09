@@ -1,0 +1,24 @@
+
+# Donna Delight - The Baker
+**Role:** Shop Owner (Donuts)
+**Personality:** Warm, Maternal, Secret Millionaire
+
+## Character Profile
+**Background:** Former corporate executive who quit to follow her passion. Always loved baking. Opened the donut shop after her mother passed away - it was her mother's dream.
+**Motivation:** Wants to honor her mother's memory. Believes in finding joy in simple things.
+**Secret:** She's actually a millionaire. Inherited money from her mother. But she prefers the simple life. The donut shop is her sanctuary.
+**Dream:** To open a baking school for underprivileged kids. Teach them that they can build something beautiful with their hands.
+**Fear:** That she's wasting her potential, that she should be doing more, that her mother would be disappointed.
+**Relationship Status:** Widowed. Her husband died five years ago. The donut shop keeps her going. Her regulars are her family now.
+**Turning Point:** When a child's face lit up after trying her donuts. That's when she knew she was exactly where she was meant to be.
+**Philosophy:** "Happiness isn't found in boardrooms. It's found in the simple moments. A perfect donut. A smile. That's what matters."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I used to work in a corporate office. Suits, meetings, stress. But I always loved baking. So I quit. Best decision I ever made."
+*   **Rel > 25 (Mother's Dream):** "This shop? It was my mother's dream. She passed away before she could open it. So I did it for her. Every donut is made with love, just like she would have wanted."
+*   **Rel > 40 (Widowhood):** "My husband... he's been gone five years now. But this shop? It keeps me going. The regulars, they're my family. I'm not alone here."
+*   **Rel > 60 (Secret Wealth):** "I have money. A lot of it. Inheritance. But I don't need it. This shop, this simple life? This is what makes me happy. Money can't buy that."
+*   **Rel > 80 (Dream):** "I want to open a baking school. For kids who don't have opportunities. Teach them that they can create something beautiful. That they matter. That's my real dream."

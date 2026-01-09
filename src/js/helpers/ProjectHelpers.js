@@ -35,23 +35,38 @@ export function handleWorkOnProject(game) {
 }
 
 /**
- * Start a working session with time passing
+ * Start a working session with manual step control
+ * No auto-progression - user must click to advance each step
  */
 export function startWorkingSession(game, hours) {
     const overlay = document.getElementById('working-overlay');
     overlay.classList.remove('hidden');
 
-    const tickRate = 100; // ms per tick
     const ticksPerHour = 10;
     const totalTicks = hours * ticksPerHour;
     let currentTick = 0;
 
-    document.getElementById('btn-stop-work').onclick = () => {
-        finishWorkingSession(game, currentTick, totalTicks);
+    // Store session state on game object
+    game.workSession = {
+        currentTick,
+        totalTicks,
+        hours,
+        active: true
     };
 
-    game.workInterval = setInterval(() => {
-        currentTick++;
+    // Stop button
+    document.getElementById('btn-stop-work').onclick = () => {
+        game.workSession.active = false;
+        finishWorkingSession(game, game.workSession.currentTick, totalTicks);
+    };
+
+    // Continue/Advance button - user must click to progress
+    const advanceBtn = document.getElementById('btn-advance-work') || createAdvanceButton();
+    advanceBtn.onclick = () => {
+        if (!game.workSession.active) return;
+
+        game.workSession.currentTick++;
+        currentTick = game.workSession.currentTick;
 
         // Advance time
         game.handleTimeAdvance(0.1);
@@ -74,23 +89,52 @@ export function startWorkingSession(game, hours) {
         }
 
         if (currentTick >= totalTicks) {
+            game.workSession.active = false;
             finishWorkingSession(game, currentTick, totalTicks);
         }
 
         // Check if stage completed early
         if (game.projectSystem.activeProject.stageProgress >=
             game.projectSystem.activeProject.stages[game.projectSystem.activeProject.currentStageIndex].maxProgress) {
+            game.workSession.active = false;
             finishWorkingSession(game, currentTick, totalTicks);
         }
+    };
 
-    }, tickRate);
+    // Initial UI update
+    document.getElementById('work-progress-fill').style.width = '0%';
+    document.getElementById('work-progress-text').textContent = '0%';
+    document.getElementById('work-time-passed').textContent = '0h 0m';
+}
+
+/**
+ * Create the advance work button if it doesn't exist
+ */
+function createAdvanceButton() {
+    const overlay = document.getElementById('working-overlay');
+    let btn = document.getElementById('btn-advance-work');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'btn-advance-work';
+        btn.className = 'btn btn-primary btn-lg';
+        btn.textContent = '⏭ Work (Click to Progress)';
+        btn.style.marginTop = '1rem';
+        const stopBtn = document.getElementById('btn-stop-work');
+        if (stopBtn && stopBtn.parentNode) {
+            stopBtn.parentNode.insertBefore(btn, stopBtn);
+        }
+    }
+    return btn;
 }
 
 /**
  * Finish a working session
  */
 export function finishWorkingSession(game, ticks, totalTicks) {
-    clearInterval(game.workInterval);
+    // Clean up work session state
+    if (game.workSession) {
+        game.workSession.active = false;
+    }
     document.getElementById('working-overlay').classList.add('hidden');
 
     game.uiUpdater.updateCareerScreen();
@@ -169,7 +213,7 @@ export function updateOfficeScreen(game) {
 
     const officeNameEl = document.getElementById('current-office-name');
     const officeIconEl = document.querySelector('.office-badge .office-icon');
-    
+
     if (officeNameEl) officeNameEl.textContent = officeNames[currentOffice];
     if (officeIconEl) officeIconEl.textContent = officeIcons[currentOffice];
 
@@ -216,7 +260,7 @@ export function updateOfficeScreen(game) {
         const aiIntEl = document.getElementById('ai-stat-int');
         const aiSpdEl = document.getElementById('ai-stat-spd');
         const aiXpFillEl = document.getElementById('ai-xp-fill');
-        
+
         if (aiNameEl) aiNameEl.textContent = ai.name;
         if (aiLevelEl) aiLevelEl.textContent = ai.level;
         if (aiIntEl) aiIntEl.textContent = ai.intelligence;
@@ -259,7 +303,7 @@ export function updateStatsScreen(game) {
             const valueEl = el.querySelector('.stat-value');
             const fillEl = el.querySelector('.stat-bar-fill');
             const xpEl = el.querySelector('.stat-xp');
-            
+
             if (valueEl) valueEl.textContent = stat.value;
             if (fillEl) fillEl.style.width = `${(stat.value / stat.maxLevel) * 100}%`;
             if (xpEl) xpEl.textContent = `XP: ${Math.floor(stat.xp)}/${stat.xpNeeded}`;

@@ -1,0 +1,55 @@
+
+# Priya Sharma - The Ethics Officer
+**Role:** Data Privacy Officer
+**Personality:** Professional, Principled, Stern but Fair
+
+## Character Profile
+**Background:** Former human rights lawyer who pivoted to tech policy. Now ensures companies follow data privacy laws.
+**Motivation:** Protecting people from the misuse of their personal data.
+**Secret:** She once had to whistleblower on a previous employer, a traumatic event that made her the strict enforcer she is today.
+**Dream:** A global "Digital Bill of Rights" that is universally enforced.
+**Fear:** A surveillance state where privacy no longer exists.
+**Relationship Status:** Protecting her own privacy fiercely.
+**Turning Point:** The "Whistleblower Incident" - realizing that laws weren't enough, and that someone had to stand up from the inside.
+**Philosophy:** "Privacy isn't a luxury. It's a fundamental human right."
+
+---
+
+## Key Narrative Dialogue (Story Reveals)
+
+*   **Rel > 10 (Background):** "I used to represent people, not policies. But I realized the biggest threat to rights was in the code, not the courts."
+*   **Rel > 25 (Philosophy):** "Just because you *can* collect the data, doesn't mean you *should*. That distinction is everything."
+*   **Rel > 40 (Secret Past):** "I learned the hard way that doing the right thing has a cost. I paid it once. I'd pay it again."
+*   **Rel > 60 (Fear):** "We are sleepwalking into a world where everything is known, tracked, and sold. I'm just trying to wake us up."
+*   **Rel > 80 (Dream):** "A Digital Bill of Rights. Enforceable. Global. That's the only way to ensure freedom in the digital age."
+
+---
+
+## Standard Dialogue Progression
+
+### Stranger
+*   *Greetings:* "Ms. Sharma.", "Do you have clearance?", "Hello."
+*   *Topics:* GDPR, compliance, regulations.
+
+### Friendly
+*   *Greetings:* "Good to see you.", "Hello.", "Compliance is key."
+*   *Topics:* Best practices, "privacy by design".
+
+### Acquaintance
+*   *Greetings:* "Hello! Good to verify.", "Priya here.", "Everything secure?"
+*   *Topics:* The Whistleblower hint ("I've seen what happens when ethics are ignored").
+
+### Friend
+*   *Greetings:* "My friend! Secure channel?", "Hey! Good to see an ally."
+*   *Topics:* The fight for privacy, shared values.
+
+### Close Friend
+*   *Greetings:* "Priya. Let's talk freely.", "Hey! You're one of the good ones."
+*   *Topics:* The "Digital Bill of Rights", trust.
+
+---
+
+## Actions & Gifts
+*   **Books:** "A thoughtful choice. Thank you."
+*   **Coffee:** "I'll accept this. Thank you."
+*   **Compliment:** "Professionalism is my language."

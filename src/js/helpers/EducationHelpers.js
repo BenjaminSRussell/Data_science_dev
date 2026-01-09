@@ -64,7 +64,7 @@ export function showExamQuestion(game) {
     document.getElementById('question-text').textContent = `${exam.currentQuestionIndex + 1}. ${q.q}`;
 
     const optsContainer = document.getElementById('options-container');
-    optsContainer.innerHTML = '';
+    optsContainer.textContent = '';
 
     q.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
@@ -100,10 +100,10 @@ export function handleAnswerQuestion(game, answerIndex) {
  */
 export function finishExam(game) {
     if (!game || !game.currentExam) return;
-    
+
     const exam = game.currentExam;
     if (!exam.questions || !Array.isArray(exam.questions)) return;
-    
+
     const total = exam.questions.length;
     const score = exam.score || 0;
     const pct = total > 0 ? Math.round((score / total) * 100) : 0;
@@ -113,11 +113,11 @@ export function finishExam(game) {
     const resultsEl = document.getElementById('exam-results');
     const scoreEl = document.getElementById('exam-score');
     const statusEl = document.getElementById('exam-status');
-    
+
     if (questionsEl) questionsEl.classList.add('hidden');
     if (resultsEl) resultsEl.classList.remove('hidden');
     if (scoreEl) scoreEl.textContent = pct;
-    
+
     if (statusEl) {
         statusEl.textContent = passed ? "PASSED!" : "FAILED";
         statusEl.className = passed ? 'success-text' : 'error-text';

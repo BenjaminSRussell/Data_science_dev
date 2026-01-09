@@ -21,9 +21,9 @@ export class DevMenu {
     }
 
     isDevMode() {
-        return window.location.hostname === 'localhost' || 
-               window.location.hostname === '127.0.0.1' ||
-               localStorage.getItem('dev_mode') === 'true';
+        return window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            localStorage.getItem('dev_mode') === 'true';
     }
 
     createToggleButton() {
@@ -139,7 +139,7 @@ export class DevMenu {
 
         // Setup event listeners
         document.getElementById('dev-menu-close').onclick = () => this.toggle();
-        
+
         // Populate sections
         this.populateScreens();
         this.populateStoryline();
@@ -223,26 +223,28 @@ export class DevMenu {
     }
 
     populateScreens() {
-        const container = document.getElementById('dev-screens');
-        const screens = [
-            'screen-menu', 'screen-game', 'screen-map', 'screen-stats',
-            'screen-career', 'screen-shop', 'screen-office', 'screen-clients',
-            'screen-staff', 'screen-library', 'screen-bank', 'screen-newspaper',
-            'screen-relationships', 'screen-chart-studio', 'screen-review'
-        ];
+        try {
+            const container = document.getElementById('dev-screens');
+            if (!container) return;
 
-        screens.forEach(screenId => {
-            const btn = this.createButton(screenId.replace('screen-', ''), () => {
-                if (this.game.screenManager) {
-                    this.game.screenManager.showScreen(screenId);
-                    this.game.showToast(`Switched to ${screenId}`, 'info');
-                }
+            const screens = [
+                'screen-menu', 'screen-game', 'screen-map', 'screen-stats',
+                'screen-career', 'screen-shop', 'screen-office', 'screen-clients',
+                'screen-staff', 'screen-library', 'screen-bank', 'screen-newspaper',
+                'screen-relationships', 'screen-chart-studio', 'screen-review'
+            ];
+
+            screens.forEach(screenId => {
+                const btn = this.createButton(screenId.replace('screen-', ''), () => {
+                    if (this.game.screenManager) {
+                        this.game.screenManager.showScreen(screenId);
+                        this.game.showToast(`Switched to ${screenId}`, 'info');
+                    }
+                });
+                container.appendChild(btn);
             });
-            container.appendChild(btn);
-        });
         } catch (error) {
-            console.error('Error populating locations:', error);
-            container.innerHTML = `<p style="color: #ff6b6b; font-size: 10px;">Error: ${error.message}</p>`;
+            console.error('Error populating screens:', error);
         }
     }
 
@@ -261,48 +263,48 @@ export class DevMenu {
         try {
             const state = window.devTools.storylineNavigator.getStorylineState();
             const allBeats = window.devTools.storylineNavigator.getAllStoryBeats();
-            
+
             if (!state || !allBeats) {
                 container.innerHTML = '<p style="color: #888; font-size: 10px;">Could not load storyline data</p>';
                 return;
             }
 
             container.innerHTML = '';
-        
-        // Show current state
-        const stateDiv = document.createElement('div');
-        stateDiv.style.cssText = 'font-size: 10px; color: #aaa; margin-bottom: 10px; padding: 5px; background: #333; border-radius: 3px;';
-        stateDiv.innerHTML = `
+
+            // Show current state
+            const stateDiv = document.createElement('div');
+            stateDiv.style.cssText = 'font-size: 10px; color: #aaa; margin-bottom: 10px; padding: 5px; background: #333; border-radius: 3px;';
+            stateDiv.innerHTML = `
             <strong>Current:</strong> ${state.phase} (${state.progress}% progress)<br>
             <strong>Arc:</strong> ${state.currentArc?.name || 'None'}<br>
             <strong>Completed Beats:</strong> ${state.completedBeats.length}
         `;
-        container.appendChild(stateDiv);
+            container.appendChild(stateDiv);
 
-        // Show beats by phase
-        Object.keys(allBeats).forEach(phase => {
-            const phaseDiv = document.createElement('div');
-            phaseDiv.style.cssText = 'margin-top: 10px; padding: 5px; border-left: 2px solid #4ecdc4;';
-            const phaseTitle = document.createElement('strong');
-            phaseTitle.textContent = `${phase.toUpperCase()}:`;
-            phaseTitle.style.cssText = 'color: #4ecdc4; font-size: 11px; display: block; margin-bottom: 5px;';
-            phaseDiv.appendChild(phaseTitle);
+            // Show beats by phase
+            Object.keys(allBeats).forEach(phase => {
+                const phaseDiv = document.createElement('div');
+                phaseDiv.style.cssText = 'margin-top: 10px; padding: 5px; border-left: 2px solid #4ecdc4;';
+                const phaseTitle = document.createElement('strong');
+                phaseTitle.textContent = `${phase.toUpperCase()}:`;
+                phaseTitle.style.cssText = 'color: #4ecdc4; font-size: 11px; display: block; margin-bottom: 5px;';
+                phaseDiv.appendChild(phaseTitle);
 
-            allBeats[phase].forEach(beat => {
-                const beatBtn = document.createElement('button');
-                beatBtn.style.cssText = 'width: 100%; padding: 4px 8px; margin: 2px 0; background: #444; color: white; border: 1px solid #555; border-radius: 3px; cursor: pointer; font-size: 10px; text-align: left;';
-                beatBtn.innerHTML = `${state.completedBeats.includes(beat.id) ? '✓ ' : ''}${beat.title}`;
-                beatBtn.title = beat.description;
-                beatBtn.onclick = () => {
-                    const result = window.devTools.storylineNavigator.triggerStoryBeat(beat.id);
-                    this.game.showToast(result.message || result.error, result.success ? 'success' : 'error');
-                    this.populateStoryline(); // Refresh
-                };
-                phaseDiv.appendChild(beatBtn);
+                allBeats[phase].forEach(beat => {
+                    const beatBtn = document.createElement('button');
+                    beatBtn.style.cssText = 'width: 100%; padding: 4px 8px; margin: 2px 0; background: #444; color: white; border: 1px solid #555; border-radius: 3px; cursor: pointer; font-size: 10px; text-align: left;';
+                    beatBtn.innerHTML = `${state.completedBeats.includes(beat.id) ? '✓ ' : ''}${beat.title}`;
+                    beatBtn.title = beat.description;
+                    beatBtn.onclick = () => {
+                        const result = window.devTools.storylineNavigator.triggerStoryBeat(beat.id);
+                        this.game.showToast(result.message || result.error, result.success ? 'success' : 'error');
+                        this.populateStoryline(); // Refresh
+                    };
+                    phaseDiv.appendChild(beatBtn);
+                });
+
+                container.appendChild(phaseDiv);
             });
-
-            container.appendChild(phaseDiv);
-        });
         } catch (error) {
             console.error('Error populating storyline:', error);
             container.innerHTML = `<p style="color: #ff6b6b; font-size: 10px;">Error: ${error.message}</p>`;
@@ -326,7 +328,7 @@ export class DevMenu {
                     console.warn('Error getting locations from locationTester:', error);
                 }
             }
-            
+
             // Fallback to world map
             if (locations.length === 0 && this.game?.gameState?.worldMap?.getLocations) {
                 try {
@@ -341,43 +343,49 @@ export class DevMenu {
                 return;
             }
 
-        container.innerHTML = ''; // Clear
-        locations.forEach(location => {
-            const btn = this.createButton(location.name || location.id, async () => {
-                if (window.devTools?.locationTester) {
-                    const result = await window.devTools.locationTester.testLocation(location.id);
-                    if (result.success) {
-                        window.devTools.locationTester.navigateToLocation(location.id);
-                        this.game.showToast(`✓ ${location.name || location.id}`, 'success');
+            container.innerHTML = ''; // Clear
+            locations.forEach(location => {
+                const btn = this.createButton(location.name || location.id, async () => {
+                    if (window.devTools?.locationTester) {
+                        const result = await window.devTools.locationTester.testLocation(location.id);
+                        if (result.success) {
+                            window.devTools.locationTester.navigateToLocation(location.id);
+                            this.game.showToast(`${location.name || location.id}`, 'success');
+                        } else {
+                            this.game.showToast(`${result.errors.join(', ')}`, 'error');
+                            console.error('Location test failed:', result);
+                        }
                     } else {
-                        this.game.showToast(`✗ ${result.errors.join(', ')}`, 'error');
-                        console.error('Location test failed:', result);
+                        // Fallback
+                        if (this.game.gameState?.worldMap?.setCurrentLocation) {
+                            this.game.gameState.worldMap.setCurrentLocation(location.id);
+                            this.game.showToast(`Location: ${location.name}`, 'info');
+                        }
                     }
-                } else {
-                    // Fallback
-                    if (this.game.gameState?.worldMap?.setCurrentLocation) {
-                        this.game.gameState.worldMap.setCurrentLocation(location.id);
-                        this.game.showToast(`Location: ${location.name}`, 'info');
-                    }
-                }
+                });
+                container.appendChild(btn);
             });
-            container.appendChild(btn);
-        });
 
-        // Also add environment manager locations
-        if (this.game.environmentManager) {
-            const btn = this.createButton('Update Env', () => {
-                this.game.environmentManager.updateLocation();
-                this.game.showToast('Environment updated', 'info');
-            });
-            container.appendChild(btn);
+            // Also add environment manager locations
+            if (this.game.environmentManager) {
+                const btn = this.createButton('Update Env', () => {
+                    this.game.environmentManager.updateLocation();
+                    this.game.showToast('Environment updated', 'info');
+                });
+                container.appendChild(btn);
+            }
+        } catch (error) {
+            console.error('Error populating locations:', error);
+            if (container) {
+                container.innerHTML = `<p style="color: #ff6b6b; font-size: 10px;">Error: ${error.message}</p>`;
+            }
         }
     }
 
     populateDialogue() {
         const container = document.getElementById('dev-dialogue');
         const npcManager = this.game.gameState?.npcManager;
-        
+
         if (!npcManager) {
             container.innerHTML = '<p style="color: #888;">NPC Manager not initialized</p>';
             return;
@@ -409,7 +417,7 @@ export class DevMenu {
 
     populateActions() {
         const container = document.getElementById('dev-actions');
-        
+
         container.appendChild(this.createButton('New Game', () => {
             this.game.startNewGame();
         }, 'primary'));
@@ -452,10 +460,10 @@ export class DevMenu {
 
     populateGameState() {
         const container = document.getElementById('dev-game-state');
-        
+
         container.appendChild(this.createButton('Show State', () => {
             console.log('Game State:', this.game.gameState);
-            alert('Game state logged to console');
+            this.game.showToast('Game state logged to console', 'info');
         }));
 
         container.appendChild(this.createButton('Reset State', () => {
@@ -484,15 +492,15 @@ export class DevMenu {
 
     populateTesting() {
         const container = document.getElementById('dev-testing');
-        
+
         container.appendChild(this.createButton('Run All Tests', () => {
             if (window.speedRunBugFinder) {
                 window.speedRunBugFinder().then(results => {
                     console.log('Test results:', results);
-                    alert(`Tests completed. Bugs: ${results.bugs.length}, Errors: ${results.errors.length}`);
+                    this.game.showToast(`Tests completed. Bugs: ${results.bugs.length}, Errors: ${results.errors.length}`, 'info');
                 });
             } else {
-                alert('Test suite not loaded. Load test/speed-run-bug-finder.js first');
+                this.game.showError('Test suite not loaded. Load test/speed-run-bug-finder.js first');
             }
         }, 'primary'));
 
@@ -511,7 +519,7 @@ export class DevMenu {
 
     populateValidation() {
         const container = document.getElementById('dev-validation');
-        
+
         container.appendChild(this.createButton('Validate Graphs', () => {
             this.validateGraphs();
         }));
@@ -550,13 +558,13 @@ export class DevMenu {
         }
 
         console.log('Dialogue test results:', results);
-        alert(`Dialogues tested: ${results.passed} passed, ${results.failed} failed`);
+        this.game.showToast(`Dialogues tested: ${results.passed} passed, ${results.failed} failed`, 'info');
     }
 
     testAllCharts() {
         const chartManager = this.game.chartManager;
         if (!chartManager) {
-            alert('Chart manager not found');
+            this.game.showError('Chart manager not found');
             return;
         }
 
@@ -592,14 +600,14 @@ export class DevMenu {
             }
         });
 
-        alert(`Charts tested: ${results.passed} passed, ${results.failed} failed`);
+        this.game.showToast(`Charts tested: ${results.passed} passed, ${results.failed} failed`, 'info');
     }
 
     testSpreadsheets() {
         // Test data table functionality
         const table = document.getElementById('data-table');
         if (!table) {
-            alert('Data table not found');
+            this.game.showError('Data table not found');
             return;
         }
 
@@ -630,7 +638,7 @@ export class DevMenu {
             console.error('Table filtering failed:', error);
         }
 
-        alert(`Spreadsheet tests: ${results.passed} passed, ${results.failed} failed`);
+        this.game.showToast(`Spreadsheet tests: ${results.passed} passed, ${results.failed} failed`, 'info');
     }
 
     validateAssets() {
@@ -654,7 +662,7 @@ export class DevMenu {
 
         setTimeout(() => {
             console.log('Asset validation:', results);
-            alert(`Assets: ${results.loaded} loaded, ${results.missing} missing`);
+            this.game.showToast(`Assets: ${results.loaded} loaded, ${results.missing} missing`, 'info');
         }, 2000);
     }
 
@@ -687,14 +695,14 @@ export class DevMenu {
             }
         });
 
-        alert(`Graph validation: ${results.passed} passed, ${results.failed} failed`);
+        this.game.showToast(`Graph validation: ${results.passed} passed, ${results.failed} failed`, 'info');
     }
 
     validateWorkSystem() {
         // Test work/task system
         const taskSystem = this.game.taskSystem;
         if (!taskSystem) {
-            alert('Task system not found');
+            this.game.showError('Task system not found');
             return;
         }
 
@@ -721,7 +729,7 @@ export class DevMenu {
             results.failed++;
         }
 
-        alert(`Work system validation: ${results.passed} passed, ${results.failed} failed`);
+        this.game.showToast(`Work system validation: ${results.passed} passed, ${results.failed} failed`, 'info');
     }
 
     async testAllOptions() {
@@ -740,7 +748,7 @@ export class DevMenu {
         }
 
         console.log('Option test results:', results);
-        alert(`Options tested: ${results.tested}, Errors: ${results.errors.length}`);
+        this.game.showToast(`Options tested: ${results.tested}, Errors: ${results.errors.length}`, 'info');
     }
 
     checkForCrashes() {
@@ -765,9 +773,9 @@ export class DevMenu {
 
         const totalIssues = Object.values(checks).reduce((a, b) => a + b, 0);
         if (totalIssues === 0) {
-            alert('✅ No crash issues detected!');
+            this.game.showToast('✅ No crash issues detected!', 'success');
         } else {
-            alert(`Found ${totalIssues} potential crash issues. Check console.`);
+            this.game.showWarning(`Found ${totalIssues} potential crash issues. Check console.`);
             console.log('Crash check results:', checks);
         }
     }

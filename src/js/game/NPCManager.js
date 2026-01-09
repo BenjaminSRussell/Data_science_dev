@@ -10,12 +10,92 @@ import { dialogueTreeSystem } from './dialogue/DialogueTreeSystem.js';
 function initializeNPCImages() {
     // This will be called after NPCs array is defined
     if (typeof NPCs !== 'undefined' && Array.isArray(NPCs)) {
+
+        // Explicit map for 3D Assets (ID -> Folder Name)
+        // If value is null, use convention: id -> folder (underscored)
+        const assetMap = {
+            'professor_higgins': 'professor_higgins',
+            'sarah_martinez': 'sarah_martinez',
+            'mike_johnson': 'mike_johnson',
+            'lisa_wong': 'lisa_wong',
+            'david_chen': 'david_chen',
+            'victoria_sterling': 'victoria_sterling',
+            'donna_delight': 'bagel_lady', // Best guess
+            'bob_bagel': 'chef', // Best guess
+            'flora_bloom': 'flora_florist',
+            'alex_rivera': 'alex_kim', // Best guess
+            'jordan_kim': 'tech_bro', // Best guess, or null for 2D
+            'brad_sterling': 'brad',
+            'carlos_tech': 'carlos_martinez',
+            'emma_bloom': 'emma_bloom',
+            'bella_lux': 'bella_lux',
+            'dr_amara_patel': 'dr._amara_patel',
+            'marcus_thompson': 'marcus_thompson',
+            'rachel_green': 'rachel_green',
+            'james_wilson': 'james_wilson',
+            'priya_sharma': 'priya_sharma',
+            'casey_lee': 'casey',
+            'sophia_zhang': 'sophia_zhang',
+            'tyler_rival': 'tyler',
+            'dr. amara patel': 'dr._amara_patel',
+            'robert_kim': 'robert_kim',
+            'maya_engineer': 'maya_chen',
+            'mr_anderson': 'mr._anderson',
+            'linda': 'linda',
+            'lawyer': 'lawyer',
+            'bartender': 'bartender',
+            'receptionist': 'receptionist',
+            'scientist': 'scientist',
+            'musician': 'musician',
+            'pilot': 'pilot',
+
+            // Integrated Previously Unused Assets
+            'luna_bookstore': 'linda', // Gentle look
+            'chloe_competitor': 'dr_sarah_chen', // Professional Rival
+            'judge_roberts': 'dr._james_williams', // Distinguished older man
+            'the_broker': 'professor', // Distinguished look
+            'taylor_morgan': 'patricia_johnson', // Developer/Casual
+            'shadow_broker': 'bartender', // Mysterious/Service vibe
+
+            // Mappings for missing characters (Best-fit fallbacks)
+            'vinnie_shark': 'lawyer', // Suit
+            'zero_cool': 'tech_bro', // Hoodie/Casual
+            'sam_taylor': 'casey', // Casual
+            'noah_artist': 'musician', // Creative vibe
+            'agent_smith': 'mr._anderson', // Men in Black look
+            'dr_wellness': 'scientist', // Lab coat/Clean
+            'coach_motivation': 'pilot' // Uniform/Active
+        };
+
         NPCs.forEach(npc => {
             if (!npc.image) {
                 npc.image = getNPCImage(npc);
             }
             if (!npc.fallbackIcon) {
                 npc.fallbackIcon = getNPCFallback(npc);
+            }
+
+            // Determine 3D Model Path
+            let folderName = assetMap[npc.id];
+
+            // If not in map, try convention (name to snake_case)
+            if (!folderName) {
+                // Try simple name match
+                const simpleName = npc.name.toLowerCase().replace(/ /g, '_').replace(/\./g, '');
+                // Basic fallback
+                if (simpleName === 'tyler_brooks') folderName = 'tyler';
+            }
+
+            if (folderName) {
+                // Standard Path
+                let modelFile = 'Meshy_AI_biped/Meshy_AI_Animation_Walking_withSkin.fbx';
+
+                // Exceptions
+                if (folderName === 'tyler') {
+                    modelFile = 'Meshy_AI_tyler_0107222328_texture_fbx/Meshy_AI_tyler_0107222328_texture.fbx';
+                }
+
+                npc.modelPath = `/assets/characters/3d/${folderName}/${modelFile}`;
             }
         });
     }
@@ -38,7 +118,7 @@ export const NPCs = [
         name: 'Professor Higgins',
         title: 'University Professor',
         icon: '',
-        image: '/assets/npcs/mentor_0.png',
+        image: '/assets/characters/bosses/anderson.png', // Temporary high-quality replacement
         type: 'mentor',
         personality: 'generous',
         location: 'university',
@@ -57,7 +137,7 @@ export const NPCs = [
         name: 'Sarah Martinez',
         title: 'Senior Data Analyst',
         icon: '',
-        image: '/assets/npcs/mentor_1.png',
+        image: '/assets/characters/bosses/chen.png', // Temporary high-quality replacement
         type: 'mentor',
         personality: 'professional',
         location: 'coffee_shop',
@@ -78,7 +158,7 @@ export const NPCs = [
         name: 'Mike Johnson',
         title: 'Marketing Director',
         icon: '',
-        image: '/assets/npcs/business_0.png',
+        image: '/assets/characters/bosses/martinez.png', // Temporary high-quality replacement
         type: 'business',
         personality: 'friendly',
         location: 'networking_bar',
@@ -97,7 +177,7 @@ export const NPCs = [
         name: 'Lisa Wong',
         title: 'Startup Founder',
         icon: '',
-        image: '/assets/npcs/business_1.png',
+        image: '/assets/characters/bosses/kim.png', // Temporary high-quality replacement
         type: 'business',
         personality: 'competitive',
         location: 'tech_hub',
@@ -114,7 +194,7 @@ export const NPCs = [
         name: 'David Chen',
         title: 'Angel Investor',
         icon: '',
-        image: '/assets/npcs/investor_0.png',
+        image: '/assets/characters/bosses/williams.png', // Temporary high-quality replacement
         type: 'investor',
         personality: 'mysterious',
         location: 'downtown',
@@ -133,7 +213,7 @@ export const NPCs = [
         name: 'Victoria Sterling',
         title: 'VC Partner',
         icon: '',
-        image: '/assets/npcs/investor_1.png',
+        image: '/downloaded_assets/ui/elements/generated_low_poly_panel_0241.png',
         type: 'investor',
         personality: 'professional',
         location: 'luxury_district',
@@ -150,7 +230,7 @@ export const NPCs = [
         name: 'Donna',
         title: 'Donut Shop Owner',
         icon: '',
-        image: '/assets/npcs/shopkeeper_0.png',
+        image: '/downloaded_assets/misc/placeholders/placeholder_placeholders_043.png',
         type: 'shopkeeper',
         personality: 'friendly',
         location: 'donut_shop',
@@ -169,7 +249,7 @@ export const NPCs = [
         name: 'Bob',
         title: 'Bagel Expert',
         icon: '',
-        image: '/assets/npcs/shopkeeper_1.png',
+        image: '/downloaded_assets/misc/placeholders/placeholder_placeholders_042.png',
         type: 'shopkeeper',
         personality: 'generous',
         location: 'bagel_shop',
@@ -188,7 +268,7 @@ export const NPCs = [
         name: 'Flora',
         title: 'Florist',
         icon: '',
-        image: '/assets/npcs/shopkeeper_2.png',
+        image: '/downloaded_assets/misc/placeholders/placeholder_placeholders_040.png',
         type: 'shopkeeper',
         personality: 'friendly',
         location: 'flower_store',
@@ -210,7 +290,7 @@ export const NPCs = [
         name: 'Alex Rivera',
         title: 'Fellow Freelancer',
         icon: '',
-        image: '/assets/npcs/alex_young.png', // New Young Asset
+        image: '/assets/characters/bosses/kim.png', // Temporary high-quality replacement
         type: 'friend',
         personality: 'friendly',
         location: 'coffee_shop',
@@ -229,7 +309,7 @@ export const NPCs = [
         name: 'Jordan Kim',
         title: 'Gym Buddy',
         icon: '',
-        image: '/assets/npcs/friend_1.png',
+        image: '/downloaded_assets/misc/placeholders/placeholder_placeholders_021.png',
         type: 'friend',
         personality: 'friendly',
         location: 'gym',
@@ -250,7 +330,7 @@ export const NPCs = [
         name: 'Brad Sterling',
         title: 'Competing Analyst',
         icon: '',
-        image: '/assets/npcs/rival_0.png',
+        image: '/assets/characters/bosses/anderson.png', // Temporary high-quality replacement
         type: 'rival',
         personality: 'competitive',
         location: 'networking_bar',
@@ -267,7 +347,7 @@ export const NPCs = [
         name: 'Vinnie "The Shark"',
         title: 'Loan Consultant',
         icon: '',
-        image: '/assets/npcs/loan_shark.png',
+        image: '/assets/characters/bosses/johnson.png', // Temporary high-quality replacement
         type: 'criminal',
         personality: 'aggressive',
         location: 'downtown', // Or secluded alley
@@ -282,7 +362,7 @@ export const NPCs = [
         name: 'Gordon "The Broker"',
         title: 'Stock Operator',
         icon: '',
-        image: '/assets/npcs/the_broker.png',
+        image: '/downloaded_assets/ui/elements/generated_low_poly_panel_0296.png',
         type: 'criminal',
         personality: 'greedy',
         location: 'stock_exchange',
@@ -313,7 +393,7 @@ export const NPCs = [
         name: 'Emma Bloom',
         title: 'Librarian & Teacher',
         icon: '',
-        image: '/assets/npcs/npc_good_character_1765747743170.png',
+        image: '/assets/characters/bosses/chen.png', // Temporary high-quality replacement
         type: 'romance',
         personality: 'friendly',
         location: 'library',
@@ -333,7 +413,7 @@ export const NPCs = [
         name: 'Bella Lux',
         title: 'Influencer',
         icon: '',
-        image: '/assets/npcs/romance_1.png',
+        image: '/assets/characters/bosses/martinez.png', // Temporary high-quality replacement
         type: 'romance',
         personality: 'high_maintenance', // Custom handling
         location: 'luxury_district',
@@ -365,6 +445,7 @@ export const NPCs = [
         name: 'Marcus Thompson',
         title: 'Data Engineering Lead',
         icon: '',
+        image: '/downloaded_assets/ui/elements/generated_low_poly_star_0279.png',
         type: 'mentor',
         personality: 'generous',
         location: 'tech_hub',
@@ -1012,7 +1093,7 @@ export class NPCManager {
 
         // Active conversations
         this.currentConversation = null;
-        
+
         // Connect dialogue system to NPC manager (will be set after initialization)
         setTimeout(() => {
             if (dialogueTreeSystem) {
@@ -1124,7 +1205,7 @@ export class NPCManager {
         return this.metNPCs.map(npcId => {
             const npc = this.getNPC(npcId);
             if (!npc) return null;
-            
+
             return {
                 ...npc,
                 relationship: this.relationships[npcId] || 0,
@@ -1190,7 +1271,7 @@ export class NPCManager {
 
         if (isFirstMeeting) {
             this.markNPCAsMet(npcId);
-            
+
             // Check for story beat (first NPC met)
             if (this.metNPCs.length === 1 && this.gameState.mainGame && this.gameState.mainGame.storyBeatsSystem) {
                 const beat = this.gameState.mainGame.storyBeatsSystem?.getBeat('meet_first_npc');
@@ -1210,7 +1291,7 @@ export class NPCManager {
 
         // Get dialogue using relationship dialogue system (loads individual NPC files)
         // relationship already declared above
-        
+
         // Try to get dialogue from individual NPC file first
         let dialogueText = null;
         if (this.gameState.relationshipDialogueSystem) {
@@ -1220,7 +1301,7 @@ export class NPCManager {
                 console.warn(`Could not load dialogue for ${npcId}:`, error);
             }
         }
-        
+
         // Check for memory-based dialogue (NPCs remember player choices)
         let memoryDialogue = null;
         if (this.gameState.npcMemorySystem && !isFirstMeeting) {
@@ -1262,6 +1343,7 @@ export class NPCManager {
         };
 
         // Get choices from dialogue tree or fallback
+        const updatedRelationship = relationship; // FIX: Define before using
         let choices = [];
         if (rootNode && rootNode.choices) {
             choices = rootNode.choices.filter(choice => {
@@ -1307,7 +1389,7 @@ export class NPCManager {
             dialogueTree: dialogueTree
         };
     }
-    
+
     /**
      * Get dynamic greeting based on relationship and personality
      */
@@ -1315,7 +1397,7 @@ export class NPCManager {
         if (rootNode && rootNode.text) {
             return rootNode.text;
         }
-        
+
         // Fallback greeting generation
         const personalityGreetings = {
             friendly: [
@@ -1344,11 +1426,11 @@ export class NPCManager {
                 "Welcome! What can I do for you?"
             ]
         };
-        
+
         const greetings = personalityGreetings[npc.personality] || personalityGreetings.friendly;
         return greetings[Math.floor(Math.random() * greetings.length)];
     }
-    
+
     /**
      * Get greeting pool based on relationship
      */
@@ -1475,13 +1557,13 @@ export class NPCManager {
             isTreeAction: false
         };
     }
-    
+
     /**
      * Apply choice effects
      */
     applyChoiceEffects(effects) {
         const npcId = this.currentConversation.npc.id;
-        
+
         // Apply relationship change
         if (effects.relationship) {
             this.modifyRelationship(npcId, effects.relationship);
@@ -1525,7 +1607,7 @@ export class NPCManager {
 
         const likesGift = npc.gifts.includes(giftId);
         const relationshipGain = likesGift ? 15 : 5; // Liked gift = +15, generic = +5
-        
+
         // Progressive relationship: Higher relationships get less gain (harder to maintain)
         const currentRel = this.relationships[npcId] || 0;
         let adjustedGain = relationshipGain;

@@ -61,7 +61,7 @@ export class WorldEventManager {
     }
 
     triggerEvent(event) {
-        console.log(` World Event Triggered: ${event.name}`);
+
         event.effect(this.gameState);
         const days = this.gameState?.timeManager?.totalDays || 0;
         this.events.push({ id: event.id, day: days });

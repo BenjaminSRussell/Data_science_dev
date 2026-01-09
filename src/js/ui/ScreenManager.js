@@ -19,7 +19,7 @@ export class ScreenManager {
             this.screens[screen.id] = screen;
         });
 
-        console.log(` Screen Manager initialized with ${Object.keys(this.screens).length} screens`);
+
     }
 
     /**
@@ -40,7 +40,7 @@ export class ScreenManager {
 
         // Phase 3: Use GSAP for smooth screen transitions
         const gsapAnimator = this.mainGame?.gsapAnimator || this.mainGame?.gameState?.gsapAnimator;
-        
+
         // Hide current screen with animation
         if (this.currentScreen && this.screens[this.currentScreen]) {
             const currentScreenEl = this.screens[this.currentScreen];
@@ -88,7 +88,7 @@ export class ScreenManager {
         } else {
             targetScreen.classList.remove('hidden');
             targetScreen.classList.add('active');
-            
+
             // Force display in case CSS is overriding
             const computedDisplay = window.getComputedStyle(targetScreen).display;
             if (computedDisplay === 'none') {
@@ -103,13 +103,13 @@ export class ScreenManager {
 
         this.currentScreen = screenId;
 
-        console.log(` Showing screen: ${screenId}`);
+
 
         // Dispatch event
         window.dispatchEvent(new CustomEvent('screenchange', {
             detail: { screen: screenId }
         }));
-        
+
         // Initialize map renderer when map screen is shown
         if (screenId === 'screen-map' && this.mainGame) {
             // Small delay to ensure DOM is ready and screen is visible
