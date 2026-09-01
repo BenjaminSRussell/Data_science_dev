@@ -1,131 +1,9 @@
-/**
- * DialogueTreeSystem.js
- * Proper dialogue trees for each character
- * No emojis - clean text-based conversations
- * Now with enhanced deep character stories
- */
+import { DialogueTree } from './DialogueTree.js';
+import { DialogueNode } from './DialogueNode.js';
 
-import { enhancedDialogueSystem } from './EnhancedDialogueSystem.js';
-
-export class DialogueNode {
-    constructor(config) {
-        this.id = config.id;
-        this.text = config.text; // What the NPC says
-        this.choices = config.choices || []; // Player response options
-        this.conditions = config.conditions || {}; // When this node is available
-        this.effects = config.effects || {}; // What happens when chosen
-        this.nextNode = config.nextNode || null; // Next node ID
-    }
-}
-
-export class DialogueTree {
-    constructor(npcId, nodes) {
-        this.npcId = npcId;
-        this.nodes = new Map();
-        nodes.forEach(node => {
-            this.nodes.set(node.id, node);
-        });
-    }
-    
-    getNode(nodeId) {
-        return this.nodes.get(nodeId) || this.nodes.get('root');
-    }
-    
-    getRootNode() {
-        return this.getNode('root');
-    }
-}
-
-/**
- * Main Dialogue Tree System
- */
-export class DialogueTreeSystem {
-    constructor() {
-        this.builder = new DialogueTreeBuilder();
-        this.treeCache = new Map();
-    }
-    
-    /**
-     * Get dialogue tree for NPC
-     * @param {string} npcId - NPC ID
-     * @param {number} relationshipLevel - Current relationship level (for enhanced dialogue)
-     * @returns {DialogueTree} Dialogue tree
-     */
-    getTree(npcId, relationshipLevel = 0) {
-        // Check cache first (key includes relationship level for enhanced trees)
-        const cacheKey = `${npcId}_${relationshipLevel}`;
-        if (this.treeCache.has(cacheKey)) {
-            return this.treeCache.get(cacheKey);
-        }
-        
-        // Get NPC data
-        const npc = this.getNPC(npcId);
-        if (!npc) {
-            console.warn(`NPC not found: ${npcId}`);
-            return null;
-        }
-        
-        // Build tree (enhanced system will be used if character has deep story)
-        const tree = this.builder.buildTreeForNPC(npc, relationshipLevel);
-        
-        // Cache it
-        this.treeCache.set(cacheKey, tree);
-        
-        return tree;
-    }
-    
-    /**
-     * Get NPC data (helper method)
-     */
-    getNPC(npcId) {
-        // This will be set by NPCManager
-        if (this.npcManager) {
-            return this.npcManager.getNPC(npcId);
-        }
-        return null;
-    }
-    
-    /**
-     * Set NPC manager reference
-     */
-    setNPCManager(npcManager) {
-        this.npcManager = npcManager;
-    }
-    
-    /**
-     * Clear cache (useful when relationships change significantly)
-     */
-    clearCache() {
-        this.treeCache.clear();
-    }
-}
-
-/**
- * Build dialogue trees for each NPC
- */
-export class DialogueTreeBuilder {
-    constructor() {
-        this.trees = new Map();
-    }
-    
-    /**
-     * Build tree for a specific NPC
-     * Uses enhanced dialogue system if character has deep story
-     */
-    buildTreeForNPC(npc, relationshipLevel = 0) {
-        // Try enhanced dialogue system first (if character has deep story)
-        try {
-            const enhancedTree = enhancedDialogueSystem.buildEnhancedTree(npc, relationshipLevel);
-            if (enhancedTree && enhancedTree.nodes.size > 1) {
-                return enhancedTree;
-            }
-        } catch (error) {
-            // Enhanced dialogue not available
-        }
-        
-        // Fallback to personality-based trees
+class DialogueTreeSystem {
+    buildTreeForNPC(npc) {
         const personality = npc.personality || 'friendly';
-        const type = npc.type || 'friend';
         
         if (personality === 'friendly') {
             return this.buildFriendlyTree(npc);
@@ -139,40 +17,38 @@ export class DialogueTreeBuilder {
             return this.buildGrumpyTree(npc);
         } else if (personality === 'generous') {
             return this.buildGenerousTree(npc);
+        } else {
+            return this.buildDefaultTree(npc);
         }
-        
-        return this.buildDefaultTree(npc);
     }
     
     buildFriendlyTree(npc) {
         const nodes = [
             new DialogueNode({
                 id: 'root',
-                text: "Hey there! Good to see you! What's on your mind?",
+                text: "Hello! How are you doing?",
                 choices: [
-                    { id: 'ask_about_work', text: 'Ask about their work' },
-                    { id: 'ask_for_help', text: 'Ask for help' },
+                    { id: 'small_talk', text: 'Small talk' },
+                    { id: 'ask_about_day', text: 'Ask about day' },
                     { id: 'compliment', text: 'Give a compliment' },
-                    { id: 'small_talk', text: 'Make small talk' },
-                    { id: 'goodbye', text: 'Say goodbye' }
+                    { id: 'goodbye', text: 'Goodbye' }
                 ]
             }),
             new DialogueNode({
-                id: 'ask_about_work',
-                text: "Oh, work's been great! I've been working on some really interesting projects lately. The data science field is just exploding right now!",
+                id: 'small_talk',
+                text: "Just doing great! What about you?",
                 choices: [
-                    { id: 'work_interesting', text: 'That sounds interesting' },
-                    { id: 'work_ask_details', text: 'Tell me more' },
-                    { id: 'work_change_topic', text: 'Change topic' }
+                    { id: 'root', text: 'I am good too' },
+                    { id: 'small_talk_more', text: 'Tell me more' }
                 ],
-                effects: { relationship: 2 }
+                effects: { relationship: 1 }
             }),
             new DialogueNode({
-                id: 'work_interesting',
-                text: "Yeah! I love what I do. Every day is different, you know? One day I'm analyzing customer behavior, the next I'm building predictive models.",
+                id: 'ask_about_day',
+                text: "My day has been good. How about yours?",
                 choices: [
-                    { id: 'work_ask_details', text: 'What kind of models?' },
-                    { id: 'root', text: 'That sounds cool' }
+                    { id: 'root', text: 'My day was good too' },
+                    { id: 'ask_about_day_more', text: 'Tell me more' }
                 ],
                 effects: { relationship: 1 }
             }),
@@ -372,26 +248,34 @@ export class DialogueTreeBuilder {
         const nodes = [
             new DialogueNode({
                 id: 'root',
-                text: "Hello. How can I help you?",
+                text: "Hello! What would you like to talk about?",
                 choices: [
-                    { id: 'ask_help', text: 'I need help' },
-                    { id: 'small_talk', text: 'Just talking' },
+                    { id: 'general', text: 'General conversation' },
+                    { id: 'specific', text: 'Specific topic' },
                     { id: 'goodbye', text: 'Goodbye' }
                 ]
             }),
             new DialogueNode({
-                id: 'ask_help',
-                text: "I can try to help. What do you need?",
+                id: 'general',
+                text: "Sure, what would you like to discuss?",
+                choices: [
+                    { id: 'root', text: 'Back to main menu' },
+                    { id: 'general_more', text: 'Tell me more' }
+                ],
                 effects: { relationship: 1 }
             }),
             new DialogueNode({
-                id: 'small_talk',
-                text: "Not much to say, really. How are things with you?",
+                id: 'specific',
+                text: "What specific topic would you like to discuss?",
+                choices: [
+                    { id: 'root', text: 'Back to main menu' },
+                    { id: 'specific_more', text: 'Tell me more' }
+                ],
                 effects: { relationship: 1 }
             }),
             new DialogueNode({
                 id: 'goodbye',
-                text: "See you later.",
+                text: "Goodbye! Have a great day!",
                 effects: { relationship: 0 }
             })
         ];
@@ -400,5 +284,4 @@ export class DialogueTreeBuilder {
     }
 }
 
-// Singleton instance
-export const dialogueTreeSystem = new DialogueTreeSystem();
+export { DialogueTreeSystem };
