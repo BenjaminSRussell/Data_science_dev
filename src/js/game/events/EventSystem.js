@@ -1,28 +1,10 @@
-/**
- * EventSystem.js
- * Manages parties, events, holidays, and stock market crashes
- */
-
-export class EventSystem {
+class EventSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.upcomingEvents = [];
         this.activeEvents = [];
-        this.eventHistory = [];
-        this.initializeEvents();
-    }
-    
-    /**
-     * Initialize recurring events
-     */
-    initializeEvents() {
-        // Schedule holidays
         this.scheduleHolidays();
-        
-        // Schedule parties
         this.scheduleParties();
-        
-        // Schedule stock market events
         this.scheduleStockEvents();
     }
     
@@ -68,10 +50,11 @@ export class EventSystem {
         
         // Networking events (bi-weekly)
         for (let week = 0; week < 52; week += 2) {
+            const day = (week * 7) % 30; // Corrected to ensure day is within 1-30
             this.upcomingEvents.push({
                 id: `networking_${week}`,
                 name: 'Networking Event',
-                day: week * 7,
+                day: day,
                 type: 'party',
                 location: 'coffee_shop',
                 description: 'Professional networking opportunity'
@@ -260,4 +243,3 @@ export class EventSystem {
         return (event.month || 0) * daysPerMonth + (event.day || 1);
     }
 }
-
