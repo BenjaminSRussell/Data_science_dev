@@ -1,82 +1,13 @@
-/**
- * Office System - Upgradeable office spaces, equipment, and staff
- * Core tycoon mechanics for building your data science empire
- */
-
-// Equipment that can be upgraded
-export const EQUIPMENT = {
-    computer: {
-        id: "computer",
-        name: "Computer",
-        icon: "",
-        levels: [
-            { name: "Old Laptop", speed: 1.0, price: 0, description: "A beat-up laptop that barely runs Excel" },
-            { name: "Desktop PC", speed: 1.3, price: 500, description: "A decent workstation" },
-            { name: "Gaming Rig", speed: 1.6, price: 2000, description: "Overkill for spreadsheets, but fast!" },
-            { name: "Workstation Pro", speed: 2.0, price: 5000, description: "Professional-grade computing power" },
-            { name: "Server Cluster", speed: 3.0, price: 15000, description: "Big data? No problem." }
-        ]
-    },
-    desk: {
-        id: "desk",
-        name: "Desk",
-        icon: "",
-        levels: [
-            { name: "Folding Table", comfort: 1.0, price: 0, description: "It wobbles, but it works" },
-            { name: "Basic Desk", comfort: 1.2, price: 300, description: "A proper desk at last" },
-            { name: "Standing Desk", comfort: 1.5, price: 800, description: "Good for your health!" },
-            { name: "L-Shaped Desk", comfort: 1.8, price: 1500, description: "Room to spread out" },
-            { name: "Executive Desk", comfort: 2.5, price: 4000, description: "Mahogany. Very prestigious." }
-        ]
-    },
-    monitor: {
-        id: "monitor",
-        name: "Monitor",
-        icon: "",
-        levels: [
-            { name: "Laptop Screen", clarity: 1.0, price: 0, description: "Squinting at 13 inches" },
-            { name: "24\" Monitor", clarity: 1.3, price: 250, description: "Now we're talking" },
-            { name: "Dual Monitors", clarity: 1.6, price: 600, description: "Double the productivity" },
-            { name: "Ultrawide", clarity: 2.0, price: 1200, description: "See all your data at once" },
-            { name: "Triple 4K Setup", clarity: 3.0, price: 3500, description: "Chart visualization heaven" }
-        ]
-    },
-    chair: {
-        id: "chair",
-        name: "Chair",
-        icon: "",
-        levels: [
-            { name: "Kitchen Chair", stamina: 1.0, price: 0, description: "Your back hurts" },
-            { name: "Office Chair", stamina: 1.3, price: 200, description: "Basic lumbar support" },
-            { name: "Ergonomic Chair", stamina: 1.6, price: 600, description: "Proper posture at last" },
-            { name: "Gaming Chair", stamina: 2.0, price: 1000, description: "RGB doesn't help, but it looks cool" },
-            { name: "Herman Miller", stamina: 3.0, price: 2500, description: "Peak comfort achieved" }
-        ]
-    },
-    software: {
-        id: "software",
-        name: "Software",
-        icon: "",
-        levels: [
-            { name: "Spreadsheets", capability: 1.0, price: 0, description: "Excel and Google Sheets" },
-            { name: "Basic BI Tools", capability: 1.4, price: 500, description: "Tableau Public, Power BI free" },
-            { name: "Pro Analytics", capability: 1.8, price: 2000, description: "Full Tableau, Looker" },
-            { name: "Python Stack", capability: 2.2, price: 1500, description: "Pandas, Matplotlib, Seaborn" },
-            { name: "Enterprise Suite", capability: 3.0, price: 8000, description: "Everything. All of it." }
-        ]
-    }
-};
-
-// Office spaces you can unlock
-export const OFFICES = [
+// Office spaces you can purchase
+export const OFFICE_SPACES = [
     {
-        id: "bedroom",
-        name: "Bedroom Corner",
+        id: "home",
+        name: "Home",
         icon: "",
         price: 0,
         capacity: 1,
-        clientBonus: 0,
-        description: "Working from your bedroom. Humble beginnings.",
+        clientBonus: 0.05,
+        description: "Starting from your own home. Cheap and cozy!",
         background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)"
     },
     {
@@ -310,7 +241,7 @@ export const MARKETING_CHANNELS = [
         id: "enterprise_sales",
         name: "Enterprise Sales Team",
         icon: "",
-        costPerDay: 500,
+        costPerDay: 200,
         leadsPerDay: 3,
         description: "Fewer leads, but they're high value"
     }
