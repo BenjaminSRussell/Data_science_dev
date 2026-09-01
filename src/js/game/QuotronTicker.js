@@ -1,134 +1,141 @@
-/**
- * QuotronTicker.js
- * Creates a real-time scrolling ticker display for stock market quotes
- * Inspired by Bloomberg terminals and financial news tickers
- */
+import { getMarketData, getCompanyData } from '../helpers/StockMarketHelpers';
 
 export class QuotronTicker {
     constructor(containerId, stockMarket) {
-        this.container = document.getElementById(containerId);
+        this.containerId = containerId;
         this.stockMarket = stockMarket;
-        this.tickerItems = [];
-        this.scrollPosition = 0;
+        this.container = document.getElementById(containerId);
+        this.scrollWrapper = null;
+        this.tickerContent = null;
         this.animationFrame = null;
-        this.isRunning = false;
-        
+        this.tickerSpeed = 2; // pixels per frame
+        this.dataInterval = null;
+        this.data = [];
+        this.isPaused = false;
+
         if (!this.container) {
             console.error(`QuotronTicker: Container ${containerId} not found`);
-            return;
+            return; // Early return to prevent further initialization
         }
-        
+
         this.init();
     }
-    
+
     init() {
-        // Create ticker container
-        this.container.innerHTML = '';
-        this.container.className = 'quotron-ticker-container';
-        
-        // Create scrolling wrapper
         this.scrollWrapper = document.createElement('div');
-        this.scrollWrapper.className = 'quotron-ticker-scroll';
+        this.scrollWrapper.className = 'quotron-scroll-wrapper';
         this.container.appendChild(this.scrollWrapper);
-        
-        // Create ticker content
+
         this.tickerContent = document.createElement('div');
         this.tickerContent.className = 'quotron-ticker-content';
         this.scrollWrapper.appendChild(this.tickerContent);
-        
-        // Initial update
+
+        this.startDataFetching();
+        this.start();
+    }
+
+    startDataFetching() {
+        this.dataInterval = setInterval(() => {
+            if (this.isPaused) return;
+            this.fetchMarketData();
+        }, 10000); // Fetch new data every 10 seconds
+    }
+
+    fetchMarketData() {
+        const marketData = getMarketData(this.stockMarket);
+        if (!marketData) return;
+
+        this.data = marketData.map(symbol => {
+            const company = getCompanyData(this.stockMarket, symbol);
+            return {
+                symbol,
+                name: company ? company.name : 'Unknown',
+                price: company ? company.price : 0
+            };
+        });
+
         this.update();
     }
-    
-    /**
-     * Update ticker with latest stock data
-     */
-    update() {
-        if (!this.stockMarket) return;
-        
-        const recentChanges = this.stockMarket.getRecentChanges(30);
-        this.tickerItems = recentChanges;
-        
-        // Clear and rebuild ticker content
-        this.tickerContent.innerHTML = '';
-        
-        // Create duplicate content for seamless loop
-        const createTickerItems = (items) => {
-            items.forEach(item => {
-                const tickerItem = document.createElement('div');
-                tickerItem.className = 'quotron-ticker-item';
-                
-                const changeClass = item.changePct >= 0 ? 'positive' : 'negative';
-                const changeSymbol = item.changePct >= 0 ? '▲' : '▼';
-                const changeColor = item.changePct >= 0 ? '#00ff88' : '#ff4444';
-                
-                tickerItem.innerHTML = `
-                    <span class="ticker-ticker">${item.ticker}</span>
-                    <span class="ticker-price">$${item.price.toFixed(2)}</span>
-                    <span class="ticker-change ${changeClass}" style="color: ${changeColor}">
-                        ${changeSymbol} ${Math.abs(item.changePct * 100).toFixed(2)}%
-                    </span>
-                    <span class="ticker-market">${item.market}</span>
-                `;
-                
-                this.tickerContent.appendChild(tickerItem);
-            });
-        };
-        
-        // Add items multiple times for seamless scrolling
-        createTickerItems(this.tickerItems);
-        createTickerItems(this.tickerItems); // Duplicate for seamless loop
-        
-        // Reset scroll position if needed
-        if (this.scrollPosition >= this.tickerContent.scrollWidth / 2) {
-            this.scrollPosition = 0;
-        }
-    }
-    
-    /**
-     * Start the scrolling animation
-     */
+
     start() {
-        if (this.isRunning) return;
-        this.isRunning = true;
-        this.animate();
+        if (!this.scrollWrapper || !this.tickerContent) {
+            console.error('QuotronTicker: scrollWrapper or tickerContent not initialized');
+            return;
+        }
+
+        this.animationFrame = requestAnimationFrame(this.animate.bind(this));
     }
-    
-    /**
-     * Stop the scrolling animation
-     */
-    stop() {
-        this.isRunning = false;
+
+    animate() {
+        if (!this.scrollWrapper || !this.tickerContent) {
+            console.error('QuotronTicker: scrollWrapper or tickerContent not initialized');
+            return;
+        }
+
+        if (this.isPaused) {
+            this.animationFrame = requestAnimationFrame(this.animate.bind(this));
+            return;
+        }
+
+        const scrollLeft = this.scrollWrapper.scrollLeft;
+        const scrollWidth = this.scrollWrapper.scrollWidth;
+        const clientWidth = this.scrollWrapper.clientWidth;
+
+        if (scrollLeft + clientWidth >= scrollWidth) {
+            this.scrollWrapper.scrollLeft = 0;
+        }
+
+        this.scrollWrapper.scrollLeft += this.tickerSpeed;
+        this.animationFrame = requestAnimationFrame(this.animate.bind(this));
+    }
+
+    update() {
+        if (!this.tickerContent) {
+            console.error('QuotronTicker: tickerContent not initialized');
+            return;
+        }
+
+        this.tickerContent.innerHTML = '';
+        this.data.forEach(item => {
+            const tickerItem = document.createElement('div');
+            tickerItem.className = 'quotron-ticker-item';
+            tickerItem.innerHTML = `<span class="symbol">${item.symbol}</span> <span class="name">${item.name}</span> <span class="price">$${item.price.toFixed(2)}</span>`;
+            this.tickerContent.appendChild(tickerItem);
+        });
+    }
+
+    pause() {
+        this.isPaused = true;
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
         }
     }
-    
-    /**
-     * Animation loop for smooth scrolling
-     */
-    animate() {
-        if (!this.isRunning) return;
-        
-        this.scrollPosition += 1; // Scroll speed
-        
-        // Reset position when we've scrolled through one set of items
-        if (this.scrollPosition >= this.tickerContent.scrollWidth / 2) {
-            this.scrollPosition = 0;
-        }
-        
-        this.scrollWrapper.scrollLeft = this.scrollPosition;
-        
-        this.animationFrame = requestAnimationFrame(() => this.animate());
+
+    resume() {
+        this.isPaused = false;
+        this.start();
     }
-    
-    /**
-     * Update ticker data and restart animation
-     */
-    refresh() {
-        this.update();
-        if (!this.isRunning) {
-            this.start();
+
+    stop() {
+        this.pause();
+        clearInterval(this.dataInterval);
+    }
+
+    reset() {
+        this.stop();
+        this.data = [];
+        this.tickerContent.innerHTML = '';
+    }
+
+    destroy() {
+        this.reset();
+        if (this.scrollWrapper) {
+            this.scrollWrapper.remove();
         }
+        this.container = null;
+        this.scrollWrapper = null;
+        this.tickerContent = null;
+        this.animationFrame = null;
+        this.dataInterval = null;
     }
 }
