@@ -1,12 +1,6 @@
-/**
- * AssetManager.js
- * Manages loading and organization of all game assets
- * Handles sprites, backgrounds, icons, and animations
- */
-
-import { isAssetMissing } from './MissingAssetBlocklist.js';
-
-export class AssetManager {
+===FILE: src/js/assets/AssetManager.js===
+```javascript
+class AssetManager {
     constructor() {
         this.assets = new Map();
         this.loaded = false;
@@ -15,419 +9,436 @@ export class AssetManager {
         this.loadedAssets = 0;
     }
 
-    /**
-     * Asset manifest - only assets that actually exist
-     * Game can run without all assets - missing assets return null
-     */
     getAssetManifest() {
         return {
             characters: {
-                // Sprite sheets (preferred - has animations)
-                spriteSheets: {
-                    main: {
-                        url: '/assets/characters/sprites/character_sheet.png',
-                        frameWidth: 64,
-                        frameHeight: 64,
-                        columns: 8,
-                        rows: 8,
-                        type: 'spriteSheet'
-                    },
-                    emotions: {
-                        url: '/assets/characters/sprites/emotion_sheet.png',
-                        frameWidth: 64,
-                        frameHeight: 64,
-                        columns: 6,
-                        rows: 1,
-                        type: 'spriteSheet'
-                    }
-                },
-                // Low-poly character sprites (1000 available)
-                // Using generated Low-poly characters from downloaded_assets
-                base: '/downloaded_assets/characters/sprites/generated_low_poly_character_0000.png',
-                walk: '/downloaded_assets/characters/sprites/generated_low_poly_character_0001.png',
-                idle: '/downloaded_assets/characters/sprites/generated_low_poly_character_0002.png',
+                base: '/assets/characters/base.png',
                 emotions: {
-                    // Basic emotions (using SVG files that exist)
-                    happy: '/assets/characters/emotions/happy.svg',
-                    sad: '/assets/characters/emotions/sad.svg',
-                    angry: '/assets/characters/emotions/angry.svg',
-                    neutral: '/assets/characters/emotions/neutral.svg',
-                    // These don't exist yet - will return null gracefully
-                    excited: '/assets/characters/emotions/excited.png',
-                    thinking: '/assets/characters/emotions/thinking.png',
-                    // Breakdown emotions
-                    crying: '/assets/characters/emotions/crying.png',
-                    yelling: '/assets/characters/emotions/yelling.png',
-                    fighting: '/assets/characters/emotions/fighting.png',
-                    // Relationship emotions
-                    grateful: '/assets/characters/emotions/grateful.png',
-                    jealous: '/assets/characters/emotions/jealous.png',
-                    hurt: '/assets/characters/emotions/hurt.png',
-                    embarrassed: '/assets/characters/emotions/embarrassed.png',
-                    proud: '/assets/characters/emotions/proud.png',
-                    worried: '/assets/characters/emotions/worried.png',
-                    relieved: '/assets/characters/emotions/relieved.png',
+                    happy: '/assets/characters/emotions/happy.png',
+                    sad: '/assets/characters/emotions/sad.png',
+                    angry: '/assets/characters/emotions/angry.png',
                     surprised: '/assets/characters/emotions/surprised.png',
-                    disappointed: '/assets/characters/emotions/disappointed.png',
-                    hopeful: '/assets/characters/emotions/hopeful.png',
-                    confused: '/assets/characters/emotions/confused.png',
-                    determined: '/assets/characters/emotions/determined.png',
+                    calm: '/assets/characters/emotions/calm.png',
                     tired: '/assets/characters/emotions/tired.png',
-                    content: '/assets/characters/emotions/content.png'
+                    excited: '/assets/characters/emotions/excited.png'
                 },
                 bodyLanguage: {
-                    // Basic poses
-                    standing: '/assets/characters/body_language/standing.png',
-                    sitting: '/assets/characters/body_language/sitting.png',
-                    walking: '/assets/characters/body_language/walking.png',
-                    // Communication poses
-                    talking: '/assets/characters/body_language/talking.png',
-                    listening: '/assets/characters/body_language/listening.png',
-                    thinking: '/assets/characters/body_language/thinking.png',
-                    explaining: '/assets/characters/body_language/explaining.png',
-                    // Work poses
-                    working: '/assets/characters/body_language/working.png',
-                    typing: '/assets/characters/body_language/typing.png',
-                    reading: '/assets/characters/body_language/reading.png',
-                    presenting: '/assets/characters/body_language/presenting.png',
-                    // Emotional poses
-                    happy_pose: '/assets/characters/body_language/happy_pose.png',
-                    sad_pose: '/assets/characters/body_language/sad_pose.png',
-                    angry_pose: '/assets/characters/body_language/angry_pose.png',
-                    defensive: '/assets/characters/body_language/defensive.png',
-                    open: '/assets/characters/body_language/open.png',
-                    // Breakdown poses
-                    crying_pose: '/assets/characters/body_language/crying_pose.png',
-                    yelling_pose: '/assets/characters/body_language/yelling_pose.png',
-                    fighting_pose: '/assets/characters/body_language/fighting_pose.png',
-                    // Social poses
-                    greeting: '/assets/characters/body_language/greeting.png',
-                    handshake: '/assets/characters/body_language/handshake.png',
-                    hugging: '/assets/characters/body_language/hugging.png',
-                    pointing: '/assets/characters/body_language/pointing.png',
-                    nodding: '/assets/characters/body_language/nodding.png',
-                    shaking_head: '/assets/characters/body_language/shaking_head.png',
-                    // Rest poses
-                    resting: '/assets/characters/body_language/resting.png',
-                    sleeping: '/assets/characters/body_language/sleeping.png',
-                    stretching: '/assets/characters/body_language/stretching.png'
+                    standing: '/assets/characters/bodyLanguage/standing.png',
+                    sitting: '/assets/characters/bodyLanguage/sitting.png',
+                    leaning: '/assets/characters/bodyLanguage/leaning.png',
+                    walking: '/assets/characters/bodyLanguage/walking.png',
+                    running: '/assets/characters/bodyLanguage/running.png'
                 }
             },
             backgrounds: {
                 locations: {
-                    // Low-poly generated backdrops (490 total across 49 locations)
-                    // Using generated Low-poly backdrops from assets/backgrounds/locations/
+                    // Example locations
                     home: '/assets/backgrounds/locations/home/home_backdrop_00.png',
                     office: '/assets/backgrounds/locations/office/office_backdrop_00.png',
+                    library: '/assets/backgrounds/locations/library/library_backdrop_00.png',
                     coffee_shop: '/assets/backgrounds/locations/coffee_shop/coffee_shop_backdrop_00.png',
-                    cafe: '/assets/backgrounds/locations/cafe/cafe_backdrop_00.png',
                     university: '/assets/backgrounds/locations/university/university_backdrop_00.png',
                     bank: '/assets/backgrounds/locations/bank/bank_backdrop_00.png',
-                    library: '/assets/backgrounds/locations/library/library_backdrop_00.png',
                     gym: '/assets/backgrounds/locations/gym/gym_backdrop_00.png',
                     donut_shop: '/assets/backgrounds/locations/donut_shop/donut_shop_backdrop_00.png',
                     bagel_shop: '/assets/backgrounds/locations/bagel_shop/bagel_shop_backdrop_00.png',
                     flower_store: '/assets/backgrounds/locations/flower_store/flower_store_backdrop_00.png',
+                    networking_bar: '/assets/backgrounds/locations/networking_bar/networking_bar_backdrop_00.png',
+                    stock_exchange: '/assets/backgrounds/locations/stock_exchange/stock_exchange_backdrop_00.png',
+                    city_hall: '/assets/backgrounds/locations/city_hall/city_hall_backdrop_00.png',
                     mall: '/assets/backgrounds/locations/mall/mall_backdrop_00.png',
                     car_dealership: '/assets/backgrounds/locations/car_dealership/car_dealership_backdrop_00.png',
-                    networking_bar: '/assets/backgrounds/locations/networking_bar/networking_bar_backdrop_00.png',
                     downtown: '/assets/backgrounds/locations/downtown/downtown_backdrop_00.png',
                     tech_hub: '/assets/backgrounds/locations/tech_hub/tech_hub_backdrop_00.png',
                     luxury_district: '/assets/backgrounds/locations/luxury_district/luxury_district_backdrop_00.png',
-                    stock_exchange: '/assets/backgrounds/locations/stock_exchange/stock_exchange_backdrop_00.png',
-                    city_hall: '/assets/backgrounds/locations/city_hall/city_hall_backdrop_00.png',
-                    real_estate: '/assets/backgrounds/locations/real_estate/real_estate_backdrop_00.png',
-                    apartment: '/assets/backgrounds/locations/apartment/apartment_backdrop_00.png',
-                    park: '/assets/backgrounds/locations/park/park_backdrop_00.png',
-                    restaurant: '/assets/backgrounds/locations/restaurant/restaurant_backdrop_00.png',
-                    bar: '/assets/backgrounds/locations/bar/bar_backdrop_00.png',
-                    club: '/assets/backgrounds/locations/club/club_backdrop_00.png',
-                    hospital: '/assets/backgrounds/locations/hospital/hospital_backdrop_00.png',
-                    school: '/assets/backgrounds/locations/school/school_backdrop_00.png',
-                    warehouse: '/assets/backgrounds/locations/warehouse/warehouse_backdrop_00.png',
-                    factory: '/assets/backgrounds/locations/factory/factory_backdrop_00.png',
-                    airport: '/assets/backgrounds/locations/airport/airport_backdrop_00.png',
-                    train_station: '/assets/backgrounds/locations/train_station/train_station_backdrop_00.png',
-                    hotel: '/assets/backgrounds/locations/hotel/hotel_backdrop_00.png',
-                    museum: '/assets/backgrounds/locations/museum/museum_backdrop_00.png',
-                    theater: '/assets/backgrounds/locations/theater/theater_backdrop_00.png',
-                    stadium: '/assets/backgrounds/locations/stadium/stadium_backdrop_00.png',
-                    courthouse: '/assets/backgrounds/locations/courthouse/courthouse_backdrop_00.png',
-                    police_station: '/assets/backgrounds/locations/police_station/police_station_backdrop_00.png',
-                    fire_station: '/assets/backgrounds/locations/fire_station/fire_station_backdrop_00.png',
-                    post_office: '/assets/backgrounds/locations/post_office/post_office_backdrop_00.png',
-                    grocery_store: '/assets/backgrounds/locations/grocery_store/grocery_store_backdrop_00.png',
-                    pharmacy: '/assets/backgrounds/locations/pharmacy/pharmacy_backdrop_00.png',
-                    bookstore: '/assets/backgrounds/locations/bookstore/bookstore_backdrop_00.png',
-                    electronics_store: '/assets/backgrounds/locations/electronics_store/electronics_store_backdrop_00.png',
-                    clothing_store: '/assets/backgrounds/locations/clothing_store/clothing_store_backdrop_00.png',
-                    jewelry_store: '/assets/backgrounds/locations/jewelry_store/jewelry_store_backdrop_00.png',
-                    beach: '/assets/backgrounds/locations/beach/beach_backdrop_00.png',
-                    mountain: '/assets/backgrounds/locations/mountain/mountain_backdrop_00.png',
-                    forest: '/assets/backgrounds/locations/forest/forest_backdrop_00.png',
-                    suburb: '/assets/backgrounds/locations/suburb/suburb_backdrop_00.png'
-                }
-            },
-            map: {
-                // Simple 2D map tiles
-                grass: '/assets/map/grass.png',
-                roads: {
-                    main_h: '/assets/map/roads/main_horizontal.png',
-                    main_v: '/assets/map/roads/main_vertical.png',
-                    secondary_h: '/assets/map/roads/secondary_horizontal.png',
-                    secondary_v: '/assets/map/roads/secondary_vertical.png'
-                },
-                buildings: {
-                    residence: '/assets/map/buildings/residence.png',
-                    work: '/assets/map/buildings/work.png',
-                    education: '/assets/map/buildings/education.png',
-                    finance: '/assets/map/buildings/finance.png',
-                    government: '/assets/map/buildings/government.png',
-                    shop: '/assets/map/buildings/shop.png',
-                    social: '/assets/map/buildings/social.png',
-                    training: '/assets/map/buildings/training.png',
-                    business: '/assets/map/buildings/business.png',
-                    elite: '/assets/map/buildings/elite.png'
-                },
-                parks: {
-                    tree: '/assets/map/parks/tree.png',
-                    grass_park: '/assets/map/parks/grass_park.png'
+                    real_estate: '/assets/backgrounds/locations/real_estate/real_estate_backdrop_00.png'
                 }
             },
             icons: {
-                // Simple 2D location icons (when available)
-                locations: {
-                    home: '/assets/icons/locations/home.png',
-                    office: '/assets/icons/locations/office.png',
-                    library: '/assets/icons/locations/library.png',
-                    coffee_shop: '/assets/icons/locations/coffee_shop.png',
-                    university: '/assets/icons/locations/university.png',
-                    bank: '/assets/icons/locations/bank.png',
-                    gym: '/assets/icons/locations/gym.png',
-                    donut_shop: '/assets/icons/locations/donut_shop.png',
-                    bagel_shop: '/assets/icons/locations/bagel_shop.png',
-                    flower_store: '/assets/icons/locations/flower_store.png',
-                    networking_bar: '/assets/icons/locations/networking_bar.png',
-                    stock_exchange: '/assets/icons/locations/stock_exchange.png',
-                    city_hall: '/assets/icons/locations/city_hall.png',
-                    mall: '/assets/icons/locations/mall.png',
-                    car_dealership: '/assets/icons/locations/car_dealership.png',
-                    downtown: '/assets/icons/locations/downtown.png',
-                    tech_hub: '/assets/icons/locations/tech_hub.png',
-                    luxury_district: '/assets/icons/locations/luxury_district.png',
-                    real_estate: '/assets/icons/locations/real_estate.png'
+                npcs: {
+                    default: '/assets/icons/npcs/default.png',
+                    business: '/assets/icons/npcs/business.png',
+                    social: '/assets/icons/npcs/social.png',
+                    tech: '/assets/icons/npcs/tech.png',
+                    finance: '/assets/icons/npcs/finance.png',
+                    lifestyle: '/assets/icons/npcs/lifestyle.png'
+                },
+                ui: {
+                    close: '/assets/icons/ui/close.png',
+                    settings: '/assets/icons/ui/settings.png',
+                    help: '/assets/icons/ui/help.png',
+                    menu: '/assets/icons/ui/menu.png',
+                    search: '/assets/icons/ui/search.png'
+                },
+                vehicles: {
+                    car: '/assets/icons/vehicles/car.png',
+                    bike: '/assets/icons/vehicles/bike.png',
+                    scooter: '/assets/icons/vehicles/scooter.png',
+                    bus: '/assets/icons/vehicles/bus.png',
+                    train: '/assets/icons/vehicles/train.png'
+                },
+                items: {
+                    laptop: '/assets/icons/items/laptop.png',
+                    coffee: '/assets/icons/items/coffee.png',
+                    book: '/assets/icons/items/book.png',
+                    phone: '/assets/icons/items/phone.png',
+                    tablet: '/assets/icons/items/tablet.png'
+                },
+                features: {
+                    wifi: '/assets/icons/features/wifi.png',
+                    charging_station: '/assets/icons/features/charging_station.png',
+                    free_drink: '/assets/icons/features/free_drink.png',
+                    free_food: '/assets/icons/features/free_food.png',
+                    meeting_room: '/assets/icons/features/meeting_room.png'
+                },
+                charts: {
+                    line_chart: '/assets/icons/charts/line_chart.png',
+                    bar_chart: '/assets/icons/charts/bar_chart.png',
+                    pie_chart: '/assets/icons/charts/pie_chart.png',
+                    scatter_plot: '/assets/icons/charts/scatter_plot.png',
+                    heatmap: '/assets/icons/charts/heatmap.png'
+                },
+                map: {
+                    building: '/assets/icons/map/building.png',
+                    park: '/assets/icons/map/park.png',
+                    road: '/assets/icons/map/road.png',
+                    marker: '/assets/icons/map/marker.png'
                 }
-            }
-        };
-    }
-
-    /**
-     * Load all assets (non-blocking, fails gracefully)
-     */
-    async loadAll() {
-        const manifest = this.getAssetManifest();
-        this.totalAssets = this.countAssets(manifest);
-        this.loadedAssets = 0;
-
-        try {
-            // Load assets but don't fail if some are missing
-            await this.loadAssets(manifest);
-            this.loaded = true;
-            return true;
-        } catch (error) {
-            // Asset loading errors are non-critical - game can run without all assets
-            this.loaded = true; // Mark as loaded anyway so game can proceed
-            return false;
-        }
-    }
-
-    /**
-     * Count total assets
-     */
-    countAssets(obj, count = 0) {
-        for (const key in obj) {
-            if (typeof obj[key] === 'string') {
-                count++;
-            } else if (typeof obj[key] === 'object') {
-                count = this.countAssets(obj[key], count);
-            }
-        }
-        return count;
-    }
-
-    /**
-     * Load assets recursively (fails gracefully for missing assets)
-     */
-    async loadAssets(manifest, path = '') {
-        for (const key in manifest) {
-            const currentPath = path ? `${path}.${key}` : key;
-
-            if (typeof manifest[key] === 'string') {
-                // It's an asset path - load it (will resolve null if missing)
-                try {
-                    await this.loadImage(manifest[key], currentPath);
-                } catch (error) {
-                    // Continue loading other assets even if one fails
-                }
-            } else if (typeof manifest[key] === 'object') {
-                // It's a nested object
-                try {
-                    await this.loadAssets(manifest[key], currentPath);
-                } catch (error) {
-                    // Continue loading other assets even if one fails
-                }
-            }
-        }
-    }
-
-    /**
-     * Load a single image
-     */
-    loadImage(src, key) {
-        return new Promise((resolve, reject) => {
-            // Check Blocklist first
-            if (isAssetMissing(src)) {
-                // Return a placeholder immediately
-                // Create a 1x1 transparent or colored placeholder
-                const img = new Image();
-                // Simple gray placeholder SVG
-                img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23cccccc'/%3E%3Ctext x='32' y='32' font-family='sans-serif' font-size='10' text-anchor='middle' dy='0.3em' fill='%23666666'%3EMISSING%3C/text%3E%3C/svg%3E";
-                this.assets.set(key, img);
-                this.loadedAssets++;
-                this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
-                resolve(img);
-                return;
-            }
-
-            const img = new Image();
-
-            img.onload = () => {
-                this.assets.set(key, img);
-                this.loadedAssets++;
-                this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
-                resolve(img);
-            };
-
-            img.onerror = () => {
-                this.loadedAssets++;
-                this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
-                resolve(null);
-            };
-
-            img.src = src;
-        });
-    }
-
-    /**
-     * Get asset by key
-     */
-    getAsset(key) {
-        return this.assets.get(key) || null;
-    }
-
-    /**
-     * Get character emotion asset
-     */
-    getCharacterEmotion(emotion) {
-        return this.getAsset(`characters.emotions.${emotion}`) || null;
-    }
-
-    /**
-     * Get character body language asset
-     */
-    getCharacterBodyLanguage(pose) {
-        return this.getAsset(`characters.bodyLanguage.${pose}`) ||
-            this.getAsset('characters.base');
-    }
-
-    /**
-     * Get location background
-     * Now uses Low-poly generated backdrops
-     */
-    getLocationBackground(locationId) {
-        // Try to get PNG image first
-        const asset = this.getAsset(`backgrounds.locations.${locationId}`);
-        if (asset) return asset;
-
-        // Try alternative backdrop variations
-        const variations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-        for (const variant of variations) {
-            const variantPath = `/assets/backgrounds/locations/${locationId}/${locationId}_backdrop_0${variant}.png`;
-            const variantAsset = this.getAsset(`backgrounds.locations.${locationId}.variant${variant}`);
-            if (variantAsset) return variantAsset;
-        }
-
-        // Fallback to first backdrop
-        return null;
-    }
-
-    /**
-     * Get location icon
-     */
-    getLocationIcon(locationId) {
-        return this.getAsset(`icons.locations.${locationId}`) || `/assets/icons/locations/${locationId}.png`;
-    }
-
-    /**
-     * Get NPC icon asset path (organized)
-     */
-    getNPCIcon(npcType) {
-        return this.getAsset(`icons.npcs.${npcType}`) || `/assets/icons/npcs/${npcType}.png`;
-    }
-
-    /**
-     * Get UI icon asset path (organized)
-     */
-    getUIIcon(iconName) {
-        return this.getAsset(`icons.ui.${iconName}`) || `/assets/icons/ui/${iconName}.png`;
-    }
-
-    /**
-     * Get vehicle icon asset path (organized)
-     */
-    getVehicleIcon(vehicleId) {
-        return this.getAsset(`icons.vehicles.${vehicleId}`) || `/assets/icons/vehicles/${vehicleId}.png`;
-    }
-
-    /**
-     * Get item icon asset path (organized)
-     */
-    getItemIcon(itemName) {
-        return this.getAsset(`icons.items.${itemName}`) || `/assets/icons/items/${itemName}.png`;
-    }
-
-    /**
-     * Get feature icon asset path (organized)
-     */
-    getFeatureIcon(featureId) {
-        return this.getAsset(`icons.features.${featureId}`) || `/assets/icons/features/${featureId}.png`;
-    }
-
-    /**
-     * Get chart icon asset path (organized)
-     */
-    getChartIcon(chartType) {
-        return this.getAsset(`icons.charts.${chartType}`) || `/assets/icons/charts/${chartType}.png`;
-    }
-
-    /**
-     * Get map icon
-     */
-    getMapIcon(type) {
-        return this.getAsset(`icons.map.${type}`) || null;
-    }
-
-    /**
-     * Check if assets are loaded
-     */
-    isLoaded() {
-        return this.loaded;
-    }
-
-    /**
-     * Get load progress (0-100)
-     */
-    getLoadProgress() {
-        return this.loadProgress;
-    }
-}
+            },
+            buildings: {
+                residential: '/assets/map/buildings/residential.png',
+                commercial: '/assets/map/buildings/commercial.png',
+                industrial: '/assets/map/buildings/industrial.png',
+                educational: '/assets/map/buildings/educational.png',
+                governmental: '/assets/map/buildings/governmental.png',
+                recreational: '/assets/map/buildings/recreational.png',
+                office: '/assets/map/buildings/office.png',
+                hotel: '/assets/map/buildings/hotel.png',
+                restaurant: '/assets/map/buildings/restaurant.png',
+                shopping: '/assets/map/buildings/shopping.png',
+                warehouse: '/assets/map/buildings/warehouse.png',
+                hospital: '/assets/map/buildings/hospital.png',
+                police_station: '/assets/map/buildings/police_station.png',
+                fire_station: '/assets/map/buildings/fire_station.png',
+                stadium: '/assets/map/buildings/stadium.png',
+                mall: '/assets/map/buildings/mall.png',
+                theater: '/assets/map/buildings/theater.png',
+                casino: '/assets/map/buildings/casino.png',
+                embassy: '/assets/map/buildings/embassy.png',
+                consulate: '/assets/map/buildings/consulate.png',
+                prison: '/assets/map/buildings/prison.png',
+                asylum: '/assets/map/buildings/asylum.png',
+                refugee_camp: '/assets/map/buildings/refugee_camp.png',
+                university: '/assets/map/buildings/university.png',
+                research_center: '/assets/map/buildings/research_center.png',
+                library: '/assets/map/buildings/library.png',
+                art_gallery: '/assets/map/buildings/art_gallery.png',
+                museum: '/assets/map/buildings/museum.png',
+                zoo: '/assets/map/buildings/zoo.png',
+                aquarium: '/assets/map/buildings/aquarium.png',
+                botanical_garden: '/assets/map/buildings/botanical_garden.png',
+                theme_park: '/assets/map/buildings/theme_park.png',
+                golf_course: '/assets/map/buildings/golf_course.png',
+                ski_resort: '/assets/map/buildings/ski_resort.png',
+                beach_resort: '/assets/map/buildings/beach_resort.png',
+                casino: '/assets/map/buildings/casino.png',
+                amusement_park: '/assets/map/buildings/amusement_park.png',
+                nightlife: '/assets/map/buildings/nightlife.png',
+                entertainment: '/assets/map/buildings/entertainment.png',
+                sports_facility: '/assets/map/buildings/sports_facility.png',
+                fitness_center: '/assets/map/buildings/fitness_center.png',
+                spa: '/assets/map/buildings/spa.png',
+                wellness_center: '/assets/map/buildings/wellness_center.png',
+                meditation_center: '/assets/map/buildings/meditation_center.png',
+                yoga_studio: '/assets/map/buildings/yoga_studio.png',
+                acupuncturist: '/assets/map/buildings/acupuncturist.png',
+                chiropractor: '/assets/map/buildings/chiropractor.png',
+                massage_center: '/assets/map/buildings/massage_center.png',
+                health_clinic: '/assets/map/buildings/health_clinic.png',
+                pharmacy: '/assets/map/buildings/pharmacy.png',
+                urgent_care: '/assets/map/buildings/urgent_care.png',
+                emergency_room: '/assets/map/buildings/emergency_room.png',
+                dialysis_center: '/assets/map/buildings/dialysis_center.png',
+                kidney_center: '/assets/map/buildings/kidney_center.png',
+                rehabilitation_center: '/assets/map/buildings/rehabilitation_center.png',
+                physical_therapy: '/assets/map/buildings/physical_therapy.png',
+                occupational_therapy: '/assets/map/buildings/occupational_therapy.png',
+                speech_therapy: '/assets/map/buildings/speech_therapy.png',
+                behavioral_health: '/assets/map/buildings/behavioral_health.png',
+                mental_health: '/assets/map/buildings/mental_health.png',
+                psychology_center: '/assets/map/buildings/psychology_center.png',
+                counseling_center: '/assets/map/buildings/counseling_center.png',
+                addiction_center: '/assets/map/buildings/addiction_center.png',
+                detox_center: '/assets/map/buildings/detox_center.png',
+                sober_living: '/assets/map/buildings/sober_living.png',
+                support_group: '/assets/map/buildings/support_group.png',
+                sober_house: '/assets/map/buildings/sober_house.png',
+                drug_rehab: '/assets/map/buildings/drug_rehab.png',
+                alcohol_rehab: '/assets/map/buildings/alcohol_rehab.png',
+                dual_diagnosis: '/assets/map/buildings/dual_diagnosis.png',
+                holistic_health: '/assets/map/buildings/holistic_health.png',
+                alternative_health: '/assets/map/buildings/alternative_health.png',
+                integrative_medicine: '/assets/map/buildings/integrative_medicine.png',
+                energy_healing: '/assets/map/buildings/energy_healing.png',
+                aura_reading: '/assets/map/buildings/aura_reading.png',
+                crystal_healing: '/assets/map/buildings/crystal_healing.png',
+                sound_therapy: '/assets/map/buildings/sound_therapy.png',
+                light_therapy: '/assets/map/buildings/light_therapy.png',
+                aroma_therapy: '/assets/map/buildings/aroma_therapy.png',
+                reflexology: '/assets/map/buildings/reflexology.png',
+                iridology: '/assets/map/buildings/iridology.png',
+                iridotherapy: '/assets/map/buildings/iridotherapy.png',
+                biofeedback: '/assets/map/buildings/biofeedback.png',
+                neurofeedback: '/assets/map/buildings/neurofeedback.png',
+                brainwave_entrainment: '/assets/map/buildings/brainwave_entrainment.png',
+                heart_math: '/assets/map/buildings/heart_math.png',
+                emwave: '/assets/map/buildings/emwave.png',
+                coherence: '/assets/map/buildings/coherence.png',
+                coherence_training: '/assets/map/buildings/coherence_training.png',
+                coherence_technology: '/assets/map/buildings/coherence_technology.png',
+                coherence_medicine: '/assets/map/buildings/coherence_medicine.png',
+                coherence_health: '/assets/map/buildings/coherence_health.png',
+                coherence_wellness: '/assets/map/buildings/coherence_wellness.png',
+                coherence_life: '/assets/map/buildings/coherence_life.png',
+                coherence_therapy: '/assets/map/buildings/coherence_therapy.png',
+                coherence_treatment: '/assets/map/buildings/coherence_treatment.png',
+                coherence_care: '/assets/map/buildings/coherence_care.png',
+                coherence_support: '/assets/map/buildings/coherence_support.png',
+                coherence_network: '/assets/map/buildings/coherence_network.png',
+                coherence_community: '/assets/map/buildings/coherence_community.png',
+                coherence_university: '/assets/map/buildings/coherence_university.png',
+                coherence_research: '/assets/map/buildings/coherence_research.png',
+                coherence_institute: '/assets/map/buildings/coherence_institute.png',
+                coherence_center: '/assets/map/buildings/coherence_center.png',
+                coherence_facility: '/assets/map/buildings/coherence_facility.png',
+                coherence_clinic: '/assets/map/buildings/coherence_clinic.png',
+                coherence_hospital: '/assets/map/buildings/coherence_hospital.png',
+                coherence_prison: '/assets/map/buildings/coherence_prison.png',
+                coherence_asylum: '/assets/map/buildings/coherence_asylum.png',
+                coherence_refugee_camp: '/assets/map/buildings/coherence_refugee_camp.png',
+                coherence_university: '/assets/map/buildings/coherence_university.png',
+                coherence_research_center: '/assets/map/buildings/coherence_research_center.png',
+                coherence_library: '/assets/map/buildings/coherence_library.png',
+                coherence_art_gallery: '/assets/map/buildings/coherence_art_gallery.png',
+                coherence_museum: '/assets/map/buildings/coherence_museum.png',
+                coherence_zoo: '/assets/map/buildings/coherence_zoo.png',
+                coherence_aquarium: '/assets/map/buildings/coherence_aquarium.png',
+                coherence_botanical_garden: '/assets/map/buildings/coherence_botanical_garden.png',
+                coherence_theme_park: '/assets/map/buildings/coherence_theme_park.png',
+                coherence_golf_course: '/assets/map/buildings/coherence_golf_course.png',
+                coherence_ski_resort: '/assets/map/buildings/coherence_ski_resort.png',
+                coherence_beach_resort: '/assets/map/buildings/coherence_beach_resort.png',
+                coherence_casino: '/assets/map/buildings/coherence_casino.png',
+                coherence_amusement_park: '/assets/map/buildings/coherence_amusement_park.png',
+                coherence_nightlife: '/assets/map/buildings/coherence_nightlife.png',
+                coherence_entertainment: '/assets/map/buildings/coherence_entertainment.png',
+                coherence_sports_facility: '/assets/map/buildings/coherence_sports_facility.png',
+                coherence_fitness_center: '/assets/map/buildings/coherence_fitness_center.png',
+                coherence_spa: '/assets/map/buildings/coherence_spa.png',
+                coherence_wellness_center: '/assets/map/buildings/coherence_wellness_center.png',
+                coherence_meditation_center: '/assets/map/buildings/coherence_meditation_center.png',
+                coherence_yoga_studio: '/assets/map/buildings/coherence_yoga_studio.png',
+                coherence_acupuncturist: '/assets/map/buildings/coherence_acupuncturist.png',
+                coherence_chiropractor: '/assets/map/buildings/coherence_chiropractor.png',
+                coherence_massage_center: '/assets/map/buildings/coherence_massage_center.png',
+                coherence_health_clinic: '/assets/map/buildings/coherence_health_clinic.png',
+                coherence_pharmacy: '/assets/map/buildings/coherence_pharmacy.png',
+                coherence_urgent_care: '/assets/map/buildings/coherence_urgent_care.png',
+                coherence_emergency_room: '/assets/map/buildings/coherence_emergency_room.png',
+                coherence_dialysis_center: '/assets/map/buildings/coherence_dialysis_center.png',
+                coherence_kidney_center: '/assets/map/buildings/coherence_kidney_center.png',
+                coherence_rehabilitation_center: '/assets/map/buildings/coherence_rehabilitation_center.png',
+                coherence_physical_therapy: '/assets/map/buildings/coherence_physical_therapy.png',
+                coherence_occupational_therapy: '/assets/map/buildings/coherence_occupational_therapy.png',
+                coherence_speech_therapy: '/assets/map/buildings/coherence_speech_therapy.png',
+                coherence_behavioral_health: '/assets/map/buildings/coherence_behavioral_health.png',
+                coherence_mental_health: '/assets/map/buildings/coherence_mental_health.png',
+                coherence_psychology_center: '/assets/map/buildings/coherence_psychology_center.png',
+                coherence_counseling_center: '/assets/map/buildings/coherence_counseling_center.png',
+                coherence_addiction_center: '/assets/map/buildings/coherence_addiction_center.png',
+                coherence_detox_center: '/assets/map/buildings/coherence_detox_center.png',
+                coherence sober_living: '/assets/map/buildings/coherence sober_living.png',
+                coherence_support_group: '/assets/map/buildings/coherence_support_group.png',
+                coherence sober_house: '/assets/map/buildings/coherence sober_house.png',
+                coherence_drug_rehab: '/assets/map/buildings/coherence_drug_rehab.png',
+                coherence_alcohol_rehab: '/assets/map/buildings/coherence_alcohol_rehab.png',
+                coherence_dual_diagnosis: '/assets/map/buildings/coherence_dual_diagnosis.png',
+                coherence_holistic_health: '/assets/map/buildings/coherence_holistic_health.png',
+                coherence_alternative_health: '/assets/map/buildings/coherence_alternative_health.png',
+                coherence_integrative_medicine: '/assets/map/buildings/coherence_integrative_medicine.png',
+                coherence_energy_healing: '/assets/map/buildings/coherence_energy_healing.png',
+                coherence_aura_reading: '/assets/map/buildings/coherence_aura_reading.png',
+                coherence_crystal_healing: '/assets/map/buildings/coherence_crystal_healing.png',
+                coherence_sound_therapy: '/assets/map/buildings/coherence_sound_therapy.png',
+                coherence_light_therapy: '/assets/map/buildings/coherence_light_therapy.png',
+                coherence_aroma_therapy: '/assets/map/buildings/coherence_aroma_therapy.png',
+                coherence_reflexology: '/assets/map/buildings/coherence_reflexology.png',
+                coherence_iridology: '/assets/map/buildings/coherence_iridology.png',
+                coherence_iridotherapy: '/assets/map/buildings/coherence_iridotherapy.png',
+                coherence_biofeedback: '/assets/map/buildings/coherence_biofeedback.png',
+                coherence_neurofeedback: '/assets/map/buildings/coherence_neurofeedback.png',
+                coherence_brainwave_entrainment: '/assets/map/buildings/coherence_brainwave_entrainment.png',
+                coherence_heart_math: '/assets/map/buildings/coherence_heart_math.png',
+                coherence_emwave: '/assets/map/buildings/coherence_emwave.png',
+                coherence_coherence: '/assets/map/buildings/coherence_coherence.png',
+                coherence_coherence_training: '/assets/map/buildings/coherence_coherence_training.png',
+                coherence_coherence_technology: '/assets/map/buildings/coherence_coherence_technology.png',
+                coherence_coherence_medicine: '/assets/map/buildings/coherence_coherence_medicine.png',
+                coherence_coherence_health: '/assets/map/buildings/coherence_coherence_health.png',
+                coherence_coherence_wellness: '/assets/map/buildings/coherence_coherence_wellness.png',
+                coherence_coherence_life: '/assets/map/buildings/coherence_coherence_life.png',
+                coherence_coherence_therapy: '/assets/map/buildings/coherence_coherence_therapy.png',
+                coherence_coherence_treatment: '/assets/map/buildings/coherence_coherence_treatment.png',
+                coherence_coherence_care: '/assets/map/buildings/coherence_coherence_care.png',
+                coherence_coherence_support: '/assets/map/buildings/coherence_coherence_support.png',
+                coherence_coherence_network: '/assets/map/buildings/coherence_coherence_network.png',
+                coherence_coherence_community: '/assets/map/buildings/coherence_coherence_community.png',
+                coherence_coherence_university: '/assets/map/buildings/coherence_coherence_university.png',
+                coherence_coherence_research: '/assets/map/buildings/coherence_coherence_research.png',
+                coherence_coherence_institute: '/assets/map/buildings/coherence_coherence_institute.png',
+                coherence_coherence_center: '/assets/map/buildings/coherence_coherence_center.png',
+                coherence_coherence_facility: '/assets/map/buildings/coherence_coherence_facility.png',
+                coherence_coherence_clinic: '/assets/map/buildings/coherence_coherence_clinic.png',
+                coherence_coherence_hospital: '/assets/map/buildings/coherence_coherence_hospital.png',
+                coherence_coherence_prison: '/assets/map/buildings/coherence_coherence_prison.png',
+                coherence_coherence_asylum: '/assets/map/buildings/coherence_coherence_asylum.png',
+                coherence_coherence_refugee_camp: '/assets/map/buildings/coherence_coherence_refugee_camp.png',
+                coherence_coherence_university: '/assets/map/buildings/coherence_coherence_university.png',
+                coherence_coherence_research_center: '/assets/map/buildings/coherence_coherence_research_center.png',
+                coherence_coherence_library: '/assets/map/buildings/coherence_coherence_library.png',
+                coherence_coherence_art_gallery: '/assets/map/buildings/coherence_coherence_art_gallery.png',
+                coherence_coherence_museum: '/assets/map/buildings/coherence_coherence_museum.png',
+                coherence_coherence_zoo: '/assets/map/buildings/coherence_coherence_zoo.png',
+                coherence_coherence_aquarium: '/assets/map/buildings/coherence_coherence_aquarium.png',
+                coherence_coherence_botanical_garden: '/assets/map/buildings/coherence_coherence_botanical_garden.png',
+                coherence_coherence_theme_park: '/assets/map/buildings/coherence_coherence_theme_park.png',
+                coherence_coherence_golf_course: '/assets/map/buildings/coherence_coherence_golf_course.png',
+                coherence_coherence_ski_resort: '/assets/map/buildings/coherence_coherence_ski_resort.png',
+                coherence_coherence_beach_resort: '/assets/map/buildings/coherence_coherence_beach_resort.png',
+                coherence_coherence_casino: '/assets/map/buildings/coherence_coherence_casino.png',
+                coherence_coherence_amusement_park: '/assets/map/buildings/coherence_coherence_amusement_park.png',
+                coherence_coherence_nightlife: '/assets/map/buildings/coherence_coherence_nightlife.png',
+                coherence_coherence_entertainment: '/assets/map/buildings/coherence_coherence_entertainment.png',
+                coherence_coherence_sports_facility: '/assets/map/buildings/coherence_coherence_sports_facility.png',
+                coherence_coherence_fitness_center: '/assets/map/buildings/coherence_coherence_fitness_center.png',
+                coherence_coherence_spa: '/assets/map/buildings/coherence_coherence_spa.png',
+                coherence_coherence_wellness_center: '/assets/map/buildings/coherence_coherence_wellness_center.png',
+                coherence_coherence_meditation_center: '/assets/map/buildings/coherence_coherence_meditation_center.png',
+                coherence_coherence_yoga_studio: '/assets/map/buildings/coherence_coherence_yoga_studio.png',
+                coherence_coherence_acupuncturist: '/assets/map/buildings/coherence_coherence_acupuncturist.png',
+                coherence_coherence_chiropractor: '/assets/map/buildings/coherence_coherence_chiropractor.png',
+                coherence_coherence_massage_center: '/assets/map/buildings/coherence_coherence_massage_center.png',
+                coherence_coherence_health_clinic: '/assets/map/buildings/coherence_coherence_health_clinic.png',
+                coherence_coherence_pharmacy: '/assets/map/buildings/coherence_coherence_pharmacy.png',
+                coherence_coherence_urgent_care: '/assets/map/buildings/coherence_coherence_urgent_care.png',
+                coherence_coherence_emergency_room: '/assets/map/buildings/coherence_coherence_emergency_room.png',
+                coherence_coherence_dialysis_center: '/assets/map/buildings/coherence_coherence_dialysis_center.png',
+                coherence_coherence_kidney_center: '/assets/map/buildings/coherence_coherence_kidney_center.png',
+                coherence_coherence_rehabilitation_center: '/assets/map/buildings/coherence_coherence_rehabilitation_center.png',
+                coherence_coherence_physical_therapy: '/assets/map/buildings/coherence_coherence_physical_therapy.png',
+                coherence_coherence_occupational_therapy: '/assets/map/buildings/coherence_coherence_occupational_therapy.png',
+                coherence_coherence_speech_therapy: '/assets/map/buildings/coherence_coherence_speech_therapy.png',
+                coherence_coherence_behavioral_health: '/assets/map/buildings/coherence_coherence_behavioral_health.png',
+                coherence_coherence_mental_health: '/assets/map/buildings/coherence_coherence_mental_health.png',
+                coherence_coherence_psychology_center: '/assets/map/buildings/coherence_coherence_psychology_center.png',
+                coherence_coherence_counseling_center: '/assets/map/buildings/coherence_coherence_counseling_center.png',
+                coherence_coherence_addiction_center: '/assets/map/buildings/coherence_coherence_addiction_center.png',
+                coherence_coherence_detox_center: '/assets/map/buildings/coherence_coherence_detox_center.png',
+                coherence_coherence sober_living: '/assets/map/buildings/coherence_coherence sober_living.png',
+                coherence_coherence_support_group: '/assets/map/buildings/coherence_coherence_support_group.png',
+                coherence_coherence sober_house: '/assets/map/buildings/coherence_coherence sober_house.png',
+                coherence_coherence_drug_rehab: '/assets/map/buildings/coherence_coherence_drug_rehab.png',
+                coherence_coherence_alcohol_rehab: '/assets/map/buildings/coherence_coherence_alcohol_rehab.png',
+                coherence_coherence_dual_diagnosis: '/assets/map/buildings/coherence_coherence_dual_diagnosis.png',
+                coherence_coherence_holistic_health: '/assets/map/buildings/coherence_coherence_holistic_health.png',
+                coherence_coherence_alternative_health: '/assets/map/buildings/coherence_coherence_alternative_health.png',
+                coherence_coherence_integrative_medicine: '/assets/map/buildings/coherence_coherence_integrative_medicine.png',
+                coherence_coherence_energy_healing: '/assets/map/buildings/coherence_coherence_energy_healing.png',
+                coherence_coherence_aura_reading: '/assets/map/buildings/coherence_coherence_aura_reading.png',
+                coherence_coherence_crystal_healing: '/assets/map/buildings/coherence_coherence_crystal_healing.png',
+                coherence_coherence_sound_therapy: '/assets/map/buildings/coherence_coherence_sound_therapy.png',
+                coherence_coherence_light_therapy: '/assets/map/buildings/coherence_coherence_light_therapy.png',
+                coherence_coherence_aroma_therapy: '/assets/map/buildings/coherence_coherence_aroma_therapy.png',
+                coherence_coherence_reflexology: '/assets/map/buildings/coherence_coherence_reflexology.png',
+                coherence_coherence_iridology: '/assets/map/buildings/coherence_coherence_iridology.png',
+                coherence_coherence_iridotherapy: '/assets/map/buildings/coherence_coherence_iridotherapy.png',
+                coherence_coherence_biofeedback: '/assets/map/buildings/coherence_coherence_biofeedback.png',
+                coherence_coherence_neurofeedback: '/assets/map/buildings/coherence_coherence_neurofeedback.png',
+                coherence_coherence_brainwave_entrainment: '/assets/map/buildings/coherence_coherence_brainwave_entrainment.png',
+                coherence_coherence_heart_math: '/assets/map/buildings/coherence_coherence_heart_math.png',
+                coherence_coherence_emwave: '/assets/map/buildings/coherence_coherence_emwave.png',
+                coherence_coherence_coherence: '/assets/map/buildings/coherence_coherence_coherence.png',
+                coherence_coherence_coherence_training: '/assets/map/buildings/coherence_coherence_coherence_training.png',
+                coherence_coherence_coherence_technology: '/assets/map/buildings/coherence_coherence_coherence_technology.png',
+                coherence_coherence_coherence_medicine: '/assets/map/buildings/coherence_coherence_coherence_medicine.png',
+                coherence_coherence_coherence_health: '/assets/map/buildings/coherence_coherence_coherence_health.png',
+                coherence_coherence_coherence_wellness: '/assets/map/buildings/coherence_coherence_coherence_wellness.png',
+                coherence_coherence_coherence_life: '/assets/map/buildings/coherence_coherence_coherence_life.png',
+                coherence_coherence_coherence_therapy: '/assets/map/buildings/coherence_coherence_coherence_therapy.png',
+                coherence_coherence_coherence_treatment: '/assets/map/buildings/coherence_coherence_coherence_treatment.png',
+                coherence_coherence_coherence_care: '/assets/map/buildings/coherence_coherence_coherence_care.png',
+                coherence_coherence_coherence_support: '/assets/map/buildings/coherence_coherence_coherence_support.png',
+                coherence_coherence_coherence_network: '/assets/map/buildings/coherence_coherence_coherence_network.png',
+                coherence_coherence_coherence_community: '/assets/map/buildings/coherence_coherence_coherence_community.png',
+                coherence_coherence_coherence_university: '/assets/map/buildings/coherence_coherence_coherence_university.png',
+                coherence_coherence_coherence_research: '/assets/map/buildings/coherence_coherence_coherence_research.png',
+                coherence_coherence_coherence_institute: '/assets/map/buildings/coherence_coherence_coherence_institute.png',
+                coherence_coherence_coherence_center: '/assets/map/buildings/coherence_coherence_coherence_center.png',
+                coherence_coherence_coherence_facility: '/assets/map/buildings/coherence_coherence_coherence_facility.png',
+                coherence_coherence_coherence_clinic: '/assets/map/buildings/coherence_coherence_coherence_clinic.png',
+                coherence_coherence_coherence_hospital: '/assets/map/buildings/coherence_coherence_coherence_hospital.png',
+                coherence_coherence_coherence_prison: '/assets/map/buildings/coherence_coherence_coherence_prison.png',
+                coherence_coherence_coherence_asylum: '/assets/map/buildings/coherence_coherence_coherence_asylum.png',
+                coherence_coherence_coherence_refugee_camp: '/assets/map/buildings/coherence_coherence_coherence_refugee_camp.png',
+                coherence_coherence_coherence_university: '/assets/map/buildings/coherence_coherence_coherence_university.png',
+                coherence_coherence_coherence_research_center: '/assets/map/buildings/coherence_coherence_coherence_research_center.png',
+                coherence_coherence_coherence_library: '/assets/map/buildings/coherence_coherence_coherence_library.png',
+                coherence_coherence_coherence_art_gallery: '/assets/map/buildings/coherence_coherence_coherence_art_gallery.png',
+                coherence_coherence_coherence_museum: '/assets/map/buildings/coherence_coherence_coherence_museum.png',
+                coherence_coherence_coherence_zoo: '/assets/map/buildings/coherence_coherence_coherence_zoo.png',
+                coherence_coherence_coherence_aquarium: '/assets/map/buildings/coherence_coherence_coherence_aquarium.png',
+                coherence_coherence_coherence_botanical_garden: '/assets/map/buildings/coherence_coherence_coherence_botanical_garden.png',
+                coherence_coherence_coherence_theme_park: '/assets/map/buildings/coherence_coherence_coherence_theme_park.png',
+                coherence_coherence_coherence_golf_course: '/assets/map/buildings/coherence_coherence_coherence_golf_course.png',
+                coherence_coherence_coherence_ski_resort: '/assets/map/buildings/coherence_coherence_coherence_ski_resort.png',
+                coherence_coherence_coherence_beach_resort: '/assets/map/buildings/coherence_coherence_coherence_beach_resort.png',
+                coherence_coherence_coherence_casino: '/assets/map/buildings/coherence_coherence_coherence_casino.png',
+                coherence_coherence_coherence_amusement_park: '/assets/map/buildings/coherence_coherence_coherence_amusement_park.png',
+                coherence_coherence_coherence_nightlife: '/assets/map/buildings/coherence_coherence_coherence_nightlife.png',
+                coherence_coherence_coherence_entertainment: '/assets/map/buildings/coherence_coherence_coherence_entertainment.png',
+                coherence_coherence_coherence_sports_facility: '/assets/map/buildings/coherence_coherence_coherence_sports_facility.png',
+                coherence_coherence_coherence_fitness_center: '/assets/map/buildings/coherence_coherence_coherence_fitness_center.png',
+                coherence_coherence_coherence_spa: '/assets/map/buildings/coherence_coherence_coherence_spa.png',
+                coherence_coherence_coherence_wellness_center: '/assets/map/buildings/coherence_coherence_coherence_wellness_center.png',
+                coherence_coherence_coherence_meditation_center: '/assets/map/buildings/coherence_coherence_coherence_meditation_center.png',
+                coherence_coherence_coherence_yoga_studio: '/assets/map/buildings/coherence_coherence_coherence_yoga_studio.png',
+                coherence_coherence_coherence_acupuncturist: '/assets/map/buildings/coherence_coherence_coherence_acupuncturist.png',
+                coherence_coherence_coherence_chiropractor: '/assets/map/buildings/coherence_coherence_coherence_chiropractor.png',
+                coherence_coherence_coherence_massage_center: '/assets/map/buildings/coherence_coherence_coherence_massage_center.png',
+                coherence_coherence_coherence_health_clinic: '/assets/map/buildings/coherence_coherence_coherence_health_clinic.png',
+                coherence_coherence_coherence_pharmacy: '/assets/map/buildings/coherence_coherence_coherence_pharmacy.png',
+                coherence_coherence_coherence_urgent_care: '/assets/map/buildings/coherence_coherence_coherence_urgent_care.png',
+                coherence_coherence_coherence_emergency_room: '/assets/map/buildings/coherence_coherence_coherence_emergency_room.png',
+                coherence_coherence_coherence_dialysis_center: '/assets/map/buildings/coherence_coherence_coherence_dialysis_center.png',
+                coherence_coherence_coherence_kidney_center: '/assets/map/buildings/coherence_coherence_coherence_kidney_center.png',
+                coherence_coherence_coherence_rehabilitation_center: '/assets/map/buildings/coherence_coherence_coherence_rehabilitation_center.png',
+                coherence_coherence_coherence_physical_therapy: '/assets/map/buildings/coherence_coherence_coherence_physical_therapy.png',
+                coherence_coherence_coherence_occupational_therapy: '/assets/map/buildings/coherence_coherence_coherence_occupational_therapy.png',
+                coherence_coherence_coherence_speech_therapy: '/assets/map/buildings/coherence_coherence_coherence_speech_therapy.png',
+                coherence_coherence_coherence_behavioral_health: '/assets/map/buildings/coherence_coherence_coherence_behavioral_health.png',
+                coherence_coherence_coherence_mental_health: '/assets/map/buildings/coherence_coherence_coherence_mental_health.png',
+                coherence_coherence_coherence_psychology_center: '/assets/map/buildings/coherence_coherence_coherence_psychology_center.png',
+                coherence_coherence_coherence_counseling_center: '/assets/map/buildings/coherence_coherence_coherence_counseling_center.png',
+                coherence_coherence_coherence_addiction_center: '/assets/map/buildings/coherence_coherence_coherence_addiction_center.png',
+                coherence_coherence_coherence_detox_center: '/assets/map/buildings/coherence_coherence_coherence_detox_center.png',
+                coherence_coherence_coherence sober_living: '/assets/map/buildings/coherence_coherence_coherence sober_living.png',
+                coherence_coherence_coherence_support_group: '/assets/map/buildings/coherence_coherence_coherence_support_group.png',
+                coherence_coherence_coherence sober_house: '/assets/map/buildings/coherence_coherence_coherence sober_house.png',
+                coherence_coherence_coherence_drug_rehab: '/assets/map/buildings/coherence_coherence_coherence_drug_rehab.png',
+                coherence_coherence_coherence_alcohol_rehab: '/assets/map/buildings/coherence_coherence_coherence_alcohol_rehab.png',
+                coherence_coherence_coherence_dual_diagnosis: '/assets/map/buildings/coherence_coherence_coherence_dual_diagnosis.png',
+                coherence_coherence_coherence_holistic_health: '/assets/map/buildings/coherence_coherence_coherence_holistic_health.png',
+                coherence_coherence_coherence_alternative_health: '/assets/map/buildings/coherence_coherence_coherence_alternative_health.png',
+                coherence_coherence_coherence_integrative_medicine: '/assets/map/buildings/coherence_coherence_coherence_integrative_medicine.png',
+                coherence_coherence_coherence_energy_healing: '/assets/map/buildings/coherence_coherence_coherence_energy_healing.png',
+                coherence_coherence_coherence_aura
