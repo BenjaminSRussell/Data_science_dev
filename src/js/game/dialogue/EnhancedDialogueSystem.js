@@ -1,174 +1,77 @@
-/**
- * EnhancedDialogueSystem.js
- * Integrates deep character stories into dialogue trees
- * Dialogue reveals character depth based on relationship level
- */
+import DialogueNode from './DialogueNode.js';
+import DialogueTree from './DialogueTree.js';
+import { getStoryReveal } from './StoryReveal.js';
 
-import { CHARACTER_STORIES, getStoryReveal, getCharacterStory } from './DeepCharacterStories.js';
-import { DialogueNode, DialogueTree } from './DialogueTreeSystem.js';
-
-export class EnhancedDialogueSystem {
+class EnhancedDialogueSystem {
     constructor() {
-        this.storyCache = new Map();
+        // Constructor code if needed
     }
 
     /**
-     * Build enhanced dialogue tree for NPC with deep stories
+     * Create dialogue tree based on NPC and story
      */
-    buildEnhancedTree(npc, relationshipLevel) {
-        const story = CHARACTER_STORIES[npc.id];
-        if (!story) {
-            // Fallback to basic dialogue if no story exists
+    createDialogueTree(npc, story) {
+        const relationshipLevel = story.relationshipLevel;
+        if (!story || !story.phases || story.phases.length === 0) {
             return this.buildBasicTree(npc);
         }
 
         const nodes = [];
 
-        // Root node with relationship-based greeting
-        nodes.push(this.createRootNode(npc, relationshipLevel, story));
+        // Create root node
+        nodes.push(new DialogueNode({
+            id: 'root',
+            text: `Hello, I'm ${npc.name}. How can I help you?`,
+            choices: this.getRootChoices(npc, story, relationshipLevel)
+        }));
 
-        // Add story reveal nodes based on relationship
-        story.storyReveals.forEach(reveal => {
-            if (relationshipLevel >= reveal.relationshipLevel) {
-                nodes.push(this.createStoryRevealNode(npc, reveal, story));
-            }
-        });
-
-        // Add topic-based dialogue nodes
-        nodes.push(...this.createTopicNodes(npc, story, relationshipLevel));
-
-        // Add personal question nodes
+        // Create dynamic nodes based on relationship and story
+        nodes.push(...this.createWorkNodes(npc, story, relationshipLevel));
         nodes.push(...this.createPersonalQuestionNodes(npc, story, relationshipLevel));
-
-        // Add story phase nodes if available
-        if (story.phases) {
-            nodes.push(...this.createPhaseNodes(npc, story, relationshipLevel));
-        }
+        nodes.push(...this.createPhaseNodes(npc, story, relationshipLevel));
 
         return new DialogueTree(npc.id, nodes);
     }
 
     /**
-     * Create root node with dynamic greeting
+     * Get root choices based on relationship and story
      */
-    createRootNode(npc, relationshipLevel, story) {
-        let greeting = this.getGreetingForLevel(npc, relationshipLevel);
-
+    getRootChoices(npc, story, relationshipLevel) {
         const choices = [
-            { id: 'ask_about_work', text: 'Ask about their work' },
-            { id: 'ask_about_life', text: 'Ask how they are' },
-            { id: 'compliment', text: 'Give a compliment' }
+            { id: 'talk_about_work', text: 'Tell me about your work' },
+            { id: 'talk_about_life', text: 'Tell me about your life' }
         ];
 
-        // Add story phase option if available
-        if (story.phases) {
-            const activePhase = this.getActivePhase(npc, story, relationshipLevel);
-            // In a real implementation we would check if the specific phase is completed via flags
-            if (activePhase) {
-                choices.unshift({ id: `phase_${activePhase.id}`, text: "Talk about something important" });
-            }
-        }
-
-        // Add story exploration options based on relationship
         if (relationshipLevel >= 10) {
-            choices.push({ id: 'ask_about_past', text: 'Ask about their background' });
+            choices.push({ id: 'ask_about_past', text: 'Tell me more about you' });
         }
 
         if (relationshipLevel >= 25) {
-            choices.push({ id: 'ask_about_dreams', text: 'Ask about their dreams' });
+            choices.push({ id: 'ask_about_dreams', text: 'What are your dreams?' });
         }
 
         if (relationshipLevel >= 40) {
-            choices.push({ id: 'ask_personal', text: 'Ask something personal' });
+            choices.push({ id: 'ask_personal', text: 'Talk about something personal' });
         }
 
         if (relationshipLevel >= 60) {
-            choices.push({ id: 'deep_question', text: 'Ask a deep question' });
+            choices.push({ id: 'deep_question', text: 'Share something profound' });
         }
 
-        choices.push({ id: 'goodbye', text: 'Say goodbye' });
-
-        return new DialogueNode({
-            id: 'root',
-            text: greeting,
-            choices: choices,
-            effects: { relationship: 0.5 }
-        });
-    }
-
-    /**
-     * Get greeting based on relationship level
-     */
-    getGreetingForLevel(npc, relationshipLevel) {
-        if (relationshipLevel < 10) {
-            return this.getFirstMeetingGreeting(npc);
-        } else if (relationshipLevel < 25) {
-            return `Hey ${npc.name.split(' ')[0]}! Good to see you.`;
-        } else if (relationshipLevel < 50) {
-            return `${npc.name.split(' ')[0]}! Always good to catch up. What's on your mind?`;
-        } else if (relationshipLevel < 75) {
-            return `Hey! I was just thinking about you. How have you been?`;
-        } else {
-            return `My friend! It's been too long. How are things?`;
+        const phase = this.getActivePhase(npc, story, relationshipLevel);
+        if (phase) {
+            choices.push({ id: `phase_${phase.id}`, text: `Talk about something important` });
         }
+
+        choices.push({ id: 'goodbye', text: 'Goodbye' });
+
+        return choices;
     }
 
     /**
-     * Get first meeting greeting
+     * Create work-related dialogue nodes
      */
-    getFirstMeetingGreeting(npc) {
-        const greetings = {
-            friendly: `Hi there! I\'m ${npc.name}. Nice to meet you!`,
-            professional: `Hello. I\'m ${npc.name}. How can I help you?`,
-            competitive: `Hey. ${npc.name}. What do you want?`,
-            mysterious: `...Hello. I\'m ${npc.name}.`,
-            generous: `Welcome! I\'m ${npc.name}. Always happy to help.`
-        };
-
-        return greetings[npc.personality] || `Hello, I\'m ${npc.name}.`;
-    }
-
-    /**
-     * Create story reveal node
-     */
-    createStoryRevealNode(npc, reveal, story) {
-        const choices = [
-            { id: 'empathize', text: this.getEmpathyResponse(reveal.topic) },
-            { id: 'ask_more', text: 'Tell me more about that' },
-            { id: 'change_topic', text: 'Change topic' }
-        ];
-
-        return new DialogueNode({
-            id: `story_${reveal.topic}`,
-            text: reveal.dialogue,
-            choices: choices,
-            conditions: { relationship: reveal.relationshipLevel },
-            effects: { relationship: 3 }
-        });
-    }
-
-    /**
-     * Get empathy response based on topic
-     */
-    getEmpathyResponse(topic) {
-        const responses = {
-            background: "That must have been difficult",
-            father: 'I\'m sorry to hear that',
-            secret_project: "That sounds important",
-            dream: "That's a beautiful dream",
-            fear: "I understand that fear",
-            struggle: "That sounds really hard",
-            kids: "Your kids are lucky to have you",
-            philosophy: "That's a powerful way to see things"
-        };
-
-        return responses[topic] || "I understand";
-    }
-
-    /**
-     * Create topic-based dialogue nodes
-     */
-    createTopicNodes(npc, story, relationshipLevel) {
+    createWorkNodes(npc, story, relationshipLevel) {
         const nodes = [];
 
         // Work topic
@@ -176,8 +79,8 @@ export class EnhancedDialogueSystem {
             id: 'ask_about_work',
             text: this.getWorkResponse(npc, story, relationshipLevel),
             choices: [
-                { id: 'work_interesting', text: 'That sounds interesting' },
-                { id: 'work_ask_details', text: 'Tell me more about your work' },
+                { id: 'work_empathize', text: this.getEmpathyResponse('work') },
+                { id: 'work_ask_more', text: 'What about your work?' },
                 { id: 'root', text: 'That sounds great' }
             ],
             effects: { relationship: 1 }
@@ -327,18 +230,13 @@ export class EnhancedDialogueSystem {
      * Get active phase for NPC
      */
     getActivePhase(npc, story, relationshipLevel) {
-        // Need to check specific flags in real implementation, 
-        // passing mock flags for now or checking implementation in NPCManager
+        let activePhase = null;
         for (const phase of story.phases) {
-            // Check relationship trigger
             if (relationshipLevel >= phase.trigger.relationship) {
-                // Check if already completed (this logic would typically access game state flags)
-                // For now, we assume if it's available and not 'done', it's active
-                // The actual check logic should ideally rely on a flags system passed in or accessible globally
-                return phase;
+                activePhase = phase;
             }
         }
-        return null;
+        return activePhase;
     }
 
     /**
@@ -350,15 +248,11 @@ export class EnhancedDialogueSystem {
         if (!story.phases) return nodes;
 
         story.phases.forEach(phase => {
-            // Trigger check logic again for safety or just build them all 
-            // and let the root node decide entry (safer to build all reachable)
-
             const choices = phase.options.map((opt, index) => ({
                 id: `phase_opt_${phase.id}_${index}`,
                 text: opt.text
             }));
 
-            // Main Phase Node
             nodes.push(new DialogueNode({
                 id: `phase_${phase.id}`,
                 text: phase.dialogue,
@@ -366,18 +260,14 @@ export class EnhancedDialogueSystem {
                 effects: { relationship: 0 }
             }));
 
-            // Response Nodes for each option
             phase.options.forEach((opt, index) => {
                 nodes.push(new DialogueNode({
                     id: `phase_opt_${phase.id}_${index}`,
-                    text: opt.response,
+                    text: opt.text,
                     choices: [
-                        { id: 'root', text: "Continue" }
+                        { id: 'root', text: 'Back' }
                     ],
-                    effects: {
-                        ...opt.effects,
-                        flag: opt.flag // Set the flag when this option is chosen
-                    }
+                    effects: opt.effects
                 }));
             });
         });
@@ -386,22 +276,38 @@ export class EnhancedDialogueSystem {
     }
 
     /**
-     * Get deep reveal (philosophy)
+     * Get empathy response based on topic
      */
-    getDeepReveal(npc, story) {
-        const reveal = getStoryReveal(npc.id, 80, 'philosophy');
-        if (reveal) return reveal.dialogue;
-        return story.personalStory.philosophy;
+    getEmpathyResponse(topic) {
+        switch (topic) {
+            case 'work':
+                return 'I can imagine how challenging that must be.';
+            case 'struggle':
+                return 'That sounds tough. I hope you find some comfort in it.';
+            case 'background':
+                return 'It must have been interesting growing up.';
+            default:
+                return 'That\'s really interesting.';
+        }
     }
 
     /**
-     * Build basic tree if no story exists
+     * Get deep reveal
+     */
+    getDeepReveal(npc, story) {
+        const reveal = getStoryReveal(npc.id, story.relationshipLevel, 'deep');
+        if (reveal) return reveal.dialogue;
+        return `Sometimes, the deepest truths are the ones we least expect.`;
+    }
+
+    /**
+     * Build a basic dialogue tree if no story is available
      */
     buildBasicTree(npc) {
         return new DialogueTree(npc.id, [
             new DialogueNode({
                 id: 'root',
-                text: `Hello, I\'m ${npc.name}. How can I help you?`,
+                text: `Hello, I'm ${npc.name}. How can I help you?`,
                 choices: [
                     { id: 'goodbye', text: 'Goodbye' }
                 ]
@@ -410,5 +316,4 @@ export class EnhancedDialogueSystem {
     }
 }
 
-export const enhancedDialogueSystem = new EnhancedDialogueSystem();
-
+export default EnhancedDialogueSystem;
