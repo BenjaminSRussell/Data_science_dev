@@ -1,27 +1,18 @@
-/**
- * MapZoneSystem.js
- * Zone management system for the city map
- * Handles zone queries, location-to-zone mapping, and zone visualization
- */
+import { getAllZones, getZoneById, getZonesByType } from '../data/mapZones.js';
 
-import { getAllZones, getZoneAt, getZoneById, getZonesByType } from '../data/mapZones.js';
-
-export class MapZoneSystem {
-    constructor(gridSystem) {
-        this.gridSystem = gridSystem;
+class MapZoneSystem {
+    constructor(gameState) {
+        this.gameState = gameState;
         this.zones = getAllZones();
-        this.zoneGrid = new Map(); // Cache zone lookups by grid key
-        this.locationZoneMap = new Map(); // Map location IDs to zones
-        
-        this.buildZoneGrid();
+        this.zoneGrid = new Map();
+        this.locationZoneMap = new Map();
+        this.gridSystem = gameState.gridSystem;
+        this.initializeZoneGrid();
     }
 
-    /**
-     * Build zone grid for fast lookups
-     */
-    buildZoneGrid() {
+    initializeZoneGrid() {
         for (const zone of this.zones) {
-            const coords = this.gridSystem.getGridRect(
+            const coords = this.gridSystem.getGridCoordinates(
                 zone.bounds.minX,
                 zone.bounds.minY,
                 zone.bounds.maxX - zone.bounds.minX + 1,
@@ -38,9 +29,6 @@ export class MapZoneSystem {
         }
     }
 
-    /**
-     * Get zone at grid coordinates
-     */
     getZoneAt(x, y) {
         const key = this.gridSystem.getGridKey(x, y);
         const zones = this.zoneGrid.get(key);
@@ -51,37 +39,22 @@ export class MapZoneSystem {
         return null;
     }
 
-    /**
-     * Get all zones
-     */
     getAllZones() {
         return this.zones;
     }
 
-    /**
-     * Get zones by type
-     */
     getZonesByType(type) {
         return getZonesByType(type);
     }
 
-    /**
-     * Get zone by ID
-     */
     getZoneById(zoneId) {
         return getZoneById(zoneId);
     }
 
-    /**
-     * Assign location to zone
-     */
     assignLocationToZone(locationId, zoneId) {
         this.locationZoneMap.set(locationId, zoneId);
     }
 
-    /**
-     * Get zone for location
-     */
     getZoneForLocation(locationId) {
         const zoneId = this.locationZoneMap.get(locationId);
         if (zoneId) {
@@ -90,9 +63,6 @@ export class MapZoneSystem {
         return null;
     }
 
-    /**
-     * Find appropriate zone for a location based on location type
-     */
     findZoneForLocationType(locationType) {
         const typeMapping = {
             'residence': 'residential',
@@ -121,9 +91,6 @@ export class MapZoneSystem {
         return this.getZonesByType('mixed')[0] || this.zones[0];
     }
 
-    /**
-     * Get zone data for rendering
-     */
     getZoneData() {
         return {
             zones: this.zones,
@@ -132,9 +99,6 @@ export class MapZoneSystem {
         };
     }
 
-    /**
-     * Check if coordinates are in a zone
-     */
     isInZone(x, y, zoneId) {
         const zone = this.getZoneById(zoneId);
         if (!zone) return false;
@@ -145,9 +109,6 @@ export class MapZoneSystem {
                y <= zone.bounds.maxY;
     }
 
-    /**
-     * Get zones overlapping a rectangle
-     */
     getZonesInRect(minX, minY, maxX, maxY) {
         const overlappingZones = [];
         
