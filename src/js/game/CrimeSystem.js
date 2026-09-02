@@ -80,7 +80,7 @@ export class CrimeSystem {
             result.heatGained = heatGain;
         } else if (result.caught) {
             // Failed and caught immediately!
-            this.handleArrest();
+            this.handleArrest('You were caught immediately! BUSTED!');
             return { success: false, message: 'You were caught immediately! BUSTED!', caught: true };
         }
 
@@ -152,7 +152,7 @@ export class CrimeSystem {
         const effectiveRisk = Math.max(15, risk - (luck * 0.2));
 
         if (roll < effectiveRisk) {
-            this.handleArrest();
+            this.handleArrest('Fraud detected! You are going to jail!');
             return { success: false, message: 'Fraud detected! You are going to jail!', caught: true };
         }
 
@@ -187,10 +187,9 @@ export class CrimeSystem {
         // Logic to be handled in main game loop or here
     }
 
-    handleArrest() {
-        // Go to jail
-        // This should trigger a special game state
-        // For now, return a flag
+    handleArrest(reason = 'Illegal activity') {
+        // Go to jail - delegate to the real arrest handler in the main game
+        this.gameState.mainGame?.handleArrest(reason);
     }
 
     toJSON() {
