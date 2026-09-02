@@ -1,35 +1,29 @@
-#!/usr/bin/env python3
-"""
-Specialized Icon Scraper
-Scrapes Low-poly icons (items and features) from multiple sources
-"""
-
-import json
-from pathlib import Path
-import time
 import logging
-import requests
-from PIL import Image
-import random
+import os
+import time
+import json
 from urllib.parse import urljoin
+from pathlib import Path
 from bs4 import BeautifulSoup
+from requests import Session
+from PIL import Image
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Setup logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class IconScraper:
-    def __init__(self, output_dir="downloaded_assets/icons"):
-        self.output_dir = Path(output_dir)
+    def __init__(self):
+        self.session = Session()
+        self.session.headers.update({'User-Agent': 'CustomIconScraper/1.0'})
+        
+        self.output_dir = Path('output/icons')
         self.items_dir = self.output_dir / 'items'
         self.features_dir = self.output_dir / 'features'
+        
         self.items_dir.mkdir(parents=True, exist_ok=True)
         self.features_dir.mkdir(parents=True, exist_ok=True)
         
-        self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        })
-        self.downloaded = []
         self.stats = {'total': 0, 'downloaded': 0}
         
         self.items = [
@@ -85,29 +79,29 @@ class IconScraper:
             
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
-                svg_link = soup.find('a', href=lambda x: x and '.svg' in x and '128' in x)
-                if not svg_link:
-                    svg_link = soup.find('a', href=lambda x: x and '.svg' in x)
-                
-                if svg_link:
-                    icon_url = urljoin(base_url, svg_link.get('href', ''))
-                    output_dir = self.items_dir if category == 'items' else self.features_dir
-                    output_path = output_dir / f"{icon_name}.svg"
-                    
-                    svg_response = self.session.get(icon_url, timeout=30)
-                    if svg_response.status_code == 200:
-                        with open(output_path, 'wb') as f:
-                            f.write(svg_response.content)
+                svg_links = soup.find_all('a', href=lambda x: x and '.svg' in x)
+                for svg_link in svg_links:
+                    if '?size=128' in svg_link.get('href', ''):
+                        icon_url = urljoin(base_url, svg_link.get('href', ''))
+                        output_dir = self.items_dir if category == 'items' else self.features_dir
+                        output_path = output_dir / f"{icon_name}.svg"
                         
-                        self.downloaded.append({
-                            'source': 'Game-Icons',
-                            'icon': icon_name,
-                            'category': category,
-                            'url': icon_url,
-                            'path': str(output_path),
-                            'license': 'CC-BY 3.0'
-                        })
-                        return 1
+                        svg_response = self.session.get(icon_url, timeout=30)
+                        if svg_response.status_code == 200:
+                            with open(output_path, 'wb') as f:
+                                f.write(svg_response.content)
+                            
+                            self.downloaded.append({
+                                'source': 'Game-Icons',
+                                'icon': icon_name,
+                                'category': category,
+                                'url': icon_url,
+                                'path': str(output_path),
+                                'license': 'CC-BY 3.0'
+                            })
+                            return 1
+                else:
+                    logger.warning(f"No 128px SVG found for {icon_name} on Game-Icons.net")
         except Exception as e:
             logger.debug(f"Error downloading icon {icon_name}: {e}")
         
@@ -215,4 +209,3 @@ class IconScraper:
 if __name__ == "__main__":
     scraper = IconScraper()
     scraper.run(target_count=500)
-
