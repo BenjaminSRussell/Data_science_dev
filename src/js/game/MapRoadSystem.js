@@ -157,12 +157,28 @@ export class MapRoadSystem {
     }
 
     /**
-     * Get intersection type (4-way, T-junction, etc.)
+     * Get intersection type (4-way, T-junction, dead-end, etc.)
+     * Compares the road start/end coordinates against the intersection
+     * coordinate to determine which arms of the intersection exist.
      */
     getIntersectionType(hRoad, vRoad) {
-        // For now, all intersections are 4-way
-        // Can be enhanced to detect T-junctions, dead ends, etc.
-        return '4-way';
+        const x = vRoad.position;
+        const y = hRoad.position;
+
+        // Horizontal arms: does the road extend left/right of the intersection?
+        const west = x > hRoad.start;
+        const east = x < hRoad.end;
+        // Vertical arms: does the road extend up/down of the intersection?
+        const north = y > vRoad.start;
+        const south = y < vRoad.end;
+
+        const arms = [west, east, north, south].filter(Boolean).length;
+
+        if (arms === 4) return '4-way';
+        if (arms === 3) return 'T-junction';
+        if (arms === 2) return 'straight';
+        if (arms === 1) return 'dead-end';
+        return 'isolated';
     }
 
     /**
