@@ -1,20 +1,12 @@
-#!/usr/bin/env python3
-"""
-Specialized Icon Scraper
-Scrapes Low-poly icons (items and features) from multiple sources
-"""
-
-import json
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+from PIL import Image
 from pathlib import Path
 import time
+import json
 import logging
-import requests
-from PIL import Image
-import random
-from urllib.parse import urljoin
-from bs4 import BeautifulSoup
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class IconScraper:
@@ -215,4 +207,3 @@ class IconScraper:
 if __name__ == "__main__":
     scraper = IconScraper()
     scraper.run(target_count=500)
-
