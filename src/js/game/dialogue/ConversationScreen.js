@@ -1,42 +1,10 @@
-/**
- * ConversationScreen.js
- * Manages the conversation screen UI and dialogue flow
- */
-
-import { dialogueTreeSystem } from './DialogueTreeSystem.js';
-import { getNPCImage, getNPCFallback } from '../../utils/NPCImageMapper.js';
-import { ThreeCharacterRenderer } from '../../characters/ThreeCharacterRenderer.js';
-
-export class ConversationScreen {
-    constructor(game) {
+class ConversationScreen {
+    constructor(game, threeRenderer) {
         this.game = game;
+        this.threeRenderer = threeRenderer;
+        this.screenElement = this.createConversationScreen();
         this.currentNPC = null;
         this.currentNode = null;
-        this.screenElement = null;
-        this.threeRenderer = new ThreeCharacterRenderer();
-    }
-
-    /**
-     * Show conversation screen for NPC
-     */
-    showConversation(npcId) {
-        const npc = this.game.npcManager?.getNPC(npcId);
-        if (!npc) return;
-
-        this.currentNPC = npc;
-
-        // Create or get conversation screen
-        let screen = document.getElementById('conversation-screen');
-        if (!screen) {
-            screen = this.createConversationScreen();
-            document.body.appendChild(screen);
-        }
-
-        this.screenElement = screen;
-        screen.classList.add('active');
-
-        // Start conversation
-        this.startConversation();
     }
 
     /**
@@ -273,4 +241,3 @@ export class ConversationScreen {
         this.currentNode = null;
     }
 }
-
