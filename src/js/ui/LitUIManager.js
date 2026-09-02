@@ -8,6 +8,7 @@ import { TopBar } from './components/TopBar.js';
 import { ProgressBar } from './components/ProgressBar.js';
 import { Button } from './components/Button.js';
 import { LocationViewComponent } from './components/LocationViewComponent.js';
+import { useGameStore } from '../store/gameStore.js';
 
 export class LitUIManager {
     constructor(game) {
