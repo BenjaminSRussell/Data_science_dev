@@ -207,13 +207,20 @@ export class DialogueUI {
         textEl.textContent = '';
         textEl.classList.add('typing');
 
+        // Cancel any in-progress typing animation to avoid overlapping calls
+        if (this._typeTimer) {
+            clearTimeout(this._typeTimer);
+            this._typeTimer = null;
+        }
+
         let i = 0;
         const type = () => {
             if (i < text.length) {
                 textEl.textContent += text[i];
                 i++;
-                setTimeout(type, speed);
+                this._typeTimer = setTimeout(type, speed);
             } else {
+                this._typeTimer = null;
                 textEl.classList.remove('typing');
             }
         };
@@ -324,6 +331,12 @@ export class DialogueUI {
         this.currentNPC = null;
         this.currentTree = null;
         this.currentNode = null;
+
+        // Stop any in-progress typing animation
+        if (this._typeTimer) {
+            clearTimeout(this._typeTimer);
+            this._typeTimer = null;
+        }
 
         if (this.onClose) {
             this.onClose();
