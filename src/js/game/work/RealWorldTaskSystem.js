@@ -1,571 +1,931 @@
-/**
- * RealWorldTaskSystem.js
- * Real-world multi-step problems with different visuals for each task type
- * Teaches actual data science work
- */
-
-export class RealWorldTaskSystem {
+===FILE: src/js/game/work/RealWorldTaskSystem.js===
+```js
+class RealWorldTaskSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.currentTask = null;
         this.taskHistory = [];
-        this.taskTypes = this.initializeTaskTypes();
     }
     
     /**
-     * Initialize task types with different visuals and workflows
+     * Get available task types
      */
-    initializeTaskTypes() {
+    getAvailableTaskTypes() {
+        return Object.keys(this.taskTypes);
+    }
+    
+    /**
+     * Get task types
+     */
+    getTaskTypes() {
         return {
-            // Data Pipeline Tasks
+            // Data Cleaning
             data_cleaning: {
                 id: 'data_cleaning',
-                name: 'Data Cleaning',
-                category: 'pipeline',
+                name: 'Data Cleaning and Preparation',
+                category: 'data_preprocessing',
                 steps: [
-                    { id: 'identify_missing', name: 'Identify Missing Values', visual: 'data_table', duration: 2 },
-                    { id: 'handle_outliers', name: 'Handle Outliers', visual: 'scatter_plot', duration: 3 },
-                    { id: 'normalize_data', name: 'Normalize Data', visual: 'transformation', duration: 2 },
-                    { id: 'validate_quality', name: 'Validate Data Quality', visual: 'quality_check', duration: 2 }
+                    { id: 'load_data', name: 'Load Data', visual: 'data_load', duration: 3 },
+                    { id: 'identify_issues', name: 'Identify Issues', visual: 'data_inspection', duration: 4 },
+                    { id: 'fix_issues', name: 'Fix Issues', visual: 'data_transform', duration: 5 },
+                    { id: 'validate_data', name: 'Validate Data', visual: 'data_validation', duration: 3 }
                 ],
-                visual: 'pipeline',
-                description: 'Clean and prepare raw data for analysis',
-                skills: ['data_processing', 'python', 'pandas'],
-                reward: { money: 500, reputation: 10, experience: 50 }
+                visual: 'data_transform',
+                description: 'Clean and prepare dataset for analysis',
+                skills: ['python', 'data_cleaning', 'data_validation'],
+                reward: { money: 800, reputation: 15, experience: 100 }
             },
-            
-            etl_pipeline: {
-                id: 'etl_pipeline',
-                name: 'ETL Pipeline',
-                category: 'pipeline',
-                steps: [
-                    { id: 'extract', name: 'Extract Data from Source', visual: 'database_extract', duration: 3 },
-                    { id: 'transform', name: 'Transform Data', visual: 'data_transform', duration: 4 },
-                    { id: 'load', name: 'Load to Data Warehouse', visual: 'database_load', duration: 2 },
-                    { id: 'monitor', name: 'Monitor Pipeline Health', visual: 'monitoring', duration: 2 }
-                ],
-                visual: 'pipeline_diagram',
-                description: 'Build Extract-Transform-Load pipeline',
-                skills: ['python', 'sql', 'airflow'],
-                reward: { money: 800, reputation: 15, experience: 80 }
-            },
-            
-            // GitHub Issues
-            github_bug_fix: {
-                id: 'github_bug_fix',
-                name: 'Fix GitHub Issue',
-                category: 'github',
-                steps: [
-                    { id: 'reproduce', name: 'Reproduce the Bug', visual: 'code_editor', duration: 2 },
-                    { id: 'identify_root', name: 'Identify Root Cause', visual: 'debugging', duration: 3 },
-                    { id: 'write_fix', name: 'Write Fix', visual: 'code_editor', duration: 3 },
-                    { id: 'test_fix', name: 'Test Fix', visual: 'testing', duration: 2 },
-                    { id: 'submit_pr', name: 'Submit Pull Request', visual: 'github', duration: 1 }
-                ],
-                visual: 'github_issue',
-                description: 'Fix a bug reported in GitHub issues',
-                skills: ['python', 'git', 'testing'],
-                reward: { money: 400, reputation: 20, experience: 60 }
-            },
-            
-            github_feature: {
-                id: 'github_feature',
-                name: 'Implement Feature Request',
-                category: 'github',
-                steps: [
-                    { id: 'analyze_requirements', name: 'Analyze Requirements', visual: 'documentation', duration: 2 },
-                    { id: 'design_solution', name: 'Design Solution', visual: 'architecture', duration: 3 },
-                    { id: 'implement', name: 'Implement Feature', visual: 'code_editor', duration: 5 },
-                    { id: 'write_tests', name: 'Write Tests', visual: 'testing', duration: 3 },
-                    { id: 'documentation', name: 'Write Documentation', visual: 'documentation', duration: 2 },
-                    { id: 'submit_pr', name: 'Submit Pull Request', visual: 'github', duration: 1 }
-                ],
-                visual: 'github_feature',
-                description: 'Implement a new feature from GitHub issue',
-                skills: ['python', 'git', 'testing', 'documentation'],
-                reward: { money: 600, reputation: 25, experience: 100 }
-            },
-            
-            // Analysis Tasks
+
+            // Exploratory Data Analysis
             exploratory_analysis: {
                 id: 'exploratory_analysis',
                 name: 'Exploratory Data Analysis',
-                category: 'analysis',
+                category: 'data_analysis',
                 steps: [
-                    { id: 'load_data', name: 'Load Dataset', visual: 'data_loading', duration: 1 },
-                    { id: 'summary_stats', name: 'Calculate Summary Statistics', visual: 'statistics', duration: 2 },
-                    { id: 'visualize', name: 'Create Visualizations', visual: 'charting', duration: 4 },
-                    { id: 'identify_patterns', name: 'Identify Patterns', visual: 'pattern_analysis', duration: 3 },
-                    { id: 'write_report', name: 'Write Analysis Report', visual: 'documentation', duration: 3 }
+                    { id: 'explore_data', name: 'Explore Data', visual: 'data_explore', duration: 5 },
+                    { id: 'visualize_data', name: 'Visualize Data', visual: 'data_visualize', duration: 4 },
+                    { id: 'interpret_results', name: 'Interpret Results', visual: 'analysis', duration: 4 }
                 ],
-                visual: 'analysis',
+                visual: 'data_visualize',
                 description: 'Perform exploratory data analysis',
-                skills: ['python', 'pandas', 'matplotlib', 'statistics'],
-                reward: { money: 700, reputation: 15, experience: 90 }
-            },
-            
-            // AI/ML Tasks
-            model_training: {
-                id: 'model_training',
-                name: 'Train ML Model',
-                category: 'ai_ml',
-                steps: [
-                    { id: 'prepare_data', name: 'Prepare Training Data', visual: 'data_prep', duration: 3 },
-                    { id: 'select_model', name: 'Select Model Architecture', visual: 'model_selection', duration: 2 },
-                    { id: 'train', name: 'Train Model', visual: 'training', duration: 10 },
-                    { id: 'evaluate', name: 'Evaluate Performance', visual: 'evaluation', duration: 3 },
-                    { id: 'tune_hyperparams', name: 'Tune Hyperparameters', visual: 'hyperparameter', duration: 5 },
-                    { id: 'retrain', name: 'Retrain with Best Params', visual: 'training', duration: 8 }
-                ],
-                visual: 'model_training',
-                description: 'Train a machine learning model',
-                skills: ['python', 'scikit-learn', 'tensorflow', 'ml'],
-                reward: { money: 1200, reputation: 30, experience: 150 }
-            },
-            
-            // AI Training (Special - for storyline)
-            ai_model_training: {
-                id: 'ai_model_training',
-                name: 'Train AI Model (University Lab)',
-                category: 'ai_research',
-                steps: [
-                    { id: 'collect_dataset', name: 'Collect Massive Dataset', visual: 'data_collection', duration: 5 },
-                    { id: 'preprocess', name: 'Preprocess Data', visual: 'data_prep', duration: 8 },
-                    { id: 'design_architecture', name: 'Design Neural Architecture', visual: 'architecture', duration: 6 },
-                    { id: 'implement_model', name: 'Implement Model', visual: 'code_editor', duration: 10 },
-                    { id: 'distributed_setup', name: 'Setup Distributed Training', visual: 'cluster', duration: 8 },
-                    { id: 'train_epoch_1', name: 'Train Epoch 1', visual: 'training', duration: 15 },
-                    { id: 'train_epoch_2', name: 'Train Epoch 2', visual: 'training', duration: 15 },
-                    { id: 'train_epoch_3', name: 'Train Epoch 3', visual: 'training', duration: 15 },
-                    { id: 'evaluate', name: 'Evaluate Model', visual: 'evaluation', duration: 5 },
-                    { id: 'analyze_results', name: 'Analyze Results', visual: 'analysis', duration: 4 },
-                    { id: 'write_paper', name: 'Write Research Paper', visual: 'documentation', duration: 8 }
-                ],
-                visual: 'ai_lab',
-                description: 'Train a large-scale AI model in university lab',
-                skills: ['python', 'tensorflow', 'pytorch', 'research', 'distributed_computing'],
-                reward: { money: 0, reputation: 100, experience: 500 },
-                requiresLab: true,
-                canTakeModel: false
+                skills: ['python', 'data_analysis', 'visualization'],
+                reward: { money: 1000, reputation: 25, experience: 120 }
             },
 
-            // ===== MASSIVE EXPANSION: More Data Science Tasks =====
-            
-            // Feature Engineering
-            feature_engineering: {
-                id: 'feature_engineering',
-                name: 'Feature Engineering Pipeline',
-                category: 'pipeline',
+            // GitHub Bug Fix
+            github_bug_fix: {
+                id: 'github_bug_fix',
+                name: 'Contribute to Open Source by Fixing a Bug',
+                category: 'software_development',
                 steps: [
-                    { id: 'analyze_features', name: 'Analyze Existing Features', visual: 'data_table', duration: 3 },
-                    { id: 'create_interactions', name: 'Create Feature Interactions', visual: 'transformation', duration: 4 },
-                    { id: 'domain_features', name: 'Engineer Domain Features', visual: 'data_transform', duration: 5 },
-                    { id: 'select_features', name: 'Feature Selection', visual: 'feature_selection', duration: 3 },
-                    { id: 'validate_features', name: 'Validate Feature Quality', visual: 'quality_check', duration: 2 }
+                    { id: 'clone_repo', name: 'Clone Repository', visual: 'git_clone', duration: 2 },
+                    { id: 'find_bug', name: 'Find Bug', visual: 'bug_hunting', duration: 3 },
+                    { id: 'fix_bug', name: 'Fix Bug', visual: 'code_fix', duration: 4 },
+                    { id: 'test_changes', name: 'Test Changes', visual: 'testing', duration: 3 },
+                    { id: 'create_pr', name: 'Create Pull Request', visual: 'git_pr', duration: 2 }
                 ],
-                visual: 'pipeline',
-                description: 'Engineer new features to improve model performance',
-                skills: ['python', 'pandas', 'feature_engineering', 'statistics'],
-                reward: { money: 900, reputation: 20, experience: 110 }
-            },
-
-            // Model Evaluation
-            model_evaluation: {
-                id: 'model_evaluation',
-                name: 'Comprehensive Model Evaluation',
-                category: 'analysis',
-                steps: [
-                    { id: 'split_data', name: 'Split Data for Validation', visual: 'data_prep', duration: 2 },
-                    { id: 'train_test', name: 'Run Train/Test Evaluation', visual: 'evaluation', duration: 4 },
-                    { id: 'cross_validate', name: 'Perform Cross-Validation', visual: 'testing', duration: 5 },
-                    { id: 'metric_analysis', name: 'Calculate All Metrics', visual: 'statistics', duration: 3 },
-                    { id: 'error_analysis', name: 'Error Analysis', visual: 'analysis', duration: 4 },
-                    { id: 'create_report', name: 'Create Evaluation Report', visual: 'documentation', duration: 3 }
-                ],
-                visual: 'evaluation',
-                description: 'Comprehensive evaluation of model performance',
-                skills: ['python', 'scikit-learn', 'statistics', 'evaluation'],
-                reward: { money: 800, reputation: 18, experience: 100 }
-            },
-
-            // Hyperparameter Tuning
-            hyperparameter_tuning: {
-                id: 'hyperparameter_tuning',
-                name: 'Hyperparameter Optimization',
-                category: 'ai_ml',
-                steps: [
-                    { id: 'define_search', name: 'Define Search Space', visual: 'architecture', duration: 3 },
-                    { id: 'grid_search', name: 'Run Grid Search', visual: 'hyperparameter', duration: 8 },
-                    { id: 'random_search', name: 'Run Random Search', visual: 'hyperparameter', duration: 6 },
-                    { id: 'bayesian_opt', name: 'Bayesian Optimization', visual: 'hyperparameter', duration: 7 },
-                    { id: 'analyze_results', name: 'Analyze Best Parameters', visual: 'analysis', duration: 3 },
-                    { id: 'final_eval', name: 'Final Model Evaluation', visual: 'evaluation', duration: 4 }
-                ],
-                visual: 'hyperparameter',
-                description: 'Optimize model hyperparameters for best performance',
-                skills: ['python', 'scikit-learn', 'optuna', 'hyperparameter_tuning'],
-                reward: { money: 1100, reputation: 25, experience: 130 }
+                visual: 'code_fix',
+                description: 'Contribute to open source by fixing a bug',
+                skills: ['git', 'bug_fixing', 'software_development'],
+                reward: { money: 700, reputation: 20, experience: 110 }
             },
 
             // Data Validation
             data_validation: {
                 id: 'data_validation',
-                name: 'Data Quality Validation',
-                category: 'pipeline',
+                name: 'Data Validation and Testing',
+                category: 'data_quality',
                 steps: [
-                    { id: 'schema_check', name: 'Schema Validation', visual: 'quality_check', duration: 2 },
-                    { id: 'type_check', name: 'Data Type Checks', visual: 'data_table', duration: 2 },
-                    { id: 'range_check', name: 'Range and Constraint Checks', visual: 'statistics', duration: 3 },
-                    { id: 'completeness', name: 'Completeness Analysis', visual: 'quality_check', duration: 2 },
-                    { id: 'consistency', name: 'Consistency Checks', visual: 'analysis', duration: 3 },
-                    { id: 'generate_report', name: 'Generate Validation Report', visual: 'documentation', duration: 2 }
+                    { id: 'validate_structure', name: 'Validate Data Structure', visual: 'data_validation', duration: 4 },
+                    { id: 'validate_values', name: 'Validate Data Values', visual: 'data_validation', duration: 4 },
+                    { id: 'test_integrity', name: 'Test Data Integrity', visual: 'testing', duration: 3 }
                 ],
-                visual: 'quality_check',
-                description: 'Validate data quality and integrity',
-                skills: ['python', 'pandas', 'data_validation', 'quality'],
-                reward: { money: 600, reputation: 12, experience: 70 }
+                visual: 'data_validation',
+                description: 'Validate and test dataset',
+                skills: ['python', 'data_validation', 'data_integrity'],
+                reward: { money: 800, reputation: 18, experience: 105 }
             },
 
             // Time Series Analysis
             time_series_analysis: {
                 id: 'time_series_analysis',
                 name: 'Time Series Analysis',
-                category: 'analysis',
+                category: 'data_analysis',
                 steps: [
-                    { id: 'load_data', name: 'Load Time Series Data', visual: 'data_loading', duration: 2 },
-                    { id: 'decompose', name: 'Decompose Time Series', visual: 'pattern_analysis', duration: 4 },
-                    { id: 'stationarity', name: 'Check Stationarity', visual: 'statistics', duration: 3 },
-                    { id: 'autocorrelation', name: 'Autocorrelation Analysis', visual: 'charting', duration: 3 },
-                    { id: 'build_model', name: 'Build Time Series Model', visual: 'model_selection', duration: 5 },
-                    { id: 'forecast', name: 'Generate Forecasts', visual: 'training', duration: 4 },
-                    { id: 'evaluate_forecast', name: 'Evaluate Forecast Accuracy', visual: 'evaluation', duration: 3 }
+                    { id: 'load_data', name: 'Load Time Series Data', visual: 'data_load', duration: 3 },
+                    { id: 'preprocess_data', name: 'Preprocess Time Series Data', visual: 'data_transform', duration: 4 },
+                    { id: 'analyze_data', name: 'Analyze Time Series Data', visual: 'data_explore', duration: 5 },
+                    { id: 'model_data', name: 'Build Forecasting Model', visual: 'model_training', duration: 6 }
                 ],
-                visual: 'analysis',
+                visual: 'data_explore',
                 description: 'Perform time series analysis and forecasting',
-                skills: ['python', 'pandas', 'statsmodels', 'time_series', 'forecasting'],
-                reward: { money: 1000, reputation: 22, experience: 120 }
+                skills: ['python', 'time_series_analysis', 'modeling'],
+                reward: { money: 1200, reputation: 28, experience: 140 }
             },
 
-            // Classification Model
-            classification_model: {
-                id: 'classification_model',
-                name: 'Build Classification Model',
-                category: 'ai_ml',
+            // Feature Engineering
+            feature_engineering: {
+                id: 'feature_engineering',
+                name: 'Feature Engineering',
+                category: 'modeling',
                 steps: [
-                    { id: 'prepare_data', name: 'Prepare Classification Data', visual: 'data_prep', duration: 3 },
-                    { id: 'balance_classes', name: 'Handle Class Imbalance', visual: 'data_transform', duration: 3 },
-                    { id: 'select_algorithm', name: 'Select Classification Algorithm', visual: 'model_selection', duration: 2 },
-                    { id: 'train_model', name: 'Train Classification Model', visual: 'training', duration: 6 },
-                    { id: 'evaluate', name: 'Evaluate with Confusion Matrix', visual: 'evaluation', duration: 4 },
-                    { id: 'optimize_threshold', name: 'Optimize Classification Threshold', visual: 'hyperparameter', duration: 3 }
+                    { id: 'define_features', name: 'Define Features', visual: 'documentation', duration: 3 },
+                    { id: 'select_features', name: 'Select Features', visual: 'feature_selection', duration: 4 },
+                    { id: 'transform_features', name: 'Transform Features', visual: 'data_transform', duration: 5 }
                 ],
-                visual: 'model_training',
-                description: 'Build and optimize classification model',
-                skills: ['python', 'scikit-learn', 'classification', 'ml'],
-                reward: { money: 1000, reputation: 22, experience: 120 }
+                visual: 'data_transform',
+                description: 'Perform feature engineering for model training',
+                skills: ['python', 'feature_engineering', 'modeling'],
+                reward: { money: 900, reputation: 22, experience: 120 }
             },
 
-            // Regression Model
-            regression_model: {
-                id: 'regression_model',
-                name: 'Build Regression Model',
-                category: 'ai_ml',
+            // Model Evaluation
+            model_evaluation: {
+                id: 'model_evaluation',
+                name: 'Evaluate Machine Learning Model',
+                category: 'modeling',
                 steps: [
-                    { id: 'prepare_data', name: 'Prepare Regression Data', visual: 'data_prep', duration: 3 },
-                    { id: 'check_assumptions', name: 'Check Regression Assumptions', visual: 'statistics', duration: 4 },
-                    { id: 'select_algorithm', name: 'Select Regression Algorithm', visual: 'model_selection', duration: 2 },
-                    { id: 'train_model', name: 'Train Regression Model', visual: 'training', duration: 6 },
-                    { id: 'evaluate', name: 'Evaluate Model Performance', visual: 'evaluation', duration: 4 },
-                    { id: 'residual_analysis', name: 'Residual Analysis', visual: 'analysis', duration: 3 }
+                    { id: 'load_model', name: 'Load Model', visual: 'model_load', duration: 2 },
+                    { id: 'evaluate_metrics', name: 'Evaluate Metrics', visual: 'metrics_evaluation', duration: 4 },
+                    { id: 'interpret_results', name: 'Interpret Results', visual: 'analysis', duration: 3 }
                 ],
-                visual: 'model_training',
-                description: 'Build and evaluate regression model',
-                skills: ['python', 'scikit-learn', 'regression', 'statistics'],
-                reward: { money: 950, reputation: 20, experience: 115 }
+                visual: 'metrics_evaluation',
+                description: 'Evaluate and interpret machine learning model',
+                skills: ['python', 'model_evaluation', 'modeling'],
+                reward: { money: 950, reputation: 24, experience: 130 }
             },
 
             // Clustering Analysis
             clustering_analysis: {
                 id: 'clustering_analysis',
                 name: 'Clustering Analysis',
-                category: 'analysis',
+                category: 'data_analysis',
                 steps: [
-                    { id: 'prepare_data', name: 'Prepare Data for Clustering', visual: 'data_prep', duration: 3 },
-                    { id: 'scale_features', name: 'Scale Features', visual: 'transformation', duration: 2 },
-                    { id: 'determine_k', name: 'Determine Optimal K', visual: 'pattern_analysis', duration: 4 },
-                    { id: 'run_clustering', name: 'Run Clustering Algorithm', visual: 'training', duration: 5 },
-                    { id: 'analyze_clusters', name: 'Analyze Cluster Characteristics', visual: 'analysis', duration: 4 },
-                    { id: 'visualize', name: 'Visualize Clusters', visual: 'charting', duration: 3 }
+                    { id: 'load_data', name: 'Load Data', visual: 'data_load', duration: 3 },
+                    { id: 'preprocess_data', name: 'Preprocess Data', visual: 'data_transform', duration: 4 },
+                    { id: 'cluster_data', name: 'Cluster Data', visual: 'clustering', duration: 5 },
+                    { id: 'interpret_clusters', name: 'Interpret Clusters', visual: 'analysis', duration: 4 }
                 ],
-                visual: 'analysis',
-                description: 'Perform clustering analysis to identify patterns',
-                skills: ['python', 'scikit-learn', 'clustering', 'unsupervised_learning'],
-                reward: { money: 850, reputation: 18, experience: 105 }
+                visual: 'clustering',
+                description: 'Perform clustering analysis',
+                skills: ['python', 'clustering', 'data_analysis'],
+                reward: { money: 950, reputation: 26, experience: 135 }
             },
 
-            // NLP Text Analysis
-            nlp_text_analysis: {
-                id: 'nlp_text_analysis',
-                name: 'NLP Text Analysis',
-                category: 'ai_ml',
+            // AI Model Training
+            ai_model_training: {
+                id: 'ai_model_training',
+                name: 'Train AI Model',
+                category: 'ai_training',
                 steps: [
-                    { id: 'load_text', name: 'Load Text Data', visual: 'data_loading', duration: 2 },
-                    { id: 'preprocess', name: 'Text Preprocessing', visual: 'data_prep', duration: 4 },
-                    { id: 'tokenize', name: 'Tokenization', visual: 'transformation', duration: 3 },
-                    { id: 'vectorize', name: 'Text Vectorization', visual: 'data_transform', duration: 4 },
-                    { id: 'topic_modeling', name: 'Topic Modeling', visual: 'pattern_analysis', duration: 5 },
-                    { id: 'sentiment', name: 'Sentiment Analysis', visual: 'analysis', duration: 4 },
-                    { id: 'visualize', name: 'Visualize Results', visual: 'charting', duration: 3 }
+                    { id: 'define_problem', name: 'Define Problem', visual: 'documentation', duration: 2 },
+                    { id: 'select_model', name: 'Select AI Model', visual: 'model_selection', duration: 3 },
+                    { id: 'train_model', name: 'Train AI Model', visual: 'ai_training', duration: 8 },
+                    { id: 'evaluate_model', name: 'Evaluate AI Model', visual: 'metrics_evaluation', duration: 4 }
                 ],
-                visual: 'nlp',
-                description: 'Perform natural language processing on text data',
-                skills: ['python', 'nltk', 'spacy', 'nlp', 'text_analysis'],
-                reward: { money: 1100, reputation: 24, experience: 130 }
+                visual: 'ai_training',
+                description: 'Train an AI model',
+                skills: ['python', 'ai_training', 'deep_learning'],
+                reward: { money: 1500, reputation: 30, experience: 180 },
+                requiresLab: true
             },
 
-            // Database Query Optimization
+            // ETL Pipeline
+            etl_pipeline: {
+                id: 'etl_pipeline',
+                name: 'Design and Implement ETL Pipeline',
+                category: 'data_engineering',
+                steps: [
+                    { id: 'extract_data', name: 'Extract Data', visual: 'data_extract', duration: 4 },
+                    { id: 'transform_data', name: 'Transform Data', visual: 'data_transform', duration: 5 },
+                    { id: 'load_data', name: 'Load Data', visual: 'data_load', duration: 4 }
+                ],
+                visual: 'data_load',
+                description: 'Design and implement ETL pipeline',
+                skills: ['python', 'etl', 'data_engineering'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // Database Optimization
             database_optimization: {
                 id: 'database_optimization',
-                name: 'Database Query Optimization',
-                category: 'pipeline',
+                name: 'Optimize Database Performance',
+                category: 'data_engineering',
                 steps: [
-                    { id: 'analyze_queries', name: 'Analyze Slow Queries', visual: 'database_extract', duration: 3 },
-                    { id: 'check_indexes', name: 'Check Index Usage', visual: 'database_load', duration: 3 },
-                    { id: 'optimize_query', name: 'Optimize Query Structure', visual: 'code_editor', duration: 4 },
-                    { id: 'add_indexes', name: 'Add Missing Indexes', visual: 'database_load', duration: 3 },
-                    { id: 'test_performance', name: 'Test Query Performance', visual: 'monitoring', duration: 3 }
+                    { id: 'analyze_performance', name: 'Analyze Performance', visual: 'database_inspection', duration: 4 },
+                    { id: 'optimize_queries', name: 'Optimize Queries', visual: 'query_optimization', duration: 5 },
+                    { id: 'test_performance', name: 'Test Performance', visual: 'testing', duration: 3 }
                 ],
-                visual: 'database',
-                description: 'Optimize database queries for better performance',
-                skills: ['sql', 'database', 'optimization', 'performance'],
-                reward: { money: 750, reputation: 16, experience: 90 }
-            },
-
-            // API Development
-            api_development: {
-                id: 'api_development',
-                name: 'Build Data Science API',
-                category: 'github',
-                steps: [
-                    { id: 'design_api', name: 'Design API Endpoints', visual: 'architecture', duration: 3 },
-                    { id: 'implement_endpoints', name: 'Implement API Endpoints', visual: 'code_editor', duration: 6 },
-                    { id: 'add_auth', name: 'Add Authentication', visual: 'code_editor', duration: 3 },
-                    { id: 'write_tests', name: 'Write API Tests', visual: 'testing', duration: 4 },
-                    { id: 'documentation', name: 'Write API Documentation', visual: 'documentation', duration: 3 },
-                    { id: 'deploy', name: 'Deploy API', visual: 'deployment', duration: 3 }
-                ],
-                visual: 'api',
-                description: 'Build RESTful API for data science models',
-                skills: ['python', 'flask', 'fastapi', 'api', 'deployment'],
-                reward: { money: 1200, reputation: 28, experience: 140 }
+                visual: 'query_optimization',
+                description: 'Optimize database performance',
+                skills: ['sql', 'database_performance', 'data_engineering'],
+                reward: { money: 1000, reputation: 22, experience: 120 }
             },
 
             // Model Deployment
             model_deployment: {
                 id: 'model_deployment',
-                name: 'Deploy ML Model to Production',
-                category: 'ai_ml',
+                name: 'Deploy Machine Learning Model',
+                category: 'modeling',
                 steps: [
-                    { id: 'serialize_model', name: 'Serialize Model', visual: 'model_selection', duration: 2 },
-                    { id: 'create_service', name: 'Create Prediction Service', visual: 'code_editor', duration: 5 },
-                    { id: 'add_monitoring', name: 'Add Monitoring', visual: 'monitoring', duration: 4 },
-                    { id: 'containerize', name: 'Containerize Service', visual: 'deployment', duration: 4 },
-                    { id: 'deploy', name: 'Deploy to Production', visual: 'deployment', duration: 4 },
-                    { id: 'test_production', name: 'Test Production Service', visual: 'testing', duration: 3 }
+                    { id: 'prepare_deployment', name: 'Prepare Deployment', visual: 'documentation', duration: 3 },
+                    { id: 'deploy_model', name: 'Deploy Model', visual: 'model_deployment', duration: 6 },
+                    { id: 'monitor_model', name: 'Monitor Model', visual: 'monitoring', duration: 4 }
                 ],
-                visual: 'deployment',
-                description: 'Deploy machine learning model to production',
-                skills: ['python', 'docker', 'kubernetes', 'mlops', 'deployment'],
-                reward: { money: 1400, reputation: 32, experience: 160 }
+                visual: 'model_deployment',
+                description: 'Deploy and monitor machine learning model',
+                skills: ['python', 'model_deployment', 'devops'],
+                reward: { money: 1050, reputation: 27, experience: 135 }
             },
 
-            // A/B Test Design
-            ab_test_design: {
-                id: 'ab_test_design',
-                name: 'Design and Analyze A/B Test',
-                category: 'analysis',
+            // NLP Analysis
+            nlp_analysis: {
+                id: 'nlp_analysis',
+                name: 'Natural Language Processing Analysis',
+                category: 'data_analysis',
                 steps: [
-                    { id: 'define_hypothesis', name: 'Define Hypothesis', visual: 'documentation', duration: 2 },
-                    { id: 'calculate_sample', name: 'Calculate Sample Size', visual: 'statistics', duration: 3 },
-                    { id: 'randomize', name: 'Randomize Users', visual: 'data_transform', duration: 2 },
-                    { id: 'run_test', name: 'Run A/B Test', visual: 'testing', duration: 7 },
-                    { id: 'collect_data', name: 'Collect Results', visual: 'data_collection', duration: 2 },
-                    { id: 'statistical_test', name: 'Statistical Significance Test', visual: 'statistics', duration: 4 },
-                    { id: 'interpret', name: 'Interpret Results', visual: 'analysis', duration: 3 }
+                    { id: 'load_data', name: 'Load Text Data', visual: 'data_load', duration: 3 },
+                    { id: 'preprocess_text', name: 'Preprocess Text', visual: 'text_preprocessing', duration: 4 },
+                    { id: 'analyze_text', name: 'Analyze Text', visual: 'data_explore', duration: 5 },
+                    { id: 'model_text', name: 'Build NLP Model', visual: 'model_training', duration: 6 }
                 ],
-                visual: 'testing',
-                description: 'Design and analyze A/B test experiment',
-                skills: ['python', 'statistics', 'hypothesis_testing', 'experimental_design'],
-                reward: { money: 900, reputation: 20, experience: 110 }
-            }
-        };
-    }
-    
-    /**
-     * Generate a task based on job and context
-     */
-    generateTask(jobId, context = {}) {
-        const availableTasks = this.getAvailableTasks(jobId, context);
-        if (availableTasks.length === 0) return null;
-        
-        const taskType = availableTasks[Math.floor(Math.random() * availableTasks.length)];
-        const taskTemplate = this.taskTypes[taskType];
-        
-        return {
-            id: `${taskType}_${Date.now()}`,
-            type: taskType,
-            name: taskTemplate.name,
-            category: taskTemplate.category,
-            steps: taskTemplate.steps.map(step => ({ ...step, completed: false })),
-            currentStep: 0,
-            visual: taskTemplate.visual,
-            description: taskTemplate.description,
-            skills: taskTemplate.skills,
-            reward: taskTemplate.reward,
-            requiresLab: taskTemplate.requiresLab || false,
-            canTakeModel: taskTemplate.canTakeModel !== false,
-            startedAt: Date.now(),
-            context: context
-        };
-    }
-    
-    /**
-     * Get available tasks for a job
-     */
-    getAvailableTasks(jobId, context = {}) {
-        const allTasks = Object.keys(this.taskTypes);
-        
-        // Filter based on job requirements - expanded with new tasks
-        const jobTasks = {
-            'data_analyst': [
-                'data_cleaning', 'exploratory_analysis', 'github_bug_fix',
-                'data_validation', 'ab_test_design', 'time_series_analysis',
-                'feature_engineering', 'model_evaluation', 'clustering_analysis'
-            ],
-            'data_engineer': [
-                'etl_pipeline', 'data_cleaning', 'github_feature',
-                'data_validation', 'database_optimization', 'api_development',
-                'feature_engineering', 'pipeline_optimization'
-            ],
-            'ml_engineer': [
-                'model_training', 'data_cleaning', 'github_feature',
-                'classification_model', 'regression_model', 'hyperparameter_tuning',
-                'model_evaluation', 'model_deployment', 'feature_engineering',
-                'nlp_text_analysis', 'clustering_analysis'
-            ],
-            'research_scientist': [
-                'ai_model_training', 'model_training', 'exploratory_analysis',
-                'time_series_analysis', 'nlp_text_analysis', 'hyperparameter_tuning',
-                'clustering_analysis', 'model_evaluation'
-            ]
-        };
-        
-        let available = jobTasks[jobId] || allTasks;
-        
-        // Check if in university lab for AI training
-        if (context.inUniversityLab && available.includes('ai_model_training')) {
-            return ['ai_model_training'];
-        }
-        
-        // Filter out AI training if not in lab
-        if (!context.inUniversityLab) {
-            available = available.filter(t => t !== 'ai_model_training');
-        }
-        
-        return available;
-    }
-    
-    /**
-     * Start a task
-     */
-    startTask(task) {
-        this.currentTask = task;
-        this.currentTask.currentStep = 0;
-        this.currentTask.startedAt = Date.now();
-        return this.currentTask;
-    }
-    
-    /**
-     * Complete current step
-     */
-    completeStep() {
-        if (!this.currentTask) return null;
-        
-        const step = this.currentTask.steps[this.currentTask.currentStep];
-        if (step) {
-            step.completed = true;
-            this.currentTask.currentStep++;
-            
-            // Check if task is complete
-            if (this.currentTask.currentStep >= this.currentTask.steps.length) {
-                return this.completeTask();
-            }
-        }
-        
-        return this.currentTask;
-    }
-    
-    /**
-     * Complete entire task
-     */
-    completeTask() {
-        if (!this.currentTask) return null;
-        
-        const task = this.currentTask;
-        this.taskHistory.push({
-            ...task,
-            completedAt: Date.now(),
-            duration: Date.now() - task.startedAt
-        });
-        
-        // Apply rewards
-        if (task.reward) {
-            if (task.reward.money && task.canTakeModel !== false) {
-                this.gameState.money += task.reward.money;
-            }
-            if (task.reward.reputation) {
-                this.gameState.reputation += task.reward.reputation;
-            }
-            if (task.reward.experience) {
-                // Add experience to relevant skills
-                task.skills.forEach(skill => {
-                    if (!this.gameState.stats[skill]) {
-                        this.gameState.stats[skill] = 0;
-                    }
-                    this.gameState.stats[skill] += Math.floor(task.reward.experience / task.skills.length);
-                });
-            }
-        }
-        
-        this.currentTask = null;
-        return task;
-    }
-    
-    /**
-     * Get current task
-     */
-    getCurrentTask() {
-        return this.currentTask;
-    }
-    
-    /**
-     * Get current step visual
-     */
-    getCurrentStepVisual() {
-        if (!this.currentTask) return null;
-        
-        const step = this.currentTask.steps[this.currentTask.currentStep];
-        return step ? step.visual : null;
-    }
-    
-    /**
-     * Get task progress (0-100)
-     */
-    getTaskProgress() {
-        if (!this.currentTask) return 0;
-        
-        const completed = this.currentTask.steps.filter(s => s.completed).length;
-        return (completed / this.currentTask.steps.length) * 100;
+                visual: 'data_explore',
+                description: 'Perform natural language processing analysis',
+                skills: ['python', 'nlp', 'text_analysis'],
+                reward: { money: 1250, reputation: 29, experience: 145 }
+            },
+
+            // Model Tuning
+            model_tuning: {
+                id: 'model_tuning',
+                name: 'Tune Machine Learning Model',
+                category: 'modeling',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_load', duration: 2 },
+                    { id: 'tune_hyperparameters', name: 'Tune Hyperparameters', visual: 'hyperparameter_tuning', duration: 5 },
+                    { id: 'evaluate_tuned_model', name: 'Evaluate Tuned Model', visual: 'metrics_evaluation', duration: 4 }
+                ],
+                visual: 'hyperparameter_tuning',
+                description: 'Tune and evaluate machine learning model',
+                skills: ['python', 'model_tuning', 'modeling'],
+                reward: { money: 900, reputation: 22, experience: 120 }
+            },
+
+            // Model Interpretation
+            model_interpretation: {
+                id: 'model_interpretation',
+                name: 'Interpret Machine Learning Model',
+                category: 'modeling',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_load', duration: 2 },
+                    { id: 'interpret_model', name: 'Interpret Model', visual: 'model_interpretation', duration: 5 },
+                    { id: 'document_results', name: 'Document Results', visual: 'documentation', duration: 3 }
+                ],
+                visual: 'model_interpretation',
+                description: 'Interpret and document machine learning model',
+                skills: ['python', 'model_interpretation', 'modeling'],
+                reward: { money: 950, reputation: 24, experience: 130 }
+            },
+
+            // AI Ethics
+            ai_ethics: {
+                id: 'ai_ethics',
+                name: 'AI Ethics and Fairness',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_ethics', name: 'Study AI Ethics', visual: 'documentation', duration: 3 },
+                    { id: 'evaluate_model', name: 'Evaluate Model Fairness', visual: 'fairness_evaluation', duration: 4 },
+                    { id: 'implement_ethics', name: 'Implement Ethical Practices', visual: 'ethics_practices', duration: 5 }
+                ],
+                visual: 'fairness_evaluation',
+                description: 'Study AI ethics and ensure model fairness',
+                skills: ['python', 'ai_ethics', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Explainability
+            ai_explainability: {
+                id: 'ai_explainability',
+                name: 'AI Explainability',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_explainability', name: 'Study AI Explainability', visual: 'documentation', duration: 3 },
+                    { id: 'implement_explainability', name: 'Implement Explainability', visual: 'explainability', duration: 4 },
+                    { id: 'test_explainability', name: 'Test Explainability', visual: 'testing', duration: 3 }
+                ],
+                visual: 'explainability',
+                description: 'Study and implement AI explainability',
+                skills: ['python', 'ai_explainability', 'deep_learning'],
+                reward: { money: 1050, reputation: 27, experience: 135 }
+            },
+
+            // ML Experimentation
+            ml_experimentation: {
+                id: 'ml_experimentation',
+                name: 'Machine Learning Experimentation',
+                category: 'modeling',
+                steps: [
+                    { id: 'define_experiment', name: 'Define Experiment', visual: 'documentation', duration: 2 },
+                    { id: 'run_experiment', name: 'Run Experiment', visual: 'experimentation', duration: 6 },
+                    { id: 'analyze_results', name: 'Analyze Results', visual: 'analysis', duration: 4 }
+                ],
+                visual: 'experimentation',
+                description: 'Conduct machine learning experiments',
+                skills: ['python', 'ml_experimentation', 'modeling'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // GitHub Code Contribution
+            github_code_contribution: {
+                id: 'github_code_contribution',
+                name: 'Contribute to Open Source by Adding New Features',
+                category: 'software_development',
+                steps: [
+                    { id: 'clone_repo', name: 'Clone Repository', visual: 'git_clone', duration: 2 },
+                    { id: 'add_features', name: 'Add New Features', visual: 'code_add', duration: 5 },
+                    { id: 'test_changes', name: 'Test Changes', visual: 'testing', duration: 4 },
+                    { id: 'create_pr', name: 'Create Pull Request', visual: 'git_pr', duration: 2 }
+                ],
+                visual: 'code_add',
+                description: 'Contribute to open source by adding new features',
+                skills: ['git', 'code_contribution', 'software_development'],
+                reward: { money: 1000, reputation: 28, experience: 140 }
+            },
+
+            // Model Scaling
+            model_scaling: {
+                id: 'model_scaling',
+                name: 'Scale Machine Learning Model',
+                category: 'modeling',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_load', duration: 2 },
+                    { id: 'scale_model', name: 'Scale Model', visual: 'model_scaling', duration: 5 },
+                    { id: 'monitor_performance', name: 'Monitor Performance', visual: 'monitoring', duration: 3 }
+                ],
+                visual: 'model_scaling',
+                description: 'Scale and monitor machine learning model',
+                skills: ['python', 'model_scaling', 'modeling'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // MLOps
+            mlops: {
+                id: 'mlops',
+                name: 'MLOps Implementation',
+                category: 'modeling',
+                steps: [
+                    { id: 'define_mlops', name: 'Define MLOps Practices', visual: 'documentation', duration: 3 },
+                    { id: 'implement_mlops', name: 'Implement MLOps', visual: 'mlops_implementation', duration: 6 },
+                    { id: 'monitor_mlops', name: 'Monitor MLOps', visual: 'monitoring', duration: 4 }
+                ],
+                visual: 'mlops_implementation',
+                description: 'Implement and monitor MLOps practices',
+                skills: ['python', 'mlops', 'devops'],
+                reward: { money: 1200, reputation: 28, experience: 140 }
+            },
+
+            // AI Security
+            ai_security: {
+                id: 'ai_security',
+                name: 'AI Security',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_security', name: 'Study AI Security', visual: 'documentation', duration: 3 },
+                    { id: 'implement_security', name: 'Implement Security Measures', visual: 'security_measures', duration: 4 },
+                    { id: 'test_security', name: 'Test Security', visual: 'testing', duration: 3 }
+                ],
+                visual: 'security_measures',
+                description: 'Study and implement AI security measures',
+                skills: ['python', 'ai_security', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // Federated Learning
+            federated_learning: {
+                id: 'federated_learning',
+                name: 'Federated Learning',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_federated', name: 'Study Federated Learning', visual: 'documentation', duration: 3 },
+                    { id: 'implement_federated', name: 'Implement Federated Learning', visual: 'federated_implementation', duration: 4 },
+                    { id: 'evaluate_federated', name: 'Evaluate Federated Learning', visual: 'evaluation', duration: 3 }
+                ],
+                visual: 'federated_implementation',
+                description: 'Study and implement federated learning',
+                skills: ['python', 'federated_learning', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // Reinforcement Learning
+            reinforcement_learning: {
+                id: 'reinforcement_learning',
+                name: 'Reinforcement Learning',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_reinforcement', name: 'Study Reinforcement Learning', visual: 'documentation', duration: 3 },
+                    { id: 'implement_reinforcement', name: 'Implement Reinforcement Learning', visual: 'reinforcement_implementation', duration: 4 },
+                    { id: 'evaluate_reinforcement', name: 'Evaluate Reinforcement Learning', visual: 'evaluation', duration: 3 }
+                ],
+                visual: 'reinforcement_implementation',
+                description: 'Study and implement reinforcement learning',
+                skills: ['python', 'reinforcement_learning', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Fairness
+            ai_fairness: {
+                id: 'ai_fairness',
+                name: 'AI Fairness',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_fairness', name: 'Study AI Fairness', visual: 'documentation', duration: 3 },
+                    { id: 'implement_fairness', name: 'Implement Fairness Measures', visual: 'fairness_measures', duration: 4 },
+                    { id: 'test_fairness', name: 'Test Fairness', visual: 'testing', duration: 3 }
+                ],
+                visual: 'fairness_measures',
+                description: 'Study and implement AI fairness measures',
+                skills: ['python', 'ai_fairness', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Interpretability
+            ai_interpretability: {
+                id: 'ai_interpretability',
+                name: 'AI Interpretability',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_interpretability', name: 'Study AI Interpretability', visual: 'documentation', duration: 3 },
+                    { id: 'implement_interpretability', name: 'Implement Interpretability', visual: 'interpretability', duration: 4 },
+                    { id: 'test_interpretability', name: 'Test Interpretability', visual: 'testing', duration: 3 }
+                ],
+                visual: 'interpretability',
+                description: 'Study and implement AI interpretability',
+                skills: ['python', 'ai_interpretability', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Explainability
+            ai_explainability: {
+                id: 'ai_explainability',
+                name: 'AI Explainability',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_explainability', name: 'Study AI Explainability', visual: 'documentation', duration: 3 },
+                    { id: 'implement_explainability', name: 'Implement Explainability', visual: 'explainability', duration: 4 },
+                    { id: 'test_explainability', name: 'Test Explainability', visual: 'testing', duration: 3 }
+                ],
+                visual: 'explainability',
+                description: 'Study and implement AI explainability',
+                skills: ['python', 'ai_explainability', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Privacy
+            ai_privacy: {
+                id: 'ai_privacy',
+                name: 'AI Privacy',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_privacy', name: 'Study AI Privacy', visual: 'documentation', duration: 3 },
+                    { id: 'implement_privacy', name: 'Implement Privacy Measures', visual: 'privacy_measures', duration: 4 },
+                    { id: 'test_privacy', name: 'Test Privacy', visual: 'testing', duration: 3 }
+                ],
+                visual: 'privacy_measures',
+                description: 'Study and implement AI privacy measures',
+                skills: ['python', 'ai_privacy', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Robustness
+            ai_robustness: {
+                id: 'ai_robustness',
+                name: 'AI Robustness',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_robustness', name: 'Study AI Robustness', visual: 'documentation', duration: 3 },
+                    { id: 'implement_robustness', name: 'Implement Robustness Measures', visual: 'robustness_measures', duration: 4 },
+                    { id: 'test_robustness', name: 'Test Robustness', visual: 'testing', duration: 3 }
+                ],
+                visual: 'robustness_measures',
+                description: 'Study and implement AI robustness measures',
+                skills: ['python', 'ai_robustness', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Trust
+            ai_trust: {
+                id: 'ai_trust',
+                name: 'AI Trust',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_trust', name: 'Study AI Trust', visual: 'documentation', duration: 3 },
+                    { id: 'implement_trust', name: 'Implement Trust Measures', visual: 'trust_measures', duration: 4 },
+                    { id: 'test_trust', name: 'Test Trust', visual: 'testing', duration: 3 }
+                ],
+                visual: 'trust_measures',
+                description: 'Study and implement AI trust measures',
+                skills: ['python', 'ai_trust', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Bias
+            ai_bias: {
+                id: 'ai_bias',
+                name: 'AI Bias',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_bias', name: 'Study AI Bias', visual: 'documentation', duration: 3 },
+                    { id: 'detect_bias', name: 'Detect Bias', visual: 'bias_detection', duration: 4 },
+                    { id: 'mitigate_bias', name: 'Mitigate Bias', visual: 'bias_mitigation', duration: 3 }
+                ],
+                visual: 'bias_mitigation',
+                description: 'Study, detect, and mitigate AI bias',
+                skills: ['python', 'ai_bias', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Transparency
+            ai_transparency: {
+                id: 'ai_transparency',
+                name: 'AI Transparency',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_transparency', name: 'Study AI Transparency', visual: 'documentation', duration: 3 },
+                    { id: 'implement_transparency', name: 'Implement Transparency', visual: 'transparency', duration: 4 },
+                    { id: 'test_transparency', name: 'Test Transparency', visual: 'testing', duration: 3 }
+                ],
+                visual: 'transparency',
+                description: 'Study and implement AI transparency',
+                skills: ['python', 'ai_transparency', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Accountability
+            ai_accountability: {
+                id: 'ai_accountability',
+                name: 'AI Accountability',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_accountability', name: 'Study AI Accountability', visual: 'documentation', duration: 3 },
+                    { id: 'implement_accountability', name: 'Implement Accountability Measures', visual: 'accountability_measures', duration: 4 },
+                    { id: 'test_accountability', name: 'Test Accountability', visual: 'testing', duration: 3 }
+                ],
+                visual: 'accountability_measures',
+                description: 'Study and implement AI accountability measures',
+                skills: ['python', 'ai_accountability', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Governance
+            ai_governance: {
+                id: 'ai_governance',
+                name: 'AI Governance',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_governance', name: 'Study AI Governance', visual: 'documentation', duration: 3 },
+                    { id: 'implement_governance', name: 'Implement Governance Measures', visual: 'governance_measures', duration: 4 },
+                    { id: 'test_governance', name: 'Test Governance', visual: 'testing', duration: 3 }
+                ],
+                visual: 'governance_measures',
+                description: 'Study and implement AI governance measures',
+                skills: ['python', 'ai_governance', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Compliance
+            ai_compliance: {
+                id: 'ai_compliance',
+                name: 'AI Compliance',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_compliance', name: 'Study AI Compliance', visual: 'documentation', duration: 3 },
+                    { id: 'implement_compliance', name: 'Implement Compliance Measures', visual: 'compliance_measures', duration: 4 },
+                    { id: 'test_compliance', name: 'Test Compliance', visual: 'testing', duration: 3 }
+                ],
+                visual: 'compliance_measures',
+                description: 'Study and implement AI compliance measures',
+                skills: ['python', 'ai_compliance', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Ethical AI
+            ai_ethical_ai: {
+                id: 'ai_ethical_ai',
+                name: 'AI Ethical AI',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_ethical_ai', name: 'Study AI Ethical AI', visual: 'documentation', duration: 3 },
+                    { id: 'implement_ethical_ai', name: 'Implement Ethical AI Measures', visual: 'ethical_ai_measures', duration: 4 },
+                    { id: 'test_ethical_ai', name: 'Test Ethical AI', visual: 'testing', duration: 3 }
+                ],
+                visual: 'ethical_ai_measures',
+                description: 'Study and implement AI ethical AI measures',
+                skills: ['python', 'ai_ethical_ai', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Responsible AI
+            ai_responsible_ai: {
+                id: 'ai_responsible_ai',
+                name: 'AI Responsible AI',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_responsible_ai', name: 'Study AI Responsible AI', visual: 'documentation', duration: 3 },
+                    { id: 'implement_responsible_ai', name: 'Implement Responsible AI Measures', visual: 'responsible_ai_measures', duration: 4 },
+                    { id: 'test_responsible_ai', name: 'Test Responsible AI', visual: 'testing', duration: 3 }
+                ],
+                visual: 'responsible_ai_measures',
+                description: 'Study and implement AI responsible AI measures',
+                skills: ['python', 'ai_responsible_ai', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Explainable AI
+            ai_explainable_ai: {
+                id: 'ai_explainable_ai',
+                name: 'AI Explainable AI',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_explainable_ai', name: 'Study AI Explainable AI', visual: 'documentation', duration: 3 },
+                    { id: 'implement_explainable_ai', name: 'Implement Explainable AI Measures', visual: 'explainable_ai_measures', duration: 4 },
+                    { id: 'test_explainable_ai', name: 'Test Explainable AI', visual: 'testing', duration: 3 }
+                ],
+                visual: 'explainable_ai_measures',
+                description: 'Study and implement AI explainable AI measures',
+                skills: ['python', 'ai_explainable_ai', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Fairness
+            ai_fairness: {
+                id: 'ai_fairness',
+                name: 'AI Fairness',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_fairness', name: 'Study AI Fairness', visual: 'documentation', duration: 3 },
+                    { id: 'implement_fairness', name: 'Implement Fairness Measures', visual: 'fairness_measures', duration: 4 },
+                    { id: 'test_fairness', name: 'Test Fairness', visual: 'testing', duration: 3 }
+                ],
+                visual: 'fairness_measures',
+                description: 'Study and implement AI fairness measures',
+                skills: ['python', 'ai_fairness', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Robustness
+            ai_robustness: {
+                id: 'ai_robustness',
+                name: 'AI Robustness',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_robustness', name: 'Study AI Robustness', visual: 'documentation', duration: 3 },
+                    { id: 'implement_robustness', name: 'Implement Robustness Measures', visual: 'robustness_measures', duration: 4 },
+                    { id: 'test_robustness', name: 'Test Robustness', visual: 'testing', duration: 3 }
+                ],
+                visual: 'robustness_measures',
+                description: 'Study and implement AI robustness measures',
+                skills: ['python', 'ai_robustness', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Transparency
+            ai_transparency: {
+                id: 'ai_transparency',
+                name: 'AI Transparency',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_transparency', name: 'Study AI Transparency', visual: 'documentation', duration: 3 },
+                    { id: 'implement_transparency', name: 'Implement Transparency', visual: 'transparency', duration: 4 },
+                    { id: 'test_transparency', name: 'Test Transparency', visual: 'testing', duration: 3 }
+                ],
+                visual: 'transparency',
+                description: 'Study and implement AI transparency',
+                skills: ['python', 'ai_transparency', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Ethics
+            ai_ethics: {
+                id: 'ai_ethics',
+                name: 'AI Ethics',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_ethics', name: 'Study AI Ethics', visual: 'documentation', duration: 3 },
+                    { id: 'implement_ethics', name: 'Implement Ethics', visual: 'ethics', duration: 4 },
+                    { id: 'test_ethics', name: 'Test Ethics', visual: 'testing', duration: 3 }
+                ],
+                visual: 'ethics',
+                description: 'Study and implement AI ethics',
+                skills: ['python', 'ai_ethics', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Accountability
+            ai_accountability: {
+                id: 'ai_accountability',
+                name: 'AI Accountability',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_accountability', name: 'Study AI Accountability', visual: 'documentation', duration: 3 },
+                    { id: 'implement_accountability', name: 'Implement Accountability', visual: 'accountability', duration: 4 },
+                    { id: 'test_accountability', name: 'Test Accountability', visual: 'testing', duration: 3 }
+                ],
+                visual: 'accountability',
+                description: 'Study and implement AI accountability',
+                skills: ['python', 'ai_accountability', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Compliance
+            ai_compliance: {
+                id: 'ai_compliance',
+                name: 'AI Compliance',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_compliance', name: 'Study AI Compliance', visual: 'documentation', duration: 3 },
+                    { id: 'implement_compliance', name: 'Implement Compliance', visual: 'compliance', duration: 4 },
+                    { id: 'test_compliance', name: 'Test Compliance', visual: 'testing', duration: 3 }
+                ],
+                visual: 'compliance',
+                description: 'Study and implement AI compliance',
+                skills: ['python', 'ai_compliance', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Governance
+            ai_governance: {
+                id: 'ai_governance',
+                name: 'AI Governance',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_governance', name: 'Study AI Governance', visual: 'documentation', duration: 3 },
+                    { id: 'implement_governance', name: 'Implement Governance', visual: 'governance', duration: 4 },
+                    { id: 'test_governance', name: 'Test Governance', visual: 'testing', duration: 3 }
+                ],
+                visual: 'governance',
+                description: 'Study and implement AI governance',
+                skills: ['python', 'ai_governance', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Responsible AI
+            ai_responsible_ai: {
+                id: 'ai_responsible_ai',
+                name: 'AI Responsible AI',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_responsible_ai', name: 'Study AI Responsible AI', visual: 'documentation', duration: 3 },
+                    { id: 'implement_responsible_ai', name: 'Implement Responsible AI', visual: 'responsible_ai', duration: 4 },
+                    { id: 'test_responsible_ai', name: 'Test Responsible AI', visual: 'testing', duration: 3 }
+                ],
+                visual: 'responsible_ai',
+                description: 'Study and implement AI responsible AI',
+                skills: ['python', 'ai_responsible_ai', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Explainable AI
+            ai_explainable_ai: {
+                id: 'ai_explainable_ai',
+                name: 'AI Explainable AI',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_explainable_ai', name: 'Study AI Explainable AI', visual: 'documentation', duration: 3 },
+                    { id: 'implement_explainable_ai', name: 'Implement Explainable AI', visual: 'explainable_ai', duration: 4 },
+                    { id: 'test_explainable_ai', name: 'Test Explainable AI', visual: 'testing', duration: 3 }
+                ],
+                visual: 'explainable_ai',
+                description: 'Study and implement AI explainable AI',
+                skills: ['python', 'ai_explainable_ai', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Fairness
+            ai_fairness: {
+                id: 'ai_fairness',
+                name: 'AI Fairness',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_fairness', name: 'Study AI Fairness', visual: 'documentation', duration: 3 },
+                    { id: 'implement_fairness', name: 'Implement Fairness', visual: 'fairness', duration: 4 },
+                    { id: 'test_fairness', name: 'Test Fairness', visual: 'testing', duration: 3 }
+                ],
+                visual: 'fairness',
+                description: 'Study and implement AI fairness',
+                skills: ['python', 'ai_fairness', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Robustness
+            ai_robustness: {
+                id: 'ai_robustness',
+                name: 'AI Robustness',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_robustness', name: 'Study AI Robustness', visual: 'documentation', duration: 3 },
+                    { id: 'implement_robustness', name: 'Implement Robustness', visual: 'robustness', duration: 4 },
+                    { id: 'test_robustness', name: 'Test Robustness', visual: 'testing', duration: 3 }
+                ],
+                visual: 'robustness',
+                description: 'Study and implement AI robustness',
+                skills: ['python', 'ai_robustness', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Transparency
+            ai_transparency: {
+                id: 'ai_transparency',
+                name: 'AI Transparency',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_transparency', name: 'Study AI Transparency', visual: 'documentation', duration: 3 },
+                    { id: 'implement_transparency', name: 'Implement Transparency', visual: 'transparency', duration: 4 },
+                    { id: 'test_transparency', name: 'Test Transparency', visual: 'testing', duration: 3 }
+                ],
+                visual: 'transparency',
+                description: 'Study and implement AI transparency',
+                skills: ['python', 'ai_transparency', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Ethics
+            ai_ethics: {
+                id: 'ai_ethics',
+                name: 'AI Ethics',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_ethics', name: 'Study AI Ethics', visual: 'documentation', duration: 3 },
+                    { id: 'implement_ethics', name: 'Implement Ethics', visual: 'ethics', duration: 4 },
+                    { id: 'test_ethics', name: 'Test Ethics', visual: 'testing', duration: 3 }
+                ],
+                visual: 'ethics',
+                description: 'Study and implement AI ethics',
+                skills: ['python', 'ai_ethics', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Accountability
+            ai_accountability: {
+                id: 'ai_accountability',
+                name: 'AI Accountability',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_accountability', name: 'Study AI Accountability', visual: 'documentation', duration: 3 },
+                    { id: 'implement_accountability', name: 'Implement Accountability', visual: 'accountability', duration: 4 },
+                    { id: 'test_accountability', name: 'Test Accountability', visual: 'testing', duration: 3 }
+                ],
+                visual: 'accountability',
+                description: 'Study and implement AI accountability',
+                skills: ['python', 'ai_accountability', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Compliance
+            ai_compliance: {
+                id: 'ai_compliance',
+                name: 'AI Compliance',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_compliance', name: 'Study AI Compliance', visual: 'documentation', duration: 3 },
+                    { id: 'implement_compliance', name: 'Implement Compliance', visual: 'compliance', duration: 4 },
+                    { id: 'test_compliance', name: 'Test Compliance', visual: 'testing', duration: 3 }
+                ],
+                visual: 'compliance',
+                description: 'Study and implement AI compliance',
+                skills: ['python', 'ai_compliance', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Governance
+            ai_governance: {
+                id: 'ai_governance',
+                name: 'AI Governance',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_governance', name: 'Study AI Governance', visual: 'documentation', duration: 3 },
+                    { id: 'implement_governance', name: 'Implement Governance', visual: 'governance', duration: 4 },
+                    { id: 'test_governance', name: 'Test Governance', visual: 'testing', duration: 3 }
+                ],
+                visual: 'governance',
+                description: 'Study and implement AI governance',
+                skills: ['python', 'ai_governance', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Responsible AI
+            ai_responsible_ai: {
+                id: 'ai_responsible_ai',
+                name: 'AI Responsible AI',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_responsible_ai', name: 'Study AI Responsible AI', visual: 'documentation', duration: 3 },
+                    { id: 'implement_responsible_ai', name: 'Implement Responsible AI', visual: 'responsible_ai', duration: 4 },
+                    { id: 'test_responsible_ai', name: 'Test Responsible AI', visual: 'testing', duration: 3 }
+                ],
+                visual: 'responsible_ai',
+                description: 'Study and implement AI responsible AI',
+                skills: ['python', 'ai_responsible_ai', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+
+            // AI Explainable AI
+            ai_explainable_ai: {
+                id: 'ai_explainable_ai',
+                name: 'AI Explainable AI',
+                category: 'ai_training',
+                steps: [
+                    { id: 'study_explainable_ai', name: 'Study AI Explainable AI', visual: 'documentation', duration: 3 },
+                    { id: 'implement_explainable_ai', name: 'Implement Explainable AI', visual: 'explainable_ai', duration: 4 },
+                    { id: 'test_explainable_ai', name: 'Test Explainable AI', visual: 'testing', duration: 3 }
+                ],
+                visual: 'explainable_ai',
+                description: 'Study and implement AI explainable AI',
+                skills: ['python', 'ai_explainable_ai', 'deep_learning'],
+                reward: { money: 1100, reputation: 25, experience: 130 }
+            },
+            // Add more training objects as needed
+        ];
     }
 }
 
+export default TrainingData;
