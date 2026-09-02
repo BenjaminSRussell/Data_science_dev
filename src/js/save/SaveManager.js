@@ -192,7 +192,7 @@ export class SaveManager {
             }
 
             const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.setItem(saveKey, JSON.stringify(saveData));
+            localStorage.setItem(saveKey, JSON.stringify(parsed));
             gameState.fromJSON(parsed.state);
 
 
