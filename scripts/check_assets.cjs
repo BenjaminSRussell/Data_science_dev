@@ -54,22 +54,26 @@ let missingCount = 0;
 assets.forEach(asset => {
     const fullPath = path.join(rootDir, 'src', asset); // Assuming assets are in src/ or mapped there
     // Actually, checked structure: src/assets and downloaded_assets are likely at root or src
-    // Let's check both src/ and root/
+    // Let's check both src/, root/, and public/
 
     let exists = false;
     let tryPath1 = path.join(rootDir, 'src', asset);
     let tryPath2 = path.join(rootDir, asset);
+    let tryPath3 = path.join(rootDir, 'public', asset);
 
     if (fs.existsSync(tryPath1)) exists = true;
     else if (fs.existsSync(tryPath2)) exists = true;
+    else if (fs.existsSync(tryPath3)) exists = true;
 
     // Also handle URL encoded spaces just in case
     if (!exists) {
         try {
             tryPath1 = path.join(rootDir, 'src', decodeURIComponent(asset));
             tryPath2 = path.join(rootDir, decodeURIComponent(asset));
+            tryPath3 = path.join(rootDir, 'public', decodeURIComponent(asset));
             if (fs.existsSync(tryPath1)) exists = true;
             else if (fs.existsSync(tryPath2)) exists = true;
+            else if (fs.existsSync(tryPath3)) exists = true;
         } catch (e) {
             // If decodeURIComponent fails, just ignore it and continue
         }
