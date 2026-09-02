@@ -7,6 +7,7 @@
 export class PerformanceManager {
     constructor() {
         this.quality = 'auto'; // auto, low, medium, high, ultra
+        this.autoMode = true; // whether automatic quality adjustment is enabled
         this.fps = 60;
         this.targetFPS = 60;
         this.frameTime = 16.67; // ms (60fps)
@@ -95,8 +96,8 @@ export class PerformanceManager {
 
         this.hardwareTier = tier;
 
-        // Auto-set quality based on hardware
-        if (this.quality === 'auto') {
+        // Auto-set quality based on hardware (only when auto mode is enabled)
+        if (this.quality === 'auto' && this.autoMode) {
             if (tier === 'high') {
                 this.setQuality('high');
             } else if (tier === 'medium') {
@@ -104,6 +105,8 @@ export class PerformanceManager {
             } else {
                 this.setQuality('low');
             }
+            // Hardware detection is an automatic adjustment, so keep auto mode on
+            this.autoMode = true;
         }
 
         return tier;
@@ -119,6 +122,9 @@ export class PerformanceManager {
         }
 
         this.quality = level;
+
+        // A manual quality selection disables automatic adjustment
+        this.autoMode = (level === 'auto');
 
         // Apply preset if not auto
         if (level !== 'auto') {
@@ -182,8 +188,8 @@ export class PerformanceManager {
                 this.fpsHistory.shift(); // Keep last 60 seconds
             }
 
-            // Auto-optimize if FPS is low
-            if (this.quality === 'auto' && this.fps < this.targetFPS - 10) {
+            // Auto-optimize if FPS is low (auto mode may have resolved to a concrete level)
+            if (this.autoMode && this.fps < this.targetFPS - 10) {
                 this.autoOptimize();
             }
 
@@ -246,6 +252,7 @@ export class PerformanceManager {
     getStats() {
         return {
             quality: this.quality,
+            autoMode: this.autoMode,
             fps: this.fps,
             averageFPS: this.getAverageFPS(),
             frameTime: this.frameTime.toFixed(2),
