@@ -1195,29 +1195,6 @@ export class MainGame {
         // console.log('[DIAGNOSTIC]', message);
     }
 
-    showError(message) {
-        logger.error('Game Error:', message);
-        this.showDiagnostic('ERROR: ' + message);
-        const errDiv = DOMUtils.createElement('div', {
-            innerHTML: `<h2>Game Error</h2><p>${message}</p><button onclick="this.parentElement.remove()" style="padding:10px;margin-top:10px;">Close</button>`,
-            style: {
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: 'rgba(255,0,0,0.95)',
-                color: 'white',
-                padding: '20px',
-                fontFamily: 'monospace',
-                zIndex: '99999',
-                border: '3px solid #f00',
-                borderRadius: '10px',
-                maxWidth: '600px'
-            }
-        });
-        document.body.appendChild(errDiv);
-    }
-
     /**
      * Start a new game (optimized for fast loading)
      */
@@ -2457,6 +2434,7 @@ export class MainGame {
             logger.warn('showError called with undefined message');
             return;
         }
+        logger.error('Game Error:', message);
         this.showToast(String(message), 'error');
     }
 
