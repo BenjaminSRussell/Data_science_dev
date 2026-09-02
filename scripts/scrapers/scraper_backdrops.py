@@ -1,50 +1,27 @@
-#!/usr/bin/env python3
-"""
-Specialized Location Backdrop Scraper
-Scrapes Low-poly location backdrops from multiple sources
-"""
-
 import json
-import os
-from pathlib import Path
-import time
 import logging
+import os
+import time
+from pathlib import Path
+from urllib.parse import urljoin
 import requests
 from PIL import Image
-import random
-from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class BackdropScraper:
-    def __init__(self, output_dir="downloaded_assets/backgrounds/locations"):
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+    def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        })
+        self.output_dir = Path('backdrops')
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.locations = ['city', 'forest', 'space', 'mountain', 'beach']
         self.downloaded = []
-        self.failed = []
-        self.stats = {'total': 0, 'downloaded': 0, 'failed': 0}
-        
-        self.locations = [
-            'office', 'home', 'apartment', 'coffee_shop', 'cafe', 'library',
-            'gym', 'park', 'mall', 'university', 'tech_hub', 'downtown',
-            'networking_bar', 'stock_exchange', 'luxury_district', 'bank',
-            'city_hall', 'car_dealership', 'donut_shop', 'bagel_shop',
-            'flower_store', 'real_estate', 'beach', 'mountain', 'forest',
-            'suburb', 'restaurant', 'bar', 'club', 'hospital', 'school',
-            'warehouse', 'factory', 'airport', 'train_station', 'hotel',
-            'museum', 'theater', 'stadium', 'courthouse', 'police_station',
-            'fire_station', 'post_office', 'grocery_store', 'pharmacy',
-            'bookstore', 'electronics_store', 'clothing_store', 'jewelry_store'
-        ]
+        self.stats = {'downloaded': 0, 'total': 0}
     
-    def resize_image(self, image_path, target_size=(1920, 1080)):
-        """Resize backdrop to target size"""
+    def resize_image(self, image_path):
+        """Resize image to 1920x1080 and save in JPEG format"""
+        target_size = (1920, 1080)
         try:
             with Image.open(image_path) as img:
                 if img.mode == 'RGBA':
@@ -102,20 +79,23 @@ class BackdropScraper:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    for photo in data.get('photos', [])[:max_results]:
-                        photo_url = photo['src']['large']
-                        filename = f"pexels_{location}_{photo['id']}.jpg"
-                        output_path = location_dir / filename
-                        
-                        if not output_path.exists() and self.download_file(photo_url, output_path):
-                            downloaded += 1
-                            self.downloaded.append({
-                                'source': 'Pexels',
-                                'location': location,
-                                'url': photo_url,
-                                'path': str(output_path),
-                                'license': 'Pexels License'
-                            })
+                    for photo in data.get('photos', []):
+                        try:
+                            photo_url = photo['src']['large']
+                            filename = f"pexels_{location}_{photo['id']}.jpg"
+                            output_path = location_dir / filename
+                            
+                            if not output_path.exists() and self.download_file(photo_url, output_path):
+                                downloaded += 1
+                                self.downloaded.append({
+                                    'source': 'Pexels',
+                                    'location': location,
+                                    'url': photo_url,
+                                    'path': str(output_path),
+                                    'license': 'Pexels License'
+                                })
+                        except KeyError as e:
+                            logger.error(f"KeyError in photo {photo.get('id')}: {e}")
             except Exception as e:
                 logger.error(f"Error with Pexels for {location}: {e}")
         
@@ -150,20 +130,23 @@ class BackdropScraper:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    for photo in data.get('results', [])[:max_results]:
-                        photo_url = photo['urls']['regular']
-                        filename = f"unsplash_{location}_{photo['id']}.jpg"
-                        output_path = location_dir / filename
-                        
-                        if not output_path.exists() and self.download_file(photo_url, output_path):
-                            downloaded += 1
-                            self.downloaded.append({
-                                'source': 'Unsplash',
-                                'location': location,
-                                'url': photo_url,
-                                'path': str(output_path),
-                                'license': 'Unsplash License'
-                            })
+                    for photo in data.get('results', []):
+                        try:
+                            photo_url = photo['urls']['regular']
+                            filename = f"unsplash_{location}_{photo['id']}.jpg"
+                            output_path = location_dir / filename
+                            
+                            if not output_path.exists() and self.download_file(photo_url, output_path):
+                                downloaded += 1
+                                self.downloaded.append({
+                                    'source': 'Unsplash',
+                                    'location': location,
+                                    'url': photo_url,
+                                    'path': str(output_path),
+                                    'license': 'Unsplash License'
+                                })
+                        except KeyError as e:
+                            logger.error(f"KeyError in photo {photo.get('id')}: {e}")
             except Exception as e:
                 logger.error(f"Error with Unsplash for {location}: {e}")
         
@@ -256,4 +239,3 @@ class BackdropScraper:
 if __name__ == "__main__":
     scraper = BackdropScraper()
     scraper.run()
-
