@@ -1,96 +1,108 @@
-#!/usr/bin/env python3
-"""
-Generate Asset Manifest from MISSING_ASSETS_AND_PROBLEMS.md
-Creates structured JSON manifest for scraping
-"""
-
 import json
-import re
-from pathlib import Path
 
 def parse_asset_list():
-    """Parse the missing assets list and create manifest"""
-    
     manifest = {
         'metadata': {
-            'total_assets': 950,
-            'generated_from': 'MISSING_ASSETS_AND_PROBLEMS.md',
-            'version': '1.0'
+            'total_assets': 0,
+            'size': {
+                'width': 1024,
+                'height': 1024
+            }
         },
         'character_sprites': {
-            'size': {'width': 128, 'height': 128, 'transparency': True},
+            'size': {
+                'width': 512,
+                'height': 512
+            },
             'assets': []
         },
         'location_backgrounds': {
-            'size': {'width': 1920, 'height': 1080, 'transparency': False},
+            'size': {
+                'width': 1920,
+                'height': 1080
+            },
             'assets': []
         },
         'feature_icons': {
-            'size': {'width': 64, 'height': 64, 'transparency': True},
+            'size': {
+                'width': 64,
+                'height': 64
+            },
             'assets': []
         },
         'map_assets': {
-            'size': {'width': 128, 'height': 128, 'transparency': True},
+            'size': {
+                'width': 32,
+                'height': 32
+            },
             'assets': []
         },
         'vehicle_sprites': {
-            'size': {'width': 128, 'height': 128, 'transparency': True},
+            'size': {
+                'width': 256,
+                'height': 256
+            },
             'assets': []
         },
         'item_icons': {
-            'size': {'width': 64, 'height': 64, 'transparency': True},
+            'size': {
+                'width': 64,
+                'height': 64
+            },
             'assets': []
         },
         'chart_icons': {
-            'size': {'width': 64, 'height': 64, 'transparency': True},
+            'size': {
+                'width': 64,
+                'height': 64
+            },
             'assets': []
         },
         'ui_elements': {
-            'size': {'width': 128, 'height': 128, 'transparency': True},
+            'size': {
+                'width': 512,
+                'height': 512
+            },
             'assets': []
         },
         'particle_effects': {
-            'size': {'width': 32, 'height': 32, 'transparency': True},
+            'size': {
+                'width': 256,
+                'height': 256
+            },
             'assets': []
         },
         'dialogue_ui': {
-            'size': {'width': 256, 'height': 256, 'transparency': True},
+            'size': {
+                'width': 1024,
+                'height': 512
+            },
             'assets': []
         },
         'npc_portraits': {
-            'size': {'width': 256, 'height': 256, 'transparency': True},
+            'size': {
+                'width': 256,
+                'height': 256
+            },
             'assets': []
         },
         'screen_transitions': {
-            'size': {'width': 1920, 'height': 1080, 'transparency': False},
+            'size': {
+                'width': 1024,
+                'height': 1024
+            },
             'assets': []
         }
     }
     
-    # Character Sprites (Items 51-150)
-    character_assets = [
-        {'id': 51, 'name': 'Player character idle animation sprite sheet', 'search_terms': ['character idle animation sprite sheet', 'idle sprite sheet'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/sprites'},
-        {'id': 52, 'name': 'Player character walking animation sprite sheet', 'search_terms': ['character walk cycle sprite sheet', 'walking animation sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/sprites'},
-        {'id': 53, 'name': 'Player character working animation sprite sheet', 'search_terms': ['character working typing animation', 'working animation sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/sprites'},
-        {'id': 54, 'name': 'Player character thinking animation sprite sheet', 'search_terms': ['character thinking pose animation', 'thinking animation sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/sprites'},
-        {'id': 55, 'name': 'Player character celebrating animation sprite sheet', 'search_terms': ['character celebration victory animation', 'celebration animation sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/sprites'},
-        {'id': 56, 'name': 'Player character stressed animation sprite sheet', 'search_terms': ['character stressed worried animation', 'stressed character sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/sprites'},
-        {'id': 57, 'name': 'Player character - Young/Messy variant sprite', 'search_terms': ['young messy character sprite', 'young character sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
-        {'id': 58, 'name': 'Player character - Clean cut/Junior analyst variant sprite', 'search_terms': ['professional character sprite', 'business character sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
-        {'id': 59, 'name': 'Player character - CEO style variant sprite', 'search_terms': ['executive CEO character sprite', 'executive character sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
-        {'id': 60, 'name': 'Player character - Evil/Mid variant sprite', 'search_terms': ['flashy character sprite gold', 'flashy character sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
-        {'id': 61, 'name': 'Player character - Evil/Late variant sprite', 'search_terms': ['aggressive character sprite', 'wolf wall street character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
-        {'id': 62, 'name': 'Player character - Good/Mid variant sprite', 'search_terms': ['good character sprite', 'professional good character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
-        {'id': 63, 'name': 'Player character - Good/Late variant sprite', 'search_terms': ['glowing character sprite', 'glowing aura character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
-    ]
-    
-    # Add emotion animations (67-76)
-    emotions = ['Happy', 'Sad', 'Angry', 'Neutral', 'Excited', 'Thinking', 'Surprised', 'Confused', 'Tired', 'Confident']
-    for i, emotion in enumerate(emotions, start=67):
+    # Character Sprites (Items 01-33)
+    character_assets = []
+    emotions = ['Happy', 'Sad', 'Angry', 'Surprised', 'Neutral', 'Excited', 'Tired', 'Fearful']
+    for i, emotion in enumerate(emotions, start=1):
         character_assets.append({
             'id': i,
-            'name': f'Character emotion - {emotion} animation frames',
-            'search_terms': [f'{emotion.lower()} character face sprite', f'{emotion.lower()} emotion sprite'],
+            'name': f'Character sprite - {emotion} emotion',
+            'search_terms': [f'{emotion.lower()} character sprite', f'{emotion.lower()} face sprite'],
             'sources': ['opengameart', 'itchio', 'craftpix'],
             'output_dir': 'characters/emotions'
         })
@@ -218,14 +230,14 @@ def parse_asset_list():
     
     manifest['item_icons']['assets'] = item_icons
     
-    # Save manifest
-    with open('asset_manifest.json', 'w') as f:
-        json.dump(manifest, f, indent=2)
+    # Recompute total assets
+    manifest['metadata']['total_assets'] = sum(len(cat['assets']) for cat in manifest.values() if 'assets' in cat)
     
-    print(f"Generated asset manifest with {sum(len(cat['assets']) for cat in manifest.values() if 'assets' in cat)} assets")
+    # Save the manifest to a JSON file
+    with open('asset_manifest.json', 'w') as f:
+        json.dump(manifest, f, indent=4)
+    
     return manifest
 
 if __name__ == "__main__":
-    manifest = parse_asset_list()
-    print("Asset manifest generated: asset_manifest.json")
-
+    parse_asset_list()
