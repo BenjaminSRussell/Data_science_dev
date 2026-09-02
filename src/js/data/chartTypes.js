@@ -1,78 +1,32 @@
-/**
- * Chart Types - Available visualization types
- */
-
-export const CHART_TYPES = [
-    {
-        id: "bar",
-        name: "Bar Chart",
-        icon: "",
-        description: "Compare values across categories",
-        unlockRank: 0,
-        bestFor: ["comparisons", "categories", "rankings"]
+export const CHART_TYPES = {
+    bar: {
+        displayName: "Bar Chart",
+        description: "A standard bar chart for comparing quantities across categories.",
+        icon: "/assets/icons/bar-chart.svg"
     },
-    {
-        id: "line",
-        name: "Line Chart",
-        icon: "",
-        description: "Show trends over time",
-        unlockRank: 0,
-        bestFor: ["trends", "time series", "changes"]
+    line: {
+        displayName: "Line Chart",
+        description: "A line chart for showing trends over time.",
+        icon: "/assets/icons/line-chart.svg"
     },
-    {
-        id: "pie",
-        name: "Pie Chart",
-        icon: "",
-        description: "Show proportions of a whole",
-        unlockRank: 0,
-        bestFor: ["proportions", "percentages", "distributions"]
+    scatter: {
+        displayName: "Scatter Plot",
+        description: "A scatter plot for showing relationships between two variables.",
+        icon: "/assets/icons/scatter-plot.svg"
     },
-    {
-        id: "scatter",
-        name: "Scatter Plot",
-        icon: "",
-        description: "Show relationships between variables",
-        unlockRank: 2,
-        bestFor: ["correlations", "distributions", "outliers"]
+    radar: {
+        displayName: "Radar Chart",
+        description: "A radar chart for comparing multiple variables.",
+        icon: "/assets/icons/radar-chart.svg"
     },
-    {
-        id: "doughnut",
-        name: "Donut Chart",
-        icon: "",
-        description: "Proportions with center space",
-        unlockRank: 2,
-        bestFor: ["proportions", "progress", "comparisons"]
+    heatmap: {
+        displayName: "Heatmap",
+        description: "A heatmap for visualizing data density.",
+        icon: "/assets/icons/heatmap.svg"
     },
-    {
-        id: "radar",
-        name: "Radar Chart",
-        icon: "",
-        description: "Compare multiple variables",
-        unlockRank: 3,
-        bestFor: ["multi-dimensional", "performance", "profiles"]
-    },
-    {
-        id: "area",
-        name: "Area Chart",
-        icon: "",
-        description: "Show volume over time",
-        unlockRank: 3,
-        bestFor: ["cumulative", "volume", "trends"]
-    },
-    {
-        id: "bubble",
-        name: "Bubble Chart",
-        icon: "⭕",
-        description: "Three-dimensional comparisons",
-        unlockRank: 4,
-        bestFor: ["3 variables", "correlations", "size comparisons"]
-    },
-    {
-        id: "polarArea",
-        name: "Polar Area",
-        icon: "",
-        description: "Radial proportional chart",
-        unlockRank: 5,
-        bestFor: ["cyclical data", "comparisons", "proportions"]
+    sankey: {
+        displayName: "Sankey Diagram",
+        description: "A sankey diagram for visualizing flow and distribution.",
+        icon: "/assets/icons/sankey-diagram.svg"
     }
-];
+};
