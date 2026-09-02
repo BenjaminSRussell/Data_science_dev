@@ -95,6 +95,11 @@ export class MenuLogoDisplay {
                 icon: 'Check',
                 label: 'Total Tasks',
                 value: totalTasks.toString()
+            },
+            {
+                icon: 'Achievement',
+                label: 'Total Achievements',
+                value: totalAchievements.toString()
             }
         ];
 
@@ -197,4 +202,3 @@ export class MenuLogoDisplay {
         this.render();
     }
 }
-
