@@ -1,12 +1,4 @@
-/**
- * GameEndingSystem.js
- * Manages all game ending conditions and victory states
- * Checks for multiple ending types and triggers appropriate endings
- */
-
-import { RANKS } from '../data/ranks.js';
-
-export class GameEndingSystem {
+class GameEndingSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.endingTriggered = false;
@@ -15,65 +7,50 @@ export class GameEndingSystem {
     }
 
     /**
-     * Check all victory conditions
-     * Called periodically during gameplay
+     * Check all victory conditions and trigger the appropriate ending
      */
     checkVictoryConditions() {
-        if (this.endingTriggered) return null;
+        const checks = [
+            this.checkSpeedrun,
+            this.checkEarlyRetirement,
+            this.checkEthicsEnding,
+            this.checkCompanyOwnership,
+            this.checkResearchBreakthrough,
+            this.checkEducationCompletion,
+            this.checkFinalRank,
+            this.checkMillionaire,
+            this.checkEndGameMap,
+            this.checkPerfectScores
+        ];
 
-        // Check final rank achievement
-        const finalRankCheck = this.checkFinalRank();
-        if (finalRankCheck) return finalRankCheck;
+        const applicableEndings = checks
+            .map(check => check.call(this))
+            .filter(ending => ending !== null);
 
-        // Check millionaire achievement
-        const millionaireCheck = this.checkMillionaire();
-        if (millionaireCheck) return millionaireCheck;
+        if (applicableEndings.length > 0) {
+            // Sort endings by specificity (higher index for more specific endings)
+            const sortedEndings = applicableEndings.sort((a, b) => {
+                const order = ['final_rank', 'millionaire', 'end_game_map', 'perfect_scores', 'early_retirement', 'speedrun', 'ethical_leader', 'ruthless_climber', 'company_owner', 'research_master', 'education_master'];
+                return order.indexOf(b.type) - order.indexOf(a.type);
+            });
 
-        // Check end-game map unlock (victory condition)
-        const endGameCheck = this.checkEndGameMap();
-        if (endGameCheck) return endGameCheck;
-
-        // Check perfect score achievement
-        const perfectCheck = this.checkPerfectScores();
-        if (perfectCheck) return perfectCheck;
-
-        // Check early retirement
-        const earlyRetirementCheck = this.checkEarlyRetirement();
-        if (earlyRetirementCheck) return earlyRetirementCheck;
-
-        // Check speedrun ending
-        const speedrunCheck = this.checkSpeedrun();
-        if (speedrunCheck) return speedrunCheck;
-
-        // Check ethics-based endings
-        const ethicsCheck = this.checkEthicsEnding();
-        if (ethicsCheck) return ethicsCheck;
-
-        // Check company ownership
-        const companyCheck = this.checkCompanyOwnership();
-        if (companyCheck) return companyCheck;
-
-        // Check research breakthrough
-        const researchCheck = this.checkResearchBreakthrough();
-        if (researchCheck) return researchCheck;
-
-        // Check education completion
-        const educationCheck = this.checkEducationCompletion();
-        if (educationCheck) return educationCheck;
+            // Trigger the most specific ending
+            return this.triggerEnding(sortedEndings[0]);
+        }
 
         return null;
     }
 
     /**
-     * Check if player reached final rank
+     * Check for generic final rank achievement
      */
     checkFinalRank() {
         const maxRankIndex = RANKS.length - 1;
         if (this.gameState.rankIndex >= maxRankIndex) {
             return {
                 type: 'final_rank',
-                title: 'Chief Data Officer',
-                message: 'Congratulations! You\'ve reached the pinnacle of your career as Chief Data Officer. The data world is yours!',
+                title: 'Top of the Line',
+                message: 'Congratulations on reaching the top rank! You are the best!',
                 showEnding: true
             };
         }
@@ -81,14 +58,14 @@ export class GameEndingSystem {
     }
 
     /**
-     * Check if player reached $1 million
+     * Check for millionaire status
      */
     checkMillionaire() {
         if (this.gameState.money >= 1000000) {
             return {
                 type: 'millionaire',
                 title: 'Millionaire',
-                message: 'You\'ve amassed a fortune of over $1,000,000! Financial independence achieved!',
+                message: 'You\'ve become a millionaire! That\'s a lot of money!',
                 showEnding: true
             };
         }
@@ -96,35 +73,14 @@ export class GameEndingSystem {
     }
 
     /**
-     * Check if end-game map is unlocked (victory condition)
+     * Check for end game map achievement
      */
     checkEndGameMap() {
-        if (this.gameState.mapProgressionSystem) {
-            const unlockedMaps = this.gameState.mapProgressionSystem.unlockedMaps || [];
-            if (unlockedMaps.includes('end_game')) {
-                const days = this.gameState.timeManager?.totalDays || 0;
-                if (days >= 90) {
-                    return {
-                        type: 'elite_district',
-                        title: 'Elite District Unlocked',
-                        message: 'You\'ve unlocked the Elite District and proven yourself among the city\'s elite!',
-                        showEnding: true
-                    };
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Check for 100 perfect scores
-     */
-    checkPerfectScores() {
-        if (this.gameState.perfectScores >= 100) {
+        if (this.gameState.endGameMapUnlocked) {
             return {
-                type: 'perfectionist',
-                title: 'Perfectionist',
-                message: 'You\'ve achieved 100 perfect scores! Your dedication to excellence is unmatched!',
+                type: 'end_game_map',
+                title: 'End Game Map Unlocked',
+                message: 'You\'ve unlocked the end game map! You\'re on the right track!',
                 showEnding: true
             };
         }
@@ -132,7 +88,22 @@ export class GameEndingSystem {
     }
 
     /**
-     * Check for early retirement (completing game in < 50 days)
+     * Check for perfect scores achievement
+     */
+    checkPerfectScores() {
+        if (this.gameState.perfectScores >= 10) {
+            return {
+                type: 'perfect_scores',
+                title: 'Perfect Scores',
+                message: 'You\'ve achieved perfect scores on 10 tasks! That\'s amazing!',
+                showEnding: true
+            };
+        }
+        return null;
+    }
+
+    /**
+     * Check for early retirement (< 50 days)
      */
     checkEarlyRetirement() {
         const days = this.gameState.timeManager?.totalDays || 0;
@@ -149,7 +120,7 @@ export class GameEndingSystem {
     }
 
     /**
-     * Check for speedrun ending (< 30 days)
+     * Check for speedrun (< 30 days)
      */
     checkSpeedrun() {
         const days = this.gameState.timeManager?.totalDays || 0;
@@ -318,7 +289,7 @@ export class GameEndingSystem {
             const rel = this.gameState.npcManager.getRelationship?.(npc.id) || 0;
             relationships[npc.id] = rel;
         });
-        
+
         return relationships;
     }
 
@@ -328,47 +299,16 @@ export class GameEndingSystem {
     getSkillStats() {
         if (!this.gameState.characterStats) return {};
         
-        const skills = ['coding', 'analysis', 'design', 'communication', 'focus', 'luck'];
-        const stats = {};
-        
-        skills.forEach(skill => {
-            stats[skill] = this.gameState.characterStats.getStat?.(skill) || 0;
-        });
-        
-        return stats;
+        return this.gameState.characterStats.getSkills();
     }
 
     /**
-     * Reset ending state (for new game)
+     * Reset the ending system
      */
     reset() {
         this.endingTriggered = false;
         this.endingType = null;
         this.endingData = null;
-        if (this.gameState) {
-            this.gameState.gameEnding = null;
-        }
-    }
-
-    /**
-     * Serialize for saving
-     */
-    toJSON() {
-        return {
-            endingTriggered: this.endingTriggered,
-            endingType: this.endingType,
-            endingData: this.endingData
-        };
-    }
-
-    /**
-     * Load from save
-     */
-    fromJSON(data) {
-        if (!data) return;
-        this.endingTriggered = data.endingTriggered || false;
-        this.endingType = data.endingType || null;
-        this.endingData = data.endingData || null;
+        this.gameState.gameEnding = null;
     }
 }
-
