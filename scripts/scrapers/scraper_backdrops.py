@@ -1,63 +1,48 @@
-#!/usr/bin/env python3
-"""
-Specialized Location Backdrop Scraper
-Scrapes Low-poly location backdrops from multiple sources
-"""
-
-import json
 import os
-from pathlib import Path
 import time
-import logging
+import json
+from pathlib import Path
 import requests
 from PIL import Image
-import random
-from urllib.parse import urljoin
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class BackdropScraper:
-    def __init__(self, output_dir="downloaded_assets/backgrounds/locations"):
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+    def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        })
-        self.downloaded = []
-        self.failed = []
-        self.stats = {'total': 0, 'downloaded': 0, 'failed': 0}
-        
+        self.output_dir = Path('output/backdrops')
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         self.locations = [
-            'office', 'home', 'apartment', 'coffee_shop', 'cafe', 'library',
-            'gym', 'park', 'mall', 'university', 'tech_hub', 'downtown',
-            'networking_bar', 'stock_exchange', 'luxury_district', 'bank',
-            'city_hall', 'car_dealership', 'donut_shop', 'bagel_shop',
-            'flower_store', 'real_estate', 'beach', 'mountain', 'forest',
-            'suburb', 'restaurant', 'bar', 'club', 'hospital', 'school',
-            'warehouse', 'factory', 'airport', 'train_station', 'hotel',
-            'museum', 'theater', 'stadium', 'courthouse', 'police_station',
-            'fire_station', 'post_office', 'grocery_store', 'pharmacy',
-            'bookstore', 'electronics_store', 'clothing_store', 'jewelry_store'
+            "New York",
+            "Los Angeles",
+            "Tokyo",
+            "Sydney",
+            "London"
         ]
+        self.downloaded = []
+        self.stats = {
+            'downloaded': 0,
+            'total': 0
+        }
     
     def resize_image(self, image_path, target_size=(1920, 1080)):
-        """Resize backdrop to target size"""
         try:
             with Image.open(image_path) as img:
                 if img.mode == 'RGBA':
                     img = img.convert('RGB')
+                elif img.mode == 'P':
+                    img = img.convert('RGB')  # Convert palette mode to RGB
                 img = img.resize(target_size, Image.Resampling.LANCZOS)
-                img.save(image_path, 'JPEG', quality=85, optimize=True)
-                return True
+                img.save(image_path, format='JPEG', quality=85, optimize=True)
+            return True
         except Exception as e:
-            logger.error(f"Error resizing {image_path}: {e}")
+            logger.error(f"Failed to resize {image_path}: {e}")
             return False
     
     def download_file(self, url, output_path):
-        """Download file from URL"""
         try:
             response = self.session.get(url, timeout=30, stream=True)
             response.raise_for_status()
@@ -256,4 +241,3 @@ class BackdropScraper:
 if __name__ == "__main__":
     scraper = BackdropScraper()
     scraper.run()
-
