@@ -5,6 +5,12 @@ const { execSync } = require('child_process');
 const rootDir = process.cwd();
 const srcDir = path.join(rootDir, 'src');
 
+// Check if srcDir exists before proceeding
+if (!fs.existsSync(srcDir)) {
+    console.error(`Directory ${srcDir} does not exist.`);
+    process.exit(1);
+}
+
 function getAllFiles(dir, exts) {
     let results = [];
     const list = fs.readdirSync(dir);
