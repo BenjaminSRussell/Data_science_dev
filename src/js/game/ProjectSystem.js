@@ -188,6 +188,39 @@ export class ProjectSystem {
         this.activeProject = null;
     }
 
+    /**
+     * Check for idle projects and show reminders if necessary
+     */
+    checkIdleProjects() {
+        if (!this.activeProject || !this.activeProject.startTime) return;
+
+        const idleTime = Date.now() - this.activeProject.startTime;
+        const idleDays = idleTime / (1000 * 60 * 60 * 24);
+
+        if (idleDays >= 3 && !this.activeProject.notifiedIdle) {
+            this.activeProject.notifiedIdle = true;
+            this.showToast('Reminder: You have an active project that has been idle for 3 days.');
+        }
+    }
+
+    /**
+     * Show a toast notification
+     * @param {string} message - The notification message
+     */
+    showToast(message) {
+        if (this.gameState.notificationSystem) {
+            this.gameState.notificationSystem.showToast(message, {
+                action: {
+                    label: 'Go to Project',
+                    handler: () => {
+                        // Navigate to the project page or show the project details
+                        console.log('Navigate to project');
+                    }
+                }
+            });
+        }
+    }
+
     // Serialization
     toJSON() {
         return {
