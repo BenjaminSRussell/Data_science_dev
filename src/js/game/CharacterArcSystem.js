@@ -103,15 +103,29 @@ export class CharacterArcSystem {
      * Get career description
      */
     getCareerDescription(rank, reputation) {
+        let base;
         if (rank >= 6) {
-            return 'You\'ve reached the pinnacle of your career, a respected leader in the industry.';
+            base = 'You\'ve reached the pinnacle of your career, a respected leader in the industry.';
         } else if (rank >= 4) {
-            return 'You\'ve established yourself as a senior professional, known for your expertise.';
+            base = 'You\'ve established yourself as a senior professional, known for your expertise.';
         } else if (rank >= 2) {
-            return 'You\'re building your reputation and making a name for yourself.';
+            base = 'You\'re building your reputation and making a name for yourself.';
         } else {
-            return 'You\'re still finding your footing, learning the ropes of the industry.';
+            base = 'You\'re still finding your footing, learning the ropes of the industry.';
         }
+
+        let repClause;
+        if (reputation >= 300) {
+            repClause = ' Your name carries weight, and people trust you.';
+        } else if (reputation >= 100) {
+            repClause = ' Word of your work is spreading through the city.';
+        } else if (reputation < -100) {
+            repClause = ' But your reputation is in tatters, and doors that once opened now stay shut.';
+        } else {
+            repClause = ' Your reputation is still a work in progress.';
+        }
+
+        return base + repClause;
     }
 
     /**
