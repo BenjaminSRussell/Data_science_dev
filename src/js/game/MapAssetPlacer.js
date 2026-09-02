@@ -17,7 +17,7 @@ export class MapAssetPlacer {
      * Place an asset with collision detection
      */
     placeAsset(asset) {
-        const { x, y, width = 1, height = 1, type } = asset;
+        const { x, y, width = 1, height = 1 } = asset;
         
         // Check if placement is valid
         if (!this.canPlaceAsset(x, y, width, height, asset.id)) {
