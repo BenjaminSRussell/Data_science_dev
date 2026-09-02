@@ -5,6 +5,12 @@ const { execSync } = require('child_process');
 const rootDir = process.cwd();
 const srcDir = path.join(rootDir, 'src');
 
+// Check if srcDir exists before proceeding
+if (!fs.existsSync(srcDir)) {
+    console.error(`Directory ${srcDir} does not exist.`);
+    process.exit(1);
+}
+
 function getAllFiles(dir, exts) {
     let results = [];
     const list = fs.readdirSync(dir);
@@ -61,12 +67,16 @@ assets.forEach(asset => {
 
     // Also handle URL encoded spaces just in case
     if (!exists) {
-        tryPath1 = path.join(rootDir, 'src', decodeURIComponent(asset));
-        tryPath2 = path.join(rootDir, decodeURIComponent(asset));
-        tryPath3 = path.join(rootDir, 'public', decodeURIComponent(asset));
-        if (fs.existsSync(tryPath1)) exists = true;
-        else if (fs.existsSync(tryPath2)) exists = true;
-        else if (fs.existsSync(tryPath3)) exists = true;
+        try {
+            tryPath1 = path.join(rootDir, 'src', decodeURIComponent(asset));
+            tryPath2 = path.join(rootDir, decodeURIComponent(asset));
+            tryPath3 = path.join(rootDir, 'public', decodeURIComponent(asset));
+            if (fs.existsSync(tryPath1)) exists = true;
+            else if (fs.existsSync(tryPath2)) exists = true;
+            else if (fs.existsSync(tryPath3)) exists = true;
+        } catch (e) {
+            // If decodeURIComponent fails, just ignore it and continue
+        }
     }
 
     if (!exists) {
