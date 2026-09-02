@@ -1,8 +1,9 @@
 #!/usr/bin/env node
+
 /**
  * Generate File Inventory
- * Creates a comprehensive document listing every file in a folder
- * Useful for tracking what needs to be reviewed/changed
+ * Generates an inventory of files and folders in the project, with optional details.
+ * Excludes specified directories and files to keep the inventory relevant.
  */
 
 import fs from 'fs';
@@ -13,204 +14,117 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.dirname(__dirname);
 
-// Get target folder from command line or default to src/js
-const targetFolder = process.argv[2] || 'src/js';
-const outputFile = process.argv[3] || 'FILE_INVENTORY.md';
+const EXCLUDE_DIRS = ['node_modules', 'dist', '.git', 'test-reports'];
+const EXCLUDE_FILES = ['*.DS_Store', '*.log'];
 
-const fullPath = path.join(rootDir, targetFolder);
-const outputPath = path.join(rootDir, outputFile);
+let files = [];
+let folders = [];
 
-// Options
-const includeSize = process.argv.includes('--size');
-const includeDate = process.argv.includes('--date');
-const includeLines = process.argv.includes('--lines');
-const includeExt = process.argv.includes('--ext');
-
-const files = [];
-const folders = [];
-
-function countLines(filePath) {
+async function scanDirectory(dir, relativePath = '') {
     try {
-        const content = fs.readFileSync(filePath, 'utf8');
-        return content.split('\n').length;
-    } catch (e) {
-        return 0;
+        const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+
+        for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name);
+            const relativeEntryPath = path.join(relativePath, entry.name);
+
+            if (entry.isDirectory()) {
+                // Skip excluded directories
+                if (EXCLUDE_DIRS.includes(entry.name) || entry.name.startsWith('.')) {
+                    continue;
+                }
+                folders.push(relativeEntryPath);
+                await scanDirectory(fullPath, relativeEntryPath);
+            } else {
+                // Skip excluded files and dotfiles (except .gitignore)
+                if (EXCLUDE_FILES.includes(entry.name) || (entry.name.startsWith('.') && entry.name !== '.gitignore')) {
+                    continue;
+                }
+                files.push(relativeEntryPath);
+            }
+        }
+    } catch (error) {
+        console.error(`Error reading directory ${dir}:`, error);
     }
 }
 
-function scanDirectory(dir, relativePath = '') {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    
-    for (const entry of entries) {
-        const fullEntryPath = path.join(dir, entry.name);
-        const relativeEntryPath = path.join(relativePath, entry.name);
-        
-        // Skip node_modules, dist, and other build artifacts
-        if (entry.name === 'node_modules' || 
-            entry.name === 'dist' || 
-            entry.name === '.git' ||
-            entry.name === 'test-reports' ||
-            entry.name.startsWith('.') && entry.name !== '.gitignore') {
-            continue;
-        }
-        
-        if (entry.isDirectory()) {
-            folders.push({
-                path: relativeEntryPath,
-                fullPath: fullEntryPath
-            });
-            scanDirectory(fullEntryPath, relativeEntryPath);
-        } else if (entry.isFile()) {
-            const stats = fs.statSync(fullEntryPath);
-            const ext = path.extname(entry.name);
-            
-            const fileInfo = {
-                path: relativeEntryPath,
-                fullPath: fullEntryPath,
-                name: entry.name,
-                extension: ext,
-                size: stats.size,
-                modified: stats.mtime,
-                lines: includeLines ? countLines(fullEntryPath) : null
-            };
-            
-            files.push(fileInfo);
-        }
+async function generateInventory(options = {}) {
+    files = [];
+    folders = [];
+
+    console.log('Generating file inventory...\n');
+    await scanDirectory(rootDir);
+
+    console.log(`Inventory generated for directory: ${rootDir}\n`);
+
+    if (options.details) {
+        console.log('Files:');
+        files.forEach(file => console.log(`  - ${file}`));
+        console.log('\nFolders:');
+        folders.forEach(folder => console.log(`  - ${folder}`));
+    }
+
+    if (options.size) {
+        console.log('\nFile sizes:');
+        files.forEach(file => {
+            const stats = fs.statSync(path.join(rootDir, file));
+            console.log(`  ${file}: ${(stats.size / 1024).toFixed(2)}KB`);
+        });
+    }
+
+    if (options.date) {
+        console.log('\nModification dates:');
+        files.forEach(file => {
+            const stats = fs.statSync(path.join(rootDir, file));
+            console.log(`  ${file}: ${stats.mtime}`);
+        });
+    }
+
+    if (options.lines) {
+        console.log('\nLine counts:');
+        files.forEach(file => {
+            const ext = path.extname(file).toLowerCase();
+            if (['.js', '.json', '.md', '.txt'].includes(ext)) {
+                const content = fs.readFileSync(path.join(rootDir, file), 'utf-8');
+                const lineCount = content.split('\n').filter(line => line.trim() !== '').length;
+                console.log(`  ${file}: ${lineCount} lines`);
+            }
+        });
+    }
+
+    if (options.ext) {
+        console.log('\nFile extensions:');
+        files.forEach(file => {
+            const ext = path.extname(file);
+            console.log(`  ${file}: ${ext}`);
+        });
     }
 }
 
-console.log(`📁 Scanning: ${targetFolder}`);
-console.log(`📄 Output: ${outputFile}`);
+// Command-line interface
+if (process.argv.includes('--help')) {
+    console.log('Usage: node scripts/generate-file-inventory.js [options]');
+    console.log('Options:');
+    console.log('  --details  Include detailed listing of files and folders');
+    console.log('  --size     Include file sizes');
+    console.log('  --date     Include modification dates');
+    console.log('  --lines    Include line counts (slower)');
+    console.log('  --ext      Include file extensions in details');
+    process.exit(0);
+}
 
-if (!fs.existsSync(fullPath)) {
-    console.error(`❌ Error: Folder "${targetFolder}" does not exist!`);
+const options = {
+    details: process.argv.includes('--details'),
+    size: process.argv.includes('--size'),
+    date: process.argv.includes('--date'),
+    lines: process.argv.includes('--lines'),
+    ext: process.argv.includes('--ext')
+};
+
+generateInventory(options).catch(error => {
+    console.error('Error generating inventory:', error);
     process.exit(1);
-}
-
-scanDirectory(fullPath);
-
-// Sort files by path
-files.sort((a, b) => a.path.localeCompare(b.path));
-folders.sort((a, b) => a.path.localeCompare(b.path));
-
-// Generate markdown document
-let markdown = `# File Inventory: ${targetFolder}\n\n`;
-markdown += `Generated: ${new Date().toISOString()}\n\n`;
-markdown += `Total Files: ${files.length}\n`;
-markdown += `Total Folders: ${folders.length}\n\n`;
-markdown += `---\n\n`;
-
-// Add table of contents
-markdown += `## Table of Contents\n\n`;
-markdown += `- [Files by Extension](#files-by-extension)\n`;
-markdown += `- [All Files](#all-files)\n`;
-markdown += `- [Folders](#folders)\n\n`;
-markdown += `---\n\n`;
-
-// Group files by extension
-const filesByExt = {};
-files.forEach(file => {
-    const ext = file.extension || '(no extension)';
-    if (!filesByExt[ext]) {
-        filesByExt[ext] = [];
-    }
-    filesByExt[ext].push(file);
 });
 
-// Files by extension
-markdown += `## Files by Extension\n\n`;
-Object.keys(filesByExt).sort().forEach(ext => {
-    const count = filesByExt[ext].length;
-    const totalSize = filesByExt[ext].reduce((sum, f) => sum + f.size, 0);
-    markdown += `### ${ext} (${count} files, ${(totalSize / 1024).toFixed(2)} KB)\n\n`;
-    
-    filesByExt[ext].forEach(file => {
-        markdown += `- [\`${file.path}\`](#${file.path.replace(/[^a-z0-9]/gi, '-').toLowerCase()})\n`;
-    });
-    markdown += `\n`;
-});
-
-markdown += `---\n\n`;
-
-// All files with details
-markdown += `## All Files\n\n`;
-
-files.forEach((file, index) => {
-    const anchor = file.path.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    markdown += `### ${index + 1}. \`${file.path}\` {#${anchor}}\n\n`;
-    
-    markdown += `**Full Path:** \`${file.fullPath}\`\n\n`;
-    
-    if (includeExt) {
-        markdown += `**Extension:** ${file.extension || '(none)'}\n\n`;
-    }
-    
-    if (includeSize) {
-        const sizeKB = (file.size / 1024).toFixed(2);
-        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-        markdown += `**Size:** ${file.size} bytes (${sizeKB} KB${sizeMB > 0.1 ? `, ${sizeMB} MB` : ''})\n\n`;
-    }
-    
-    if (includeDate) {
-        markdown += `**Modified:** ${file.modified.toISOString()}\n\n`;
-    }
-    
-    if (includeLines && file.lines !== null) {
-        markdown += `**Lines:** ${file.lines}\n\n`;
-    }
-    
-    markdown += `---\n\n`;
-});
-
-// Folders
-markdown += `## Folders\n\n`;
-folders.forEach((folder, index) => {
-    markdown += `${index + 1}. \`${folder.path}\`\n`;
-});
-markdown += `\n`;
-
-// Summary statistics
-markdown += `---\n\n`;
-markdown += `## Statistics\n\n`;
-markdown += `- **Total Files:** ${files.length}\n`;
-markdown += `- **Total Folders:** ${folders.length}\n`;
-
-const totalSize = files.reduce((sum, f) => sum + f.size, 0);
-markdown += `- **Total Size:** ${(totalSize / 1024).toFixed(2)} KB (${(totalSize / 1024 / 1024).toFixed(2)} MB)\n`;
-
-if (includeLines) {
-    const totalLines = files.reduce((sum, f) => sum + (f.lines || 0), 0);
-    markdown += `- **Total Lines:** ${totalLines.toLocaleString()}\n`;
-}
-
-// File extensions summary
-markdown += `\n**Files by Extension:**\n\n`;
-Object.keys(filesByExt).sort().forEach(ext => {
-    const count = filesByExt[ext].length;
-    markdown += `- ${ext || '(no extension)'}: ${count} files\n`;
-});
-
-// Write to file
-fs.writeFileSync(outputPath, markdown, 'utf8');
-
-console.log(`\n✅ Inventory generated successfully!`);
-console.log(`📄 Output: ${outputPath}`);
-console.log(`📊 Files: ${files.length}`);
-console.log(`📁 Folders: ${folders.length}`);
-
-if (includeSize) {
-    const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
-    console.log(`💾 Total Size: ${totalSizeMB} MB`);
-}
-
-if (includeLines) {
-    const totalLines = files.reduce((sum, f) => sum + (f.lines || 0), 0);
-    console.log(`📝 Total Lines: ${totalLines.toLocaleString()}`);
-}
-
-console.log(`\nUsage options:`);
-console.log(`  --size   Include file sizes`);
-console.log(`  --date   Include modification dates`);
-console.log(`  --lines  Include line counts (slower)`);
-console.log(`  --ext    Include file extensions in details`);
-
+// Export scanDirectory for testing
+export { scanDirectory };
