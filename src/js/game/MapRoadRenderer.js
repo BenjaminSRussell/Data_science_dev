@@ -49,7 +49,7 @@ export class MapRoadRenderer {
         roadEl.dataset.roadId = road.id;
         
         if (road.direction === 'horizontal') {
-            const width = (road.end - road.start + 1) * tileSize;
+            const width = endPixel.x - startPixel.x;
             const height = road.width * tileSize;
             const left = ((startPixel.x - width / 2) / containerWidth) * 100;
             const top = ((startPixel.y - height / 2) / containerHeight) * 100;
@@ -65,7 +65,7 @@ export class MapRoadRenderer {
             `;
         } else { // vertical
             const width = road.width * tileSize;
-            const height = (road.end - road.start + 1) * tileSize;
+            const height = endPixel.y - startPixel.y;
             const left = ((startPixel.x - width / 2) / containerWidth) * 100;
             const top = ((startPixel.y - height / 2) / containerHeight) * 100;
             roadEl.style.cssText = `
