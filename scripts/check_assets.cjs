@@ -29,18 +29,30 @@ const assets = new Set();
 // Matches: /assets/..., assets/..., /downloaded_assets/...
 const regex = /['"](\/?(?:assets|downloaded_assets)\/[^'"]+)['"]/g;
 
-console.log(`Scanning ${jsFiles.length} files for asset references...`);
-
-jsFiles.forEach(file => {
-    const content = fs.readFileSync(file, 'utf8');
+function extractAssetReferences(content) {
+    const assetPaths = new Set();
     let match;
     while ((match = regex.exec(content)) !== null) {
         let assetPath = match[1];
-        // Clean path
         if (assetPath.startsWith('/')) assetPath = assetPath.substring(1);
-        assets.add(assetPath);
+        assetPaths.add(assetPath);
     }
+    return Array.from(assetPaths);
+}
+
+module.exports = {
+    extractAssetReferences
+};
+
+jsFiles.forEach(file => {
+    const content = fs.readFileSync(file, 'utf8');
+    const assetPaths = extractAssetReferences(content);
+    assetPaths.forEach(assetPath => {
+        assets.add(assetPath);
+    });
 });
+
+console.log(`Scanning ${jsFiles.length} files for asset references...`);
 
 console.log(`Found ${assets.size} unique asset references.`);
 
