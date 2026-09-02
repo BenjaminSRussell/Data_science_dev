@@ -1,54 +1,33 @@
-/**
- * StoryBeatsSystem.js
- * Manages specific story beats that trigger at key moments
- * Priority 2: Narrative Structure
- */
-
-export class StoryBeatsSystem {
+class StoryBeatsSystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.completedBeats = [];
+        this.completedBeats = this.gameState.completedStoryBeats || [];
         this.pendingBeats = [];
     }
 
     /**
-     * Initialize story beats
-     */
-    initialize() {
-        this.completedBeats = this.gameState.completedStoryBeats || [];
-        this.updatePendingBeats();
-    }
-
-    /**
-     * Get story beats for current phase
+     * Get story beats for a given phase
      */
     getStoryBeatsForPhase(phase) {
         const beats = {
             early: [
                 {
-                    id: 'first_job',
-                    title: 'Your First Job',
-                    description: 'You got your first job. This is where it all begins.',
-                    trigger: { type: 'job_obtained', condition: true },
+                    id: 'job_first',
+                    title: 'First Job',
+                    description: 'You landed your first job. Congratulations!',
+                    trigger: { type: 'job_obtained' },
                     required: true
                 },
                 {
-                    id: 'first_task_complete',
-                    title: 'First Task Completed',
-                    description: 'You completed your first data visualization task. The journey has truly begun.',
+                    id: 'complete_first_task',
+                    title: 'First Task',
+                    description: 'You completed your first task. Your skills are improving.',
                     trigger: { type: 'task_completed', count: 1 },
                     required: true
                 },
                 {
-                    id: 'first_promotion',
-                    title: 'Moving Up',
-                    description: 'You got promoted! Your hard work is paying off.',
-                    trigger: { type: 'rank_increase', from: 0, to: 1 },
-                    required: false
-                },
-                {
-                    id: 'rent_due_first',
-                    title: 'First Rent Payment',
+                    id: 'rent_first_payment',
+                    title: 'Your Payment',
                     description: 'Rent is due. The reality of city life sets in.',
                     trigger: { type: 'rent_paid', week: 1 },
                     required: true
