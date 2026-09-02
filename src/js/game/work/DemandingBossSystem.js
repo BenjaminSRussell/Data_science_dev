@@ -1,163 +1,65 @@
 /**
- * DemandBossSystem.js
- * Manages demanding boss behavior
- * High expectations, frequent tasks, pressure
+ * DemandingBossSystem - Handles the generation of demanding tasks for high-level bosses.
  */
 
 export class DemandingBossSystem {
-    constructor(gameState) {
-        this.gameState = gameState;
-        this.boss = null;
-        this.demandLevel = 50; // 0-100
-        this.taskFrequency = 3; // Tasks per week
-        this.satisfaction = 50; // Boss satisfaction
-    }
-    
-    /**
-     * Initialize boss
-     */
-    initializeBoss(bossData) {
+    constructor() {
         this.boss = {
-            id: bossData.id || 'boss_default',
-            name: bossData.name || 'Mr. Anderson',
-            title: bossData.title || 'Department Head',
-            personality: 'demanding',
-            demandLevel: bossData.demandLevel || 70,
-            satisfaction: 50
+            id: '',
+            name: 'Mr. Anderson',
+            title: '',
+            demandLevel: 0
         };
-        
         this.demandLevel = this.boss.demandLevel;
     }
-    
-    /**
-     * Generate demanding task
-     */
-    generateTask() {
-        const difficulty = this.calculateDifficulty();
-        const deadline = this.calculateDeadline();
-        const reward = this.calculateReward(difficulty);
-        
-        return {
-            id: 'task_' + Date.now(),
-            name: this.generateTaskName(),
-            description: this.generateTaskDescription(),
-            difficulty: difficulty,
-            deadline: deadline,
-            reward: reward,
-            requirements: this.generateRequirements(),
-            bossSatisfaction: this.satisfaction
-        };
+
+    initializeBoss({ id, name = 'Mr. Anderson', title, demandLevel }) {
+        this.boss.id = id;
+        this.boss.name = name;
+        this.boss.title = title;
+        this.boss.demandLevel = demandLevel;
+        this.demandLevel = this.boss.demandLevel;
     }
-    
-    /**
-     * Calculate task difficulty based on demand level
-     */
+
     calculateDifficulty() {
-        const base = 30;
-        const demandBonus = this.demandLevel * 0.5;
-        return Math.min(100, base + demandBonus);
+        const baseDifficulty = 30;
+        const maxDifficulty = 100;
+        const difficulty = baseDifficulty + (this.demandLevel * 0.5);
+        return Math.min(difficulty, maxDifficulty);
     }
-    
-    /**
-     * Calculate deadline (demanding boss = shorter deadlines)
-     */
+
     calculateDeadline() {
-        const baseDays = 7;
-        const demandReduction = this.demandLevel * 0.05;
-        return Math.max(1, baseDays - demandReduction);
+        const baseDeadline = 7;
+        const minDeadline = 1;
+        const deadline = baseDeadline - (this.demandLevel * 0.05);
+        return Math.max(deadline, minDeadline);
     }
-    
-    /**
-     * Calculate reward
-     */
+
     calculateReward(difficulty) {
         return difficulty * 10;
     }
-    
-    /**
-     * Generate task name
-     */
-    generateTaskName() {
-        const names = [
-            'Urgent Data Analysis',
-            'Critical Report Needed',
-            'High-Priority Visualization',
-            'Emergency Data Review',
-            'Immediate Action Required'
+
+    generateTask() {
+        const taskTemplates = [
+            'Debug critical system bug',
+            'Optimize database query performance',
+            'Implement new security feature',
+            'Create comprehensive documentation',
+            'Conduct code review and refactor'
         ];
-        return names[Math.floor(Math.random() * names.length)];
-    }
-    
-    /**
-     * Generate task description
-     */
-    generateTaskDescription() {
-        return 'This needs to be done immediately. I expect nothing less than perfection.';
-    }
-    
-    /**
-     * Generate requirements
-     */
-    generateRequirements() {
-        return [
-            'High quality visualization',
-            'Detailed analysis',
-            'Professional presentation',
-            'On-time delivery'
-        ];
-    }
-    
-    /**
-     * Evaluate task completion
-     */
-    evaluateTask(task, quality, onTime) {
-        let satisfactionChange = 0;
-        
-        if (quality >= 80) {
-            satisfactionChange += 10;
-        } else if (quality < 60) {
-            satisfactionChange -= 15;
-        }
-        
-        if (onTime) {
-            satisfactionChange += 5;
-        } else {
-            satisfactionChange -= 10;
-        }
-        
-        this.satisfaction = Math.max(0, Math.min(100, this.satisfaction + satisfactionChange));
-        
+
+        const taskId = `task_${Date.now()}`;
+        const taskName = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+        const difficulty = this.calculateDifficulty();
+        const deadline = this.calculateDeadline();
+        const reward = this.calculateReward(difficulty);
+
         return {
-            satisfaction: this.satisfaction,
-            change: satisfactionChange,
-            message: this.getBossMessage(satisfactionChange)
+            id: taskId,
+            name: taskName,
+            difficulty,
+            deadline,
+            reward
         };
     }
-    
-    /**
-     * Get boss message
-     */
-    getBossMessage(change) {
-        if (change > 5) {
-            return 'Good work. Keep it up.';
-        } else if (change < -5) {
-            return 'This is unacceptable. Do better.';
-        } else {
-            return 'Adequate. I expect more next time.';
-        }
-    }
-    
-    /**
-     * Get boss dialogue
-     */
-    getBossDialogue() {
-        if (this.satisfaction < 30) {
-            return 'Your performance has been disappointing. I need to see improvement immediately.';
-        } else if (this.satisfaction < 60) {
-            return 'You are meeting expectations, but I know you can do better.';
-        } else {
-            return 'Good work. Continue at this level and we will discuss your future here.';
-        }
-    }
 }
-
