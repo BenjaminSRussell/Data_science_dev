@@ -25,9 +25,8 @@ class TravelAnimationSystem {
             'bus_pass': '/assets/icons/vehicles/bus_pass.png',
             'used_car': '/assets/icons/vehicles/used_car.png',
             'luxury_car': '/assets/icons/vehicles/luxury_car.png',
-            'sedan': '/assets/icons/vehicles/used_car.png',
-            'sports_car': '/assets/icons/vehicles/used_car.png',
-            'luxury_car': '/assets/icons/vehicles/luxury_car.png'
+            'sedan': '/assets/icons/vehicles/sedan.png',
+            'sports_car': '/assets/icons/vehicles/sports_car.png'
         };
         return icons[vehicle] || '/assets/icons/vehicles/walking.png';
     }
