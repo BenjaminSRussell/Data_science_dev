@@ -178,7 +178,7 @@ export function updateRelationshipsScreen(game) {
 
     grid.textContent = '';
 
-    npcs.forEach(npc => {
+    const cards = npcs.map(npc => {
         const card = document.createElement('div');
         card.className = 'npc-card';
         card.dataset.npc = npc.id;
