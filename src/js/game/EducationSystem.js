@@ -57,6 +57,50 @@ export class EducationSystem {
                     { q: "Which of these is a Supervised Learning algorithm?", options: ["K-Means", "Linear Regression", "PCA", "Apriori"], correct: 1 },
                     { q: "What is 'Overfitting'?", options: ["Model is too simple", "Model memorizes noise", "Model is too slow", "Data is missing"], correct: 1 }
                 ]
+            },
+            'python_201': {
+                id: 'python_201',
+                name: "Python 201",
+                cost: 1000,
+                description: "Advanced Python: OOP, decorators, and data structures.",
+                questions: [
+                    { q: "Which keyword defines a class in Python?", options: ["class", "def", "struct", "object"], correct: 0 },
+                    { q: "What does a decorator do?", options: ["Deletes a function", "Modifies a function's behavior", "Compiles Python to C", "Imports a module"], correct: 1 },
+                    { q: "Which of these is a mutable data structure?", options: ["tuple", "str", "list", "frozenset"], correct: 2 }
+                ]
+            },
+            'advanced_ml': {
+                id: 'advanced_ml',
+                name: "Advanced Machine Learning",
+                cost: 2500,
+                description: "Ensembles, regularization, and model tuning.",
+                questions: [
+                    { q: "Which algorithm builds an ensemble of decision trees?", options: ["Random Forest", "K-Means", "Naive Bayes", "Linear Regression"], correct: 0 },
+                    { q: "L2 regularization is also known as?", options: ["Ridge", "Lasso", "Dropout", "Bagging"], correct: 0 },
+                    { q: "Which metric is best for imbalanced classification?", options: ["Accuracy", "F1 Score", "MSE", "R-squared"], correct: 1 }
+                ]
+            },
+            'deep_learning': {
+                id: 'deep_learning',
+                name: "Deep Learning",
+                cost: 3000,
+                description: "Neural networks, backpropagation, and CNNs.",
+                questions: [
+                    { q: "What is the purpose of backpropagation?", options: ["Shuffle the data", "Update weights using gradients", "Drop out neurons", "Normalize inputs"], correct: 1 },
+                    { q: "Which architecture is best for image classification?", options: ["CNN", "RNN", "Decision Tree", "SVM"], correct: 0 },
+                    { q: "What does a ReLU activation output for x = -3?", options: ["-3", "3", "0", "1"], correct: 2 }
+                ]
+            },
+            'ethics_ai': {
+                id: 'ethics_ai',
+                name: "Ethics in AI",
+                cost: 2000,
+                description: "Bias, fairness, and responsible AI practices.",
+                questions: [
+                    { q: "What is 'algorithmic bias'?", options: ["A bug in the code", "Systematic unfairness in model outputs", "Slow training", "Missing data"], correct: 1 },
+                    { q: "Which principle requires models to be understandable to users?", options: ["Transparency", "Profitability", "Scalability", "Latency"], correct: 0 },
+                    { q: "What is a key concern with training on biased data?", options: ["Faster inference", "Reinforcing existing inequalities", "Lower memory use", "Simpler models"], correct: 1 }
+                ]
             }
         };
     }
