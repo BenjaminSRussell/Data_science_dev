@@ -1,0 +1,4 @@
+# This file is used for pytest configuration
+[tool.pytest.ini_options]
+addopts = "--verbose"
+testpaths = ["tools/tests"]
