@@ -1,273 +1,62 @@
-/**
- * GameState - Central game state management
- * Holds all player data, current task, and game configuration
- */
-
-import { RANKS } from '../data/ranks.js';
-import { CHART_TYPES } from '../data/chartTypes.js';
-import { JobSystem } from './JobSystem.js';
-import { WorkInteractionSystem } from './WorkInteractionSystem.js';
-import { RealisticDialogueSystem } from './RealisticDialogueSystem.js';
-import { RelationshipEmotionSystem } from './RelationshipEmotionSystem.js';
-import { WorldEvolutionSystem } from './WorldEvolutionSystem.js';
-import { InvestmentEcommerceSystem } from './InvestmentEcommerceSystem.js';
-import { StorylineManager } from './StorylineManager.js';
-import { MapProgressionSystem } from './MapProgressionSystem.js';
-import { IDESystem } from './IDESystem.js';
-import { LocationBackgroundSystem } from './LocationBackgroundSystem.js';
-import { WeeklyNewsSystem } from './WeeklyNewsSystem.js';
-import { ScreenThemeManager } from './ScreenThemeManager.js';
-import { MapCoordinateSystem } from './MapCoordinateSystem.js';
-
-export class GameState {
+class GameState {
     constructor() {
-        this.reset();
-    }
-
-    /**
-     * Reset game state to initial values
-     */
-    reset() {
-        // Player stats
         this.money = 100;
         this.reputation = 0;
         this.rankIndex = 0;
-        this.rent = 500; // Weekly rent
-
-        // Progress tracking
+        this.rent = 500; // Initial rent
+        this.bank = null; // Bank state
         this.tasksCompleted = 0;
         this.perfectScores = 0;
         this.totalEarned = 0;
-        this.totalSpent = 0;
-        this.weeklyIncome = 0; // Track income for tax calculation
-        this.startTime = Date.now();
+        this.weeklyIncome = 0;
         this.totalRatings = 0;
         this.ratingSum = 0;
-
-        // Current state
-        this.currentTask = null;
-        this.currentLocation = 'apartment'; // Start at apartment
-        this.bank = null; // Bank state (savings/loan)
-
-        // Unlocked content
-        this.unlockedChartTypes = ['bar', 'line', 'pie']; // Starting charts
-        this.purchasedItems = []; // Shop items
-        this.unlockedThemes = ['default'];
-        this.unlockedTools = []; // Software tools
-        this.unlockedLibraries = [];
-
-        // Game configuration
-        this.chartConfig = {
-            type: 'bar',
-            palette: 'corporate',
-            showLegend: true,
-            showGrid: true,
-            showDataLabels: false,
-            title: ''
-        };
-
-        this.lastScore = null;
-
-        // Game flags
+        this.unlockedChartTypes = ['bar', 'line', 'pie'];
+        this.unlockedTools = [];
+        this.purchasedItems = [];
         this.isGameStarted = false;
         this.tutorialCompleted = false;
-
-        // Settings
         this.soundEnabled = true;
         this.musicEnabled = true;
-        this.settings = {
-            soundEnabled: true,
-            autoSave: true,
-            theme: 'dark'
-        };
+        this.unlockedLibraries = [];
 
-        // Sub-systems storage (these are initialized externally and then linked)
-        this.worldMap = null;
-        this.npcManager = null;
-        this.newsManager = null;
-        this.stockMarket = null;
-        this.crimeSystem = null;
-        this.romanceSystem = null;
-        this.legalSystem = null;
-        this.educationSystem = null;
-        this.worldEventManager = null;
-        this.projectSystem = null;
-        this.aiSystem = null;
-        this.hardwareManager = null;
-        this.timeManager = null;
-        this.characterStats = null;
-        
-        // New integrated systems
-        this.jobSystem = null;
-        this.workInteractionSystem = null;
-        this.realisticDialogueSystem = null;
-        this.relationshipEmotionSystem = null;
-        this.worldEvolutionSystem = null;
-        this.investmentEcommerceSystem = null;
-        this.storylineManager = null;
-        this.storyBeatsSystem = null;
-        this.characterArcSystem = null;
-        this.npcMemorySystem = null;
-        this.filterManager = null;
-        this.mapProgressionSystem = null;
-        this.ideSystem = null;
-        this.locationBackgroundSystem = null;
-        this.weeklyNewsSystem = null;
-        this.screenThemeManager = null;
-        this.mapCoordinateSystem = null;
-        this.contractSystem = null; // New contract system
-        this.bankSystem = null; // Bank system
-        this.gameEndingSystem = null; // Game ending system
-        this.gameEnding = null; // Current ending state
-        
-        // Phase 1 Visual Systems
-        this.visualSystem = null;
-        this.animationManager = null;
-        this.assetManager = null;
-        this.performanceManager = null;
-        this.uiLayerManager = null;
-        this.cameraSystem = null;
-        
-        // Additional state
-        this.currentJob = null;
-        this.housingLevel = 'apartment';
-        this.officeLevel = 'small';
-        this.mainGame = null; // Reference to MainGame instance
+        // Sub-systems
+        this.worldMap = new WorldMap(this);
+        this.npcManager = new NPCManager(this);
+        this.stockMarket = new StockMarket(this);
+        this.projectSystem = new ProjectSystem(this);
+        this.worldEventManager = new WorldEventManager(this);
+        this.crimeSystem = new CrimeSystem(this);
+        this.educationSystem = new EducationSystem(this);
+        this.timeManager = new TimeManager(this);
+        this.aiSystem = new AI(this);
+        this.hardwareManager = new HardwareManager(this);
+        this.characterStats = new CharacterStats(this);
+        this.jobSystem = new JobSystem(this);
+        this.contractSystem = new ContractSystem(this);
+        this.mapProgressionSystem = new MapProgressionSystem(this);
+        this.romanceSystem = new RomanceSystem(this);
+        this.legalSystem = new LegalSystem(this);
+        this.bankSystem = new BankSystem(this);
+        this.visualProgressionSystem = new VisualProgressionSystem(this);
+        this.realWorldTaskSystem = new RealWorldTaskSystem(this);
+        this.aiTrainingStoryline = new AIStoryline(this);
+        this.githubIssuesSystem = new GitHubIssuesSystem(this);
+        this.researchPaperSystem = new ResearchPaperSystem(this);
+        this.emotionalBreakdownSystem = new EmotionalBreakdownSystem(this);
+        this.performanceManager = new PerformanceManager(this);
     }
 
     /**
-     * Get current rank info
-     */
-    get currentRank() {
-        return RANKS[this.rankIndex] || RANKS[0];
-    }
-
-    /**
-     * Get next rank info (if exists)
-     */
-    get nextRank() {
-        return RANKS[this.rankIndex + 1] || null;
-    }
-
-    /**
-     * Calculate progress to next rank (0-100)
-     */
-    get progressToNextRank() {
-        if (!this.nextRank) return 100;
-
-        const currentReq = this.currentRank.repRequired;
-        const nextReq = this.nextRank.repRequired;
-        const progress = ((this.reputation - currentReq) / (nextReq - currentReq)) * 100;
-
-        return Math.min(100, Math.max(0, progress));
-    }
-
-    /**
-     * Get average rating
-     */
-    get averageRating() {
-        if (this.totalRatings === 0) return 0;
-        return (this.ratingSum / this.totalRatings).toFixed(1);
-    }
-
-    /**
-     * Check if a chart type is unlocked
-     */
-    isChartTypeUnlocked(type) {
-        return true; // Liberalization: All charts unlocked by default!
-    }
-
-    /**
-     * Get software quality multiplier based on purchased software
-     * Returns an object with quality bonuses
-     */
-    getSoftwareQualityMultiplier() {
-        const multipliers = {
-            visualClarity: 1.0,
-            dataAccuracy: 1.0,
-            chartAppropriateness: 1.0,
-            speedBonus: 0  // Percentage bonus (0.1 = 10%)
-        };
-
-        // Software quality effects
-        if (this.purchasedItems.includes('soft_ide_pro')) {
-            multipliers.visualClarity += 0.05; // +5% visual clarity (fewer bugs)
-            multipliers.dataAccuracy += 0.03; // +3% accuracy (better code)
-        }
-
-        if (this.purchasedItems.includes('soft_automl')) {
-            multipliers.speedBonus += 0.10; // +10% speed bonus
-            multipliers.chartAppropriateness += 0.03; // +3% (auto-selection helps)
-        }
-
-        if (this.purchasedItems.includes('soft_cloud_basic')) {
-            multipliers.dataAccuracy += 0.05; // +5% (better processing power)
-            multipliers.speedBonus += 0.05; // +5% speed
-        }
-
-        if (this.purchasedItems.includes('soft_enterprise_db')) {
-            multipliers.dataAccuracy += 0.08; // +8% (better data handling)
-            multipliers.chartAppropriateness += 0.02; // +2%
-        }
-
-        if (this.purchasedItems.includes('soft_neural_arch')) {
-            multipliers.visualClarity += 0.10; // +10% (AI-optimized)
-            multipliers.chartAppropriateness += 0.08; // +8% (better selection)
-            multipliers.dataAccuracy += 0.05; // +5%
-        }
-
-        return multipliers;
-    }
-
-    /**
-     * Unlock a chart type
-     */
-    unlockChartType(type) {
-        if (!this.unlockedChartTypes.includes(type)) {
-            this.unlockedChartTypes.push(type);
-        }
-    }
-
-    /**
-     * Check if player can afford an item
-     */
-    canAfford(price) {
-        return this.money >= price;
-    }
-
-    /**
-     * Purchase an item
-     */
-    purchaseItem(item) {
-        if (!this.canAfford(item.price)) return false;
-        if (this.purchasedItems.includes(item.id)) return false;
-
-        this.money -= item.price;
-        this.purchasedItems.push(item.id);
-
-        // Apply item effect
-        if (item.type === 'chart') {
-            this.unlockChartType(item.chartType);
-        } else if (item.type === 'tool') {
-            this.unlockedTools.push(item.toolId);
-        } else if (item.type === 'software') {
-            // Software items are tracked in purchasedItems, no additional action needed
-            // Software quality effects are calculated dynamically
-        }
-
-        return true;
-    }
-
-    /**
-     * Serialize state for saving
+     * Save state to JSON
      */
     toJSON() {
         return {
             money: this.money,
             reputation: this.reputation,
             rankIndex: this.rankIndex,
-            rent: this.rent, // Persist rent
-            bank: this.bank, // Persist bank state
+            rent: this.rent,
+            bank: this.bank,
             tasksCompleted: this.tasksCompleted,
             perfectScores: this.perfectScores,
             totalEarned: this.totalEarned,
@@ -394,3 +183,5 @@ export class GameState {
         }
     }
 }
+
+export default GameState;
