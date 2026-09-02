@@ -7,6 +7,7 @@ import { EQUIPMENT, OFFICES, STAFF_TYPES, MARKETING_CHANNELS } from '../data/tyc
 export class OfficeManager {
     constructor(gameState) {
         this.gameState = gameState;
+this.gameStore = gameStore;
 
         // Equipment levels (index into EQUIPMENT[type].levels)
         this.equipmentLevels = {

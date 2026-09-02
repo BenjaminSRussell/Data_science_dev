@@ -39,7 +39,7 @@ export class GameState {
         this.perfectScores = 0;
         this.totalEarned = 0;
         this.totalSpent = 0;
-        this.weeklyIncome = 0; // Track income for tax calculation
+        this.weeklyIncome = data.weeklyIncome ?? 0; // Track income for tax calculation
         this.startTime = Date.now();
         this.totalRatings = 0;
         this.ratingSum = 0;
