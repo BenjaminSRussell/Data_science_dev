@@ -1,112 +1,35 @@
-/**
- * Time System - Day/night cycle and time slot management
- * Each day has 6 time slots, activities consume time
- */
-
-// Time slot definitions
-export const TIME_SLOTS = [
-    { id: 'early_morning', name: 'Early Morning', icon: '', hours: '6:00 - 9:00', index: 0 },
-    { id: 'late_morning', name: 'Late Morning', icon: '', hours: '9:00 - 12:00', index: 1 },
-    { id: 'afternoon', name: 'Afternoon', icon: '', hours: '12:00 - 15:00', index: 2 },
-    { id: 'late_afternoon', name: 'Late Afternoon', icon: '', hours: '15:00 - 18:00', index: 3 },
-    { id: 'evening', name: 'Evening', icon: '', hours: '18:00 - 21:00', index: 4 },
-    { id: 'night', name: 'Night', icon: '', hours: '21:00 - 00:00', index: 5 }
-];
-
-// Days of the week
-export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-// Months
-export const MONTHS = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-];
-
-/**
- * TimeManager class - handles game time progression
- */
-export class TimeManager {
+class TimeManager {
     constructor() {
-        // Start at Day 1, Monday, January, Year 1
-        this.day = 1;           // Day of month (1-30)
-        this.dayOfWeek = 0;     // 0 = Monday
-        this.month = 0;         // 0 = January
-        this.year = 1;
-        this.timeSlot = 0;      // Current time slot (0-5)
-
-        // Track total days played
-        this.totalDays = 1;
-
-        // Energy system
+        this.day = 1;
+        this.dayOfWeek = 0;
+        this.month = 0;
+        this.year = 2023;
+        this.timeSlot = 0;
+        this.totalDays = 0;
         this.energy = 100;
         this.maxEnergy = 100;
 
-        // Event callbacks
-        this.onTimeAdvance = null;
         this.onDayChange = null;
         this.onMonthChange = null;
         this.onYearChange = null;
     }
 
     /**
-     * Get current time slot info
+     * Advance time by a certain number of slots
+     * @param {number} slots - Number of time slots to advance
      */
-    getCurrentSlot() {
-        return TIME_SLOTS[this.timeSlot];
-    }
-
-    /**
-     * Get formatted date string
-     */
-    getDateString() {
-        return `${DAYS[this.dayOfWeek]}, ${MONTHS[this.month]} ${this.day}, Year ${this.year}`;
-    }
-
-    /**
-     * Get short date
-     */
-    getShortDate() {
-        return `${MONTHS[this.month].slice(0, 3)} ${this.day}, Y${this.year}`;
-    }
-
-    /**
-     * Get time of day
-     */
-    getTimeOfDay() {
-        return TIME_SLOTS[this.timeSlot].name;
-    }
-
-    /**
-     * Check if it's a weekend
-     */
-    isWeekend() {
-        return this.dayOfWeek >= 5; // Saturday or Sunday
-    }
-
-    /**
-     * Get remaining time slots today
-     */
-    getRemainingSlots() {
-        return 6 - this.timeSlot;
-    }
-
-    /**
-     * Advance time by N slots
-     */
-    advanceTime(slots = 1) {
+    advanceTime(slots) {
         const events = [];
+        slots = Math.floor(slots);
+
+        if (slots <= 0) {
+            return events;
+        }
 
         for (let i = 0; i < slots; i++) {
-            this.timeSlot++;
-
-            // Check for day change
-            if (this.timeSlot >= 6) {
-                this.timeSlot = 0;
+            this.timeSlot = (this.timeSlot + 1) % 6;
+            if (this.timeSlot === 0) {
                 events.push(...this.advanceDay());
-            }
-
-            if (this.onTimeAdvance) {
-                this.onTimeAdvance(this.getCurrentSlot());
             }
         }
 
