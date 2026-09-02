@@ -223,14 +223,14 @@ export class LocationView {
 
             // Update game state based on result
             if (result.result.energy) {
-                // Restore energy
-            }
-            if (result.result.skill) {
-                // Increase skill
-            }
-            if (result.result.money) {
-                // Change money
-            }
+    this.game.gameState.player.energy += result.result.energy;
+}
+if (result.result.skill) {
+    this.game.gameState.player.skill += result.result.skill;
+}
+if (result.result.money) {
+    this.game.gameState.player.money += result.result.money;
+}
         }
     }
 
