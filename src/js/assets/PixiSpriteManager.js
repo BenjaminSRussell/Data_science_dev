@@ -1,106 +1,86 @@
-/**
- * PixiSpriteManager.js
- * Replaces custom SpriteSheetManager with PixiJS Spritesheet
- * Phase 4: Code Reduction - Using PixiJS Spritesheet instead of custom parsing
- */
+// ... (rest of the file remains unchanged)
 
-import { Assets, Spritesheet, AnimatedSprite, Sprite } from 'pixi.js';
+// Mocking dependencies
+jest.mock('pixi.js', () => ({
+  Sprite: jest.fn().mockImplementation(() => ({
+    texture: null,
+  })),
+  AnimatedSprite: jest.fn().mockImplementation(() => ({
+    textures: [],
+  })),
+}));
 
-export class PixiSpriteManager {
-    constructor() {
-        this.spriteSheets = new Map();
-        this.animations = new Map();
-    }
+// Mocking PIXI.Loader.shared.add and PIXI.Loader.shared.load
+const mockLoader = {
+  add: jest.fn(),
+  load: jest.fn(),
+};
+jest.mock('pixi.js', () => ({
+  Loader: {
+    shared: mockLoader,
+  },
+}));
 
-    /**
-     * Load sprite sheet
-     * Phase 4: Uses PixiJS Spritesheet class
-     */
-    async loadSpriteSheet(id, jsonUrl, imageUrl) {
-        try {
-            // Load the JSON data and image
-            const [jsonData, texture] = await Promise.all([
-                fetch(jsonUrl).then(r => r.json()),
-                Assets.load(imageUrl)
-            ]);
+describe('PixiSpriteManager', () => {
+  let spriteManager;
 
-            // Create spritesheet
-            const sheet = new Spritesheet(texture, jsonData);
-            await sheet.parse();
+  beforeEach(() => {
+    spriteManager = new PixiSpriteManager();
+    spriteManager.spriteSheets = {
+      sheet1: { textures: { walk_0: 'texture1' } },
+      sheet2: { animations: { walk: ['texture1', 'texture2'] } },
+    };
+  });
 
-            this.spriteSheets.set(id, sheet);
+  describe('createSprite', () => {
+    it('returns null when sheetId not in spriteSheets', () => {
+      expect(spriteManager.createSprite('sheet3', 'walk_0')).toBeNull();
+    });
 
-            // Extract animations if available
-            if (sheet.animations) {
-                this.animations.set(id, sheet.animations);
-            }
+    it('returns null when sheet exists but frameName not a key in sheet.textures', () => {
+      expect(spriteManager.createSprite('sheet2', 'walk_0')).toBeNull();
+    });
 
-            return sheet;
-        } catch (error) {
-            console.warn(`Failed to load sprite sheet: ${id}`, error);
-            return null;
-        }
-    }
+    it('returns a real Sprite instance when both sheet and frame exist', () => {
+      const sprite = spriteManager.createSprite('sheet1', 'walk_0');
+      expect(sprite).toBeInstanceOf(Sprite);
+    });
+  });
 
-    /**
-     * Create sprite from sheet
-     */
-    createSprite(sheetId, frameName) {
-        const sheet = this.spriteSheets.get(sheetId);
-        if (!sheet) return null;
+  describe('createAnimatedSprite', () => {
+    it('returns null for missing sheet', () => {
+      expect(spriteManager.createAnimatedSprite('sheet3', 'walk')).toBeNull();
+    });
 
-        const texture = sheet.textures[frameName];
-        if (!texture) return null;
+    it('returns null when sheet.animations doesn\'t have the name', () => {
+      expect(spriteManager.createAnimatedSprite('sheet1', 'walk')).toBeNull();
+    });
 
-        return new Sprite(texture);
-    }
+    it('returns a real AnimatedSprite instance with fake sheet', () => {
+      const animatedSprite = spriteManager.createAnimatedSprite('sheet2', 'walk');
+      expect(animatedSprite).toBeInstanceOf(AnimatedSprite);
+    });
+  });
 
-    /**
-     * Create animated sprite
-     * Phase 4: Uses PixiJS AnimatedSprite
-     */
-    createAnimatedSprite(sheetId, animationName) {
-        const sheet = this.spriteSheets.get(sheetId);
-        if (!sheet) return null;
+  describe('getSpriteSheet', () => {
+    it('returns null for not-found paths', () => {
+      expect(spriteManager.getSpriteSheet('sheet3')).toBeNull();
+    });
 
-        const animationFrames = sheet.animations?.[animationName];
-        if (!animationFrames) return null;
+    it('returns exactly what was registered for found paths', () => {
+      expect(spriteManager.getSpriteSheet('sheet1')).toBe(spriteManager.spriteSheets.sheet1);
+    });
+  });
 
-        const animatedSprite = new AnimatedSprite(animationFrames);
-        return animatedSprite;
-    }
+  describe('getAnimationFrames', () => {
+    it('returns null for not-found paths', () => {
+      expect(spriteManager.getAnimationFrames('sheet3', 'walk')).toBeNull();
+    });
 
-    /**
-     * Play animation
-     */
-    playAnimation(sprite, animationName, loop = true) {
-        if (!sprite || !(sprite instanceof AnimatedSprite)) return;
+    it('returns exactly what was registered for found paths', () => {
+      expect(spriteManager.getAnimationFrames('sheet2', 'walk')).toBe(spriteManager.spriteSheets.sheet2.animations.walk);
+    });
+  });
+});
 
-        // Get animation frames from current sheet
-        const sheetId = sprite.sheetId; // Store sheetId when creating
-        const animationFrames = this.animations.get(sheetId)?.[animationName];
-        
-        if (animationFrames) {
-            sprite.textures = animationFrames;
-            sprite.loop = loop;
-            sprite.play();
-        }
-    }
-
-    /**
-     * Get sprite sheet
-     */
-    getSpriteSheet(id) {
-        return this.spriteSheets.get(id) || null;
-    }
-
-    /**
-     * Get animation frames
-     */
-    getAnimationFrames(sheetId, animationName) {
-        const sheet = this.spriteSheets.get(sheetId);
-        if (!sheet || !sheet.animations) return null;
-
-        return sheet.animations[animationName] || null;
-    }
-}
+// ... (rest of the file remains unchanged)
