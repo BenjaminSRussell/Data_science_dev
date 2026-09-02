@@ -259,18 +259,36 @@ export class CharacterArcSystem {
     getMilestoneDescription(entry) {
         const { changes, direction } = entry;
 
+        const moneyDelta = changes?.money || 0;
+        const ethicsDelta = changes?.ethics || 0;
+        const reputationDelta = changes?.reputation || 0;
+        const rankDelta = changes?.rank || 0;
+
+        const moneyText = moneyDelta >= 10000
+            ? ` You're now $${Math.round(Math.abs(moneyDelta) / 1000)}k ${moneyDelta > 0 ? 'richer' : 'poorer'}.`
+            : '';
+        const ethicsText = ethicsDelta !== 0
+            ? ` Your ethics have ${ethicsDelta > 0 ? 'risen' : 'fallen'} by ${Math.abs(ethicsDelta)}.`
+            : '';
+        const reputationText = reputationDelta !== 0
+            ? ` Your reputation has ${reputationDelta > 0 ? 'grown' : 'dropped'} by ${Math.abs(reputationDelta)}.`
+            : '';
+        const rankText = rankDelta !== 0
+            ? ` Your rank has ${rankDelta > 0 ? 'climbed' : 'slipped'} by ${Math.abs(rankDelta)}.`
+            : '';
+
         if (direction === 'corruption') {
-            return 'You crossed a line. The money was good, but something changed inside you.';
+            return `You crossed a line. The money was good, but something changed inside you.${ethicsText}${moneyText}`;
         } else if (direction === 'redemption') {
-            return 'You made a stand for what\'s right. It wasn\'t easy, but you have no regrets.';
+            return `You made a stand for what's right. It wasn't easy, but you have no regrets.${ethicsText}${reputationText}`;
         } else if (direction === 'success') {
-            return 'You reached a major milestone in your career. Your hard work is paying off.';
+            return `You reached a major milestone in your career. Your hard work is paying off.${rankText}${reputationText}`;
         } else if (direction === 'decline') {
-            return 'You made choices that compromised your values. The path ahead looks darker.';
+            return `You made choices that compromised your values. The path ahead looks darker.${ethicsText}${moneyText}`;
         } else if (direction === 'growth') {
-            return 'You stayed true to yourself. Your integrity is your greatest strength.';
+            return `You stayed true to yourself. Your integrity is your greatest strength.${ethicsText}${reputationText}`;
         } else {
-            return 'You continue to navigate the complexities of life, finding your own way.';
+            return `You continue to navigate the complexities of life, finding your own way.${ethicsText}${moneyText}`;
         }
     }
 }
