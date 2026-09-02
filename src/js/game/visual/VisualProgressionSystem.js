@@ -1,127 +1,16 @@
-/**
- * VisualProgressionSystem.js
- * Progressively upgrades game visuals as player advances
- * Better sprites unlock at milestones
- */
-
-export class VisualProgressionSystem {
+class VisualProgressionSystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.currentTier = 'basic'; // basic, mid, premium
+        this.currentTier = 'basic';
         this.unlockedTiers = ['basic'];
-        this.milestones = this.initializeMilestones();
+        this.milestones = {};
         this.visualUpgrades = new Map();
     }
     
     /**
-     * Initialize progression milestones
+     * Set current tier based on unlocked tiers
      */
-    initializeMilestones() {
-        return {
-            // Money milestones
-            money_10k: { tier: 'mid', threshold: 10000, type: 'money', unlocked: false },
-            money_50k: { tier: 'mid', threshold: 50000, type: 'money', unlocked: false },
-            money_100k: { tier: 'premium', threshold: 100000, type: 'money', unlocked: false },
-            money_500k: { tier: 'premium', threshold: 500000, type: 'money', unlocked: false },
-            
-            // Relationship milestones
-            relationships_5: { tier: 'mid', threshold: 5, type: 'relationships', unlocked: false },
-            relationships_10: { tier: 'mid', threshold: 10, type: 'relationships', unlocked: false },
-            relationships_20: { tier: 'premium', threshold: 20, type: 'relationships', unlocked: false },
-            
-            // Days played milestones
-            days_30: { tier: 'mid', threshold: 30, type: 'days', unlocked: false },
-            days_60: { tier: 'mid', threshold: 60, type: 'days', unlocked: false },
-            days_100: { tier: 'premium', threshold: 100, type: 'days', unlocked: false },
-            
-            // Job level milestones
-            job_level_5: { tier: 'mid', threshold: 5, type: 'jobLevel', unlocked: false },
-            job_level_10: { tier: 'premium', threshold: 10, type: 'jobLevel', unlocked: false },
-            
-            // Skills milestones
-            skills_50: { tier: 'mid', threshold: 50, type: 'totalSkills', unlocked: false },
-            skills_100: { tier: 'premium', threshold: 100, type: 'totalSkills', unlocked: false }
-        };
-    }
-    
-    /**
-     * Check milestones and unlock visual tiers
-     */
-    checkMilestones() {
-        const stats = this.getCurrentStats();
-        let unlockedNewTier = false;
-        
-        for (const [milestoneId, milestone] of Object.entries(this.milestones)) {
-            if (milestone.unlocked) continue;
-            
-            const currentValue = stats[milestone.type] || 0;
-            
-            if (currentValue >= milestone.threshold) {
-                milestone.unlocked = true;
-                this.unlockTier(milestone.tier);
-                unlockedNewTier = true;
-                
-                // Show upgrade notification
-                this.showVisualUpgradeNotification(milestone.tier, milestoneId);
-            }
-        }
-        
-        // Update current tier based on unlocked tiers
-        this.updateCurrentTier();
-        
-        return unlockedNewTier;
-    }
-    
-    /**
-     * Get current player stats
-     */
-    getCurrentStats() {
-        const stats = {
-            money: this.gameState.money || 0,
-            relationships: 0,
-            days: 0,
-            jobLevel: 0,
-            totalSkills: 0
-        };
-        
-        // Count relationships
-        if (this.gameState.npcManager) {
-            const metNPCs = this.gameState.npcManager?.getMetNPCs() || [];
-            stats.relationships = metNPCs.length;
-        }
-        
-        // Get days played
-        if (this.gameState.timeManager) {
-            stats.days = this.gameState.timeManager?.totalDays || 0;
-        }
-        
-        // Get job level
-        if (this.gameState.jobSystem && this.gameState.jobSystem.currentJob) {
-            stats.jobLevel = this.gameState.jobSystem?.currentJob?.level || 0;
-        }
-        
-        // Calculate total skills
-        if (this.gameState.stats) {
-            stats.totalSkills = Object.values(this.gameState.stats).reduce((sum, val) => sum + (val || 0), 0);
-        }
-        
-        return stats;
-    }
-    
-    /**
-     * Unlock visual tier
-     */
-    unlockTier(tier) {
-        if (!this.unlockedTiers.includes(tier)) {
-            this.unlockedTiers.push(tier);
-            this.applyVisualUpgrade(tier);
-        }
-    }
-    
-    /**
-     * Update current tier (highest unlocked)
-     */
-    updateCurrentTier() {
+    setCurrentTierBasedOnUnlockedTiers() {
         if (this.unlockedTiers.includes('premium')) {
             this.currentTier = 'premium';
         } else if (this.unlockedTiers.includes('mid')) {
@@ -371,4 +260,3 @@ export class VisualProgressionSystem {
         }
     }
 }
-
