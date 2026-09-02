@@ -1,153 +1,74 @@
-/**
- * GitHubIssuesSystem.js
- * GitHub issues system from data science perspective
- * Real-world issues and pull requests
- */
-
-export class GitHubIssuesSystem {
-    constructor(gameState) {
-        this.gameState = gameState;
-        this.openIssues = [];
-        this.closedIssues = [];
-        this.pullRequests = [];
-        this.repositories = this.initializeRepositories();
-        this.generateInitialIssues();
-    }
-    
-    /**
-     * Initialize repositories
-     */
-    initializeRepositories() {
-        return [
-            {
-                id: 'data_pipeline',
-                name: 'data-pipeline',
-                owner: 'company',
-                description: 'ETL pipeline for data processing',
-                stars: 42,
-                issues: 8,
-                pullRequests: 3
-            },
-            {
-                id: 'ml_models',
-                name: 'ml-models',
-                owner: 'company',
-                description: 'Machine learning model library',
-                stars: 128,
-                issues: 15,
-                pullRequests: 7
-            },
-            {
-                id: 'data_analysis',
-                name: 'data-analysis-tools',
-                owner: 'company',
-                description: 'Tools for data analysis and visualization',
-                stars: 89,
-                issues: 12,
-                pullRequests: 5
-            }
+class GitHubIssuesSystem {
+    constructor() {
+        this.repositories = [
+            { id: 'ml_models', name: 'ML Models' },
+            { id: 'data_analysis', name: 'Data Analysis' }
         ];
-    }
-    
-    /**
-     * Generate initial GitHub issues
-     */
-    generateInitialIssues() {
+
         this.openIssues = [
             {
                 id: 'issue_1',
                 number: 42,
-                title: ' Data processing fails on null values',
-                body: 'When processing data with null values, the pipeline crashes with a KeyError. Need to handle missing data gracefully.',
-                labels: ['bug', 'high-priority', 'data-pipeline'],
+                title: ' Fix data parsing error',
+                body: 'Error occurs while parsing large JSON files. Need to add error handling.',
+                labels: ['bug', 'data-pipeline'],
                 assignee: null,
-                repository: 'data_pipeline',
+                repository: 'ml_models',
                 createdAt: Date.now() - 86400000, // 1 day ago
                 difficulty: 'medium',
-                skills: ['python', 'pandas', 'data_cleaning'],
-                reward: { money: 400, reputation: 20 }
+                skills: ['python', 'json', 'error_handling'],
+                reward: { money: 300, reputation: 15 }
             },
             {
                 id: 'issue_2',
                 number: 43,
-                title: ' Add data validation pipeline',
-                body: 'Implement comprehensive data validation to catch errors early in the pipeline. Should include schema validation, type checking, and range validation.',
-                labels: ['enhancement', 'feature', 'data-pipeline'],
-                assignee: null,
-                repository: 'data_pipeline',
-                createdAt: Date.now() - 172800000, // 2 days ago
+                title: ' Optimize feature extraction',
+                body: 'Feature extraction process is slow. Need to use more efficient algorithms.',
+                labels: ['performance', 'optimization', 'ml_models'],
+                assignee: 'player',
+                repository: 'ml_models',
+                assignedAt: Date.now() - 172800000, // 2 days ago
                 difficulty: 'hard',
-                skills: ['python', 'pandas', 'data_validation'],
+                skills: ['python', 'feature_extraction', 'ml_algorithms'],
                 reward: { money: 600, reputation: 25 }
-            },
-            {
-                id: 'issue_3',
-                number: 44,
-                title: ' Memory leak in large dataset processing',
-                body: 'Processing large datasets (>10GB) causes memory issues. Need to implement chunking or streaming processing.',
-                labels: ['bug', 'performance', 'ml_models'],
-                assignee: null,
-                repository: 'ml_models',
-                createdAt: Date.now() - 259200000, // 3 days ago
-                difficulty: 'hard',
-                skills: ['python', 'memory_optimization', 'data_processing'],
-                reward: { money: 800, reputation: 30 }
-            },
-            {
-                id: 'issue_4',
-                number: 45,
-                title: ' Add support for time series analysis',
-                body: 'Add time series analysis capabilities to the data analysis tools. Should include trend analysis, seasonality detection, and forecasting.',
-                labels: ['enhancement', 'feature', 'data_analysis'],
-                assignee: null,
-                repository: 'data_analysis',
-                createdAt: Date.now() - 345600000, // 4 days ago
-                difficulty: 'very_hard',
-                skills: ['python', 'time_series', 'statistics', 'forecasting'],
-                reward: { money: 1000, reputation: 35 }
-            },
-            {
-                id: 'issue_5',
-                number: 46,
-                title: ' Improve model training pipeline',
-                body: 'The current training pipeline is slow and inefficient. Need to optimize data loading, add distributed training support, and implement checkpointing.',
-                labels: ['enhancement', 'performance', 'ml_models'],
-                assignee: null,
-                repository: 'ml_models',
-                createdAt: Date.now() - 432000000, // 5 days ago
-                difficulty: 'extreme',
-                skills: ['python', 'tensorflow', 'distributed_training', 'optimization'],
-                reward: { money: 1500, reputation: 50 }
             }
         ];
+
+        this.closedIssues = [];
+        this.pullRequests = [];
+
+        this.gameState = {
+            money: 0,
+            reputation: 0
+        };
     }
-    
+
     /**
      * Get open issues
      */
     getOpenIssues(filters = {}) {
         let issues = [...this.openIssues];
-        
+
         // Filter by repository
         if (filters.repository) {
             issues = issues.filter(issue => issue.repository === filters.repository);
         }
-        
+
         // Filter by difficulty
         if (filters.difficulty) {
             issues = issues.filter(issue => issue.difficulty === filters.difficulty);
         }
-        
+
         // Filter by labels
         if (filters.labels && filters.labels.length > 0) {
-            issues = issues.filter(issue => 
+            issues = issues.filter(issue =>
                 filters.labels.some(label => issue.labels.includes(label))
             );
         }
-        
+
         return issues;
     }
-    
+
     /**
      * Assign issue to player
      */
@@ -156,21 +77,21 @@ export class GitHubIssuesSystem {
         if (!issue) {
             return { success: false, message: 'Issue not found' };
         }
-        
+
         if (issue.assignee) {
             return { success: false, message: 'Issue already assigned' };
         }
-        
+
         issue.assignee = 'player';
         issue.assignedAt = Date.now();
-        
+
         return {
             success: true,
             issue: issue,
             message: `Assigned issue #${issue.number}: ${issue.title}`
         };
     }
-    
+
     /**
      * Complete issue (creates pull request)
      */
@@ -179,7 +100,7 @@ export class GitHubIssuesSystem {
         if (!issue) {
             return { success: false, message: 'Issue not assigned to you' };
         }
-        
+
         // Create pull request
         const pullRequest = {
             id: `pr_${Date.now()}`,
@@ -194,15 +115,15 @@ export class GitHubIssuesSystem {
             reviews: [],
             mergeable: true
         };
-        
+
         this.pullRequests.push(pullRequest);
-        
+
         // Move issue to closed
         this.openIssues = this.openIssues.filter(i => i.id !== issueId);
         issue.status = 'closed';
         issue.closedAt = Date.now();
         this.closedIssues.push(issue);
-        
+
         // Apply rewards
         if (issue.reward) {
             if (issue.reward.money) {
@@ -212,7 +133,7 @@ export class GitHubIssuesSystem {
                 this.gameState.reputation += issue.reward.reputation;
             }
         }
-        
+
         return {
             success: true,
             pullRequest: pullRequest,
@@ -220,24 +141,24 @@ export class GitHubIssuesSystem {
             message: `Created pull request #${pullRequest.number} for issue #${issue.number}`
         };
     }
-    
+
     /**
      * Get pull requests
      */
     getPullRequests(filters = {}) {
         let prs = [...this.pullRequests];
-        
+
         if (filters.status) {
             prs = prs.filter(pr => pr.status === filters.status);
         }
-        
+
         if (filters.repository) {
             prs = prs.filter(pr => pr.repository === filters.repository);
         }
-        
+
         return prs;
     }
-    
+
     /**
      * Merge pull request
      */
@@ -246,26 +167,26 @@ export class GitHubIssuesSystem {
         if (!pr) {
             return { success: false, message: 'Pull request not found' };
         }
-        
+
         if (pr.status !== 'open') {
             return { success: false, message: 'Pull request already merged or closed' };
         }
-        
+
         // Check if reviews are required
         if (pr.reviews.length < 1) {
             return { success: false, message: 'Pull request needs at least 1 review' };
         }
-        
+
         pr.status = 'merged';
         pr.mergedAt = Date.now();
-        
+
         return {
             success: true,
             pullRequest: pr,
             message: `Merged pull request #${pr.number}`
         };
     }
-    
+
     /**
      * Generate new issue (randomly)
      */
@@ -296,10 +217,10 @@ export class GitHubIssuesSystem {
                 difficulty: 'hard'
             }
         ];
-        
+
         const template = issueTemplates[Math.floor(Math.random() * issueTemplates.length)];
         const issueNumber = this.openIssues.length + this.closedIssues.length + 1;
-        
+
         const issue = {
             id: `issue_${Date.now()}`,
             number: issueNumber,
@@ -316,9 +237,8 @@ export class GitHubIssuesSystem {
                 reputation: template.difficulty === 'easy' ? 10 : template.difficulty === 'medium' ? 20 : 30
             }
         };
-        
+
         this.openIssues.push(issue);
         return issue;
     }
 }
-
