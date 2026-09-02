@@ -1,79 +1,33 @@
-/**
- * CharacterArcSystem.js
- * Tracks and displays character transformation over time
- * Priority 2 & 3: Narrative Structure & Choice Consequences
- */
-
-export class CharacterArcSystem {
+class CharacterArcSystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.arcHistory = [];
         this.startingState = null;
         this.currentState = null;
-    }
-
-    /**
-     * Initialize character arc
-     */
-    initialize() {
+        this.arcHistory = [];
         this.captureStartingState();
-        this.updateCurrentState();
     }
 
-    /**
-     * Capture starting character state
-     */
     captureStartingState() {
-        if (this.startingState) return; // Already captured
-
-        this.startingState = {
-            ethics: this.gameState.characterStats?.ethics || 0,
-            reputation: this.gameState.reputation || 0,
-            rank: this.gameState.rankIndex || 0,
-            money: this.gameState.money || 100,
-            relationships: this.getRelationshipCount(),
-            days: this.gameState.timeManager?.totalDays || 0,
-            description: 'A newcomer to Data City, full of potential but uncertain of the path ahead.'
-        };
+        if (!this.startingState) {
+            this.startingState = {
+                ...this.gameState,
+                description: this.generateCurrentDescription(this.gameState.ethics, this.gameState.reputation, this.gameState.rank, this.gameState.days)
+            };
+        }
     }
 
-    /**
-     * Update current character state
-     */
-    updateCurrentState() {
-        const ethics = this.gameState.characterStats?.ethics || 0;
-        const reputation = this.gameState.reputation || 0;
-        const rank = this.gameState.rankIndex || 0;
-        const money = this.gameState.money || 0;
-        const relationships = this.getRelationshipCount();
-        const days = this.gameState.timeManager?.totalDays || 0;
-
+    updateGameState(newGameState) {
         this.currentState = {
-            ethics,
-            reputation,
-            rank,
-            money,
-            relationships,
-            days,
-            description: this.generateCurrentDescription(ethics, reputation, rank, days)
+            ...newGameState,
+            description: this.generateCurrentDescription(newGameState.ethics, newGameState.reputation, newGameState.rank, newGameState.days)
         };
-
-        // Track arc progression
         this.trackArcProgression();
     }
 
-    /**
-     * Get relationship count
-     */
     getRelationshipCount() {
-        const npcManager = this.gameState.npcManager;
-        if (!npcManager) return 0;
-        return npcManager.getMetNPCs?.()?.length || 0;
+        return this.gameState.npcManager ? this.gameState.npcManager.length || 0 : 0;
     }
 
-    /**
-     * Generate current character description
-     */
     generateCurrentDescription(ethics, reputation, rank, days) {
         const ethicsDesc = this.getEthicsDescription(ethics);
         const careerDesc = this.getCareerDescription(rank, reputation);
@@ -82,9 +36,6 @@ export class CharacterArcSystem {
         return `${ethicsDesc} ${careerDesc} ${timeDesc}`;
     }
 
-    /**
-     * Get ethics description
-     */
     getEthicsDescription(ethics) {
         if (ethics < -30) {
             return 'You\'ve walked a dark path, making choices that prioritize profit over principles.';
@@ -99,9 +50,6 @@ export class CharacterArcSystem {
         }
     }
 
-    /**
-     * Get career description
-     */
     getCareerDescription(rank, reputation) {
         if (rank >= 6) {
             return 'You\'ve reached the pinnacle of your career, a respected leader in the industry.';
@@ -114,9 +62,6 @@ export class CharacterArcSystem {
         }
     }
 
-    /**
-     * Get time description
-     */
     getTimeDescription(days) {
         if (days >= 180) {
             return 'Months have passed, and you\'ve seen the city change around you.';
@@ -129,9 +74,6 @@ export class CharacterArcSystem {
         }
     }
 
-    /**
-     * Track arc progression
-     */
     trackArcProgression() {
         if (!this.startingState) return;
 
@@ -158,9 +100,6 @@ export class CharacterArcSystem {
         }
     }
 
-    /**
-     * Determine arc direction
-     */
     determineArcDirection(changes) {
         if (changes.ethics < -20 && changes.money > 50000) {
             return 'corruption';
@@ -177,9 +116,6 @@ export class CharacterArcSystem {
         }
     }
 
-    /**
-     * Check if change is significant
-     */
     isSignificantChange(changes) {
         return Math.abs(changes.ethics) >= 10 ||
                Math.abs(changes.reputation) >= 100 ||
@@ -188,9 +124,6 @@ export class CharacterArcSystem {
                changes.relationships > 0;
     }
 
-    /**
-     * Get arc summary
-     */
     getArcSummary() {
         if (!this.startingState || !this.currentState) {
             return {
@@ -215,9 +148,6 @@ export class CharacterArcSystem {
         };
     }
 
-    /**
-     * Get transformation description
-     */
     getTransformationDescription() {
         if (!this.startingState || !this.currentState) return 'No transformation yet.';
 
@@ -242,9 +172,6 @@ export class CharacterArcSystem {
         }
     }
 
-    /**
-     * Get arc milestones
-     */
     getArcMilestones() {
         return this.arcHistory.map(entry => ({
             day: entry.days,
@@ -253,9 +180,6 @@ export class CharacterArcSystem {
         }));
     }
 
-    /**
-     * Get milestone description
-     */
     getMilestoneDescription(entry) {
         const { changes, direction } = entry;
 
