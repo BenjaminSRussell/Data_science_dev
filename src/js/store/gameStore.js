@@ -12,7 +12,7 @@ import { RANKS } from '../data/ranks.js';
 
 
 // Display visible debug info on page (wait for DOM)
-if (typeof document !== 'undefined') {
+if (import.meta.env.DEV && typeof document !== 'undefined') {
     const showDebug = () => {
         if (document.body) {
             const debugDiv = document.createElement('div');
@@ -35,7 +35,7 @@ if (typeof document !== 'undefined') {
 try {
     if (typeof localStorage === 'undefined') {
         console.error('[DEBUG] localStorage is not available!');
-        if (typeof document !== 'undefined') {
+        if (import.meta.env.DEV && typeof document !== 'undefined') {
             const errDiv = document.getElementById('debug-store-info');
             if (errDiv) errDiv.innerHTML = 'localStorage unavailable!';
         }
@@ -316,7 +316,7 @@ try {
     );
 
     // #region agent log
-    if (typeof document !== 'undefined') {
+    if (import.meta.env.DEV && typeof document !== 'undefined') {
         const debugDiv = document.getElementById('debug-store-info');
         if (debugDiv) debugDiv.innerHTML = ' Zustand store created';
     }
@@ -329,7 +329,7 @@ try {
         name: error.name
     });
     // #region agent log
-    if (typeof document !== 'undefined') {
+    if (import.meta.env.DEV && typeof document !== 'undefined') {
         const debugDiv = document.getElementById('debug-store-info');
         if (debugDiv) {
             debugDiv.style.borderColor = '#f00';
@@ -495,7 +495,7 @@ try {
     }));
 
     // #region agent log
-    if (typeof document !== 'undefined') {
+    if (import.meta.env.DEV && typeof document !== 'undefined') {
         const debugDiv = document.getElementById('debug-store-info');
         if (debugDiv) {
             debugDiv.style.borderColor = '#ff0';
