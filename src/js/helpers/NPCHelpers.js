@@ -1,32 +1,10 @@
 /**
- * NPCHelpers.js
- * Helper functions for NPC interactions, dialogues, and relationships
- * Cleanup: Uses centralized utilities
- */
-
-import { getTextIcon } from '../utils/IconMapper.js';
-import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
-import { DialogueUI } from '../ui/DialogueUI.js';
-import { DOMUtils } from '../utils/DOMUtils.js';
-import { logger } from '../utils/Logger.js';
-
-/**
- * Handle visiting an NPC (opens clean dialogue interface)
+ * Visit an NPC
  */
 export function handleVisitNPC(game, npcId) {
-    const npc = game.gameState.npcManager.getNPC(npcId);
+    const npc = game.gameState.npcManager.getNPCById(npcId);
     if (!npc) return;
 
-    // Use new DialogueUI for clean, responsive dialogue
-    if (!game.dialogueUI) {
-        game.dialogueUI = new DialogueUI(game);
-    }
-
-    const relationshipLevel = game.gameState.npcManager.getRelationship?.(npcId) || 0;
-    game.dialogueUI.open(npc, relationshipLevel);
-    return;
-
-    // Fallback to modal if conversation screen not available
     const tier = game.gameState.npcManager.getRelationshipTier(npc.id);
     const npcImage = getNPCImage(npc);
     const fallbackIcon = getNPCFallback(npc);
@@ -178,6 +156,8 @@ export function updateRelationshipsScreen(game) {
 
     grid.textContent = '';
 
+    const cards = [];
+
     npcs.forEach(npc => {
         const card = document.createElement('div');
         card.className = 'npc-card';
@@ -235,7 +215,7 @@ export function updateRelationshipsScreen(game) {
             handleVisitNPC(game, npc.id);
         });
 
-        return card;
+        cards.push(card);
     });
 
     grid.appendChild(DOMUtils.batch(cards));
@@ -247,6 +227,3 @@ export function updateRelationshipsScreen(game) {
 export function interactWithNPC(game, npcId) {
     handleVisitNPC(game, npcId);
 }
-
-
-
