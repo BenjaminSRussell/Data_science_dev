@@ -351,6 +351,7 @@ export class SaveSlotManager {
                 </div>
                 <div class="slot-item-footer">
                     <span class="slot-item-last-played">${lastPlayedText}</span>
+                    <span class="slot-item-completion">${completion}% complete</span>
                 </div>
             </div>
         `;
