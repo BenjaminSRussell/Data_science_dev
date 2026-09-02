@@ -134,6 +134,10 @@ export class ActTransitionScreen {
             items.push(`<div class="summary-item"><strong>Your Path:</strong> ${ethicsDesc}</div>`);
         }
 
+        if (summary.playtime) {
+            items.push(`<div class="summary-item"><strong>Time Played:</strong> ${summary.playtime} days</div>`);
+        }
+
         return items.length > 0 ? items.join('') : '<p>Your journey continues...</p>';
     }
 
@@ -211,7 +215,8 @@ export class ActTransitionScreen {
             decisions: 0,
             progress: '',
             relationships: 0,
-            ethics: 0
+            ethics: 0,
+            playtime: 0
         };
 
         // Count decisions
@@ -234,6 +239,11 @@ export class ActTransitionScreen {
         // Ethics
         if (gameState.characterStats) {
             summary.ethics = gameState.characterStats.ethics || 0;
+        }
+
+        // Playtime
+        if (timeManager) {
+            summary.playtime = timeManager.totalDays || 0;
         }
 
         return summary;
