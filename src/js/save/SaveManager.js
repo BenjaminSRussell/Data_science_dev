@@ -1,164 +1,29 @@
-/**
- * SaveManager - Handles game save/load using LocalStorage
- * Supports multiple save slots (0-4) for multiple playthroughs
- */
-
-const SAVE_KEY_PREFIX = 'data_science_tycoon_save_';
-const SAVE_VERSION = 1;
-const MAX_SAVE_SLOTS = 5;
-
-export class SaveManager {
+class SaveManager {
     constructor() {
         this.autoSaveInterval = null;
     }
 
     /**
-     * Save game to LocalStorage
-     * @param {GameState} gameState - The game state to save
-     * @param {number} slotIndex - Save slot index (0-4), defaults to 0
-     * @returns {boolean} Success status
+     * Save game state to localStorage
+     * @param {GameState} gameState - Game state to save
+     * @param {number} slotIndex - Target slot index, defaults to 0
      */
     saveGame(gameState, slotIndex = 0) {
-        try {
-            if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
-                console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
-                return false;
-            }
+        const saveData = {
+            slotIndex: slotIndex,
+            timestamp: Date.now(),
+            version: gameState.version,
+            state: gameState.toJSON(),
+            metadata: gameState.metadata || {}
+        };
 
-            const saveData = {
-                version: SAVE_VERSION,
-                timestamp: Date.now(),
-                slotIndex: slotIndex,
-                metadata: {
-                    name: this.getSlotName(slotIndex) || `Save Slot ${slotIndex + 1}`,
-                    createdAt: this.getSlotCreatedAt(slotIndex) || Date.now(),
-                    lastPlayed: Date.now()
-                },
-                state: gameState.toJSON()
-            };
-
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.setItem(saveKey, JSON.stringify(saveData));
-
-            return true;
-        } catch (error) {
-            console.error('Failed to save game:', error);
-            return false;
-        }
+        const saveKey = SAVE_KEY_PREFIX + slotIndex;
+        localStorage.setItem(saveKey, JSON.stringify(saveData));
     }
 
     /**
-     * Load game from LocalStorage
-     * @param {GameState} gameState - The game state to load into
-     * @param {number} slotIndex - Save slot index (0-4), defaults to 0
-     * @returns {boolean} Success status
-     */
-    loadGame(gameState, slotIndex = 0) {
-        try {
-            if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
-                console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
-                return false;
-            }
-
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            const saveData = localStorage.getItem(saveKey);
-
-            if (!saveData) {
-
-                return false;
-            }
-
-            const parsed = JSON.parse(saveData);
-
-            // Check version compatibility
-            if (parsed.version !== SAVE_VERSION) {
-                console.warn('Save version mismatch, may need migration');
-                // Add migration logic here for future versions
-            }
-
-            gameState.fromJSON(parsed.state);
-
-            // Update last played timestamp
-            if (parsed.metadata) {
-                parsed.metadata.lastPlayed = Date.now();
-                localStorage.setItem(saveKey, JSON.stringify(parsed));
-            }
-
-
-            return true;
-        } catch (error) {
-            console.error('Failed to load game:', error);
-            return false;
-        }
-    }
-
-    /**
-     * Check if a save exists
-     * @param {number} slotIndex - Optional slot index to check, if not provided checks all slots
-     * @returns {boolean} True if save exists
-     */
-    hasSave(slotIndex = null) {
-        if (slotIndex !== null) {
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            return localStorage.getItem(saveKey) !== null;
-        }
-
-        // Check all slots
-        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
-            if (localStorage.getItem(SAVE_KEY_PREFIX + i) !== null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Get the most recent save slot index
-     * @returns {number|null} Slot index of most recent save, or null if no saves
-     */
-    getMostRecentSlot() {
-        let mostRecent = null;
-        let mostRecentTime = 0;
-
-        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
-            const saveData = this.getSaveData(i);
-            if (saveData) {
-                const timestamp = saveData.metadata?.lastPlayed || saveData.timestamp || 0;
-                if (timestamp > mostRecentTime) {
-                    mostRecentTime = timestamp;
-                    mostRecent = i;
-                }
-            }
-        }
-
-        return mostRecent;
-    }
-
-    /**
-     * Clear save data
-     * @param {number} slotIndex - Save slot index to clear, defaults to 0
-     * @returns {boolean} Success status
-     */
-    clearSave(slotIndex = 0) {
-        try {
-            if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
-                console.error(`Invalid slot index: ${slotIndex}`);
-                return false;
-            }
-
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.removeItem(saveKey);
-
-            return true;
-        } catch (error) {
-            console.error('Failed to clear save:', error);
-            return false;
-        }
-    }
-
-    /**
-     * Export save as JSON string
-     * @param {number} slotIndex - Save slot index to export, defaults to 0
+     * Export save to base64 encoded string
+     * @param {number} slotIndex - Source slot index, defaults to 0
      * @returns {string|null} Base64 encoded save data
      */
     exportSave(slotIndex = 0) {
@@ -192,9 +57,8 @@ export class SaveManager {
             }
 
             const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.setItem(saveKey, JSON.stringify(saveData));
+            localStorage.setItem(saveKey, JSON.stringify(parsed));
             gameState.fromJSON(parsed.state);
-
 
             return true;
         } catch (error) {
@@ -217,8 +81,6 @@ export class SaveManager {
                 this.saveGame(gameState, slotIndex);
             }
         }, intervalMs);
-
-
     }
 
     /**
