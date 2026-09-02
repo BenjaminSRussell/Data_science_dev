@@ -1,102 +1,32 @@
 /**
  * MissingAssetBlocklist.js
- * Auto-generated list of known missing assets to prevent 404s.
- * Used by AssetManager to serve fallbacks.
+ * Manages a list of missing assets to handle gracefully
  */
-export const MISSING_ASSETS = new Set([
-    "assets/characters/sprites/character_sheet.png",
-    "assets/characters/sprites/emotion_sheet.png",
-    "downloaded_assets/characters/sprites/generated_low_poly_character_0000.png",
-    "downloaded_assets/characters/sprites/generated_low_poly_character_0001.png",
-    "downloaded_assets/characters/sprites/generated_low_poly_character_0002.png",
-    "assets/characters/emotions/excited.png",
-    "assets/characters/emotions/thinking.png",
-    "assets/characters/emotions/crying.png",
-    "assets/characters/emotions/yelling.png",
-    "assets/characters/emotions/fighting.png",
-    "assets/characters/emotions/grateful.png",
-    "assets/characters/emotions/jealous.png",
-    "assets/characters/emotions/hurt.png",
-    "assets/characters/emotions/embarrassed.png",
-    "assets/characters/emotions/proud.png",
-    "assets/characters/emotions/worried.png",
-    "assets/characters/emotions/relieved.png",
-    "assets/characters/emotions/surprised.png",
-    "assets/characters/emotions/disappointed.png",
-    "assets/characters/emotions/hopeful.png",
-    "assets/characters/emotions/confused.png",
-    "assets/characters/emotions/determined.png",
-    "assets/characters/emotions/tired.png",
-    "assets/characters/emotions/content.png",
-    "assets/characters/body_language/standing.png",
-    "assets/characters/body_language/sitting.png",
-    "assets/characters/body_language/walking.png",
-    "assets/characters/body_language/talking.png",
-    "assets/characters/body_language/listening.png",
-    "assets/characters/body_language/thinking.png",
-    "assets/characters/body_language/explaining.png",
-    "assets/characters/body_language/working.png",
-    "assets/characters/body_language/typing.png",
-    "assets/characters/body_language/reading.png",
-    "assets/characters/body_language/presenting.png",
-    "assets/characters/body_language/happy_pose.png",
-    "assets/characters/body_language/sad_pose.png",
-    "assets/characters/body_language/angry_pose.png",
-    "assets/characters/body_language/defensive.png",
-    "assets/characters/body_language/open.png",
-    "assets/characters/body_language/crying_pose.png",
-    "assets/characters/body_language/yelling_pose.png",
-    "assets/characters/body_language/fighting_pose.png",
-    "assets/characters/body_language/greeting.png",
-    "assets/characters/body_language/handshake.png",
-    "assets/characters/body_language/hugging.png",
-    "assets/characters/body_language/pointing.png",
-    "assets/characters/body_language/nodding.png",
-    "assets/characters/body_language/shaking_head.png",
-    "assets/characters/body_language/resting.png",
-    "assets/characters/body_language/sleeping.png",
-    "assets/characters/body_language/stretching.png",
-    "assets/map/grass.png",
-    "assets/map/roads/main_horizontal.png",
-    "assets/map/roads/main_vertical.png",
-    "assets/map/roads/secondary_horizontal.png",
-    "assets/map/roads/secondary_vertical.png",
-    "assets/map/buildings/residence.png",
-    "assets/map/buildings/work.png",
-    "assets/map/buildings/education.png",
-    "assets/map/buildings/finance.png",
-    "assets/map/buildings/government.png",
-    "assets/map/buildings/shop.png",
-    "assets/map/buildings/social.png",
-    "assets/map/buildings/training.png",
-    "assets/map/buildings/business.png",
-    "assets/map/buildings/elite.png",
-    "assets/map/parks/tree.png",
-    "assets/map/parks/grass_park.png",
-    "assets/characters/emotions/happy.png",
-    "assets/characters/emotions/sad.png",
-    "assets/characters/emotions/angry.png",
-    "assets/characters/emotions/neutral.png",
-    "assets/npcs/the_hacker.png",
-    "assets/icons/vehicles/sedan.png",
-    "assets/characters/sprites/basic_character_sheet.png",
-    "assets/characters/sprites/mid_character_sheet.png",
-    "assets/characters/sprites/premium_character_sheet.png",
-    "assets/icons/features/bed.png",
-    "assets/icons/locations/home_icon.png",
-    "assets/icons/locations/office_icon.png",
-    "assets/icons/locations/coffee_icon.png",
-    "assets/icons/locations/university_icon.png",
-    "assets/icons/locations/bank_icon.png",
-    "assets/icons/locations/park_icon.png",
-    "assets/icons/map/marker.png",
-    "assets/icons/map/player.png",
-    "assets/icons/map/location_pin.png"
-]);
 
-export function isAssetMissing(path) {
-    if (!path) return true;
-    // Normalize path just in case
-    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-    return MISSING_ASSETS.has(cleanPath);
+export class MissingAssetBlocklist {
+    constructor() {
+        this.MISSING_ASSETS = new Set([
+            'characters/placeholder.png',
+            'backgrounds/default.png',
+            'icons/question.png',
+            'ui/loading.gif',
+            'vehicles/car_placeholder.png'
+        ]);
+    }
+
+    /**
+     * Check if an asset is missing
+     * @param {string} path - The asset path to check
+     * @returns {boolean} - True if the asset is missing, false otherwise
+     */
+    isAssetMissing(path) {
+        if (!path) {
+            return true; // Falsy input guard
+        }
+
+        // Normalize path by stripping leading slash if present
+        const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
+
+        return this.MISSING_ASSETS.has(normalizedPath);
+    }
 }
