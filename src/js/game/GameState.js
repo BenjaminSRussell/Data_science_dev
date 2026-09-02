@@ -320,7 +320,8 @@ export class GameState {
             
             // Phase 1 Visual Systems (save quality settings)
             performanceManager: this.performanceManager ? {
-                quality: this.performanceManager.quality
+                quality: this.performanceManager.quality,
+                autoMode: this.performanceManager.autoMode
             } : null
         };
     }
@@ -391,6 +392,9 @@ export class GameState {
         // Restore Phase 1 Visual Systems settings
         if (this.performanceManager && data.performanceManager) {
             this.performanceManager.setQuality(data.performanceManager.quality || 'auto');
+            // Restore auto mode flag (setQuality('auto') re-enables it; a concrete
+            // level disables it, matching the saved autoMode value)
+            this.performanceManager.autoMode = data.performanceManager.autoMode ?? (data.performanceManager.quality === 'auto');
         }
     }
 }
