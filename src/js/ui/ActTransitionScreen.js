@@ -24,20 +24,21 @@ export class ActTransitionScreen {
             overlay.classList.add('active');
         }, 100);
 
-        // Auto-advance after delay or on click
-        const continueBtn = overlay.querySelector('.act-continue-btn');
-        continueBtn.addEventListener('click', () => {
-            this.closeTransition(overlay);
-        });
-
         // Also close on escape
         const closeHandler = (e) => {
             if (e.key === 'Escape') {
-                this.closeTransition(overlay);
                 document.removeEventListener('keydown', closeHandler);
+                this.closeTransition(overlay);
             }
         };
         document.addEventListener('keydown', closeHandler);
+
+        // Auto-advance after delay or on click
+        const continueBtn = overlay.querySelector('.act-continue-btn');
+        continueBtn.addEventListener('click', () => {
+            document.removeEventListener('keydown', closeHandler);
+            this.closeTransition(overlay);
+        });
     }
 
     /**
