@@ -1,40 +1,91 @@
 /**
- * Option Testing System
- * Tests all clickable options and buttons to ensure they don't crash
+ * OptionTester.js
+ * Developer utility for testing UI options
  */
 
-export class OptionTester {
-    constructor(game) {
-        this.game = game;
-        this.results = [];
+import BaseComponent from './BaseComponent.js';
+import { html, css } from 'lit';
+
+export class OptionTester extends BaseComponent {
+    static properties = {
+        game: { type: Object }
+    };
+
+    static styles = css`
+        :host {
+            display: block;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            margin: 5px;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    `;
+
+    constructor() {
+        super();
+        this.game = null;
+        this.results = {};
     }
 
-    async testAll() {
+    render() {
+        return html`
+            <div>
+                <game-button label="Test All Options" onclick="${() => this.testAllOptions()}"></game-button>
+                <game-button label="Test Buttons" onclick="${() => this.testButtons()}"></game-button>
+                <game-button label="Test Dropdowns" onclick="${() => this.testDropdowns()}"></game-button>
+                <game-button label="Test Inputs" onclick="${() => this.testInputs()}"></game-button>
+            </div>
+            ${this.results.total ? html`
+                <div class="results">
+                    <h3>Test Results</h3>
+                    <p>Total Tests: ${this.results.total}</p>
+                    <p>Passed: ${this.results.passed}</p>
+                    <p>Failed: ${this.results.failed}</p>
+                    ${this.results.errors.length > 0 ? html`
+                        <h4>Errors</h4>
+                        <ul>
+                            ${this.results.errors.map(error => html`
+                                <li>${error.element}: ${error.error}</li>
+                            `)}
+                        </ul>
+                    ` : ''}
+                </div>
+            ` : ''}
+        `;
+    }
+
+    async testAllOptions() {
         const results = {
             total: 0,
             passed: 0,
             failed: 0,
-            errors: [],
-            screens: []
+            buttons: [],
+            screens: [],
+            errors: []
         };
 
         // Test all buttons
         const buttons = this.getAllButtons();
-        results.total = buttons.length;
-
         for (const btn of buttons) {
             try {
-                const testResult = await this.testButton(btn);
-                if (testResult.success) {
+                const buttonResults = await this.testButton(btn);
+                results.buttons.push({ element: this.getElementId(btn), ...buttonResults });
+                if (buttonResults.success) {
                     results.passed++;
                 } else {
                     results.failed++;
-                    results.errors.push({
-                        element: this.getElementId(btn),
-                        error: testResult.error
-                    });
                 }
-                await this.wait(50); // Small delay between tests
             } catch (error) {
                 results.failed++;
                 results.errors.push({
@@ -210,11 +261,12 @@ export class OptionTester {
     }
 
     getElementId(element) {
-        return element.id || element.className || element.tagName || 'unknown';
+        // Fallback chain: element.id, element.className, element.tagName
+        // Every element has a non-empty tagName, so 'unknown' is unreachable
+        return element.id || element.className || element.tagName;
     }
 
     wait(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
-
