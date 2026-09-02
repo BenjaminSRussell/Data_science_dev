@@ -1,105 +1,121 @@
-import os
 import re
 import shutil
+from pathlib import Path
 
-# Config
-MANIFEST_PATH = 'ASSET_MANIFEST.md'
-WORKBENCH_DIR = '_ASSET_WORKBENCH'
-TODO_PLACEHOLDER_SOURCE = 'downloaded_assets/ui/elements/generated_low_poly_star_0279.png' # Using the star as "TODO"
-
-def sanitize_filename(name):
-    # dynamic filename generation: "Rachel Green" -> "rachel_green.png"
-    # "Small Business" -> "small_business.png"
-    # Remove emojis if any (simple regex for basic ascii names, might need more for emojis)
-    name = re.sub(r'[^\w\s-]', '', name).strip().lower()
-    name = re.sub(r'[-\s]+', '_', name)
-    return f"{name}.png"
+# Define constants
+ASSET_MANIFEST = 'ASSET_MANIFEST.md'
+PLACEHOLDER_PATH = 'PLACEHOLDER_IMAGE.png'
+DESTINATION_DIR = 'workbench'
+SOURCE_DIR = 'assets'
 
 def parse_manifest_and_create_workbench():
-    if os.path.exists(WORKBENCH_DIR):
-        print(f"cleaning existing {WORKBENCH_DIR}...")
-        shutil.rmtree(WORKBENCH_DIR)
-    os.makedirs(WORKBENCH_DIR)
+    manifest_path = Path(ASSET_MANIFEST)
+    if not manifest_path.exists():
+        raise FileNotFoundError(f"Manifest file {ASSET_MANIFEST} not found.")
     
-    current_category = "Uncategorized"
+    destination = Path(DESTINATION_DIR)
+    destination.mkdir(parents=True, exist_ok=True)
     
-    with open(MANIFEST_PATH, 'r') as f:
-        lines = f.readlines()
-        
-    print(f"Parsing {MANIFEST_PATH}...")
-    
-    # ensure todo source exists
-    if not os.path.exists(TODO_PLACEHOLDER_SOURCE):
-        print(f"Warning: TODO source {TODO_PLACEHOLDER_SOURCE} not found. Creating a blank one.")
-        with open(TODO_PLACEHOLDER_SOURCE, 'wb') as f:
-            f.write(b'') # blank file
-
-    for line in lines:
-        line = line.strip()
-        
-        # Check for Category Header
-        header_match = re.match(r'^## \d+\. (.+) \(', line)
-        if header_match:
-            current_category = header_match.group(1).replace(' ', '_')
-            print(f"Processing Category: {current_category}")
-            os.makedirs(os.path.join(WORKBENCH_DIR, current_category), exist_ok=True)
-            continue
+    category = None
+    with manifest_path.open('r') as file:
+        for line_number, line in enumerate(file, 1):
+            line = line.strip()
+            if not line:
+                continue
             
-        # Check for Table Row
-        # Looking for rows with | ... | ... |
-        if not line.startswith('|') or '---' in line or 'Preview' in line:
-            continue
+            if line.startswith('# '):
+                # Parse category header
+                category_match = re.match(r'# ([^\n]+)', line)
+                if category_match:
+                    category = category_match.group(1).strip()
+                    category_dir = destination / category
+                    category_dir.mkdir(parents=True, exist_ok=True)
+                    logger.info(f"Created category directory: {category_dir}")
+                else:
+                    logger.warning(f"Invalid category header at line {line_number}: {line}")
+                continue
             
-        parts = [p.strip() for p in line.split('|')]
-        if len(parts) < 5:
-            continue
+            row = line.split('|')
+            if len(row) < 5:
+                logger.warning(f"Skipping malformed row at line {line_number}: {line}")
+                continue
             
-        # Format: | Preview | Name | Path | Status | ...
-        # parts[0] is empty string (before first |)
-        # parts[1] is Preview
-        # parts[2] is Name (Item/NPC Name)
-        # parts[3] is Path
-        # parts[4] is Status
-        
-        preview_col = parts[1]
-        name_col = parts[2]
-        path_col = parts[3]
-        status_col = parts[4]
-
-        # Extract name
-        name = name_col.replace('**', '') # cleanup md bold if any
-        
-        # Extract path
-        path_match = re.search(r'`([^`]+)`', path_col)
-        source_path = path_match.group(1) if path_match else None
-        
-        # Determine filename
-        filename = ""
-        if source_path:
-            filename = os.path.basename(source_path)
-        else:
-            filename = sanitize_filename(name)
+            status = row[1].strip()
+            source_path = row[2].strip()
             
-        dest_path = os.path.join(WORKBENCH_DIR, current_category, filename)
-        
-        # Action based on status
-        if "EXISTS" in status_col or "PENDING" in status_col:
-            # Copy existing file
-            if source_path and os.path.exists(source_path.lstrip('/')):
-                # remove leading slash for local path
-                real_source = source_path.lstrip('/')
-                shutil.copy2(real_source, dest_path)
-                # print(f"Copied {real_source} -> {dest_path}")
+            if not category:
+                logger.warning(f"Asset row outside of a category at line {line_number}: {line}")
+                continue
+            
+            asset_name = row[3].strip()
+            destination_path = category_dir / asset_name
+            
+            if status == 'EXISTS':
+                if (Path(SOURCE_DIR) / source_path).exists():
+                    shutil.copy2(Path(SOURCE_DIR) / source_path, destination_path)
+                    logger.info(f"Copied asset: {source_path} to {destination_path}")
+                else:
+                    logger.warning(f"MISSING FILE: {source_path} not found, using placeholder.")
+                    shutil.copy2(PLACEHOLDER_PATH, destination_path)
+            elif status == 'PENDING':
+                if (Path(SOURCE_DIR) / source_path).exists():
+                    shutil.copy2(Path(SOURCE_DIR) / source_path, destination_path)
+                    logger.info(f"Copied pending asset: {source_path} to {destination_path}")
+                else:
+                    shutil.copy2(PLACEHOLDER_PATH, destination_path)
+                    logger.warning(f"MISSING FILE: {source_path} not found, using placeholder.")
+            elif status == 'MISSING':
+                shutil.copy2(PLACEHOLDER_PATH, destination_path)
+                logger.info(f"Using placeholder for missing asset: {asset_name}")
             else:
-                print(f"MISSING FILE FOR EXISTING ENTRY: {source_path}")
-                shutil.copy2(TODO_PLACEHOLDER_SOURCE, dest_path)
-                
-        elif "MISSING" in status_col:
-            # Create TODO placeholder
-            shutil.copy2(TODO_PLACEHOLDER_SOURCE, dest_path)
-            # print(f"Created Placeholder -> {dest_path}")
+                logger.warning(f"Invalid status '{status}' for asset {asset_name} at line {line_number}")
 
-    print(f"\nSuccess! Asset Workbench created at {WORKBENCH_DIR}")
+# Test cases
+def test_parse_manifest_and_create_workbench(tmp_path, monkeypatch):
+    # Create synthetic manifest and files
+    manifest_content = """
+# Characters
+| Status | Source Path | Asset Name | Description | Notes |
+|--------|-------------|------------|-------------|-------|
+| EXISTS | assets/char1.png | char1.png | Character 1 |       |
+| PENDING | assets/char2.png | char2.png | Character 2 |       |
+| MISSING | assets/char3.png | char3.png | Character 3 |       |
+| INVALID | assets/char4.png | char4.png | Character 4 |       |
+"""
+    manifest_path = tmp_path / ASSET_MANIFEST
+    manifest_path.write_text(manifest_content)
+    
+    source_dir = tmp_path / SOURCE_DIR
+    source_dir.mkdir()
+    (source_dir / 'char1.png').write_text('char1 content')
+    
+    placeholder_path = tmp_path / PLACEHOLDER_PATH
+    placeholder_path.write_text('placeholder content')
+    
+    # Monkeypatch constants
+    monkeypatch.setattr('tools.create_asset_workbench.ASSET_MANIFEST', str(manifest_path))
+    monkeypatch.setattr('tools.create_asset_workbench.PLACEHOLDER_PATH', str(placeholder_path))
+    monkeypatch.setattr('tools.create_asset_workbench.DESTINATION_DIR', str(tmp_path / DESTINATION_DIR))
+    monkeypatch.setattr('tools.create_asset_workbench.SOURCE_DIR', str(source_dir))
+    
+    # Run the function
+    parse_manifest_and_create_workbench()
+    
+    # Assert on the resulting directory tree
+    destination_dir = tmp_path / DESTINATION_DIR
+    assert destination_dir.exists()
+    assert (destination_dir / 'Characters').exists()
+    
+    assert (destination_dir / 'Characters' / 'char1.png').exists()
+    assert (destination_dir / 'Characters' / 'char1.png').read_text() == 'char1 content'
+    
+    assert (destination_dir / 'Characters' / 'char2.png').exists()
+    assert (destination_dir / 'Characters' / 'char2.png').read_text() == 'placeholder content'
+    
+    assert (destination_dir / 'Characters' / 'char3.png').exists()
+    assert (destination_dir / 'Characters' / 'char3.png').read_text() == 'placeholder content'
+    
+    assert not (destination_dir / 'Characters' / 'char4.png').exists()
 
 if __name__ == "__main__":
     parse_manifest_and_create_workbench()
