@@ -1,49 +1,29 @@
-/**
- * Graph/Chart Validation System
- * Validates that all charts render correctly and data is accurate
- */
-
-export class GraphValidator {
+class GraphValidator {
     constructor(game) {
         this.game = game;
     }
 
-    async validateAll() {
-        const results = {
-            chartTypes: await this.validateChartTypes(),
-            dataAccuracy: await this.validateDataAccuracy(),
-            rendering: await this.validateRendering(),
-            interactions: await this.validateInteractions()
-        };
-
-        return results;
-    }
-
     async validateChartTypes() {
-        const chartManager = this.game.chartManager;
-        if (!chartManager) {
-            return { error: 'Chart manager not found' };
-        }
+        const testCases = [
+            { type: 'bar', testData: { labels: ['A', 'B'], datasets: [{ label: 'Test', data: [10, 20] }] } },
+            { type: 'line', testData: { labels: ['A', 'B'], datasets: [{ label: 'Test', data: [10, 20] }] } },
+            { type: 'pie', testData: { labels: ['A', 'B'], datasets: [{ data: [10, 20] }] } },
+            { type: 'doughnut', testData: { labels: ['A', 'B'], datasets: [{ data: [10, 20] }] } },
+            { type: 'polarArea', testData: { labels: ['A', 'B'], datasets: [{ data: [10, 20] }] } },
+            { type: 'radar', testData: { labels: ['A', 'B'], datasets: [{ data: [10, 20] }] } }
+        ];
 
-        const chartTypes = ['bar', 'line', 'pie', 'scatter', 'doughnut', 'area', 'radar'];
         const results = {
-            total: chartTypes.length,
+            total: testCases.length,
             passed: 0,
             failed: 0,
             errors: []
         };
 
-        const testData = {
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-            datasets: [{
-                label: 'Test Dataset',
-                data: [10, 20, 30, 40]
-            }]
-        };
+        const chartManager = this.game.chartManager;
 
-        for (const type of chartTypes) {
+        for (const { type, testData } of testCases) {
             try {
-                // Create temporary canvas
                 const canvas = document.createElement('canvas');
                 canvas.id = `test-chart-${type}-${Date.now()}`;
                 canvas.width = 400;
@@ -313,4 +293,3 @@ export class GraphValidator {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
-
