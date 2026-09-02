@@ -1,25 +1,11 @@
-/**
- * IDESystem.js
- * IDE for coding yourself to earn money
- */
-
-export class IDESystem {
+class IDESystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.currentProject = null;
-        this.completedProjects = [];
-        this.availableProjects = this.initializeProjects();
-    }
-
-    /**
-     * Initialize coding projects
-     */
-    initializeProjects() {
-        return [
+        this.availableProjects = [
             {
-                id: 'simple_script',
-                name: 'Simple Automation Script',
-                description: 'Write a Python script to automate data entry',
+                id: 'data_entry',
+                name: 'Data Entry Automation',
+                description: 'Automate a simple data entry process',
                 difficulty: 2,
                 timeRequired: 4,
                 basePay: 200,
@@ -139,18 +125,16 @@ function createDashboard(data) {
                 ]
             }
         ];
+        this.currentProject = null;
+        this.completedProjects = [];
     }
 
-    /**
-     * Start a coding project
-     */
     startProject(projectId) {
         const project = this.availableProjects.find(p => p.id === projectId);
         if (!project) {
             return { success: false, message: 'Project not found.' };
         }
 
-        // Check if player has required skills
         const intelligence = this.gameState.characterStats?.getStat('intelligence') || 0;
         if (intelligence < project.difficulty * 10) {
             return { 
@@ -173,9 +157,6 @@ function createDashboard(data) {
         };
     }
 
-    /**
-     * Submit code for project
-     */
     submitCode(code) {
         if (!this.currentProject) {
             return { success: false, message: 'No active project.' };
@@ -183,14 +164,11 @@ function createDashboard(data) {
 
         const project = this.currentProject;
         
-        // Simple validation (in real game, would have actual code execution)
         const quality = this.evaluateCode(code, project);
         
-        // Calculate pay based on quality
         const pay = Math.floor(project.basePay * quality);
         this.gameState.money += pay;
 
-        // XP rewards
         if (project.skills) {
             project.skills?.forEach(skill => {
                 const xp = project.difficulty * 10 * quality;
@@ -198,7 +176,6 @@ function createDashboard(data) {
             });
         }
 
-        // Complete project
         this.completedProjects.push({
             projectId: project.id,
             completedAt: Date.now(),
@@ -220,25 +197,19 @@ function createDashboard(data) {
         };
     }
 
-    /**
-     * Evaluate code quality (simplified)
-     */
     evaluateCode(code, project) {
         let quality = 0.5; // Base quality
 
-        // Check if code is not just template
         if (code !== project.codeTemplate) {
             quality += 0.2;
         }
 
-        // Check code length (more code = more effort)
         const codeLength = code.split('\n').length;
         const templateLength = project.codeTemplate.split('\n').length;
         if (codeLength > templateLength * 1.5) {
             quality += 0.1;
         }
 
-        // Check for common patterns (simplified)
         if (code.includes('def ') || code.includes('function ')) {
             quality += 0.1;
         }
@@ -246,15 +217,11 @@ function createDashboard(data) {
             quality += 0.1;
         }
 
-        // Random factor (simulating code quality assessment)
         quality += (Math.random() - 0.5) * 0.2;
 
         return Math.max(0.3, Math.min(1.0, quality));
     }
 
-    /**
-     * Get available projects based on skills
-     */
     getAvailableProjects() {
         const intelligence = this.gameState.characterStats?.getStat('intelligence') || 0;
         
@@ -263,16 +230,10 @@ function createDashboard(data) {
         });
     }
 
-    /**
-     * Get current project
-     */
     getCurrentProject() {
         return this.currentProject;
     }
 
-    /**
-     * Cancel current project
-     */
     cancelProject() {
         if (!this.currentProject) {
             return { success: false, message: 'No active project.' };
@@ -282,8 +243,3 @@ function createDashboard(data) {
         return { success: true, message: 'Project cancelled.' };
     }
 }
-
-
-
-
-
