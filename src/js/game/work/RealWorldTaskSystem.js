@@ -1,571 +1,1071 @@
-/**
- * RealWorldTaskSystem.js
- * Real-world multi-step problems with different visuals for each task type
- * Teaches actual data science work
- */
-
-export class RealWorldTaskSystem {
+class RealWorldTaskSystem {
     constructor(gameState) {
-        this.gameState = gameState;
-        this.currentTask = null;
+        this.gameState = gameState || { money: 0, reputation: 0, stats: {} };
         this.taskHistory = [];
-        this.taskTypes = this.initializeTaskTypes();
-    }
-    
-    /**
-     * Initialize task types with different visuals and workflows
-     */
-    initializeTaskTypes() {
-        return {
-            // Data Pipeline Tasks
+        this.currentTask = null;
+        
+        this.taskTypes = {
             data_cleaning: {
                 id: 'data_cleaning',
                 name: 'Data Cleaning',
-                category: 'pipeline',
+                category: 'data',
                 steps: [
-                    { id: 'identify_missing', name: 'Identify Missing Values', visual: 'data_table', duration: 2 },
-                    { id: 'handle_outliers', name: 'Handle Outliers', visual: 'scatter_plot', duration: 3 },
-                    { id: 'normalize_data', name: 'Normalize Data', visual: 'transformation', duration: 2 },
-                    { id: 'validate_quality', name: 'Validate Data Quality', visual: 'quality_check', duration: 2 }
+                    { id: 'inspect_data', name: 'Inspect Data', visual: 'data_inspection', duration: 3 },
+                    { id: 'fix_errors', name: 'Fix Errors', visual: 'code_editor', duration: 4 },
+                    { id: 'validate_data', name: 'Validate Data', visual: 'data_validation', duration: 2 }
                 ],
-                visual: 'pipeline',
-                description: 'Clean and prepare raw data for analysis',
-                skills: ['data_processing', 'python', 'pandas'],
-                reward: { money: 500, reputation: 10, experience: 50 }
+                visual: 'data_cleaning',
+                description: 'Clean and validate the dataset',
+                skills: ['python', 'data_cleaning', 'pandas', 'data_validation'],
+                reward: { money: 700, reputation: 15, experience: 80 }
             },
-            
-            etl_pipeline: {
-                id: 'etl_pipeline',
-                name: 'ETL Pipeline',
-                category: 'pipeline',
-                steps: [
-                    { id: 'extract', name: 'Extract Data from Source', visual: 'database_extract', duration: 3 },
-                    { id: 'transform', name: 'Transform Data', visual: 'data_transform', duration: 4 },
-                    { id: 'load', name: 'Load to Data Warehouse', visual: 'database_load', duration: 2 },
-                    { id: 'monitor', name: 'Monitor Pipeline Health', visual: 'monitoring', duration: 2 }
-                ],
-                visual: 'pipeline_diagram',
-                description: 'Build Extract-Transform-Load pipeline',
-                skills: ['python', 'sql', 'airflow'],
-                reward: { money: 800, reputation: 15, experience: 80 }
-            },
-            
-            // GitHub Issues
-            github_bug_fix: {
-                id: 'github_bug_fix',
-                name: 'Fix GitHub Issue',
-                category: 'github',
-                steps: [
-                    { id: 'reproduce', name: 'Reproduce the Bug', visual: 'code_editor', duration: 2 },
-                    { id: 'identify_root', name: 'Identify Root Cause', visual: 'debugging', duration: 3 },
-                    { id: 'write_fix', name: 'Write Fix', visual: 'code_editor', duration: 3 },
-                    { id: 'test_fix', name: 'Test Fix', visual: 'testing', duration: 2 },
-                    { id: 'submit_pr', name: 'Submit Pull Request', visual: 'github', duration: 1 }
-                ],
-                visual: 'github_issue',
-                description: 'Fix a bug reported in GitHub issues',
-                skills: ['python', 'git', 'testing'],
-                reward: { money: 400, reputation: 20, experience: 60 }
-            },
-            
-            github_feature: {
-                id: 'github_feature',
-                name: 'Implement Feature Request',
-                category: 'github',
-                steps: [
-                    { id: 'analyze_requirements', name: 'Analyze Requirements', visual: 'documentation', duration: 2 },
-                    { id: 'design_solution', name: 'Design Solution', visual: 'architecture', duration: 3 },
-                    { id: 'implement', name: 'Implement Feature', visual: 'code_editor', duration: 5 },
-                    { id: 'write_tests', name: 'Write Tests', visual: 'testing', duration: 3 },
-                    { id: 'documentation', name: 'Write Documentation', visual: 'documentation', duration: 2 },
-                    { id: 'submit_pr', name: 'Submit Pull Request', visual: 'github', duration: 1 }
-                ],
-                visual: 'github_feature',
-                description: 'Implement a new feature from GitHub issue',
-                skills: ['python', 'git', 'testing', 'documentation'],
-                reward: { money: 600, reputation: 25, experience: 100 }
-            },
-            
-            // Analysis Tasks
             exploratory_analysis: {
                 id: 'exploratory_analysis',
                 name: 'Exploratory Data Analysis',
                 category: 'analysis',
                 steps: [
-                    { id: 'load_data', name: 'Load Dataset', visual: 'data_loading', duration: 1 },
-                    { id: 'summary_stats', name: 'Calculate Summary Statistics', visual: 'statistics', duration: 2 },
-                    { id: 'visualize', name: 'Create Visualizations', visual: 'charting', duration: 4 },
-                    { id: 'identify_patterns', name: 'Identify Patterns', visual: 'pattern_analysis', duration: 3 },
-                    { id: 'write_report', name: 'Write Analysis Report', visual: 'documentation', duration: 3 }
+                    { id: 'load_data', name: 'Load Data', visual: 'data_loading', duration: 2 },
+                    { id: 'summary_stats', name: 'Summary Statistics', visual: 'data_statistics', duration: 3 },
+                    { id: 'visualizations', name: 'Create Visualizations', visual: 'visualization', duration: 4 },
+                    { id: 'interpret_results', name: 'Interpret Results', visual: 'analysis', duration: 3 }
                 ],
-                visual: 'analysis',
-                description: 'Perform exploratory data analysis',
-                skills: ['python', 'pandas', 'matplotlib', 'statistics'],
-                reward: { money: 700, reputation: 15, experience: 90 }
+                visual: 'visualization',
+                description: 'Perform exploratory data analysis on the dataset',
+                skills: ['python', 'data_analysis', 'matplotlib', 'pandas'],
+                reward: { money: 800, reputation: 18, experience: 90 }
             },
-            
-            // AI/ML Tasks
-            model_training: {
-                id: 'model_training',
-                name: 'Train ML Model',
-                category: 'ai_ml',
+            github_bug_fix: {
+                id: 'github_bug_fix',
+                name: 'Fix GitHub Issue',
+                category: 'development',
                 steps: [
-                    { id: 'prepare_data', name: 'Prepare Training Data', visual: 'data_prep', duration: 3 },
-                    { id: 'select_model', name: 'Select Model Architecture', visual: 'model_selection', duration: 2 },
-                    { id: 'train', name: 'Train Model', visual: 'training', duration: 10 },
-                    { id: 'evaluate', name: 'Evaluate Performance', visual: 'evaluation', duration: 3 },
-                    { id: 'tune_hyperparams', name: 'Tune Hyperparameters', visual: 'hyperparameter', duration: 5 },
-                    { id: 'retrain', name: 'Retrain with Best Params', visual: 'training', duration: 8 }
+                    { id: 'read_issue', name: 'Read Issue', visual: 'documentation', duration: 2 },
+                    { id: 'reproduce_bug', name: 'Reproduce Bug', visual: 'code_debugging', duration: 3 },
+                    { id: 'fix_code', name: 'Fix Code', visual: 'code_editor', duration: 4 },
+                    { id: 'test_fix', name: 'Test Fix', visual: 'testing', duration: 2 },
+                    { id: 'commit_changes', name: 'Commit Changes', visual: 'version_control', duration: 2 }
                 ],
-                visual: 'model_training',
-                description: 'Train a machine learning model',
-                skills: ['python', 'scikit-learn', 'tensorflow', 'ml'],
-                reward: { money: 1200, reputation: 30, experience: 150 }
+                visual: 'code_debugging',
+                description: 'Fix a bug reported on GitHub',
+                skills: ['git', 'bug_fixing', 'code_review'],
+                reward: { money: 600, reputation: 12, experience: 60 }
             },
-            
-            // AI Training (Special - for storyline)
-            ai_model_training: {
-                id: 'ai_model_training',
-                name: 'Train AI Model (University Lab)',
-                category: 'ai_research',
-                steps: [
-                    { id: 'collect_dataset', name: 'Collect Massive Dataset', visual: 'data_collection', duration: 5 },
-                    { id: 'preprocess', name: 'Preprocess Data', visual: 'data_prep', duration: 8 },
-                    { id: 'design_architecture', name: 'Design Neural Architecture', visual: 'architecture', duration: 6 },
-                    { id: 'implement_model', name: 'Implement Model', visual: 'code_editor', duration: 10 },
-                    { id: 'distributed_setup', name: 'Setup Distributed Training', visual: 'cluster', duration: 8 },
-                    { id: 'train_epoch_1', name: 'Train Epoch 1', visual: 'training', duration: 15 },
-                    { id: 'train_epoch_2', name: 'Train Epoch 2', visual: 'training', duration: 15 },
-                    { id: 'train_epoch_3', name: 'Train Epoch 3', visual: 'training', duration: 15 },
-                    { id: 'evaluate', name: 'Evaluate Model', visual: 'evaluation', duration: 5 },
-                    { id: 'analyze_results', name: 'Analyze Results', visual: 'analysis', duration: 4 },
-                    { id: 'write_paper', name: 'Write Research Paper', visual: 'documentation', duration: 8 }
-                ],
-                visual: 'ai_lab',
-                description: 'Train a large-scale AI model in university lab',
-                skills: ['python', 'tensorflow', 'pytorch', 'research', 'distributed_computing'],
-                reward: { money: 0, reputation: 100, experience: 500 },
-                requiresLab: true,
-                canTakeModel: false
-            },
-
-            // ===== MASSIVE EXPANSION: More Data Science Tasks =====
-            
-            // Feature Engineering
-            feature_engineering: {
-                id: 'feature_engineering',
-                name: 'Feature Engineering Pipeline',
-                category: 'pipeline',
-                steps: [
-                    { id: 'analyze_features', name: 'Analyze Existing Features', visual: 'data_table', duration: 3 },
-                    { id: 'create_interactions', name: 'Create Feature Interactions', visual: 'transformation', duration: 4 },
-                    { id: 'domain_features', name: 'Engineer Domain Features', visual: 'data_transform', duration: 5 },
-                    { id: 'select_features', name: 'Feature Selection', visual: 'feature_selection', duration: 3 },
-                    { id: 'validate_features', name: 'Validate Feature Quality', visual: 'quality_check', duration: 2 }
-                ],
-                visual: 'pipeline',
-                description: 'Engineer new features to improve model performance',
-                skills: ['python', 'pandas', 'feature_engineering', 'statistics'],
-                reward: { money: 900, reputation: 20, experience: 110 }
-            },
-
-            // Model Evaluation
-            model_evaluation: {
-                id: 'model_evaluation',
-                name: 'Comprehensive Model Evaluation',
-                category: 'analysis',
-                steps: [
-                    { id: 'split_data', name: 'Split Data for Validation', visual: 'data_prep', duration: 2 },
-                    { id: 'train_test', name: 'Run Train/Test Evaluation', visual: 'evaluation', duration: 4 },
-                    { id: 'cross_validate', name: 'Perform Cross-Validation', visual: 'testing', duration: 5 },
-                    { id: 'metric_analysis', name: 'Calculate All Metrics', visual: 'statistics', duration: 3 },
-                    { id: 'error_analysis', name: 'Error Analysis', visual: 'analysis', duration: 4 },
-                    { id: 'create_report', name: 'Create Evaluation Report', visual: 'documentation', duration: 3 }
-                ],
-                visual: 'evaluation',
-                description: 'Comprehensive evaluation of model performance',
-                skills: ['python', 'scikit-learn', 'statistics', 'evaluation'],
-                reward: { money: 800, reputation: 18, experience: 100 }
-            },
-
-            // Hyperparameter Tuning
-            hyperparameter_tuning: {
-                id: 'hyperparameter_tuning',
-                name: 'Hyperparameter Optimization',
-                category: 'ai_ml',
-                steps: [
-                    { id: 'define_search', name: 'Define Search Space', visual: 'architecture', duration: 3 },
-                    { id: 'grid_search', name: 'Run Grid Search', visual: 'hyperparameter', duration: 8 },
-                    { id: 'random_search', name: 'Run Random Search', visual: 'hyperparameter', duration: 6 },
-                    { id: 'bayesian_opt', name: 'Bayesian Optimization', visual: 'hyperparameter', duration: 7 },
-                    { id: 'analyze_results', name: 'Analyze Best Parameters', visual: 'analysis', duration: 3 },
-                    { id: 'final_eval', name: 'Final Model Evaluation', visual: 'evaluation', duration: 4 }
-                ],
-                visual: 'hyperparameter',
-                description: 'Optimize model hyperparameters for best performance',
-                skills: ['python', 'scikit-learn', 'optuna', 'hyperparameter_tuning'],
-                reward: { money: 1100, reputation: 25, experience: 130 }
-            },
-
-            // Data Validation
             data_validation: {
                 id: 'data_validation',
-                name: 'Data Quality Validation',
-                category: 'pipeline',
+                name: 'Data Validation',
+                category: 'data',
                 steps: [
-                    { id: 'schema_check', name: 'Schema Validation', visual: 'quality_check', duration: 2 },
-                    { id: 'type_check', name: 'Data Type Checks', visual: 'data_table', duration: 2 },
-                    { id: 'range_check', name: 'Range and Constraint Checks', visual: 'statistics', duration: 3 },
-                    { id: 'completeness', name: 'Completeness Analysis', visual: 'quality_check', duration: 2 },
-                    { id: 'consistency', name: 'Consistency Checks', visual: 'analysis', duration: 3 },
-                    { id: 'generate_report', name: 'Generate Validation Report', visual: 'documentation', duration: 2 }
+                    { id: 'define_rules', name: 'Define Validation Rules', visual: 'documentation', duration: 2 },
+                    { id: 'run_validation', name: 'Run Validation', visual: 'data_validation', duration: 3 },
+                    { id: 'fix_issues', name: 'Fix Validation Issues', visual: 'code_editor', duration: 4 },
+                    { id: 'revalidate', name: 'Revalidate Data', visual: 'data_validation', duration: 2 }
                 ],
-                visual: 'quality_check',
-                description: 'Validate data quality and integrity',
-                skills: ['python', 'pandas', 'data_validation', 'quality'],
-                reward: { money: 600, reputation: 12, experience: 70 }
+                visual: 'data_validation',
+                description: 'Validate the dataset against predefined rules',
+                skills: ['python', 'data_validation', 'pandas'],
+                reward: { money: 750, reputation: 14, experience: 70 }
             },
-
-            // Time Series Analysis
+            etl_pipeline: {
+                id: 'etl_pipeline',
+                name: 'ETL Pipeline Development',
+                category: 'development',
+                steps: [
+                    { id: 'extract_data', name: 'Extract Data', visual: 'data_extraction', duration: 3 },
+                    { id: 'transform_data', name: 'Transform Data', visual: 'data_transform', duration: 4 },
+                    { id: 'load_data', name: 'Load Data', visual: 'data_loading', duration: 3 },
+                    { id: 'test_pipeline', name: 'Test Pipeline', visual: 'testing', duration: 3 },
+                    { id: 'deploy_pipeline', name: 'Deploy Pipeline', visual: 'deployment', duration: 2 }
+                ],
+                visual: 'data_pipeline',
+                description: 'Develop an ETL pipeline',
+                skills: ['python', 'etl', 'airflow', 'pandas'],
+                reward: { money: 1000, reputation: 25, experience: 120 }
+            },
+            github_feature: {
+                id: 'github_feature',
+                name: 'Implement GitHub Feature',
+                category: 'development',
+                steps: [
+                    { id: 'read_feature', name: 'Read Feature Request', visual: 'documentation', duration: 2 },
+                    { id: 'design_feature', name: 'Design Feature', visual: 'documentation', duration: 3 },
+                    { id: 'implement_code', name: 'Implement Code', visual: 'code_editor', duration: 5 },
+                    { id: 'test_feature', name: 'Test Feature', visual: 'testing', duration: 3 },
+                    { id: 'commit_changes', name: 'Commit Changes', visual: 'version_control', duration: 2 }
+                ],
+                visual: 'code_editor',
+                description: 'Implement a new feature from GitHub request',
+                skills: ['git', 'feature_development', 'code_review'],
+                reward: { money: 1100, reputation: 28, experience: 140 }
+            },
+            database_optimization: {
+                id: 'database_optimization',
+                name: 'Database Optimization',
+                category: 'development',
+                steps: [
+                    { id: 'analyze_queries', name: 'Analyze Queries', visual: 'data_analysis', duration: 3 },
+                    { id: 'optimize_queries', name: 'Optimize Queries', visual: 'code_editor', duration: 4 },
+                    { id: 'test_performance', name: 'Test Performance', visual: 'performance_testing', duration: 3 },
+                    { id: 'deploy_changes', name: 'Deploy Changes', visual: 'deployment', duration: 2 }
+                ],
+                visual: 'database',
+                description: 'Optimize database queries for better performance',
+                skills: ['sql', 'database_optimization', 'performance_testing'],
+                reward: { money: 950, reputation: 22, experience: 110 }
+            },
+            api_development: {
+                id: 'api_development',
+                name: 'API Development',
+                category: 'development',
+                steps: [
+                    { id: 'define_api', name: 'Define API Endpoints', visual: 'documentation', duration: 2 },
+                    { id: 'implement_endpoints', name: 'Implement Endpoints', visual: 'code_editor', duration: 4 },
+                    { id: 'test_api', name: 'Test API', visual: 'testing', duration: 3 },
+                    { id: 'deploy_api', name: 'Deploy API', visual: 'deployment', duration: 2 }
+                ],
+                visual: 'api',
+                description: 'Develop a RESTful API',
+                skills: ['python', 'api_development', 'flask', 'restful'],
+                reward: { money: 1050, reputation: 26, experience: 125 }
+            },
+            feature_engineering: {
+                id: 'feature_engineering',
+                name: 'Feature Engineering',
+                category: 'analysis',
+                steps: [
+                    { id: 'define_features', name: 'Define Features', visual: 'documentation', duration: 2 },
+                    { id: 'extract_features', name: 'Extract Features', visual: 'data_transform', duration: 3 },
+                    { id: 'transform_features', name: 'Transform Features', visual: 'code_editor', duration: 4 },
+                    { id: 'validate_features', name: 'Validate Features', visual: 'data_validation', duration: 2 }
+                ],
+                visual: 'feature_engineering',
+                description: 'Create new features from the dataset',
+                skills: ['python', 'feature_engineering', 'pandas', 'numpy'],
+                reward: { money: 900, reputation: 20, experience: 100 }
+            },
+            pipeline_optimization: {
+                id: 'pipeline_optimization',
+                name: 'Pipeline Optimization',
+                category: 'development',
+                steps: [
+                    { id: 'analyze_pipeline', name: 'Analyze Pipeline', visual: 'data_analysis', duration: 3 },
+                    { id: 'optimize_pipeline', name: 'Optimize Pipeline', visual: 'code_editor', duration: 4 },
+                    { id: 'test_pipeline', name: 'Test Pipeline', visual: 'testing', duration: 3 },
+                    { id: 'deploy_changes', name: 'Deploy Changes', visual: 'deployment', duration: 2 }
+                ],
+                visual: 'data_pipeline',
+                description: 'Optimize an existing data pipeline',
+                skills: ['python', 'pipeline_optimization', 'airflow', 'pandas'],
+                reward: { money: 1000, reputation: 25, experience: 120 }
+            },
             time_series_analysis: {
                 id: 'time_series_analysis',
                 name: 'Time Series Analysis',
                 category: 'analysis',
                 steps: [
                     { id: 'load_data', name: 'Load Time Series Data', visual: 'data_loading', duration: 2 },
-                    { id: 'decompose', name: 'Decompose Time Series', visual: 'pattern_analysis', duration: 4 },
-                    { id: 'stationarity', name: 'Check Stationarity', visual: 'statistics', duration: 3 },
-                    { id: 'autocorrelation', name: 'Autocorrelation Analysis', visual: 'charting', duration: 3 },
-                    { id: 'build_model', name: 'Build Time Series Model', visual: 'model_selection', duration: 5 },
-                    { id: 'forecast', name: 'Generate Forecasts', visual: 'training', duration: 4 },
-                    { id: 'evaluate_forecast', name: 'Evaluate Forecast Accuracy', visual: 'evaluation', duration: 3 }
+                    { id: 'analyze_data', name: 'Analyze Time Series Data', visual: 'data_statistics', duration: 3 },
+                    { id: 'create_model', name: 'Create Time Series Model', visual: 'model_creation', duration: 4 },
+                    { id: 'validate_model', name: 'Validate Time Series Model', visual: 'model_validation', duration: 3 }
                 ],
-                visual: 'analysis',
-                description: 'Perform time series analysis and forecasting',
-                skills: ['python', 'pandas', 'statsmodels', 'time_series', 'forecasting'],
-                reward: { money: 1000, reputation: 22, experience: 120 }
+                visual: 'time_series',
+                description: 'Perform time series analysis on the dataset',
+                skills: ['python', 'time_series_analysis', 'statsmodels', 'pandas'],
+                reward: { money: 850, reputation: 17, experience: 85 }
             },
-
-            // Classification Model
-            classification_model: {
-                id: 'classification_model',
-                name: 'Build Classification Model',
-                category: 'ai_ml',
-                steps: [
-                    { id: 'prepare_data', name: 'Prepare Classification Data', visual: 'data_prep', duration: 3 },
-                    { id: 'balance_classes', name: 'Handle Class Imbalance', visual: 'data_transform', duration: 3 },
-                    { id: 'select_algorithm', name: 'Select Classification Algorithm', visual: 'model_selection', duration: 2 },
-                    { id: 'train_model', name: 'Train Classification Model', visual: 'training', duration: 6 },
-                    { id: 'evaluate', name: 'Evaluate with Confusion Matrix', visual: 'evaluation', duration: 4 },
-                    { id: 'optimize_threshold', name: 'Optimize Classification Threshold', visual: 'hyperparameter', duration: 3 }
-                ],
-                visual: 'model_training',
-                description: 'Build and optimize classification model',
-                skills: ['python', 'scikit-learn', 'classification', 'ml'],
-                reward: { money: 1000, reputation: 22, experience: 120 }
-            },
-
-            // Regression Model
-            regression_model: {
-                id: 'regression_model',
-                name: 'Build Regression Model',
-                category: 'ai_ml',
-                steps: [
-                    { id: 'prepare_data', name: 'Prepare Regression Data', visual: 'data_prep', duration: 3 },
-                    { id: 'check_assumptions', name: 'Check Regression Assumptions', visual: 'statistics', duration: 4 },
-                    { id: 'select_algorithm', name: 'Select Regression Algorithm', visual: 'model_selection', duration: 2 },
-                    { id: 'train_model', name: 'Train Regression Model', visual: 'training', duration: 6 },
-                    { id: 'evaluate', name: 'Evaluate Model Performance', visual: 'evaluation', duration: 4 },
-                    { id: 'residual_analysis', name: 'Residual Analysis', visual: 'analysis', duration: 3 }
-                ],
-                visual: 'model_training',
-                description: 'Build and evaluate regression model',
-                skills: ['python', 'scikit-learn', 'regression', 'statistics'],
-                reward: { money: 950, reputation: 20, experience: 115 }
-            },
-
-            // Clustering Analysis
             clustering_analysis: {
                 id: 'clustering_analysis',
                 name: 'Clustering Analysis',
                 category: 'analysis',
                 steps: [
-                    { id: 'prepare_data', name: 'Prepare Data for Clustering', visual: 'data_prep', duration: 3 },
-                    { id: 'scale_features', name: 'Scale Features', visual: 'transformation', duration: 2 },
-                    { id: 'determine_k', name: 'Determine Optimal K', visual: 'pattern_analysis', duration: 4 },
-                    { id: 'run_clustering', name: 'Run Clustering Algorithm', visual: 'training', duration: 5 },
-                    { id: 'analyze_clusters', name: 'Analyze Cluster Characteristics', visual: 'analysis', duration: 4 },
-                    { id: 'visualize', name: 'Visualize Clusters', visual: 'charting', duration: 3 }
+                    { id: 'load_data', name: 'Load Data', visual: 'data_loading', duration: 2 },
+                    { id: 'preprocess_data', name: 'Preprocess Data', visual: 'data_transform', duration: 3 },
+                    { id: 'run_clustering', name: 'Run Clustering Algorithm', visual: 'model_creation', duration: 4 },
+                    { id: 'interpret_clusters', name: 'Interpret Clusters', visual: 'analysis', duration: 3 }
                 ],
-                visual: 'analysis',
-                description: 'Perform clustering analysis to identify patterns',
-                skills: ['python', 'scikit-learn', 'clustering', 'unsupervised_learning'],
-                reward: { money: 850, reputation: 18, experience: 105 }
+                visual: 'clustering',
+                description: 'Perform clustering analysis on the dataset',
+                skills: ['python', 'clustering_analysis', 'scikit-learn', 'pandas'],
+                reward: { money: 800, reputation: 18, experience: 90 }
             },
-
-            // NLP Text Analysis
-            nlp_text_analysis: {
-                id: 'nlp_text_analysis',
-                name: 'NLP Text Analysis',
-                category: 'ai_ml',
-                steps: [
-                    { id: 'load_text', name: 'Load Text Data', visual: 'data_loading', duration: 2 },
-                    { id: 'preprocess', name: 'Text Preprocessing', visual: 'data_prep', duration: 4 },
-                    { id: 'tokenize', name: 'Tokenization', visual: 'transformation', duration: 3 },
-                    { id: 'vectorize', name: 'Text Vectorization', visual: 'data_transform', duration: 4 },
-                    { id: 'topic_modeling', name: 'Topic Modeling', visual: 'pattern_analysis', duration: 5 },
-                    { id: 'sentiment', name: 'Sentiment Analysis', visual: 'analysis', duration: 4 },
-                    { id: 'visualize', name: 'Visualize Results', visual: 'charting', duration: 3 }
-                ],
-                visual: 'nlp',
-                description: 'Perform natural language processing on text data',
-                skills: ['python', 'nltk', 'spacy', 'nlp', 'text_analysis'],
-                reward: { money: 1100, reputation: 24, experience: 130 }
-            },
-
-            // Database Query Optimization
-            database_optimization: {
-                id: 'database_optimization',
-                name: 'Database Query Optimization',
-                category: 'pipeline',
-                steps: [
-                    { id: 'analyze_queries', name: 'Analyze Slow Queries', visual: 'database_extract', duration: 3 },
-                    { id: 'check_indexes', name: 'Check Index Usage', visual: 'database_load', duration: 3 },
-                    { id: 'optimize_query', name: 'Optimize Query Structure', visual: 'code_editor', duration: 4 },
-                    { id: 'add_indexes', name: 'Add Missing Indexes', visual: 'database_load', duration: 3 },
-                    { id: 'test_performance', name: 'Test Query Performance', visual: 'monitoring', duration: 3 }
-                ],
-                visual: 'database',
-                description: 'Optimize database queries for better performance',
-                skills: ['sql', 'database', 'optimization', 'performance'],
-                reward: { money: 750, reputation: 16, experience: 90 }
-            },
-
-            // API Development
-            api_development: {
-                id: 'api_development',
-                name: 'Build Data Science API',
-                category: 'github',
-                steps: [
-                    { id: 'design_api', name: 'Design API Endpoints', visual: 'architecture', duration: 3 },
-                    { id: 'implement_endpoints', name: 'Implement API Endpoints', visual: 'code_editor', duration: 6 },
-                    { id: 'add_auth', name: 'Add Authentication', visual: 'code_editor', duration: 3 },
-                    { id: 'write_tests', name: 'Write API Tests', visual: 'testing', duration: 4 },
-                    { id: 'documentation', name: 'Write API Documentation', visual: 'documentation', duration: 3 },
-                    { id: 'deploy', name: 'Deploy API', visual: 'deployment', duration: 3 }
-                ],
-                visual: 'api',
-                description: 'Build RESTful API for data science models',
-                skills: ['python', 'flask', 'fastapi', 'api', 'deployment'],
-                reward: { money: 1200, reputation: 28, experience: 140 }
-            },
-
-            // Model Deployment
-            model_deployment: {
-                id: 'model_deployment',
-                name: 'Deploy ML Model to Production',
-                category: 'ai_ml',
-                steps: [
-                    { id: 'serialize_model', name: 'Serialize Model', visual: 'model_selection', duration: 2 },
-                    { id: 'create_service', name: 'Create Prediction Service', visual: 'code_editor', duration: 5 },
-                    { id: 'add_monitoring', name: 'Add Monitoring', visual: 'monitoring', duration: 4 },
-                    { id: 'containerize', name: 'Containerize Service', visual: 'deployment', duration: 4 },
-                    { id: 'deploy', name: 'Deploy to Production', visual: 'deployment', duration: 4 },
-                    { id: 'test_production', name: 'Test Production Service', visual: 'testing', duration: 3 }
-                ],
-                visual: 'deployment',
-                description: 'Deploy machine learning model to production',
-                skills: ['python', 'docker', 'kubernetes', 'mlops', 'deployment'],
-                reward: { money: 1400, reputation: 32, experience: 160 }
-            },
-
-            // A/B Test Design
-            ab_test_design: {
-                id: 'ab_test_design',
-                name: 'Design and Analyze A/B Test',
+            model_development: {
+                id: 'model_development',
+                name: 'Model Development',
                 category: 'analysis',
                 steps: [
-                    { id: 'define_hypothesis', name: 'Define Hypothesis', visual: 'documentation', duration: 2 },
-                    { id: 'calculate_sample', name: 'Calculate Sample Size', visual: 'statistics', duration: 3 },
-                    { id: 'randomize', name: 'Randomize Users', visual: 'data_transform', duration: 2 },
-                    { id: 'run_test', name: 'Run A/B Test', visual: 'testing', duration: 7 },
-                    { id: 'collect_data', name: 'Collect Results', visual: 'data_collection', duration: 2 },
-                    { id: 'statistical_test', name: 'Statistical Significance Test', visual: 'statistics', duration: 4 },
-                    { id: 'interpret', name: 'Interpret Results', visual: 'analysis', duration: 3 }
+                    { id: 'define_problem', name: 'Define Problem', visual: 'documentation', duration: 2 },
+                    { id: 'prepare_data', name: 'Prepare Data', visual: 'data_transform', duration: 3 },
+                    { id: 'develop_model', name: 'Develop Model', visual: 'model_creation', duration: 4 },
+                    { id: 'test_model', name: 'Test Model', visual: 'model_validation', duration: 3 }
                 ],
-                visual: 'testing',
-                description: 'Design and analyze A/B test experiment',
-                skills: ['python', 'statistics', 'hypothesis_testing', 'experimental_design'],
-                reward: { money: 900, reputation: 20, experience: 110 }
+                visual: 'model_creation',
+                description: 'Develop a predictive model',
+                skills: ['python', 'model_development', 'scikit-learn', 'pandas'],
+                reward: { money: 1100, reputation: 28, experience: 140 }
+            },
+            model_optimization: {
+                id: 'model_optimization',
+                name: 'Model Optimization',
+                category: 'analysis',
+                steps: [
+                    { id: 'analyze_model', name: 'Analyze Model Performance', visual: 'data_statistics', duration: 3 },
+                    { id: 'optimize_model', name: 'Optimize Model Parameters', visual: 'model_tuning', duration: 4 },
+                    { id: 'test_model', name: 'Test Optimized Model', visual: 'model_validation', duration: 3 },
+                    { id: 'deploy_model', name: 'Deploy Model', visual: 'deployment', duration: 2 }
+                ],
+                visual: 'model_tuning',
+                description: 'Optimize the parameters of an existing model',
+                skills: ['python', 'model_optimization', 'scikit-learn', 'pandas'],
+                reward: { money: 1050, reputation: 26, experience: 125 }
+            },
+            model_deployment: {
+                id: 'model_deployment',
+                name: 'Model Deployment',
+                category: 'development',
+                steps: [
+                    { id: 'prepare_deployment', name: 'Prepare for Deployment', visual: 'deployment_preparation', duration: 2 },
+                    { id: 'deploy_model', name: 'Deploy Model', visual: 'deployment', duration: 3 },
+                    { id: 'monitor_model', name: 'Monitor Model Performance', visual: 'monitoring', duration: 2 }
+                ],
+                visual: 'deployment',
+                description: 'Deploy a predictive model to production',
+                skills: ['python', 'model_deployment', 'flask', 'production'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_monitoring: {
+                id: 'model_monitoring',
+                name: 'Model Monitoring',
+                category: 'development',
+                steps: [
+                    { id: 'set_up_monitoring', name: 'Set Up Monitoring', visual: 'monitoring_setup', duration: 2 },
+                    { id: 'monitor_performance', name: 'Monitor Model Performance', visual: 'monitoring', duration: 3 },
+                    { id: 'analyze_results', name: 'Analyze Monitoring Results', visual: 'analysis', duration: 2 }
+                ],
+                visual: 'monitoring',
+                description: 'Monitor the performance of a deployed model',
+                skills: ['python', 'model_monitoring', 'flask', 'production'],
+                reward: { money: 1000, reputation: 25, experience: 120 }
+            },
+            data_visualization: {
+                id: 'data_visualization',
+                name: 'Data Visualization',
+                category: 'visualization',
+                steps: [
+                    { id: 'load_data', name: 'Load Data', visual: 'data_loading', duration: 2 },
+                    { id: 'create_visualizations', name: 'Create Visualizations', visual: 'visualization', duration: 4 },
+                    { id: 'interpret_visualizations', name: 'Interpret Visualizations', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'visualization',
+                description: 'Create visualizations to analyze the dataset',
+                skills: ['python', 'data_visualization', 'matplotlib', 'pandas'],
+                reward: { money: 850, reputation: 17, experience: 85 }
+            },
+            model_evaluation: {
+                id: 'model_evaluation',
+                name: 'Model Evaluation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_data', name: 'Load Evaluation Data', visual: 'data_loading', duration: 2 },
+                    { id: 'run_evaluation', name: 'Run Model Evaluation', visual: 'model_validation', duration: 3 },
+                    { id: 'interpret_results', name: 'Interpret Evaluation Results', visual: 'analysis', duration: 2 }
+                ],
+                visual: 'model_validation',
+                description: 'Evaluate the performance of a predictive model',
+                skills: ['python', 'model_evaluation', 'scikit-learn', 'pandas'],
+                reward: { money: 950, reputation: 22, experience: 110 }
+            },
+            model_tuning: {
+                id: 'model_tuning',
+                name: 'Model Tuning',
+                category: 'analysis',
+                steps: [
+                    { id: 'define_tuning', name: 'Define Tuning Parameters', visual: 'documentation', duration: 2 },
+                    { id: 'run_tuning', name: 'Run Model Tuning', visual: 'model_tuning', duration: 4 },
+                    { id: 'test_tuning', name: 'Test Tuned Model', visual: 'model_validation', duration: 3 }
+                ],
+                visual: 'model_tuning',
+                description: 'Tune the parameters of a predictive model',
+                skills: ['python', 'model_tuning', 'scikit-learn', 'pandas'],
+                reward: { money: 1000, reputation: 25, experience: 120 }
+            },
+            model_training: {
+                id: 'model_training',
+                name: 'Model Training',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_data', name: 'Load Training Data', visual: 'data_loading', duration: 2 },
+                    { id: 'train_model', name: 'Train Model', visual: 'model_training', duration: 4 },
+                    { id: 'validate_model', name: 'Validate Trained Model', visual: 'model_validation', duration: 3 }
+                ],
+                visual: 'model_training',
+                description: 'Train a predictive model on the dataset',
+                skills: ['python', 'model_training', 'scikit-learn', 'pandas'],
+                reward: { money: 900, reputation: 20, experience: 100 }
+            },
+            model_selection: {
+                id: 'model_selection',
+                name: 'Model Selection',
+                category: 'analysis',
+                steps: [
+                    { id: 'define_criteria', name: 'Define Model Selection Criteria', visual: 'documentation', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'select_model', name: 'Select Best Model', visual: 'model_selection', duration: 2 }
+                ],
+                visual: 'model_selection',
+                description: 'Select the best model for a given problem',
+                skills: ['python', 'model_selection', 'scikit-learn', 'pandas'],
+                reward: { money: 800, reputation: 18, experience: 90 }
+            },
+            model_interpretation: {
+                id: 'model_interpretation',
+                name: 'Model Interpretation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'interpret_model', name: 'Interpret Model', visual: 'model_interpretation', duration: 4 },
+                    { id: 'analyze_interpretation', name: 'Analyze Interpretation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_interpretation',
+                description: 'Interpret the results of a predictive model',
+                skills: ['python', 'model_interpretation', 'scikit-learn', 'pandas'],
+                reward: { money: 950, reputation: 22, experience: 110 }
+            },
+            model_explanation: {
+                id: 'model_explanation',
+                name: 'Model Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 4 },
+                    { id: 'analyze_explanation', name: 'Analyze Explanation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_explanation',
+                description: 'Explain the inner workings of a predictive model',
+                skills: ['python', 'model_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1000, reputation: 25, experience: 120 }
+            },
+            model_validation: {
+                id: 'model_validation',
+                name: 'Model Validation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_data', name: 'Load Validation Data', visual: 'data_loading', duration: 2 },
+                    { id: 'validate_model', name: 'Validate Model', visual: 'model_validation', duration: 4 },
+                    { id: 'analyze_validation', name: 'Analyze Validation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_validation',
+                description: 'Validate the performance of a predictive model',
+                skills: ['python', 'model_validation', 'scikit-learn', 'pandas'],
+                reward: { money: 900, reputation: 20, experience: 100 }
+            },
+            model_comparison: {
+                id: 'model_comparison',
+                name: 'Model Comparison',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_models', name: 'Load Models', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 4 },
+                    { id: 'analyze_comparison', name: 'Analyze Comparison Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_comparison',
+                description: 'Compare the performance of multiple predictive models',
+                skills: ['python', 'model_comparison', 'scikit-learn', 'pandas'],
+                reward: { money: 1000, reputation: 25, experience: 120 }
+            },
+            model_assessment: {
+                id: 'model_assessment',
+                name: 'Model Assessment',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 4 },
+                    { id: 'analyze_assessment', name: 'Analyze Assessment Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_assessment',
+                description: 'Assess the performance of a predictive model',
+                skills: ['python', 'model_assessment', 'scikit-learn', 'pandas'],
+                reward: { money: 900, reputation: 20, experience: 100 }
+            },
+            model_review: {
+                id: 'model_review',
+                name: 'Model Review',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 4 },
+                    { id: 'analyze_review', name: 'Analyze Review Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_review',
+                description: 'Review the results of a predictive model',
+                skills: ['python', 'model_review', 'scikit-learn', 'pandas'],
+                reward: { money: 950, reputation: 22, experience: 110 }
+            },
+            model_audit: {
+                id: 'model_audit',
+                name: 'Model Audit',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'analyze_audit', name: 'Analyze Audit Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_audit',
+                description: 'Audit the performance of a predictive model',
+                skills: ['python', 'model_audit', 'scikit-learn', 'pandas'],
+                reward: { money: 1000, reputation: 25, experience: 120 }
+            },
+            model_inspection: {
+                id: 'model_inspection',
+                name: 'Model Inspection',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'inspect_model', name: 'Inspect Model', visual: 'model_inspection', duration: 4 },
+                    { id: 'analyze_inspection', name: 'Analyze Inspection Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_inspection',
+                description: 'Inspect the results of a predictive model',
+                skills: ['python', 'model_inspection', 'scikit-learn', 'pandas'],
+                reward: { money: 900, reputation: 20, experience: 100 }
+            },
+            model_analysis: {
+                id: 'model_analysis',
+                name: 'Model Analysis',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'analyze_results', name: 'Analyze Analysis Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_analysis',
+                description: 'Analyze the performance of a predictive model',
+                skills: ['python', 'model_analysis', 'scikit-learn', 'pandas'],
+                reward: { money: 950, reputation: 22, experience: 110 }
+            },
+            model_review_audit: {
+                id: 'model_review_audit',
+                name: 'Model Review and Audit',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 3 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'analyze_review_audit', name: 'Analyze Review and Audit Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_review_audit',
+                description: 'Review and audit the performance of a predictive model',
+                skills: ['python', 'model_review_audit', 'scikit-learn', 'pandas'],
+                reward: { money: 1100, reputation: 28, experience: 140 }
+            },
+            model_validation_assessment: {
+                id: 'model_validation_assessment',
+                name: 'Model Validation and Assessment',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'validate_model', name: 'Validate Model', visual: 'model_validation', duration: 3 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 4 },
+                    { id: 'analyze_validation_assessment', name: 'Analyze Validation and Assessment Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_validation_assessment',
+                description: 'Validate and assess the performance of a predictive model',
+                skills: ['python', 'model_validation_assessment', 'scikit-learn', 'pandas'],
+                reward: { money: 1100, reputation: 28, experience: 140 }
+            },
+            model_evaluation_comparison: {
+                id: 'model_evaluation_comparison',
+                name: 'Model Evaluation and Comparison',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'evaluate_model', name: 'Evaluate Model', visual: 'model_evaluation', duration: 3 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 4 },
+                    { id: 'analyze_evaluation_comparison', name: 'Analyze Evaluation and Comparison Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_evaluation_comparison',
+                description: 'Evaluate and compare the performance of multiple predictive models',
+                skills: ['python', 'model_evaluation_comparison', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_interpretation_explanation: {
+                id: 'model_interpretation_explanation',
+                name: 'Model Interpretation and Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'interpret_model', name: 'Interpret Model', visual: 'model_interpretation', duration: 3 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 4 },
+                    { id: 'analyze_interpretation_explanation', name: 'Analyze Interpretation and Explanation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_interpretation_explanation',
+                description: 'Interpret and explain the results of a predictive model',
+                skills: ['python', 'model_interpretation_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_analysis_review: {
+                id: 'model_analysis_review',
+                name: 'Model Analysis and Review',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 3 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 4 },
+                    { id: 'analyze_analysis_review', name: 'Analyze Analysis and Review Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_analysis_review',
+                description: 'Analyze and review the performance of a predictive model',
+                skills: ['python', 'model_analysis_review', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_assessment_audit: {
+                id: 'model_assessment_audit',
+                name: 'Model Assessment and Audit',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 3 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'analyze_assessment_audit', name: 'Analyze Assessment and Audit Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_assessment_audit',
+                description: 'Assess and audit the performance of a predictive model',
+                skills: ['python', 'model_assessment_audit', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_analysis: {
+                id: 'model_comparison_analysis',
+                name: 'Model Comparison and Analysis',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'analyze_comparison_analysis', name: 'Analyze Comparison and Analysis Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_comparison_analysis',
+                description: 'Compare and analyze the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_analysis', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_interpretation_assessment: {
+                id: 'model_interpretation_assessment',
+                name: 'Model Interpretation and Assessment',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'interpret_model', name: 'Interpret Model', visual: 'model_interpretation', duration: 3 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 4 },
+                    { id: 'analyze_interpretation_assessment', name: 'Analyze Interpretation and Assessment Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_interpretation_assessment',
+                description: 'Interpret and assess the performance of a predictive model',
+                skills: ['python', 'model_interpretation_assessment', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_explanation_comparison: {
+                id: 'model_explanation_comparison',
+                name: 'Model Explanation and Comparison',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 3 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 4 },
+                    { id: 'analyze_explanation_comparison', name: 'Analyze Explanation and Comparison Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_explanation_comparison',
+                description: 'Explain and compare the performance of multiple predictive models',
+                skills: ['python', 'model_explanation_comparison', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_validation_explanation: {
+                id: 'model_validation_explanation',
+                name: 'Model Validation and Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'validate_model', name: 'Validate Model', visual: 'model_validation', duration: 3 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 4 },
+                    { id: 'analyze_validation_explanation', name: 'Analyze Validation and Explanation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_validation_explanation',
+                description: 'Validate and explain the performance of a predictive model',
+                skills: ['python', 'model_validation_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_audit: {
+                id: 'model_comparison_audit',
+                name: 'Model Comparison and Audit',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'analyze_comparison_audit', name: 'Analyze Comparison and Audit Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_comparison_audit',
+                description: 'Compare and audit the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_audit', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_assessment_analysis: {
+                id: 'model_assessment_analysis',
+                name: 'Model Assessment and Analysis',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 3 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'analyze_assessment_analysis', name: 'Analyze Assessment and Analysis Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_assessment_analysis',
+                description: 'Assess and analyze the performance of a predictive model',
+                skills: ['python', 'model_assessment_analysis', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_explanation_analysis: {
+                id: 'model_explanation_analysis',
+                name: 'Model Explanation and Analysis',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 3 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'analyze_explanation_analysis', name: 'Analyze Explanation and Analysis Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_explanation_analysis',
+                description: 'Explain and analyze the performance of a predictive model',
+                skills: ['python', 'model_explanation_analysis', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_validation_review: {
+                id: 'model_validation_review',
+                name: 'Model Validation and Review',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'validate_model', name: 'Validate Model', visual: 'model_validation', duration: 3 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 4 },
+                    { id: 'analyze_validation_review', name: 'Analyze Validation and Review Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_validation_review',
+                description: 'Validate and review the performance of a predictive model',
+                skills: ['python', 'model_validation_review', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_audit_analysis: {
+                id: 'model_audit_analysis',
+                name: 'Model Audit and Analysis',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 3 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'analyze_audit_analysis', name: 'Analyze Audit and Analysis Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_audit_analysis',
+                description: 'Audit and analyze the performance of a predictive model',
+                skills: ['python', 'model_audit_analysis', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_explanation: {
+                id: 'model_comparison_explanation',
+                name: 'Model Comparison and Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 4 },
+                    { id: 'analyze_comparison_explanation', name: 'Analyze Comparison and Explanation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_comparison_explanation',
+                description: 'Compare and explain the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_review_analysis: {
+                id: 'model_review_analysis',
+                name: 'Model Review and Analysis',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 3 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'analyze_review_analysis', name: 'Analyze Review and Analysis Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_review_analysis',
+                description: 'Review and analyze the performance of a predictive model',
+                skills: ['python', 'model_review_analysis', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_explanation_assessment: {
+                id: 'model_explanation_assessment',
+                name: 'Model Explanation and Assessment',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 3 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 4 },
+                    { id: 'analyze_explanation_assessment', name: 'Analyze Explanation and Assessment Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_explanation_assessment',
+                description: 'Explain and assess the performance of a predictive model',
+                skills: ['python', 'model_explanation_assessment', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_validation_audit: {
+                id: 'model_validation_audit',
+                name: 'Model Validation and Audit',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'validate_model', name: 'Validate Model', visual: 'model_validation', duration: 3 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'analyze_validation_audit', name: 'Analyze Validation and Audit Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_validation_audit',
+                description: 'Validate and audit the performance of a predictive model',
+                skills: ['python', 'model_validation_audit', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_review_audit: {
+                id: 'model_review_audit',
+                name: 'Model Review and Audit',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 3 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'analyze_review_audit', name: 'Analyze Review and Audit Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_review_audit',
+                description: 'Review and audit the performance of a predictive model',
+                skills: ['python', 'model_review_audit', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_assessment_review: {
+                id: 'model_assessment_review',
+                name: 'Model Assessment and Review',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 3 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 4 },
+                    { id: 'analyze_assessment_review', name: 'Analyze Assessment and Review Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_assessment_review',
+                description: 'Assess and review the performance of a predictive model',
+                skills: ['python', 'model_assessment_review', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_explanation_review: {
+                id: 'model_explanation_review',
+                name: 'Model Explanation and Review',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 3 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 4 },
+                    { id: 'analyze_explanation_review', name: 'Analyze Explanation and Review Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_explanation_review',
+                description: 'Explain and review the performance of a predictive model',
+                skills: ['python', 'model_explanation_review', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_validation_explanation: {
+                id: 'model_validation_explanation',
+                name: 'Model Validation and Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'validate_model', name: 'Validate Model', visual: 'model_validation', duration: 3 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 4 },
+                    { id: 'analyze_validation_explanation', name: 'Analyze Validation and Explanation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_validation_explanation',
+                description: 'Validate and explain the performance of a predictive model',
+                skills: ['python', 'model_validation_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_assessment_explanation: {
+                id: 'model_assessment_explanation',
+                name: 'Model Assessment and Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 3 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 4 },
+                    { id: 'analyze_assessment_explanation', name: 'Analyze Assessment and Explanation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_assessment_explanation',
+                description: 'Assess and explain the performance of a predictive model',
+                skills: ['python', 'model_assessment_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_review_explanation: {
+                id: 'model_review_explanation',
+                name: 'Model Review and Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 3 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 4 },
+                    { id: 'analyze_review_explanation', name: 'Analyze Review and Explanation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_review_explanation',
+                description: 'Review and explain the performance of a predictive model',
+                skills: ['python', 'model_review_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_audit_explanation: {
+                id: 'model_audit_explanation',
+                name: 'Model Audit and Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 3 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 4 },
+                    { id: 'analyze_audit_explanation', name: 'Analyze Audit and Explanation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_audit_explanation',
+                description: 'Audit and explain the performance of a predictive model',
+                skills: ['python', 'model_audit_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_analysis: {
+                id: 'model_comparison_analysis',
+                name: 'Model Comparison and Analysis',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'analyze_comparison_analysis', name: 'Analyze Comparison and Analysis Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_comparison_analysis',
+                description: 'Compare and analyze the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_analysis', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_explanation: {
+                id: 'model_comparison_explanation',
+                name: 'Model Comparison and Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 4 },
+                    { id: 'analyze_comparison_explanation', name: 'Analyze Comparison and Explanation Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_comparison_explanation',
+                description: 'Compare and explain the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_assessment: {
+                id: 'model_comparison_assessment',
+                name: 'Model Comparison and Assessment',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 4 },
+                    { id: 'analyze_comparison_assessment', name: 'Analyze Comparison and Assessment Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_comparison_assessment',
+                description: 'Compare and assess the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_assessment', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_review: {
+                id: 'model_comparison_review',
+                name: 'Model Comparison and Review',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 4 },
+                    { id: 'analyze_comparison_review', name: 'Analyze Comparison and Review Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_comparison_review',
+                description: 'Compare and review the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_review', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_audit: {
+                id: 'model_comparison_audit',
+                name: 'Model Comparison and Audit',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'analyze_comparison_audit', name: 'Analyze Comparison and Audit Results', visual: 'analysis', duration: 3 }
+                ],
+                visual: 'model_comparison_audit',
+                description: 'Compare and audit the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_audit', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_audit_explanation: {
+                id: 'model_comparison_audit_explanation',
+                name: 'Model Comparison and Audit with Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 5 },
+                    { id: 'analyze_comparison_audit_explanation', name: 'Analyze Comparison, Audit, and Explanation Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_audit_explanation',
+                description: 'Compare, audit, and explain the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_audit_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_audit_assessment: {
+                id: 'model_comparison_audit_assessment',
+                name: 'Model Comparison and Audit with Assessment',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 5 },
+                    { id: 'analyze_comparison_audit_assessment', name: 'Analyze Comparison, Audit, and Assessment Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_audit_assessment',
+                description: 'Compare, audit, and assess the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_audit_assessment', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_audit_review: {
+                id: 'model_comparison_audit_review',
+                name: 'Model Comparison and Audit with Review',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'audit_model', name: 'Audit Model', visual: 'model_audit', duration: 4 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 5 },
+                    { id: 'analyze_comparison_audit_review', name: 'Analyze Comparison, Audit, and Review Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_audit_review',
+                description: 'Compare, audit, and review the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_audit_review', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_analysis_explanation: {
+                id: 'model_comparison_analysis_explanation',
+                name: 'Model Comparison and Analysis with Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 5 },
+                    { id: 'analyze_comparison_analysis_explanation', name: 'Analyze Comparison, Analysis, and Explanation Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_analysis_explanation',
+                description: 'Compare, analyze, and explain the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_analysis_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_analysis_assessment: {
+                id: 'model_comparison_analysis_assessment',
+                name: 'Model Comparison and Analysis with Assessment',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 5 },
+                    { id: 'analyze_comparison_analysis_assessment', name: 'Analyze Comparison, Analysis, and Assessment Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_analysis_assessment',
+                description: 'Compare, analyze, and assess the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_analysis_assessment', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_analysis_review: {
+                id: 'model_comparison_analysis_review',
+                name: 'Model Comparison and Analysis with Review',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'analyze_model', name: 'Analyze Model', visual: 'model_analysis', duration: 4 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 5 },
+                    { id: 'analyze_comparison_analysis_review', name: 'Analyze Comparison, Analysis, and Review Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_analysis_review',
+                description: 'Compare, analyze, and review the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_analysis_review', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_assessment_explanation: {
+                id: 'model_comparison_assessment_explanation',
+                name: 'Model Comparison and Assessment with Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 4 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 5 },
+                    { id: 'analyze_comparison_assessment_explanation', name: 'Analyze Comparison, Assessment, and Explanation Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_assessment_explanation',
+                description: 'Compare, assess, and explain the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_assessment_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_assessment_review: {
+                id: 'model_comparison_assessment_review',
+                name: 'Model Comparison and Assessment with Review',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 4 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 5 },
+                    { id: 'analyze_comparison_assessment_review', name: 'Analyze Comparison, Assessment, and Review Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_assessment_review',
+                description: 'Compare, assess, and review the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_assessment_review', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_review_explanation: {
+                id: 'model_comparison_review_explanation',
+                name: 'Model Comparison and Review with Explanation',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 4 },
+                    { id: 'explain_model', name: 'Explain Model', visual: 'model_explanation', duration: 5 },
+                    { id: 'analyze_comparison_review_explanation', name: 'Analyze Comparison, Review, and Explanation Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_review_explanation',
+                description: 'Compare, review, and explain the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_review_explanation', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
+            },
+            model_comparison_review_assessment: {
+                id: 'model_comparison_review_assessment',
+                name: 'Model Comparison and Review with Assessment',
+                category: 'analysis',
+                steps: [
+                    { id: 'load_model', name: 'Load Model', visual: 'model_loading', duration: 2 },
+                    { id: 'compare_models', name: 'Compare Models', visual: 'model_comparison', duration: 3 },
+                    { id: 'review_model', name: 'Review Model', visual: 'model_review', duration: 4 },
+                    { id: 'assess_model', name: 'Assess Model', visual: 'model_assessment', duration: 5 },
+                    { id: 'analyze_comparison_review_assessment', name: 'Analyze Comparison, Review, and Assessment Results', visual: 'analysis', duration: 6 }
+                ],
+                visual: 'model_comparison_review_assessment',
+                description: 'Compare, review, and assess the performance of multiple predictive models',
+                skills: ['python', 'model_comparison_review_assessment', 'scikit-learn', 'pandas'],
+                reward: { money: 1200, reputation: 30, experience: 150 }
             }
-        };
-    }
-    
-    /**
-     * Generate a task based on job and context
-     */
-    generateTask(jobId, context = {}) {
-        const availableTasks = this.getAvailableTasks(jobId, context);
-        if (availableTasks.length === 0) return null;
-        
-        const taskType = availableTasks[Math.floor(Math.random() * availableTasks.length)];
-        const taskTemplate = this.taskTypes[taskType];
-        
-        return {
-            id: `${taskType}_${Date.now()}`,
-            type: taskType,
-            name: taskTemplate.name,
-            category: taskTemplate.category,
-            steps: taskTemplate.steps.map(step => ({ ...step, completed: false })),
-            currentStep: 0,
-            visual: taskTemplate.visual,
-            description: taskTemplate.description,
-            skills: taskTemplate.skills,
-            reward: taskTemplate.reward,
-            requiresLab: taskTemplate.requiresLab || false,
-            canTakeModel: taskTemplate.canTakeModel !== false,
-            startedAt: Date.now(),
-            context: context
-        };
-    }
-    
-    /**
-     * Get available tasks for a job
-     */
-    getAvailableTasks(jobId, context = {}) {
-        const allTasks = Object.keys(this.taskTypes);
-        
-        // Filter based on job requirements - expanded with new tasks
-        const jobTasks = {
-            'data_analyst': [
-                'data_cleaning', 'exploratory_analysis', 'github_bug_fix',
-                'data_validation', 'ab_test_design', 'time_series_analysis',
-                'feature_engineering', 'model_evaluation', 'clustering_analysis'
-            ],
-            'data_engineer': [
-                'etl_pipeline', 'data_cleaning', 'github_feature',
-                'data_validation', 'database_optimization', 'api_development',
-                'feature_engineering', 'pipeline_optimization'
-            ],
-            'ml_engineer': [
-                'model_training', 'data_cleaning', 'github_feature',
-                'classification_model', 'regression_model', 'hyperparameter_tuning',
-                'model_evaluation', 'model_deployment', 'feature_engineering',
-                'nlp_text_analysis', 'clustering_analysis'
-            ],
-            'research_scientist': [
-                'ai_model_training', 'model_training', 'exploratory_analysis',
-                'time_series_analysis', 'nlp_text_analysis', 'hyperparameter_tuning',
-                'clustering_analysis', 'model_evaluation'
-            ]
-        };
-        
-        let available = jobTasks[jobId] || allTasks;
-        
-        // Check if in university lab for AI training
-        if (context.inUniversityLab && available.includes('ai_model_training')) {
-            return ['ai_model_training'];
         }
-        
-        // Filter out AI training if not in lab
-        if (!context.inUniversityLab) {
-            available = available.filter(t => t !== 'ai_model_training');
-        }
-        
-        return available;
-    }
-    
-    /**
-     * Start a task
-     */
-    startTask(task) {
-        this.currentTask = task;
-        this.currentTask.currentStep = 0;
-        this.currentTask.startedAt = Date.now();
-        return this.currentTask;
-    }
-    
-    /**
-     * Complete current step
-     */
-    completeStep() {
-        if (!this.currentTask) return null;
-        
-        const step = this.currentTask.steps[this.currentTask.currentStep];
-        if (step) {
-            step.completed = true;
-            this.currentTask.currentStep++;
-            
-            // Check if task is complete
-            if (this.currentTask.currentStep >= this.currentTask.steps.length) {
-                return this.completeTask();
-            }
-        }
-        
-        return this.currentTask;
-    }
-    
-    /**
-     * Complete entire task
-     */
-    completeTask() {
-        if (!this.currentTask) return null;
-        
-        const task = this.currentTask;
-        this.taskHistory.push({
-            ...task,
-            completedAt: Date.now(),
-            duration: Date.now() - task.startedAt
-        });
-        
-        // Apply rewards
-        if (task.reward) {
-            if (task.reward.money && task.canTakeModel !== false) {
-                this.gameState.money += task.reward.money;
-            }
-            if (task.reward.reputation) {
-                this.gameState.reputation += task.reward.reputation;
-            }
-            if (task.reward.experience) {
-                // Add experience to relevant skills
-                task.skills.forEach(skill => {
-                    if (!this.gameState.stats[skill]) {
-                        this.gameState.stats[skill] = 0;
-                    }
-                    this.gameState.stats[skill] += Math.floor(task.reward.experience / task.skills.length);
-                });
-            }
-        }
-        
-        this.currentTask = null;
-        return task;
-    }
-    
-    /**
-     * Get current task
-     */
-    getCurrentTask() {
-        return this.currentTask;
-    }
-    
-    /**
-     * Get current step visual
-     */
-    getCurrentStepVisual() {
-        if (!this.currentTask) return null;
-        
-        const step = this.currentTask.steps[this.currentTask.currentStep];
-        return step ? step.visual : null;
-    }
-    
-    /**
-     * Get task progress (0-100)
-     */
-    getTaskProgress() {
-        if (!this.currentTask) return 0;
-        
-        const completed = this.currentTask.steps.filter(s => s.completed).length;
-        return (completed / this.currentTask.steps.length) * 100;
     }
 }
-
