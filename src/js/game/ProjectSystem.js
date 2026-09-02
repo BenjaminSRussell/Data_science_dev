@@ -1,146 +1,152 @@
 /**
  * ProjectSystem.js
- * Manages active projects, progress, and stage transitions.
+ * Manages project creation, tracking, and completion.
  */
-import { CONTRACTS, PROJECT_TYPES } from './ProjectDatabase.js';
 
 export class ProjectSystem {
     constructor(gameState) {
         this.gameState = gameState;
-
-        this.activeProject = null; // Currently working on
-        this.availableContracts = []; // List of available jobs
-
+        this.activeProject = null;
         this.completedProjects = [];
-        this.projectHistory = {}; // { id: count }
+        this.projectHistory = {};
+        this.CONTRACTS = [
+            {
+                id: 'project_1',
+                name: 'Alpha',
+                description: 'Build the first version of the Alpha software.',
+                stages: [
+                    { name: 'Design', maxProgress: 100 },
+                    { name: 'Development', maxProgress: 200 },
+                    { name: 'Testing', maxProgress: 150 }
+                ],
+                reward: 1000,
+                xpReward: { programming: 50 },
+                difficulty: 2,
+                reputation: 50,
+                requirements: {
+                    stat: 'intelligence',
+                    value: 5
+                }
+            },
+            {
+                id: 'project_2',
+                name: 'Beta',
+                description: 'Build the first version of the Beta software.',
+                stages: [
+                    { name: 'Design', maxProgress: 120 },
+                    { name: 'Development', maxProgress: 220 },
+                    { name: 'Testing', maxProgress: 160 }
+                ],
+                reward: 1500,
+                xpReward: { programming: 75 },
+                difficulty: 3,
+                reputation: 75,
+                requirements: {
+                    stat: 'intelligence',
+                    value: 6
+                }
+            }
+        ];
 
-        // Refresh contracts on init
         this.refreshContracts();
     }
 
     /**
-     * Generate available contracts based on player stats
+     * Refresh available contracts based on character stats and reputation
      */
     refreshContracts() {
-        // Filter contracts player qualifies for
-        this.availableContracts = CONTRACTS.filter(contract => {
-            // Check requirements
-            if (contract.requirements) {
-                if (contract.requirements.stat &&
-                    this.gameState.characterStats?.getStat(contract.requirements.stat) < contract.requirements.value) {
-                    return false;
-                }
-                if (contract.requirements.reputation &&
-                    this.gameState.reputation < contract.requirements.reputation) {
-                    return false;
-                }
-            }
-            return true;
+        this.availableContracts = this.CONTRACTS.filter(contract => {
+            const statRequirement = contract.requirements.stat;
+            const valueRequirement = contract.requirements.value;
+            const statValue = this.gameState.characterStats?.getStat(statRequirement) || 0;
+            const reputationValue = this.gameState.reputation || 0;
+
+            return statValue >= valueRequirement && reputationValue >= contract.reputation;
         });
     }
 
     /**
-     * Start a new project
+     * Start a project
+     * @param {string} contractId - The ID of the contract to start
      */
     startProject(contractId) {
-        if (this.activeProject) return { success: false, reason: "Already working on a project." };
+        if (this.activeProject) {
+            return { success: false, reason: "Already working on a project." };
+        }
 
-        const contract = CONTRACTS.find(c => c.id === contractId);
-        if (!contract) return { success: false, reason: "Contract not found." };
+        const contract = this.availableContracts.find(c => c.id === contractId);
+        if (!contract) {
+            return { success: false, reason: "Contract not found." };
+        }
 
         this.activeProject = {
-            ...contract,
+            contractId: contract.id,
             currentStageIndex: 0,
-            stageProgress: 0, // 0 to maxProgress
-            totalProgress: 0,
-            startTime: Date.now()
+            stageProgress: 0,
+            startedAt: new Date()
         };
 
-        return { success: true, project: this.activeProject };
+        return { success: true };
     }
 
     /**
-     * Work on the current project (called by Game Loop)
-     * @param {number} workPower - Base work amount per tick
+     * Work on the active project
+     * @param {number} workPower - The amount of work power to apply
      */
     workOnProject(workPower) {
-        if (!this.activeProject) return null;
-
-        const stage = this.activeProject.stages[this.activeProject.currentStageIndex];
-
-        // AI Bonus Check
-        let aiBonus = 0;
-        if (this.gameState.aiSystem) {
-            aiBonus = this.gameState.aiSystem?.processingPower || 0;
-
-            // Intelligence Bonus for specific stages?
-            // e.g. Cleaning is faster with high AI Int
+        if (!this.activeProject) {
+            return { success: false, reason: "No active project." };
         }
 
-        // Hardware Bonus Check
-        // if (stage.type === PROJECT_TYPES.MODELING && hasGPU) bonus += 5;
+        const aiBonus = this.gameState.aiSystem ? this.gameState.aiSystem.processingPower : 0;
+        const totalWork = workPower + aiBonus;
 
-        const effectiveWork = workPower + aiBonus;
-        this.activeProject.stageProgress += effectiveWork;
+        const contract = this.CONTRACTS.find(c => c.id === this.activeProject.contractId);
+        const stage = contract.stages[this.activeProject.currentStageIndex];
 
-        // Check stage completion
+        this.activeProject.stageProgress += totalWork;
+
         if (this.activeProject.stageProgress >= stage.maxProgress) {
-            return this.completeStage();
+            this.completeStage();
         }
 
-        return {
-            status: 'working',
-            stage: stage.name,
-            progress: (this.activeProject.stageProgress / stage.maxProgress) * 100
-        };
+        return { success: true };
     }
 
     /**
-     * Complete the current stage
+     * Complete the current stage of the active project
      */
     completeStage() {
-        if (!this.activeProject || !this.activeProject.stages) return null;
-        
-        const currentIndex = this.activeProject.currentStageIndex || 0;
-        const stage = this.activeProject.stages[currentIndex];
-        
-        if (!stage) return null;
-
-        // If there was a challenge, we assume it was passed (UI handles the challenge interaction before working)
-        // Or we pause here if challenge not met? 
-        // Design Decision: Challenges pause the "Fast Forward".
-
-        // Move to next stage
-        this.activeProject.currentStageIndex = (currentIndex + 1);
-        this.activeProject.stageProgress = 0;
-
-        // Check if Project is fully complete
-        if (this.activeProject.currentStageIndex >= this.activeProject.stages.length) {
-            return this.completeProject();
+        if (!this.activeProject) {
+            return { success: false, reason: "No active project." };
         }
 
-        const nextStage = this.activeProject.stages[this.activeProject.currentStageIndex];
-        return {
-            status: 'stage_complete',
-            nextStage: nextStage || null
-        };
+        const contract = this.CONTRACTS.find(c => c.id === this.activeProject.contractId);
+
+        this.activeProject.currentStageIndex++;
+        this.activeProject.stageProgress = 0;
+
+        if (this.activeProject.currentStageIndex >= contract.stages.length) {
+            this.completeProject();
+        }
+
+        return { success: true };
     }
 
     /**
-     * Complete the entire project
+     * Complete the active project
      */
     completeProject() {
-        if (!this.activeProject) return null;
-        
-        const project = this.activeProject;
-
-        // Rewards
-        if (project.reward) {
-            this.gameState.money = (this.gameState.money || 0) + project.reward;
+        if (!this.activeProject) {
+            return { success: false, reason: "No active project." };
         }
-        
-        if (project.xpReward && this.gameState?.characterStats) {
-            Object.entries(project.xpReward || {}).forEach(([skill, amount]) => {
+
+        const contract = this.CONTRACTS.find(c => c.id === this.activeProject.contractId);
+
+        this.gameState.money = (this.gameState.money || 0) + contract.reward;
+
+        if (contract.xpReward && this.gameState?.characterStats) {
+            Object.entries(contract.xpReward || {}).forEach(([skill, amount]) => {
                 if (this.gameState.characterStats?.addExperience && typeof amount === 'number') {
                     try {
                         this.gameState.characterStats.addExperience(skill, amount);
@@ -150,39 +156,39 @@ export class ProjectSystem {
                 }
             });
         }
-        
-        if (project.ethics && this.gameState?.characterStats?.modifyEthics) {
+
+        if (contract.ethics && this.gameState?.characterStats?.modifyEthics) {
             try {
-                this.gameState.characterStats.modifyEthics(project.ethics);
+                this.gameState.characterStats.modifyEthics(contract.ethics);
             } catch (error) {
                 console.warn('Failed to modify ethics:', error);
             }
         }
 
         // Reputation
-        if (project.difficulty) {
-            this.gameState.reputation = (this.gameState.reputation || 0) + (project.difficulty * 10);
+        if (contract.difficulty) {
+            this.gameState.reputation = (this.gameState.reputation || 0) + (contract.difficulty * 10);
         }
 
         // Track history
-        if (project.id) {
+        if (contract.id) {
             if (!this.completedProjects) this.completedProjects = [];
-            this.completedProjects.push(project.id);
+            this.completedProjects.push(contract.id);
             if (!this.projectHistory) this.projectHistory = {};
-            this.projectHistory[project.id] = (this.projectHistory[project.id] || 0) + 1;
+            this.projectHistory[contract.id] = (this.projectHistory[contract.id] || 0) + 1;
         }
 
         this.activeProject = null;
 
         return {
             status: 'project_complete',
-            project: project,
-            reward: project.reward || 0
+            contract: contract,
+            reward: contract.reward || 0
         };
     }
 
     /**
-     * Cancel current
+     * Cancel current project
      */
     cancelProject() {
         this.activeProject = null;
