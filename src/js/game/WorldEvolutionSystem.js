@@ -1,224 +1,130 @@
 /**
  * WorldEvolutionSystem.js
- * World changes: businesses closing, new ones opening, economic shifts
+ * Handles the weekly business health simulation and evolution of the game world.
  */
 
-export class WorldEvolutionSystem {
+import { GameState } from '../GameState.js';
+import { Economy } from '../Economy.js';
+import { NewsManager } from '../NewsManager.js';
+import { MapManager } from '../MapManager.js';
+
+class WorldEvolutionSystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.worldState = {
-            week: 0,
-            businesses: [],
-            economicClimate: 'stable', // stable, boom, recession, depression
-            unemploymentRate: 5.0,
-            events: []
-        };
-        this.businesses = this.initializeBusinesses();
+        this.economy = new Economy();
+        this.newsManager = new NewsManager();
+        this.mapManager = new MapManager();
+
+        // Initialize business locations
+        this.businessLocations = this.getBusinessLocation();
     }
 
     /**
-     * Initialize businesses in the world
-     */
-    initializeBusinesses() {
-        return [
-            { id: 'techcorp', name: 'TechCorp', type: 'tech', health: 100, employees: 500 },
-            { id: 'datadynamics', name: 'DataDynamics', type: 'analytics', health: 80, employees: 200 },
-            { id: 'local_coffee', name: 'Corner Coffee', type: 'retail', health: 60, employees: 5 },
-            { id: 'startup_alpha', name: 'Startup Alpha', type: 'startup', health: 40, employees: 15 },
-            { id: 'consulting_firm', name: 'McKinsey Analytics', type: 'consulting', health: 90, employees: 300 }
-        ];
-    }
-
-    /**
-     * Process weekly world changes
+     * Process weekly changes in the game world.
      */
     processWeeklyChanges() {
-        this.worldState.week++;
-        const changes = [];
-
-        // Economic climate changes
-        this.updateEconomicClimate();
-
-        // Business health changes
-        this.businesses.forEach(business => {
-            const change = this.updateBusinessHealth(business);
-            if (change) changes.push(change);
-        });
-
-        // Random events
-        const event = this.generateRandomEvent();
-        if (event) changes.push(event);
-
-        // Update unemployment based on business health
-        this.updateUnemploymentRate();
-
-        return {
-            week: this.worldState.week,
-            changes,
-            economicClimate: this.worldState.economicClimate,
-            unemploymentRate: this.worldState.unemploymentRate
-        };
+        this.economy.updateEconomicClimate();
+        this.applyBusinessHealthChanges();
+        this.checkForClosuresAndLayoffs();
+        this.generateNewsEvents();
     }
 
     /**
-     * Update economic climate
+     * Update the game world.
      */
-    updateEconomicClimate() {
-        const week = this.worldState.week;
-        const random = Math.random();
-
-        // Economic cycles
-        if (week % 20 === 0 && random > 0.7) {
-            // Recession hits
-            this.worldState.economicClimate = 'recession';
-        } else if (week % 15 === 0 && random > 0.6) {
-            // Economic boom
-            this.worldState.economicClimate = 'boom';
-        } else if (week % 10 === 0) {
-            // Return to stability
-            this.worldState.economicClimate = 'stable';
-        }
+    update() {
+        this.processWeeklyChanges();
     }
 
     /**
-     * Update business health
+     * Apply health changes to businesses.
      */
-    updateBusinessHealth(business) {
-        const climate = this.worldState.economicClimate;
-        let healthChange = 0;
-
-        // Economic impact
-        if (climate === 'recession') {
-            healthChange -= 5 + Math.random() * 5;
-        } else if (climate === 'boom') {
-            healthChange += 3 + Math.random() * 3;
-        } else {
-            healthChange += (Math.random() - 0.5) * 2; // Small random variation
-        }
-
-        // Business type vulnerability
-        if (business.type === 'startup' && climate === 'recession') {
-            healthChange -= 10; // Startups are vulnerable
-        }
-        if (business.type === 'retail' && climate === 'recession') {
-            healthChange -= 8; // Retail suffers
-        }
-
-        business.health = Math.max(0, Math.min(100, business.health + healthChange));
-
-        // Check for business closure
-        if (business.health <= 0 && !business.closed) {
-            business.closed = true;
-            business.closedWeek = this.worldState.week;
-            return {
-                type: 'business_closed',
-                business: business.name,
-                message: `${business.name} has closed its doors. ${business.employees} people lost their jobs.`,
-                impact: {
-                    unemployment: business.employees,
-                    locationAffected: this.getBusinessLocation(business.id)
-                }
-            };
-        }
-
-        // Check for layoffs
-        if (business.health < 30 && business.health > 0 && Math.random() > 0.7) {
-            const layoffs = Math.floor(business.employees * 0.1);
-            business.employees -= layoffs;
-            return {
-                type: 'layoffs',
-                business: business.name,
-                message: `${business.name} announced layoffs. ${layoffs} employees lost their jobs.`,
-                impact: {
-                    unemployment: layoffs
-                }
-            };
-        }
-
-        return null;
-    }
-
-    /**
-     * Generate random world event
-     */
-    generateRandomEvent() {
-        const events = [
-            {
-                type: 'new_business',
-                message: 'A new tech startup opened downtown. Job opportunities available!',
-                impact: { jobs: 10 }
-            },
-            {
-                type: 'industry_award',
-                message: 'Local data scientist wins prestigious industry award. Inspiration for all!',
-                impact: { morale: 10 }
-            },
-            {
-                type: 'scandal',
-                message: 'Major corporation involved in data privacy scandal. Public trust erodes.',
-                impact: { reputation: -5 }
-            },
-            {
-                type: 'innovation',
-                message: 'Breakthrough in AI technology announced. New opportunities emerge.',
-                impact: { techAdvancement: true }
+    applyBusinessHealthChanges() {
+        for (const location of this.gameState.locations) {
+            const business = location.business;
+            if (business) {
+                business.health += this.economy.getWeeklyHealthChange();
+                business.health = Math.max(0, Math.min(100, business.health));
             }
-        ];
+        }
+    }
 
-        if (Math.random() > 0.7) {
-            return events[Math.floor(Math.random() * events.length)];
+    /**
+     * Check for business closures and layoffs.
+     */
+    checkForClosuresAndLayoffs() {
+        for (const location of this.gameState.locations) {
+            const business = location.business;
+            if (business) {
+                if (business.health <= this.economy.getClosureThreshold()) {
+                    this.closeBusiness(location);
+                } else if (business.health <= this.economy.getLayoffThreshold()) {
+                    this.layoffEmployees(location);
+                }
+            }
+        }
+    }
+
+    /**
+     * Close a business.
+     * @param {Object} location - The location where the business is located.
+     */
+    closeBusiness(location) {
+        const business = location.business;
+        business.status = 'closed';
+        this.newsManager.reportBusinessClosure(business.name);
+    }
+
+    /**
+     * Lay off employees at a business.
+     * @param {Object} location - The location where the business is located.
+     */
+    layoffEmployees(location) {
+        const business = location.business;
+        const layoffs = Math.floor(business.employees * 0.2);
+        business.employees -= layoffs;
+        this.newsManager.reportLayoffs(business.name, layoffs);
+    }
+
+    /**
+     * Generate news events based on the current game state.
+     */
+    generateNewsEvents() {
+        for (const event of this.newsManager.generateEvents(this.gameState)) {
+            this.newsManager.addEvent(event);
+        }
+    }
+
+    /**
+     * Get the business location mapping.
+     * @returns {Object} - The business location mapping.
+     */
+    getBusinessLocation() {
+        const businessLocations = {
+            'business1': { x: 10, y: 10 },
+            'business2': { x: 15, y: 15 },
+            'business3': { x: 20, y: 20 },
+            'business4': { x: 25, y: 25 },
+            'business5': { x: 30, y: 30 }
+        };
+
+        // Reconcile with actual map location data
+        for (const [businessId, position] of Object.entries(businessLocations)) {
+            const zone = this.mapManager.getZoneSystem().getZoneAt(position.x, position.y);
+            if (zone) {
+                const block = this.mapManager.getBlockSystem().getBlockAt(position.x, position.y);
+                if (block) {
+                    this.mapManager.getBuildingSystem().placeBuilding({
+                        id: businessId,
+                        type: 'business',
+                        position: position
+                    });
+                }
+            }
         }
 
-        return null;
-    }
-
-    /**
-     * Update unemployment rate
-     */
-    updateUnemploymentRate() {
-        const totalEmployees = this.businesses.reduce((sum, b) => sum + (b.closed ? 0 : b.employees), 0);
-        const closedEmployees = this.businesses.filter(b => b.closed).reduce((sum, b) => sum + b.employees, 0);
-        
-        // Simplified unemployment calculation
-        const baseRate = 5.0;
-        const unemploymentFromClosures = (closedEmployees / 1000) * 10; // Rough estimate
-        this.worldState.unemploymentRate = Math.min(20, baseRate + unemploymentFromClosures);
-    }
-
-    /**
-     * Get business location (for map updates)
-     */
-    getBusinessLocation(businessId) {
-        const locationMap = {
-            'techcorp': 'downtown',
-            'datadynamics': 'tech_hub',
-            'local_coffee': 'coffee_shop',
-            'startup_alpha': 'tech_hub',
-            'consulting_firm': 'downtown'
-        };
-        return locationMap[businessId] || 'downtown';
-    }
-
-    /**
-     * Get current world state
-     */
-    getWorldState() {
-        return {
-            ...this.worldState,
-            businesses: this.businesses.map(b => ({
-                id: b.id,
-                name: b.name,
-                health: b.health,
-                closed: b.closed || false
-            }))
-        };
+        return businessLocations;
     }
 }
 
-
-
-
-
-
-
-
+export default WorldEvolutionSystem;
