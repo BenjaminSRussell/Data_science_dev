@@ -1,144 +1,124 @@
 /**
- * BankSystem - Handles savings, loans, and interest
+ * BankSystem.js
+ * Manages bank accounts, savings, loans, and interest.
  */
-
 export class BankSystem {
     constructor(gameState) {
         this.gameState = gameState;
 
-        // Default bank state if not exists
-        if (!this.gameState.bank) {
-            this.gameState.bank = {
-                savings: 0,
-                loan: 0,
-                loanInterestRate: 0.10, // 10% weekly initial
-                savingsInterestRate: 0.005, // 0.5% weekly
-                creditScore: 500, // 300-850
-                transactionHistory: []
-            };
-        }
-    }
-
-    /**
-     * Deposit money into savings
-     */
-    deposit(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
-        if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-
-        this.gameState.money -= amount;
-        this.gameState.bank.savings += amount;
-        this.logTransaction('Deposit', amount);
-
-        return { success: true, message: `Deposited $${amount}`, newBalance: this.gameState.bank.savings };
-    }
-
-    /**
-     * Withdraw money from savings
-     */
-    withdraw(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-        if (this.gameState.bank.savings < amount) return { success: false, message: "Insufficient savings" };
-
-        this.gameState.bank.savings -= amount;
-        this.gameState.money += amount;
-        this.logTransaction('Withdrawal', -amount);
-
-        return { success: true, message: `Withdrew $${amount}`, newBalance: this.gameState.bank.savings };
-    }
-
-    /**
-     * Take out a loan
-     */
-    takeLoan(amount) {
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-        const maxLoan = this.calculateMaxLoan();
-        if (amount > maxLoan) return { success: false, message: `Loan limit exceeded (Max: $${maxLoan})` };
-
-        this.gameState.bank.loan += amount;
-        this.gameState.money += amount;
-        this.logTransaction('Loan Taken', amount);
-
-        return { success: true, message: `Loan taken: $${amount}` };
-    }
-
-    /**
-     * Repay loan
-     */
-    repayLoan(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-        if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
-        if (this.gameState.bank.loan <= 0) return { success: false, message: "No active loan" };
-
-        const payment = Math.min(amount, this.gameState.bank.loan);
-        this.gameState.money -= payment;
-        this.gameState.bank.loan -= payment;
-        this.logTransaction('Loan Repayment', -payment);
-
-        return { success: true, message: `Repaid $${payment} of loan` };
-    }
-
-    /**
-     * Calculate weekly interest
-     */
-    processWeeklyInterest() {
-        const results = {
-            savingsInterest: 0,
-            loanInterest: 0
+        this.accounts = {
+            checking: { balance: 0 },
+            savings: { balance: 0 },
+            loan: { principal: 0, interestRate: 0.05, outstanding: 0, weeksOutstanding: 0 }
         };
 
-        if (!this.gameState.bank) return results;
-
-        // Savings interest
-        if (this.gameState.bank.savings > 0) {
-            results.savingsInterest = Math.floor(this.gameState.bank.savings * this.gameState.bank.savingsInterestRate);
-            this.gameState.bank.savings += results.savingsInterest;
-        }
-
-        // Loan interest
-        if (this.gameState.bank.loan > 0) {
-            results.loanInterest = Math.ceil(this.gameState.bank.loan * this.gameState.bank.loanInterestRate);
-            this.gameState.bank.loan += results.loanInterest;
-        }
-
-        return results;
+        this.interestMultiplier = 1.02; // Default 2% weekly interest for savings
     }
 
     /**
-     * Calculate max loan based on reputation and credit score
+     * Deposit money into a specified account.
      */
-    calculateMaxLoan() {
-        if (!this.gameState.bank) return 0;
-        
-        // Base $1000 + $100 per reputation point
-        const reputation = this.gameState.reputation || 0;
-        let limit = 1000 + (reputation * 100);
+    deposit(accountId, amount) {
+        if (!this.accounts[accountId]) return { success: false, message: "Invalid account." };
+        if (amount <= 0) return { success: false, message: "Deposit amount must be positive." };
 
-        // Multiplier based on credit score (simplified)
-        const creditMultiplier = this.gameState.bank.creditScore / 500;
+        this.accounts[accountId].balance += amount;
 
-        return Math.floor(limit * creditMultiplier);
+        return { success: true, message: `Deposited $${amount} into ${accountId} account.` };
     }
 
-    logTransaction(type, amount) {
-        if (!this.gameState.bank) return;
-        if (!this.gameState.bank.transactionHistory) {
-            this.gameState.bank.transactionHistory = [];
-        }
-        
-        this.gameState.bank.transactionHistory.unshift({
-            date: new Date().toISOString(), // In-game date would be better if passed, using real time for now unique ID
-            type,
-            amount,
-            balance: this.gameState.bank.savings
-        });
+    /**
+     * Withdraw money from a specified account.
+     */
+    withdraw(accountId, amount) {
+        if (!this.accounts[accountId]) return { success: false, message: "Invalid account." };
+        if (amount <= 0) return { success: false, message: "Withdrawal amount must be positive." };
+        if (this.accounts[accountId].balance < amount) return { success: false, message: "Insufficient funds." };
 
-        // Keep history short
-        if (this.gameState.bank.transactionHistory.length > 20) {
-            this.gameState.bank.transactionHistory.pop();
+        this.accounts[accountId].balance -= amount;
+
+        return { success: true, message: `Withdrew $${amount} from ${accountId} account.` };
+    }
+
+    /**
+     * Apply weekly interest to savings account.
+     */
+    processWeeklyInterest() {
+        const interest = this.accounts.savings.balance * this.interestMultiplier;
+        this.accounts.savings.balance += interest;
+
+        this.processLoanInterest();
+    }
+
+    /**
+     * Apply interest to loan.
+     */
+    processLoanInterest() {
+        const interest = this.accounts.loan.outstanding * this.accounts.loan.interestRate;
+        this.accounts.loan.outstanding += Math.ceil(interest);
+
+        this.checkLoanConsequences();
+    }
+
+    /**
+     * Check for loan consequences.
+     */
+    checkLoanConsequences() {
+        const outstanding = this.accounts.loan.outstanding;
+        const threshold = this.accounts.loan.principal;
+        const weeksOutstanding = this.accounts.loan.weeksOutstanding;
+
+        if (outstanding > 0 && weeksOutstanding >= 10) {
+            // Apply consequence: reputation penalty
+            this.gameState.reputation -= 10;
+            this.accounts.loan.weeksOutstanding = 0; // Reset after applying consequence
+        } else if (outstanding > 0) {
+            this.accounts.loan.weeksOutstanding += 1;
+        } else {
+            this.accounts.loan.weeksOutstanding = 0; // Reset if loan is paid off
         }
+    }
+
+    /**
+     * Take out a loan.
+     */
+    loan(amount, interestRate) {
+        if (this.accounts.loan.outstanding > 0) return { success: false, message: "You already have an outstanding loan." };
+        if (amount <= 0) return { success: false, message: "Loan amount must be positive." };
+        if (interestRate <= 0) return { success: false, message: "Interest rate must be positive." };
+
+        this.accounts.loan.principal = amount;
+        this.accounts.loan.interestRate = interestRate;
+        this.accounts.loan.outstanding = amount;
+
+        return { success: true, message: `Loan of $${amount} taken out with ${interestRate * 100}% interest rate.` };
+    }
+
+    /**
+     * Pay off the loan.
+     */
+    payOffLoan(amount) {
+        if (amount <= 0) return { success: false, message: "Payment amount must be positive." };
+        if (this.accounts.loan.outstanding < amount) return { success: false, message: "Payment exceeds outstanding amount." };
+
+        this.accounts.loan.outstanding -= amount;
+
+        return { success: true, message: `Paid off $${amount} of the loan.` };
+    }
+
+    /**
+     * Serialization
+     */
+    toJSON() {
+        return {
+            accounts: this.accounts,
+            interestMultiplier: this.interestMultiplier
+        };
+    }
+
+    fromJSON(data) {
+        if (!data) return;
+        this.accounts = data.accounts || this.accounts;
+        this.interestMultiplier = data.interestMultiplier || this.interestMultiplier;
     }
 }
