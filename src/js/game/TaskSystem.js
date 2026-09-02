@@ -1,127 +1,75 @@
-/**
- * TaskSystem - Generates and manages data visualization tasks
- */
-
-import { TASKS } from '../data/tasks.js';
-import { BOSSES } from '../data/bosses.js';
+import { BOSSES } from './Bosses.js';
 import { COMPREHENSIVE_DATA_SCIENCE_TASKS } from '../data/comprehensive_datascience_tasks.js';
+import { TASKS } from '../data/tasks.js';
 
 export class TaskSystem {
     constructor(gameState) {
         this.gameState = gameState;
+        this.lastSortCol = -1;
+        this.lastSortAsc = true;
+        this.currentTableData = null;
+        this.originalTableData = null;
     }
 
     /**
-     * Generate a new task appropriate for player's rank
+     * Generate a new task for the player
      */
-    generateNewTask() {
-        const rank = this.gameState.currentRank;
-        const difficulty = this.getDifficultyForRank(this.gameState.rankIndex);
+    generateTask() {
+        const allTasks = COMPREHENSIVE_DATA_SCIENCE_TASKS && COMPREHENSIVE_DATA_SCIENCE_TASKS.length > 0
+            ? COMPREHENSIVE_DATA_SCIENCE_TASKS
+            : TASKS; // Ensure TASKS is reachable
 
-        // Use comprehensive data science tasks if available, fallback to original tasks
-        const allTasks = COMPREHENSIVE_DATA_SCIENCE_TASKS && COMPREHENSIVE_DATA_SCIENCE_TASKS.length > 0 
-            ? COMPREHENSIVE_DATA_SCIENCE_TASKS 
-            : TASKS;
+        const taskTemplate = this.selectTaskTemplate(allTasks);
+        const task = this.createTaskFromTemplate(taskTemplate);
 
-        // Filter tasks by difficulty (with tolerance for difficulty matching)
-        const availableTasks = allTasks.filter(t => {
-            const taskDiff = typeof t.difficulty === 'number' ? t.difficulty : parseInt(t.difficulty) || 1;
-            return Math.abs(taskDiff - difficulty) <= 0.5; // Allow 0.5 difficulty tolerance
-        });
+        this.gameState.currentTask = task;
+        this.updateBossDialogue();
+        return task;
+    }
 
-        if (availableTasks.length === 0) {
-            console.warn('No tasks found for difficulty:', difficulty);
-            return this.generateFallbackTask();
-        }
+    /**
+     * Select a task template from the available tasks
+     */
+    selectTaskTemplate(tasks) {
+        // Randomly select a task template
+        const index = Math.floor(Math.random() * tasks.length);
+        return tasks[index];
+    }
 
-        // Pick a random task
-        const taskTemplate = availableTasks[Math.floor(Math.random() * availableTasks.length)];
-
-        // Pick a random boss
+    /**
+     * Create a task object from a template
+     */
+    createTaskFromTemplate(template) {
         const boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
+        const data = this.generateRandomData(template.dataType);
 
-        return this.createTaskFromTemplate(taskTemplate, boss);
-    }
-
-    /**
-     * Create task from template
-     */
-    createTaskFromTemplate(taskTemplate, boss = null) {
-        // Generate data based on task template
-        const data = this.generateData(taskTemplate);
-
-        // Get difficulty from template
-        const difficulty = typeof taskTemplate.difficulty === 'number' 
-            ? taskTemplate.difficulty 
-            : parseInt(taskTemplate.difficulty) || 1;
-        
-        // Pick boss if not provided
-        if (!boss) {
-            boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
-        }
-
-        // Calculate reward based on rank and difficulty
-        const rank = this.gameState.currentRank;
-        const baseReward = 100 * (rank?.salaryMultiplier || 1);
-        const difficultyBonus = difficulty * 20;
-        const potentialReward = Math.round(baseReward + difficultyBonus);
-
-        // Create the task
-        this.gameState.currentTask = {
+        return {
             id: `task_${Date.now()}`,
-            template: taskTemplate,
+            template: template,
             boss: boss,
             data: data,
-            requirements: taskTemplate.requirements || [],
-            optimalChartTypes: taskTemplate.optimalChartTypes || ['bar'],
-            acceptableChartTypes: taskTemplate.acceptableChartTypes || taskTemplate.optimalChartTypes || ['bar'],
-            potentialReward: potentialReward,
-            startTime: Date.now(),
-            // Include additional metadata from comprehensive tasks
-            domain: taskTemplate.domain,
-            skills: taskTemplate.skills,
-            tools: taskTemplate.tools,
-            deliverable: taskTemplate.deliverable,
-            realWorldContext: taskTemplate.realWorldContext
+            requirements: template.requirements,
+            optimalChartTypes: template.optimalChartTypes,
+            potentialReward: this.calculatePotentialReward(template.difficulty),
+            startTime: Date.now()
         };
-
-        // Update boss dialogue
-        this.updateBossDialogue();
-
-        return this.gameState.currentTask;
     }
 
     /**
-     * Get difficulty level based on rank
+     * Generate random data based on the data type
      */
-    getDifficultyForRank(rankIndex) {
-        if (rankIndex <= 1) return 1; // Entry level
-        if (rankIndex <= 3) return 2; // Mid level
-        if (rankIndex <= 5) return 3; // Senior level
-        return 4; // Expert level
-    }
-
-    /**
-     * Generate data based on task template
-     */
-    generateData(template) {
-        switch (template.dataType) {
+    generateRandomData(dataType) {
+        switch (dataType) {
             case 'quarterly_sales':
                 return this.generateQuarterlySalesData();
-            case 'monthly_revenue':
-                return this.generateMonthlyRevenueData();
-            case 'product_comparison':
-                return this.generateProductComparisonData();
-            case 'category_breakdown':
-                return this.generateCategoryBreakdownData();
-            case 'trend_analysis':
-                return this.generateTrendAnalysisData();
-            case 'customer_demographics':
+            case 'user_growth':
+                return this.generateUserGrowthData();
+            case 'demographics':
                 return this.generateDemographicsData();
             case 'performance_metrics':
                 return this.generatePerformanceData();
             default:
-                return this.generateQuarterlySalesData();
+                return this.generateFallbackTask().data; // Fallback to a known good task
         }
     }
 
@@ -129,105 +77,27 @@ export class TaskSystem {
      * Generate quarterly sales data
      */
     generateQuarterlySalesData() {
-        const quarters = ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'];
-        const baseRevenue = this.randomRange(80000, 150000);
+        const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+        let value = this.randomRange(10000, 50000);
+        const sales = quarters.map(() => {
+            value = value + this.randomRange(-5000, 5000);
+            return Math.max(5000, value);
+        });
 
         return {
-            columns: ['Quarter', 'Revenue', 'Expenses', 'Profit'],
-            rows: quarters.map((q, i) => {
-                const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
-                const revenue = Math.round(baseRevenue * growth);
-                const expenses = Math.round(revenue * (0.5 + Math.random() * 0.2));
-                const profit = revenue - expenses;
-
-                return [q, revenue, expenses, profit];
-            }),
+            columns: ['Quarter', 'Sales'],
+            rows: quarters.map((q, i) => [q, sales[i]]),
             labels: quarters,
             datasets: {
-                Revenue: quarters.map((_, i) => {
-                    const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
-                    return Math.round(baseRevenue * growth);
-                }),
-                Expenses: [],
-                Profit: []
+                Sales: sales
             }
         };
     }
 
     /**
-     * Generate monthly revenue data
+     * Generate user growth data
      */
-    generateMonthlyRevenueData() {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const baseRevenue = this.randomRange(50000, 100000);
-
-        const revenues = months.map((_, i) => {
-            const seasonal = Math.sin((i / 12) * Math.PI * 2) * 0.2;
-            const growth = 1 + (i * 0.02) + seasonal + (Math.random() * 0.1);
-            return Math.round(baseRevenue * growth);
-        });
-
-        return {
-            columns: ['Month', 'Revenue'],
-            rows: months.map((m, i) => [m, revenues[i]]),
-            labels: months,
-            datasets: {
-                Revenue: revenues
-            }
-        };
-    }
-
-    /**
-     * Generate product comparison data
-     */
-    generateProductComparisonData() {
-        const products = ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'];
-
-        const sales = products.map(() => this.randomRange(5000, 50000));
-        const ratings = products.map(() => (3 + Math.random() * 2).toFixed(1));
-
-        return {
-            columns: ['Product', 'Sales ($)', 'Rating'],
-            rows: products.map((p, i) => [p, sales[i], ratings[i]]),
-            labels: products,
-            datasets: {
-                Sales: sales,
-                Rating: ratings.map(r => parseFloat(r))
-            }
-        };
-    }
-
-    /**
-     * Generate category breakdown data
-     */
-    generateCategoryBreakdownData() {
-        const categories = ['Electronics', 'Clothing', 'Food', 'Home & Garden', 'Sports'];
-
-        // Generate random percentages that sum to 100
-        let remaining = 100;
-        const percentages = categories.map((_, i) => {
-            if (i === categories.length - 1) return remaining;
-            const val = this.randomRange(10, Math.min(40, remaining - (categories.length - i - 1) * 5));
-            remaining -= val;
-            return val;
-        });
-
-        return {
-            columns: ['Category', 'Percentage', 'Revenue'],
-            rows: categories.map((c, i) => [c, percentages[i], percentages[i] * 1000]),
-            labels: categories,
-            datasets: {
-                Percentage: percentages,
-                Revenue: percentages.map(p => p * 1000)
-            }
-        };
-    }
-
-    /**
-     * Generate trend analysis data
-     */
-    generateTrendAnalysisData() {
+    generateUserGrowthData() {
         const weeks = Array.from({ length: 12 }, (_, i) => `Week ${i + 1}`);
 
         let value = this.randomRange(1000, 5000);
@@ -369,7 +239,7 @@ export class TaskSystem {
         // Update header
         const thead = table.querySelector('thead tr');
         thead.innerHTML = data.columns.map((c, i) =>
-            `<th class="sortable-header" onclick="game.gameState.taskSystem.handleTableSort(${i})">${c} ↕</th>`
+            `<th class="sortable-header" onclick="game.gameState.taskSystem.handleTableSort(${i})">${c} Ã¢â€ â€¢</th>`
         ).join('');
 
         // Update body
@@ -403,42 +273,38 @@ export class TaskSystem {
     }
 
     handleTableSort(colIndex) {
-        if (!this.currentTableData) return;
+        if (this.currentTableData && this.currentTableData.rows) {
+            const sortedData = this.currentTableData.rows.slice().sort((a, b) => {
+                if (a[colIndex] === b[colIndex]) return 0;
+                if (this.lastSortCol === colIndex) {
+                    return a[colIndex] < b[colIndex] ? 1 : -1;
+                }
+                return a[colIndex] < b[colIndex] ? -1 : 1;
+            });
 
-        const isAscending = this.lastSortCol === colIndex ? !this.lastSortAsc : true;
-        this.lastSortCol = colIndex;
-        this.lastSortAsc = isAscending;
-
-        this.currentTableData.rows.sort((a, b) => {
-            const valA = a[colIndex];
-            const valB = b[colIndex];
-
-            if (typeof valA === 'number' && typeof valB === 'number') {
-                return isAscending ? valA - valB : valB - valA;
-            }
-            return isAscending ? String(valA).localeCompare(String(valB)) : String(valB).localeCompare(String(valA));
-        });
-
-        this.updateDataTable(this.currentTableData);
+            this.currentTableData.rows = sortedData;
+            this.updateDataTable(this.currentTableData);
+            this.lastSortCol = colIndex;
+            this.lastSortAsc = !this.lastSortAsc;
+        }
     }
 
-    handleTableFilter(query) {
-        if (!this.originalTableData) return;
-
-        const lowerQuery = query.toLowerCase();
-
-        // Filter from ORIGINAL data to allow un-filtering
-        this.currentTableData.rows = this.originalTableData.rows.filter(row =>
-            row.some(cell => String(cell).toLowerCase().includes(lowerQuery))
-        );
-
-        this.updateDataTable(this.currentTableData);
+    handleTableFilter(filterValue) {
+        if (this.originalTableData && this.originalTableData.rows) {
+            const filteredData = {
+                ...this.originalTableData,
+                rows: this.originalTableData.rows.filter(row =>
+                    row.some(cell => cell.toString().toLowerCase().includes(filterValue.toLowerCase()))
+                )
+            };
+            this.updateDataTable(filteredData);
+        }
     }
 
     /**
-     * Helper: random number in range
+     * Calculate the potential reward for a task based on its difficulty
      */
-    randomRange(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+    calculatePotentialReward(difficulty) {
+        return (difficulty + 1) * 100;
     }
 }
