@@ -41,7 +41,7 @@ export class CrimeSystem {
                 risk = 30 + (this.heat / 2);
                 heatGain = 20;
                 ethicsLoss = -15;
-                result = this.executePumpAndDump(params, risk, luck);
+                result = this.executePumpAndDump(params, risk, luck, focus);
                 break;
 
             case 'insider_trading':
@@ -49,7 +49,7 @@ export class CrimeSystem {
                 risk = 40 + (this.heat / 2);
                 heatGain = 25;
                 ethicsLoss = -20;
-                result = this.executeInsiderTrading(params, risk, luck);
+                result = this.executeInsiderTrading(params, risk, luck, focus);
                 break;
 
             case 'rathole':
@@ -57,7 +57,7 @@ export class CrimeSystem {
                 risk = 20 + (this.heat / 2);
                 heatGain = 10;
                 ethicsLoss = -10;
-                result = this.executeRathole(params, risk, luck);
+                result = this.executeRathole(params, risk, luck, focus);
                 break;
 
             case 'fabricate_data':
@@ -65,7 +65,7 @@ export class CrimeSystem {
                 risk = 50 + (this.heat / 2);
                 heatGain = 30;
                 ethicsLoss = -30;
-                result = this.executeFabricateData(params, risk, luck);
+                result = this.executeFabricateData(params, risk, luck, focus);
                 break;
 
             default:
@@ -87,13 +87,14 @@ export class CrimeSystem {
         return result;
     }
 
-    executePumpAndDump(stockId, risk, luck) {
+    executePumpAndDump(stockId, risk, luck, focus) {
         // Logic: Boost stock price temporarily, allowing player to sell high
         // For simplicity: The action effectively boosts the stock immediately
 
         const roll = Math.random() * 100;
         // Luck reduces risk. 100 Luck = -20 risk.
-        const effectiveRisk = Math.max(5, risk - (luck * 0.2));
+        // Focus reduces risk (error reduction). 100 Focus = -10 risk.
+        const effectiveRisk = Math.max(5, risk - (luck * 0.2) - (focus * 0.1));
 
         if (roll < effectiveRisk) {
             // Failed - Investigation started
@@ -110,9 +111,9 @@ export class CrimeSystem {
         return { success: true, message: 'You successfully hyped the stock! Price is surging!' };
     }
 
-    executeInsiderTrading(stockId, risk, luck) {
+    executeInsiderTrading(stockId, risk, luck, focus) {
         const roll = Math.random() * 100;
-        const effectiveRisk = Math.max(10, risk - (luck * 0.2));
+        const effectiveRisk = Math.max(10, risk - (luck * 0.2) - (focus * 0.1));
 
         if (roll < effectiveRisk) {
             this.triggerInvestigation();
@@ -128,13 +129,13 @@ export class CrimeSystem {
         return { success: true, message: 'Insider info acquired. The stock is guaranteed to jump.' };
     }
 
-    executeRathole(amount, risk, luck) {
+    executeRathole(amount, risk, luck, focus) {
         // Hide money to avoid fines/taxes? Or simply launder it?
         // Maybe "Launder Money" -> Converts "Dirty Money" (if we track it) to Clean
         // For now: Just gives a small profit (tax evasion)
 
         const roll = Math.random() * 100;
-        const effectiveRisk = Math.max(5, risk - (luck * 0.2));
+        const effectiveRisk = Math.max(5, risk - (luck * 0.2) - (focus * 0.1));
 
         if (roll < effectiveRisk) {
             this.triggerInvestigation();
@@ -147,9 +148,9 @@ export class CrimeSystem {
         return { success: true, message: `Hidden $${amount}. Saved $${profit} in taxes.`, profit: profit };
     }
 
-    executeFabricateData(client, risk, luck) {
+    executeFabricateData(client, risk, luck, focus) {
         const roll = Math.random() * 100;
-        const effectiveRisk = Math.max(15, risk - (luck * 0.2));
+        const effectiveRisk = Math.max(15, risk - (luck * 0.2) - (focus * 0.1));
 
         if (roll < effectiveRisk) {
             this.handleArrest();
