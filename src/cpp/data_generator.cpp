@@ -1,14 +1,14 @@
 #include "data_generator.h"
-#include <cmath>
-#include <ctime>
 #include <sstream>
+#include <cmath>
 
 DataGenerator::DataGenerator() {
-  // Seed random number generator
-  rng.seed(static_cast<unsigned int>(time(nullptr)));
+  rng.seed(std::random_device{}());
 }
 
-DataGenerator::~DataGenerator() {}
+DataGenerator::~DataGenerator() {
+  // Destructor
+}
 
 int DataGenerator::randomRange(int min, int max) {
   std::uniform_int_distribution<int> dist(min, max);
