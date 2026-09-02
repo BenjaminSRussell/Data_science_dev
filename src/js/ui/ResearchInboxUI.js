@@ -1,74 +1,33 @@
-/**
- * ResearchInboxUI.js
- * UI for viewing research paper notifications
- * Phase 2: Now uses Lit component (ResearchInboxComponent) with fallback
- */
-
-export class ResearchInboxUI {
-    constructor(researchPaperSystem) {
+class ResearchInboxUI {
+    constructor(researchPaperSystem, litComponent = null) {
         this.researchPaperSystem = researchPaperSystem;
-        this.container = null;
-        this.litComponent = null;
+        this.litComponent = litComponent;
         this.isOpen = false;
+        this.container = null;
+        this.activeElementBeforeOpen = null;
+        this.createInboxUI();
+        this.setupEventListeners();
     }
     
     /**
      * Create inbox UI
-     * Phase 2: Uses Lit component if available
      */
     createInboxUI() {
-        // Try to use Lit component first
-        try {
-            if (customElements.get('research-inbox-component')) {
-                let container = document.getElementById('research-inbox-container');
-                if (!container) {
-                    container = document.createElement('div');
-                    container.id = 'research-inbox-container';
-                    document.body.appendChild(container);
-                }
-                
-                this.litComponent = document.createElement('research-inbox-component');
-                this.litComponent.addEventListener('paper-click', (e) => {
-                    this.showPaperDetails(e.detail.notification.id);
-                });
-                this.litComponent.addEventListener('inbox-close', () => {
-                    this.close();
-                });
-                container.appendChild(this.litComponent);
-                return container;
-            }
-        } catch (err) {
-            console.warn('Lit component not available, using fallback:', err);
-        }
-        
-        // Fallback to DOM method
-        const container = document.createElement('div');
-        container.id = 'research-inbox-container';
-        container.className = 'research-inbox-container';
-        container.style.display = 'none';
-        
-        container.innerHTML = `
-            <div class="research-inbox-header">
-                <h2> Research Papers Inbox</h2>
-                <button class="inbox-close-btn" id="inbox-close-btn">×</button>
+        this.container = document.createElement('div');
+        this.container.className = 'research-inbox';
+        this.container.innerHTML = `
+            <div class="inbox-header">
+                <button id="inbox-close-btn">Ãƒâ€”</button>
+                <h2>Inbox</h2>
             </div>
-            <div class="research-inbox-tabs">
-                <button class="inbox-tab active" data-tab="all">All Papers</button>
-                <button class="inbox-tab" data-tab="unread">Unread (${this.researchPaperSystem.getUnreadCount()})</button>
-                <button class="inbox-tab" data-tab="breakthrough">Breakthroughs</button>
+            <div class="inbox-tabs">
+                <div class="inbox-tab active" data-tab="all">All</div>
+                <div class="inbox-tab" data-tab="unread">Unread</div>
+                <div class="inbox-tab" data-tab="breakthrough">Breakthrough</div>
             </div>
-            <div class="research-inbox-content" id="inbox-content">
-                <!-- Papers will be rendered here -->
-            </div>
+            <div id="inbox-content"></div>
         `;
-        
-        document.body.appendChild(container);
-        this.container = container;
-        
-        // Setup event listeners
-        this.setupEventListeners();
-        
-        return container;
+        document.body.appendChild(this.container);
     }
     
     /**
@@ -187,7 +146,7 @@ export class ResearchInboxUI {
             <div class="paper-detail-content">
                 <div class="paper-detail-header">
                     <h2>${paper.title}</h2>
-                    <button class="paper-detail-close">×</button>
+                    <button class="paper-detail-close">Ãƒâ€”</button>
                 </div>
                 <div class="paper-detail-body">
                     <div class="paper-detail-meta">
@@ -230,19 +189,58 @@ export class ResearchInboxUI {
         document.body.appendChild(modal);
         
         // Close button
-        modal.querySelector('.paper-detail-close').addEventListener('click', () => {
-            modal.remove();
-        });
+        const closeButton = modal.querySelector('.paper-detail-close');
+        closeButton.addEventListener('click', () => this.closeModal(modal));
         
         // Close on outside click
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.remove();
+                this.closeModal(modal);
             }
         });
         
-        // Update inbox display
-        this.renderPapers(this.getActiveTab());
+        // Handle Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeModal(modal);
+            }
+        });
+        
+        // Trap focus within modal
+        const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const firstFocusableElement = focusableElements[0];
+        const lastFocusableElement = focusableElements[focusableElements.length - 1];
+        
+        firstFocusableElement.focus();
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                if (document.activeElement === lastFocusableElement && !e.shiftKey) {
+                    e.preventDefault();
+                    firstFocusableElement.focus();
+                } else if (document.activeElement === firstFocusableElement && e.shiftKey) {
+                    e.preventDefault();
+                    lastFocusableElement.focus();
+                }
+            }
+        });
+        
+        // Save active element before opening
+        this.activeElementBeforeOpen = document.activeElement;
+    }
+    
+    /**
+     * Close modal
+     */
+    closeModal(modal) {
+        modal.remove();
+        document.removeEventListener('keydown', this.handleEscapeKey);
+        document.removeEventListener('keydown', this.handleTabTrap);
+        
+        // Restore focus to the element that had focus before the modal opened
+        if (this.activeElementBeforeOpen) {
+            this.activeElementBeforeOpen.focus();
+        }
     }
     
     /**
@@ -310,25 +308,13 @@ export class ResearchInboxUI {
     }
     
     /**
-     * Toggle inbox
-     */
-    toggle() {
-        if (this.isOpen) {
-            this.close();
-        } else {
-            this.open();
-        }
-    }
-    
-    /**
      * Update unread count
      */
     updateUnreadCount() {
-        const unreadTab = this.container?.querySelector('.inbox-tab[data-tab="unread"]');
+        const unreadCount = this.researchPaperSystem.getInbox().filter(item => !item.read).length;
+        const unreadTab = this.container.querySelector('.inbox-tab[data-tab="unread"]');
         if (unreadTab) {
-            const count = this.researchPaperSystem.getUnreadCount();
-            unreadTab.textContent = `Unread (${count})`;
+            unreadTab.textContent = `Unread (${unreadCount})`;
         }
     }
 }
-
