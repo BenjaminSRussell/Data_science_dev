@@ -1,129 +1,59 @@
-/**
- * JealousySystem.js
- * Handles jealousy when player succeeds
- * NPCs stop talking when jealous
- */
-
-export class JealousySystem {
+class JealousySystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.jealousyLevels = new Map(); // NPC ID -> jealousy level (0-100)
-        this.relationshipChanges = new Map(); // Track relationship changes
     }
-    
-    /**
-     * Check for jealousy triggers
-     */
+
     checkJealousy(playerSuccess) {
         if (!this.gameState.npcManager) return;
-        
-        const npcs = this.gameState.npcManager?.getAllNPCs() || [];
-        
-        npcs.forEach(npc => {
+
+        const allNPCs = this.gameState.npcManager.getAllNPCs();
+        allNPCs.forEach(npc => {
             if (this.shouldBeJealous(npc, playerSuccess)) {
-                this.increaseJealousy(npc.id, playerSuccess.level || 10);
+                this.increaseJealousy(npc.id, 10);
+            } else {
+                this.increaseJealousy(npc.id, 1);
             }
         });
-    }
-    
-    /**
-     * Determine if NPC should be jealous
-     */
-    shouldBeJealous(npc, playerSuccess) {
-        // Competitive NPCs are more likely to be jealous
-        if (npc.personality === 'competitive') {
-            return true;
+
+        // Random chance for others to feel jealous
+        if (Math.random() < 0.3) {
+            const randomNPC = allNPCs[Math.floor(Math.random() * allNPCs.length)];
+            this.increaseJealousy(randomNPC.id, 5);
         }
-        
-        // NPCs in similar field
+    }
+
+    shouldBeJealous(npc, playerSuccess) {
+        if (npc.type === 'competitive') return true;
         if (npc.type === 'business' || npc.type === 'mentor') {
             return playerSuccess.type === 'career' || playerSuccess.type === 'financial';
         }
-        
-        // Random chance for others
-        return Math.random() < 0.3;
+        return false;
     }
-    
-    /**
-     * Increase jealousy level
-     */
+
     increaseJealousy(npcId, amount) {
-        const current = this.jealousyLevels.get(npcId) || 0;
-        const newLevel = Math.min(100, current + amount);
-        this.jealousyLevels.set(npcId, newLevel);
-        
-        // If jealousy is high, reduce relationship
-        if (newLevel > 50) {
-            this.affectRelationship(npcId, -5);
+        const currentJealousy = this.gameState.npcManager.getRelationship(npcId, 'jealousy') || 0;
+        const newJealousy = Math.min(currentJealousy + amount, 100);
+        this.gameState.npcManager.setRelationship(npcId, 'jealousy', newJealousy);
+
+        if (newJealousy > 50) {
+            this.affectRelationship(npcId, -10);
         }
-        
-        // If jealousy is very high, NPC stops talking
-        if (newLevel > 75) {
+        if (newJealousy > 75) {
             this.stopTalking(npcId);
         }
     }
-    
-    /**
-     * Affect relationship due to jealousy
-     */
-    affectRelationship(npcId, change) {
-        if (!this.gameState.npcManager) return;
-        
-        const current = this.gameState.npcManager?.getRelationship(npcId) || 0;
-        this.gameState.npcManager?.setRelationship(npcId, Math.max(0, current + change));
-        
-        // Track the change
-        this.relationshipChanges.set(npcId, (this.relationshipChanges.get(npcId) || 0) + change);
+
+    affectRelationship(npcId, amount) {
+        const currentRelationship = this.gameState.npcManager.getRelationship(npcId, 'relationship') || 0;
+        const newRelationship = Math.max(currentRelationship + amount, 0);
+        this.gameState.npcManager.setRelationship(npcId, 'relationship', newRelationship);
     }
-    
-    /**
-     * Stop talking to player
-     */
+
     stopTalking(npcId) {
-        const npc = this.gameState.npcManager?.getNPC(npcId);
-        if (!npc) return;
-        
-        // Mark NPC as not talking
+        const npc = this.gameState.npcManager.getNPC(npcId);
         npc.willNotTalk = true;
-        npc.jealousyMessage = this.getJealousyMessage(npc);
-    }
-    
-    /**
-     * Get jealousy message
-     */
-    getJealousyMessage(npc) {
-        const messages = [
-            `${npc.name} seems distant and avoids eye contact.`,
-            `${npc.name} gives you a cold shoulder.`,
-            `${npc.name} makes excuses to avoid talking to you.`,
-            `${npc.name} seems envious of your success.`
-        ];
-        
-        return messages[Math.floor(Math.random() * messages.length)];
-    }
-    
-    /**
-     * Reduce jealousy over time
-     */
-    reduceJealousy(npcId, amount = 1) {
-        const current = this.jealousyLevels.get(npcId) || 0;
-        const newLevel = Math.max(0, current - amount);
-        this.jealousyLevels.set(npcId, newLevel);
-        
-        // If jealousy drops, NPC might start talking again
-        if (newLevel < 50) {
-            const npc = this.gameState.npcManager?.getNPC(npcId);
-            if (npc) {
-                npc.willNotTalk = false;
-            }
-        }
-    }
-    
-    /**
-     * Get jealousy level
-     */
-    getJealousyLevel(npcId) {
-        return this.jealousyLevels.get(npcId) || 0;
+        npc.jealousyMessage = "I'm too jealous to talk to you right now.";
     }
 }
 
+export default JealousySystem;
