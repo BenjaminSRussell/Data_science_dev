@@ -1,57 +1,19 @@
-/**
- * ResearchInboxUI.js
- * UI for viewing research paper notifications
- * Phase 2: Now uses Lit component (ResearchInboxComponent) with fallback
- */
-
-export class ResearchInboxUI {
+class ResearchInboxUI {
     constructor(researchPaperSystem) {
         this.researchPaperSystem = researchPaperSystem;
         this.container = null;
-        this.litComponent = null;
         this.isOpen = false;
+        this.litComponent = null; // Assume Lit component is not used here
     }
     
     /**
      * Create inbox UI
-     * Phase 2: Uses Lit component if available
      */
     createInboxUI() {
-        // Try to use Lit component first
-        try {
-            if (customElements.get('research-inbox-component')) {
-                let container = document.getElementById('research-inbox-container');
-                if (!container) {
-                    container = document.createElement('div');
-                    container.id = 'research-inbox-container';
-                    document.body.appendChild(container);
-                }
-                
-                this.litComponent = document.createElement('research-inbox-component');
-                this.litComponent.addEventListener('paper-click', (e) => {
-                    this.showPaperDetails(e.detail.notification.id);
-                });
-                this.litComponent.addEventListener('inbox-close', () => {
-                    this.close();
-                });
-                container.appendChild(this.litComponent);
-                return container;
-            }
-        } catch (err) {
-            console.warn('Lit component not available, using fallback:', err);
-        }
-        
-        // Fallback to DOM method
         const container = document.createElement('div');
-        container.id = 'research-inbox-container';
-        container.className = 'research-inbox-container';
-        container.style.display = 'none';
-        
+        container.className = 'research-inbox';
         container.innerHTML = `
-            <div class="research-inbox-header">
-                <h2> Research Papers Inbox</h2>
-                <button class="inbox-close-btn" id="inbox-close-btn">×</button>
-            </div>
+            <button id="inbox-close-btn" class="inbox-close-btn">Ãƒâ€”</button>
             <div class="research-inbox-tabs">
                 <button class="inbox-tab active" data-tab="all">All Papers</button>
                 <button class="inbox-tab" data-tab="unread">Unread (${this.researchPaperSystem.getUnreadCount()})</button>
@@ -133,6 +95,17 @@ export class ResearchInboxUI {
                 this.showPaperDetails(notificationId);
             });
         });
+        
+        // Add keyboard navigation
+        content.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const activeCard = content.querySelector('.paper-card:focus');
+                if (activeCard) {
+                    const notificationId = activeCard.dataset.notificationId;
+                    this.showPaperDetails(notificationId);
+                }
+            }
+        });
     }
     
     /**
@@ -145,7 +118,8 @@ export class ResearchInboxUI {
         
         return `
             <div class="paper-card ${isUnread ? 'unread' : ''} ${isBreakthrough ? 'breakthrough' : ''}" 
-                 data-notification-id="${notification.id}">
+                 data-notification-id="${notification.id}"
+                 tabindex="0">
                 <div class="paper-card-header">
                     <div class="paper-badge ${isBreakthrough ? 'breakthrough-badge' : ''}">
                         ${isBreakthrough ? ' BREAKTHROUGH' : ''}
@@ -187,7 +161,7 @@ export class ResearchInboxUI {
             <div class="paper-detail-content">
                 <div class="paper-detail-header">
                     <h2>${paper.title}</h2>
-                    <button class="paper-detail-close">×</button>
+                    <button class="paper-detail-close">Ãƒâ€”</button>
                 </div>
                 <div class="paper-detail-body">
                     <div class="paper-detail-meta">
@@ -331,4 +305,3 @@ export class ResearchInboxUI {
         }
     }
 }
-
