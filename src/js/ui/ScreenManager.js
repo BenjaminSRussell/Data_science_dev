@@ -1,142 +1,61 @@
 /**
- * ScreenManager - Handles screen transitions and navigation
+ * ScreenManager.js
+ * Manages screen navigation and state
  */
 
 export class ScreenManager {
-    constructor(mainGame) {
-        this.mainGame = mainGame;
-        this.currentScreen = 'screen-menu';
-        this.screens = {};
+    constructor() {
+        this.currentScreen = null;
         this.history = [];
+        this.screens = {};
     }
 
     /**
-     * Initialize screen manager
+     * Register a screen with the manager
+     * @param {string} screenId - The ID of the screen
+     * @param {Object} screen - The screen object
      */
-    init() {
-        // Cache all screen elements
-        document.querySelectorAll('.screen').forEach(screen => {
-            this.screens[screen.id] = screen;
-        });
-
-
+    registerScreen(screenId, screen) {
+        this.screens[screenId] = screen;
     }
 
     /**
-     * Show a specific screen
+     * Show a screen and optionally add it to the history
+     * @param {string} screenId - The ID of the screen to show
+     * @param {boolean} addToHistory - Whether to add this screen to the history
      */
     showScreen(screenId, addToHistory = true) {
-        const targetScreen = this.screens[screenId];
-
-        if (!targetScreen) {
-            console.error(`Screen not found: ${screenId}`);
+        if (this.isScreenActive(screenId)) {
+            console.warn(`Screen ${screenId} is already active.`);
             return;
         }
 
-        // Apply screen theme if theme manager exists
-        if (this.mainGame?.gameState?.screenThemeManager) {
-            this.mainGame.gameState.screenThemeManager?.applyTheme(screenId);
-        }
-
-        // Phase 3: Use GSAP for smooth screen transitions
-        const gsapAnimator = this.mainGame?.gsapAnimator || this.mainGame?.gameState?.gsapAnimator;
-
-        // Hide current screen with animation
-        if (this.currentScreen && this.screens[this.currentScreen]) {
-            const currentScreenEl = this.screens[this.currentScreen];
-            if (gsapAnimator) {
-                gsapAnimator.animateExit(currentScreenEl, 'fade', {
-                    duration: 0.2,
-                    onComplete: () => {
-                        currentScreenEl.classList.remove('active');
-                        currentScreenEl.classList.add('hidden');
-                    }
-                });
-            } else {
-                currentScreenEl.classList.remove('active');
-                currentScreenEl.classList.add('hidden');
-            }
-        }
-
-        // Show top bar for game screens, hide for menu
-        const topBar = document.getElementById('top-bar');
-        if (topBar) {
-            if (screenId === 'screen-menu') {
-                if (gsapAnimator) {
-                    gsapAnimator.fadeOut(topBar, { duration: 0.2 });
-                } else {
-                    topBar.style.display = 'none';
-                }
-            } else {
-                if (gsapAnimator) {
-                    gsapAnimator.fadeIn(topBar, { duration: 0.2 });
-                } else {
-                    topBar.style.display = 'flex';
-                }
-            }
-        }
-
-        // Show target screen with animation
-        if (gsapAnimator) {
-            targetScreen.classList.remove('hidden');
-            gsapAnimator.animateEntrance(targetScreen, 'fade', {
-                duration: 0.3,
-                onComplete: () => {
-                    targetScreen.classList.add('active');
-                }
-            });
-        } else {
-            targetScreen.classList.remove('hidden');
-            targetScreen.classList.add('active');
-
-            // Force display in case CSS is overriding
-            const computedDisplay = window.getComputedStyle(targetScreen).display;
-            if (computedDisplay === 'none') {
-                targetScreen.style.display = 'block';
-            }
-        }
-
-        // Track history
-        if (addToHistory && this.currentScreen !== screenId) {
-            this.history.push(this.currentScreen);
+        if (this.currentScreen) {
+            this.screens[this.currentScreen].onHide();
         }
 
         this.currentScreen = screenId;
+        this.screens[this.currentScreen].onShow();
 
-
-
-        // Dispatch event
-        window.dispatchEvent(new CustomEvent('screenchange', {
-            detail: { screen: screenId }
-        }));
-
-        // Initialize map renderer when map screen is shown
-        if (screenId === 'screen-map' && this.mainGame) {
-            // Small delay to ensure DOM is ready and screen is visible
-            setTimeout(() => {
-                if (this.mainGame.updateMapScreen) {
-                    this.mainGame.updateMapScreen();
-                }
-                // Also trigger resize to ensure map gets correct dimensions
-                if (this.mainGame.unifiedMapSystem && this.mainGame.unifiedMapSystem.handleResize) {
-                    this.mainGame.unifiedMapSystem.handleResize();
-                }
-            }, 100);
+        if (addToHistory) {
+            this.history.push(screenId);
         }
     }
 
     /**
-     * Go back to previous screen
+     * Go back to the previous screen in the history
      */
     goBack() {
-        if (this.history.length > 0) {
+        if (this.history.length > 1) {
+            this.history.pop(); // Remove current screen
             const previousScreen = this.history.pop();
             this.showScreen(previousScreen, false);
         }
     }
 
     /**
-     * Get current screen ID
+     * Get the current screen ID
+     * @returns {string|null} - The ID of the current screen or null if none
      */
     getCurrentScreen() {
         return this.currentScreen;
@@ -144,6 +63,8 @@ export class ScreenManager {
 
     /**
      * Check if a screen is currently active
+     * @param {string} screenId - The ID of the screen to check
+     * @returns {boolean} - True if the screen is active, false otherwise
      */
     isScreenActive(screenId) {
         return this.currentScreen === screenId;
