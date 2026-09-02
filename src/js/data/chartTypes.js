@@ -1,78 +1,62 @@
-/**
- * Chart Types - Available visualization types
- */
-
-export const CHART_TYPES = [
-    {
-        id: "bar",
-        name: "Bar Chart",
-        icon: "",
-        description: "Compare values across categories",
-        unlockRank: 0,
-        bestFor: ["comparisons", "categories", "rankings"]
+export const CHART_TYPES = {
+    bar: {
+        name: 'Bar Chart',
+        icon: 'bar-chart',
+        suitableFor: ['categorical', 'numeric'],
+        rankRequirement: 1
     },
-    {
-        id: "line",
-        name: "Line Chart",
-        icon: "",
-        description: "Show trends over time",
-        unlockRank: 0,
-        bestFor: ["trends", "time series", "changes"]
+    line: {
+        name: 'Line Chart',
+        icon: 'line-chart',
+        suitableFor: ['categorical', 'numeric'],
+        rankRequirement: 1
     },
-    {
-        id: "pie",
-        name: "Pie Chart",
-        icon: "",
-        description: "Show proportions of a whole",
-        unlockRank: 0,
-        bestFor: ["proportions", "percentages", "distributions"]
+    pie: {
+        name: 'Pie Chart',
+        icon: 'pie-chart',
+        suitableFor: ['categorical', 'numeric'],
+        rankRequirement: 1
     },
-    {
-        id: "scatter",
-        name: "Scatter Plot",
-        icon: "",
-        description: "Show relationships between variables",
-        unlockRank: 2,
-        bestFor: ["correlations", "distributions", "outliers"]
+    doughnut: {
+        name: 'Doughnut Chart',
+        icon: 'doughnut-chart',
+        suitableFor: ['categorical', 'numeric'],
+        rankRequirement: 1
     },
-    {
-        id: "doughnut",
-        name: "Donut Chart",
-        icon: "",
-        description: "Proportions with center space",
-        unlockRank: 2,
-        bestFor: ["proportions", "progress", "comparisons"]
+    scatter: {
+        name: 'Scatter Plot',
+        icon: 'scatter-plot',
+        suitableFor: ['numeric', 'numeric'],
+        rankRequirement: 2
     },
-    {
-        id: "radar",
-        name: "Radar Chart",
-        icon: "",
-        description: "Compare multiple variables",
-        unlockRank: 3,
-        bestFor: ["multi-dimensional", "performance", "profiles"]
+    radar: {
+        name: 'Radar Chart',
+        icon: 'radar-chart',
+        suitableFor: ['categorical', 'numeric'],
+        rankRequirement: 2
     },
-    {
-        id: "area",
-        name: "Area Chart",
-        icon: "",
-        description: "Show volume over time",
-        unlockRank: 3,
-        bestFor: ["cumulative", "volume", "trends"]
+    area: {
+        name: 'Area Chart',
+        icon: 'area-chart',
+        suitableFor: ['categorical', 'numeric'],
+        rankRequirement: 2
     },
-    {
-        id: "bubble",
-        name: "Bubble Chart",
-        icon: "⭕",
-        description: "Three-dimensional comparisons",
-        unlockRank: 4,
-        bestFor: ["3 variables", "correlations", "size comparisons"]
+    bubble: {
+        name: 'Bubble Chart',
+        icon: 'bubble-chart',
+        suitableFor: ['numeric', 'numeric', 'numeric'],
+        rankRequirement: 3
     },
-    {
-        id: "polarArea",
-        name: "Polar Area",
-        icon: "",
-        description: "Radial proportional chart",
-        unlockRank: 5,
-        bestFor: ["cyclical data", "comparisons", "proportions"]
+    polarArea: {
+        name: 'Polar Area Chart',
+        icon: 'polar-area-chart',
+        suitableFor: ['categorical', 'numeric'],
+        rankRequirement: 3
+    },
+    heatmap: {
+        name: 'Heatmap',
+        icon: 'heatmap',
+        suitableFor: ['numeric', 'numeric'],
+        rankRequirement: 5
     }
-];
+};
