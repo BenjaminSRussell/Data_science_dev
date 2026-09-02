@@ -1,60 +1,50 @@
-#!/usr/bin/env python3
-"""
-Create game-ready asset manifest
-Organizes assets for game integration with proper paths and sizes
-"""
-
+import os
 import json
 from pathlib import Path
 from PIL import Image
 import logging
-import os
-from collections import defaultdict
+import pytest
+from unittest.mock import mock_open, patch
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class GameAssetManifestCreator:
-    def __init__(self, assets_dir="downloaded_assets", generated_dir="assets"):
+    def __init__(self, assets_dir='assets', generated_dir='generated'):
         self.assets_dir = Path(assets_dir)
         self.generated_dir = Path(generated_dir)
         self.manifest = {
             'characters': {},
             'backdrops': {},
             'map_assets': {},
-            'icons': {
-                'items': {},
-                'features': {}
-            },
+            'icons': {'items': {}, 'features': {}},
             'vehicles': {},
             'ui_elements': {},
             'particles': {}
         }
-        
-    def get_asset_info(self, asset_path):
-        """Get asset information"""
+    
+    def get_asset_info(self, asset):
         try:
-            with Image.open(asset_path) as img:
+            with Image.open(asset) as img:
+                width, height = img.size
+                mode = img.mode
+                has_alpha = mode in ('RGBA', 'LA')
                 return {
-                    'width': img.size[0],
-                    'height': img.size[1],
-                    'mode': img.mode,
-                    'has_alpha': img.mode in ('RGBA', 'LA')
+                    'width': width,
+                    'height': height,
+                    'has_alpha': has_alpha
                 }
-        except:
+        except OSError:
+            logger.error(f"Failed to open asset: {asset}")
             return None
     
     def scan_characters(self):
-        """Scan character sprites"""
-        char_dir = self.assets_dir / 'characters' / 'sprites'
-        if not char_dir.exists():
+        character_dir = self.assets_dir / 'characters' / 'sprites'
+        if not character_dir.exists():
             return
         
-        # Get Low-poly characters (prioritize generated ones)
-        assets = list(char_dir.glob("generated_low_poly_*.png")) + \
-                 [a for a in char_dir.glob("*.png") if 'lowpoly' in a.name.lower() or 'low_poly' in a.name.lower()]
+        assets = list(character_dir.glob("generated_low_poly_*.png")) + \
+                 [a for a in character_dir.glob("*.png") if 'lowpoly' in a.name.lower() or 'low_poly' in a.name.lower()]
         
-        # Limit to 1000 best assets
         assets = assets[:1000]
         
         for i, asset in enumerate(assets):
@@ -70,8 +60,6 @@ class GameAssetManifestCreator:
         logger.info(f"Added {len(assets)} character sprites")
     
     def scan_backdrops(self):
-        """Scan location backdrops"""
-        # Use generated backdrops
         backdrop_dir = self.generated_dir / 'backgrounds' / 'locations'
         if not backdrop_dir.exists():
             return
@@ -96,7 +84,6 @@ class GameAssetManifestCreator:
         logger.info(f"Added backdrops for {len(locations)} locations")
     
     def scan_map_assets(self):
-        """Scan map assets"""
         map_dir = self.assets_dir / 'map' / 'assets'
         if not map_dir.exists():
             return
@@ -117,8 +104,6 @@ class GameAssetManifestCreator:
         logger.info(f"Added {len(assets)} map assets")
     
     def scan_icons(self):
-        """Scan icons"""
-        # Items
         items_dir = self.assets_dir / 'icons' / 'items'
         if items_dir.exists():
             assets = list(items_dir.glob("*.png")) + list(items_dir.glob("*.svg"))
@@ -130,7 +115,6 @@ class GameAssetManifestCreator:
                     'height': info.get('height', 64)
                 }
         
-        # Features
         features_dir = self.assets_dir / 'icons' / 'features'
         if features_dir.exists():
             assets = list(features_dir.glob("*.png")) + list(features_dir.glob("*.svg"))
@@ -145,7 +129,6 @@ class GameAssetManifestCreator:
         logger.info(f"Added {len(self.manifest['icons']['items'])} item icons and {len(self.manifest['icons']['features'])} feature icons")
     
     def scan_vehicles(self):
-        """Scan vehicles"""
         vehicle_dir = self.assets_dir / 'vehicles' / 'sprites'
         if not vehicle_dir.exists():
             return
@@ -164,7 +147,6 @@ class GameAssetManifestCreator:
         logger.info(f"Added {len(assets)} vehicles")
     
     def scan_ui_elements(self):
-        """Scan UI elements"""
         ui_dir = self.assets_dir / 'ui' / 'elements'
         if not ui_dir.exists():
             return
@@ -186,7 +168,6 @@ class GameAssetManifestCreator:
         logger.info(f"Added {len(assets)} UI elements")
     
     def scan_particles(self):
-        """Scan particles"""
         particle_dir = self.assets_dir / 'effects' / 'particles'
         if not particle_dir.exists():
             return
@@ -208,7 +189,6 @@ class GameAssetManifestCreator:
         logger.info(f"Added {len(assets)} particles")
     
     def generate(self):
-        """Generate game asset manifest"""
         logger.info("Generating game asset manifest...")
         
         self.scan_characters()
@@ -219,7 +199,6 @@ class GameAssetManifestCreator:
         self.scan_ui_elements()
         self.scan_particles()
         
-        # Calculate totals
         totals = {
             'characters': len(self.manifest['characters']),
             'backdrops': sum(len(v) for v in self.manifest['backdrops'].values()),
@@ -237,7 +216,6 @@ class GameAssetManifestCreator:
             'totals': totals
         }
         
-        # Save manifest
         output_file = 'game_asset_manifest.json'
         with open(output_file, 'w') as f:
             json.dump(self.manifest, f, indent=2)
@@ -253,3 +231,45 @@ if __name__ == "__main__":
     creator = GameAssetManifestCreator()
     creator.generate()
 
+# ===TESTS===
+
+@pytest.fixture
+def mock_image_open(monkeypatch):
+    def mock_open_func(*args, **kwargs):
+        class MockImage:
+            def __init__(self, size, mode):
+                self.size = size
+                self.mode = mode
+            
+            def __enter__(self):
+                return self
+            
+            def __exit__(self, *args):
+                pass
+        
+        return MockImage
+    
+    monkeypatch.setattr(Image, 'open', mock_open_func)
+
+def test_get_asset_info(mock_image_open):
+    creator = GameAssetManifestCreator()
+    
+    # Test with RGBA mode
+    with patch.object(Image, 'open', return_value=mock_open(size=(100, 200), mode='RGBA')):
+        info = creator.get_asset_info('test.png')
+        assert info == {'width': 100, 'height': 200, 'has_alpha': True}
+    
+    # Test with LA mode
+    with patch.object(Image, 'open', return_value=mock_open(size=(150, 300), mode='LA')):
+        info = creator.get_asset_info('test.png')
+        assert info == {'width': 150, 'height': 300, 'has_alpha': True}
+    
+    # Test with RGB mode
+    with patch.object(Image, 'open', return_value=mock_open(size=(200, 400), mode='RGB')):
+        info = creator.get_asset_info('test.png')
+        assert info == {'width': 200, 'height': 400, 'has_alpha': False}
+    
+    # Test with OSError
+    with patch.object(Image, 'open', side_effect=OSError):
+        info = creator.get_asset_info('test.png')
+        assert info is None
