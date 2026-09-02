@@ -304,7 +304,11 @@ export class DialogueUI {
 
         if (effects.item && this.game?.gameState) {
             // Give item
-
+            const gameState = this.game.gameState;
+            const itemId = typeof effects.item === 'string' ? effects.item : effects.item.id;
+            if (itemId && !gameState.purchasedItems.includes(itemId)) {
+                gameState.purchasedItems.push(itemId);
+            }
         }
     }
 
