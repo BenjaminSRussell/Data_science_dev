@@ -1,131 +1,123 @@
-#!/usr/bin/env python3
-"""
-Generate additional Low-poly assets programmatically
-Creates Low-poly style assets when scrapers don't find enough
-"""
-
-import json
-from pathlib import Path
-from PIL import Image, ImageDraw, ImageFilter
+import os
 import random
-import logging
+import json
 import math
+from PIL import Image, ImageDraw, ImageFilter
+import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class LowPolyGenerator:
-    def __init__(self, output_dir="downloaded_assets"):
-        self.output_dir = Path(output_dir)
-        self.generated = []
-        
-        # Low-poly color palette
+    def __init__(self, output_dir='output'):
+        self.output_dir = os.path.abspath(output_dir)
         self.palette = [
-            (139, 92, 246),   # Purple
-            (167, 139, 250),  # Light Purple
-            (59, 130, 246),   # Blue
-            (99, 102, 241),   # Indigo
-            (16, 185, 129),   # Green
-            (34, 197, 94),    # Light Green
-            (245, 158, 11),   # Orange
-            (217, 119, 6),    # Dark Orange
-            (239, 68, 68),    # Red
-            (236, 72, 153),   # Pink
+            (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
+            (0, 255, 255), (255, 0, 255), (128, 0, 0), (0, 128, 0),
+            (0, 0, 128), (128, 128, 0), (0, 128, 128), (128, 0, 128),
+            (192, 192, 192), (128, 128, 128), (64, 64, 64), (255, 165, 0),
+            (255, 215, 0), (0, 128, 0), (144, 238, 144), (75, 0, 130),
+            (127, 255, 0), (0, 0, 128), (135, 206, 235), (72, 209, 204),
+            (218, 112, 214), (255, 99, 71), (210, 180, 140), (240, 128, 128),
+            (220, 220, 220), (255, 255, 240), (255, 255, 224), (248, 248, 255),
+            (255, 250, 240), (253, 245, 230), (250, 235, 215), (245, 242, 240),
+            (240, 255, 240), (238, 232, 170), (255, 215, 0), (255, 255, 0),
+            (255, 160, 122), (255, 127, 80), (244, 164, 96), (255, 140, 0),
+            (255, 69, 0), (255, 0, 0), (139, 0, 0), (255, 105, 180),
+            (216, 191, 216), (255, 182, 193), (255, 192, 203), (255, 228, 181),
+            (255, 228, 181), (240, 255, 240), (245, 245, 220), (255, 255, 255)
         ]
-    
-    def generate_low_poly_character(self, output_path, size=(128, 128), variant=0):
+        self.generated = []
+
+    def generate_low_poly_character(self, output_path, variant=0):
         """Generate Low-poly character sprite"""
-        img = Image.new('RGBA', size, (0, 0, 0, 0))
+        img = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
         
-        # Create Low-poly character shape
-        center_x, center_y = size[0] // 2, size[1] // 2
-        
-        # Head (polygonal)
-        head_points = []
-        for i in range(6):
-            angle = (i * 2 * math.pi / 6) + variant * 0.5
-            radius = 20 + variant * 2
-            x = center_x + radius * math.cos(angle)
-            y = center_y - 30 + radius * math.sin(angle)
-            head_points.append((x, y))
-        
+        # Head
         head_color = random.choice(self.palette)
-        draw.polygon(head_points, fill=head_color, outline=None)
+        draw.polygon([
+            (20, 10), (44, 10), (60, 25), (60, 35), (44, 45), (20, 45)
+        ], fill=head_color, outline=None)
         
-        # Body (polygonal)
-        body_points = [
-            (center_x - 15, center_y - 10),
-            (center_x + 15, center_y - 10),
-            (center_x + 20, center_y + 30),
-            (center_x - 20, center_y + 30)
-        ]
+        # Body
         body_color = random.choice(self.palette)
-        draw.polygon(body_points, fill=body_color, outline=None)
+        draw.polygon([
+            (15, 35), (40, 35), (40, 60), (15, 60)
+        ], fill=body_color, outline=None)
         
-        # Apply gradient overlay
-        overlay = Image.new('RGBA', size, (0, 0, 0, 0))
-        overlay_draw = ImageDraw.Draw(overlay)
-        for i in range(50):
-            alpha = int(20 * (1 - i / 50))
-            radius = int(size[0] * 0.4 * (i / 50))
-            overlay_draw.ellipse(
-                [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
-                fill=(255, 255, 255, alpha), outline=None
-            )
+        # Eyes
+        draw.ellipse([
+            (25, 20), (30, 25)
+        ], fill=(0, 0, 0), outline=None)
+        draw.ellipse([
+            (38, 20), (43, 25)
+        ], fill=(0, 0, 0), outline=None)
         
-        img = Image.alpha_composite(img, overlay)
-        img = img.filter(ImageFilter.GaussianBlur(radius=0.5))
+        # Mouth
+        draw.polygon([
+            (30, 30), (35, 35), (40, 30)
+        ], fill=(0, 0, 0), outline=None)
         
         img.save(output_path, 'PNG', optimize=True)
         return True
     
-    def generate_low_poly_icon(self, output_path, icon_type, size=(64, 64)):
+    def generate_low_poly_icon(self, output_path, icon_type):
         """Generate Low-poly icon"""
-        img = Image.new('RGBA', size, (0, 0, 0, 0))
+        img = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
         
-        center_x, center_y = size[0] // 2, size[1] // 2
-        
-        # Create Low-poly shape based on icon type
-        if 'bed' in icon_type.lower():
-            # Bed shape
-            points = [
-                (10, 30), (54, 30), (50, 50), (14, 50)
-            ]
-        elif 'desk' in icon_type.lower():
-            # Desk shape
-            points = [
-                (10, 20), (54, 20), (54, 40), (10, 40)
-            ]
-        elif 'chair' in icon_type.lower():
-            # Chair shape
-            points = [
-                (20, 15), (44, 15), (44, 35), (20, 35)
-            ]
-        else:
-            # Generic polygonal shape
-            points = []
-            for i in range(6):
-                angle = i * 2 * math.pi / 6
-                radius = 20
-                x = center_x + radius * math.cos(angle)
-                y = center_y + radius * math.sin(angle)
-                points.append((x, y))
-        
         color = random.choice(self.palette)
-        draw.polygon(points, fill=color, outline=None)
         
-        # Add gradient
-        overlay = Image.new('RGBA', size, (0, 0, 0, 0))
-        overlay_draw = ImageDraw.Draw(overlay)
-        overlay_draw.ellipse(
-            [center_x - 15, center_y - 15, center_x + 15, center_y + 15],
-            fill=(255, 255, 255, 30), outline=None
-        )
-        
-        img = Image.alpha_composite(img, overlay)
-        img = img.filter(ImageFilter.GaussianBlur(radius=0.3))
+        if 'bed' in icon_type:
+            draw.polygon([
+                (10, 10), (50, 10), (50, 50), (10, 50)
+            ], fill=color, outline=None)
+            draw.rectangle([
+                (20, 40), (40, 50)
+            ], fill=(0, 0, 0), outline=None)
+        elif 'desk' in icon_type:
+            draw.polygon([
+                (10, 10), (50, 10), (50, 40), (10, 40)
+            ], fill=color, outline=None)
+            draw.rectangle([
+                (20, 30), (40, 40)
+            ], fill=(0, 0, 0), outline=None)
+        elif 'chair' in icon_type:
+            draw.polygon([
+                (10, 10), (50, 10), (50, 50), (10, 50)
+            ], fill=color, outline=None)
+            draw.polygon([
+                (30, 20), (40, 10), (50, 20)
+            ], fill=(0, 0, 0), outline=None)
+        elif 'table' in icon_type:
+            draw.polygon([
+                (10, 10), (50, 10), (50, 40), (10, 40)
+            ], fill=color, outline=None)
+            draw.rectangle([
+                (20, 30), (40, 40)
+            ], fill=(0, 0, 0), outline=None)
+        elif 'lamp' in icon_type:
+            draw.polygon([
+                (10, 10), (50, 10), (50, 50), (10, 50)
+            ], fill=color, outline=None)
+            draw.ellipse([
+                (20, 20), (40, 40)
+            ], fill=(255, 255, 255), outline=None)
+        elif 'computer' in icon_type:
+            draw.polygon([
+                (10, 10), (50, 10), (50, 50), (10, 50)
+            ], fill=color, outline=None)
+            draw.polygon([
+                (10, 10), (50, 10), (50, 30), (10, 30)
+            ], fill=(0, 0, 0), outline=None)
+        elif 'phone' in icon_type:
+            draw.polygon([
+                (10, 10), (50, 10), (50, 50), (10, 50)
+            ], fill=color, outline=None)
+            draw.ellipse([
+                (20, 20), (40, 40)
+            ], fill=(0, 0, 0), outline=None)
         
         img.save(output_path, 'PNG', optimize=True)
         return True
@@ -137,163 +129,79 @@ class LowPolyGenerator:
         
         center_x, center_y = size[0] // 2, size[1] // 2
         
-        # Create Low-poly UI shape
-        if 'button' in element_type.lower():
-            # Button shape
-            points = [
-                (20, 20), (108, 20), (108, 108), (20, 108)
-            ]
-        elif 'panel' in element_type.lower():
-            # Panel shape
-            points = [
-                (10, 10), (118, 10), (118, 118), (10, 118)
-            ]
-        else:
-            # Generic polygonal
-            points = []
-            for i in range(8):
-                angle = i * 2 * math.pi / 8
-                radius = 40
-                x = center_x + radius * math.cos(angle)
-                y = center_y + radius * math.sin(angle)
-                points.append((x, y))
-        
-        color = random.choice(self.palette)
-        draw.polygon(points, fill=color, outline=None)
-        
-        # Gradient overlay
-        overlay = Image.new('RGBA', size, (0, 0, 0, 0))
-        overlay_draw = ImageDraw.Draw(overlay)
-        overlay_draw.ellipse(
-            [center_x - 30, center_y - 30, center_x + 30, center_y + 30],
-            fill=(255, 255, 255, 40), outline=None
-        )
-        
-        img = Image.alpha_composite(img, overlay)
-        img = img.filter(ImageFilter.GaussianBlur(radius=0.5))
+        if 'button' in element_type:
+            draw.polygon([
+                (center_x - 50, center_y - 20), (center_x + 50, center_y - 20),
+                (center_x + 50, center_y + 20), (center_x - 50, center_y + 20)
+            ], fill=random.choice(self.palette), outline=None)
+        elif 'slider' in element_type:
+            draw.polygon([
+                (center_x - 50, center_y - 20), (center_x + 50, center_y - 20),
+                (center_x + 50, center_y + 20), (center_x - 50, center_y + 20)
+            ], fill=random.choice(self.palette), outline=None)
+            draw.ellipse([
+                (center_x - 20, center_y - 10), (center_x + 20, center_y + 10)
+            ], fill=(255, 255, 255), outline=None)
         
         img.save(output_path, 'PNG', optimize=True)
         return True
     
-    def generate_low_poly_particle(self, output_path, particle_type, size=(32, 32)):
-        """Generate Low-poly particle effect"""
+    def generate_low_poly(self, output_path, shape, size=(64, 64)):
+        """Generate Low-poly shape"""
         img = Image.new('RGBA', size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
         
-        center_x, center_y = size[0] // 2, size[1] // 2
-        
-        # Create Low-poly particle shape
-        points = []
-        num_points = 5 + random.randint(0, 3)
-        for i in range(num_points):
-            angle = i * 2 * math.pi / num_points
-            radius = 10 + random.randint(-2, 2)
-            x = center_x + radius * math.cos(angle)
-            y = center_y + radius * math.sin(angle)
-            points.append((x, y))
-        
-        color = random.choice(self.palette)
-        draw.polygon(points, fill=color, outline=None)
-        
-        # Glow effect
-        overlay = Image.new('RGBA', size, (0, 0, 0, 0))
-        overlay_draw = ImageDraw.Draw(overlay)
-        overlay_draw.ellipse(
-            [center_x - 8, center_y - 8, center_x + 8, center_y + 8],
-            fill=(*color[:3], 100), outline=None
-        )
-        
-        img = Image.alpha_composite(img, overlay)
+        if 'triangle' in shape:
+            draw.polygon([
+                (size[0] // 2, 10), (10, size[1] - 10), (size[0] - 10, size[1] - 10)
+            ], fill=random.choice(self.palette), outline=None)
+        elif 'square' in shape:
+            draw.polygon([
+                (10, 10), (size[0] - 10, 10), (size[0] - 10, size[1] - 10), (10, size[1] - 10)
+            ], fill=random.choice(self.palette), outline=None)
+        elif 'circle' in shape:
+            draw.ellipse([
+                (10, 10), (size[0] - 10, size[1] - 10)
+            ], fill=random.choice(self.palette), outline=None)
         
         img.save(output_path, 'PNG', optimize=True)
         return True
     
-    def fill_category(self, category, target_count, current_count):
-        """Fill a category with generated Low-poly assets"""
-        needed = max(0, target_count - current_count)
-        if needed == 0:
-            return 0
-        
-        logger.info(f"Generating {needed} Low-poly assets for {category}")
-        
-        generated = 0
-        category_path = self.output_dir / category
-        category_path.mkdir(parents=True, exist_ok=True)
-        
-        if 'character' in category:
-            for i in range(needed):
-                output_path = category_path / f"generated_low_poly_character_{i:04d}.png"
-                if self.generate_low_poly_character(output_path, variant=i):
-                    generated += 1
-                    self.generated.append({'category': category, 'path': str(output_path)})
-        
-        elif 'icon' in category:
-            icon_types = ['bed', 'desk', 'chair', 'table', 'lamp', 'computer', 'phone']
-            for i in range(needed):
-                icon_type = icon_types[i % len(icon_types)]
-                output_path = category_path / f"generated_low_poly_{icon_type}_{i:04d}.png"
-                if self.generate_low_poly_icon(output_path, icon_type):
-                    generated += 1
-                    self.generated.append({'category': category, 'path': str(output_path)})
-        
-        elif 'ui' in category or 'element' in category:
-            element_types = ['button', 'panel', 'frame', 'arrow', 'star']
-            for i in range(needed):
-                element_type = element_types[i % len(element_types)]
-                output_path = category_path / f"generated_low_poly_{element_type}_{i:04d}.png"
-                if self.generate_low_poly_ui_element(output_path, element_type):
-                    generated += 1
-                    self.generated.append({'category': category, 'path': str(output_path)})
-        
-        elif 'particle' in category or 'effect' in category:
-            particle_types = ['sparkle', 'star', 'glow', 'magic', 'energy']
-            for i in range(needed):
-                particle_type = particle_types[i % len(particle_types)]
-                output_path = category_path / f"generated_low_poly_{particle_type}_{i:04d}.png"
-                if self.generate_low_poly_particle(output_path, particle_type):
-                    generated += 1
-                    self.generated.append({'category': category, 'path': str(output_path)})
-        
-        logger.info(f"Generated {generated} assets for {category}")
-        return generated
-    
-    def run(self):
-        """Generate Low-poly assets to fill gaps"""
-        logger.info("Starting Low-poly asset generation...")
-        
-        # Target counts
-        targets = {
-            'characters/sprites': 1000,
-            'icons/items': 250,
-            'icons/features': 250,
-            'ui/elements': 300,
-            'effects/particles': 200
-        }
-        
-        # Count current assets
-        for category, target in targets.items():
-            category_path = self.output_dir / category
-            if category_path.exists():
-                current = len(list(category_path.glob("*.png")))
-            else:
-                current = 0
-            
-            if current < target:
-                self.fill_category(category, target, current)
-        
-        # Save manifest
-        manifest = {
-            'generated': self.generated,
-            'total_generated': len(self.generated)
-        }
-        
-        with open('generated_low_poly_manifest.json', 'w') as f:
-            json.dump(manifest, f, indent=2)
-        
-        logger.info(f"Generated {len(self.generated)} Low-poly assets")
-        logger.info("Manifest saved to generated_low_poly_manifest.json")
+    def fill_directory(self, target_dir, shape, size=(64, 64), count=100):
+        """Fill directory with Low-poly shapes"""
+        for i in range(count):
+            output_path = os.path.join(target_dir, f'{shape}_{i+1}.png')
+            self.generate_low_poly(output_path, shape, size)
+        logger.info(f'Filled directory {target_dir} with {count} {shape} shapes.')
 
-if __name__ == "__main__":
+    def fill_directory_with_icons(self, target_dir, icon_type, count=100):
+        """Fill directory with Low-poly icons"""
+        for i in range(count):
+            output_path = os.path.join(target_dir, f'{icon_type}_{i+1}.png')
+            self.generate_low_poly_icon(output_path, icon_type)
+        logger.info(f'Filled directory {target_dir} with {count} {icon_type} icons.')
+
+    def fill_directory_with_ui_elements(self, target_dir, element_type, size=(128, 128), count=100):
+        """Fill directory with Low-poly UI elements"""
+        for i in range(count):
+            output_path = os.path.join(target_dir, f'{element_type}_{i+1}.png')
+            self.generate_low_poly_ui_element(output_path, element_type, size)
+        logger.info(f'Filled directory {target_dir} with {count} {element_type} UI elements.')
+
+    def fill_directory_with_characters(self, target_dir, count=100):
+        """Fill directory with Low-poly characters"""
+        for i in range(count):
+            output_path = os.path.join(target_dir, f'character_{i+1}.png')
+            self.generate_low_poly_character(output_path, i % 10)
+        logger.info(f'Filled directory {target_dir} with {count} Low-poly characters.')
+
+if __name__ == '__main__':
     generator = LowPolyGenerator()
-    generator.run()
+    
+    # Example usage:
+    # generator.fill_directory('shapes', 'triangle')
+    # generator.fill_directory_with_icons('icons', 'bed')
+    # generator.fill_directory_with_ui_elements('ui_elements', 'button')
+    # generator.fill_directory_with_characters('characters')
 
+    # Add your own directory and shape/icon/ui_element/character generation calls here
