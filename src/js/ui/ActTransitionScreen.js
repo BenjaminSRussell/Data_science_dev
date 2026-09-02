@@ -145,41 +145,26 @@ export class ActTransitionScreen {
         if (!storylineManager) return '';
 
         const arc = storylineManager.getCurrentArc();
-        const ethics = this.game?.gameState?.characterStats?.ethics || 0;
+        if (!arc) return '';
 
-        let arcPreview = '';
-        
-        if (ethics < -30) {
-            arcPreview = `
-                <div class="arc-preview dark">
-                    <div class="arc-preview-icon"></div>
-                    <div class="arc-preview-text">
-                        <strong>The Dark Path</strong><br>
-                        Your choices have led you down a darker road. The world sees you differently now.
-                    </div>
+        const themeClass = {
+            corruption: 'dark',
+            integrity: 'light',
+            survival: 'balanced'
+        }[arc.theme] || 'balanced';
+
+        const challenges = (arc.challenges || []).map(c => c.replace(/_/g, ' ')).join(', ');
+
+        const arcPreview = `
+            <div class="arc-preview ${themeClass}">
+                <div class="arc-preview-icon"></div>
+                <div class="arc-preview-text">
+                    <strong>${arc.name}</strong><br>
+                    ${arc.description}
+                    ${challenges ? `<br><em>Challenges ahead: ${challenges}</em>` : ''}
                 </div>
-            `;
-        } else if (ethics > 30) {
-            arcPreview = `
-                <div class="arc-preview light">
-                    <div class="arc-preview-icon"></div>
-                    <div class="arc-preview-text">
-                        <strong>The Righteous Path</strong><br>
-                        You've stayed true to your values. Your integrity defines you.
-                    </div>
-                </div>
-            `;
-        } else {
-            arcPreview = `
-                <div class="arc-preview balanced">
-                    <div class="arc-preview-icon"></div>
-                    <div class="arc-preview-text">
-                        <strong>The Balanced Path</strong><br>
-                        You navigate the complexities of life, finding balance between ambition and ethics.
-                    </div>
-                </div>
-            `;
-        }
+            </div>
+        `;
 
         return `<div class="act-arc-preview">${arcPreview}</div>`;
     }
