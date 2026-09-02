@@ -65,7 +65,7 @@ export class ComprehensiveSpriteSystem {
             const poses = bodyLanguageMapper.getAllPoses();
             const promises = poses.map(pose => {
                 try {
-                    const config = bodyLanguageMapper.getBodyLanguage(pose);
+                    const config = bodyLanguageMapper.getPose(pose);
                     if (config && config.sprite) {
                         return this.loadSprite(config.sprite, `pose_${pose}`);
                     }
@@ -246,4 +246,3 @@ export class ComprehensiveSpriteSystem {
         return (loaded / total) * 100;
     }
 }
-
