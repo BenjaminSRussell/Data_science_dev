@@ -1,233 +1,17 @@
-/**
- * Character Stats System - RPG-style character progression
- * Stats affect gameplay outcomes and unlock abilities
- */
+import { STATS, TRAINING_ACTIVITIES } from './Constants.js';
 
-// Character stat definitions
-export const STATS = {
-    intelligence: {
-        id: 'intelligence',
-        name: 'Intelligence',
-        icon: '',
-        color: '#4ecdc4',
-        description: 'Affects chart quality and complex analysis',
-        maxLevel: 100,
-        effects: {
-            chartQuality: 0.5,     // +0.5% per point
-            analysisSpeed: 0.3,   // +0.3% per point
-            unlockAdvanced: 50    // Unlock advanced features at 50
-        }
-    },
-    charisma: {
-        id: 'charisma',
-        name: 'Charisma',
-        icon: '',
-        color: '#a855f7',
-        description: 'Better negotiations and relationships',
-        maxLevel: 100,
-        effects: {
-            clientPay: 0.5,        // +0.5% pay per point
-            relationshipGain: 1,  // +1% relationship gain
-            unlockVC: 60          // Unlock VC path at 60
-        }
-    },
-    stamina: {
-        id: 'stamina',
-        name: 'Stamina',
-        icon: '',
-        color: '#ff6b9d',
-        description: 'Work more hours without fatigue',
-        maxLevel: 100,
-        effects: {
-            maxEnergy: 1,         // +1 max energy per point
-            recoveryRate: 0.2,    // +0.2% recovery
-            workHours: 0.05       // +0.05 extra time slots
-        }
-    },
-    focus: {
-        id: 'focus',
-        name: 'Focus',
-        icon: '',
-        color: '#ffd93d',
-        description: 'Complete tasks faster',
-        maxLevel: 100,
-        effects: {
-            taskSpeed: 0.8,       // +0.8% task speed per point
-            errorReduction: 0.3, // -0.3% errors
-            multitask: 30         // Unlock multitasking at 30
-        }
-    },
-    luck: {
-        id: 'luck',
-        name: 'Luck',
-        icon: '',
-        color: '#6bcb77',
-        description: 'Random bonuses and market wins',
-        maxLevel: 50, // Luck caps lower
-        effects: {
-            bonusChance: 1,       // +1% bonus event chance
-            marketTiming: 0.5,    // +0.5% better market timing
-            rareClients: 0.3      // +0.3% rare client chance
-        }
-    },
-    analytics: {
-        id: 'analytics',
-        name: 'Analytics',
-        icon: '',
-        color: '#ff8548',
-        description: 'Unlock advanced chart types and tools',
-        maxLevel: 100,
-        effects: {
-            chartTypes: [10, 25, 40, 60, 80], // Unlock levels
-            dataInsights: 0.5,    // +0.5% insight quality
-            automation: 70        // Unlock automation at 70
-        }
-    }
-};
-
-// Training activities that improve stats
-export const TRAINING_ACTIVITIES = [
-    {
-        id: 'study_books',
-        name: 'Study Books',
-        icon: '',
-        location: 'library',
-        stats: { intelligence: 2, analytics: 1 },
-        cost: 0,
-        timeSlots: 2,
-        energyCost: 15,
-        description: 'Read data science textbooks'
-    },
-    {
-        id: 'online_course',
-        name: 'Online Course',
-        icon: '',
-        location: 'home',
-        stats: { intelligence: 3, analytics: 2 },
-        cost: 50,
-        timeSlots: 2,
-        energyCost: 20,
-        description: 'Take an online tutorial'
-    },
-    {
-        id: 'gym_workout',
-        name: 'Gym Workout',
-        icon: '',
-        location: 'gym',
-        stats: { stamina: 3, focus: 1 },
-        cost: 20,
-        timeSlots: 1,
-        energyCost: 25,
-        description: 'Build physical endurance'
-    },
-    {
-        id: 'meditation',
-        name: 'Meditation',
-        icon: '',
-        location: 'home',
-        stats: { focus: 3, stamina: 1 },
-        cost: 0,
-        timeSlots: 1,
-        energyCost: -10, // Restores energy!
-        description: 'Clear your mind and focus'
-    },
-    {
-        id: 'networking_event',
-        name: 'Networking Event',
-        icon: '',
-        location: 'networking_bar',
-        stats: { charisma: 3, luck: 1 },
-        cost: 30,
-        timeSlots: 2,
-        energyCost: 20,
-        description: 'Meet industry professionals'
-    },
-    {
-        id: 'presentation_practice',
-        name: 'Presentation Practice',
-        icon: '',
-        location: 'home',
-        stats: { charisma: 2, intelligence: 1 },
-        cost: 0,
-        timeSlots: 1,
-        energyCost: 15,
-        description: 'Practice your pitch'
-    },
-    {
-        id: 'data_challenges',
-        name: 'Data Challenges',
-        icon: '',
-        location: 'home',
-        stats: { analytics: 3, intelligence: 1 },
-        cost: 0,
-        timeSlots: 2,
-        energyCost: 25,
-        description: 'Solve Kaggle competitions'
-    },
-    {
-        id: 'coffee_network',
-        name: 'Coffee Meetup',
-        icon: '',
-        location: 'coffee_shop',
-        stats: { charisma: 1, luck: 1 },
-        cost: 10,
-        timeSlots: 1,
-        energyCost: 5,
-        description: 'Casual networking over coffee'
-    },
-    {
-        id: 'certification_study',
-        name: 'Certification Study',
-        icon: '',
-        location: 'university',
-        stats: { analytics: 4, intelligence: 2 },
-        cost: 100,
-        timeSlots: 3,
-        energyCost: 30,
-        description: 'Study for professional certification'
-    }
-];
-
-/**
- * CharacterStats class - manages player stats and training
- */
-export class CharacterStats {
+class CharacterStats {
     constructor() {
-        // Core stats (0-100)
         this.stats = {
-            intelligence: 10,
-            charisma: 10,
-            stamina: 100, // Max energy
-            focus: 10,
-            luck: 10,
-            analytics: 10
-        };
-
-        // Moral Alignment (-100 to 100)
-        // -100: Pure Evil (Wolf of Wall Street)
-        // 0: Neutral
-        // +100: Saint
-        this.ethics = 50; // 0 (Evil) to 100 (Saint)
-        this.level = 1;
-        this.visualStage = 'level_1'; // level_1, level_2_good, level_2_evil, etc.
-
-        // Define Skills
-        this.skills = {
-            python: { id: 'python', name: 'Python', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            sql: { id: 'sql', name: 'SQL', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            statistics: { id: 'statistics', name: 'Statistics', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            machine_learning: { id: 'machine_learning', name: 'Machine Learning', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            communication: { id: 'communication', name: 'Communication', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            charisma: { id: 'charisma', name: 'Charisma', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 }
-        };
-
-        // Experience points for each stat
-        this.xp = {
-            intelligence: 0,
-            charisma: 0,
-            focus: 0,
-            luck: 0,
-            analytics: 0
+            python_sql: 1,
+            statistics: 1,
+            reputation: 1,
+            intelligence: 1,
+            charisma: 1,
+            stamina: 1,
+            focus: 1,
+            luck: 1,
+            analytics: 1
         };
 
         // XP needed per level (increases each level)
@@ -241,6 +25,9 @@ export class CharacterStats {
             bodyType: 'average', // average, fit, overweight
             age: 22
         };
+
+        // Ethics tracking
+        this.ethics = 50;
     }
 
     /**
@@ -442,3 +229,5 @@ export class CharacterStats {
         }
     }
 }
+
+export default CharacterStats;
