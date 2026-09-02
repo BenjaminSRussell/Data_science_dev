@@ -1,53 +1,14 @@
 {
   "name": "data-science-tycoon",
   "version": "1.0.0",
-  "description": "A web-based WASM/C++ simulation game where players climb the corporate data science ladder",
-  "type": "module",
+  "description": "Data Science Tycoon - C++ WASM Core",
+  "main": "index.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
     "build:wasm": "emcc src/cpp/main.cpp src/cpp/game_state.cpp src/cpp/data_generator.cpp src/cpp/task_system.cpp src/cpp/scorer.cpp src/cpp/economy.cpp -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 --bind -o public/wasm/game.js",
-    "build:all": "npm run build:wasm && npm run build",
-    "test": "vitest run",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch",
-    "test:continuous": "node test/integration/continuous-test-runner.js",
-    "inventory": "node scripts/generate-file-inventory.js",
-    "inventory:full": "node scripts/generate-file-inventory.js src/js FILE_INVENTORY.md --size --date --lines --ext",
-    "compress-assets": "node scripts/compress-assets-for-git.js",
-    "check-sizes": "node scripts/check-file-sizes.js"
+    "build:all": "npm run build:wasm",
+    "test:cpp": "mkdir -p test/cpp/build && g++ -std=c++17 -Wall -Wextra -Itest/cpp/vendor -Isrc/cpp test/cpp/test_main.cpp test/cpp/*_test.cpp src/cpp/game_state.cpp src/cpp/data_generator.cpp src/cpp/task_system.cpp src/cpp/scorer.cpp src/cpp/economy.cpp -o test/cpp/build/cpp_tests && test/cpp/build/cpp_tests"
   },
-  "dependencies": {
-    "@floating-ui/dom": "^1.7.4",
-    "@pixi/particle-emitter": "^5.0.8",
-    "chart.js": "^4.4.1",
-    "gsap": "^3.14.2",
-    "howler": "^2.2.4",
-    "interactjs": "^1.10.27",
-    "lit": "^3.3.1",
-    "pixi.js": "^8.14.3",
-    "three": "^0.182.0",
-    "zustand": "^5.0.9"
-  },
-  "devDependencies": {
-    "@vitest/coverage-v8": "^2.0.0",
-    "@vitest/ui": "^2.0.0",
-    "jsdom": "^24.0.0",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "sharp": "^0.34.5",
-    "vite": "^5.0.0",
-    "vitest": "^2.0.0"
-  },
-  "keywords": [
-    "game",
-    "data-science",
-    "simulation",
-    "wasm",
-    "webassembly"
-  ],
+  "keywords": [],
   "author": "",
-  "license": "MIT"
+  "license": "ISC"
 }

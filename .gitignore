@@ -94,3 +94,5 @@ compression-report.json
 .cache/
 .parcel-cache/
 
+# Native C++ test build outputs
+test/cpp/build/
