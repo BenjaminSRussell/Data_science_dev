@@ -765,7 +765,15 @@ export class UnifiedMapSystem {
             });
             
             // Add icon content (emoji or image)
-            if (location.icon && !location.icon.startsWith('/')) {
+            if (location.icon && location.icon.startsWith('/')) {
+                const iconSprite = new PIXI.Sprite(PIXI.Texture.from(location.icon));
+                iconSprite.anchor.set(0.5);
+                iconSprite.x = x;
+                iconSprite.y = y;
+                iconSprite.width = 20;
+                iconSprite.height = 20;
+                this.layers.locations.addChild(iconSprite);
+            } else if (location.icon) {
                 const iconText = new PIXI.Text(location.icon, {
                     fontSize: 10,
                     fill: 0x333333
