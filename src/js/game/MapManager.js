@@ -31,11 +31,12 @@ export class MapManager {
         // Initialize block system
         this.blockSystem = new MapBlockSystem(this.gridSystem, this.roadSystem, this.zoneSystem);
         
-        // Initialize building system (needs zoneSystem reference)
-        this.buildingSystem = new MapBuildingSystem(this.gridSystem, this.roadSystem, this.blockSystem, this.zoneSystem);
-        
         // Initialize asset placer
-        this.assetPlacer = new MapAssetPlacer(this.gridSystem, this.roadSystem, this.buildingSystem);
+        this.assetPlacer = new MapAssetPlacer(this.gridSystem, this.roadSystem, null);
+        
+        // Initialize building system (needs zoneSystem and assetPlacer references)
+        this.buildingSystem = new MapBuildingSystem(this.gridSystem, this.roadSystem, this.blockSystem, this.zoneSystem, this.assetPlacer);
+        this.assetPlacer.buildingSystem = this.buildingSystem;
         
         // Initialize environment system
         this.environmentSystem = new MapEnvironmentSystem(this.gridSystem, this.roadSystem, this.zoneSystem, this.assetPlacer);
