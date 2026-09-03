@@ -633,6 +633,18 @@ export class MainGame {
     }
 
     /**
+     * Find the first empty save slot (0-4), or null if all are full
+     */
+    findEmptySaveSlot() {
+        for (let i = 0; i < 5; i++) {
+            if (!this.saveManager.hasSave(i)) {
+                return i;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Handle save slot selection
      */
     handleSlotSelection(slotIndex, isNewGame) {
@@ -777,17 +789,17 @@ export class MainGame {
         document.getElementById('btn-new-game')?.addEventListener('click', () => {
             // Show save slots for new game selection
             if (this.saveSlotManager) {
-                // Find first empty slot or use slot 0
-                let emptySlot = null;
-                for (let i = 0; i < 5; i++) {
-                    if (!this.saveManager.hasSave(i)) {
-                        emptySlot = i;
-                        break;
+                // Find first empty slot
+                const emptySlot = this.findEmptySaveSlot();
+                if (emptySlot === null) {
+                    // All slots are full - warn before overwriting slot 1
+                    if (!confirm('All save slots are full.\n\nStarting a new game will overwrite Save Slot 1.\n\nContinue?')) {
+                        return;
                     }
+                    this.handleSlotSelection(0, true);
+                } else {
+                    this.handleSlotSelection(emptySlot, true);
                 }
-                // If no empty slot, use slot 0 (will overwrite)
-                const slotToUse = emptySlot !== null ? emptySlot : 0;
-                this.handleSlotSelection(slotToUse, true);
             } else {
                 // Fallback: start game directly if SaveSlotManager not initialized
                 this.startNewGame();
@@ -1224,13 +1236,7 @@ export class MainGame {
     startNewGame(slotIndex = null) {
         // Use provided slot or find first empty slot, default to 0
         if (slotIndex === null) {
-            // Find first empty slot
-            for (let i = 0; i < 5; i++) {
-                if (!this.saveManager.hasSave(i)) {
-                    slotIndex = i;
-                    break;
-                }
-            }
+            slotIndex = this.findEmptySaveSlot();
             if (slotIndex === null) {
                 slotIndex = 0; // Default to slot 0 if all are full
             }
