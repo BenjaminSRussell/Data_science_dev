@@ -10,7 +10,6 @@ import { WorkInteractionSystem } from './WorkInteractionSystem.js';
 import { RealisticDialogueSystem } from './RealisticDialogueSystem.js';
 import { RelationshipEmotionSystem } from './RelationshipEmotionSystem.js';
 import { WorldEvolutionSystem } from './WorldEvolutionSystem.js';
-import { InvestmentEcommerceSystem } from './InvestmentEcommerceSystem.js';
 import { StorylineManager } from './StorylineManager.js';
 import { MapProgressionSystem } from './MapProgressionSystem.js';
 import { IDESystem } from './IDESystem.js';

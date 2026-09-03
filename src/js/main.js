@@ -66,7 +66,6 @@ import { WorkInteractionSystem } from './game/WorkInteractionSystem.js';
 import { RealisticDialogueSystem } from './game/RealisticDialogueSystem.js';
 import { RelationshipEmotionSystem } from './game/RelationshipEmotionSystem.js';
 import { WorldEvolutionSystem } from './game/WorldEvolutionSystem.js';
-import { InvestmentEcommerceSystem } from './game/InvestmentEcommerceSystem.js';
 import { StorylineManager } from './game/StorylineManager.js';
 import { StoryBeatsSystem } from './game/StoryBeatsSystem.js';
 import { CharacterArcSystem } from './game/CharacterArcSystem.js';
@@ -1441,7 +1440,6 @@ export class MainGame {
             this.gameState.realisticDialogueSystem = new RealisticDialogueSystem();
             this.gameState.relationshipEmotionSystem = new RelationshipEmotionSystem(this.gameState);
             this.gameState.worldEvolutionSystem = new WorldEvolutionSystem(this.gameState);
-            this.gameState.investmentEcommerceSystem = new InvestmentEcommerceSystem(this.gameState);
             this.gameState.storylineManager = new StorylineManager(this.gameState);
             this.gameState.storyBeatsSystem = new StoryBeatsSystem(this.gameState);
             this.gameState.characterArcSystem = new CharacterArcSystem(this.gameState);
@@ -1523,7 +1521,6 @@ export class MainGame {
             this.realisticDialogueSystem = this.gameState.realisticDialogueSystem;
             this.relationshipEmotionSystem = this.gameState.relationshipEmotionSystem;
             this.worldEvolutionSystem = this.gameState.worldEvolutionSystem;
-            this.investmentEcommerceSystem = this.gameState.investmentEcommerceSystem;
             this.storylineManager = this.gameState.storylineManager;
             this.storyBeatsSystem = this.gameState.storyBeatsSystem;
             // NOTE: mapProgressionSystem already linked above, don't duplicate
