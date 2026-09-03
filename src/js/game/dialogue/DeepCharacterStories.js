@@ -351,6 +351,46 @@ export const CHARACTER_STORIES = {
         ]
     },
 
+    priya_sharma: {
+        personalStory: {
+            background: "Former human rights lawyer who pivoted to tech policy. Now a Data Privacy Officer who ensures companies follow data privacy laws.",
+            motivation: "Protecting people from the misuse of their personal data.",
+            secret: "She once had to whistleblower on a previous employer, a traumatic event that made her the strict enforcer she is today.",
+            dream: "A global \"Digital Bill of Rights\" that is universally enforced.",
+            fear: "A surveillance state where privacy no longer exists.",
+            relationship: "Protecting her own privacy fiercely.",
+            turningPoint: "The \"Whistleblower Incident\" - realizing that laws weren't enough, and that someone had to stand up from the inside.",
+            philosophy: "Privacy isn't a luxury. It's a fundamental human right."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I used to represent people, not policies. But I realized the biggest threat to rights was in the code, not the courts."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "Just because you *can* collect the data, doesn't mean you *should*. That distinction is everything."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "I learned the hard way that doing the right thing has a cost. I paid it once. I'd pay it again."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'fear',
+                dialogue: "We are sleepwalking into a world where everything is known, tracked, and sold. I'm just trying to wake us up."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'dream',
+                dialogue: "A Digital Bill of Rights. Enforceable. Global. That's the only way to ensure freedom in the digital age."
+            }
+        ]
+    },
+
     david_chen: {
         personalStory: {
             background: "Immigrant who came to the country with $50 in his pocket. Built a tech company from scratch, sold it for millions. Now invests in others' dreams.",
