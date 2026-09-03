@@ -140,6 +140,19 @@ export class DevMenu {
         // Setup event listeners
         document.getElementById('dev-menu-close').onclick = () => this.toggle();
 
+        const setPhaseBtn = document.getElementById('dev-set-phase');
+        if (setPhaseBtn) {
+            setPhaseBtn.onclick = () => {
+                const phaseSelect = document.getElementById('dev-storyline-phase');
+                const phase = phaseSelect ? phaseSelect.value : 'early';
+                const result = window.devTools?.storylineNavigator?.setStorylinePhase(phase);
+                if (result) {
+                    this.game.showToast(result.message || result.error, result.success ? 'success' : 'error');
+                    this.populateStoryline(); // Refresh
+                }
+            };
+        }
+
         // Populate sections
         this.populateScreens();
         this.populateStoryline();
