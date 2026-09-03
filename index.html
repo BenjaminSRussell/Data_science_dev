@@ -63,26 +63,27 @@
                 <button class="btn-grey" id="btn-nav-bank" title="Bank">BANK</button>
                 <button class="btn-grey" id="btn-settings" title="Settings">OPTS</button>
                 <button class="btn-grey" id="btn-theme-toggle" title="Theme">LIGHT</button>
-                <button class="btn-grey" id="btn-music-radio" title="Radio">MUSIC: OFF</button>
+                <button class="btn-grey" id="btn-music-radio" title="Radio" aria-haspopup="true"
+                    aria-expanded="false" aria-controls="music-radio-menu">MUSIC: OFF</button>
                 <!-- Radio Menu -->
-                <div id="music-radio-menu" class="hidden"
+                <div id="music-radio-menu" class="hidden" role="menu" aria-label="Music stations"
                     style="display: grid; position: absolute; top: 100%; right: 0; background: #2d2d2d; border: 1px solid #444; padding: 0.5rem; z-index: 1000; min-width: 150px; gap: 0.25rem;">
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="lofi_beats">Lofi Beats</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="folk_radio">Folk Radio</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="jazz_fm">Jazz FM</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="synthwave">Synthwave</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="space_rock">Space Rock</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="glitch_stream">Glitch Stream</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="zen_garden">Zen Garden</button>
                     <div style="border-top: 1px dashed #555; margin: 0.25rem 0;"></div>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%; color: #aaa;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%; color: #aaa;"
                         data-station="off">Turn Off</button>
                 </div>
             </div>
