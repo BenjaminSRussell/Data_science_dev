@@ -2141,7 +2141,7 @@ export class MainGame {
             }
 
             // Auto-save
-            this.saveManager.saveGame(this.gameState);
+            this.saveManager.saveGame(this.gameState, this.currentSaveSlot);
 
         }, 2000);
     }
