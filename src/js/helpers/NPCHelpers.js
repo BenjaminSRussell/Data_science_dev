@@ -231,8 +231,19 @@ export function updateRelationshipsScreen(game) {
         card.appendChild(relationshipBar);
         card.appendChild(tier);
 
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', npc.name);
+
         card.addEventListener('click', () => {
             handleVisitNPC(game, npc.id);
+        });
+
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleVisitNPC(game, npc.id);
+            }
         });
 
         return card;
