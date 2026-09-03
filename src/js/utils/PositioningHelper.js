@@ -66,11 +66,15 @@ export class PositioningHelper {
      * @param {HTMLElement} element - Element to position
      * @param {number} x - Pixel X
      * @param {number} y - Pixel Y
+     * @param {boolean} center - Center element on the point (default: true)
      */
-    static positionAtPixels(element, x, y) {
+    static positionAtPixels(element, x, y, center = true) {
         element.style.position = 'absolute';
         element.style.left = `${x}px`;
         element.style.top = `${y}px`;
+        if (center) {
+            element.style.transform = 'translate(-50%, -50%)';  // Center on pixel point
+        }
     }
 
     /**
@@ -217,7 +221,7 @@ export class PositioningHelper {
         } else if (coordinateSystem === 'percentage') {
             this.positionAtPercent(element, position.x, position.y);
         } else {
-            this.positionAtPixels(element, position.x, position.y);
+            this.positionAtPixels(element, position.x, position.y, center);
         }
 
         // Set size
