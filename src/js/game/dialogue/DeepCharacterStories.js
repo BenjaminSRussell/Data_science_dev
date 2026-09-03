@@ -5,6 +5,45 @@
  */
 
 export const CHARACTER_STORIES = {
+    chloe_competitor: {
+        personalStory: {
+            background: "Started around the same time as you. Always trying to steal your clients. Top of her class at university.",
+            motivation: "Being Number One.",
+            secret: "She admires your work ethic, but sees it as a threat she must neutralize.",
+            dream: "To be the CEO of a data empire.",
+            fear: "Mediocrity.",
+            relationship: "Married to her ambition.",
+            turningPoint: "Losing a major competition in college. She vowed never to lose again.",
+            philosophy: "There is no second place. You win, or you learn."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I graduated Summa Cum Laude. You? Just checking the competition."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "Clients don't want 'good'. They want the best. That's me."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "I saw your latest report. Not terrible. I would have used a different model, but... decent."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'drive',
+                dialogue: "I don't sleep. I optimize. That's why I'll always be one step ahead."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'goal',
+                dialogue: "CEO. That's the title I want. And I'm not asking for permission."
+            }
+        ]
+    },
     professor_higgins: {
         personalStory: {
             background: "Grew up in a small farming town, first in his family to attend college. Worked three jobs to pay for his education. Lost his father to cancer when he was 20, which inspired him to use data science for medical research.",
