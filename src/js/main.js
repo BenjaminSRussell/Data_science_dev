@@ -1271,6 +1271,13 @@ export class MainGame {
                     this.gameState.educationSystem = new EducationSystem(this.gameState);
                     this.gameState.worldEventManager = new WorldEventManager(this.gameState);
                     this.gameState.projectSystem = new ProjectSystem(this.gameState);
+                    // Link deferred systems to main class now that they exist
+                    this.crimeSystem = this.gameState.crimeSystem;
+                    this.romanceSystem = this.gameState.romanceSystem;
+                    this.legalSystem = this.gameState.legalSystem;
+                    this.educationSystem = this.gameState.educationSystem;
+                    this.worldEventManager = this.gameState.worldEventManager;
+                    this.projectSystem = this.gameState.projectSystem;
                 } catch (error) {
                     logger.warn('Error loading medium priority systems:', error);
                 }
@@ -1284,6 +1291,10 @@ export class MainGame {
                     this.gameState.contractSystem = new ContractSystem(this.gameState);
                     // NOTE: mapProgressionSystem is initialized later in startNewGame, don't duplicate here
                     // this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
+                    // Link deferred systems to main class now that they exist
+                    this.aiSystem = this.gameState.aiSystem;
+                    this.hardwareManager = this.gameState.hardwareManager;
+                    this.contractSystem = this.gameState.contractSystem;
                 } catch (error) {
                     logger.warn('Error loading low priority systems:', error);
                 }
@@ -1506,15 +1517,9 @@ export class MainGame {
             this.npcManager = this.gameState.npcManager;
             this.newsManager = this.gameState.newsManager;
             this.stockMarket = this.gameState.stockMarket;
-            this.crimeSystem = this.gameState.crimeSystem;
-            this.romanceSystem = this.gameState.romanceSystem;
-            this.legalSystem = this.gameState.legalSystem;
-            this.educationSystem = this.gameState.educationSystem;
-            this.worldEventManager = this.gameState.worldEventManager;
-            this.projectSystem = this.gameState.projectSystem;
-            this.aiSystem = this.gameState.aiSystem;
-            this.hardwareManager = this.gameState.hardwareManager;
-            this.contractSystem = this.gameState.contractSystem;
+            // NOTE: crimeSystem, romanceSystem, legalSystem, educationSystem, worldEventManager,
+            // projectSystem, aiSystem, hardwareManager, contractSystem are linked inside their
+            // deferred setTimeout callbacks (they don't exist yet at this point).
             this.mapProgressionSystem = this.gameState.mapProgressionSystem;
 
             // Link new systems
