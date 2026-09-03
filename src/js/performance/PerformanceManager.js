@@ -229,14 +229,15 @@ export class PerformanceManager {
         const avgFPS = this.getAverageFPS();
 
         if (avgFPS < 30 && this.quality !== 'low') {
-
             this.setQuality('low');
         } else if (avgFPS < 45 && this.quality === 'high') {
-
             this.setQuality('medium');
         } else if (avgFPS >= 55 && this.quality === 'low') {
-
             this.setQuality('medium');
+        } else if (avgFPS >= 55 && this.quality === 'medium') {
+            this.setQuality('high');
+        } else if (avgFPS >= 55 && this.quality === 'high') {
+            this.setQuality('ultra');
         }
     }
 
