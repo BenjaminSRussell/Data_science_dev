@@ -205,19 +205,26 @@ export class MenuThemeSystem {
         }
         if (!gameState) return this.themes.starter;
 
-        // Check for highest unlocked theme based on rank
-        const rankThemes = ['starter', 'corporate', 'executive'];
+        // Consider all unlocked themes, not just the rank-based ones
         let selectedTheme = this.themes.starter;
 
-        for (let i = rankThemes.length - 1; i >= 0; i--) {
-            const themeId = rankThemes[i];
-            const theme = this.themes[themeId];
-            if (theme.unlocked) {
-                const req = theme.unlockRequirement;
-                if (!req || (req.rankIndex !== undefined && gameState.rankIndex >= req.rankIndex)) {
-                    selectedTheme = theme;
-                    break;
-                }
+        const meetsRequirement = (req) => {
+            if (!req) return true;
+            if (req.rankIndex !== undefined && (gameState.rankIndex || 0) < req.rankIndex) return false;
+            if (req.tasksCompleted !== undefined && (gameState.tasksCompleted || 0) < req.tasksCompleted) return false;
+            if (req.reputation !== undefined && (gameState.reputation || 0) < req.reputation) return false;
+            if (req.money !== undefined && (gameState.money || 0) < req.money) return false;
+            return true;
+        };
+
+        // Prefer the most "advanced" theme: rank-based themes by rank,
+        // then progression-based themes (dataViz, minimalist)
+        const themeOrder = ['starter', 'corporate', 'executive', 'dataViz', 'minimalist'];
+        for (let i = themeOrder.length - 1; i >= 0; i--) {
+            const theme = this.themes[themeOrder[i]];
+            if (theme && theme.unlocked && meetsRequirement(theme.unlockRequirement)) {
+                selectedTheme = theme;
+                break;
             }
         }
 
