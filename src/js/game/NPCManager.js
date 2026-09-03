@@ -1515,6 +1515,15 @@ export class NPCManager {
         // Handle special actions
         if (choice.action === 'date_ask') {
             const result = this.gameState.romanceSystem?.askOnDate(this.currentConversation.npc.id);
+            if (!result) {
+                return {
+                    success: false,
+                    text: "You can't do that yet.",
+                    effects: {},
+                    newRelationship: this.relationships[this.currentConversation.npc.id],
+                    isSpecialAction: true
+                };
+            }
             return {
                 success: result.success,
                 text: result.message,
@@ -1532,6 +1541,16 @@ export class NPCManager {
             } else {
                 const type = choice.action.replace('date_', '');
                 result = this.gameState.romanceSystem?.goOnDate(type);
+            }
+
+            if (!result) {
+                return {
+                    success: false,
+                    text: "You can't do that yet.",
+                    effects: {},
+                    newRelationship: this.relationships[this.currentConversation.npc.id],
+                    isSpecialAction: true
+                };
             }
 
             return {
