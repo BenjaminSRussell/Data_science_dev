@@ -145,7 +145,7 @@ export const NPCs = [
         gifts: ['coffee', 'tech_gadgets'],
         dialogueTopics: ['industry', 'career', 'visualization'],
         benefits: { statBoost: 'analytics', clientReferrals: true },
-        backstory: 'Works at a top tech company. Loves helping newcomers break into the field.',
+        backstory: 'Started as a barista and taught herself Python at night, working her way up from data entry to senior analyst. Single mother of two, works 60-hour weeks to provide for her kids.',
         description: 'Experienced analyst at a Fortune 500 company. Known for her clear communication and ability to translate complex data into actionable insights.',
         age: 34,
         interests: ['data visualization', 'career development', 'coffee'],
