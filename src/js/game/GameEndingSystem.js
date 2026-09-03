@@ -235,7 +235,7 @@ export class GameEndingSystem {
     checkEducationCompletion() {
         if (this.gameState.educationSystem) {
             const completedCourses = this.gameState.educationSystem?.completedCourses || [];
-            const degrees = this.gameState.educationSystem?.degrees || [];
+            const degrees = Object.values(this.gameState.educationSystem?.degrees || {});
             const allDegrees = degrees.every(d => d.acquired);
             
             if (completedCourses.length >= 10 && allDegrees) {
