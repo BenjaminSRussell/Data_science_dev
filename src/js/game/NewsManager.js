@@ -285,6 +285,7 @@ export class NewsManager {
         const headline = this.generateNewsItem();
         this.dailyPaper.headline = headline;
         this.newsHistory.unshift(headline); //Keep history for now/legacy support
+        if (this.newsHistory.length > this.maxHistory) this.newsHistory.length = this.maxHistory;
 
         // Generate 2-3 smaller articles
         const count = 2 + Math.floor(Math.random() * 2);
@@ -292,6 +293,7 @@ export class NewsManager {
             const article = this.generateNewsItem();
             this.dailyPaper.articles.push(article);
             this.newsHistory.unshift(article);
+            if (this.newsHistory.length > this.maxHistory) this.newsHistory.length = this.maxHistory;
         }
 
         return this.dailyPaper;
