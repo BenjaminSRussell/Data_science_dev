@@ -207,6 +207,20 @@ export class AudioManager {
             }
         });
 
+        // If the track fails to load (404, corrupt file, bad codec), try another
+        // track from the same station so one bad file doesn't silence it forever.
+        this.currentMusic.addEventListener('error', () => {
+            if (!this.musicEnabled) return;
+            console.warn(`Failed to load music track: ${url}. Trying another track.`);
+            const remaining = station.tracks.filter(t => t !== randomTrack);
+            if (remaining.length > 0) {
+                const retryStation = { ...station, tracks: remaining };
+                this.playRandomTrack(retryStation);
+            } else {
+                console.warn(`No other tracks available in station: ${station.name || 'unknown'}.`);
+            }
+        });
+
         this.currentMusic.play().catch(e => {
             console.log('Audio play failed (interaction likely needed):', e);
         });
