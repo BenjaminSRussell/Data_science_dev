@@ -1145,7 +1145,7 @@ export class MainGame {
         // Listen for promotion events
         window.addEventListener('promotion', (e) => {
             const rank = e.detail.rank;
-            this.showToast(`Promoted to ${rank.title}!`, 'success');
+            this.uiUpdater.showPromotionAnimation(rank);
             this.audioManager.play('success');
             this.uiUpdater.updateAllUI();
         });
