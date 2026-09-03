@@ -28,11 +28,12 @@ export class EconomySystem {
         const bossModifier = task.boss.strictness || 1.0;
 
         // Calculate weighted average
+        // Divide by strictness so stricter bosses (higher strictness) are harder to please
         const rawScore = (
             chartAppropriateness * 0.4 +
             visualClarity * 0.3 +
             dataAccuracy * 0.3
-        ) * bossModifier;
+        ) / bossModifier;
 
         // Convert to stars (1-5)
         const stars = this.scoreToStars(rawScore);
