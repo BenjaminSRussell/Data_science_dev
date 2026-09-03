@@ -549,6 +549,46 @@ export const CHARACTER_STORIES = {
                 dialogue: "Nature doesn't rush, yet everything gets done. We should learn from that. Slow down. Breathe. Grow. At your own pace. That's the secret to peace."
             }
         ]
+    },
+
+    casey_lee: {
+        personalStory: {
+            background: "Marketing specialist who grew up on social media. Learned to speak Fluent Gen Z and ride trends before they peak. Started in a small agency, now runs campaigns that go viral.",
+            motivation: "Wants to prove that marketing is about people, not products. Believes in the power of storytelling to build tribes, not just sell things.",
+            secret: "Friday night? Her phone goes in a lockbox. Seriously. The scroll... it consumes you. She needs the digital detox to stay sane.",
+            dream: "To use the power of viral storytelling for something real. Not just selling shoes, but changing laws. Making a real impact on the world.",
+            fear: "That she'll lose herself to the scroll, that the trends will consume her, that she'll become the thing she fights against.",
+            relationship: "Single. Focused on her career. Has a few close friends, but mostly keeps to herself. Finds peace in the quiet after the digital detox.",
+            turningPoint: "When a campaign she ran raised 100k in 24 hours. Just by telling the right story. That's when she realized the power she held.",
+            philosophy: "It's not about the product. It's about the tribe. You find the story that resonates, and the rest follows."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I speak Fluent Gen Z. It's a skill, I promise. Trends move fast."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "It's not about the product. It's about the tribe..."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "Friday night? My phone goes in a lockbox. Seriously. The scroll... it consumes you."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'impact',
+                dialogue: "We raised 100k. 24 hours. Just by telling the right story. That's power."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'dream',
+                dialogue: "Imagine using this power for something real. Not just selling shoes, but changing laws."
+            }
+        ]
     }
 };
 
