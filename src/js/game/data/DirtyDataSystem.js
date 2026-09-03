@@ -121,7 +121,7 @@ export class DirtyDataSystem {
         });
         
         // Severe consequences
-        this.reputation -= action.consequences.reputation * 2;
+        this.reputation += action.consequences.reputation * 2;
         
         // Legal trouble
         if (this.gameState.legalSystem) {
