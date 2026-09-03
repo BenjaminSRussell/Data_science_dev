@@ -102,10 +102,9 @@ export class AudioManager {
             fail: { freq: 220, duration: 200 },
             complete: { freq: 660, duration: 100 },
             start: { freq: 440, duration: 100 },
-            purchase: { freq: 1000, duration: 75 },
-            promotion: { freq: 523, duration: 200 },
             kaching: { freq: 1200, duration: 100 },
-            error: { freq: 150, duration: 300 }
+            error: { freq: 150, duration: 300 },
+            keyboard_typing: { freq: 1400, duration: 30 }
         };
 
         const sound = sounds[soundName];
