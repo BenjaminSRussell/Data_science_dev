@@ -69,6 +69,8 @@ export class CompanyManagementSystem {
             return { success: false, message: 'Cannot afford salary' };
         }
         
+        this.gameState.economySystem.money -= salary;
+        
         const employee = {
             id: 'emp_' + Date.now(),
             name: candidate.name,
