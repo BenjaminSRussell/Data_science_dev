@@ -8,16 +8,32 @@ GameState::~GameState() {}
 // Money management
 int GameState::getMoney() const { return money; }
 
-void GameState::setMoney(int amount) { money = amount; }
+void GameState::setMoney(int amount) {
+  if (amount >= MIN_MONEY) {
+    money = amount;
+  }
+}
 
-void GameState::addMoney(int amount) { money += amount; }
+void GameState::addMoney(int amount) {
+  if (money + amount >= MIN_MONEY) {
+    money += amount;
+  }
+}
 
 // Reputation management
 int GameState::getReputation() const { return reputation; }
 
-void GameState::setReputation(int amount) { reputation = amount; }
+void GameState::setReputation(int amount) {
+  if (amount >= MIN_REPUTATION) {
+    reputation = amount;
+  }
+}
 
-void GameState::addReputation(int amount) { reputation += amount; }
+void GameState::addReputation(int amount) {
+  if (reputation + amount >= MIN_REPUTATION) {
+    reputation += amount;
+  }
+}
 
 // Rank management
 int GameState::getRankIndex() const { return rankIndex; }
@@ -44,7 +60,11 @@ void GameState::incrementPerfectScores() { perfectScores++; }
 
 int GameState::getTotalEarned() const { return totalEarned; }
 
-void GameState::addToTotalEarned(int amount) { totalEarned += amount; }
+void GameState::addToTotalEarned(int amount) {
+  if (totalEarned + amount >= MIN_TOTAL_EARNED) {
+    totalEarned += amount;
+  }
+}
 
 // Reset state
 void GameState::reset() {
