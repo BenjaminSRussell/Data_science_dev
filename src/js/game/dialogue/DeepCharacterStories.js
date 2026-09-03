@@ -351,6 +351,46 @@ export const CHARACTER_STORIES = {
         ]
     },
 
+    james_wilson: {
+        personalStory: {
+            background: "Runs a top consulting firm. Former Ivy League, former Wall Street. Knows how to wear a suit and bill by the hour.",
+            motivation: "Solving high-level problems for the world's biggest companies (and getting paid well for it).",
+            secret: "He's burned out. The travel, the hotels, the PowerPoint decks... he sometimes dreams of quitting to run a quiet bookstore.",
+            dream: "To retire to a vineyard in Italy. No phones. No clients. Just grapes and time.",
+            fear: "Becoming irrelevant.",
+            relationship: "Divorced three times. \"Married to the firm.\"",
+            turningPoint: "Winning a massive government contract that saved his firm from bankruptcy.",
+            philosophy: "Perception is reality. If you look like the expert, you are the expert."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I've been in boardrooms you only read about in the news. The stakes are always high."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "It's not just about the data. It's about the narrative. Can you tell a story that justifies a billion-dollar decision?"
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'burnout',
+                dialogue: "Another airport lounge. Another hotel. Sometimes the glamour wears thin, you know?"
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'secret_dream',
+                dialogue: "Italy. A vineyard. No phones. No clients. Just grapes and time. That's the exit strategy."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'regret',
+                dialogue: "I've sacrificed a lot for this career. Families. Friends. Make sure you don't lose yourself in the hustle."
+            }
+        ]
+    },
+
     david_chen: {
         personalStory: {
             background: "Immigrant who came to the country with $50 in his pocket. Built a tech company from scratch, sold it for millions. Now invests in others' dreams.",
