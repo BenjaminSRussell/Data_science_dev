@@ -122,6 +122,8 @@ export function updateMapScreen(game) {
     }
 
     updateVehicleDisplay(game);
+    updateMapLocationStates(game);
+    updatePlayerMarker(game);
 
     // Update icons to use image assets
     updateMapLocationIcons(game);
