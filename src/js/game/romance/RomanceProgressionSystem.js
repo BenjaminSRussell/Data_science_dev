@@ -138,9 +138,17 @@ export class RomanceProgressionSystem {
             return { success: false, message: 'No partner to work with' };
         }
         
+        // Look up the project to scale the bonus by its difficulty
+        const project = this.gameState.projectSystem?.activeProject?.id === projectId
+            ? this.gameState.projectSystem.activeProject
+            : this.gameState.projectSystem?.completedProjects?.find(p => p.id === projectId)
+              || this.gameState.projectSystem?.availableContracts?.find(c => c.id === projectId);
+        
+        const difficulty = project?.difficulty || 1;
+        
         // Combined income and skills
         const combinedIncome = (this.gameState.economySystem?.money || 0) + this.romancePartner.income;
-        const bonus = 1.5; // 50% bonus when working together
+        const bonus = 1.5 + (difficulty - 1) * 0.25; // 50% base bonus, +25% per difficulty level above 1
         
         return {
             success: true,
