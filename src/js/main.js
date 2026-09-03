@@ -3064,7 +3064,7 @@ export class MainGame {
 
             // Update inbox UI if open
             if (this.researchInboxUI && this.researchInboxUI.isOpen) {
-                this.researchInboxUI.updateUnreadCount();
+                this.researchInboxUI.refresh();
             }
         } catch (error) {
             logger.error('Error updating inbox badge:', error);
