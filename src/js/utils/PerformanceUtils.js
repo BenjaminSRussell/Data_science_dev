@@ -82,6 +82,9 @@ export class PerformanceUtils {
         const start = performance.now();
         const result = fn();
         const end = performance.now();
+        const duration = end - start;
+
+        console.debug(`[PerformanceUtils] ${name}: ${duration.toFixed(2)}ms`);
 
         return result;
     }
@@ -93,6 +96,9 @@ export class PerformanceUtils {
         const start = performance.now();
         const result = await fn();
         const end = performance.now();
+        const duration = end - start;
+
+        console.debug(`[PerformanceUtils] ${name}: ${duration.toFixed(2)}ms`);
 
         return result;
     }
