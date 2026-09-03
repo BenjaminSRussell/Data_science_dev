@@ -2099,11 +2099,6 @@ export class MainGame {
                 const oldRank = this.gameState.rankIndex;
                 const promoted = this.economySystem.checkPromotion();
                 if (promoted) {
-                    const newRank = this.gameState.currentRank;
-                    this.showToast(`PROMOTED to ${newRank.title}!`, 'success');
-                    this.audioManager.play('success');
-                    this.uiUpdater.updateAllUI();
-
                     // Check for story beats (promotion)
                     if (this.storyBeatsSystem) {
                         if (oldRank === 0) {
