@@ -277,7 +277,7 @@ export class StockMarket {
         });
 
         // Process world events (can cause large market movements)
-        worldEvents.forEach(event => {
+        this.activeWorldEvents.forEach(event => {
             if (event.type === 'market_crash') {
                 // Global crash affects all markets
                 Object.keys(this.marketTrends).forEach(market => {
