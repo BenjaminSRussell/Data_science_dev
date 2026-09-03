@@ -58,15 +58,6 @@ export class RomanceProgressionSystem {
      * Determine partner's bias
      */
     determineBias(partner) {
-        // Each partner has a bias that affects their advice
-        const biases = {
-            'ethical': 'Always chooses ethical options',
-            'practical': 'Prefers practical solutions',
-            'ambitious': 'Encourages risk-taking',
-            'cautious': 'Prefers safe choices',
-            'creative': 'Suggests creative solutions'
-        };
-        
         // Assign based on personality
         if (partner.personality === 'professional') return 'practical';
         if (partner.personality === 'competitive') return 'ambitious';
