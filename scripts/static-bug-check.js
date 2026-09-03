@@ -71,7 +71,7 @@ function checkFile(filePath) {
         }
         
         // Check for empty catch blocks
-        if (line.includes('catch') && lines[index + 1]?.trim() === '}') {
+        if (line.includes('catch') && !line.includes('//') && lines[index + 1]?.trim() === '}') {
             bugs.push(`${fileName}:${lineNum} - Empty catch block (swallows errors)`);
         }
     });
