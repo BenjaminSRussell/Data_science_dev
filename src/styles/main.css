@@ -1866,8 +1866,19 @@ a:hover {
 }
 
 @media (max-width: 768px) {
+    #top-bar {
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+    }
+
     .top-bar-center {
-        display: none;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .top-bar-right {
+        flex-wrap: wrap;
+        gap: 0.25rem;
     }
 
     .menu-title {
