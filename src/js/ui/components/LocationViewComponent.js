@@ -124,14 +124,16 @@ export class LocationViewComponent extends BaseComponent {
             const top = 30 + Math.floor(index / 5) * 20;
 
             return html`
-                <div class="location-feature" 
-                     style="left: ${left}%; top: ${top}%;"
-                     @click=${() => this.handleFeatureClick(feature)}>
+                <button class="location-feature"
+                        type="button"
+                        aria-label="${feature.name}"
+                        style="left: ${left}%; top: ${top}%;"
+                        @click=${() => this.handleFeatureClick(feature)}>
                     ${feature.icon && feature.icon.startsWith('/')
                         ? html`<img src="${feature.icon}" alt="${feature.name}" style="width: 32px; height: 32px;">`
                         : html`<span style="font-size: 32px;">${feature.icon || ''}</span>`
                     }
-                </div>
+                </button>
             `;
         });
     }
