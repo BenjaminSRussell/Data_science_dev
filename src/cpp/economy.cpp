@@ -1,11 +1,6 @@
 #include "economy.h"
 #include <algorithm>
 
-// Static member definitions
-const int Economy::RANK_THRESHOLDS[] = {0, 100, 300, 600, 1200, 2500, 5000};
-const double Economy::SALARY_MULTIPLIERS[] = {1.0, 1.5, 2.0, 3.0,
-                                              5.0, 8.0, 15.0};
-
 Economy::Economy() {}
 
 Economy::~Economy() {}
@@ -36,8 +31,8 @@ int Economy::calculateReputation(int stars) {
 }
 
 double Economy::getSalaryMultiplier(int rankIndex) {
-  if (rankIndex >= 0 && rankIndex <= 6) {
-    return SALARY_MULTIPLIERS[rankIndex];
+  if (rankIndex >= 0 && rankIndex < RankConfig::RANK_COUNT) {
+    return RankConfig::SALARY_MULTIPLIERS[rankIndex];
   }
   return 1.0;
 }
@@ -51,8 +46,8 @@ bool Economy::canPromote(int reputation, int currentRank) {
 }
 
 int Economy::getRequiredReputation(int rankIndex) {
-  if (rankIndex >= 0 && rankIndex <= 6) {
-    return RANK_THRESHOLDS[rankIndex];
+  if (rankIndex >= 0 && rankIndex < RankConfig::RANK_COUNT) {
+    return RankConfig::RANK_THRESHOLDS[rankIndex];
   }
   return 999999; // Unreachable
 }

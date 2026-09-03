@@ -1,4 +1,5 @@
 #include "task_system.h"
+#include "rank_config.h"
 
 TaskSystem::TaskSystem() {}
 
@@ -18,10 +19,10 @@ int TaskSystem::calculatePotentialReward(int rankIndex, int difficulty) {
   // Base reward
   int baseReward = 100;
 
-  // Rank multipliers
-  double rankMultipliers[] = {1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 15.0};
-  double rankMult =
-      (rankIndex >= 0 && rankIndex <= 6) ? rankMultipliers[rankIndex] : 1.0;
+  // Rank multipliers (shared with Economy via RankConfig)
+  double rankMult = (rankIndex >= 0 && rankIndex < RankConfig::RANK_COUNT)
+                        ? RankConfig::SALARY_MULTIPLIERS[rankIndex]
+                        : 1.0;
 
   // Difficulty bonus
   int difficultyBonus = difficulty * 20;

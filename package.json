@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "build:wasm": "emcc src/cpp/main.cpp src/cpp/game_state.cpp src/cpp/data_generator.cpp src/cpp/task_system.cpp src/cpp/scorer.cpp src/cpp/economy.cpp -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 --bind -o public/wasm/game.js",
+    "build:wasm": "emcc src/cpp/main.cpp src/cpp/game_state.cpp src/cpp/data_generator.cpp src/cpp/task_system.cpp src/cpp/scorer.cpp src/cpp/economy.cpp src/cpp/rank_config.cpp -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 --bind -o public/wasm/game.js",
     "build:all": "npm run build:wasm && npm run build",
     "test": "vitest run",
     "test:ui": "vitest --ui",

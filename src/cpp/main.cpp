@@ -5,6 +5,7 @@
  * Build with:
  * emcc src/cpp/main.cpp src/cpp/game_state.cpp src/cpp/data_generator.cpp \
  *      src/cpp/task_system.cpp src/cpp/scorer.cpp src/cpp/economy.cpp \
+ *      src/cpp/rank_config.cpp \
  *      -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 \
  *      -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 \
  *      --bind -o public/wasm/game.js
