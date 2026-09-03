@@ -113,11 +113,13 @@ export class Portfolio {
 
     sell(stockId, quantity, price) {
         if (!this.holdings[stockId] || this.holdings[stockId] < quantity) return 0;
-        this.holdings[stockId] -= quantity;
 
-        // Simplified cost basis logic: assume selling reduces invested amount proportionally?
-        // Actually, profit is calculated at sell time.
-        // For totalInvested tracking, it's tricky. Let's just track current value.
+        // Reduce totalInvested proportionally using weighted-average cost basis,
+        // computed before mutating holdings.
+        const totalShares = this.holdings[stockId] + quantity;
+        this.totalInvested -= (this.totalInvested / totalShares) * quantity;
+
+        this.holdings[stockId] -= quantity;
 
         if (this.holdings[stockId] === 0) delete this.holdings[stockId];
         return quantity * price;
