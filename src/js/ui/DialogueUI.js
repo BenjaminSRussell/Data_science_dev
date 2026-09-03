@@ -284,10 +284,9 @@ export class DialogueUI {
      */
     applyEffects(effects) {
         if (effects.relationship && this.game?.gameState?.npcManager) {
-            const currentRel = this.game.gameState.npcManager.getRelationship?.(this.currentNPC.id) || 0;
-            this.game.gameState.npcManager.setRelationship?.(
+            this.game.gameState.npcManager.modifyRelationship?.(
                 this.currentNPC.id,
-                currentRel + effects.relationship
+                effects.relationship
             );
         }
 
