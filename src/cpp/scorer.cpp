@@ -1,9 +1,8 @@
 #include "scorer.h"
 #include <cstdlib>
-#include <ctime>
 #include <map>
 
-Scorer::Scorer() { srand(static_cast<unsigned int>(time(nullptr))); }
+Scorer::Scorer() {}
 
 Scorer::~Scorer() {}
 

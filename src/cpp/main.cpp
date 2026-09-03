@@ -12,6 +12,8 @@
 
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
+#include <cstdlib>
+#include <ctime>
 #include "game_state.h"
 #include "data_generator.h"
 #include "scorer.h"
@@ -68,12 +70,15 @@ std::string getVersion() {
 
 // Initialize WASM module
 bool initializeWASM() {
-    // Initialization logic here
+    // Seed the global RNG once at program start
+    srand(static_cast<unsigned int>(time(nullptr)));
     return true;
 }
 
 // Main function for WASM
 int main() {
+    // Seed the global RNG once at program start
+    srand(static_cast<unsigned int>(time(nullptr)));
     // WASM module initialized
     return 0;
 }
