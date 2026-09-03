@@ -330,5 +330,22 @@ export class ResearchInboxUI {
             unreadTab.textContent = `Unread (${count})`;
         }
     }
+    
+    /**
+     * Refresh the open inbox with the latest papers and unread count
+     */
+    refresh() {
+        if (!this.isOpen || !this.researchPaperSystem) return;
+        
+        const papers = this.researchPaperSystem.getInbox();
+        const unreadCount = this.researchPaperSystem.getUnreadCount();
+        
+        if (this.litComponent) {
+            this.litComponent.updatePapers(papers, unreadCount);
+        } else if (this.container) {
+            this.renderPapers(this.getActiveTab());
+            this.updateUnreadCount();
+        }
+    }
 }
 
