@@ -257,6 +257,9 @@ export class SaveSlotManager {
             }
         }
 
+        // Track the selected slot and update the visual highlight
+        this.setCurrentSlot(emptySlot);
+
         if (this.onSlotSelected) {
             this.onSlotSelected(emptySlot, true);
         }
@@ -418,6 +421,9 @@ export class SaveSlotManager {
      * Handle slot click
      */
     handleSlotClick(slotIndex, isEmpty) {
+        // Track the selected slot and update the visual highlight
+        this.setCurrentSlot(slotIndex);
+
         if (isEmpty) {
             // Start new game in this slot
             if (this.onSlotSelected) {
@@ -440,6 +446,8 @@ export class SaveSlotManager {
 
         switch (action) {
             case 'load':
+                // Track the selected slot and update the visual highlight
+                this.setCurrentSlot(slotIndex);
                 if (this.onSlotSelected) {
                     this.onSlotSelected(slotIndex, false);
                 }
