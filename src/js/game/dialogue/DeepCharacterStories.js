@@ -471,6 +471,46 @@ export const CHARACTER_STORIES = {
         ]
     },
 
+    robert_kim: {
+        personalStory: {
+            background: "Early-stage investor who made his money in the dot-com boom. Focuses on data-driven startups.",
+            motivation: "Finding diamonds in the rough. Loves the energy of early-stage founders.",
+            secret: "He relies heavily on his 'gut feeling' rather than just spreadsheets, which contradicts his analytical persona.",
+            dream: "To find a founder who reminds him of his younger self.",
+            fear: "Missing out on 'The Next Big Thing' (FOMO).",
+            relationship: "Family man. Often talks about his kids' coding projects.",
+            turningPoint: "Passing on a startup that became a unicorn. He vowed never to be too cautious again.",
+            philosophy: "I don't invest in ideas. I invest in people."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I was there in the 90s. The Wild West. We built the internet with duct tape and hope."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "Your spreadsheet looks nice. But tell me... why YOU? Why this? Why now?"
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "The numbers have to work, yes. But I look for the spark. The fire in the eyes. That's what sells me."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'regret',
+                dialogue: "I passed on a company once. They're worth billions now. It taught me that sometimes, you have to take the leap."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'dream',
+                dialogue: "I'm looking for the next generation. Someone with the vision to change things. Are you that person?"
+            }
+        ]
+    },
+
     jordan_kim: {
         personalStory: {
             background: "Former athlete who had to retire due to injury. Found purpose in helping others achieve their fitness goals. Uses exercise as therapy.",
