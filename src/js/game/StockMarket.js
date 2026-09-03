@@ -402,8 +402,8 @@ export class StockMarket {
         stock.price = stock.price * magnitude;
         stock.history.push(stock.price);
 
-        // Add volatility
-        stock.volatility += 0.2; // Becomes unstable
+        // Add volatility (capped so repeated manipulation can't push it past sane bounds)
+        stock.volatility = Math.min(stock.volatility + 0.2, 0.5); // Becomes unstable
 
 
         return true;
