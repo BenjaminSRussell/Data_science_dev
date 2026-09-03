@@ -41,7 +41,8 @@ class GameAssetManifestCreator:
                     'mode': img.mode,
                     'has_alpha': img.mode in ('RGBA', 'LA')
                 }
-        except:
+        except Exception as e:
+            logger.warning(f"Failed to load asset {asset_path}: {e}")
             return None
     
     def scan_characters(self):
