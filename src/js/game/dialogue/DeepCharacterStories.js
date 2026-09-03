@@ -549,6 +549,45 @@ export const CHARACTER_STORIES = {
                 dialogue: "Nature doesn't rush, yet everything gets done. We should learn from that. Slow down. Breathe. Grow. At your own pace. That's the secret to peace."
             }
         ]
+    },
+    luna_bookstore: {
+        personalStory: {
+            background: "Inherited an old bookstore and refused to let it die in the digital age. Loves books more than anything.",
+            motivation: "Preserving the magic of physical books.",
+            secret: "She writes fantasy novels under a pen name that are surprisingly popular online.",
+            dream: "A library that contains every story ever told.",
+            fear: "The death of print.",
+            relationshipStatus: "In love with fictional characters.",
+            turningPoint: "Finding a first edition of her favorite childhood book in a bargain bin.",
+            philosophy: "A room without books is like a body without a soul."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "People say print is dead. I say they just haven't found the right book yet."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "The smell of old paper... it's the smell of history. Of thoughts preserved in time."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "I live a thousand lives. One in this shop, and 999 others in the pages."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'dream',
+                dialogue: "I want this place to be a sanctuary. Where the wifi is weak but the coffee is strong."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'identity',
+                dialogue: "Stories are real. Sometimes, I think they're more real than we are."
+            }
+        ]
     }
 };
 
