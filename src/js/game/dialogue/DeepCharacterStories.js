@@ -549,6 +549,46 @@ export const CHARACTER_STORIES = {
                 dialogue: "Nature doesn't rush, yet everything gets done. We should learn from that. Slow down. Breathe. Grow. At your own pace. That's the secret to peace."
             }
         ]
+    },
+
+    dr_amara_patel: {
+        personalStory: {
+            background: "Leading researcher in deep learning. Published dozens of papers. Defines herself by her academic contributions.",
+            motivation: "Pushing the boundaries of what Artificial Intelligence can do.",
+            secret: "Privately worries that AI might one day outpace human understanding, a fear she discusses only with trusted peers.",
+            dream: "To create a \"General Intelligence\" that can solve humanity's greatest challenges.",
+            fear: "That her research could be misused for unethical purposes.",
+            relationshipStatus: "Married to her work, though she mentors many promising students who become her \"intellectual family.\"",
+            turningPoint: "The day she realized a neural network had identified a pattern she missed, proving the machine was \"teaching\" her.",
+            philosophy: "\"The answers are in the data. We just need to ask the right questions.\""
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I've spent my life in labs. Some call it lonely. I call it focused. The data speaks if you listen."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'research',
+                dialogue: "Neural networks aren't just code. They're a reflection of how we think. Or how we should think."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "Sometimes... I wonder if we're building something we can't control. It keeps me up at night."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'dream',
+                dialogue: "Imagine an AI that doesn't just calculate, but understands. That solves climate change, disease. That's what I'm building."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'philosophy',
+                dialogue: "We are the architects of the future. Every line of code is a brick in the foundation of tomorrow."
+            }
+        ]
     }
 };
 
