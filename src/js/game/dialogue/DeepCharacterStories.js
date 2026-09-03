@@ -471,6 +471,46 @@ export const CHARACTER_STORIES = {
         ]
     },
 
+    victoria_sterling: {
+        personalStory: {
+            background: "Born into wealth, related to Brad Sterling, but she built her own empire in venture capital. Known as 'The Iron Lady' of tech investing.",
+            motivation: "Finding the next Unicorn. ROI is king.",
+            secret: "She actually respects people who stand up to her, though she never admits it.",
+            dream: "To own the majority share of the next Google or Amazon.",
+            fear: "Losing her edge.",
+            relationship: "Married to her portfolio.",
+            turningPoint: "Turning a failing startup around by firing the entire board (including her friends) and installing new leadership. It worked, and made her millions.",
+            philosophy: "Results. Everything else is just noise."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I don't gamble. I invest. There is a difference. One relies on luck, the other on leverage."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "I don't care about your 'passion'. I care about your execution. Can you deliver?"
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'family',
+                dialogue: "The Sterling name... it carries weight. And expectations. Some crumble under it. I thrived."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'respect',
+                dialogue: "You didn't flinch when I challenged you. Good. I can't stand sycophants."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'legacy',
+                dialogue: "Money is just a way of keeping score. The real game is power. Influence. Shaping the future."
+            }
+        ]
+    },
+
     jordan_kim: {
         personalStory: {
             background: "Former athlete who had to retire due to injury. Found purpose in helping others achieve their fitness goals. Uses exercise as therapy.",
