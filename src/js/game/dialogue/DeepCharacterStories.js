@@ -351,6 +351,46 @@ export const CHARACTER_STORIES = {
         ]
     },
 
+    noah_artist: {
+        personalStory: {
+            background: "Creates beautiful visualizations. Values creativity and expression. Sees data as a medium for art.",
+            motivation: "Making people feel something.",
+            secret: "He is colorblind but hides it by memorizing hex codes.",
+            dream: "To paint a mural on the moon.",
+            fear: "Being misunderstood.",
+            relationship: "Romantic. Sends handwritten letters.",
+            turningPoint: "Seeing a sunset and realizing it could be plotted on a graph.",
+            philosophy: "Life isn't black and white. It's a spectrum."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I see the world in shapes and flows. Data isn't just numbers. It's a landscape."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "Art isn't about what you see. It's about what you make others see."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "Colors... they're tricky for me. I memorize the codes. #FF0000 is red. I know it, even if I don't see it."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'goal',
+                dialogue: "The moon. A blank canvas. Imagine the contrast. That's the ultimate installation."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'romance',
+                dialogue: "You are my favorite subject. The one variable I can't predict."
+            }
+        ]
+    },
+
     david_chen: {
         personalStory: {
             background: "Immigrant who came to the country with $50 in his pocket. Built a tech company from scratch, sold it for millions. Now invests in others' dreams.",
