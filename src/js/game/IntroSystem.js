@@ -37,6 +37,13 @@ export class IntroSystem {
         video.onended = finishVideo;
         if (skipBtn) skipBtn.onclick = finishVideo;
 
+        // Respect the player's sound settings (mute + volume)
+        const audioManager = this.game && this.game.audioManager;
+        if (audioManager) {
+            video.muted = !audioManager.soundEnabled;
+            video.volume = audioManager.soundVolume ?? 1;
+        }
+
         // Start playback
         video.play().catch(err => {
             logger.warn('Video playback failed, skipping to text:', err);
