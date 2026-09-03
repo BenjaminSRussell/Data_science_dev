@@ -69,8 +69,7 @@ export class JealousySystem {
     affectRelationship(npcId, change) {
         if (!this.gameState.npcManager) return;
         
-        const current = this.gameState.npcManager?.getRelationship(npcId) || 0;
-        this.gameState.npcManager?.setRelationship(npcId, Math.max(0, current + change));
+        this.gameState.npcManager?.modifyRelationship(npcId, change);
         
         // Track the change
         this.relationshipChanges.set(npcId, (this.relationshipChanges.get(npcId) || 0) + change);
