@@ -2856,6 +2856,12 @@ export class MainGame {
             return;
         }
 
+        // Verify character stats exist before mutating any state
+        if (!this.characterStats) {
+            this.showError('Character stats not initialized');
+            return;
+        }
+
         // Pay cost
         if (this.gameState.money < activity.cost) {
             this.showError("Not enough money!");
@@ -2865,10 +2871,6 @@ export class MainGame {
 
         // Do training
         this.timeManager.useEnergy(activity.energyCost);
-        if (!this.characterStats) {
-            this.showError('Character stats not initialized');
-            return;
-        }
         const results = this.characterStats.train(activityId);
 
         this.handleTimeAdvance(activity.timeSlots);
