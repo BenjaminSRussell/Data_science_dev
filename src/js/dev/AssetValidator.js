@@ -164,13 +164,19 @@ export class AssetValidator {
     }
 
     getAudioPaths() {
-        // Get audio file paths
+        // Get audio file paths from the music stations' tracks
+        // (sound effects are synthesized tones with no file assets)
         const audioManager = this.game?.audioManager;
         const paths = [];
 
-        if (audioManager?.sounds) {
-            Object.values(audioManager.sounds).forEach(sound => {
-                if (sound.url) paths.push(sound.url);
+        if (audioManager?.musicStations) {
+            Object.values(audioManager.musicStations).forEach(station => {
+                if (station?.tracks) {
+                    station.tracks.forEach(track => {
+                        const path = `/assets/audio/music/${track}`;
+                        if (!paths.includes(path)) paths.push(path);
+                    });
+                }
             });
         }
 

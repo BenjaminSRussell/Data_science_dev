@@ -6,7 +6,6 @@ export class AudioManager {
     constructor() {
         this.soundEnabled = true;
         this.musicEnabled = true;
-        this.sounds = {};
         this.currentMusic = null;
         this.currentStation = 'lofi_beats'; // Default station
 
