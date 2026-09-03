@@ -136,11 +136,28 @@ export class LocationBackgroundSystem {
      * Get time of day
      */
     getTimeOfDay() {
-        const hour = this.gameState.timeManager?.currentHour || 12;
-        if (hour >= 6 && hour < 12) return 'morning';
-        if (hour >= 12 && hour < 17) return 'afternoon';
-        if (hour >= 17 && hour < 21) return 'evening';
-        return 'night';
+        if (!this.gameState.timeManager) {
+            return 'morning';
+        }
+
+        const slot = this.gameState.timeManager?.timeSlot;
+
+        // Morning: slots 0-1 (early morning, late morning)
+        if (slot <= 1) {
+            return 'morning';
+        }
+        // Afternoon: slots 2-3 (afternoon, late afternoon)
+        else if (slot <= 3) {
+            return 'afternoon';
+        }
+        // Evening: slot 4 (evening)
+        else if (slot <= 4) {
+            return 'evening';
+        }
+        // Night: slot 5 (night)
+        else {
+            return 'night';
+        }
     }
 
     /**
