@@ -17,7 +17,7 @@ export default defineConfig({
       ]
     },
     include: ['**/*.test.js', '**/*.spec.js'],
-    exclude: ['node_modules', 'dist', 'test/']
+    exclude: ['node_modules', 'dist']
   },
   resolve: {
     alias: {
