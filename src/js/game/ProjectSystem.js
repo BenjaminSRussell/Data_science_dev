@@ -48,6 +48,28 @@ export class ProjectSystem {
         const contract = CONTRACTS.find(c => c.id === contractId);
         if (!contract) return { success: false, reason: "Contract not found." };
 
+        // Re-validate requirements at accept time (mirrors ContractSystem.acceptContract)
+        if (contract.requirements) {
+            if (contract.requirements.reputation &&
+                this.gameState.reputation < contract.requirements.reputation) {
+                return { success: false, reason: `Insufficient reputation (need ${contract.requirements.reputation}, have ${this.gameState.reputation || 0})` };
+            }
+            if (contract.requirements.stat) {
+                const playerStat = this.gameState.characterStats?.getStat(contract.requirements.stat) || 0;
+                if (playerStat < contract.requirements.value) {
+                    return { success: false, reason: `Insufficient ${contract.requirements.stat} (need ${contract.requirements.value}, have ${playerStat})` };
+                }
+            }
+            if (contract.requirements.stats) {
+                for (const [stat, value] of Object.entries(contract.requirements.stats)) {
+                    const playerStat = this.gameState.characterStats?.getStat(stat) || 0;
+                    if (playerStat < value) {
+                        return { success: false, reason: `Insufficient ${stat} (need ${value}, have ${playerStat})` };
+                    }
+                }
+            }
+        }
+
         this.activeProject = {
             ...contract,
             currentStageIndex: 0,
