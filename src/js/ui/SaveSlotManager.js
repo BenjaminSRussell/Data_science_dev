@@ -339,7 +339,7 @@ export class SaveSlotManager {
             <div class="slot-item-content">
                 <div class="slot-item-header">
                     <div class="slot-item-rank">${rank.title}</div>
-                    <button class="slot-btn-grey" aria-label="Slot options">⋯</button>
+                    <button class="slot-btn-grey" aria-label="Slot options" aria-haspopup="true" aria-expanded="false">⋯</button>
                 </div>
                 <div class="slot-item-title">${slotName}</div>
                 <div class="slot-item-stats">
@@ -389,12 +389,23 @@ export class SaveSlotManager {
         menuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggleSlotMenu(card);
+            menuBtn.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
         });
 
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
             if (!card.contains(e.target)) {
                 menu.classList.add('hidden');
+                menuBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Close menu when Escape is pressed
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+                menuBtn.setAttribute('aria-expanded', 'false');
+                menuBtn.focus();
             }
         });
     }
