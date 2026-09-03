@@ -276,10 +276,25 @@ export class SaveSlotManager {
             item.innerHTML = this.createFilledSlotHTML(slotInfo);
         }
 
+        // Make the row keyboard-accessible like the "Start New Game" button
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('aria-label', slotInfo.isEmpty
+            ? `Start new game in slot ${slotIndex + 1}`
+            : `Load game from slot ${slotIndex + 1}`);
+
         // Add click handler
         item.addEventListener('click', (e) => {
             if (e.target.closest('.slot-btn-grey') || e.target.closest('.slot-menu')) return;
             this.handleSlotClick(slotIndex, slotInfo.isEmpty);
+        });
+
+        // Add keyboard handler (Enter/Space)
+        item.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                this.handleSlotClick(slotIndex, slotInfo.isEmpty);
+            }
         });
 
         // Add context menu for filled slots
