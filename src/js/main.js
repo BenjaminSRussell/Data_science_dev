@@ -18,7 +18,7 @@ import { GameState } from './game/GameState.js';
 import { ScreenManager } from './ui/ScreenManager.js';
 import { ChartManager } from './charts/ChartManager.js';
 import { AudioManager } from './audio/AudioManager.js';
-import { SaveManager } from './save/SaveManager.js';
+import { SaveManager, MAX_SAVE_SLOTS } from './save/SaveManager.js';
 import { SaveSlotManager } from './ui/SaveSlotManager.js';
 import { MenuThemeSystem } from './game/MenuThemeSystem.js';
 import { MenuLogoDisplay } from './ui/MenuLogoDisplay.js';
@@ -779,7 +779,7 @@ export class MainGame {
             if (this.saveSlotManager) {
                 // Find first empty slot or use slot 0
                 let emptySlot = null;
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
                     if (!this.saveManager.hasSave(i)) {
                         emptySlot = i;
                         break;
@@ -1225,7 +1225,7 @@ export class MainGame {
         // Use provided slot or find first empty slot, default to 0
         if (slotIndex === null) {
             // Find first empty slot
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
                 if (!this.saveManager.hasSave(i)) {
                     slotIndex = i;
                     break;
