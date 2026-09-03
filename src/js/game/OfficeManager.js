@@ -121,9 +121,12 @@ export class OfficeManager {
      * Get available staff to hire
      */
     getAvailableStaff() {
+        const rank = this.gameState.rankIndex || 0;
         return STAFF_TYPES.filter(s => {
             // Check capacity
             if (this.staff.length >= this.currentOffice.capacity) return false;
+            // Check rank requirement
+            if (s.unlockRank && rank < s.unlockRank) return false;
             return true;
         });
     }
