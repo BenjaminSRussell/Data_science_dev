@@ -106,12 +106,14 @@ export class Portfolio {
     }
 
     buy(stockId, quantity, price) {
+        if (!Number.isInteger(quantity) || quantity <= 0) return;
         if (!this.holdings[stockId]) this.holdings[stockId] = 0;
         this.holdings[stockId] += quantity;
         this.totalInvested += quantity * price;
     }
 
     sell(stockId, quantity, price) {
+        if (!Number.isInteger(quantity) || quantity <= 0) return 0;
         if (!this.holdings[stockId] || this.holdings[stockId] < quantity) return 0;
         this.holdings[stockId] -= quantity;
 
@@ -410,6 +412,7 @@ export class StockMarket {
     }
 
     buyStock(stockId, quantity) {
+        if (!Number.isInteger(quantity) || quantity <= 0) return { success: false, reason: 'Invalid quantity' };
         // Legal Check: Needs Series 7 for large trades or specific types?
         // Let's enforce it for ALL trades to force the license purchase
         if (!this.gameState.legalSystem?.hasLicense('series_7') && !this.gameState.legalSystem?.hasLicense('series_63')) {
@@ -433,6 +436,7 @@ export class StockMarket {
     }
 
     sellStock(stockId, quantity) {
+        if (!Number.isInteger(quantity) || quantity <= 0) return { success: false, reason: 'Invalid quantity' };
         // Selling also requires license ideally
         if (!this.gameState.legalSystem?.hasLicense('series_7') && this.gameState.characterStats?.ethics > -20) {
             return { success: false, reason: "You need a Series 7 License to trade." };
