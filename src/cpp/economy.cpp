@@ -15,7 +15,9 @@ int Economy::calculateReward(int baseReward, int stars,
   // Star multipliers
   double starMultipliers[] = {0.2, 0.4, 0.7, 1.0, 1.3};
 
-  double multiplier = 1.0;
+  // Default to the worst-case tier so out-of-range star values (e.g. 0 or >5)
+  // degrade gracefully instead of being rewarded as near-perfect.
+  double multiplier = starMultipliers[0];
   if (stars >= 1 && stars <= 5) {
     multiplier = starMultipliers[stars - 1];
   }
