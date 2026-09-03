@@ -475,15 +475,15 @@ export class DevMenu {
 
         container.appendChild(this.createButton('Save Game', () => {
             if (this.game.saveManager) {
-                this.game.saveManager.save(0, this.game.gameState);
+                this.game.saveManager.saveGame(this.game.gameState, 0);
                 this.game.showToast('Game saved', 'success');
             }
         }));
 
         container.appendChild(this.createButton('Load Game', () => {
             if (this.game.saveManager) {
-                const save = this.game.saveManager.load(0);
-                if (save) {
+                const loaded = this.game.saveManager.loadGame(this.game.gameState, 0);
+                if (loaded) {
                     this.game.showToast('Game loaded', 'success');
                 }
             }
