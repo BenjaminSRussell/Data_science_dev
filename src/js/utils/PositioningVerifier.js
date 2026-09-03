@@ -202,7 +202,7 @@ export class PositioningVerifier {
             locations: {
                 total: report.locations?.total || 0,
                 gridCoordinates: report.locations?.gridCoordinates.length || 0,
-                percentageCoordinates: report.locations?.percentageCoordinates.length || 0,
+                percentageCoordinates: report.locations?.percentageCoordinates?.length || 0,
                 invalid: report.locations?.invalidCoordinates.length || 0,
                 conflicts: report.locations?.conflicts.length || 0
             },
