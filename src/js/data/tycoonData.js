@@ -61,7 +61,7 @@ export const EQUIPMENT = {
             { name: "Spreadsheets", capability: 1.0, price: 0, description: "Excel and Google Sheets" },
             { name: "Basic BI Tools", capability: 1.4, price: 500, description: "Tableau Public, Power BI free" },
             { name: "Pro Analytics", capability: 1.8, price: 2000, description: "Full Tableau, Looker" },
-            { name: "Python Stack", capability: 2.2, price: 1500, description: "Pandas, Matplotlib, Seaborn" },
+            { name: "Python Stack", capability: 2.2, price: 3500, description: "Pandas, Matplotlib, Seaborn" },
             { name: "Enterprise Suite", capability: 3.0, price: 8000, description: "Everything. All of it." }
         ]
     }
