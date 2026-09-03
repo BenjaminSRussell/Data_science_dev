@@ -2292,17 +2292,57 @@ export class MainGame {
 
         if (!radioBtn || !radioMenu) return;
 
+        const openRadioMenu = () => {
+            radioMenu.classList.remove('hidden');
+            radioBtn.setAttribute('aria-expanded', 'true');
+            // Move focus to the first station so keyboard users can navigate
+            const firstStation = radioMenu.querySelector('.radio-station');
+            firstStation?.focus();
+        };
+
+        const closeRadioMenu = (returnFocus = false) => {
+            radioMenu.classList.add('hidden');
+            radioBtn.setAttribute('aria-expanded', 'false');
+            if (returnFocus) {
+                radioBtn.focus();
+            }
+        };
+
         // Toggle menu visibility
         radioBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            radioMenu.classList.toggle('hidden');
+            if (radioMenu.classList.contains('hidden')) {
+                openRadioMenu();
+            } else {
+                closeRadioMenu();
+            }
         });
 
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
             if (!radioBtn.contains(e.target) && !radioMenu.contains(e.target)) {
-                radioMenu.classList.add('hidden');
+                closeRadioMenu();
             }
+        });
+
+        // Close on Escape and return focus to the trigger button
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !radioMenu.classList.contains('hidden')) {
+                closeRadioMenu(true);
+            }
+        });
+
+        // Arrow-key navigation between stations while the menu is open
+        radioMenu.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+            const stations = Array.from(radioMenu.querySelectorAll('.radio-station'));
+            const index = stations.indexOf(document.activeElement);
+            if (index === -1) return;
+            e.preventDefault();
+            const next = e.key === 'ArrowDown'
+                ? (index + 1) % stations.length
+                : (index - 1 + stations.length) % stations.length;
+            stations[next].focus();
         });
 
         // Handle station selection
@@ -2311,7 +2351,7 @@ export class MainGame {
                 const stationId = station.dataset.station;
                 this.switchMusicStation(stationId);
                 this.updateRadioUI();
-                radioMenu.classList.add('hidden');
+                closeRadioMenu(true);
             });
         });
 
