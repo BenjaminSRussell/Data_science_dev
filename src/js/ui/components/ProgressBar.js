@@ -67,7 +67,7 @@ export class ProgressBar extends BaseComponent {
                         ${this.showValue ? html`<span>${this.value} / ${this.max}</span>` : ''}
                     </div>
                 ` : ''}
-                <div class="progress-bar">
+                <div class="progress-bar" role="progressbar" aria-valuenow="${this.value}" aria-valuemin="0" aria-valuemax="${this.max}" aria-label="${this.label || 'Progress'}">
                     <div class="progress-fill" style="width: ${percentage}%"></div>
                 </div>
             </div>
