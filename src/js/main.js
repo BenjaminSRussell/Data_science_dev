@@ -2735,6 +2735,15 @@ export class MainGame {
                     this.showToast('CRITICAL: Eviction imminent! Earn money fast!', 'error');
                 }
 
+                // Check for map unlocks (mid_game / end_game)
+                if (this.gameState.mapProgressionSystem) {
+                    const unlockResult = this.gameState.mapProgressionSystem.checkMapUnlocks();
+                    if (unlockResult && unlockResult.unlocked) {
+                        this.showToast(unlockResult.message, 'success');
+                        this.updateMapScreen();
+                    }
+                }
+
                 // Check for game ending conditions
                 if (this.gameState.gameEndingSystem) {
                     const ending = this.gameState.gameEndingSystem.checkVictoryConditions();
