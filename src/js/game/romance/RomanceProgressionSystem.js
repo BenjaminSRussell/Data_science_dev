@@ -119,15 +119,16 @@ export class RomanceProgressionSystem {
      * Get advice message
      */
     getAdviceMessage(bias, recommendation) {
+        const optionName = recommendation?.name || 'this option';
         const messages = {
-            'ethical': `I think we should choose the ethical option. It's the right thing to do.`,
-            'practical': `Let's go with the most practical solution. It makes the most sense.`,
-            'ambitious': `I think we should take the risk. The reward is worth it.`,
-            'cautious': `Let's be careful here. The safe option is better.`,
-            'creative': `What if we tried something different? The creative approach might work.`
+            'ethical': `I think we should choose "${optionName}". It's the right thing to do.`,
+            'practical': `Let's go with "${optionName}". It makes the most sense.`,
+            'ambitious': `I think we should take the risk with "${optionName}". The reward is worth it.`,
+            'cautious': `Let's be careful here and pick "${optionName}". The safe option is better.`,
+            'creative': `What if we tried "${optionName}"? The creative approach might work.`
         };
         
-        return messages[bias] || 'I think this is the best choice.';
+        return messages[bias] || `I think "${optionName}" is the best choice.`;
     }
     
     /**
