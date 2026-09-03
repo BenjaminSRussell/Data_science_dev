@@ -288,7 +288,7 @@ export const NPCs = [
     {
         id: 'alex_rivera',
         name: 'Alex Rivera',
-        title: 'Fellow Freelancer',
+        title: 'Security Consultant',
         icon: '',
         image: '/assets/characters/bosses/kim.png', // Temporary high-quality replacement
         type: 'friend',
@@ -298,8 +298,8 @@ export const NPCs = [
         gifts: ['coffee', 'snacks'],
         dialogueTopics: ['freelancing', 'life', 'hobbies'],
         benefits: { moralBoost: true, jobSharing: true },
-        backstory: 'Started freelancing the same time as you. Currently struggling to find steady work.',
-        description: 'A fellow freelancer trying to make it in the data science world. Shares your struggles and dreams. Always up for a coffee chat.',
+        backstory: 'Former hacker turned security consultant. Got a second chance after being caught as a teenager, and now runs paid security audits and bug bounties. Married to a cybersecurity lawyer.',
+        description: 'A former hacker who turned his skills to good as a security consultant. Still hacks, but legally (bug bounties, audits). Always up for a coffee chat.',
         age: 26,
         interests: ['coding', 'startups', 'coffee shops'],
         favoriteTopics: ['freelance life', 'side projects', 'mutual support']
