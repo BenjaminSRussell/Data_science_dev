@@ -282,6 +282,11 @@ export class GameState {
             soundEnabled: this.soundEnabled,
             musicEnabled: this.musicEnabled,
             unlockedLibraries: this.unlockedLibraries || [],
+            currentTask: this.currentTask,
+            currentLocation: this.currentLocation,
+            chartConfig: this.chartConfig,
+            housingLevel: this.housingLevel,
+            officeLevel: this.officeLevel,
 
             // Sub-systems
             worldMap: this.worldMap?.toJSON(),
@@ -350,6 +355,18 @@ export class GameState {
         this.soundEnabled = data.soundEnabled ?? true;
         this.musicEnabled = data.musicEnabled ?? true;
         this.unlockedLibraries = data.unlockedLibraries || [];
+        this.currentTask = data.currentTask ?? null;
+        this.currentLocation = data.currentLocation ?? 'apartment';
+        this.chartConfig = data.chartConfig ?? {
+            type: 'bar',
+            palette: 'corporate',
+            showLegend: true,
+            showGrid: true,
+            showDataLabels: false,
+            title: ''
+        };
+        this.housingLevel = data.housingLevel ?? 'apartment';
+        this.officeLevel = data.officeLevel ?? 'small';
 
         // Restore sub-systems
         if (this.worldMap && data.worldMap) this.worldMap.fromJSON(data.worldMap);
