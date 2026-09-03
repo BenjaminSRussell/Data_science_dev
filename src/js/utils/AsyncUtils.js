@@ -111,22 +111,22 @@ export class AsyncUtils {
     static debounceAsync(func, wait) {
         let timeout;
         let latestArgs;
-        let latestResolve;
-        let latestReject;
+        let pendingResolvers = [];
 
         return function executedFunction(...args) {
             return new Promise((resolve, reject) => {
                 latestArgs = args;
-                latestResolve = resolve;
-                latestReject = reject;
+                pendingResolvers.push({ resolve, reject });
 
                 clearTimeout(timeout);
                 timeout = setTimeout(async () => {
+                    const resolvers = pendingResolvers;
+                    pendingResolvers = [];
                     try {
                         const result = await func(...latestArgs);
-                        latestResolve(result);
+                        resolvers.forEach(({ resolve: r }) => r(result));
                     } catch (error) {
-                        latestReject(error);
+                        resolvers.forEach(({ reject: r }) => r(error));
                     }
                 }, wait);
             });
