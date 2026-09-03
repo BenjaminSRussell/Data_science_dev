@@ -2,7 +2,7 @@
  * SaveSlotManager - Manages save slot display and interactions in the main menu
  */
 
-import { SaveManager } from '../save/SaveManager.js';
+import { SaveManager, MAX_SAVE_SLOTS } from '../save/SaveManager.js';
 import { RANKS } from '../data/ranks.js';
 
 export class SaveSlotManager {
@@ -483,7 +483,7 @@ export class SaveSlotManager {
     duplicateSlot(slotIndex) {
         // Find next empty slot
         let targetSlot = null;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
             if (i !== slotIndex && this.saveManager.hasSave(i) === false) {
                 targetSlot = i;
                 break;
