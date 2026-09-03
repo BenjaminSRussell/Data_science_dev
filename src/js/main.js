@@ -1705,8 +1705,9 @@ export class MainGame {
     /**
      * Continue saved game
      */
-    continueGame() {
+    continueGame(slotIndex = this.currentSaveSlot) {
         logger.debug('Continuing saved game...');
+        this.currentSaveSlot = slotIndex;
 
         // Initialize RPG systems if they don't exist (migration)
         if (!this.gameState.characterStats) this.gameState.characterStats = new CharacterStats();
@@ -1808,7 +1809,7 @@ export class MainGame {
 
         // Reload save data now that subsystems are initialized
         logger.debug("Reloading save data for subsystems...");
-        this.saveManager.loadGame(this.gameState, this.currentSaveSlot);
+        this.saveManager.loadGame(this.gameState, slotIndex);
 
         // Generate a new task if none exists
         if (!this.gameState.currentTask) {
