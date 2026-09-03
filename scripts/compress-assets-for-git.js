@@ -106,6 +106,43 @@ async function compressImage(inputPath, outputPath = null) {
     }
 }
 
+/**
+ * Recursively collect files with the given extensions under a root directory.
+ *
+ * @param {string} rootDir - Directory to scan. If it does not exist, no files
+ *   are collected (missing directories are skipped gracefully).
+ * @param {string[]} extensions - Lowercase extensions to match, e.g. ['.png'].
+ *   Matching is case-insensitive (a file named `photo.PNG` matches '.png').
+ * @param {string[]} [out] - Optional array to push matched file paths into.
+ *   A new array is created when omitted.
+ * @returns {string[]} The array of matched file paths.
+ */
+export function collectImageFiles(rootDir, extensions, out = []) {
+    if (!fs.existsSync(rootDir)) {
+        return out;
+    }
+
+    const scanDir = (currentDir) => {
+        const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+
+        for (const entry of entries) {
+            const fullPath = path.join(currentDir, entry.name);
+
+            if (entry.isDirectory()) {
+                scanDir(fullPath);
+            } else if (entry.isFile()) {
+                const ext = path.extname(entry.name).toLowerCase();
+                if (extensions.includes(ext)) {
+                    out.push(fullPath);
+                }
+            }
+        }
+    };
+
+    scanDir(rootDir);
+    return out;
+}
+
 async function findAndCompressAssets() {
     console.log('🔍 Finding assets to compress...\n');
 
@@ -120,26 +157,7 @@ async function findAndCompressAssets() {
 
     // Find all image files
     for (const dir of directories) {
-        if (!fs.existsSync(dir)) continue;
-
-        function scanDir(currentDir) {
-            const entries = fs.readdirSync(currentDir, { withFileTypes: true });
-            
-            for (const entry of entries) {
-                const fullPath = path.join(currentDir, entry.name);
-                
-                if (entry.isDirectory()) {
-                    scanDir(fullPath);
-                } else if (entry.isFile()) {
-                    const ext = path.extname(entry.name).toLowerCase();
-                    if (imageExtensions.includes(ext)) {
-                        files.push(fullPath);
-                    }
-                }
-            }
-        }
-
-        scanDir(dir);
+        collectImageFiles(dir, imageExtensions, files);
     }
 
     stats.total = files.length;
@@ -213,9 +231,12 @@ async function findAndCompressAssets() {
     console.log(`\n📄 Report saved to: ${path.relative(rootDir, reportPath)}`);
 }
 
-// Run compression
-findAndCompressAssets().catch(error => {
-    console.error('❌ Compression failed:', error);
-    process.exit(1);
-});
+// Run compression only when executed directly (not when imported by tests)
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === __filename;
+if (isMain) {
+    findAndCompressAssets().catch(error => {
+        console.error('❌ Compression failed:', error);
+        process.exit(1);
+    });
+}
 
