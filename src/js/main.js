@@ -1135,13 +1135,6 @@ export class MainGame {
         document.getElementById('btn-bank-take-loan')?.addEventListener('click', () => handleBankAction('loan', 'bank-loan-input'));
         document.getElementById('btn-bank-repay')?.addEventListener('click', () => handleBankAction('repay', 'bank-repay-input'));
 
-        // Auto-save on visibility change
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && this.gameState.isGameStarted) {
-                this.saveManager.saveGame(this.gameState, this.currentSaveSlot);
-            }
-        });
-
         // Listen for promotion events
         window.addEventListener('promotion', (e) => {
             const rank = e.detail.rank;
