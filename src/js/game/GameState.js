@@ -313,6 +313,9 @@ export class GameState {
                 pullRequests: this.githubIssuesSystem.pullRequests
             } : null,
             researchPaperSystem: this.researchPaperSystem?.toJSON(),
+            weeklyNewsSystem: this.weeklyNewsSystem?.toJSON(),
+            gameEndingSystem: this.gameEndingSystem?.toJSON(),
+            newsManager: this.newsManager?.toJSON(),
             emotionalBreakdownSystem: this.emotionalBreakdownSystem ? {
                 activeBreakdowns: Array.from(this.emotionalBreakdownSystem.activeBreakdowns.values()),
                 breakdownHistory: this.emotionalBreakdownSystem.breakdownHistory
@@ -383,6 +386,9 @@ export class GameState {
         if (this.researchPaperSystem && data.researchPaperSystem) {
             this.researchPaperSystem.fromJSON(data.researchPaperSystem);
         }
+        if (this.weeklyNewsSystem && data.weeklyNewsSystem) this.weeklyNewsSystem.fromJSON(data.weeklyNewsSystem);
+        if (this.gameEndingSystem && data.gameEndingSystem) this.gameEndingSystem.fromJSON(data.gameEndingSystem);
+        if (this.newsManager && data.newsManager) this.newsManager.fromJSON(data.newsManager);
         if (this.emotionalBreakdownSystem && data.emotionalBreakdownSystem) {
             // Restore breakdown history
             this.emotionalBreakdownSystem.breakdownHistory = data.emotionalBreakdownSystem.breakdownHistory || [];
