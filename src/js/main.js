@@ -1799,7 +1799,6 @@ export class MainGame {
         this.educationSystem = this.gameState.educationSystem;
         this.worldEventManager = this.gameState.worldEventManager;
         this.projectSystem = this.gameState.projectSystem;
-        this.projectSystem = this.gameState.projectSystem;
         this.aiSystem = this.gameState.aiSystem;
 
         // Initialize BankSystem
