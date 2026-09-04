@@ -224,25 +224,55 @@ function createDashboard(data) {
      * Evaluate code quality (simplified)
      */
     evaluateCode(code, project) {
-        let quality = 0.5; // Base quality
+        let quality = 0.3; // Base quality
 
-        // Check if code is not just template
-        if (code !== project.codeTemplate) {
-            quality += 0.2;
+        // Substantive check: the template's stub region ("# Your code here"
+        // and the bare "pass" placeholder) must be replaced with real code.
+        // A raw string-inequality check is defeated by a single-character edit.
+        const templateLines = project.codeTemplate.split('\n');
+        const codeLines = code.split('\n');
+        const stubLineCount = templateLines.filter(
+            line => line.trim() === 'pass' || line.trim().startsWith('# Your code here')
+        ).length;
+        const remainingStubLines = codeLines.filter(
+            line => line.trim() === 'pass' || line.trim().startsWith('# Your code here')
+        ).length;
+        const stubReplaced = stubLineCount > 0
+            ? remainingStubLines < stubLineCount
+            : code !== project.codeTemplate;
+
+        if (stubReplaced) {
+            quality += 0.3;
         }
 
         // Check code length (more code = more effort)
-        const codeLength = code.split('\n').length;
-        const templateLength = project.codeTemplate.split('\n').length;
+        const codeLength = codeLines.length;
+        const templateLength = templateLines.length;
         if (codeLength > templateLength * 1.5) {
             quality += 0.1;
         }
 
-        // Check for common patterns (simplified)
-        if (code.includes('def ') || code.includes('function ')) {
+        // Check for common patterns, but only award credit for keywords the
+        // player added beyond what the template already contained.
+        const countOccurrences = (text, needle) =>
+            text.split(needle).length - 1;
+
+        const functionKeywords = ['def ', 'function '];
+        const importKeywords = ['import ', 'require('];
+
+        const addedFunctions = functionKeywords.reduce(
+            (sum, kw) => sum + Math.max(0, countOccurrences(code, kw) - countOccurrences(project.codeTemplate, kw)),
+            0
+        );
+        const addedImports = importKeywords.reduce(
+            (sum, kw) => sum + Math.max(0, countOccurrences(code, kw) - countOccurrences(project.codeTemplate, kw)),
+            0
+        );
+
+        if (addedFunctions > 0) {
             quality += 0.1;
         }
-        if (code.includes('import ') || code.includes('require(')) {
+        if (addedImports > 0) {
             quality += 0.1;
         }
 
