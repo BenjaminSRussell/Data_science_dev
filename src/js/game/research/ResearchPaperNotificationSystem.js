@@ -320,7 +320,7 @@ export class ResearchPaperNotificationSystem {
         
         // Add to inbox
         this.inbox.push({
-            id: `notification_${Date.now()}`,
+            id: `notification_${Date.now()}_${paperId}`,
             paperId: paperId,
             paper: paper,
             receivedAt: Date.now(),
