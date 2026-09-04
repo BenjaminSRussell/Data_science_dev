@@ -11,7 +11,7 @@ export class DialogueComponent extends BaseComponent {
     static properties = {
         npc: { type: Object },
         currentNode: { type: Object },
-        isOpen: { type: Boolean },
+        isOpen: { type: Boolean, reflect: true },
         typingText: { type: String },
         isTyping: { type: Boolean }
     };
