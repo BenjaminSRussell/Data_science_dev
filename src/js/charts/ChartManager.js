@@ -127,13 +127,44 @@ export class ChartManager {
             primaryKey = data.columns?.[1] || 'Value';
         }
 
+        const labels = data.labels || data.rows?.map(r => r[0]) || [];
+
+        // Chart.js 4.x requires {x, y} points for scatter and {x, y, r} points
+        // for bubble. The game data model only ever produces a single numeric
+        // series per dataset, so:
+        //  - scatter: x is derived from the label (numeric if possible, else
+        //    the point index) and y is the value.
+        //  - bubble: there is NO third dimension in the data model to draw r
+        //    from. We synthesize r from the value magnitude (normalized to a
+        //    3-12px range) rather than silently faking an independent radius
+        //    series. This is a deliberate, documented approximation.
+        let pointData = values;
+        if (type === 'scatter' || type === 'bubble') {
+            const numericValues = values.map(v => Number(v) || 0);
+            const maxAbs = Math.max(...numericValues.map(Math.abs), 1);
+            pointData = values.map((v, i) => {
+                const label = labels[i];
+                const x = (label !== undefined && label !== null && label !== '' && !isNaN(Number(label)))
+                    ? Number(label)
+                    : i;
+                const point = { x, y: Number(v) || 0 };
+                if (type === 'bubble') {
+                    // Synthesize radius from value magnitude (3-12px).
+                    // NOTE: the game data model has no third dimension; this
+                    // is a derived approximation, not real data.
+                    point.r = 3 + (Math.abs(point.y) / maxAbs) * 9;
+                }
+                return point;
+            });
+        }
+
         return {
             type: type,
             data: {
-                labels: data.labels || data.rows?.map(r => r[0]) || [],
+                labels: labels,
                 datasets: [{
                     label: primaryKey,
-                    data: values,
+                    data: pointData,
                     backgroundColor: type === 'line' ? palette[0].replace('0.8', '0.2') : palette,
                     borderColor: type === 'line' ? palette[0] : palette.map(c => c.replace('0.8', '1')),
                     borderWidth: type === 'line' ? 3 : 1,
