@@ -390,6 +390,11 @@ export class ContractSystem {
         const contract = this.activeContracts.find(c => c.id === contractId);
         if (!contract) return { success: false, reason: 'Contract not found' };
         
+        // Guard: cannot complete before requirements are met
+        if (contract.progress < contract.timeRequired) {
+            return { success: false, reason: 'Contract requirements not yet met' };
+        }
+        
         // Calculate pay with bonuses
         let pay = contract.basePay;
         let bonuses = [];
