@@ -12,6 +12,44 @@ export class TaskSystem {
     }
 
     /**
+     * Get the current task (stored on gameState.currentTask)
+     */
+    getCurrentTask() {
+        return this.gameState.currentTask;
+    }
+
+    /**
+     * Complete the current task, awarding its potential reward.
+     * Returns the completed task, or null if there is no current task.
+     */
+    completeTask(taskId = null) {
+        const task = this.gameState.currentTask;
+        if (!task) return null;
+        if (taskId && task.id !== taskId) return null;
+
+        const reward = task.potentialReward || 0;
+        if (typeof this.gameState.addMoney === 'function') {
+            this.gameState.addMoney(reward);
+        } else if (typeof this.gameState.money === 'number') {
+            this.gameState.money += reward;
+        }
+
+        this.gameState.currentTask = null;
+        return task;
+    }
+
+    /**
+     * Work on the current task (no-op placeholder for dev tooling).
+     * Returns the current task, or null if there is none.
+     */
+    workOnTask(taskId = null) {
+        const task = this.gameState.currentTask;
+        if (!task) return null;
+        if (taskId && task.id !== taskId) return null;
+        return task;
+    }
+
+    /**
      * Generate a new task appropriate for player's rank
      */
     generateNewTask() {
