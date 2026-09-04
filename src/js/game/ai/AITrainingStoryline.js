@@ -10,6 +10,7 @@ export class AITrainingStoryline {
     constructor(gameState) {
         this.gameState = gameState;
         this.currentPhase = 'pre_attention'; // pre_attention, attention_era, post_attention
+        this.highestPhaseReached = 'pre_attention'; // highest phase ever reached (monotonic)
         this.timeline = this.initializeTimeline();
         this.universityLab = null;
         this.researchProgress = 0;
@@ -255,6 +256,13 @@ export class AITrainingStoryline {
      */
     transitionToPhase(phaseName) {
         this.currentPhase = phaseName;
+        // Track the highest phase ever reached so phase-gated content
+        // (e.g. research papers) can be unlocked even if the phase has
+        // already advanced past the required one.
+        const phaseOrder = ['pre_attention', 'attention_era', 'post_attention'];
+        if (phaseOrder.indexOf(phaseName) > phaseOrder.indexOf(this.highestPhaseReached)) {
+            this.highestPhaseReached = phaseName;
+        }
         const phase = this.timeline[phaseName];
         
         // Show notification

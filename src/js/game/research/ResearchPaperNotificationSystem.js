@@ -289,9 +289,17 @@ export class ResearchPaperNotificationSystem {
         if (!this.gameState || !this.gameState.timeManager) return;
         
         const currentDay = this.gameState.timeManager?.totalDays || 1;
-        const currentPhase = (this.gameState.aiTrainingStoryline && this.gameState.aiTrainingStoryline?.currentPhase) 
-            ? this.gameState.aiTrainingStoryline.currentPhase 
-            : 'pre_attention';
+        const storyline = this.gameState.aiTrainingStoryline;
+        // Use the highest phase ever reached (monotonic) rather than the
+        // current phase, so a paper whose phase requirement was already
+        // passed (phase advanced before the day threshold) still unlocks.
+        const reachedPhase = (storyline && storyline.highestPhaseReached)
+            ? storyline.highestPhaseReached
+            : (storyline && storyline.currentPhase)
+                ? storyline.currentPhase
+                : 'pre_attention';
+        const phaseOrder = ['pre_attention', 'attention_era', 'post_attention'];
+        const reachedIndex = phaseOrder.indexOf(reachedPhase);
         
         // Check scheduled papers
         this.scheduledPapers.forEach(schedule => {
@@ -301,8 +309,12 @@ export class ResearchPaperNotificationSystem {
             // Check if day requirement met
             if (currentDay < schedule.unlockDay) return;
             
-            // Check if phase requirement met
-            if (schedule.requiresPhase && currentPhase !== schedule.phase) return;
+            // Check if phase requirement met (order-aware: the required
+            // phase must have been reached, not necessarily be current)
+            if (schedule.requiresPhase) {
+                const requiredIndex = phaseOrder.indexOf(schedule.phase);
+                if (requiredIndex === -1 || reachedIndex < requiredIndex) return;
+            }
             
             // Unlock and add to inbox
             this.unlockPaper(schedule.paperId);
