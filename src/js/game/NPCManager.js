@@ -1250,7 +1250,11 @@ export class NPCManager {
         if (!npc) return;
 
         const personality = PERSONALITY_TRAITS[npc.personality];
-        const adjustedAmount = Math.floor(amount * personality.relationshipGain);
+        let adjustedAmount = amount * personality.relationshipGain;
+        // Don't let Math.floor eat fractional gains: any positive gain counts as at least 1,
+        // any negative loss counts as at most -1, so small gains/losses still register.
+        if (adjustedAmount > 0) adjustedAmount = Math.max(1, Math.round(adjustedAmount));
+        else if (adjustedAmount < 0) adjustedAmount = Math.min(-1, Math.round(adjustedAmount));
 
         this.relationships[npcId] = Math.max(0, Math.min(100,
             (this.relationships[npcId] || 0) + adjustedAmount
