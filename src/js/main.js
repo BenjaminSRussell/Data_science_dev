@@ -2666,6 +2666,12 @@ export class MainGame {
                 } else {
                     this.newsManager.generateDailyNews();
                 }
+
+                // Roll for background world events (market crash, tech boom, etc.)
+                if (this.worldEventManager) {
+                    this.worldEventManager.processDay();
+                }
+
                 this.showToast('A new day has begun!', 'info');
 
                 // Expenses
