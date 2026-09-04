@@ -434,6 +434,14 @@ export function handleTravel(game, locationId) {
     const result = game.worldMap.travelTo(locationId);
 
     if (result.success) {
+        // Sync location to the Zustand store so gameState.currentLocation
+        // (kept in sync via the store subscription) reflects the new location
+        if (game.gameStore) {
+            game.gameStore.getState().setCurrentLocation(locationId);
+        } else {
+            game.gameState.currentLocation = locationId;
+        }
+
         // Advance time immediately
         game.handleTimeAdvance(result.timeCost);
 
