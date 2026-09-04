@@ -372,6 +372,7 @@ export class SaveSlotManager {
                 <button class="menu-item" data-action="rename">Rename</button>
                 <button class="menu-item" data-action="duplicate">Duplicate</button>
                 <button class="menu-item" data-action="export">Export</button>
+                <button class="menu-item" data-action="import">Import</button>
                 <button class="menu-item danger" data-action="delete">Delete</button>
             `;
             card.appendChild(menu);
@@ -457,6 +458,10 @@ export class SaveSlotManager {
                 this.exportSlot(slotIndex);
                 break;
 
+            case 'import':
+                this.importSlot(slotIndex);
+                break;
+
             case 'delete':
                 this.deleteSlot(slotIndex);
                 break;
@@ -530,6 +535,44 @@ export class SaveSlotManager {
         if (this.saveManager.game && this.saveManager.game.showToast) {
             this.saveManager.game.showToast('Save exported successfully!', 'success');
         }
+    }
+
+    /**
+     * Import a save slot from a file
+     */
+    importSlot(slotIndex) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.txt';
+
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const text = event.target.result;
+                const success = this.saveManager.importSave(text, this.saveManager.game, slotIndex);
+                if (success) {
+                    this.renderSlots();
+                    if (this.saveManager.game && this.saveManager.game.showToast) {
+                        this.saveManager.game.showToast('Save imported successfully!', 'success');
+                    }
+                } else {
+                    if (this.saveManager.game && this.saveManager.game.showError) {
+                        this.saveManager.game.showError('Failed to import save.');
+                    }
+                }
+            };
+            reader.onerror = () => {
+                if (this.saveManager.game && this.saveManager.game.showError) {
+                    this.saveManager.game.showError('Failed to read file.');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        input.click();
     }
 
     /**
