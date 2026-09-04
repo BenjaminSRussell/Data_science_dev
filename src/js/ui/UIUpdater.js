@@ -795,6 +795,14 @@ export class UIUpdater {
         if (part.stats.compute) text.push(`Compute: ${part.stats.compute} TFLOPS`);
         if (part.stats.vram) text.push(`VRAM: ${part.stats.vram}GB`);
         if (part.stats.resolution) text.push(`Res: Level ${part.stats.resolution}`);
+        if (part.stats.aesthetics) text.push(`Aesthetics: +${part.stats.aesthetics}`);
+        if (part.stats.airflow) text.push(`Airflow: +${part.stats.airflow}`);
+        if (part.stats.noise_dampening) text.push(`Noise Dampening: +${part.stats.noise_dampening}`);
+        if (part.stats.refresh_rate) text.push(`Refresh: ${part.stats.refresh_rate}Hz`);
+        if (part.stats.productivity) text.push(`Productivity: x${part.stats.productivity}`);
+        if (part.stats.reliability) text.push(`Reliability: x${part.stats.reliability}`);
+        if (part.stats.style) text.push(`Style: +${part.stats.style}`);
+        if (part.stats.power_draw) text.push(`Power: ${part.stats.power_draw}W`);
 
         return `<div class="equipment-bonus">${text.join(', ')}</div>`;
     }
