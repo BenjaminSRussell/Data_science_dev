@@ -40,12 +40,6 @@ export class TimeManager {
         // Energy system
         this.energy = 100;
         this.maxEnergy = 100;
-
-        // Event callbacks
-        this.onTimeAdvance = null;
-        this.onDayChange = null;
-        this.onMonthChange = null;
-        this.onYearChange = null;
     }
 
     /**
@@ -77,13 +71,6 @@ export class TimeManager {
     }
 
     /**
-     * Check if it's a weekend
-     */
-    isWeekend() {
-        return this.dayOfWeek >= 5; // Saturday or Sunday
-    }
-
-    /**
      * Get remaining time slots today
      */
     getRemainingSlots() {
@@ -103,10 +90,6 @@ export class TimeManager {
             if (this.timeSlot >= 6) {
                 this.timeSlot = 0;
                 events.push(...this.advanceDay());
-            }
-
-            if (this.onTimeAdvance) {
-                this.onTimeAdvance(this.getCurrentSlot());
             }
         }
 
@@ -130,14 +113,6 @@ export class TimeManager {
         if (this.day > 30) {
             this.day = 1;
             events.push(...this.advanceMonth());
-        }
-
-        if (this.onDayChange) {
-            this.onDayChange({
-                day: this.day,
-                dayOfWeek: DAYS[this.dayOfWeek],
-                isWeekend: this.isWeekend()
-            });
         }
 
         events.push({ type: 'new_day', data: { day: this.totalDays } });
