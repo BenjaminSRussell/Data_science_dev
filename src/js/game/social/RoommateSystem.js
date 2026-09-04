@@ -50,6 +50,13 @@ export class RoommateSystem {
     }
     
     /**
+     * Set relationship, clamped to [0, 100]
+     */
+    setRelationship(value) {
+        this.relationship = Math.max(0, Math.min(100, value));
+    }
+    
+    /**
      * Interact with roommate
      */
     interact(action) {
@@ -78,7 +85,7 @@ export class RoommateSystem {
             'Want to grab food together?'
         ];
         
-        this.relationship += 2;
+        this.setRelationship(this.relationship + 2);
         
         return {
             message: `You chat with ${this.roommate.name}`,
@@ -95,7 +102,7 @@ export class RoommateSystem {
             return { message: `${this.roommate.name} seems hesitant to help` };
         }
         
-        this.relationship += 3;
+        this.setRelationship(this.relationship + 3);
         return {
             message: `${this.roommate.name} agrees to help you`,
             help: true
@@ -106,7 +113,7 @@ export class RoommateSystem {
      * Complain about something
      */
     complain() {
-        this.relationship -= 5;
+        this.setRelationship(this.relationship - 5);
         return {
             message: `${this.roommate.name} seems annoyed`,
             relationship: this.relationship
@@ -117,7 +124,7 @@ export class RoommateSystem {
      * Hang out with roommate
      */
     hangout() {
-        this.relationship += 5;
+        this.setRelationship(this.relationship + 5);
         return {
             message: `You spend time with ${this.roommate.name}`,
             relationship: this.relationship,
