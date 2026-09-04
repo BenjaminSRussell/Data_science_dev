@@ -1810,6 +1810,20 @@ export class MainGame {
         logger.debug("Reloading save data for subsystems...");
         this.saveManager.loadGame(this.gameState, this.currentSaveSlot);
 
+        // Re-apply BankSystem default state: the reload above re-runs
+        // GameState.fromJSON, which sets bank to null when the save has no
+        // bank data, clobbering the default the BankSystem constructor set.
+        if (!this.gameState.bank) {
+            this.gameState.bank = {
+                savings: 0,
+                loan: 0,
+                loanInterestRate: 0.10, // 10% weekly initial
+                savingsInterestRate: 0.005, // 0.5% weekly
+                creditScore: 500, // 300-850
+                transactionHistory: []
+            };
+        }
+
         // Generate a new task if none exists
         if (!this.gameState.currentTask) {
             this.taskSystem.generateNewTask();
