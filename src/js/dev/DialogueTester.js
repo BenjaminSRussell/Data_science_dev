@@ -62,11 +62,8 @@ export class DialogueTester {
                 return result;
             }
 
-            npcManager.startConversation(npcId);
-            await this.wait(200);
-
-            // Get current dialogue
-            const dialogue = npcManager.getCurrentDialogue?.();
+            // Start conversation (async; returns the dialogue payload)
+            const dialogue = await npcManager.startConversation(npcId);
             if (!dialogue) {
                 result.error = 'No dialogue returned';
                 return result;
@@ -74,18 +71,19 @@ export class DialogueTester {
 
             result.dialogueCount = 1;
 
-            // Test dialogue options
-            if (dialogue.options && Array.isArray(dialogue.options)) {
-                for (const option of dialogue.options) {
+            // Test dialogue choices
+            if (dialogue.choices && Array.isArray(dialogue.choices)) {
+                for (let choiceIndex = 0; choiceIndex < dialogue.choices.length; choiceIndex++) {
+                    const choice = dialogue.choices[choiceIndex];
                     result.optionCount++;
-                    
-                    // Test option selection
-                    if (npcManager.selectOption && typeof option.id === 'string') {
+
+                    // Test choice selection by index
+                    if (npcManager.makeChoice) {
                         try {
-                            npcManager.selectOption(option.id);
+                            npcManager.makeChoice(choiceIndex);
                             await this.wait(100);
                         } catch (optError) {
-                            result.error = `Option ${option.id} failed: ${optError.message}`;
+                            result.error = `Choice ${choiceIndex} failed: ${optError.message}`;
                             return result;
                         }
                     }
@@ -106,11 +104,13 @@ export class DialogueTester {
         if (!npcManager) return { error: 'NPC Manager not found' };
 
         try {
-            npcManager.startConversation(npcId);
+            // Start conversation (async; returns the dialogue payload)
+            await npcManager.startConversation(npcId);
             await this.wait(200);
 
-            for (const optionId of optionPath) {
-                npcManager.selectOption?.(optionId);
+            // Drive each turn by choice index into the current choices array
+            for (const choiceIndex of optionPath) {
+                npcManager.makeChoice?.(choiceIndex);
                 await this.wait(200);
             }
 
@@ -128,14 +128,14 @@ export class DialogueTester {
             issues.push('Dialogue missing text/message');
         }
 
-        // Check options
-        if (dialogue.options) {
-            dialogue.options.forEach((option, index) => {
-                if (!option.id) {
-                    issues.push(`Option ${index} missing ID`);
+        // Check choices (real payloads use `choices` with `text`/`action`)
+        if (dialogue.choices) {
+            dialogue.choices.forEach((choice, index) => {
+                if (!choice.text) {
+                    issues.push(`Choice ${index} missing text`);
                 }
-                if (!option.text && !option.label) {
-                    issues.push(`Option ${index} missing text`);
+                if (!choice.action) {
+                    issues.push(`Choice ${index} missing action`);
                 }
             });
         }
