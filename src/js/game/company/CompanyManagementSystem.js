@@ -99,7 +99,7 @@ export class CompanyManagementSystem {
             skillBonus += level * 100;
         });
         
-        return baseSalary + skillBonus + (candidate.experience * 50);
+        return baseSalary + skillBonus + ((candidate.experience || 0) * 50);
     }
     
     /**
