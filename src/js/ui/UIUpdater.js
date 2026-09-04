@@ -840,7 +840,7 @@ export class UIUpdater {
         if (savingsEl) savingsEl.textContent = `$${savings.toLocaleString()}`;
         if (loanEl) loanEl.textContent = `$${loan.toLocaleString()}`;
         if (creditScoreEl) creditScoreEl.textContent = creditScore;
-        if (loanLimitEl) loanLimitEl.textContent = `$${maxLoan.toLocaleString()}`;
+        if (loanLimitEl) loanLimitEl.textContent = `$${Math.max(0, maxLoan - loan).toLocaleString()}`;
         if (netWorthEl) netWorthEl.textContent = `$${netWorth.toLocaleString()}`;
     }
 }

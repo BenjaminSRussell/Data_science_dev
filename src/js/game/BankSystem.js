@@ -55,7 +55,7 @@ export class BankSystem {
     takeLoan(amount) {
         if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
         const maxLoan = this.calculateMaxLoan();
-        if (amount > maxLoan) return { success: false, message: `Loan limit exceeded (Max: $${maxLoan})` };
+        if (this.gameState.bank.loan + amount > maxLoan) return { success: false, message: `Loan limit exceeded (Max: $${maxLoan})` };
 
         this.gameState.bank.loan += amount;
         this.gameState.money += amount;
