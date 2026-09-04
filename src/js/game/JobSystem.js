@@ -272,7 +272,10 @@ export class JobSystem {
 
         // Calculate pay based on quality
         const pay = Math.floor(task.basePay * quality);
-        
+
+        // Apply pay
+        this.gameState.money += pay;
+
         // Apply XP rewards
         if (task.xpReward) {
             for (const [stat, amount] of Object.entries(task.xpReward)) {
