@@ -150,6 +150,9 @@ export class HardwareManager {
         const part = HARDWARE_PARTS[type].find(p => p.id === partId);
         if (!part) return { success: false, message: "Part not found" };
 
+        const currentRank = this.gameState.currentRank?.level ?? 0;
+        if (part.unlockRank > currentRank) return { success: false, message: `Requires rank ${part.unlockRank}` };
+
         if (this.gameState.money < part.price) return { success: false, message: "Not enough money" };
 
         this.gameState.money -= part.price;
