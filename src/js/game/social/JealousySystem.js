@@ -80,12 +80,14 @@ export class JealousySystem {
      * Stop talking to player
      */
     stopTalking(npcId) {
-        const npc = this.gameState.npcManager?.getNPC(npcId);
-        if (!npc) return;
+        const npcManager = this.gameState.npcManager;
+        const npc = npcManager?.getNPC(npcId);
+        if (!npc || !npcManager) return;
         
-        // Mark NPC as not talking
-        npc.willNotTalk = true;
-        npc.jealousyMessage = this.getJealousyMessage(npc);
+        // Mark NPC as not talking (stored in per-save state, not the shared NPC definition)
+        const state = npcManager.getNPCState(npcId);
+        state.willNotTalk = true;
+        state.jealousyMessage = this.getJealousyMessage(npc);
     }
     
     /**
@@ -112,9 +114,11 @@ export class JealousySystem {
         
         // If jealousy drops, NPC might start talking again
         if (newLevel < 50) {
-            const npc = this.gameState.npcManager?.getNPC(npcId);
-            if (npc) {
-                npc.willNotTalk = false;
+            const npcManager = this.gameState.npcManager;
+            if (npcManager) {
+                const state = npcManager.getNPCState(npcId);
+                state.willNotTalk = false;
+                state.jealousyMessage = null;
             }
         }
     }

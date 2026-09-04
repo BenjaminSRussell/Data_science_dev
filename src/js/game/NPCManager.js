@@ -1266,6 +1266,17 @@ export class NPCManager {
         const npc = this.getNPC(npcId);
         if (!npc) return null;
 
+        // Jealousy: NPC refuses to talk to the player
+        const npcState = this.getNPCState(npcId);
+        if (npcState.willNotTalk) {
+            return {
+                npcId,
+                npc,
+                greeting: npcState.jealousyMessage || `${npc.name} refuses to talk to you.`,
+                isJealousyRefusal: true
+            };
+        }
+
         const relationship = this.relationships[npcId] || 0;
         const isFirstMeeting = !this.metNPCs.includes(npcId);
 
