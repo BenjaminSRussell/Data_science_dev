@@ -97,6 +97,14 @@ export class InvestmentEcommerceSystem {
      * Start e-commerce business
      */
     startEcommerceBusiness(name, initialInvestment) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return { success: false, message: "Invalid business name." };
+        }
+
+        if (!Number.isFinite(initialInvestment) || initialInvestment <= 0) {
+            return { success: false, message: "Invalid investment amount." };
+        }
+
         if (this.gameState.money < initialInvestment) {
             return { success: false, message: "Not enough money to start business." };
         }
