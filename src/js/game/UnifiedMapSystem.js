@@ -1,7 +1,7 @@
 /**
  * UnifiedMapSystem.js
  * Replaces all map renderers with PixiJS for better performance
- * Consolidates WorldMapRenderer, SimpleMapRenderer, CityMapRenderer, etc.
+ * Consolidates WorldMapRenderer, SimpleMapRenderer, etc.
  * 
  * Phase 1: Code Reduction - Using PixiJS instead of DOM manipulation
  */
