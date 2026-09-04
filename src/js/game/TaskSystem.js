@@ -336,7 +336,11 @@ export class TaskSystem {
         if (taskDesc) taskDesc.textContent = task.template.description;
 
         const taskReward = document.getElementById('task-reward');
-        if (taskReward) taskReward.textContent = `$${task.potentialReward}`;
+        if (taskReward) {
+            const minReward = Math.round(task.potentialReward * 0.2);
+            const maxReward = Math.round(task.potentialReward * 1.3);
+            taskReward.textContent = `$${minReward} - $${maxReward}`;
+        }
 
         // Update requirements
         const reqContainer = document.querySelector('.task-requirements');
