@@ -35,9 +35,10 @@ export class LocationTester {
 
             // Add known location IDs if we don't have them yet
             const knownLocationIds = [
-                'home', 'office', 'library', 'gym', 'coffee_shop', 'park', 'mall',
-                'university', 'tech_hub', 'downtown', 'luxury_district', 'networking_bar',
-                'car_dealership', 'apartment', 'club', 'forest', 'real_estate'
+                'home', 'office', 'library', 'gym', 'coffee_shop', 'donut_shop',
+                'bagel_shop', 'flower_store', 'networking_bar', 'bank', 'stock_exchange',
+                'city_hall', 'university', 'mall', 'car_dealership', 'downtown',
+                'tech_hub', 'luxury_district', 'real_estate'
             ];
             
             knownLocationIds.forEach(id => {
