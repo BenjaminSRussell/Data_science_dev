@@ -174,7 +174,10 @@ export class InvestmentEcommerceSystem {
         });
 
         // Calculate expenses
-        const expenses = business.marketingBudget + (business.products.length * 50); // Base operating costs
+        // Marketing spend is a one-time durable investment (deducted in investInMarketing
+        // and applied as a permanent sales multiplier above), so it must NOT be re-charged
+        // as a recurring weekly expense here.
+        const expenses = business.products.length * 50; // Base operating costs
 
         // Update business
         business.revenue += revenue;
