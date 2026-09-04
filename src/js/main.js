@@ -2665,6 +2665,13 @@ export class MainGame {
                 if (!this.newsManager) {
                 } else {
                     this.newsManager.generateDailyNews();
+
+                    // Check for random events
+                    const triggeredEvents = this.newsManager.checkRandomEvents();
+                    for (const randomEvent of triggeredEvents) {
+                        this.newsManager.applyEventEffects(randomEvent);
+                        this.showToast(`${randomEvent.title} ${randomEvent.description}`, randomEvent.type === 'negative' ? 'warning' : 'success');
+                    }
                 }
                 this.showToast('A new day has begun!', 'info');
 
