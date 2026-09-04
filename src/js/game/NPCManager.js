@@ -1614,12 +1614,13 @@ export class NPCManager {
         if (currentRel > 60) adjustedGain = Math.max(3, relationshipGain * 0.5); // Harder to gain at high levels
         if (currentRel > 85) adjustedGain = Math.max(2, relationshipGain * 0.3); // Very hard at max levels
 
+        const beforeValue = this.relationships[npcId] || 0;
         this.modifyRelationship(npcId, adjustedGain);
 
         return {
             success: true,
             liked: likesGift,
-            relationshipGain,
+            relationshipGain: this.relationships[npcId] - beforeValue,
             newRelationship: this.relationships[npcId]
         };
     }
