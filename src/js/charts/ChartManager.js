@@ -60,6 +60,40 @@ export class ChartManager {
     }
 
     /**
+     * Create a chart on an arbitrary canvas (for dev tools / testing)
+     * @param {string|HTMLCanvasElement} canvasIdOrElement - Canvas ID or element
+     * @param {string} type - Chart type (bar, line, pie, etc.)
+     * @param {object} data - Chart.js data object with labels and datasets
+     * @returns {Chart|null} The created Chart instance, or null if canvas not found
+     */
+    createChart(canvasIdOrElement, type, data) {
+        const canvas = typeof canvasIdOrElement === 'string'
+            ? document.getElementById(canvasIdOrElement)
+            : canvasIdOrElement;
+        if (!canvas) return null;
+
+        const chartType = this.mapChartType(type);
+        const palette = PALETTES.corporate;
+
+        const chart = new Chart(canvas, {
+            type: chartType,
+            data: {
+                labels: data.labels || [],
+                datasets: data.datasets || []
+            },
+            options: {
+                responsive: false,
+                animation: false,
+                plugins: {
+                    legend: { display: true }
+                }
+            }
+        });
+
+        return chart;
+    }
+
+    /**
      * Create preview chart in chart studio
      */
     createPreviewChart(data, config) {
