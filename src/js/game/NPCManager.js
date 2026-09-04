@@ -1605,6 +1605,11 @@ export class NPCManager {
             this.markNPCAsMet(npcId);
         }
 
+        // NPCs with no gifts (e.g. rivals) refuse gifts entirely
+        if (!npc.gifts || npc.gifts.length === 0) {
+            return { success: false, reason: 'refuses gifts' };
+        }
+
         const likesGift = npc.gifts.includes(giftId);
         const relationshipGain = likesGift ? 15 : 5; // Liked gift = +15, generic = +5
 
