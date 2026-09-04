@@ -224,10 +224,12 @@ export class UIUpdater {
             });
         }
 
-        // Update task reward
+        // Update task reward (show the true payout range: 1-star to 5-star)
         if (task.potentialReward) {
+            const minReward = Math.round(task.potentialReward * 0.2);
+            const maxReward = Math.round(task.potentialReward * 1.3);
             DOMUtils.updateElement('#task-reward', {
-                textContent: CommonUtils.formatCurrency(task.potentialReward)
+                textContent: `${CommonUtils.formatCurrency(minReward)} - ${CommonUtils.formatCurrency(maxReward)}`
             });
         }
 
