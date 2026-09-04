@@ -740,7 +740,7 @@ export class UIUpdater {
         const equipped = hm.equippedParts;
 
         // Map through hardware types to show current status and upgrade options
-        const types = [HARDWARE_TYPES.COOLING, HARDWARE_TYPES.CASE, HARDWARE_TYPES.MONITOR, HARDWARE_TYPES.GPU];
+        const types = [HARDWARE_TYPES.CPU, HARDWARE_TYPES.GPU, HARDWARE_TYPES.RAM, HARDWARE_TYPES.STORAGE, HARDWARE_TYPES.COOLING, HARDWARE_TYPES.CASE, HARDWARE_TYPES.MONITOR];
 
         const equipmentHTML = types.map(type => {
             const currentPartId = equipped[type];
