@@ -174,7 +174,15 @@ export class HardwareManager {
 
     fromJSON(data) {
         if (!data) return;
-        this.ownedParts = data.ownedParts || this.ownedParts;
-        this.equippedParts = data.equippedParts || this.equippedParts;
+        if (data.ownedParts) {
+            for (const type of Object.keys(this.ownedParts)) {
+                if (data.ownedParts[type]) this.ownedParts[type] = data.ownedParts[type];
+            }
+        }
+        if (data.equippedParts) {
+            for (const type of Object.keys(this.equippedParts)) {
+                if (data.equippedParts[type]) this.equippedParts[type] = data.equippedParts[type];
+            }
+        }
     }
 }
