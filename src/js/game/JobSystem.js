@@ -208,6 +208,11 @@ export class JobSystem {
         this.jobHistory = [];
         this.availableJobs = [];
         this.completedTasks = [];
+        // Tasks the player has started but not yet completed, keyed by taskId.
+        // A task may only be completed if it was started (and enough time has
+        // passed for task.timeRequired, in hours). Tasks are repeatable: once
+        // completed, a task can be started again.
+        this.activeTasks = {};
     }
 
     /**
@@ -250,25 +255,50 @@ export class JobSystem {
     }
 
     /**
-     * Start a task
+     * Start a task.
+     * Records the task as in-progress on this.activeTasks so that
+     * completeTask() can verify it was actually started.
      */
     startTask(taskId) {
         const task = this.findTask(taskId);
         if (!task) return null;
 
-        return {
+        const startTime = Date.now();
+        this.activeTasks[taskId] = {
             task,
-            startTime: Date.now(),
+            startTime,
             status: 'in_progress'
         };
+
+        return this.activeTasks[taskId];
     }
 
     /**
-     * Complete a task
+     * Complete a task.
+     * Rejects (returns null) if the task was never started, was already
+     * completed without being restarted, or was started less than
+     * task.timeRequired hours ago. Quality is clamped to [0, 1].
+     * Tasks are repeatable: after completion the task can be started again.
      */
     completeTask(taskId, quality = 1.0) {
         const task = this.findTask(taskId);
         if (!task) return null;
+
+        const active = this.activeTasks[taskId];
+        if (!active) {
+            // Task was never started (or was already completed and not restarted)
+            return null;
+        }
+
+        // Enforce the task's time requirement (timeRequired is in hours)
+        const elapsedMs = Date.now() - active.startTime;
+        const requiredMs = (task.timeRequired || 0) * 60 * 60 * 1000;
+        if (elapsedMs < requiredMs) {
+            return null;
+        }
+
+        // Clamp quality to [0, 1] so callers can't inflate or negate pay
+        quality = Math.min(1, Math.max(0, quality));
 
         // Calculate pay based on quality
         const pay = Math.floor(task.basePay * quality);
@@ -286,6 +316,10 @@ export class JobSystem {
             quality,
             pay
         });
+
+        // Clear the active entry so the same taskId can't be completed twice
+        // without being started again (tasks remain repeatable).
+        delete this.activeTasks[taskId];
 
         return {
             pay,
@@ -324,7 +358,8 @@ export class JobSystem {
             currentJob: this.currentJob,
             jobHistory: this.jobHistory,
             availableJobs: this.availableJobs,
-            completedTasks: this.completedTasks
+            completedTasks: this.completedTasks,
+            activeTasks: this.activeTasks
         };
     }
     
@@ -337,6 +372,7 @@ export class JobSystem {
         this.jobHistory = data.jobHistory || [];
         this.availableJobs = data.availableJobs || [];
         this.completedTasks = data.completedTasks || [];
+        this.activeTasks = data.activeTasks || {};
     }
 }
 
