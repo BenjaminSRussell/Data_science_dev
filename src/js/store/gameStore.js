@@ -421,10 +421,21 @@ try {
             const state = get();
             if (!state.canAfford(item.price)) return false;
             if (state.purchasedItems.includes(item.id)) return false;
+
             set({
                 money: state.money - item.price,
                 purchasedItems: [...state.purchasedItems, item.id]
             });
+
+            // Apply item effect
+            if (item.type === 'chart') {
+                get().unlockChartType(item.chartType);
+            } else if (item.type === 'tool') {
+                set((s) => ({
+                    unlockedTools: [...s.unlockedTools, item.toolId]
+                }));
+            }
+
             return true;
         },
         incrementTasksCompleted: () => set((state) => ({ tasksCompleted: state.tasksCompleted + 1 })),
@@ -446,12 +457,39 @@ try {
         updateChartConfig: (config) => set((state) => ({
             chartConfig: { ...state.chartConfig, ...config }
         })),
-        getSoftwareQualityMultiplier: () => ({
-            visualClarity: 1.0,
-            dataAccuracy: 1.0,
-            chartAppropriateness: 1.0,
-            speedBonus: 0
-        }),
+        getSoftwareQualityMultiplier: () => {
+            const state = get();
+            const multipliers = {
+                visualClarity: 1.0,
+                dataAccuracy: 1.0,
+                chartAppropriateness: 1.0,
+                speedBonus: 0
+            };
+
+            if (state.purchasedItems.includes('soft_ide_pro')) {
+                multipliers.visualClarity += 0.05;
+                multipliers.dataAccuracy += 0.03;
+            }
+            if (state.purchasedItems.includes('soft_automl')) {
+                multipliers.speedBonus += 0.10;
+                multipliers.chartAppropriateness += 0.03;
+            }
+            if (state.purchasedItems.includes('soft_cloud_basic')) {
+                multipliers.dataAccuracy += 0.05;
+                multipliers.speedBonus += 0.05;
+            }
+            if (state.purchasedItems.includes('soft_enterprise_db')) {
+                multipliers.dataAccuracy += 0.08;
+                multipliers.chartAppropriateness += 0.02;
+            }
+            if (state.purchasedItems.includes('soft_neural_arch')) {
+                multipliers.visualClarity += 0.10;
+                multipliers.chartAppropriateness += 0.08;
+                multipliers.dataAccuracy += 0.05;
+            }
+
+            return multipliers;
+        },
         reset: () => set({
             money: 100,
             reputation: 0,
