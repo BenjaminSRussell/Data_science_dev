@@ -738,6 +738,8 @@ export class DevMenu {
         const results = { tested: 0, errors: [] };
 
         for (const btn of Array.from(buttons).slice(0, 50)) { // Limit to 50
+            // Skip dev menu buttons (they may open blocking confirm()/prompt() dialogs)
+            if (btn.closest('#dev-menu') || btn.id.includes('dev-')) continue;
             try {
                 btn.click();
                 results.tested++;
