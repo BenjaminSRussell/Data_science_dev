@@ -163,10 +163,10 @@ export class CompanyManagementSystem {
      */
     findClients() {
         const potentialClients = [
-            { name: 'TechCorp', needs: 'data_analysis', budget: 5000 },
-            { name: 'RetailCo', needs: 'visualization', budget: 3000 },
-            { name: 'FinanceInc', needs: 'machine_learning', budget: 8000 },
-            { name: 'StartupXYZ', needs: 'statistics', budget: 2000 }
+            { id: 'client_techcorp', name: 'TechCorp', needs: 'data_analysis', budget: 5000 },
+            { id: 'client_retailco', name: 'RetailCo', needs: 'visualization', budget: 3000 },
+            { id: 'client_financeinc', name: 'FinanceInc', needs: 'machine_learning', budget: 8000 },
+            { id: 'client_startupxyz', name: 'StartupXYZ', needs: 'statistics', budget: 2000 }
         ];
         
         return potentialClients;
@@ -176,7 +176,7 @@ export class CompanyManagementSystem {
      * Acquire client
      */
     acquireClient(clientId) {
-        const client = this.findClients().find(c => c.name === clientId);
+        const client = this.findClients().find(c => c.id === clientId);
         if (!client) return { success: false };
         
         this.clients.push({
