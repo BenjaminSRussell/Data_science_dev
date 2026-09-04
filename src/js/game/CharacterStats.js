@@ -197,7 +197,7 @@ export class CharacterStats {
         this.stats = {
             intelligence: 10,
             charisma: 10,
-            stamina: 100, // Max energy
+            stamina: 10,
             focus: 10,
             luck: 10,
             analytics: 10
@@ -225,6 +225,7 @@ export class CharacterStats {
         this.xp = {
             intelligence: 0,
             charisma: 0,
+            stamina: 0,
             focus: 0,
             luck: 0,
             analytics: 0
