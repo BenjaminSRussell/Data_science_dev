@@ -369,7 +369,12 @@ export class ContractSystem {
         const contract = this.activeContracts.find(c => c.id === contractId);
         if (!contract) return null;
         
+        if (!Number.isFinite(workAmount) || workAmount <= 0) {
+            return { status: 'error', reason: 'Invalid work amount' };
+        }
+        
         contract.progress += workAmount;
+        contract.progress = Math.max(0, contract.progress);
         
         // Check completion
         if (contract.progress >= contract.timeRequired) {
