@@ -11,7 +11,7 @@ export class ResearchInboxComponent extends BaseComponent {
     static properties = {
         papers: { type: Array },
         activeTab: { type: String },
-        isOpen: { type: Boolean },
+        isOpen: { type: Boolean, reflect: true },
         unreadCount: { type: Number }
     };
 
