@@ -775,7 +775,7 @@ export class DevMenu {
         if (totalIssues === 0) {
             this.game.showToast('✅ No crash issues detected!', 'success');
         } else {
-            this.game.showWarning(`Found ${totalIssues} potential crash issues. Check console.`);
+            this.game.showToast(`Found ${totalIssues} potential crash issues. Check console.`, 'warning');
             console.log('Crash check results:', checks);
         }
     }
