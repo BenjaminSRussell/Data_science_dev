@@ -33,8 +33,9 @@ export class NotificationSystem {
         const currentTime = this.gameState.dayNightCycle?.getTimeOfDay() || 'morning';
         const currentSlot = this.gameState.timeManager?.timeSlot;
         
-        // Check scheduled notifications
-        this.scheduledNotifications.forEach(notif => {
+        // Check scheduled notifications (iterate over a copy so splicing
+        // in triggerNotification doesn't skip subsequent entries)
+        [...this.scheduledNotifications].forEach(notif => {
             if (this.shouldTrigger(notif, currentTime, currentSlot)) {
                 this.triggerNotification(notif);
             }
