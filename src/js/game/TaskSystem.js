@@ -369,7 +369,7 @@ export class TaskSystem {
         // Update header
         const thead = table.querySelector('thead tr');
         thead.innerHTML = data.columns.map((c, i) =>
-            `<th class="sortable-header" onclick="game.gameState.taskSystem.handleTableSort(${i})">${c} ↕</th>`
+            `<th class="sortable-header" onclick="game.taskSystem.handleTableSort(${i})">${c} ↕</th>`
         ).join('');
 
         // Update body
