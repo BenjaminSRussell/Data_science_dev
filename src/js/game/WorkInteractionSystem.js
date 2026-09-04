@@ -213,12 +213,43 @@ export class WorkInteractionSystem {
             message = "Congratulations! You got the promotion. Your salary increases and you have more responsibility.";
             this.boss.promotionReadiness = 0; // Reset
             this.gameState.reputation += 100;
-        } else if (readiness > 60) {
-            message = "Not quite yet, but you're close. Keep up the good work and check back in a few weeks.";
-            this.boss.promotionReadiness += 10;
         } else {
-            message = "I appreciate your ambition, but you need more experience. Focus on your current role first.";
-            this.boss.promotionReadiness += 5;
+            // Identify the real blocker(s) so the feedback matches what's actually holding the player back
+            const blockers = [];
+            if (readiness <= 80) blockers.push("readiness");
+            if (relationship <= 60) blockers.push("relationship");
+            if (reputation <= 500) blockers.push("reputation");
+            if (completedTasks <= 20) blockers.push("completedTasks");
+
+            if (blockers.length === 1) {
+                switch (blockers[0]) {
+                    case "relationship":
+                        message = "Your boss doesn't trust you enough yet. Build a stronger relationship before asking again.";
+                        break;
+                    case "reputation":
+                        message = "You need a stronger reputation in the field before you're ready for this role.";
+                        break;
+                    case "completedTasks":
+                        message = "You haven't completed enough projects yet. Finish more tasks to prove you're ready.";
+                        break;
+                    default:
+                        if (readiness > 60) {
+                            message = "Not quite yet, but you're close. Keep up the good work and check back in a few weeks.";
+                            this.boss.promotionReadiness += 10;
+                        } else {
+                            message = "I appreciate your ambition, but you need more experience. Focus on your current role first.";
+                            this.boss.promotionReadiness += 5;
+                        }
+                }
+            } else {
+                if (readiness > 60) {
+                    message = "Not quite yet, but you're close. Keep up the good work and check back in a few weeks.";
+                    this.boss.promotionReadiness += 10;
+                } else {
+                    message = "I appreciate your ambition, but you need more experience. Focus on your current role first.";
+                    this.boss.promotionReadiness += 5;
+                }
+            }
         }
 
         // Relationship impact
