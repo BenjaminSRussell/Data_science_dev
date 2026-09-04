@@ -315,6 +315,9 @@ export function handleServeJailTime(game) {
 
     game.handleTimeAdvance(6);
     game.gameState.jailSentence--;
+    if (game.crimeSystem) {
+        game.crimeSystem.jailTimeServed = (game.crimeSystem.jailTimeServed || 0) + 1;
+    }
     document.getElementById('jail-time-left').textContent = `${game.gameState.jailSentence} days`;
 
     if (game.gameState.jailSentence <= 0) {
