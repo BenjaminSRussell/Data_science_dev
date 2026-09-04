@@ -5,6 +5,7 @@
 
 import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
 import { dialogueTreeSystem } from './dialogue/DialogueTreeSystem.js';
+import { CommonUtils } from '../utils/CommonUtils.js';
 
 // Initialize all NPC images - ensures every NPC has a visual
 function initializeNPCImages() {
@@ -1235,11 +1236,7 @@ export class NPCManager {
      */
     getRelationshipTier(npcId) {
         const level = this.relationships[npcId] || 0;
-        if (level < 10) return { tier: 'stranger', label: 'Stranger', color: '#888' };
-        if (level < 30) return { tier: 'acquaintance', label: 'Acquaintance', color: '#4ecdc4' };
-        if (level < 60) return { tier: 'friend', label: 'Friend', color: '#6bcb77' };
-        if (level < 85) return { tier: 'close_friend', label: 'Close Friend', color: '#a855f7' };
-        return { tier: 'best_friend', label: 'Best Friend', color: '#ffd93d' };
+        return CommonUtils.getRelationshipTier(level);
     }
 
     /**
