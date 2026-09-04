@@ -137,6 +137,7 @@ export class HardwareManager {
                 if (part.stats.cooling) stats.cooling += part.stats.cooling;
                 if (part.stats.noise) stats.noise += part.stats.noise;
                 if (part.stats.style) stats.aesthetics += part.stats.style;
+                if (part.stats.aesthetics) stats.aesthetics += part.stats.aesthetics;
                 if (part.stats.compute) stats.compute += part.stats.compute;
                 if (part.stats.productivity) stats.productivity = Math.max(stats.productivity, part.stats.productivity); // Max, not add
             }
