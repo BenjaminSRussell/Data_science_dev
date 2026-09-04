@@ -3,6 +3,8 @@
  * Provides quick access to all screens, locations, and testing tools
  */
 
+import { STATS } from '../game/CharacterStats.js';
+
 export class DevMenu {
     constructor(game) {
         this.game = game;
@@ -431,12 +433,20 @@ export class DevMenu {
         }));
 
         container.appendChild(this.createButton('Max Stats', () => {
-            if (this.game.gameState?.characterStats) {
-                const stats = this.game.gameState.characterStats.getStats();
-                Object.keys(stats).forEach(stat => {
-                    this.game.gameState.characterStats.trainStat?.(stat, 100);
-                });
-                this.game.showToast('Maxed all stats', 'success');
+            const cs = this.game.gameState?.characterStats;
+            if (cs) {
+                try {
+                    Object.keys(STATS).forEach(stat => {
+                        const maxLevel = STATS[stat].maxLevel;
+                        while (cs.getStat(stat) < maxLevel) {
+                            cs.addExperience(stat, cs.getXPForNextLevel(stat));
+                        }
+                    });
+                    this.game.uiUpdater?.updateAllUI?.();
+                    this.game.showToast('Maxed all stats', 'success');
+                } catch (e) {
+                    console.error('Max Stats failed:', e);
+                }
             }
         }));
 
