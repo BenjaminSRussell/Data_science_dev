@@ -361,6 +361,24 @@ export class WorldMap {
     }
 
     /**
+     * Get all locations
+     */
+    getLocations() {
+        return LOCATIONS;
+    }
+
+    /**
+     * Set current location without accessibility/vehicle checks (dev tooling)
+     */
+    setCurrentLocation(locationId) {
+        if (LOCATIONS_MAP.has(locationId)) {
+            this.currentLocation = locationId;
+            this.visitedLocations.add(locationId);
+            this._invalidateCache();
+        }
+    }
+
+    /**
      * Get current location data - O(1)
      */
     getCurrentLocation() {
