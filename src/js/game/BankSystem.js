@@ -23,7 +23,7 @@ export class BankSystem {
      * Deposit money into savings
      */
     deposit(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
+        if (!Number.isFinite(amount) || amount <= 0) return { success: false, message: "Invalid amount" };
         if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
         if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
 
@@ -38,7 +38,7 @@ export class BankSystem {
      * Withdraw money from savings
      */
     withdraw(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
+        if (!Number.isFinite(amount) || amount <= 0) return { success: false, message: "Invalid amount" };
         if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
         if (this.gameState.bank.savings < amount) return { success: false, message: "Insufficient savings" };
 
@@ -53,6 +53,7 @@ export class BankSystem {
      * Take out a loan
      */
     takeLoan(amount) {
+        if (!Number.isFinite(amount) || amount <= 0) return { success: false, message: "Invalid amount" };
         if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
         const maxLoan = this.calculateMaxLoan();
         if (amount > maxLoan) return { success: false, message: `Loan limit exceeded (Max: $${maxLoan})` };
@@ -68,7 +69,7 @@ export class BankSystem {
      * Repay loan
      */
     repayLoan(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
+        if (!Number.isFinite(amount) || amount <= 0) return { success: false, message: "Invalid amount" };
         if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
         if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
         if (this.gameState.bank.loan <= 0) return { success: false, message: "No active loan" };
