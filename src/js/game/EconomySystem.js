@@ -195,10 +195,13 @@ export class EconomySystem {
         const multiplier = starMultipliers[stars] || 1.0;
 
         // Time bonus (if completed quickly)
-        // const elapsed = (Date.now() - task.startTime) / 1000;
-        // const timeBonus = elapsed < task.timeLimit / 2 ? 1.2 : 1.0;
+        let timeBonus = 1.0;
+        if (task.timeLimit && task.startTime) {
+            const elapsed = (Date.now() - task.startTime) / 1000;
+            timeBonus = elapsed < task.timeLimit / 2 ? 1.2 : 1.0;
+        }
 
-        return Math.round(baseReward * multiplier);
+        return Math.round(baseReward * multiplier * timeBonus);
     }
 
     /**
