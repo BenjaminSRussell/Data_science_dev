@@ -17,7 +17,7 @@ export class JealousySystem {
     checkJealousy(playerSuccess) {
         if (!this.gameState.npcManager) return;
         
-        const npcs = this.gameState.npcManager?.getAllNPCs() || [];
+        const npcs = this.gameState.npcManager?.getMetNPCs() || [];
         
         npcs.forEach(npc => {
             if (this.shouldBeJealous(npc, playerSuccess)) {
