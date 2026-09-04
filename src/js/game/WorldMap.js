@@ -417,6 +417,16 @@ export class WorldMap {
     }
 
     /**
+     * Calculate the actual time cost (in slots) of traveling to a location
+     * with the current vehicle - O(1)
+     */
+    calculateTravelTime(location) {
+        const vehicle = VEHICLES_MAP.get(this.currentVehicle);
+        const baseTravelTime = location.travelTime;
+        return Math.max(0, Math.ceil(baseTravelTime / vehicle.travelSpeed));
+    }
+
+    /**
      * Check if can travel to location - O(1)
      */
     canTravelTo(locationId) {
@@ -431,7 +441,7 @@ export class WorldMap {
             return { can: false, reason: 'Location not accessible with current vehicle/stats' };
         }
 
-        return { can: true, travelTime: location.travelTime };
+        return { can: true, travelTime: this.calculateTravelTime(location) };
     }
 
     /**
@@ -442,11 +452,9 @@ export class WorldMap {
         if (!check.can) return check;
 
         const location = LOCATIONS_MAP.get(locationId);
-        const vehicle = VEHICLES_MAP.get(this.currentVehicle);
 
         // Calculate travel time
-        const baseTravelTime = location.travelTime;
-        const actualSlots = Math.max(0, Math.ceil(baseTravelTime / vehicle.travelSpeed));
+        const actualSlots = this.calculateTravelTime(location);
 
         this.currentLocation = locationId;
         this.visitedLocations.add(locationId); // Set.add is O(1)
