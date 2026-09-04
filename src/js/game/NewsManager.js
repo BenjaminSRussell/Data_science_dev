@@ -267,6 +267,33 @@ export class NewsManager {
     }
 
     /**
+     * Add a news item to the history (e.g. from world events).
+     * Accepts a partial item and fills in defaults.
+     */
+    addNews(newsItem) {
+        if (!newsItem) return;
+
+        const item = {
+            id: `news_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            category: 'general',
+            text: '',
+            timestamp: this.gameState.timeManager?.getDateString() || 'Today',
+            effects: null,
+            read: false,
+            ...newsItem
+        };
+
+        this.newsHistory.unshift(item);
+
+        // Respect the history cap
+        if (this.newsHistory.length > this.maxHistory) {
+            this.newsHistory.length = this.maxHistory;
+        }
+
+        return item;
+    }
+
+    /**
      * Generate news for the day
      */
     /**
