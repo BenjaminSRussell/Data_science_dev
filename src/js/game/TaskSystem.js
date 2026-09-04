@@ -208,7 +208,8 @@ export class TaskSystem {
         let remaining = 100;
         const percentages = categories.map((_, i) => {
             if (i === categories.length - 1) return remaining;
-            const val = this.randomRange(10, Math.min(40, remaining - (categories.length - i - 1) * 5));
+            const cap = Math.max(10, Math.min(40, remaining - (categories.length - i - 1) * 5));
+            const val = this.randomRange(10, cap);
             remaining -= val;
             return val;
         });
@@ -439,6 +440,7 @@ export class TaskSystem {
      * Helper: random number in range
      */
     randomRange(min, max) {
+        if (min > max) [min, max] = [max, min];
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 }
