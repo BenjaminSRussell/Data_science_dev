@@ -352,9 +352,13 @@ export class ContractSystem {
         
         // Move to active
         this.availableContracts = this.availableContracts.filter(c => c.id !== contractId);
+        const acceptedAt = Date.now();
         this.activeContracts.push({
             ...contract,
-            acceptedAt: Date.now(),
+            acceptedAt,
+            // Deadline is measured from acceptance, not generation, so a contract
+            // that sat in the available pool doesn't arrive partially expired.
+            deadline: acceptedAt + (contract.timeRequired * 24 * 60 * 60 * 1000),
             progress: 0,
             status: 'active'
         });
