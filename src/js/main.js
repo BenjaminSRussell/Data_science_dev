@@ -239,6 +239,10 @@ export class MainGame {
         this.gameState.musicEnabled = store.musicEnabled;
         this.gameState.currentLocation = store.currentLocation;
         this.gameState.chartConfig = store.chartConfig;
+        this.gameState.currentTask = store.currentTask;
+        this.gameState.unlockedThemes = store.unlockedThemes;
+        this.gameState.lastScore = store.lastScore;
+        this.gameState.settings = store.settings;
 
         // Subscribe to store changes to keep GameState in sync
         this.gameStore.subscribe((state) => {
@@ -263,6 +267,10 @@ export class MainGame {
             this.gameState.musicEnabled = state.musicEnabled;
             this.gameState.currentLocation = state.currentLocation;
             this.gameState.chartConfig = state.chartConfig;
+            this.gameState.currentTask = state.currentTask;
+            this.gameState.unlockedThemes = state.unlockedThemes;
+            this.gameState.lastScore = state.lastScore;
+            this.gameState.settings = state.settings;
         });
     }
 
