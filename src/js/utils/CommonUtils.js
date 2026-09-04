@@ -298,6 +298,29 @@ export class CommonUtils {
     static flatten(array, depth = Infinity) {
         return array.flat(depth);
     }
+
+    /**
+     * Shared relationship tier table (0-100 scale).
+     * Single source of truth for NPCManager, RoommateSystem, etc.
+     */
+    static RELATIONSHIP_TIERS = [
+        { max: 10, tier: 'stranger', label: 'Stranger', color: '#888' },
+        { max: 30, tier: 'acquaintance', label: 'Acquaintance', color: '#4ecdc4' },
+        { max: 60, tier: 'friend', label: 'Friend', color: '#6bcb77' },
+        { max: 85, tier: 'close_friend', label: 'Close Friend', color: '#a855f7' },
+        { max: Infinity, tier: 'best_friend', label: 'Best Friend', color: '#ffd93d' }
+    ];
+
+    /**
+     * Get relationship tier info from a 0-100 level.
+     * Returns { tier, label, color } using the shared RELATIONSHIP_TIERS table.
+     */
+    static getRelationshipTier(level) {
+        for (const entry of CommonUtils.RELATIONSHIP_TIERS) {
+            if (level < entry.max) return entry;
+        }
+        return CommonUtils.RELATIONSHIP_TIERS[CommonUtils.RELATIONSHIP_TIERS.length - 1];
+    }
 }
 
 

@@ -141,10 +141,7 @@ export class RoommateSystem {
      * Get relationship level
      */
     getRelationshipLevel() {
-        if (this.relationship < 20) return 'stranger';
-        if (this.relationship < 40) return 'acquaintance';
-        if (this.relationship < 70) return 'friend';
-        return 'close_friend';
+        return CommonUtils.getRelationshipTier(this.relationship).tier;
     }
     
     /**
