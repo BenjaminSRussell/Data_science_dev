@@ -150,7 +150,7 @@ export function handleNPCResponse(game, result) {
 export function handleNPCGift(game, npcId) {
     const result = game.gameState.npcManager?.giveGift(npcId, 'coffee');
     DOMUtils.updateElement('#npc-dialogue-area', {
-        innerHTML: result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess."
+        innerHTML: !result?.success ? "I don't accept gifts." : (result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess.")
     });
 }
 
