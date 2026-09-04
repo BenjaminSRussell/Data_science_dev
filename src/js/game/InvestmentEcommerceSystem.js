@@ -135,6 +135,19 @@ export class InvestmentEcommerceSystem {
             return { success: false, message: "You don't have an e-commerce business." };
         }
 
+        if (product.id === undefined || product.id === null) {
+            return { success: false, message: "Product must have an id." };
+        }
+        if (this.ecommerceBusiness.products.some(p => p.id === product.id)) {
+            return { success: false, message: "A product with this id already exists." };
+        }
+        if (typeof product.price !== "number" || !isFinite(product.price) || product.price <= 0) {
+            return { success: false, message: "Product price must be a positive number." };
+        }
+        if (typeof product.name !== "string" || product.name.trim() === "") {
+            return { success: false, message: "Product must have a name." };
+        }
+
         const cost = product.cost || 100;
         if (this.gameState.money < cost) {
             return { success: false, message: "Not enough money to add product." };
