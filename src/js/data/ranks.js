@@ -1,58 +1,46 @@
-/**
- * Career Ranks - Progression ladder for the game
- */
-
-export const RANKS = [
+const RANKS = [
     {
         id: 1,
-        title: "Data Entry Clerk",
+        title: "Junior Data Analyst",
         salaryMultiplier: 1.0,
         repRequired: 0,
-        description: "You're just starting out. Time to prove yourself!",
+        description: "Starting out, basic tasks are your focus.",
         perks: []
     },
     {
         id: 2,
-        title: "Junior Analyst",
-        salaryMultiplier: 1.5,
+        title: "Data Analyst",
+        salaryMultiplier: 2.0,
         repRequired: 100,
-        description: "You've shown basic competence. Keep improving!",
-        perks: ["Access to Line Charts"]
+        description: "You're becoming more proficient in your role.",
+        perks: ["Access to basic charts"]
     },
     {
         id: 3,
-        title: "Data Analyst",
-        salaryMultiplier: 2.0,
-        repRequired: 300,
-        description: "A solid analyst who can handle most requests.",
-        perks: ["Access to Scatter Plots"]
+        title: "Senior Data Analyst",
+        salaryMultiplier: 3.0,
+        repRequired: 500,
+        description: "You've gained significant experience.",
+        perks: ["Access to advanced charts"]
     },
     {
         id: 4,
-        title: "Senior Analyst",
-        salaryMultiplier: 3.0,
-        repRequired: 600,
-        description: "Your visualizations are trusted across departments.",
-        perks: ["Access to Radar Charts", "Time bonus increased"]
+        title: "Data Scientist",
+        salaryMultiplier: 5.0,
+        repRequired: 1000,
+        description: "Your expertise is highly valued.",
+        perks: ["Access to predictive analytics"]
     },
     {
         id: 5,
-        title: "Lead Data Scientist",
-        salaryMultiplier: 5.0,
-        repRequired: 1200,
-        description: "You lead visualization projects for the entire company.",
-        perks: ["Access to Heatmaps", "Boss tolerance increased"]
-    },
-    {
-        id: 6,
         title: "Principal Scientist",
         salaryMultiplier: 8.0,
         repRequired: 2500,
         description: "Your work influences major business decisions.",
-        perks: ["Access to Sankey Diagrams", "Premium clients"]
+        perks: ["Access to advanced data tools"]
     },
     {
-        id: 7,
+        id: 6,
         title: "Chief Data Officer",
         salaryMultiplier: 15.0,
         repRequired: 5000,
