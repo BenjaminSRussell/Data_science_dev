@@ -139,6 +139,9 @@ export class EventSystem {
         const event = this.upcomingEvents.find(e => e.id === eventId);
         if (!event) return null;
         
+        // Already active — don't re-trigger
+        if (this.activeEvents.some(e => e.id === eventId)) return null;
+        
         this.activeEvents.push(event);
         
         // Handle event based on type

@@ -48,11 +48,15 @@ export class WorldEventManager {
      */
     processDay() {
         // Remove expired modifiers
-        // ...
+        const currentDay = this.gameState?.timeManager?.totalDays || 0;
+        this.activeModifiers = this.activeModifiers.filter(m => m.expiry > currentDay);
 
         // Roll for new events
         Object.values(this.eventPool).forEach(event => {
             if (event.condition && !event.condition(this.gameState)) return;
+
+            // Already active — don't re-trigger while its duration lasts
+            if (this.activeModifiers.some(m => m.id === event.id)) return;
 
             if (Math.random() < event.chance) {
                 this.triggerEvent(event);
@@ -65,6 +69,14 @@ export class WorldEventManager {
         event.effect(this.gameState);
         const days = this.gameState?.timeManager?.totalDays || 0;
         this.events.push({ id: event.id, day: days });
+
+        // Track the active modifier so it can't re-trigger until it expires
+        this.activeModifiers.push({
+            id: event.id,
+            type: event.id,
+            value: event.duration,
+            expiry: days + (event.duration || 1)
+        });
     }
 
     // Serialization
