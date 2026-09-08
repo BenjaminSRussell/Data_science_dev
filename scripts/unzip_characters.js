@@ -9,6 +9,12 @@ if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
 }
 
+// Ensure animated characters 3d exists
+if (!fs.existsSync(srcDir)) {
+    console.error(`Directory '${srcDir}' does not exist.`);
+    process.exit(0);
+}
+
 const files = fs.readdirSync(srcDir);
 files.forEach(file => {
     if (file.endsWith('.zip')) {
