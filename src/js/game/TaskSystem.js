@@ -132,11 +132,15 @@ export class TaskSystem {
         const quarters = ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'];
         const baseRevenue = this.randomRange(80000, 150000);
 
+        const revenues = quarters.map((_, i) => {
+            const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
+            return Math.round(baseRevenue * growth);
+        });
+
         return {
             columns: ['Quarter', 'Revenue', 'Expenses', 'Profit'],
             rows: quarters.map((q, i) => {
-                const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
-                const revenue = Math.round(baseRevenue * growth);
+                const revenue = revenues[i];
                 const expenses = Math.round(revenue * (0.5 + Math.random() * 0.2));
                 const profit = revenue - expenses;
 
@@ -144,10 +148,7 @@ export class TaskSystem {
             }),
             labels: quarters,
             datasets: {
-                Revenue: quarters.map((_, i) => {
-                    const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
-                    return Math.round(baseRevenue * growth);
-                }),
+                Revenue: revenues,
                 Expenses: [],
                 Profit: []
             }
