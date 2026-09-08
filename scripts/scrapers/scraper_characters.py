@@ -19,6 +19,12 @@ from bs4 import BeautifulSoup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+def sanitize_filename(name: str) -> str:
+    """Sanitize filename to be safe for filesystem use"""
+    name = name.strip().replace('\\', '_').replace('/', '_')
+    name = ''.join(c for c in name if c.isalnum() or c in ('_', '-', '.'))
+    return name[:30] + '.png'
+
 class CharacterSpriteScraper:
     def __init__(self, output_dir="downloaded_assets/characters/sprites"):
         self.output_dir = Path(output_dir)
@@ -87,8 +93,7 @@ class CharacterSpriteScraper:
                     download_link = asset_soup.find('a', href=lambda x: x and '/download' in x)
                     if download_link:
                         file_url = urljoin(base_url, download_link.get('href', ''))
-                        filename = f"character_{len(self.downloaded)}_{title_link.text.strip()[:30]}.png"
-                        filename = ''.join(c for c in filename if c.isalnum() or c in ('_', '-', '.'))
+                        filename = sanitize_filename(f"character_{len(self.downloaded)}_{title_link.text.strip()}")
                         output_path = self.output_dir / filename
                         
                         if self.download_file(file_url, output_path):
@@ -197,4 +202,3 @@ class CharacterSpriteScraper:
 if __name__ == "__main__":
     scraper = CharacterSpriteScraper()
     scraper.run(target_count=1000)
-
