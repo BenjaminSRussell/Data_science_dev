@@ -43,8 +43,8 @@ export class EventSystem {
         holidays.forEach(holiday => {
             this.upcomingEvents.push({
                 ...holiday,
-                scheduled: true,
-                year: this.gameState.timeManager?.year || 1
+                scheduled: true
+                // No year field: holidays recur every year, matched on month+day
             });
         });
     }
@@ -86,10 +86,13 @@ export class EventSystem {
         // Random stock market crashes (rare)
         for (let i = 0; i < 5; i++) {
             const randomDay = Math.floor(Math.random() * 365);
+            const month = Math.floor(randomDay / 30);
+            const day = (randomDay % 30) + 1;
             this.upcomingEvents.push({
                 id: `crash_${i}`,
                 name: 'Stock Market Crash',
-                day: randomDay,
+                month: month,
+                day: day,
                 type: 'crash',
                 severity: Math.random() * 50 + 20, // 20-70% drop
                 description: 'Major market downturn'
@@ -99,10 +102,13 @@ export class EventSystem {
         // Bull markets (positive events)
         for (let i = 0; i < 3; i++) {
             const randomDay = Math.floor(Math.random() * 365);
+            const month = Math.floor(randomDay / 30);
+            const day = (randomDay % 30) + 1;
             this.upcomingEvents.push({
                 id: `bull_${i}`,
                 name: 'Bull Market',
-                day: randomDay,
+                month: month,
+                day: day,
                 type: 'bull',
                 boost: Math.random() * 30 + 10, // 10-40% gain
                 description: 'Strong market performance'
