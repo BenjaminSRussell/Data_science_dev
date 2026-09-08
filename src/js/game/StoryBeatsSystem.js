@@ -143,8 +143,21 @@ export class StoryBeatsSystem {
         if (!storylineManager) return;
 
         const phase = storylineManager.storylinePhase;
-        const allBeats = this.getStoryBeatsForPhase(phase);
-        
+
+        // Accumulate beats from all phases the player has passed through,
+        // so optional beats from earlier phases (e.g. 'early') remain
+        // completable even after the phase has advanced.
+        const phaseOrder = ['early', 'mid', 'late', 'endgame'];
+        const currentIndex = phaseOrder.indexOf(phase);
+        const phasesToInclude = currentIndex >= 0
+            ? phaseOrder.slice(0, currentIndex + 1)
+            : [phase];
+
+        const allBeats = [];
+        for (const p of phasesToInclude) {
+            allBeats.push(...this.getStoryBeatsForPhase(p));
+        }
+
         // Filter out completed beats
         this.pendingBeats = allBeats.filter(beat => 
             !this.completedBeats.includes(beat.id)
