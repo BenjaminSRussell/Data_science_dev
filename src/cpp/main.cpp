@@ -5,7 +5,8 @@
 #include "economy.h"
 #include "task_system.h"
 
-using namespace emscripten;
+std::string getVersion();
+bool initializeWASM();
 
 EMSCRIPTEN_BINDINGS(module) {
   class_<GameState>("GameState")
