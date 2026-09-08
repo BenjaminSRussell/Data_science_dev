@@ -11,7 +11,6 @@ import { OFFICE_LOCATIONS } from '../data/locations.js';
 import { LOCATIONS } from '../game/WorldMap.js';
 import { HARDWARE_PARTS, HARDWARE_TYPES } from '../game/HardwareSystems.js';
 import { LitUIManager } from './LitUIManager.js';
-import { useGameStore } from '../store/gameStore.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommonUtils } from '../utils/CommonUtils.js';
 import { logger } from '../utils/Logger.js';
@@ -42,69 +41,19 @@ export class UIUpdater {
 
     /**
      * Update top bar stats
-     * Phase 2: Uses LitUIManager (with fallback to DOM)
-     * Phase 4: Uses Zustand store
+     * Phase 2: Uses LitUIManager
      */
     updateTopBar() {
-        // Phase 4: Get state from Zustand store
-        const gameStore = this.game?.gameStore || useGameStore;
-        const state = gameStore.getState();
-        
-        // Try Lit component first
-        if (this.litUIManager) {
-            this.litUIManager.updateTopBar();
-        } else {
-            // Fallback to DOM manipulation (using DOMUtils)
-            DOMUtils.updateElement('#money-value', {
-                textContent: CommonUtils.formatCurrency(state.money ?? 0)
-            });
-            DOMUtils.updateElement('#reputation-value', {
-                textContent: CommonUtils.formatNumber(state.reputation ?? 0)
-            });
-            if (state.currentRank) {
-                DOMUtils.updateElement('#rank-value', {
-                    textContent: state.currentRank.title
-                });
-            }
-        }
+        this.litUIManager.updateTopBar();
     }
 
 
     /**
      * Update rank progress display
-     * Phase 2: Uses LitUIManager (with fallback to DOM)
-     * Phase 4: Uses Zustand store
+     * Phase 2: Uses LitUIManager
      */
     updateRankProgress() {
-        // Phase 4: Get state from Zustand store
-        const gameStore = this.game?.gameStore || useGameStore;
-        const state = gameStore.getState();
-        
-        // Try Lit component first
-        if (this.litUIManager) {
-            this.litUIManager.updateRankProgress();
-        } else {
-            // Fallback to DOM manipulation
-            const currentRankEl = document.getElementById('current-rank');
-            const progressEl = document.getElementById('rank-progress');
-            const nextRankEl = document.querySelector('.next-rank');
-
-            if (currentRankEl && state.currentRank) {
-                currentRankEl.textContent = state.currentRank.title || 'None';
-            }
-
-            if (progressEl) {
-                progressEl.style.width = `${state.progressToNextRank || 0}%`;
-            }
-
-            if (nextRankEl) {
-                if (state.nextRank) {
-                    nextRankEl.textContent = `Next: ${state.nextRank.title}`;
-                } else {
-                    nextRankEl.textContent = 'Max Rank Achieved!';
-                }
-            }
-        }
+        this.litUIManager.updateRankProgress();
     }
 
     /**
