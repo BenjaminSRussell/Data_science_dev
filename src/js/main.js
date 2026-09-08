@@ -304,8 +304,8 @@ this.gameState.ratingSum = store.ratingSum;m;
         }
 
         // Show brief toast
-        if (this.game && this.game.showToast) {
-            this.game.showToast(`Switched to ${newTheme === 'light' ? 'Light' : 'Dark'} Mode`, 'info');
+        if (this.showToast) {
+            this.showToast(`Switched to ${newTheme === 'light' ? 'Light' : 'Dark'} Mode`, 'info');
         }
     }
 
