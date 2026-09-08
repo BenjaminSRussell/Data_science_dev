@@ -25,10 +25,10 @@ export function handleWorkOnProject(game) {
     if (!game.projectSystem || !game.projectSystem.activeProject) return;
 
     const energyCost = 15;
-    if (!game.timeManager?.hasEnergy(energyCost)) {
-        game.showError("You are too exhausted to code. Go sleep!");
-        return;
-    }
+    if (!game.timeManager?.canPerformAction(null, energyCost)) {
+    game.showError("You are too exhausted to code. Go sleep!");
+    return;
+}
 
     game.timeManager?.useEnergy(energyCost);
     startWorkingSession(game, 3);
@@ -117,7 +117,7 @@ function createAdvanceButton() {
         btn = document.createElement('button');
         btn.id = 'btn-advance-work';
         btn.className = 'btn btn-primary btn-lg';
-        btn.textContent = '⏭ Work (Click to Progress)';
+        btn.textContent = 'ÃƒÂ¢Ã¯Â¿Â½Ã‚Â­ Work (Click to Progress)';
         btn.style.marginTop = '1rem';
         const stopBtn = document.getElementById('btn-stop-work');
         if (stopBtn && stopBtn.parentNode) {
@@ -174,10 +174,10 @@ export function handleTrainAI(game) {
     const energyCost = 20;
     const moneyCost = 50;
 
-    if (!game.timeManager?.hasEnergy(energyCost)) {
-        game.showError("Too tired to train AI!");
-        return;
-    }
+    if (!game.timeManager?.canPerformAction(null, energyCost)) {
+    game.showError("Too tired to train AI!");
+    return;
+}
 
     if (game.gameState.money < moneyCost) {
         game.showError("Need $50 for Cloud Compute!");
