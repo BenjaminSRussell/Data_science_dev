@@ -2132,7 +2132,7 @@ this.gameState.ratingSum = store.ratingSum;m;
             }
 
             // Auto-save
-            this.saveManager.saveGame(this.gameState);
+            this.saveManager.saveGame(this.gameState, this.currentSaveSlot);
 
         }, 2000);
     }
