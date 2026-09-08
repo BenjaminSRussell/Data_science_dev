@@ -1793,6 +1793,9 @@ this.gameState.ratingSum = store.ratingSum;m;
         this.bankSystem = new BankSystem(this.gameState);
         // Link specific bank state if needed, but BankSystem constructor uses gameState directly
 
+        // Load deferred systems (not called when continuing a saved game)
+        setTimeout(() => this.loadDeferredSystems(), 50);
+
         // Reload save data now that subsystems are initialized
         logger.debug("Reloading save data for subsystems...");
         this.saveManager.loadGame(this.gameState, this.currentSaveSlot);
