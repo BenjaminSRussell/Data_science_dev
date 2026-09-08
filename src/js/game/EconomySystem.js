@@ -2,8 +2,6 @@
  * EconomySystem - Handles scoring, rewards, and progression
  */
 
-import { RANKS } from '../data/ranks.js';
-
 export class EconomySystem {
     constructor(gameState) {
         this.gameState = gameState;
