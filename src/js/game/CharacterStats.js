@@ -208,18 +208,7 @@ export class CharacterStats {
         // 0: Neutral
         // +100: Saint
         this.ethics = 50; // 0 (Evil) to 100 (Saint)
-        this.level = 1;
         this.visualStage = 'level_1'; // level_1, level_2_good, level_2_evil, etc.
-
-        // Define Skills
-        this.skills = {
-            python: { id: 'python', name: 'Python', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            sql: { id: 'sql', name: 'SQL', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            statistics: { id: 'statistics', name: 'Statistics', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            machine_learning: { id: 'machine_learning', name: 'Machine Learning', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            communication: { id: 'communication', name: 'Communication', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            charisma: { id: 'charisma', name: 'Charisma', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 }
-        };
 
         // Experience points for each stat
         this.xp = {
