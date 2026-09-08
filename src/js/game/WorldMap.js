@@ -350,6 +350,7 @@ export class WorldMap {
 
         // Cache for accessible locations (invalidated on state change)
         this._accessibleCache = null;
+        this._cacheKey = null;
         this._cacheInvalid = true;
     }
 
@@ -376,11 +377,28 @@ export class WorldMap {
     }
 
     /**
+     * Cheap hash of the state that affects accessibility.
+     * Recomputed on every call so money/reputation/stat changes
+     * invalidate the cache without needing explicit invalidation.
+     */
+    _accessibilityKey() {
+        const stats = this.gameState.characterStats;
+        const statKeys = [];
+        for (const location of LOCATIONS) {
+            const req = location.unlockRequirement;
+            if (req?.stat) statKeys.push(req.stat);
+        }
+        const statPart = statKeys.map(k => `${k}:${stats?.getStat(k) || 0}`).join(',');
+        return `${this.gameState.money}|${this.gameState.reputation}|${this.currentVehicle}|${statPart}`;
+    }
+
+    /**
      * Get all accessible locations - O(n) with caching
      */
     getAccessibleLocations() {
-        // Return cached result if valid
-        if (!this._cacheInvalid && this._accessibleCache) {
+        // Return cached result if the accessibility-relevant state is unchanged
+        const key = this._accessibilityKey();
+        if (!this._cacheInvalid && this._accessibleCache && this._cacheKey === key) {
             return this._accessibleCache;
         }
 
@@ -411,6 +429,7 @@ export class WorldMap {
 
         // Cache result
         this._accessibleCache = accessible;
+        this._cacheKey = key;
         this._cacheInvalid = false;
 
         return accessible;
