@@ -202,8 +202,8 @@ class MassThemeScraper:
             for i in range(2):
                 assets.append({
                     'id': len(assets) + 1,
-                    'name': f"{particle}_effect_{i}",
-                    'search_terms': [f"{self.theme} {particle} effect", f"{self.theme} {particle} particle"],
+                    'name': f"{map_type}_map_{i}",
+                    'search_terms': [f"{self.theme} {map_type} map", f"{self.theme} {map_type} environment"],
                     'sources': ['opengameart'],
                     'output_dir': 'effects/particles',
                     'size': {'width': 64, 'height': 64, 'transparency': True, 'exact': True},
