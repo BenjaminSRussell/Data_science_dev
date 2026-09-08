@@ -111,7 +111,8 @@ export async function handleNPCTalk(game, npcId) {
     }
 
     // Update actions to choices
-    const actionsDiv = document.querySelector('#npc-modal .npc-actions');
+    const actionsDiv = document.querySelector('#npc-modal .npc-modal-actions');
+    if (!actionsDiv) return;
     actionsDiv.textContent = '';
 
     convo.choices.forEach((choice, index) => {
