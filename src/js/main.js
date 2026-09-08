@@ -1789,7 +1789,6 @@ this.gameState.ratingSum = store.ratingSum;m;
         this.educationSystem = this.gameState.educationSystem;
         this.worldEventManager = this.gameState.worldEventManager;
         this.projectSystem = this.gameState.projectSystem;
-        this.projectSystem = this.gameState.projectSystem;
         this.aiSystem = this.gameState.aiSystem;
 
         // Link story systems (may be null if save predates them)
