@@ -215,17 +215,17 @@ export class WorkInteractionSystem {
             this.gameState.reputation += 100;
         } else if (readiness > 60) {
             message = "Not quite yet, but you're close. Keep up the good work and check back in a few weeks.";
-            this.boss.promotionReadiness += 10;
+            this.boss.promotionReadiness = Math.min(100, this.boss.promotionReadiness + 10);
         } else {
             message = "I appreciate your ambition, but you need more experience. Focus on your current role first.";
-            this.boss.promotionReadiness += 5;
+            this.boss.promotionReadiness = Math.min(100, this.boss.promotionReadiness + 5);
         }
 
         // Relationship impact
         if (success) {
-            this.boss.relationship += 10;
+            this.boss.relationship = Math.min(100, this.boss.relationship + 10);
         } else if (readiness < 40) {
-            this.boss.relationship -= 2; // Slightly annoyed if asked too early
+            this.boss.relationship = Math.max(0, this.boss.relationship - 2); // Slightly annoyed if asked too early
         }
 
         return {
