@@ -42,9 +42,10 @@ export class EnvironmentManager {
     updateLocation() {
         const rankIndex = this.gameState.rankIndex;
 
-        // Find the highest unlocked location
-        let newLocation = OFFICE_LOCATIONS[0];
+        // Find the highest unlocked location (skip hidden decorative entries)
+        let newLocation = OFFICE_LOCATIONS.find(l => !l.hidden) || OFFICE_LOCATIONS[0];
         for (const location of OFFICE_LOCATIONS) {
+            if (location.hidden) continue;
             if (rankIndex >= location.rankRequired) {
                 newLocation = location;
             }

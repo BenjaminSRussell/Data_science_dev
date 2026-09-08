@@ -49,6 +49,23 @@ describe('EnvironmentManager', () => {
             expect(location.rankRequired).toBeLessThanOrEqual(3);
         });
 
+        it('should never select a hidden decorative location', () => {
+            for (const rank of [0, 1, 3, 5, 6, 10]) {
+                mockGameState.rankIndex = rank;
+                const location = envManager.updateLocation();
+                expect(location.hidden).toBeFalsy();
+            }
+        });
+
+        it('should respect rank progression across non-hidden locations', () => {
+            mockGameState.rankIndex = 0;
+            expect(envManager.updateLocation().id).toBe('home_office');
+            mockGameState.rankIndex = 3;
+            expect(envManager.updateLocation().id).toBe('corporate_floor');
+            mockGameState.rankIndex = 6;
+            expect(envManager.updateLocation().id).toBe('executive_suite');
+        });
+
         it('should not change location if already set to same location', () => {
             mockGameState.rankIndex = 0;
             envManager.updateLocation();
