@@ -1,7 +1,7 @@
 /**
  * ProgressBar.js
- * Progress bar component using Lit
- * Phase 2: Replaces manual progress bar DOM manipulation
+ * Reusable progress bar component using Lit
+ * Phase 2: Replaces document.createElement('div') calls
  */
 
 import { BaseComponent } from './BaseComponent.js';
@@ -18,33 +18,29 @@ export class ProgressBar extends BaseComponent {
     static styles = css`
         :host {
             display: block;
-        }
-
-        .progress-container {
             width: 100%;
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
+            height: 24px;
+            background: #e0e0e0;
+            border-radius: 8px;
             overflow: hidden;
+            position: relative;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #10b981);
-            transition: width 0.3s ease;
-            border-radius: 4px;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        .progress-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            color: white;
+            pointer-events: none;
         }
     `;
 
@@ -57,21 +53,16 @@ export class ProgressBar extends BaseComponent {
     }
 
     render() {
-        const percentage = Math.min((this.value / this.max) * 100, 100);
-
+        const percentage = this.calculatePercentage();
         return html`
-            <div class="progress-container">
-                ${this.label || this.showValue ? html`
-                    <div class="progress-label">
-                        <span>${this.label}</span>
-                        ${this.showValue ? html`<span>${this.value} / ${this.max}</span>` : ''}
-                    </div>
-                ` : ''}
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${percentage}%"></div>
-                </div>
-            </div>
+            <div class="progress-fill" style="width: ${percentage}%"></div>
+            ${this.showValue ? html`<div class="progress-label">${this.label ? this.label : `${this.value} / ${this.max}`}</div>` : ''}
         `;
+    }
+
+    calculatePercentage() {
+        if (this.max === 0) return 100; // Handle division by zero
+        return Math.min((this.value / this.max) * 100, 100);
     }
 }
 
