@@ -665,7 +665,9 @@ export class UnifiedMapSystem {
             'social': 0xa855f7,
             'training': 0xef4444,
             'business': 0x64748b,
-            'elite': 0xffd700
+            'elite': 0xffd700,
+            'investment': 0x0ea5e9,
+            'shopping': 0xec4899
         };
         
         const buildingSizes = {
