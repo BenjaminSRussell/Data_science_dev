@@ -397,6 +397,52 @@ export class DevMenu {
         }
     }
 
+    async testAllLocations() {
+        const resultsContainer = document.getElementById('dev-location-results');
+        const tester = window.devTools?.locationTester;
+
+        if (!tester) {
+            if (resultsContainer) {
+                resultsContainer.innerHTML = '<p style="color: #ff6b6b; font-size: 10px;">Location tester not available</p>';
+            }
+            return;
+        }
+
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '<p style="color: #4ecdc4; font-size: 10px;">Testing all locations...</p>';
+        }
+
+        try {
+            const results = await tester.testAllLocations();
+
+            if (resultsContainer) {
+                let html = `<p style="color: #4ecdc4; font-size: 10px; margin-bottom: 5px;">` +
+                    `Total: ${results.total} | Passed: ${results.passed} | Failed: ${results.failed} | Warnings: ${results.warnings}</p>`;
+
+                results.details.forEach(detail => {
+                    const status = detail.success && detail.errors.length === 0 ? '✓' :
+                        detail.errors.length > 0 ? '✗' : '!';
+                    const color = detail.success && detail.errors.length === 0 ? '#4ecdc4' :
+                        detail.errors.length > 0 ? '#ff6b6b' : '#ffd93d';
+                    html += `<div style="color: ${color}; font-size: 10px;">${status} ${detail.locationId}` +
+                        (detail.errors.length > 0 ? ` - ${detail.errors.join(', ')}` : '') +
+                        (detail.warnings.length > 0 ? ` (${detail.warnings.join(', ')})` : '') +
+                        `</div>`;
+                });
+
+                resultsContainer.innerHTML = html;
+            }
+
+            this.game.showToast(`Location tests: ${results.passed} passed, ${results.failed} failed, ${results.warnings} warnings`,
+                results.failed > 0 ? 'error' : 'success');
+        } catch (error) {
+            console.error('Error testing all locations:', error);
+            if (resultsContainer) {
+                resultsContainer.innerHTML = `<p style="color: #ff6b6b; font-size: 10px;">Error: ${error.message}</p>`;
+            }
+        }
+    }
+
     populateDialogue() {
         const container = document.getElementById('dev-dialogue');
         const npcManager = this.game.gameState?.npcManager;
