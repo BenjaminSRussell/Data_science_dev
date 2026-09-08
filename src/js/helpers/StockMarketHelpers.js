@@ -281,9 +281,6 @@ export function handleCrime(game, type, params) {
     const result = game.crimeSystem.commitCrime(type, params);
     if (result.success) {
         game.showToast(result.message, 'success');
-        if (result.profit) {
-            game.showToast(`Profit: $${result.profit}`, 'success');
-        }
         updateStockMarketScreen(game);
         game.uiUpdater.updateAllUI();
     } else {
