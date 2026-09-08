@@ -645,6 +645,18 @@ this.gameState.ratingSum = store.ratingSum;m;
     }
 
     /**
+     * Find the first empty save slot (0-4), or null if all are full
+     */
+    findEmptySaveSlot() {
+        for (let i = 0; i < 5; i++) {
+            if (!this.saveManager.hasSave(i)) {
+                return i;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Handle save slot selection
      */
     handleSlotSelection(slotIndex, isNewGame) {
@@ -796,10 +808,10 @@ this.gameState.ratingSum = store.ratingSum;m;
                         emptySlot = i;
                         break;
                     }
+                    this.handleSlotSelection(0, true);
+                } else {
+                    this.handleSlotSelection(emptySlot, true);
                 }
-                // If no empty slot, use slot 0 (will overwrite)
-                const slotToUse = emptySlot !== null ? emptySlot : 0;
-                this.handleSlotSelection(slotToUse, true);
             } else {
                 // Fallback: start game directly if SaveSlotManager not initialized
                 this.startNewGame();
