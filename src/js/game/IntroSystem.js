@@ -4,6 +4,8 @@
  * First thing shown after clicking "New Career"
  */
 
+import { logger } from '../utils/Logger.js';
+
 export class IntroSystem {
     constructor(game) {
         this.game = game;
