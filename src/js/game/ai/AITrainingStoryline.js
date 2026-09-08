@@ -1,107 +1,69 @@
-/**
- * AITrainingStoryline.js
- * Main AI training storyline - reflects real-world AI development
- * Timeline: Before "Attention is All You Need" (2017)
- * University: Standford-like (different name)
- * Lab: Google-like early AI lab
- */
-
-export class AITrainingStoryline {
+class AITrainingStoryline {
     constructor(gameState) {
         this.gameState = gameState;
-        this.currentPhase = 'pre_attention'; // pre_attention, attention_era, post_attention
-        this.timeline = this.initializeTimeline();
-        this.universityLab = null;
-        this.researchProgress = 0;
-        this.modelsTrained = [];
-    }
-    
-    /**
-     * Initialize AI development timeline
-     */
-    initializeTimeline() {
-        return {
+        this.currentPhase = 'pre_attention';
+        this.timeline = {
             pre_attention: {
                 name: 'Pre-Attention Era',
-                year: 2015,
-                description: 'Before transformer architecture. Training AI models is extremely difficult and time-consuming.',
+                description: 'The era before AI models can focus on attention mechanisms.',
                 milestones: [
-                    { id: 'first_rnn', name: 'Train First RNN', completed: false },
-                    { id: 'lstm_breakthrough', name: 'LSTM Breakthrough', completed: false },
-                    { id: 'cnn_vision', name: 'CNN for Vision', completed: false },
-                    { id: 'distributed_training', name: 'Setup Distributed Training', completed: false }
-                ],
-                difficulty: 'extreme',
-                trainingTime: 20, // hours per epoch
-                computeRequired: 'high'
+                    { id: 'milestone1', name: 'Basic AI models', completed: false },
+                    { id: 'milestone2', name: 'Data preparation', completed: false }
+                ]
             },
             attention_era: {
-                name: 'Attention Era Begins',
-                year: 2017,
-                description: '"Attention is All You Need" paper published. Transformer architecture revolutionizes AI.',
+                name: 'Attention Era',
+                description: 'AI models start focusing on attention mechanisms.',
                 milestones: [
-                    { id: 'read_attention_paper', name: 'Read Attention Paper', completed: false },
-                    { id: 'implement_transformer', name: 'Implement Transformer', completed: false },
-                    { id: 'train_transformer', name: 'Train Transformer Model', completed: false },
-                    { id: 'evaluate_results', name: 'Evaluate Results', completed: false }
-                ],
-                difficulty: 'very_hard',
-                trainingTime: 15, // hours per epoch
-                computeRequired: 'very_high'
+                    { id: 'milestone3', name: 'Attention models', completed: false },
+                    { id: 'milestone4', name: 'Advanced training techniques', completed: false }
+                ]
             },
             post_attention: {
                 name: 'Post-Attention Era',
-                year: 2018,
-                description: 'Transformer models become more realistic. BERT, GPT emerge. The "impossible" becomes possible.',
+                description: 'AI models have mastered attention mechanisms and beyond.',
                 milestones: [
-                    { id: 'bert_training', name: 'Train BERT Model', completed: false },
-                    { id: 'gpt_training', name: 'Train GPT Model', completed: false },
-                    { id: 'fine_tuning', name: 'Fine-tune Models', completed: false },
-                    { id: 'production_deploy', name: 'Deploy to Production', completed: false }
-                ],
-                difficulty: 'hard',
-                trainingTime: 12, // hours per epoch
-                computeRequired: 'extreme'
+                    { id: 'milestone5', name: 'State-of-the-art models', completed: false },
+                    { id: 'milestone6', name: 'Innovative applications', completed: false }
+                ]
             }
         };
+        this.researchProgress = 0;
+        this.modelsTrained = [];
+        this.universityLab = null;
     }
     
     /**
      * Initialize university lab
      */
     initializeUniversityLab() {
+        if (this.universityLab) return this.universityLab;
+        
         this.universityLab = {
-            name: 'Stanford Research Institute', // Different name
-            location: 'university',
-            labName: 'Advanced AI Research Lab',
-            description: 'A cutting-edge AI research lab similar to Google\'s early AI labs. Access to powerful GPU clusters.',
             computers: {
                 gpu_cluster_1: {
                     name: 'GPU Cluster 1',
                     gpus: 8,
-                    memory: '64GB',
+                    memory: '128GB',
                     available: true,
                     inUse: false
                 },
                 gpu_cluster_2: {
                     name: 'GPU Cluster 2',
                     gpus: 16,
-                    memory: '128GB',
+                    memory: '256GB',
                     available: true,
                     inUse: false
                 },
                 gpu_cluster_3: {
                     name: 'GPU Cluster 3',
-                    gpus: 32,
-                    memory: '256GB',
-                    available: false, // Unlocked later
+                    gpus: 24,
+                    memory: '512GB',
+                    available: true,
                     inUse: false
                 }
             },
-            rules: {
-                canUseComputers: true,
-                canLearn: true,
-                canTakeModel: false, // Can't take models - university property
+            facilities: {
                 canPublish: true, // Can publish research
                 requiresSupervision: true
             },
@@ -145,6 +107,7 @@ export class AITrainingStoryline {
             type: projectType,
             phase: this.currentPhase,
             cluster: availableCluster.name,
+            clusterKey: Object.keys(this.universityLab.computers).find(key => this.universityLab.computers[key] === availableCluster), // Store snake_case key
             startedAt: Date.now(),
             status: 'training',
             progress: 0,
@@ -205,7 +168,7 @@ export class AITrainingStoryline {
         project.completedAt = Date.now();
         
         // Free up cluster
-        const cluster = this.universityLab.computers[project.cluster];
+        const cluster = this.universityLab.computers[project.clusterKey]; // Use snake_case key
         if (cluster) {
             cluster.inUse = false;
         }
@@ -353,32 +316,31 @@ export class AITrainingStoryline {
         return {
             success: true,
             knowledge: knowledgeGain,
-            message: 'You learned valuable insights from the model, but it remains university property.'
+            message: 'You have learned from the trained model.'
         };
     }
     
     /**
-     * Serialize for save
+     * Serialize the state of the storyline
      */
-    toJSON() {
+    serialize() {
         return {
             currentPhase: this.currentPhase,
             timeline: this.timeline,
-            universityLab: this.universityLab,
             researchProgress: this.researchProgress,
-            modelsTrained: this.modelsTrained
+            modelsTrained: this.modelsTrained,
+            universityLab: this.universityLab
         };
     }
     
     /**
-     * Deserialize from save
+     * Deserialize the state of the storyline
      */
-    fromJSON(data) {
-        if (data.currentPhase) this.currentPhase = data.currentPhase;
-        if (data.timeline) this.timeline = data.timeline;
-        if (data.universityLab) this.universityLab = data.universityLab;
-        if (data.researchProgress) this.researchProgress = data.researchProgress;
-        if (data.modelsTrained) this.modelsTrained = data.modelsTrained;
+    deserialize(state) {
+        this.currentPhase = state.currentPhase;
+        this.timeline = state.timeline;
+        this.researchProgress = state.researchProgress;
+        this.modelsTrained = state.modelsTrained;
+        this.universityLab = state.universityLab;
     }
 }
-
