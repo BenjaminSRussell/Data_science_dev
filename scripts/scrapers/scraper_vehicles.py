@@ -145,4 +145,3 @@ class VehicleScraper:
 if __name__ == "__main__":
     scraper = VehicleScraper()
     scraper.run(target_count=300)
-
