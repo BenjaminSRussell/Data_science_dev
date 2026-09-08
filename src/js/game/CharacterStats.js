@@ -414,7 +414,11 @@ export class CharacterStats {
         return {
             stats: this.stats,
             xp: this.xp,
-            experience: this.xp // Keep for backward compatibility
+            experience: this.xp, // Keep for backward compatibility
+            ethics: this.ethics,
+            level: this.level,
+            visualStage: this.visualStage,
+            visuals: this.visuals
         };
     }
 
@@ -429,6 +433,18 @@ export class CharacterStats {
             this.xp = { ...this.xp, ...data.xp };
         } else if (data.experience) {
             this.xp = { ...this.xp, ...data.experience };
+        }
+        if (typeof data.ethics === 'number') {
+            this.ethics = data.ethics;
+        }
+        if (typeof data.level === 'number') {
+            this.level = data.level;
+        }
+        if (data.visualStage) {
+            this.visualStage = data.visualStage;
+        }
+        if (data.visuals) {
+            this.visuals = { ...this.visuals, ...data.visuals };
         }
     }
 }
