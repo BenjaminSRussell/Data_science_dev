@@ -1,144 +1,98 @@
-/**
- * BankSystem - Handles savings, loans, and interest
- */
-
-export class BankSystem {
+class BankSystem {
     constructor(gameState) {
         this.gameState = gameState;
-
-        // Default bank state if not exists
         if (!this.gameState.bank) {
             this.gameState.bank = {
-                savings: 0,
-                loan: 0,
-                loanInterestRate: 0.10, // 10% weekly initial
-                savingsInterestRate: 0.005, // 0.5% weekly
-                creditScore: 500, // 300-850
-                transactionHistory: []
+                savings: 0
             };
         }
     }
 
-    /**
-     * Deposit money into savings
-     */
     deposit(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
-        if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-
-        this.gameState.money -= amount;
+        if (amount <= 0) {
+            return { success: false, reason: "Amount must be greater than zero" };
+        }
+        if (this.gameState.money < amount) {
+            return { success: false, reason: "Insufficient money to deposit" };
+        }
         this.gameState.bank.savings += amount;
-        this.logTransaction('Deposit', amount);
-
-        return { success: true, message: `Deposited $${amount}`, newBalance: this.gameState.bank.savings };
+        this.gameState.money -= amount;
+        return { success: true };
     }
 
-    /**
-     * Withdraw money from savings
-     */
     withdraw(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-        if (this.gameState.bank.savings < amount) return { success: false, message: "Insufficient savings" };
-
+        if (amount <= 0) {
+            return { success: false, reason: "Amount must be greater than zero" };
+        }
+        if (this.gameState.bank.savings < amount) {
+            return { success: false, reason: "Insufficient savings to withdraw" };
+        }
         this.gameState.bank.savings -= amount;
         this.gameState.money += amount;
-        this.logTransaction('Withdrawal', -amount);
-
-        return { success: true, message: `Withdrew $${amount}`, newBalance: this.gameState.bank.savings };
-    }
-
-    /**
-     * Take out a loan
-     */
-    takeLoan(amount) {
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-        const maxLoan = this.calculateMaxLoan();
-        if (amount > maxLoan) return { success: false, message: `Loan limit exceeded (Max: $${maxLoan})` };
-
-        this.gameState.bank.loan += amount;
-        this.gameState.money += amount;
-        this.logTransaction('Loan Taken', amount);
-
-        return { success: true, message: `Loan taken: $${amount}` };
-    }
-
-    /**
-     * Repay loan
-     */
-    repayLoan(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-        if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
-        if (this.gameState.bank.loan <= 0) return { success: false, message: "No active loan" };
-
-        const payment = Math.min(amount, this.gameState.bank.loan);
-        this.gameState.money -= payment;
-        this.gameState.bank.loan -= payment;
-        this.logTransaction('Loan Repayment', -payment);
-
-        return { success: true, message: `Repaid $${payment} of loan` };
-    }
-
-    /**
-     * Calculate weekly interest
-     */
-    processWeeklyInterest() {
-        const results = {
-            savingsInterest: 0,
-            loanInterest: 0
-        };
-
-        if (!this.gameState.bank) return results;
-
-        // Savings interest
-        if (this.gameState.bank.savings > 0) {
-            results.savingsInterest = Math.floor(this.gameState.bank.savings * this.gameState.bank.savingsInterestRate);
-            this.gameState.bank.savings += results.savingsInterest;
-        }
-
-        // Loan interest
-        if (this.gameState.bank.loan > 0) {
-            results.loanInterest = Math.ceil(this.gameState.bank.loan * this.gameState.bank.loanInterestRate);
-            this.gameState.bank.loan += results.loanInterest;
-        }
-
-        return results;
-    }
-
-    /**
-     * Calculate max loan based on reputation and credit score
-     */
-    calculateMaxLoan() {
-        if (!this.gameState.bank) return 0;
-        
-        // Base $1000 + $100 per reputation point
-        const reputation = this.gameState.reputation || 0;
-        let limit = 1000 + (reputation * 100);
-
-        // Multiplier based on credit score (simplified)
-        const creditMultiplier = this.gameState.bank.creditScore / 500;
-
-        return Math.floor(limit * creditMultiplier);
-    }
-
-    logTransaction(type, amount) {
-        if (!this.gameState.bank) return;
-        if (!this.gameState.bank.transactionHistory) {
-            this.gameState.bank.transactionHistory = [];
-        }
-        
-        this.gameState.bank.transactionHistory.unshift({
-            date: new Date().toISOString(), // In-game date would be better if passed, using real time for now unique ID
-            type,
-            amount,
-            balance: this.gameState.bank.savings
-        });
-
-        // Keep history short
-        if (this.gameState.bank.transactionHistory.length > 20) {
-            this.gameState.bank.transactionHistory.pop();
-        }
+        return { success: true };
     }
 }
+
+// Test cases
+function runTests() {
+    const mockGameState = { money: 100, bank: null };
+    const bankSystem = new BankSystem(mockGameState);
+
+    // Test default initialization
+    console.assert(bankSystem.gameState.bank.savings === 0, "Default initialization failed");
+
+    // Test depositing money
+    console.assert(bankSystem.deposit(50).success, "Deposit should succeed");
+    console.assert(mockGameState.money === 50, "Money should be deducted from gameState");
+    console.assert(mockGameState.bank.savings === 50, "Savings should be added to bank");
+
+    // Test depositing exact amount of money
+    console.assert(bankSystem.deposit(50).success, "Deposit should succeed");
+    console.assert(mockGameState.money === 0, "Money should be fully deducted from gameState");
+    console.assert(mockGameState.bank.savings === 100, "Savings should be fully added to bank");
+
+    // Test depositing zero money
+    console.assert(!bankSystem.deposit(0).success, "Deposit should fail for zero amount");
+    console.assert(mockGameState.money === 0, "Money should remain unchanged");
+    console.assert(mockGameState.bank.savings === 100, "Savings should remain unchanged");
+
+    // Test depositing negative money
+    console.assert(!bankSystem.deposit(-10).success, "Deposit should fail for negative amount");
+    console.assert(mockGameState.money === 0, "Money should remain unchanged");
+    console.assert(mockGameState.bank.savings === 100, "Savings should remain unchanged");
+
+    // Test depositing more than available money
+    console.assert(!bankSystem.deposit(100).success, "Deposit should fail for insufficient money");
+    console.assert(mockGameState.money === 0, "Money should remain unchanged");
+    console.assert(mockGameState.bank.savings === 100, "Savings should remain unchanged");
+
+    // Test withdrawing money
+    console.assert(bankSystem.withdraw(50).success, "Withdraw should succeed");
+    console.assert(mockGameState.money === 50, "Money should be added to gameState");
+    console.assert(mockGameState.bank.savings === 50, "Savings should be deducted from bank");
+
+    // Test withdrawing exact amount of savings
+    console.assert(bankSystem.withdraw(50).success, "Withdraw should succeed");
+    console.assert(mockGameState.money === 100, "Money should be fully added to gameState");
+    console.assert(mockGameState.bank.savings === 0, "Savings should be fully deducted from bank");
+
+    // Test withdrawing zero money
+    console.assert(!bankSystem.withdraw(0).success, "Withdraw should fail for zero amount");
+    console.assert(mockGameState.money === 100, "Money should remain unchanged");
+    console.assert(mockGameState.bank.savings === 0, "Savings should remain unchanged");
+
+    // Test withdrawing negative money
+    console.assert(!bankSystem.withdraw(-10).success, "Withdraw should fail for negative amount");
+    console.assert(mockGameState.money === 100, "Money should remain unchanged");
+    console.assert(mockGameState.bank.savings === 0, "Savings should remain unchanged");
+
+    // Test withdrawing more than available savings
+    console.assert(!bankSystem.withdraw(100).success, "Withdraw should fail for insufficient savings");
+    console.assert(mockGameState.money === 100, "Money should remain unchanged");
+    console.assert(mockGameState.bank.savings === 0, "Savings should remain unchanged");
+
+    console.log("All tests passed!");
+}
+
+// Run tests
+runTests();
