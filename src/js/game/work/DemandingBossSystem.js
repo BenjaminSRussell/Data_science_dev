@@ -10,7 +10,6 @@ export class DemandingBossSystem {
         this.boss = null;
         this.demandLevel = 50; // 0-100
         this.taskFrequency = 3; // Tasks per week
-        this.satisfaction = 50; // Boss satisfaction
     }
     
     /**
@@ -45,7 +44,7 @@ export class DemandingBossSystem {
             deadline: deadline,
             reward: reward,
             requirements: this.generateRequirements(),
-            bossSatisfaction: this.satisfaction
+            bossSatisfaction: this.boss.satisfaction
         };
     }
     
@@ -125,10 +124,10 @@ export class DemandingBossSystem {
             satisfactionChange -= 10;
         }
         
-        this.satisfaction = Math.max(0, Math.min(100, this.satisfaction + satisfactionChange));
+        this.boss.satisfaction = Math.max(0, Math.min(100, this.boss.satisfaction + satisfactionChange));
         
         return {
-            satisfaction: this.satisfaction,
+            satisfaction: this.boss.satisfaction,
             change: satisfactionChange,
             message: this.getBossMessage(satisfactionChange)
         };
@@ -151,9 +150,9 @@ export class DemandingBossSystem {
      * Get boss dialogue
      */
     getBossDialogue() {
-        if (this.satisfaction < 30) {
+        if (this.boss.satisfaction < 30) {
             return 'Your performance has been disappointing. I need to see improvement immediately.';
-        } else if (this.satisfaction < 60) {
+        } else if (this.boss.satisfaction < 60) {
             return 'You are meeting expectations, but I know you can do better.';
         } else {
             return 'Good work. Continue at this level and we will discuss your future here.';
