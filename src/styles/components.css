@@ -531,11 +531,11 @@
 }
 
 .rating-star.filled {
-    color: var(#666666);
+    color: #666666;
 }
 
 .rating-star.half {
-    background: linear-gradient(90deg, var(#666666) 50%, var(--color-text-muted) 50%);
+    background: linear-gradient(90deg, #666666 50%, var(--color-text-muted) 50%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
