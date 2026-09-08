@@ -240,6 +240,7 @@ export function handleBuyStock(game, stockId) {
     if (!qty || qty <= 0) return;
 
     const result = game.stockMarket?.buyStock(stockId, qty);
+    if (!result) return;
     if (result.success) {
         game.showToast(`Bought ${qty} shares of ${result.stock.ticker}`, 'success');
         updateStockMarketScreen(game);
@@ -257,6 +258,7 @@ export function handleSellStock(game, stockId) {
     if (!qty || qty <= 0) return;
 
     const result = game.stockMarket?.sellStock(stockId, qty);
+    if (!result) return;
     if (result.success) {
         game.showToast(`Sold ${qty} shares of ${result.stock.ticker}`, 'success');
         updateStockMarketScreen(game);
