@@ -278,4 +278,24 @@ export class StoryBeatsSystem {
                 : 0
         };
     }
+
+    /**
+     * Serialize state for saving
+     */
+    toJSON() {
+        return {
+            completedBeats: this.completedBeats,
+            pendingBeats: this.pendingBeats
+        };
+    }
+
+    /**
+     * Load state from saved data
+     */
+    fromJSON(data) {
+        if (!data) return;
+        this.completedBeats = data.completedBeats || [];
+        this.pendingBeats = data.pendingBeats || [];
+        this.gameState.completedStoryBeats = this.completedBeats;
+    }
 }
