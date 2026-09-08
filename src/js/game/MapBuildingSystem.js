@@ -5,11 +5,12 @@
  */
 
 export class MapBuildingSystem {
-    constructor(gridSystem, roadSystem, blockSystem, zoneSystem = null) {
+    constructor(gridSystem, roadSystem, blockSystem, zoneSystem = null, assetPlacer = null) {
         this.gridSystem = gridSystem;
         this.roadSystem = roadSystem;
         this.blockSystem = blockSystem;
         this.zoneSystem = zoneSystem;
+        this.assetPlacer = assetPlacer;
         this.buildings = [];
         this.buildingGrid = new Map(); // Track occupied grid cells
     }
@@ -171,6 +172,14 @@ export class MapBuildingSystem {
                 const key = this.gridSystem.getGridKey(x, y);
                 if (this.buildingGrid.has(key)) {
                     return false;
+                }
+                
+                // Check if an asset occupies this cell
+                if (this.assetPlacer) {
+                    const asset = this.assetPlacer.getAssetAt(x, y);
+                    if (asset) {
+                        return false;
+                    }
                 }
             }
         }
