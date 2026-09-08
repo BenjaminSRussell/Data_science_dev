@@ -526,7 +526,6 @@ export class UIUpdater {
             `;
         }).join('');
         grid.innerHTML = libraryHTML;
-        grid.innerHTML = libraryHTML;
     }
 
     /**
