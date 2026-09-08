@@ -947,7 +947,9 @@ this.gameState.ratingSum = store.ratingSum;m;
                 return;
             }
             const result = this.timeManager.sleep();
-            this.handleTimeAdvance(result.slotsSkipped); // triggers new day
+            // sleep() already advanced the clock; pass its events through so
+            // the day/week effects run exactly once (no double advance).
+            this.handleTimeAdvance(result.slotsSkipped, result.events);
             this.updateMapScreen();
             this.showToast('You slept well and feel refreshed!', 'success');
         });
@@ -2691,13 +2693,15 @@ this.gameState.ratingSum = store.ratingSum;m;
         MapHelpers.handleLocationAction(this, action);
     }
 
-    handleTimeAdvance(slots) {
+    handleTimeAdvance(slots, precomputedEvents = null) {
         if (!this.timeManager) {
             return;
         }
-        if (slots <= 0) return;
+        if (precomputedEvents === null && slots <= 0) return;
 
-        const events = this.timeManager.advanceTime(slots);
+        // If the caller already advanced time (e.g. sleep()), consume the
+        // events it returned instead of advancing a second time.
+        const events = precomputedEvents ?? this.timeManager.advanceTime(slots);
 
         // Handle events (new day, etc)
         events.forEach(event => {
