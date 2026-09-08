@@ -316,6 +316,10 @@ export class GameState {
                 closedIssues: this.githubIssuesSystem.closedIssues,
                 pullRequests: this.githubIssuesSystem.pullRequests
             } : null,
+            ideSystem: this.ideSystem ? {
+                currentProject: this.ideSystem.currentProject,
+                completedProjects: this.ideSystem.completedProjects
+            } : null,
             researchPaperSystem: this.researchPaperSystem?.toJSON(),
             gameEndingSystem: this.gameEndingSystem?.toJSON(),
             emotionalBreakdownSystem: this.emotionalBreakdownSystem ? {
@@ -396,6 +400,10 @@ export class GameState {
             this.githubIssuesSystem.openIssues = data.githubIssuesSystem.openIssues || [];
             this.githubIssuesSystem.closedIssues = data.githubIssuesSystem.closedIssues || [];
             this.githubIssuesSystem.pullRequests = data.githubIssuesSystem.pullRequests || [];
+        }
+        if (this.ideSystem && data.ideSystem) {
+            this.ideSystem.currentProject = data.ideSystem.currentProject || null;
+            this.ideSystem.completedProjects = data.ideSystem.completedProjects || [];
         }
         if (this.researchPaperSystem && data.researchPaperSystem) {
             this.researchPaperSystem.fromJSON(data.researchPaperSystem);
