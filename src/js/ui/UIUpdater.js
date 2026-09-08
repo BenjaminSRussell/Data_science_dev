@@ -365,7 +365,7 @@ export class UIUpdater {
             const workBtn = document.getElementById('btn-work-project');
             workBtn.onclick = () => {
                 // Call main game work handler
-                game.handleWorkOnProject();
+                this.game.handleWorkOnProject();
             };
 
         } else {
