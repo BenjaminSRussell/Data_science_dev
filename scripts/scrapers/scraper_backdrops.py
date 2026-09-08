@@ -87,20 +87,23 @@ class BackdropScraper:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    for photo in data.get('photos', [])[:max_results]:
-                        photo_url = photo['src']['large']
-                        filename = f"pexels_{location}_{photo['id']}.jpg"
-                        output_path = location_dir / filename
-                        
-                        if not output_path.exists() and self.download_file(photo_url, output_path):
-                            downloaded += 1
-                            self.downloaded.append({
-                                'source': 'Pexels',
-                                'location': location,
-                                'url': photo_url,
-                                'path': str(output_path),
-                                'license': 'Pexels License'
-                            })
+                    for photo in data.get('photos', []):
+                        try:
+                            photo_url = photo['src']['large']
+                            filename = f"pexels_{location}_{photo['id']}.jpg"
+                            output_path = location_dir / filename
+                            
+                            if not output_path.exists() and self.download_file(photo_url, output_path):
+                                downloaded += 1
+                                self.downloaded.append({
+                                    'source': 'Pexels',
+                                    'location': location,
+                                    'url': photo_url,
+                                    'path': str(output_path),
+                                    'license': 'Pexels License'
+                                })
+                        except KeyError as e:
+                            logger.error(f"KeyError in photo {photo.get('id')}: {e}")
             except Exception as e:
                 logger.error(f"Error with Pexels for {location}: {e}")
         
@@ -135,20 +138,23 @@ class BackdropScraper:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    for photo in data.get('results', [])[:max_results]:
-                        photo_url = photo['urls']['regular']
-                        filename = f"unsplash_{location}_{photo['id']}.jpg"
-                        output_path = location_dir / filename
-                        
-                        if not output_path.exists() and self.download_file(photo_url, output_path):
-                            downloaded += 1
-                            self.downloaded.append({
-                                'source': 'Unsplash',
-                                'location': location,
-                                'url': photo_url,
-                                'path': str(output_path),
-                                'license': 'Unsplash License'
-                            })
+                    for photo in data.get('results', []):
+                        try:
+                            photo_url = photo['urls']['regular']
+                            filename = f"unsplash_{location}_{photo['id']}.jpg"
+                            output_path = location_dir / filename
+                            
+                            if not output_path.exists() and self.download_file(photo_url, output_path):
+                                downloaded += 1
+                                self.downloaded.append({
+                                    'source': 'Unsplash',
+                                    'location': location,
+                                    'url': photo_url,
+                                    'path': str(output_path),
+                                    'license': 'Unsplash License'
+                                })
+                        except KeyError as e:
+                            logger.error(f"KeyError in photo {photo.get('id')}: {e}")
             except Exception as e:
                 logger.error(f"Error with Unsplash for {location}: {e}")
         
