@@ -197,6 +197,10 @@ export class GitHubIssuesSystem {
         
         this.pullRequests.push(pullRequest);
         
+        // Simulate a reviewer approving the PR so the review gate in
+        // mergePullRequest() can be satisfied.
+        this.addReview(pullRequest.id, 'approved');
+        
         // Move issue to closed
         this.openIssues = this.openIssues.filter(i => i.id !== issueId);
         issue.status = 'closed';
@@ -219,6 +223,31 @@ export class GitHubIssuesSystem {
             issue: issue,
             message: `Created pull request #${pullRequest.number} for issue #${issue.number}`
         };
+    }
+    
+    /**
+     * Add a review to a pull request
+     * @param {string} prId - Pull request ID
+     * @param {string} state - Review state ('approved', 'changes_requested', 'commented')
+     * @param {string} reviewer - Reviewer name
+     * @returns {object} Result object
+     */
+    addReview(prId, state = 'approved', reviewer = 'reviewer') {
+        const pr = this.pullRequests.find(p => p.id === prId);
+        if (!pr) {
+            return { success: false, message: 'Pull request not found' };
+        }
+        if (pr.status !== 'open') {
+            return { success: false, message: 'Pull request is not open' };
+        }
+        pr.reviews.push({
+            id: `review_${Date.now()}`,
+            reviewer,
+            state,
+            body: state === 'approved' ? 'LGTM!' : 'Please address the requested changes.',
+            createdAt: Date.now()
+        });
+        return { success: true, review: pr.reviews[pr.reviews.length - 1] };
     }
     
     /**

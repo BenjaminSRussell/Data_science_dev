@@ -49,10 +49,6 @@ export class GameEndingSystem {
         const ethicsCheck = this.checkEthicsEnding();
         if (ethicsCheck) return ethicsCheck;
 
-        // Check company ownership
-        const companyCheck = this.checkCompanyOwnership();
-        if (companyCheck) return companyCheck;
-
         // Check research breakthrough
         const researchCheck = this.checkResearchBreakthrough();
         if (researchCheck) return researchCheck;
@@ -193,30 +189,11 @@ export class GameEndingSystem {
     }
 
     /**
-     * Check for company ownership
-     */
-    checkCompanyOwnership() {
-        if (this.gameState.investmentEcommerceSystem) {
-            const company = this.gameState.investmentEcommerceSystem?.getCompany?.();
-            if (company && company.ownership >= 100) {
-                return {
-                    type: 'company_owner',
-                    title: 'Company Owner',
-                    message: 'You\'ve built and own your own company! Entrepreneurship achieved!',
-                    showEnding: true
-                };
-            }
-        }
-        return null;
-    }
-
-    /**
      * Check for research breakthrough
      */
     checkResearchBreakthrough() {
         if (this.gameState.researchPaperSystem) {
-            const papers = this.gameState.researchPaperSystem?.getPublishedPapers?.() || [];
-            const breakthroughPapers = papers.filter(p => p.impact && p.impact.includes('breakthrough'));
+            const breakthroughPapers = this.gameState.researchPaperSystem?.getBreakthroughPapers?.() || [];
             if (breakthroughPapers.length >= 3) {
                 return {
                     type: 'research_master',
@@ -236,7 +213,7 @@ export class GameEndingSystem {
         if (this.gameState.educationSystem) {
             const completedCourses = this.gameState.educationSystem?.completedCourses || [];
             const degrees = this.gameState.educationSystem?.degrees || [];
-            const allDegrees = degrees.every(d => d.acquired);
+            const allDegrees = Object.values(degrees).every(d => d.acquired);
             
             if (completedCourses.length >= 10 && allDegrees) {
                 return {

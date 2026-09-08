@@ -100,8 +100,11 @@ export class ClientManager {
             critical: 60
         };
 
+        const now = Date.now();
+        const baseTimeMs = baseTime[urgency] * 1000;
+
         return {
-            id: `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `job_${now}_${Math.random().toString(36).substr(2, 9)}`,
             clientType: clientType,
             title: jobTypes[Math.floor(Math.random() * jobTypes.length)],
             description: `${clientType.name} needs a ${jobTypes[Math.floor(Math.random() * jobTypes.length)].toLowerCase()}`,
@@ -112,8 +115,9 @@ export class ClientManager {
             complexity: clientType.dataComplexity,
             data: null, // Data is assigned when job is accepted
             status: 'pending',
-            createdAt: Date.now(),
-            expiresAt: Date.now() + (1000 * 60 * 5), // 5 minute window to accept
+            createdAt: now,
+            expiresAt: now + baseTimeMs, // Urgency-based window to accept
+            deadline: now + baseTimeMs, // In-progress deadline once accepted
             progress: 0
         };
     }

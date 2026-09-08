@@ -106,18 +106,22 @@ export class Portfolio {
     }
 
     buy(stockId, quantity, price) {
+        if (!Number.isInteger(quantity) || quantity <= 0) return;
         if (!this.holdings[stockId]) this.holdings[stockId] = 0;
         this.holdings[stockId] += quantity;
         this.totalInvested += quantity * price;
     }
 
     sell(stockId, quantity, price) {
+        if (!Number.isInteger(quantity) || quantity <= 0) return 0;
         if (!this.holdings[stockId] || this.holdings[stockId] < quantity) return 0;
-        this.holdings[stockId] -= quantity;
 
-        // Simplified cost basis logic: assume selling reduces invested amount proportionally?
-        // Actually, profit is calculated at sell time.
-        // For totalInvested tracking, it's tricky. Let's just track current value.
+        // Reduce totalInvested proportionally using weighted-average cost basis,
+        // computed before mutating holdings.
+        const totalShares = this.holdings[stockId] + quantity;
+        this.totalInvested -= (this.totalInvested / totalShares) * quantity;
+
+        this.holdings[stockId] -= quantity;
 
         if (this.holdings[stockId] === 0) delete this.holdings[stockId];
         return quantity * price;
@@ -277,7 +281,7 @@ export class StockMarket {
         });
 
         // Process world events (can cause large market movements)
-        worldEvents.forEach(event => {
+        this.activeWorldEvents.forEach(event => {
             if (event.type === 'market_crash') {
                 // Global crash affects all markets
                 Object.keys(this.marketTrends).forEach(market => {
@@ -402,14 +406,15 @@ export class StockMarket {
         stock.price = stock.price * magnitude;
         stock.history.push(stock.price);
 
-        // Add volatility
-        stock.volatility += 0.2; // Becomes unstable
+        // Add volatility (capped so repeated manipulation can't push it past sane bounds)
+        stock.volatility = Math.min(stock.volatility + 0.2, 0.5); // Becomes unstable
 
 
         return true;
     }
 
     buyStock(stockId, quantity) {
+        if (!Number.isInteger(quantity) || quantity <= 0) return { success: false, reason: 'Invalid quantity' };
         // Legal Check: Needs Series 7 for large trades or specific types?
         // Let's enforce it for ALL trades to force the license purchase
         if (!this.gameState.legalSystem?.hasLicense('series_7') && !this.gameState.legalSystem?.hasLicense('series_63')) {
@@ -433,6 +438,7 @@ export class StockMarket {
     }
 
     sellStock(stockId, quantity) {
+        if (!Number.isInteger(quantity) || quantity <= 0) return { success: false, reason: 'Invalid quantity' };
         // Selling also requires license ideally
         if (!this.gameState.legalSystem?.hasLicense('series_7') && this.gameState.characterStats?.ethics > -20) {
             return { success: false, reason: "You need a Series 7 License to trade." };

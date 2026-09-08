@@ -1,9 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
-
-const rootDir = process.cwd();
-const srcDir = path.join(rootDir, 'src');
 
 // Check if srcDir exists before proceeding
 if (!fs.existsSync(srcDir)) {
@@ -28,25 +24,38 @@ function getAllFiles(dir, exts) {
     return results;
 }
 
-const jsFiles = getAllFiles(srcDir, ['.js', '.json', '.css']);
-const assets = new Set();
+module.exports = {
+    getAllFiles
+};
 
-// Regex to find paths roughly looking like assets
-// Matches: /assets/..., assets/..., /downloaded_assets/...
-const regex = /['"](\/?(?:assets|downloaded_assets)\/[^'"]+)['"]/g;
+if (require.main === module) {
+    const rootDir = process.cwd();
+    const srcDir = path.join(rootDir, 'src');
 
-console.log(`Scanning ${jsFiles.length} files for asset references...`);
-
-jsFiles.forEach(file => {
-    const content = fs.readFileSync(file, 'utf8');
+function extractAssetReferences(content) {
+    const assetPaths = new Set();
     let match;
     while ((match = regex.exec(content)) !== null) {
         let assetPath = match[1];
-        // Clean path
         if (assetPath.startsWith('/')) assetPath = assetPath.substring(1);
-        assets.add(assetPath);
+        assetPaths.add(assetPath);
     }
+    return Array.from(assetPaths);
+}
+
+module.exports = {
+    extractAssetReferences
+};
+
+jsFiles.forEach(file => {
+    const content = fs.readFileSync(file, 'utf8');
+    const assetPaths = extractAssetReferences(content);
+    assetPaths.forEach(assetPath => {
+        assets.add(assetPath);
+    });
 });
+
+console.log(`Scanning ${jsFiles.length} files for asset references...`);
 
 console.log(`Found ${assets.size} unique asset references.`);
 
@@ -79,10 +88,12 @@ assets.forEach(asset => {
         }
     }
 
-    if (!exists) {
-        console.log(`[MISSING] ${asset}`);
-        missingCount++;
-    }
-});
+        // Also handle URL encoded spaces just in case
+        if (!exists) {
+            tryPath1 = path.join(rootDir, 'src', decodeURIComponent(asset));
+            tryPath2 = path.join(rootDir, decodeURIComponent(asset));
+            if (fs.existsSync(tryPath1)) exists = true;
+            else if (fs.existsSync(tryPath2)) exists = true;
+        }
 
 console.log(`Total missing assets: ${missingCount}`);

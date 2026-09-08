@@ -350,6 +350,7 @@ export class WorldMap {
 
         // Cache for accessible locations (invalidated on state change)
         this._accessibleCache = null;
+        this._cacheKey = null;
         this._cacheInvalid = true;
     }
 
@@ -358,6 +359,24 @@ export class WorldMap {
      */
     getLocation(locationId) {
         return LOCATIONS_MAP.get(locationId);
+    }
+
+    /**
+     * Get all locations
+     */
+    getLocations() {
+        return LOCATIONS;
+    }
+
+    /**
+     * Set current location without accessibility/vehicle checks (dev tooling)
+     */
+    setCurrentLocation(locationId) {
+        if (LOCATIONS_MAP.has(locationId)) {
+            this.currentLocation = locationId;
+            this.visitedLocations.add(locationId);
+            this._invalidateCache();
+        }
     }
 
     /**
@@ -376,11 +395,28 @@ export class WorldMap {
     }
 
     /**
+     * Cheap hash of the state that affects accessibility.
+     * Recomputed on every call so money/reputation/stat changes
+     * invalidate the cache without needing explicit invalidation.
+     */
+    _accessibilityKey() {
+        const stats = this.gameState.characterStats;
+        const statKeys = [];
+        for (const location of LOCATIONS) {
+            const req = location.unlockRequirement;
+            if (req?.stat) statKeys.push(req.stat);
+        }
+        const statPart = statKeys.map(k => `${k}:${stats?.getStat(k) || 0}`).join(',');
+        return `${this.gameState.money}|${this.gameState.reputation}|${this.currentVehicle}|${statPart}`;
+    }
+
+    /**
      * Get all accessible locations - O(n) with caching
      */
     getAccessibleLocations() {
-        // Return cached result if valid
-        if (!this._cacheInvalid && this._accessibleCache) {
+        // Return cached result if the accessibility-relevant state is unchanged
+        const key = this._accessibilityKey();
+        if (!this._cacheInvalid && this._accessibleCache && this._cacheKey === key) {
             return this._accessibleCache;
         }
 
@@ -411,9 +447,20 @@ export class WorldMap {
 
         // Cache result
         this._accessibleCache = accessible;
+        this._cacheKey = key;
         this._cacheInvalid = false;
 
         return accessible;
+    }
+
+    /**
+     * Calculate the actual time cost (in slots) of traveling to a location
+     * with the current vehicle - O(1)
+     */
+    calculateTravelTime(location) {
+        const vehicle = VEHICLES_MAP.get(this.currentVehicle);
+        const baseTravelTime = location.travelTime;
+        return Math.max(0, Math.ceil(baseTravelTime / vehicle.travelSpeed));
     }
 
     /**
@@ -431,7 +478,7 @@ export class WorldMap {
             return { can: false, reason: 'Location not accessible with current vehicle/stats' };
         }
 
-        return { can: true, travelTime: location.travelTime };
+        return { can: true, travelTime: this.calculateTravelTime(location) };
     }
 
     /**
@@ -442,11 +489,9 @@ export class WorldMap {
         if (!check.can) return check;
 
         const location = LOCATIONS_MAP.get(locationId);
-        const vehicle = VEHICLES_MAP.get(this.currentVehicle);
 
         // Calculate travel time
-        const baseTravelTime = location.travelTime;
-        const actualSlots = Math.max(0, Math.ceil(baseTravelTime / vehicle.travelSpeed));
+        const actualSlots = this.calculateTravelTime(location);
 
         this.currentLocation = locationId;
         this.visitedLocations.add(locationId); // Set.add is O(1)

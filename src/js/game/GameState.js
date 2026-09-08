@@ -10,7 +10,6 @@ import { WorkInteractionSystem } from './WorkInteractionSystem.js';
 import { RealisticDialogueSystem } from './RealisticDialogueSystem.js';
 import { RelationshipEmotionSystem } from './RelationshipEmotionSystem.js';
 import { WorldEvolutionSystem } from './WorldEvolutionSystem.js';
-import { InvestmentEcommerceSystem } from './InvestmentEcommerceSystem.js';
 import { StorylineManager } from './StorylineManager.js';
 import { MapProgressionSystem } from './MapProgressionSystem.js';
 import { IDESystem } from './IDESystem.js';
@@ -39,7 +38,7 @@ export class GameState {
         this.perfectScores = 0;
         this.totalEarned = 0;
         this.totalSpent = 0;
-        this.weeklyIncome = 0; // Track income for tax calculation
+        this.weeklyIncome = data.weeklyIncome ?? 0; // Track income for tax calculation
         this.startTime = Date.now();
         this.totalRatings = 0;
         this.ratingSum = 0;
@@ -282,6 +281,11 @@ export class GameState {
             soundEnabled: this.soundEnabled,
             musicEnabled: this.musicEnabled,
             unlockedLibraries: this.unlockedLibraries || [],
+            currentTask: this.currentTask,
+            currentLocation: this.currentLocation,
+            chartConfig: this.chartConfig,
+            housingLevel: this.housingLevel,
+            officeLevel: this.officeLevel,
 
             // Sub-systems
             worldMap: this.worldMap?.toJSON(),
@@ -312,7 +316,12 @@ export class GameState {
                 closedIssues: this.githubIssuesSystem.closedIssues,
                 pullRequests: this.githubIssuesSystem.pullRequests
             } : null,
+            ideSystem: this.ideSystem ? {
+                currentProject: this.ideSystem.currentProject,
+                completedProjects: this.ideSystem.completedProjects
+            } : null,
             researchPaperSystem: this.researchPaperSystem?.toJSON(),
+            gameEndingSystem: this.gameEndingSystem?.toJSON(),
             emotionalBreakdownSystem: this.emotionalBreakdownSystem ? {
                 activeBreakdowns: Array.from(this.emotionalBreakdownSystem.activeBreakdowns.values()),
                 breakdownHistory: this.emotionalBreakdownSystem.breakdownHistory
@@ -320,7 +329,8 @@ export class GameState {
             
             // Phase 1 Visual Systems (save quality settings)
             performanceManager: this.performanceManager ? {
-                quality: this.performanceManager.quality
+                quality: this.performanceManager.quality,
+                autoMode: this.performanceManager.autoMode
             } : null
         };
     }
@@ -350,6 +360,18 @@ export class GameState {
         this.soundEnabled = data.soundEnabled ?? true;
         this.musicEnabled = data.musicEnabled ?? true;
         this.unlockedLibraries = data.unlockedLibraries || [];
+        this.currentTask = data.currentTask ?? null;
+        this.currentLocation = data.currentLocation ?? 'apartment';
+        this.chartConfig = data.chartConfig ?? {
+            type: 'bar',
+            palette: 'corporate',
+            showLegend: true,
+            showGrid: true,
+            showDataLabels: false,
+            title: ''
+        };
+        this.housingLevel = data.housingLevel ?? 'apartment';
+        this.officeLevel = data.officeLevel ?? 'small';
 
         // Restore sub-systems
         if (this.worldMap && data.worldMap) this.worldMap.fromJSON(data.worldMap);
@@ -380,10 +402,19 @@ export class GameState {
             this.githubIssuesSystem.closedIssues = data.githubIssuesSystem.closedIssues || [];
             this.githubIssuesSystem.pullRequests = data.githubIssuesSystem.pullRequests || [];
         }
+        if (this.ideSystem && data.ideSystem) {
+            this.ideSystem.currentProject = data.ideSystem.currentProject || null;
+            this.ideSystem.completedProjects = data.ideSystem.completedProjects || [];
+        }
         if (this.researchPaperSystem && data.researchPaperSystem) {
             this.researchPaperSystem.fromJSON(data.researchPaperSystem);
         }
+        if (this.gameEndingSystem && data.gameEndingSystem) this.gameEndingSystem.fromJSON(data.gameEndingSystem);
         if (this.emotionalBreakdownSystem && data.emotionalBreakdownSystem) {
+            // Restore active breakdowns (saved as an array of {id, ...} objects)
+            this.emotionalBreakdownSystem.activeBreakdowns = new Map(
+                (data.emotionalBreakdownSystem.activeBreakdowns || []).map(b => [b.id, b])
+            );
             // Restore breakdown history
             this.emotionalBreakdownSystem.breakdownHistory = data.emotionalBreakdownSystem.breakdownHistory || [];
         }
@@ -391,6 +422,9 @@ export class GameState {
         // Restore Phase 1 Visual Systems settings
         if (this.performanceManager && data.performanceManager) {
             this.performanceManager.setQuality(data.performanceManager.quality || 'auto');
+            // Restore auto mode flag (setQuality('auto') re-enables it; a concrete
+            // level disables it, matching the saved autoMode value)
+            this.performanceManager.autoMode = data.performanceManager.autoMode ?? (data.performanceManager.quality === 'auto');
         }
     }
 }

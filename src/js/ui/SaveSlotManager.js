@@ -2,7 +2,7 @@
  * SaveSlotManager - Manages save slot display and interactions in the main menu
  */
 
-import { SaveManager } from '../save/SaveManager.js';
+import { SaveManager, MAX_SAVE_SLOTS } from '../save/SaveManager.js';
 import { RANKS } from '../data/ranks.js';
 
 export class SaveSlotManager {
@@ -257,6 +257,9 @@ export class SaveSlotManager {
             }
         }
 
+        // Track the selected slot and update the visual highlight
+        this.setCurrentSlot(emptySlot);
+
         if (this.onSlotSelected) {
             this.onSlotSelected(emptySlot, true);
         }
@@ -276,10 +279,25 @@ export class SaveSlotManager {
             item.innerHTML = this.createFilledSlotHTML(slotInfo);
         }
 
+        // Make the row keyboard-accessible like the "Start New Game" button
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('aria-label', slotInfo.isEmpty
+            ? `Start new game in slot ${slotIndex + 1}`
+            : `Load game from slot ${slotIndex + 1}`);
+
         // Add click handler
         item.addEventListener('click', (e) => {
             if (e.target.closest('.slot-btn-grey') || e.target.closest('.slot-menu')) return;
             this.handleSlotClick(slotIndex, slotInfo.isEmpty);
+        });
+
+        // Add keyboard handler (Enter/Space)
+        item.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                this.handleSlotClick(slotIndex, slotInfo.isEmpty);
+            }
         });
 
         // Add context menu for filled slots
@@ -339,7 +357,7 @@ export class SaveSlotManager {
             <div class="slot-item-content">
                 <div class="slot-item-header">
                     <div class="slot-item-rank">${rank.title}</div>
-                    <button class="slot-btn-grey" aria-label="Slot options">⋯</button>
+                    <button class="slot-btn-grey" aria-label="Slot options" aria-haspopup="true" aria-expanded="false">⋯</button>
                 </div>
                 <div class="slot-item-title">${slotName}</div>
                 <div class="slot-item-stats">
@@ -351,6 +369,7 @@ export class SaveSlotManager {
                 </div>
                 <div class="slot-item-footer">
                     <span class="slot-item-last-played">${lastPlayedText}</span>
+                    <span class="slot-item-completion">${completion}% complete</span>
                 </div>
             </div>
         `;
@@ -372,6 +391,7 @@ export class SaveSlotManager {
                 <button class="menu-item" data-action="rename">Rename</button>
                 <button class="menu-item" data-action="duplicate">Duplicate</button>
                 <button class="menu-item" data-action="export">Export</button>
+                <button class="menu-item" data-action="import">Import</button>
                 <button class="menu-item danger" data-action="delete">Delete</button>
             `;
             card.appendChild(menu);
@@ -389,12 +409,23 @@ export class SaveSlotManager {
         menuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggleSlotMenu(card);
+            menuBtn.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
         });
 
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
             if (!card.contains(e.target)) {
                 menu.classList.add('hidden');
+                menuBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Close menu when Escape is pressed
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+                menuBtn.setAttribute('aria-expanded', 'false');
+                menuBtn.focus();
             }
         });
     }
@@ -418,6 +449,9 @@ export class SaveSlotManager {
      * Handle slot click
      */
     handleSlotClick(slotIndex, isEmpty) {
+        // Track the selected slot and update the visual highlight
+        this.setCurrentSlot(slotIndex);
+
         if (isEmpty) {
             // Start new game in this slot
             if (this.onSlotSelected) {
@@ -440,6 +474,8 @@ export class SaveSlotManager {
 
         switch (action) {
             case 'load':
+                // Track the selected slot and update the visual highlight
+                this.setCurrentSlot(slotIndex);
                 if (this.onSlotSelected) {
                     this.onSlotSelected(slotIndex, false);
                 }
@@ -455,6 +491,10 @@ export class SaveSlotManager {
 
             case 'export':
                 this.exportSlot(slotIndex);
+                break;
+
+            case 'import':
+                this.importSlot(slotIndex);
                 break;
 
             case 'delete':
@@ -483,7 +523,7 @@ export class SaveSlotManager {
     duplicateSlot(slotIndex) {
         // Find next empty slot
         let targetSlot = null;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
             if (i !== slotIndex && this.saveManager.hasSave(i) === false) {
                 targetSlot = i;
                 break;
@@ -530,6 +570,44 @@ export class SaveSlotManager {
         if (this.saveManager.game && this.saveManager.game.showToast) {
             this.saveManager.game.showToast('Save exported successfully!', 'success');
         }
+    }
+
+    /**
+     * Import a save slot from a file
+     */
+    importSlot(slotIndex) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.txt';
+
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const text = event.target.result;
+                const success = this.saveManager.importSave(text, this.saveManager.game, slotIndex);
+                if (success) {
+                    this.renderSlots();
+                    if (this.saveManager.game && this.saveManager.game.showToast) {
+                        this.saveManager.game.showToast('Save imported successfully!', 'success');
+                    }
+                } else {
+                    if (this.saveManager.game && this.saveManager.game.showError) {
+                        this.saveManager.game.showError('Failed to import save.');
+                    }
+                }
+            };
+            reader.onerror = () => {
+                if (this.saveManager.game && this.saveManager.game.showError) {
+                    this.saveManager.game.showError('Failed to read file.');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        input.click();
     }
 
     /**

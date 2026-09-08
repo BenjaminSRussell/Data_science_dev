@@ -144,7 +144,10 @@ export class ContractGenerator {
                     timeRequired: 2,
                     difficulty: 1,
                     deliverables: ['Completed database', 'Accuracy report'],
-                    requiredStats: { focus: 10 }
+                    requiredStats: { focus: 10 },
+                    bonusConditions: [
+                        { type: 'perfect_quality', multiplier: 0.25, achieved: false }
+                    ]
                 },
                 {
                     title: 'Invoice Data Entry',
@@ -161,7 +164,10 @@ export class ContractGenerator {
                     timeRequired: 4,
                     difficulty: 2,
                     deliverables: ['Cleaned dataset', 'Data quality report'],
-                    requiredStats: { intelligence: 15, focus: 10 }
+                    requiredStats: { intelligence: 15, focus: 10 },
+                    bonusConditions: [
+                        { type: 'skill_requirement', skill: 'focus', value: 20, multiplier: 0.2 }
+                    ]
                 },
                 {
                     title: 'Merge Customer Databases',
@@ -178,7 +184,10 @@ export class ContractGenerator {
                     timeRequired: 6,
                     difficulty: 3,
                     deliverables: ['Analysis report', 'Visualizations'],
-                    requiredStats: { intelligence: 20, analytics: 15 }
+                    requiredStats: { intelligence: 20, analytics: 15 },
+                    bonusConditions: [
+                        { type: 'skill_requirement', skill: 'intelligence', value: 30, multiplier: 0.2 }
+                    ]
                 },
                 {
                     title: 'Customer Segmentation',
@@ -195,7 +204,10 @@ export class ContractGenerator {
                     timeRequired: 10,
                     difficulty: 4,
                     deliverables: ['Dashboard', 'User guide'],
-                    requiredStats: { intelligence: 25, analytics: 20 }
+                    requiredStats: { intelligence: 25, analytics: 20 },
+                    bonusConditions: [
+                        { type: 'reputation_threshold', value: 500, multiplier: 0.25 }
+                    ]
                 }
             ],
             REPORTING: [
@@ -215,7 +227,10 @@ export class ContractGenerator {
                     timeRequired: 15,
                     difficulty: 6,
                     deliverables: ['Model', 'Validation report'],
-                    requiredStats: { intelligence: 40, analytics: 35 }
+                    requiredStats: { intelligence: 40, analytics: 35 },
+                    bonusConditions: [
+                        { type: 'skill_requirement', skill: 'analytics', value: 45, multiplier: 0.3 }
+                    ]
                 }
             ],
             MACHINE_LEARNING: [
@@ -225,7 +240,11 @@ export class ContractGenerator {
                     timeRequired: 20,
                     difficulty: 8,
                     deliverables: ['Trained model', 'Performance metrics'],
-                    requiredStats: { intelligence: 50, analytics: 45 }
+                    requiredStats: { intelligence: 50, analytics: 45 },
+                    bonusConditions: [
+                        { type: 'reputation_threshold', value: 1500, multiplier: 0.3 },
+                        { type: 'perfect_quality', multiplier: 0.2, achieved: false }
+                    ]
                 }
             ],
             PREDICTIVE_ANALYTICS: [
@@ -352,9 +371,13 @@ export class ContractSystem {
         
         // Move to active
         this.availableContracts = this.availableContracts.filter(c => c.id !== contractId);
+        const acceptedAt = Date.now();
         this.activeContracts.push({
             ...contract,
-            acceptedAt: Date.now(),
+            acceptedAt,
+            // Deadline is measured from acceptance, not generation, so a contract
+            // that sat in the available pool doesn't arrive partially expired.
+            deadline: acceptedAt + (contract.timeRequired * 24 * 60 * 60 * 1000),
             progress: 0,
             status: 'active'
         });
@@ -369,7 +392,12 @@ export class ContractSystem {
         const contract = this.activeContracts.find(c => c.id === contractId);
         if (!contract) return null;
         
+        if (!Number.isFinite(workAmount) || workAmount <= 0) {
+            return { status: 'error', reason: 'Invalid work amount' };
+        }
+        
         contract.progress += workAmount;
+        contract.progress = Math.max(0, contract.progress);
         
         // Check completion
         if (contract.progress >= contract.timeRequired) {
@@ -389,6 +417,11 @@ export class ContractSystem {
     completeContract(contractId) {
         const contract = this.activeContracts.find(c => c.id === contractId);
         if (!contract) return { success: false, reason: 'Contract not found' };
+        
+        // Guard: cannot complete before requirements are met
+        if (contract.progress < contract.timeRequired) {
+            return { success: false, reason: 'Contract requirements not yet met' };
+        }
         
         // Calculate pay with bonuses
         let pay = contract.basePay;

@@ -5,6 +5,7 @@
 
 import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
 import { dialogueTreeSystem } from './dialogue/DialogueTreeSystem.js';
+import { CommonUtils } from '../utils/CommonUtils.js';
 
 // Initialize all NPC images - ensures every NPC has a visual
 function initializeNPCImages() {
@@ -145,7 +146,7 @@ export const NPCs = [
         gifts: ['coffee', 'tech_gadgets'],
         dialogueTopics: ['industry', 'career', 'visualization'],
         benefits: { statBoost: 'analytics', clientReferrals: true },
-        backstory: 'Works at a top tech company. Loves helping newcomers break into the field.',
+        backstory: 'Started as a barista and taught herself Python at night, working her way up from data entry to senior analyst. Single mother of two, works 60-hour weeks to provide for her kids.',
         description: 'Experienced analyst at a Fortune 500 company. Known for her clear communication and ability to translate complex data into actionable insights.',
         age: 34,
         interests: ['data visualization', 'career development', 'coffee'],
@@ -288,7 +289,7 @@ export const NPCs = [
     {
         id: 'alex_rivera',
         name: 'Alex Rivera',
-        title: 'Fellow Freelancer',
+        title: 'Security Consultant',
         icon: '',
         image: '/assets/characters/bosses/kim.png', // Temporary high-quality replacement
         type: 'friend',
@@ -298,8 +299,8 @@ export const NPCs = [
         gifts: ['coffee', 'snacks'],
         dialogueTopics: ['freelancing', 'life', 'hobbies'],
         benefits: { moralBoost: true, jobSharing: true },
-        backstory: 'Started freelancing the same time as you. Currently struggling to find steady work.',
-        description: 'A fellow freelancer trying to make it in the data science world. Shares your struggles and dreams. Always up for a coffee chat.',
+        backstory: 'Former hacker turned security consultant. Got a second chance after being caught as a teenager, and now runs paid security audits and bug bounties. Married to a cybersecurity lawyer.',
+        description: 'A former hacker who turned his skills to good as a security consultant. Still hacks, but legally (bug bounties, audits). Always up for a coffee chat.',
         age: 26,
         interests: ['coding', 'startups', 'coffee shops'],
         favoriteTopics: ['freelance life', 'side projects', 'mutual support']
@@ -1159,6 +1160,9 @@ export class NPCManager {
                 if (req.day && this.gameState.timeManager?.totalDays < req.day) return false;
                 if (req.stat && this.gameState.characterStats?.getStat(req.stat) < req.value) return false;
                 if (req.reputation && this.gameState.reputation < req.reputation) return false;
+                if (req.ethics !== undefined && this.gameState.characterStats?.ethics < req.ethics) return false;
+                if (req.netWorth !== undefined && (this.gameState.money || 0) < req.netWorth) return false;
+                if (req.money !== undefined && (this.gameState.money || 0) < req.money) return false;
                 if (req.relationship) {
                     for (const [npcId, level] of Object.entries(req.relationship)) {
                         if (this.relationships[npcId] < level) return false;
@@ -1235,11 +1239,7 @@ export class NPCManager {
      */
     getRelationshipTier(npcId) {
         const level = this.relationships[npcId] || 0;
-        if (level < 10) return { tier: 'stranger', label: 'Stranger', color: '#888' };
-        if (level < 30) return { tier: 'acquaintance', label: 'Acquaintance', color: '#4ecdc4' };
-        if (level < 60) return { tier: 'friend', label: 'Friend', color: '#6bcb77' };
-        if (level < 85) return { tier: 'close_friend', label: 'Close Friend', color: '#a855f7' };
-        return { tier: 'best_friend', label: 'Best Friend', color: '#ffd93d' };
+        return CommonUtils.getRelationshipTier(level);
     }
 
     /**
@@ -1250,7 +1250,11 @@ export class NPCManager {
         if (!npc) return;
 
         const personality = PERSONALITY_TRAITS[npc.personality];
-        const adjustedAmount = Math.floor(amount * personality.relationshipGain);
+        let adjustedAmount = amount * personality.relationshipGain;
+        // Don't let Math.floor eat fractional gains: any positive gain counts as at least 1,
+        // any negative loss counts as at most -1, so small gains/losses still register.
+        if (adjustedAmount > 0) adjustedAmount = Math.max(1, Math.round(adjustedAmount));
+        else if (adjustedAmount < 0) adjustedAmount = Math.min(-1, Math.round(adjustedAmount));
 
         this.relationships[npcId] = Math.max(0, Math.min(100,
             (this.relationships[npcId] || 0) + adjustedAmount
@@ -1265,6 +1269,17 @@ export class NPCManager {
     async startConversation(npcId) {
         const npc = this.getNPC(npcId);
         if (!npc) return null;
+
+        // Jealousy: NPC refuses to talk to the player
+        const npcState = this.getNPCState(npcId);
+        if (npcState.willNotTalk) {
+            return {
+                npcId,
+                npc,
+                greeting: npcState.jealousyMessage || `${npc.name} refuses to talk to you.`,
+                isJealousyRefusal: true
+            };
+        }
 
         const relationship = this.relationships[npcId] || 0;
         const isFirstMeeting = !this.metNPCs.includes(npcId);
@@ -1515,6 +1530,15 @@ export class NPCManager {
         // Handle special actions
         if (choice.action === 'date_ask') {
             const result = this.gameState.romanceSystem?.askOnDate(this.currentConversation.npc.id);
+            if (!result) {
+                return {
+                    success: false,
+                    text: "You can't do that yet.",
+                    effects: {},
+                    newRelationship: this.relationships[this.currentConversation.npc.id],
+                    isSpecialAction: true
+                };
+            }
             return {
                 success: result.success,
                 text: result.message,
@@ -1532,6 +1556,16 @@ export class NPCManager {
             } else {
                 const type = choice.action.replace('date_', '');
                 result = this.gameState.romanceSystem?.goOnDate(type);
+            }
+
+            if (!result) {
+                return {
+                    success: false,
+                    text: "You can't do that yet.",
+                    effects: {},
+                    newRelationship: this.relationships[this.currentConversation.npc.id],
+                    isSpecialAction: true
+                };
             }
 
             return {
@@ -1605,6 +1639,11 @@ export class NPCManager {
             this.markNPCAsMet(npcId);
         }
 
+        // NPCs with no gifts (e.g. rivals) refuse gifts entirely
+        if (!npc.gifts || npc.gifts.length === 0) {
+            return { success: false, reason: 'refuses gifts' };
+        }
+
         const likesGift = npc.gifts.includes(giftId);
         const relationshipGain = likesGift ? 15 : 5; // Liked gift = +15, generic = +5
 
@@ -1614,12 +1653,13 @@ export class NPCManager {
         if (currentRel > 60) adjustedGain = Math.max(3, relationshipGain * 0.5); // Harder to gain at high levels
         if (currentRel > 85) adjustedGain = Math.max(2, relationshipGain * 0.3); // Very hard at max levels
 
+        const beforeValue = this.relationships[npcId] || 0;
         this.modifyRelationship(npcId, adjustedGain);
 
         return {
             success: true,
             liked: likesGift,
-            relationshipGain,
+            relationshipGain: this.relationships[npcId] - beforeValue,
             newRelationship: this.relationships[npcId]
         };
     }

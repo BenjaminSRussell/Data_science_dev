@@ -1,6 +1,8 @@
 #ifndef ECONOMY_H
 #define ECONOMY_H
 
+#include "rank_config.h"
+
 /**
  * Economy - Currency and reward calculations
  */
@@ -23,11 +25,6 @@ public:
 
   // Get required reputation for rank
   int getRequiredReputation(int rankIndex);
-
-private:
-  // Rank thresholds
-  static const int RANK_THRESHOLDS[];
-  static const double SALARY_MULTIPLIERS[];
 };
 
 #endif // ECONOMY_H

@@ -1,5 +1,7 @@
 #include "game_state.h"
 #include <sstream>
+#include <vector>
+#include <string>
 
 GameState::GameState() { reset(); }
 
@@ -8,16 +10,32 @@ GameState::~GameState() {}
 // Money management
 int GameState::getMoney() const { return money; }
 
-void GameState::setMoney(int amount) { money = amount; }
+void GameState::setMoney(int amount) {
+  if (amount >= MIN_MONEY) {
+    money = amount;
+  }
+}
 
-void GameState::addMoney(int amount) { money += amount; }
+void GameState::addMoney(int amount) {
+  if (money + amount >= MIN_MONEY) {
+    money += amount;
+  }
+}
 
 // Reputation management
 int GameState::getReputation() const { return reputation; }
 
-void GameState::setReputation(int amount) { reputation = amount; }
+void GameState::setReputation(int amount) {
+  if (amount >= MIN_REPUTATION) {
+    reputation = amount;
+  }
+}
 
-void GameState::addReputation(int amount) { reputation += amount; }
+void GameState::addReputation(int amount) {
+  if (reputation + amount >= MIN_REPUTATION) {
+    reputation += amount;
+  }
+}
 
 // Rank management
 int GameState::getRankIndex() const { return rankIndex; }
@@ -44,7 +62,11 @@ void GameState::incrementPerfectScores() { perfectScores++; }
 
 int GameState::getTotalEarned() const { return totalEarned; }
 
-void GameState::addToTotalEarned(int amount) { totalEarned += amount; }
+void GameState::addToTotalEarned(int amount) {
+  if (totalEarned + amount >= MIN_TOTAL_EARNED) {
+    totalEarned += amount;
+  }
+}
 
 // Reset state
 void GameState::reset() {
@@ -74,60 +96,50 @@ void GameState::fromJSON(const std::string &json) {
   // Basic JSON parsing - extracts numeric values from JSON string
   // For production, consider using a proper JSON library like nlohmann/json
   reset();
-  
-  // Find and extract values using simple string parsing
-  size_t pos = json.find("\"money\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      money = std::stoi(json.substr(start, end - start));
+
+  // Parse the integer value of a single field, bounded to the field's own
+  // value (up to the next ',' or '}') so a missing/non-numeric value can
+  // never leak digits from a later field. Returns false if the field is
+  // absent or its value is not a valid integer.
+  auto parseField = [&json](const char *key, int &out) -> bool {
+    size_t pos = json.find(key);
+    if (pos == std::string::npos) return false;
+    pos += std::string(key).size();
+    // Skip whitespace after the colon
+    while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\t' ||
+                                 json[pos] == '\n' || json[pos] == '\r')) {
+      pos++;
     }
-  }
-  
-  pos = json.find("\"reputation\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      reputation = std::stoi(json.substr(start, end - start));
+    if (pos >= json.size()) return false;
+    // Bound the value at the next ',' or '}'
+    size_t end = json.find_first_of(",}", pos);
+    if (end == std::string::npos) end = json.size();
+    std::string value = json.substr(pos, end - pos);
+    // Trim surrounding whitespace
+    size_t b = value.find_first_not_of(" \t\n\r");
+    if (b == std::string::npos) return false;
+    size_t e = value.find_last_not_of(" \t\n\r");
+    value = value.substr(b, e - b + 1);
+    // Validate: optional sign followed by at least one digit
+    size_t i = 0;
+    if (value[i] == '-' || value[i] == '+') i++;
+    if (i >= value.size()) return false;
+    for (size_t j = i; j < value.size(); j++) {
+      if (value[j] < '0' || value[j] > '9') return false;
     }
-  }
-  
-  pos = json.find("\"rankIndex\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      int idx = std::stoi(json.substr(start, end - start));
-      setRankIndex(idx);
-    }
-  }
-  
-  pos = json.find("\"tasksCompleted\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      tasksCompleted = std::stoi(json.substr(start, end - start));
-    }
-  }
-  
-  pos = json.find("\"perfectScores\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      perfectScores = std::stoi(json.substr(start, end - start));
-    }
-  }
-  
-  pos = json.find("\"totalEarned\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      totalEarned = std::stoi(json.substr(start, end - start));
-    }
+    errno = 0;
+    char *endp = nullptr;
+    long v = std::strtol(value.c_str(), &endp, 10);
+    if (errno == ERANGE || endp == value.c_str() || *endp != '\0') return false;
+    if (v < INT_MIN || v > INT_MAX) return false;
+    out = static_cast<int>(v);
+    return true;
+  };
+
+  parseField("\"money\":", money);
+  parseField("\"reputation\":", reputation);
+  int idx;
+  if (parseField("\"rankIndex\":", idx)) {
+    setRankIndex(idx);
   }
 }

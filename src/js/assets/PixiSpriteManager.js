@@ -1,106 +1,76 @@
 /**
  * PixiSpriteManager.js
- * Replaces custom SpriteSheetManager with PixiJS Spritesheet
- * Phase 4: Code Reduction - Using PixiJS Spritesheet instead of custom parsing
+ * Handles sprite management and animation for the game using PixiJS
  */
 
-import { Assets, Spritesheet, AnimatedSprite, Sprite } from 'pixi.js';
+import { Sprite, TextureCache } from 'pixi.js';
+import { GameAssetLoader } from './GameAssetLoader';
 
 export class PixiSpriteManager {
-    constructor() {
-        this.spriteSheets = new Map();
-        this.animations = new Map();
+    constructor(loader) {
+        this.loader = loader;
+        this.textures = new Map();
     }
 
     /**
-     * Load sprite sheet
-     * Phase 4: Uses PixiJS Spritesheet class
+     * Load texture from asset path
      */
-    async loadSpriteSheet(id, jsonUrl, imageUrl) {
-        try {
-            // Load the JSON data and image
-            const [jsonData, texture] = await Promise.all([
-                fetch(jsonUrl).then(r => r.json()),
-                Assets.load(imageUrl)
-            ]);
-
-            // Create spritesheet
-            const sheet = new Spritesheet(texture, jsonData);
-            await sheet.parse();
-
-            this.spriteSheets.set(id, sheet);
-
-            // Extract animations if available
-            if (sheet.animations) {
-                this.animations.set(id, sheet.animations);
-            }
-
-            return sheet;
-        } catch (error) {
-            console.warn(`Failed to load sprite sheet: ${id}`, error);
-            return null;
+    async loadTexture(assetPath) {
+        if (TextureCache[assetPath]) {
+            return TextureCache[assetPath];
         }
+        return new Promise((resolve, reject) => {
+            const texture = PIXI.Texture.from(assetPath, { resourceOptions: { autoDetectFormat: true } });
+            texture.baseTexture.on('loaded', () => {
+                this.textures.set(assetPath, texture);
+                resolve(texture);
+            });
+            texture.baseTexture.on('error', reject);
+        });
     }
 
     /**
-     * Create sprite from sheet
+     * Create animated sprite from texture array
      */
-    createSprite(sheetId, frameName) {
-        const sheet = this.spriteSheets.get(sheetId);
-        if (!sheet) return null;
-
-        const texture = sheet.textures[frameName];
-        if (!texture) return null;
-
-        return new Sprite(texture);
-    }
-
-    /**
-     * Create animated sprite
-     * Phase 4: Uses PixiJS AnimatedSprite
-     */
-    createAnimatedSprite(sheetId, animationName) {
-        const sheet = this.spriteSheets.get(sheetId);
-        if (!sheet) return null;
-
-        const animationFrames = sheet.animations?.[animationName];
-        if (!animationFrames) return null;
-
-        const animatedSprite = new AnimatedSprite(animationFrames);
+    createAnimatedSprite(textureArray, sheetId) {
+        const textures = textureArray.map(texturePath => TextureCache[texturePath]);
+        const animatedSprite = new Sprite.from(textures);
+        animatedSprite.animationSpeed = 0.1;
+        animatedSprite.loop = true;
+        animatedSprite.play();
+        animatedSprite.sheetId = sheetId; // Assign sheetId to the sprite
         return animatedSprite;
     }
 
     /**
-     * Play animation
+     * Play animation for sprite
      */
-    playAnimation(sprite, animationName, loop = true) {
-        if (!sprite || !(sprite instanceof AnimatedSprite)) return;
-
-        // Get animation frames from current sheet
-        const sheetId = sprite.sheetId; // Store sheetId when creating
-        const animationFrames = this.animations.get(sheetId)?.[animationName];
-        
-        if (animationFrames) {
-            sprite.textures = animationFrames;
-            sprite.loop = loop;
-            sprite.play();
+    playAnimation(sprite, animationName) {
+        if (sprite.sheetId) {
+            const sheet = this.loader.getSpriteSheet(sprite.sheetId);
+            if (sheet) {
+                const animation = sheet.animations[animationName];
+                if (animation) {
+                    sprite.textures = animation;
+                    sprite.animationSpeed = 0.1;
+                    sprite.loop = true;
+                    sprite.play();
+                }
+            }
         }
     }
 
     /**
-     * Get sprite sheet
+     * Stop animation for sprite
      */
-    getSpriteSheet(id) {
-        return this.spriteSheets.get(id) || null;
+    stopAnimation(sprite) {
+        sprite.stop();
     }
 
     /**
-     * Get animation frames
+     * Get sprite sheet by ID
      */
-    getAnimationFrames(sheetId, animationName) {
-        const sheet = this.spriteSheets.get(sheetId);
-        if (!sheet || !sheet.animations) return null;
-
-        return sheet.animations[animationName] || null;
+    getSpriteSheet(sheetId) {
+        return this.textures.get(sheetId);
     }
 }

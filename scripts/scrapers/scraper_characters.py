@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Specialized Character Sprite Scraper
 Scrapes Low-poly character sprites from multiple sources
@@ -18,6 +17,12 @@ from bs4 import BeautifulSoup
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+def sanitize_filename(name: str) -> str:
+    """Sanitize filename to be safe for filesystem use"""
+    name = name.strip().replace('\\', '_').replace('/', '_')
+    name = ''.join(c for c in name if c.isalnum() or c in ('_', '-', '.'))
+    return name[:30] + '.png'
 
 class CharacterSpriteScraper:
     def __init__(self, output_dir="downloaded_assets/characters/sprites"):
@@ -87,8 +92,7 @@ class CharacterSpriteScraper:
                     download_link = asset_soup.find('a', href=lambda x: x and '/download' in x)
                     if download_link:
                         file_url = urljoin(base_url, download_link.get('href', ''))
-                        filename = f"character_{len(self.downloaded)}_{title_link.text.strip()[:30]}.png"
-                        filename = ''.join(c for c in filename if c.isalnum() or c in ('_', '-', '.'))
+                        filename = sanitize_filename(f"character_{len(self.downloaded)}_{title_link.text.strip()}")
                         output_path = self.output_dir / filename
                         
                         if self.download_file(file_url, output_path):
@@ -124,28 +128,33 @@ class CharacterSpriteScraper:
                 temp_dir.mkdir(parents=True, exist_ok=True)
                 
                 import subprocess
-                result = subprocess.run(['git', 'clone', '--depth', '1', repo_url, str(temp_dir)],
-                                      capture_output=True, text=True)
-                
-                if result.returncode == 0:
-                    for img_file in temp_dir.rglob('*.png'):
-                        if 'character' in str(img_file).lower() or 'sprite' in str(img_file).lower():
-                            filename = f"{repo_name}_{img_file.name}"
-                            output_path = self.output_dir / filename
-                            if not output_path.exists():
-                                import shutil
-                                shutil.copy2(img_file, output_path)
-                                self.resize_image(output_path)
-                                downloaded += 1
-                                self.downloaded.append({
-                                    'source': 'GitHub',
-                                    'repo': repo_url,
-                                    'path': str(output_path)
-                                })
-                
-                import shutil
-                if temp_dir.exists():
-                    shutil.rmtree(temp_dir)
+                try:
+                    result = subprocess.run(['git', 'clone', '--depth', '1', repo_url, str(temp_dir)],
+                                          capture_output=True, text=True, timeout=120)
+                    
+                    if result.returncode == 0:
+                        for img_file in temp_dir.rglob('*.png'):
+                            if 'character' in str(img_file).lower() or 'sprite' in str(img_file).lower():
+                                filename = f"{repo_name}_{img_file.name}"
+                                output_path = self.output_dir / filename
+                                if not output_path.exists():
+                                    import shutil
+                                    shutil.copy2(img_file, output_path)
+                                    self.resize_image(output_path)
+                                    downloaded += 1
+                                    self.downloaded.append({
+                                        'source': 'GitHub',
+                                        'repo': repo_url,
+                                        'path': str(output_path)
+                                    })
+                except subprocess.TimeoutExpired:
+                    logger.error(f"Git clone operation timed out for {repo_url}")
+                except Exception as e:
+                    logger.error(f"Error cloning {repo_url}: {e}")
+                finally:
+                    import shutil
+                    if temp_dir.exists():
+                        shutil.rmtree(temp_dir)
             except Exception as e:
                 logger.error(f"Error with GitHub repo {repo_url}: {e}")
         
@@ -197,4 +206,3 @@ class CharacterSpriteScraper:
 if __name__ == "__main__":
     scraper = CharacterSpriteScraper()
     scraper.run(target_count=1000)
-

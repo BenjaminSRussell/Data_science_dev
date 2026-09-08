@@ -5,7 +5,7 @@
 
 const SAVE_KEY_PREFIX = 'data_science_tycoon_save_';
 const SAVE_VERSION = 1;
-const MAX_SAVE_SLOTS = 5;
+export const MAX_SAVE_SLOTS = 5;
 
 export class SaveManager {
     constructor() {
@@ -192,7 +192,7 @@ export class SaveManager {
             }
 
             const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.setItem(saveKey, JSON.stringify(saveData));
+            localStorage.setItem(saveKey, JSON.stringify(parsed));
             gameState.fromJSON(parsed.state);
 
 

@@ -52,8 +52,12 @@ export class DialogueTreeSystem {
      * @returns {DialogueTree} Dialogue tree
      */
     getTree(npcId, relationshipLevel = 0) {
-        // Check cache first (key includes relationship level for enhanced trees)
-        const cacheKey = `${npcId}_${relationshipLevel}`;
+        // Check cache first (key includes relationship tier for enhanced trees).
+        // Bucket the raw relationship integer (0-100) into tiers of 10 so the
+        // cache holds at most ~11 entries per NPC instead of one per value the
+        // player ever reaches.
+        const relationshipTier = Math.floor(relationshipLevel / 10) * 10;
+        const cacheKey = `${npcId}_${relationshipTier}`;
         if (this.treeCache.has(cacheKey)) {
             return this.treeCache.get(cacheKey);
         }

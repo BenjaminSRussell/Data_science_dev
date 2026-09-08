@@ -17,6 +17,10 @@ export class CompanyManagementSystem {
      * Start a new company
      */
     startCompany(name, type = 'consulting') {
+        if (this.playerCompany) {
+            return { success: false, message: 'You already have a company' };
+        }
+        
         this.playerCompany = {
             id: 'player_company_' + Date.now(),
             name: name,
@@ -36,6 +40,10 @@ export class CompanyManagementSystem {
      * Buy an existing company
      */
     buyCompany(companyId, price) {
+        if (this.playerCompany) {
+            return { success: false, message: 'You already have a company' };
+        }
+        
         if (this.gameState.economySystem.money < price) {
             return { success: false, message: 'Not enough money' };
         }
@@ -69,6 +77,8 @@ export class CompanyManagementSystem {
             return { success: false, message: 'Cannot afford salary' };
         }
         
+        this.gameState.economySystem.money -= salary;
+        
         const employee = {
             id: 'emp_' + Date.now(),
             name: candidate.name,
@@ -99,7 +109,7 @@ export class CompanyManagementSystem {
             skillBonus += level * 100;
         });
         
-        return baseSalary + skillBonus + (candidate.experience * 50);
+        return baseSalary + skillBonus + ((candidate.experience || 0) * 50);
     }
     
     /**
@@ -163,10 +173,10 @@ export class CompanyManagementSystem {
      */
     findClients() {
         const potentialClients = [
-            { name: 'TechCorp', needs: 'data_analysis', budget: 5000 },
-            { name: 'RetailCo', needs: 'visualization', budget: 3000 },
-            { name: 'FinanceInc', needs: 'machine_learning', budget: 8000 },
-            { name: 'StartupXYZ', needs: 'statistics', budget: 2000 }
+            { id: 'client_techcorp', name: 'TechCorp', needs: 'data_analysis', budget: 5000 },
+            { id: 'client_retailco', name: 'RetailCo', needs: 'visualization', budget: 3000 },
+            { id: 'client_financeinc', name: 'FinanceInc', needs: 'machine_learning', budget: 8000 },
+            { id: 'client_startupxyz', name: 'StartupXYZ', needs: 'statistics', budget: 2000 }
         ];
         
         return potentialClients;
@@ -176,7 +186,7 @@ export class CompanyManagementSystem {
      * Acquire client
      */
     acquireClient(clientId) {
-        const client = this.findClients().find(c => c.name === clientId);
+        const client = this.findClients().find(c => c.id === clientId);
         if (!client) return { success: false };
         
         this.clients.push({

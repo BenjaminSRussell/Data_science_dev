@@ -1,127 +1,143 @@
 #!/usr/bin/env python3
-"""
-Master Scraper - Runs all specialized scrapers
-Downloads all asset types with proper organization
-"""
 
 import subprocess
-import sys
-import time
-import logging
-from pathlib import Path
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+import unittest
+from unittest.mock import patch, call
 
 SCRAPERS = [
-    {
-        'name': 'Character Sprites',
-        'script': 'scraper_characters.py',
-        'target': 1000,
-        'description': 'Low-poly character sprites (128x128px)'
-    },
-    {
-        'name': 'Location Backdrops',
-        'script': 'scraper_backdrops.py',
-        'target': 'all_locations',
-        'description': 'Low-poly location backdrops (1920x1080px)'
-    },
-    {
-        'name': 'Map Assets',
-        'script': 'scraper_map_assets.py',
-        'target': 500,
-        'description': 'Low-poly map elements (128x128px)'
-    },
-    {
-        'name': 'Icons',
-        'script': 'scraper_icons.py',
-        'target': 500,
-        'description': 'Low-poly icons (64x64px)'
-    },
-    {
-        'name': 'Vehicles',
-        'script': 'scraper_vehicles.py',
-        'target': 300,
-        'description': 'Low-poly vehicle sprites (128x128px)'
-    },
-    {
-        'name': 'UI Elements',
-        'script': 'scraper_ui_elements.py',
-        'target': 300,
-        'description': 'Low-poly UI elements (128x128px)'
-    },
-    {
-        'name': 'Particle Effects',
-        'script': 'scraper_particles.py',
-        'target': 200,
-        'description': 'Low-poly particle effects (32x32px)'
-    }
+    {"name": "map_assets", "script": "./scraper_map_assets.py"},
+    {"name": "character_designs", "script": "./scraper_character_designs.py"},
+    {"name": "environment_scenes", "script": "./scraper_environment_scenes.py"},
+    {"name": "ui_elements", "script": "./scraper_ui_elements.py"},
+    {"name": "sound_effects", "script": "./scraper_sound_effects.py"},
+    {"name": "music_tracks", "script": "./scraper_music_tracks.py"},
+    {"name": "game_models", "script": "./scraper_game_models.py"}
 ]
 
 def run_scraper(scraper_info):
-    """Run a single scraper"""
-    script_path = Path(__file__).parent / scraper_info['script']
-    
-    logger.info("=" * 60)
-    logger.info(f"Starting: {scraper_info['name']}")
-    logger.info(f"Description: {scraper_info['description']}")
-    logger.info("=" * 60)
-    
     try:
         result = subprocess.run(
-            [sys.executable, str(script_path)],
+            ['python3', scraper_info['script']],
+            check=True,
             capture_output=True,
             text=True,
-            timeout=3600  # 1 hour max per scraper
+            timeout=3600
         )
-        
-        if result.returncode == 0:
-            logger.info(f"✅ {scraper_info['name']} completed successfully")
-            logger.info(result.stdout[-500:])  # Last 500 chars
-        else:
-            logger.error(f"❌ {scraper_info['name']} failed")
-            logger.error(result.stderr[-500:])
-        
-        return result.returncode == 0
-    except subprocess.TimeoutExpired:
-        logger.error(f"⏱️ {scraper_info['name']} timed out")
+        print(f"Scraper {scraper_info['name']} completed successfully.")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Scraper {scraper_info['name']} failed with error: {e.stderr}")
+        return False
+    except subprocess.TimeoutExpired as e:
+        print(f"Scraper {scraper_info['name']} timed out after {e.timeout} seconds.")
         return False
     except Exception as e:
-        logger.error(f"❌ Error running {scraper_info['name']}: {e}")
+        print(f"An unexpected error occurred while running {scraper_info['name']}: {e}")
         return False
 
 def main():
-    """Run all scrapers"""
-    logger.info("=" * 60)
-    logger.info("MASTER SCRAPER - Running All Specialized Scrapers")
-    logger.info("=" * 60)
-    
     results = {}
-    
     for scraper in SCRAPERS:
         success = run_scraper(scraper)
         results[scraper['name']] = success
-        
-        # Brief pause between scrapers
+        if not success:
+            print(f"At least one scraper failed. Stopping early.")
+            break
         if scraper != SCRAPERS[-1]:
-            logger.info("Waiting 5 seconds before next scraper...")
             time.sleep(5)
     
-    # Summary
-    logger.info("=" * 60)
-    logger.info("SCRAPING SUMMARY")
-    logger.info("=" * 60)
-    
-    for name, success in results.items():
-        status = "✅ SUCCESS" if success else "❌ FAILED"
-        logger.info(f"{name}: {status}")
-    
-    successful = sum(1 for s in results.values() if s)
-    total = len(results)
-    
-    logger.info(f"\nTotal: {successful}/{total} scrapers completed successfully")
-    logger.info("=" * 60)
+    successful_scrapers = sum(results.values())
+    total_scrapers = len(results)
+    print(f"Scraping complete: {successful_scrapers}/{total_scrapers} successful.")
+    return results
 
-if __name__ == "__main__":
-    main()
+class TestRunAllScrapers(unittest.TestCase):
+    @patch('subprocess.run')
+    def test_run_scraper_success(self, mock_run):
+        mock_run.return_value = subprocess.CompletedProcess(returncode=0, stdout="", stderr="")
+        result = run_scraper(SCRAPERS[0])
+        self.assertTrue(result)
+        mock_run.assert_called_once_with(['python3', SCRAPERS[0]['script']], check=True, capture_output=True, text=True, timeout=3600)
 
+    @patch('subprocess.run')
+    def test_run_scraper_failure(self, mock_run):
+        mock_run.return_value = subprocess.CompletedProcess(returncode=1, stdout="", stderr="Error message")
+        result = run_scraper(SCRAPERS[0])
+        self.assertFalse(result)
+        mock_run.assert_called_once_with(['python3', SCRAPERS[0]['script']], check=True, capture_output=True, text=True, timeout=3600)
+
+    @patch('subprocess.run')
+    def test_run_scraper_timeout(self, mock_run):
+        mock_run.side_effect = subprocess.TimeoutExpired(cmd=SCRAPERS[0]['script'], timeout=3600)
+        result = run_scraper(SCRAPERS[0])
+        self.assertFalse(result)
+        mock_run.assert_called_once_with(['python3', SCRAPERS[0]['script']], check=True, capture_output=True, text=True, timeout=3600)
+
+    @patch('subprocess.run')
+    def test_run_scraper_exception(self, mock_run):
+        mock_run.side_effect = Exception("Unexpected error")
+        result = run_scraper(SCRAPERS[0])
+        self.assertFalse(result)
+        mock_run.assert_called_once_with(['python3', SCRAPERS[0]['script']], check=True, capture_output=True, text=True, timeout=3600)
+
+    @patch('subprocess.run')
+    @patch('time.sleep')
+    def test_main_alternating_success(self, mock_sleep, mock_run):
+        mock_run.side_effect = [
+            subprocess.CompletedProcess(returncode=0, stdout="", stderr=""),
+            subprocess.CompletedProcess(returncode=1, stdout="", stderr=""),
+            subprocess.CompletedProcess(returncode=0, stdout="", stderr=""),
+            subprocess.CompletedProcess(returncode=1, stdout="", stderr=""),
+            subprocess.CompletedProcess(returncode=0, stdout="", stderr=""),
+            subprocess.CompletedProcess(returncode=1, stdout="", stderr=""),
+            subprocess.CompletedProcess(returncode=0, stdout="", stderr="")
+        ]
+        results = main()
+        expected_results = {
+            "map_assets": True,
+            "character_designs": False,
+            "environment_scenes": True,
+            "ui_elements": False,
+            "sound_effects": True,
+            "music_tracks": False,
+            "game_models": True
+        }
+        self.assertEqual(results, expected_results)
+        self.assertEqual(mock_sleep.call_count, 6)
+
+    @patch('subprocess.run')
+    @patch('time.sleep')
+    def test_main_all_success(self, mock_sleep, mock_run):
+        mock_run.return_value = subprocess.CompletedProcess(returncode=0, stdout="", stderr="")
+        results = main()
+        expected_results = {
+            "map_assets": True,
+            "character_designs": True,
+            "environment_scenes": True,
+            "ui_elements": True,
+            "sound_effects": True,
+            "music_tracks": True,
+            "game_models": True
+        }
+        self.assertEqual(results, expected_results)
+        self.assertEqual(mock_sleep.call_count, 6)
+
+    @patch('subprocess.run')
+    @patch('time.sleep')
+    def test_main_all_failure(self, mock_sleep, mock_run):
+        mock_run.return_value = subprocess.CompletedProcess(returncode=1, stdout="", stderr="")
+        results = main()
+        expected_results = {
+            "map_assets": False,
+            "character_designs": False,
+            "environment_scenes": False,
+            "ui_elements": False,
+            "sound_effects": False,
+            "music_tracks": False,
+            "game_models": False
+        }
+        self.assertEqual(results, expected_results)
+        self.assertEqual(mock_sleep.call_count, 0)
+
+if __name__ == '__main__':
+    unittest.main()

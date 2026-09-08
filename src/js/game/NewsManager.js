@@ -267,6 +267,33 @@ export class NewsManager {
     }
 
     /**
+     * Add a news item to the history (e.g. from world events).
+     * Accepts a partial item and fills in defaults.
+     */
+    addNews(newsItem) {
+        if (!newsItem) return;
+
+        const item = {
+            id: `news_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            category: 'general',
+            text: '',
+            timestamp: this.gameState.timeManager?.getDateString() || 'Today',
+            effects: null,
+            read: false,
+            ...newsItem
+        };
+
+        this.newsHistory.unshift(item);
+
+        // Respect the history cap
+        if (this.newsHistory.length > this.maxHistory) {
+            this.newsHistory.length = this.maxHistory;
+        }
+
+        return item;
+    }
+
+    /**
      * Generate news for the day
      */
     /**
@@ -285,6 +312,7 @@ export class NewsManager {
         const headline = this.generateNewsItem();
         this.dailyPaper.headline = headline;
         this.newsHistory.unshift(headline); //Keep history for now/legacy support
+        if (this.newsHistory.length > this.maxHistory) this.newsHistory.length = this.maxHistory;
 
         // Generate 2-3 smaller articles
         const count = 2 + Math.floor(Math.random() * 2);
@@ -292,6 +320,7 @@ export class NewsManager {
             const article = this.generateNewsItem();
             this.dailyPaper.articles.push(article);
             this.newsHistory.unshift(article);
+            if (this.newsHistory.length > this.maxHistory) this.newsHistory.length = this.maxHistory;
         }
 
         return this.dailyPaper;
@@ -434,10 +463,8 @@ export class NewsManager {
         }
 
         if (effects.energyPenalty && this.gameState.timeManager) {
-            if (this.gameState?.timeManager) {
-                this.gameState.timeManager.energy = (this.gameState.timeManager.energy || 0) - (effects.energyPenalty || 0);
-            }
-            results.energyLost = effects.energyPenalty;
+            const result = this.gameState.timeManager.useEnergy(effects.energyPenalty);
+            results.energyLost = result.success ? effects.energyPenalty : 0;
         }
 
         return results;

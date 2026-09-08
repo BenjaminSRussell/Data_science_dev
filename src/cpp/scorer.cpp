@@ -1,9 +1,8 @@
 #include "scorer.h"
 #include <cstdlib>
-#include <ctime>
 #include <map>
 
-Scorer::Scorer() { srand(static_cast<unsigned int>(time(nullptr))); }
+Scorer::Scorer() {}
 
 Scorer::~Scorer() {}
 
@@ -14,9 +13,8 @@ int Scorer::calculateChartScore(const std::string &dataType,
   int clarity = scoreVisualClarity(hasLegend, hasTitle, hasGrid);
   int accuracy = scoreDataAccuracy();
 
-  // Weighted average
-  int score =
-      static_cast<int>(appropriateness * 0.4 + clarity * 0.3 + accuracy * 0.3);
+  // Weighted average (integer arithmetic avoids floating-point boundary error)
+  int score = (appropriateness * 4 + clarity * 3 + accuracy * 3) / 10;
 
   return std::max(0, std::min(100, score));
 }

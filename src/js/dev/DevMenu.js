@@ -3,6 +3,8 @@
  * Provides quick access to all screens, locations, and testing tools
  */
 
+import { STATS } from '../game/CharacterStats.js';
+
 export class DevMenu {
     constructor(game) {
         this.game = game;
@@ -139,6 +141,19 @@ export class DevMenu {
 
         // Setup event listeners
         document.getElementById('dev-menu-close').onclick = () => this.toggle();
+
+        const setPhaseBtn = document.getElementById('dev-set-phase');
+        if (setPhaseBtn) {
+            setPhaseBtn.onclick = () => {
+                const phaseSelect = document.getElementById('dev-storyline-phase');
+                const phase = phaseSelect ? phaseSelect.value : 'early';
+                const result = window.devTools?.storylineNavigator?.setStorylinePhase(phase);
+                if (result) {
+                    this.game.showToast(result.message || result.error, result.success ? 'success' : 'error');
+                    this.populateStoryline(); // Refresh
+                }
+            };
+        }
 
         // Populate sections
         this.populateScreens();
@@ -382,6 +397,52 @@ export class DevMenu {
         }
     }
 
+    async testAllLocations() {
+        const resultsContainer = document.getElementById('dev-location-results');
+        const tester = window.devTools?.locationTester;
+
+        if (!tester) {
+            if (resultsContainer) {
+                resultsContainer.innerHTML = '<p style="color: #ff6b6b; font-size: 10px;">Location tester not available</p>';
+            }
+            return;
+        }
+
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '<p style="color: #4ecdc4; font-size: 10px;">Testing all locations...</p>';
+        }
+
+        try {
+            const results = await tester.testAllLocations();
+
+            if (resultsContainer) {
+                let html = `<p style="color: #4ecdc4; font-size: 10px; margin-bottom: 5px;">` +
+                    `Total: ${results.total} | Passed: ${results.passed} | Failed: ${results.failed} | Warnings: ${results.warnings}</p>`;
+
+                results.details.forEach(detail => {
+                    const status = detail.success && detail.errors.length === 0 ? '✓' :
+                        detail.errors.length > 0 ? '✗' : '!';
+                    const color = detail.success && detail.errors.length === 0 ? '#4ecdc4' :
+                        detail.errors.length > 0 ? '#ff6b6b' : '#ffd93d';
+                    html += `<div style="color: ${color}; font-size: 10px;">${status} ${detail.locationId}` +
+                        (detail.errors.length > 0 ? ` - ${detail.errors.join(', ')}` : '') +
+                        (detail.warnings.length > 0 ? ` (${detail.warnings.join(', ')})` : '') +
+                        `</div>`;
+                });
+
+                resultsContainer.innerHTML = html;
+            }
+
+            this.game.showToast(`Location tests: ${results.passed} passed, ${results.failed} failed, ${results.warnings} warnings`,
+                results.failed > 0 ? 'error' : 'success');
+        } catch (error) {
+            console.error('Error testing all locations:', error);
+            if (resultsContainer) {
+                resultsContainer.innerHTML = `<p style="color: #ff6b6b; font-size: 10px;">Error: ${error.message}</p>`;
+            }
+        }
+    }
+
     populateDialogue() {
         const container = document.getElementById('dev-dialogue');
         const npcManager = this.game.gameState?.npcManager;
@@ -431,12 +492,20 @@ export class DevMenu {
         }));
 
         container.appendChild(this.createButton('Max Stats', () => {
-            if (this.game.gameState?.characterStats) {
-                const stats = this.game.gameState.characterStats.getStats();
-                Object.keys(stats).forEach(stat => {
-                    this.game.gameState.characterStats.trainStat?.(stat, 100);
-                });
-                this.game.showToast('Maxed all stats', 'success');
+            const cs = this.game.gameState?.characterStats;
+            if (cs) {
+                try {
+                    Object.keys(STATS).forEach(stat => {
+                        const maxLevel = STATS[stat].maxLevel;
+                        while (cs.getStat(stat) < maxLevel) {
+                            cs.addExperience(stat, cs.getXPForNextLevel(stat));
+                        }
+                    });
+                    this.game.uiUpdater?.updateAllUI?.();
+                    this.game.showToast('Maxed all stats', 'success');
+                } catch (e) {
+                    console.error('Max Stats failed:', e);
+                }
             }
         }));
 
@@ -475,15 +544,15 @@ export class DevMenu {
 
         container.appendChild(this.createButton('Save Game', () => {
             if (this.game.saveManager) {
-                this.game.saveManager.save(0, this.game.gameState);
+                this.game.saveManager.saveGame(this.game.gameState, 0);
                 this.game.showToast('Game saved', 'success');
             }
         }));
 
         container.appendChild(this.createButton('Load Game', () => {
             if (this.game.saveManager) {
-                const save = this.game.saveManager.load(0);
-                if (save) {
+                const loaded = this.game.saveManager.loadGame(this.game.gameState, 0);
+                if (loaded) {
                     this.game.showToast('Game loaded', 'success');
                 }
             }
@@ -738,6 +807,8 @@ export class DevMenu {
         const results = { tested: 0, errors: [] };
 
         for (const btn of Array.from(buttons).slice(0, 50)) { // Limit to 50
+            // Skip dev menu buttons (they may open blocking confirm()/prompt() dialogs)
+            if (btn.closest('#dev-menu') || btn.id.includes('dev-')) continue;
             try {
                 btn.click();
                 results.tested++;
@@ -775,7 +846,7 @@ export class DevMenu {
         if (totalIssues === 0) {
             this.game.showToast('✅ No crash issues detected!', 'success');
         } else {
-            this.game.showWarning(`Found ${totalIssues} potential crash issues. Check console.`);
+            this.game.showToast(`Found ${totalIssues} potential crash issues. Check console.`, 'warning');
             console.log('Crash check results:', checks);
         }
     }

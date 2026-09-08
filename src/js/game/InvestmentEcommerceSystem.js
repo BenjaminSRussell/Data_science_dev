@@ -97,6 +97,14 @@ export class InvestmentEcommerceSystem {
      * Start e-commerce business
      */
     startEcommerceBusiness(name, initialInvestment) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return { success: false, message: "Invalid business name." };
+        }
+
+        if (!Number.isFinite(initialInvestment) || initialInvestment <= 0) {
+            return { success: false, message: "Invalid investment amount." };
+        }
+
         if (this.gameState.money < initialInvestment) {
             return { success: false, message: "Not enough money to start business." };
         }
@@ -133,6 +141,19 @@ export class InvestmentEcommerceSystem {
     addProduct(product) {
         if (!this.ecommerceBusiness) {
             return { success: false, message: "You don't have an e-commerce business." };
+        }
+
+        if (product.id === undefined || product.id === null) {
+            return { success: false, message: "Product must have an id." };
+        }
+        if (this.ecommerceBusiness.products.some(p => p.id === product.id)) {
+            return { success: false, message: "A product with this id already exists." };
+        }
+        if (typeof product.price !== "number" || !isFinite(product.price) || product.price <= 0) {
+            return { success: false, message: "Product price must be a positive number." };
+        }
+        if (typeof product.name !== "string" || product.name.trim() === "") {
+            return { success: false, message: "Product must have a name." };
         }
 
         const cost = product.cost || 100;
@@ -174,7 +195,10 @@ export class InvestmentEcommerceSystem {
         });
 
         // Calculate expenses
-        const expenses = business.marketingBudget + (business.products.length * 50); // Base operating costs
+        // Marketing spend is a one-time durable investment (deducted in investInMarketing
+        // and applied as a permanent sales multiplier above), so it must NOT be re-charged
+        // as a recurring weekly expense here.
+        const expenses = business.products.length * 50; // Base operating costs
 
         // Update business
         business.revenue += revenue;

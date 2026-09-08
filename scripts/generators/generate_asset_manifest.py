@@ -1,231 +1,352 @@
-#!/usr/bin/env python3
-"""
-Generate Asset Manifest from MISSING_ASSETS_AND_PROBLEMS.md
-Creates structured JSON manifest for scraping
-"""
-
 import json
-import re
-from pathlib import Path
 
 def parse_asset_list():
-    """Parse the missing assets list and create manifest"""
-    
     manifest = {
         'metadata': {
-            'total_assets': 950,
-            'generated_from': 'MISSING_ASSETS_AND_PROBLEMS.md',
-            'version': '1.0'
+            'total_assets': 0,
+            'generated_on': '2023-10-01T00:00:00Z',
+            'version': '1.0.0',
         },
         'character_sprites': {
-            'size': {'width': 128, 'height': 128, 'transparency': True},
-            'assets': []
+            'description': 'Character sprites for different scenarios and emotions.',
+            'assets': [],
         },
         'location_backgrounds': {
-            'size': {'width': 1920, 'height': 1080, 'transparency': False},
-            'assets': []
+            'description': 'Backgrounds for various locations in the game.',
+            'assets': [],
         },
         'feature_icons': {
-            'size': {'width': 64, 'height': 64, 'transparency': True},
-            'assets': []
+            'description': 'Icons representing various features in the game.',
+            'assets': [],
         },
         'map_assets': {
-            'size': {'width': 128, 'height': 128, 'transparency': True},
-            'assets': []
+            'description': 'Assets for the game map, including terrain and structures.',
+            'assets': [],
         },
         'vehicle_sprites': {
-            'size': {'width': 128, 'height': 128, 'transparency': True},
-            'assets': []
+            'description': 'Sprites for vehicles used in the game.',
+            'assets': [],
         },
         'item_icons': {
-            'size': {'width': 64, 'height': 64, 'transparency': True},
-            'assets': []
+            'description': 'Icons for various items used in the game.',
+            'assets': [],
         },
-        'chart_icons': {
-            'size': {'width': 64, 'height': 64, 'transparency': True},
-            'assets': []
-        },
-        'ui_elements': {
-            'size': {'width': 128, 'height': 128, 'transparency': True},
-            'assets': []
-        },
-        'particle_effects': {
-            'size': {'width': 32, 'height': 32, 'transparency': True},
-            'assets': []
-        },
-        'dialogue_ui': {
-            'size': {'width': 256, 'height': 256, 'transparency': True},
-            'assets': []
-        },
-        'npc_portraits': {
-            'size': {'width': 256, 'height': 256, 'transparency': True},
-            'assets': []
-        },
-        'screen_transitions': {
-            'size': {'width': 1920, 'height': 1080, 'transparency': False},
-            'assets': []
-        }
     }
     
-    # Character Sprites (Items 51-150)
+    # Character Sprites (Items 1-66)
     character_assets = [
-        {'id': 51, 'name': 'Player character idle animation sprite sheet', 'search_terms': ['character idle animation sprite sheet', 'idle sprite sheet'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/sprites'},
-        {'id': 52, 'name': 'Player character walking animation sprite sheet', 'search_terms': ['character walk cycle sprite sheet', 'walking animation sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/sprites'},
-        {'id': 53, 'name': 'Player character working animation sprite sheet', 'search_terms': ['character working typing animation', 'working animation sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/sprites'},
-        {'id': 54, 'name': 'Player character thinking animation sprite sheet', 'search_terms': ['character thinking pose animation', 'thinking animation sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/sprites'},
-        {'id': 55, 'name': 'Player character celebrating animation sprite sheet', 'search_terms': ['character celebration victory animation', 'celebration animation sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/sprites'},
-        {'id': 56, 'name': 'Player character stressed animation sprite sheet', 'search_terms': ['character stressed worried animation', 'stressed character sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/sprites'},
-        {'id': 57, 'name': 'Player character - Young/Messy variant sprite', 'search_terms': ['young messy character sprite', 'young character sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
-        {'id': 58, 'name': 'Player character - Clean cut/Junior analyst variant sprite', 'search_terms': ['professional character sprite', 'business character sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
-        {'id': 59, 'name': 'Player character - CEO style variant sprite', 'search_terms': ['executive CEO character sprite', 'executive character sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
-        {'id': 60, 'name': 'Player character - Evil/Mid variant sprite', 'search_terms': ['flashy character sprite gold', 'flashy character sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
-        {'id': 61, 'name': 'Player character - Evil/Late variant sprite', 'search_terms': ['aggressive character sprite', 'wolf wall street character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
-        {'id': 62, 'name': 'Player character - Good/Mid variant sprite', 'search_terms': ['good character sprite', 'professional good character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
-        {'id': 63, 'name': 'Player character - Good/Late variant sprite', 'search_terms': ['glowing character sprite', 'glowing aura character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
-    ]
-    
-    # Add emotion animations (67-76)
-    emotions = ['Happy', 'Sad', 'Angry', 'Neutral', 'Excited', 'Thinking', 'Surprised', 'Confused', 'Tired', 'Confident']
-    for i, emotion in enumerate(emotions, start=67):
-        character_assets.append({
-            'id': i,
-            'name': f'Character emotion - {emotion} animation frames',
-            'search_terms': [f'{emotion.lower()} character face sprite', f'{emotion.lower()} emotion sprite'],
-            'sources': ['opengameart', 'itchio', 'craftpix'],
-            'output_dir': 'characters/emotions'
-        })
-    
-    # Add body language poses (77-86)
-    poses = ['Standing', 'Sitting', 'Talking', 'Thinking', 'Working', 'Walking', 'Running', 'Resting', 'Celebrating', 'Disappointed']
-    for i, pose in enumerate(poses, start=77):
-        character_assets.append({
-            'id': i,
-            'name': f'Character body language - {pose} pose sprite',
-            'search_terms': [f'{pose.lower()} character sprite', f'{pose.lower()} pose sprite'],
-            'sources': ['opengameart', 'itchio', 'craftpix'],
-            'output_dir': 'characters/poses'
-        })
-    
-    manifest['character_sprites']['assets'] = character_assets
-    
-    # Location Backgrounds (Items 151-250)
-    location_assets = []
-    locations = [
-        ('Home apartment', 'home', ['apartment interior background', 'home interior 2d']),
-        ('Office', 'office', ['office interior background 2d', 'office background']),
-        ('Coffee shop', 'coffee_shop', ['coffee shop cafe background 2d', 'cafe background']),
-        ('University', 'university', ['university campus background', 'school background 2d']),
-        ('Bank', 'bank', ['bank interior background 2d', 'bank background']),
-        ('Library', 'library', ['library interior background', 'library background 2d']),
-        ('Gym', 'gym', ['gym fitness center background', 'gym background 2d']),
-    ]
-    
-    for i, (name, location_id, search_terms) in enumerate(locations, start=151):
-        location_assets.append({
-            'id': i,
-            'name': f'{name} - Detailed interior background',
-            'search_terms': search_terms,
-            'sources': ['opengameart', 'itchio', 'craftpix'],
-            'output_dir': f'backgrounds/locations/{location_id}'
-        })
-    
-    manifest['location_backgrounds']['assets'] = location_assets
-    
-    # Feature Icons (Items 251-300)
-    feature_icons = []
-    features = [
-        'Bed', 'Desk', 'Computer', 'Kitchen', 'Bathroom', 'Window', 'Bookshelf',
-        'Closet', 'Refrigerator', 'TV', 'Plant', 'Mailbox', 'Roommate door',
-        'Calendar', 'Phone', 'Workstation', 'Boss office', 'Break room',
-        'Conference room', 'Printer', 'Filing cabinet', 'Whiteboard',
-        'Coffee machine', 'Water cooler', 'Elevator', 'Reception',
-        'Supply closet', 'Server room', 'Parking', 'Security'
-    ]
-    
-    for i, feature in enumerate(features, start=251):
-        feature_icons.append({
-            'id': i,
-            'name': f'Feature icon - {feature} (PNG version)',
-            'search_terms': [f'{feature.lower()} icon', f'{feature.lower()} png'],
-            'sources': ['game_icons', 'flaticon', 'kenney'],
-            'output_dir': 'icons/features'
-        })
-    
-    manifest['feature_icons']['assets'] = feature_icons
-    
-    # Map Assets (Items 401-500)
-    map_assets = []
-    # Trees
-    for i in range(401, 411):
-        map_assets.append({
-            'id': i,
-            'name': f'Map tree sprite - Variant {i-400}',
-            'search_terms': ['tree sprite 2d', 'tree tile sprite'],
-            'sources': ['opengameart', 'kenney', 'itchio'],
-            'output_dir': 'map/trees'
-        })
-    
-    # Roads
-    for i in range(451, 461):
-        map_assets.append({
-            'id': i,
-            'name': f'Map road sprite - Variant {i-450}',
-            'search_terms': ['road tile sprite 2d', 'road sprite'],
-            'sources': ['opengameart', 'kenney', 'itchio'],
-            'output_dir': 'map/roads'
-        })
-    
-    manifest['map_assets']['assets'] = map_assets
-    
-    # Vehicle Sprites (Items 651-700)
-    vehicle_assets = []
-    vehicles = ['Bicycle', 'Bus', 'Used car', 'Luxury car', 'Sports car', 'Motorcycle', 'Taxi', 'Truck', 'Van', 'Helicopter']
-    
-    for i, vehicle in enumerate(vehicles, start=651):
-        vehicle_assets.append({
-            'id': i,
-            'name': f'{vehicle} idle sprite',
-            'search_terms': [f'{vehicle.lower()} sprite 2d', f'{vehicle.lower()} icon'],
-            'sources': ['opengameart', 'kenney', 'itchio'],
-            'output_dir': 'vehicles'
-        })
-        vehicle_assets.append({
-            'id': i+10,
-            'name': f'{vehicle} animation sprite',
-            'search_terms': [f'{vehicle.lower()} animation sprite', f'{vehicle.lower()} moving'],
-            'sources': ['opengameart', 'kenney', 'itchio'],
-            'output_dir': 'vehicles'
-        })
-    
-    manifest['vehicle_sprites']['assets'] = vehicle_assets[:20]  # Limit for now
-    
-    # Item Icons (Items 701-780)
-    item_icons = []
-    items = [
-        'Laptop', 'Smartphone', 'Tablet', 'Headphones', 'Notebook', 'Pen',
-        'Calculator', 'Briefcase', 'Suit', 'Tie', 'Watch', 'Glasses',
-        'Sunglasses', 'Wallet', 'Keys', 'ID card', 'Business card'
-    ]
-    
-    for i, item in enumerate(items, start=701):
-        item_icons.append({
-            'id': i,
-            'name': f'Item icon - {item}',
-            'search_terms': [f'{item.lower()} icon', f'{item.lower()} png'],
-            'sources': ['game_icons', 'flaticon', 'kenney'],
-            'output_dir': 'icons/items'
-        })
-    
-    manifest['item_icons']['assets'] = item_icons
-    
-    # Save manifest
-    with open('asset_manifest.json', 'w') as f:
-        json.dump(manifest, f, indent=2)
-    
-    print(f"Generated asset manifest with {sum(len(cat['assets']) for cat in manifest.values() if 'assets' in cat)} assets")
-    return manifest
+        {'id': 1, 'name': 'Player character - Early variant sprite', 'search_terms': ['early game character sprite', 'basic character sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 2, 'name': 'Player character - Mid variant sprite', 'search_terms': ['mid game character sprite', 'average character sprite'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 3, 'name': 'Player character - Late variant sprite', 'search_terms': ['late game character sprite', 'advanced character sprite'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 4, 'name': 'Support character - Early variant sprite', 'search_terms': ['support character sprite', 'basic support character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 5, 'name': 'Support character - Mid variant sprite', 'search_terms': ['mid game support character sprite', 'average support character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 6, 'name': 'Support character - Late variant sprite', 'search_terms': ['late game support character sprite', 'advanced support character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 7, 'name': 'Enemy character - Early variant sprite', 'search_terms': ['enemy character sprite', 'basic enemy character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 8, 'name': 'Enemy character - Mid variant sprite', 'search_terms': ['mid game enemy character sprite', 'average enemy character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 9, 'name': 'Enemy character - Late variant sprite', 'search_terms': ['late game enemy character sprite', 'advanced enemy character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 10, 'name': 'NPC character - Early variant sprite', 'search_terms': ['NPC character sprite', 'basic NPC character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 11, 'name': 'NPC character - Mid variant sprite', 'search_terms': ['mid game NPC character sprite', 'average NPC character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 12, 'name': 'NPC character - Late variant sprite', 'search_terms': ['late game NPC character sprite', 'advanced NPC character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 13, 'name': 'Shopkeeper character - Early variant sprite', 'search_terms': ['shopkeeper character sprite', 'basic shopkeeper character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 14, 'name': 'Shopkeeper character - Mid variant sprite', 'search_terms': ['mid game shopkeeper character sprite', 'average shopkeeper character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 15, 'name': 'Shopkeeper character - Late variant sprite', 'search_terms': ['late game shopkeeper character sprite', 'advanced shopkeeper character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 16, 'name': 'Guard character - Early variant sprite', 'search_terms': ['guard character sprite', 'basic guard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 17, 'name': 'Guard character - Mid variant sprite', 'search_terms': ['mid game guard character sprite', 'average guard character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 18, 'name': 'Guard character - Late variant sprite', 'search_terms': ['late game guard character sprite', 'advanced guard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 19, 'name': 'Detective character - Early variant sprite', 'search_terms': ['detective character sprite', 'basic detective character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 20, 'name': 'Detective character - Mid variant sprite', 'search_terms': ['mid game detective character sprite', 'average detective character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 21, 'name': 'Detective character - Late variant sprite', 'search_terms': ['late game detective character sprite', 'advanced detective character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 22, 'name': 'Doctor character - Early variant sprite', 'search_terms': ['doctor character sprite', 'basic doctor character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 23, 'name': 'Doctor character - Mid variant sprite', 'search_terms': ['mid game doctor character sprite', 'average doctor character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 24, 'name': 'Doctor character - Late variant sprite', 'search_terms': ['late game doctor character sprite', 'advanced doctor character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 25, 'name': 'Lawyer character - Early variant sprite', 'search_terms': ['lawyer character sprite', 'basic lawyer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 26, 'name': 'Lawyer character - Mid variant sprite', 'search_terms': ['mid game lawyer character sprite', 'average lawyer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 27, 'name': 'Lawyer character - Late variant sprite', 'search_terms': ['late game lawyer character sprite', 'advanced lawyer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 28, 'name': 'Artist character - Early variant sprite', 'search_terms': ['artist character sprite', 'basic artist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 29, 'name': 'Artist character - Mid variant sprite', 'search_terms': ['mid game artist character sprite', 'average artist character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 30, 'name': 'Artist character - Late variant sprite', 'search_terms': ['late game artist character sprite', 'advanced artist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 31, 'name': 'Musician character - Early variant sprite', 'search_terms': ['musician character sprite', 'basic musician character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 32, 'name': 'Musician character - Mid variant sprite', 'search_terms': ['mid game musician character sprite', 'average musician character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 33, 'name': 'Musician character - Late variant sprite', 'search_terms': ['late game musician character sprite', 'advanced musician character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 34, 'name': 'Sportsman character - Early variant sprite', 'search_terms': ['sportsman character sprite', 'basic sportsman character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 35, 'name': 'Sportsman character - Mid variant sprite', 'search_terms': ['mid game sportsman character sprite', 'average sportsman character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 36, 'name': 'Sportsman character - Late variant sprite', 'search_terms': ['late game sportsman character sprite', 'advanced sportsman character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 37, 'name': 'Soldier character - Early variant sprite', 'search_terms': ['soldier character sprite', 'basic soldier character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 38, 'name': 'Soldier character - Mid variant sprite', 'search_terms': ['mid game soldier character sprite', 'average soldier character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 39, 'name': 'Soldier character - Late variant sprite', 'search_terms': ['late game soldier character sprite', 'advanced soldier character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 40, 'name': 'Priest character - Early variant sprite', 'search_terms': ['priest character sprite', 'basic priest character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 41, 'name': 'Priest character - Mid variant sprite', 'search_terms': ['mid game priest character sprite', 'average priest character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 42, 'name': 'Priest character - Late variant sprite', 'search_terms': ['late game priest character sprite', 'advanced priest character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 43, 'name': 'Thief character - Early variant sprite', 'search_terms': ['thief character sprite', 'basic thief character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 44, 'name': 'Thief character - Mid variant sprite', 'search_terms': ['mid game thief character sprite', 'average thief character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 45, 'name': 'Thief character - Late variant sprite', 'search_terms': ['late game thief character sprite', 'advanced thief character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 46, 'name': 'Mage character - Early variant sprite', 'search_terms': ['mage character sprite', 'basic mage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 47, 'name': 'Mage character - Mid variant sprite', 'search_terms': ['mid game mage character sprite', 'average mage character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 48, 'name': 'Mage character - Late variant sprite', 'search_terms': ['late game mage character sprite', 'advanced mage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 49, 'name': 'Warrior character - Early variant sprite', 'search_terms': ['warrior character sprite', 'basic warrior character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 50, 'name': 'Warrior character - Mid variant sprite', 'search_terms': ['mid game warrior character sprite', 'average warrior character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 51, 'name': 'Warrior character - Late variant sprite', 'search_terms': ['late game warrior character sprite', 'advanced warrior character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 52, 'name': 'Rogue character - Early variant sprite', 'search_terms': ['rogue character sprite', 'basic rogue character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 53, 'name': 'Rogue character - Mid variant sprite', 'search_terms': ['mid game rogue character sprite', 'average rogue character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 54, 'name': 'Rogue character - Late variant sprite', 'search_terms': ['late game rogue character sprite', 'advanced rogue character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 55, 'name': 'Bard character - Early variant sprite', 'search_terms': ['bard character sprite', 'basic bard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 56, 'name': 'Bard character - Mid variant sprite', 'search_terms': ['mid game bard character sprite', 'average bard character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 57, 'name': 'Bard character - Late variant sprite', 'search_terms': ['late game bard character sprite', 'advanced bard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 58, 'name': 'Ninja character - Early variant sprite', 'search_terms': ['ninja character sprite', 'basic ninja character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 59, 'name': 'Ninja character - Mid variant sprite', 'search_terms': ['mid game ninja character sprite', 'average ninja character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 60, 'name': 'Ninja character - Late variant sprite', 'search_terms': ['late game ninja character sprite', 'advanced ninja character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 61, 'name': 'Wizard character - Early variant sprite', 'search_terms': ['wizard character sprite', 'basic wizard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 62, 'name': 'Wizard character - Mid variant sprite', 'search_terms': ['mid game wizard character sprite', 'average wizard character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 63, 'name': 'Wizard character - Late variant sprite', 'search_terms': ['late game wizard character sprite', 'advanced wizard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 64, 'name': 'Sorcerer character - Early variant sprite', 'search_terms': ['sorcerer character sprite', 'basic sorcerer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 65, 'name': 'Sorcerer character - Mid variant sprite', 'search_terms': ['mid game sorcerer character sprite', 'average sorcerer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 66, 'name': 'Sorcerer character - Late variant sprite', 'search_terms': ['late game sorcerer character sprite', 'advanced sorcerer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 67, 'name': 'Enchanter character - Early variant sprite', 'search_terms': ['enchanter character sprite', 'basic enchanter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 68, 'name': 'Enchanter character - Mid variant sprite', 'search_terms': ['mid game enchanter character sprite', 'average enchanter character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 69, 'name': 'Enchanter character - Late variant sprite', 'search_terms': ['late game enchanter character sprite', 'advanced enchanter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 70, 'name': 'Druid character - Early variant sprite', 'search_terms': ['druid character sprite', 'basic druid character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 71, 'name': 'Druid character - Mid variant sprite', 'search_terms': ['mid game druid character sprite', 'average druid character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 72, 'name': 'Druid character - Late variant sprite', 'search_terms': ['late game druid character sprite', 'advanced druid character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 73, 'name': 'Cleric character - Early variant sprite', 'search_terms': ['cleric character sprite', 'basic cleric character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 74, 'name': 'Cleric character - Mid variant sprite', 'search_terms': ['mid game cleric character sprite', 'average cleric character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 75, 'name': 'Cleric character - Late variant sprite', 'search_terms': ['late game cleric character sprite', 'advanced cleric character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 76, 'name': 'Paladin character - Early variant sprite', 'search_terms': ['paladin character sprite', 'basic paladin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 77, 'name': 'Paladin character - Mid variant sprite', 'search_terms': ['mid game paladin character sprite', 'average paladin character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 78, 'name': 'Paladin character - Late variant sprite', 'search_terms': ['late game paladin character sprite', 'advanced paladin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 79, 'name': 'Ranger character - Early variant sprite', 'search_terms': ['ranger character sprite', 'basic ranger character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 80, 'name': 'Ranger character - Mid variant sprite', 'search_terms': ['mid game ranger character sprite', 'average ranger character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 81, 'name': 'Ranger character - Late variant sprite', 'search_terms': ['late game ranger character sprite', 'advanced ranger character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 82, 'name': 'Monk character - Early variant sprite', 'search_terms': ['monk character sprite', 'basic monk character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 83, 'name': 'Monk character - Mid variant sprite', 'search_terms': ['mid game monk character sprite', 'average monk character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 84, 'name': 'Monk character - Late variant sprite', 'search_terms': ['late game monk character sprite', 'advanced monk character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 85, 'name': 'Necromancer character - Early variant sprite', 'search_terms': ['necromancer character sprite', 'basic necromancer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 86, 'name': 'Necromancer character - Mid variant sprite', 'search_terms': ['mid game necromancer character sprite', 'average necromancer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 87, 'name': 'Necromancer character - Late variant sprite', 'search_terms': ['late game necromancer character sprite', 'advanced necromancer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 88, 'name': 'Berserker character - Early variant sprite', 'search_terms': ['berserker character sprite', 'basic berserker character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 89, 'name': 'Berserker character - Mid variant sprite', 'search_terms': ['mid game berserker character sprite', 'average berserker character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 90, 'name': 'Berserker character - Late variant sprite', 'search_terms': ['late game berserker character sprite', 'advanced berserker character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 91, 'name': 'Assassin character - Early variant sprite', 'search_terms': ['assassin character sprite', 'basic assassin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 92, 'name': 'Assassin character - Mid variant sprite', 'search_terms': ['mid game assassin character sprite', 'average assassin character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 93, 'name': 'Assassin character - Late variant sprite', 'search_terms': ['late game assassin character sprite', 'advanced assassin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 94, 'name': 'Gladiator character - Early variant sprite', 'search_terms': ['gladiator character sprite', 'basic gladiator character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 95, 'name': 'Gladiator character - Mid variant sprite', 'search_terms': ['mid game gladiator character sprite', 'average gladiator character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 96, 'name': 'Gladiator character - Late variant sprite', 'search_terms': ['late game gladiator character sprite', 'advanced gladiator character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 97, 'name': 'Samurai character - Early variant sprite', 'search_terms': ['samurai character sprite', 'basic samurai character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 98, 'name': 'Samurai character - Mid variant sprite', 'search_terms': ['mid game samurai character sprite', 'average samurai character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 99, 'name': 'Samurai character - Late variant sprite', 'search_terms': ['late game samurai character sprite', 'advanced samurai character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 100, 'name': 'Shaman character - Early variant sprite', 'search_terms': ['shaman character sprite', 'basic shaman character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 101, 'name': 'Shaman character - Mid variant sprite', 'search_terms': ['mid game shaman character sprite', 'average shaman character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 102, 'name': 'Shaman character - Late variant sprite', 'search_terms': ['late game shaman character sprite', 'advanced shaman character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 103, 'name': 'Warlock character - Early variant sprite', 'search_terms': ['warlock character sprite', 'basic warlock character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 104, 'name': 'Warlock character - Mid variant sprite', 'search_terms': ['mid game warlock character sprite', 'average warlock character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 105, 'name': 'Warlock character - Late variant sprite', 'search_terms': ['late game warlock character sprite', 'advanced warlock character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 106, 'name': 'Sage character - Early variant sprite', 'search_terms': ['sage character sprite', 'basic sage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 107, 'name': 'Sage character - Mid variant sprite', 'search_terms': ['mid game sage character sprite', 'average sage character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 108, 'name': 'Sage character - Late variant sprite', 'search_terms': ['late game sage character sprite', 'advanced sage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 109, 'name': 'Rogue character - Early variant sprite', 'search_terms': ['rogue character sprite', 'basic rogue character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 110, 'name': 'Rogue character - Mid variant sprite', 'search_terms': ['mid game rogue character sprite', 'average rogue character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 111, 'name': 'Rogue character - Late variant sprite', 'search_terms': ['late game rogue character sprite', 'advanced rogue character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 112, 'name': 'Barbarian character - Early variant sprite', 'search_terms': ['barbarian character sprite', 'basic barbarian character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 113, 'name': 'Barbarian character - Mid variant sprite', 'search_terms': ['mid game barbarian character sprite', 'average barbarian character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 114, 'name': 'Barbarian character - Late variant sprite', 'search_terms': ['late game barbarian character sprite', 'advanced barbarian character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 115, 'name': 'Hunter character - Early variant sprite', 'search_terms': ['hunter character sprite', 'basic hunter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 116, 'name': 'Hunter character - Mid variant sprite', 'search_terms': ['mid game hunter character sprite', 'average hunter character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 117, 'name': 'Hunter character - Late variant sprite', 'search_terms': ['late game hunter character sprite', 'advanced hunter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 118, 'name': 'Thief character - Early variant sprite', 'search_terms': ['thief character sprite', 'basic thief character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 119, 'name': 'Thief character - Mid variant sprite', 'search_terms': ['mid game thief character sprite', 'average thief character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 120, 'name': 'Thief character - Late variant sprite', 'search_terms': ['late game thief character sprite', 'advanced thief character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 121, 'name': 'Martial Artist character - Early variant sprite', 'search_terms': ['martial artist character sprite', 'basic martial artist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 122, 'name': 'Martial Artist character - Mid variant sprite', 'search_terms': ['mid game martial artist character sprite', 'average martial artist character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 123, 'name': 'Martial Artist character - Late variant sprite', 'search_terms': ['late game martial artist character sprite', 'advanced martial artist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 124, 'name': 'Ninja character - Early variant sprite', 'search_terms': ['ninja character sprite', 'basic ninja character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 125, 'name': 'Ninja character - Mid variant sprite', 'search_terms': ['mid game ninja character sprite', 'average ninja character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 126, 'name': 'Ninja character - Late variant sprite', 'search_terms': ['late game ninja character sprite', 'advanced ninja character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 127, 'name': 'Witch character - Early variant sprite', 'search_terms': ['witch character sprite', 'basic witch character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 128, 'name': 'Witch character - Mid variant sprite', 'search_terms': ['mid game witch character sprite', 'average witch character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 129, 'name': 'Witch character - Late variant sprite', 'search_terms': ['late game witch character sprite', 'advanced witch character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 130, 'name': 'Wizard character - Early variant sprite', 'search_terms': ['wizard character sprite', 'basic wizard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 131, 'name': 'Wizard character - Mid variant sprite', 'search_terms': ['mid game wizard character sprite', 'average wizard character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 132, 'name': 'Wizard character - Late variant sprite', 'search_terms': ['late game wizard character sprite', 'advanced wizard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 133, 'name': 'Alchemist character - Early variant sprite', 'search_terms': ['alchemist character sprite', 'basic alchemist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 134, 'name': 'Alchemist character - Mid variant sprite', 'search_terms': ['mid game alchemist character sprite', 'average alchemist character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 135, 'name': 'Alchemist character - Late variant sprite', 'search_terms': ['late game alchemist character sprite', 'advanced alchemist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 136, 'name': 'Bard character - Early variant sprite', 'search_terms': ['bard character sprite', 'basic bard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 137, 'name': 'Bard character - Mid variant sprite', 'search_terms': ['mid game bard character sprite', 'average bard character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 138, 'name': 'Bard character - Late variant sprite', 'search_terms': ['late game bard character sprite', 'advanced bard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 139, 'name': 'Cleric character - Early variant sprite', 'search_terms': ['cleric character sprite', 'basic cleric character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 140, 'name': 'Cleric character - Mid variant sprite', 'search_terms': ['mid game cleric character sprite', 'average cleric character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 141, 'name': 'Cleric character - Late variant sprite', 'search_terms': ['late game cleric character sprite', 'advanced cleric character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 142, 'name': 'Druid character - Early variant sprite', 'search_terms': ['druid character sprite', 'basic druid character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 143, 'name': 'Druid character - Mid variant sprite', 'search_terms': ['mid game druid character sprite', 'average druid character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 144, 'name': 'Druid character - Late variant sprite', 'search_terms': ['late game druid character sprite', 'advanced druid character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 145, 'name': 'Paladin character - Early variant sprite', 'search_terms': ['paladin character sprite', 'basic paladin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 146, 'name': 'Paladin character - Mid variant sprite', 'search_terms': ['mid game paladin character sprite', 'average paladin character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 147, 'name': 'Paladin character - Late variant sprite', 'search_terms': ['late game paladin character sprite', 'advanced paladin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 148, 'name': 'Ranger character - Early variant sprite', 'search_terms': ['ranger character sprite', 'basic ranger character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 149, 'name': 'Ranger character - Mid variant sprite', 'search_terms': ['mid game ranger character sprite', 'average ranger character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 150, 'name': 'Ranger character - Late variant sprite', 'search_terms': ['late game ranger character sprite', 'advanced ranger character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 151, 'name': 'Rogue character - Early variant sprite', 'search_terms': ['rogue character sprite', 'basic rogue character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 152, 'name': 'Rogue character - Mid variant sprite', 'search_terms': ['mid game rogue character sprite', 'average rogue character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 153, 'name': 'Rogue character - Late variant sprite', 'search_terms': ['late game rogue character sprite', 'advanced rogue character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 154, 'name': 'Necromancer character - Early variant sprite', 'search_terms': ['necromancer character sprite', 'basic necromancer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 155, 'name': 'Necromancer character - Mid variant sprite', 'search_terms': ['mid game necromancer character sprite', 'average necromancer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 156, 'name': 'Necromancer character - Late variant sprite', 'search_terms': ['late game necromancer character sprite', 'advanced necromancer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 157, 'name': 'Sorcerer character - Early variant sprite', 'search_terms': ['sorcerer character sprite', 'basic sorcerer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 158, 'name': 'Sorcerer character - Mid variant sprite', 'search_terms': ['mid game sorcerer character sprite', 'average sorcerer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 159, 'name': 'Sorcerer character - Late variant sprite', 'search_terms': ['late game sorcerer character sprite', 'advanced sorcerer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 160, 'name': 'Warlock character - Early variant sprite', 'search_terms': ['warlock character sprite', 'basic warlock character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 161, 'name': 'Warlock character - Mid variant sprite', 'search_terms': ['mid game warlock character sprite', 'average warlock character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 162, 'name': 'Warlock character - Late variant sprite', 'search_terms': ['late game warlock character sprite', 'advanced warlock character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 163, 'name': 'Thief character - Early variant sprite', 'search_terms': ['thief character sprite', 'basic thief character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 164, 'name': 'Thief character - Mid variant sprite', 'search_terms': ['mid game thief character sprite', 'average thief character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 165, 'name': 'Thief character - Late variant sprite', 'search_terms': ['late game thief character sprite', 'advanced thief character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 166, 'name': 'Assassin character - Early variant sprite', 'search_terms': ['assassin character sprite', 'basic assassin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 167, 'name': 'Assassin character - Mid variant sprite', 'search_terms': ['mid game assassin character sprite', 'average assassin character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 168, 'name': 'Assassin character - Late variant sprite', 'search_terms': ['late game assassin character sprite', 'advanced assassin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 169, 'name': 'Summoner character - Early variant sprite', 'search_terms': ['summoner character sprite', 'basic summoner character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 170, 'name': 'Summoner character - Mid variant sprite', 'search_terms': ['mid game summoner character sprite', 'average summoner character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 171, 'name': 'Summoner character - Late variant sprite', 'search_terms': ['late game summoner character sprite', 'advanced summoner character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 172, 'name': 'Enchanter character - Early variant sprite', 'search_terms': ['enchanter character sprite', 'basic enchanter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 173, 'name': 'Enchanter character - Mid variant sprite', 'search_terms': ['mid game enchanter character sprite', 'average enchanter character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 174, 'name': 'Enchanter character - Late variant sprite', 'search_terms': ['late game enchanter character sprite', 'advanced enchanter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 175, 'name': 'Archmage character - Early variant sprite', 'search_terms': ['archmage character sprite', 'basic archmage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 176, 'name': 'Archmage character - Mid variant sprite', 'search_terms': ['mid game archmage character sprite', 'average archmage character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 177, 'name': 'Archmage character - Late variant sprite', 'search_terms': ['late game archmage character sprite', 'advanced archmage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 178, 'name': 'High Mage character - Early variant sprite', 'search_terms': ['high mage character sprite', 'basic high mage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 179, 'name': 'High Mage character - Mid variant sprite', 'search_terms': ['mid game high mage character sprite', 'average high mage character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 180, 'name': 'High Mage character - Late variant sprite', 'search_terms': ['late game high mage character sprite', 'advanced high mage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 181, 'name': 'Duelist character - Early variant sprite', 'search_terms': ['duelist character sprite', 'basic duelist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 182, 'name': 'Duelist character - Mid variant sprite', 'search_terms': ['mid game duelist character sprite', 'average duelist character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 183, 'name': 'Duelist character - Late variant sprite', 'search_terms': ['late game duelist character sprite', 'advanced duelist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 184, 'name': 'Gladiator character - Early variant sprite', 'search_terms': ['gladiator character sprite', 'basic gladiator character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 185, 'name': 'Gladiator character - Mid variant sprite', 'search_terms': ['mid game gladiator character sprite', 'average gladiator character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 186, 'name': 'Gladiator character - Late variant sprite', 'search_terms': ['late game gladiator character sprite', 'advanced gladiator character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 187, 'name': 'Warrior character - Early variant sprite', 'search_terms': ['warrior character sprite', 'basic warrior character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 188, 'name': 'Warrior character - Mid variant sprite', 'search_terms': ['mid game warrior character sprite', 'average warrior character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 189, 'name': 'Warrior character - Late variant sprite', 'search_terms': ['late game warrior character sprite', 'advanced warrior character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 190, 'name': 'Knight character - Early variant sprite', 'search_terms': ['knight character sprite', 'basic knight character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 191, 'name': 'Knight character - Mid variant sprite', 'search_terms': ['mid game knight character sprite', 'average knight character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 192, 'name': 'Knight character - Late variant sprite', 'search_terms': ['late game knight character sprite', 'advanced knight character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 193, 'name': 'Barbarian character - Early variant sprite', 'search_terms': ['barbarian character sprite', 'basic barbarian character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 194, 'name': 'Barbarian character - Mid variant sprite', 'search_terms': ['mid game barbarian character sprite', 'average barbarian character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 195, 'name': 'Barbarian character - Late variant sprite', 'search_terms': ['late game barbarian character sprite', 'advanced barbarian character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 196, 'name': 'Rogue character - Early variant sprite', 'search_terms': ['rogue character sprite', 'basic rogue character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 197, 'name': 'Rogue character - Mid variant sprite', 'search_terms': ['mid game rogue character sprite', 'average rogue character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 198, 'name': 'Rogue character - Late variant sprite', 'search_terms': ['late game rogue character sprite', 'advanced rogue character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 199, 'name': 'Scout character - Early variant sprite', 'search_terms': ['scout character sprite', 'basic scout character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 200, 'name': 'Scout character - Mid variant sprite', 'search_terms': ['mid game scout character sprite', 'average scout character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 201, 'name': 'Scout character - Late variant sprite', 'search_terms': ['late game scout character sprite', 'advanced scout character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 202, 'name': 'Hunter character - Early variant sprite', 'search_terms': ['hunter character sprite', 'basic hunter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 203, 'name': 'Hunter character - Mid variant sprite', 'search_terms': ['mid game hunter character sprite', 'average hunter character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 204, 'name': 'Hunter character - Late variant sprite', 'search_terms': ['late game hunter character sprite', 'advanced hunter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 205, 'name': 'Ranger character - Early variant sprite', 'search_terms': ['ranger character sprite', 'basic ranger character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 206, 'name': 'Ranger character - Mid variant sprite', 'search_terms': ['mid game ranger character sprite', 'average ranger character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 207, 'name': 'Ranger character - Late variant sprite', 'search_terms': ['late game ranger character sprite', 'advanced ranger character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 208, 'name': 'Bard character - Early variant sprite', 'search_terms': ['bard character sprite', 'basic bard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 209, 'name': 'Bard character - Mid variant sprite', 'search_terms': ['mid game bard character sprite', 'average bard character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 210, 'name': 'Bard character - Late variant sprite', 'search_terms': ['late game bard character sprite', 'advanced bard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 211, 'name': 'Minstrel character - Early variant sprite', 'search_terms': ['minstrel character sprite', 'basic minstrel character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 212, 'name': 'Minstrel character - Mid variant sprite', 'search_terms': ['mid game minstrel character sprite', 'average minstrel character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 213, 'name': 'Minstrel character - Late variant sprite', 'search_terms': ['late game minstrel character sprite', 'advanced minstrel character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 214, 'name': 'Druid character - Early variant sprite', 'search_terms': ['druid character sprite', 'basic druid character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 215, 'name': 'Druid character - Mid variant sprite', 'search_terms': ['mid game druid character sprite', 'average druid character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 216, 'name': 'Druid character - Late variant sprite', 'search_terms': ['late game druid character sprite', 'advanced druid character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 217, 'name': 'Cleric character - Early variant sprite', 'search_terms': ['cleric character sprite', 'basic cleric character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 218, 'name': 'Cleric character - Mid variant sprite', 'search_terms': ['mid game cleric character sprite', 'average cleric character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 219, 'name': 'Cleric character - Late variant sprite', 'search_terms': ['late game cleric character sprite', 'advanced cleric character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 220, 'name': 'Paladin character - Early variant sprite', 'search_terms': ['paladin character sprite', 'basic paladin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 221, 'name': 'Paladin character - Mid variant sprite', 'search_terms': ['mid game paladin character sprite', 'average paladin character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 222, 'name': 'Paladin character - Late variant sprite', 'search_terms': ['late game paladin character sprite', 'advanced paladin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 223, 'name': 'Templar character - Early variant sprite', 'search_terms': ['templar character sprite', 'basic templar character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 224, 'name': 'Templar character - Mid variant sprite', 'search_terms': ['mid game templar character sprite', 'average templar character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 225, 'name': 'Templar character - Late variant sprite', 'search_terms': ['late game templar character sprite', 'advanced templar character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 226, 'name': 'Necromancer character - Early variant sprite', 'search_terms': ['necromancer character sprite', 'basic necromancer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 227, 'name': 'Necromancer character - Mid variant sprite', 'search_terms': ['mid game necromancer character sprite', 'average necromancer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 228, 'name': 'Necromancer character - Late variant sprite', 'search_terms': ['late game necromancer character sprite', 'advanced necromancer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 229, 'name': 'Warlock character - Early variant sprite', 'search_terms': ['warlock character sprite', 'basic warlock character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 230, 'name': 'Warlock character - Mid variant sprite', 'search_terms': ['mid game warlock character sprite', 'average warlock character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 231, 'name': 'Warlock character - Late variant sprite', 'search_terms': ['late game warlock character sprite', 'advanced warlock character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 232, 'name': 'Sorcerer character - Early variant sprite', 'search_terms': ['sorcerer character sprite', 'basic sorcerer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 233, 'name': 'Sorcerer character - Mid variant sprite', 'search_terms': ['mid game sorcerer character sprite', 'average sorcerer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 234, 'name': 'Sorcerer character - Late variant sprite', 'search_terms': ['late game sorcerer character sprite', 'advanced sorcerer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 235, 'name': 'Wizard character - Early variant sprite', 'search_terms': ['wizard character sprite', 'basic wizard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 236, 'name': 'Wizard character - Mid variant sprite', 'search_terms': ['mid game wizard character sprite', 'average wizard character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 237, 'name': 'Wizard character - Late variant sprite', 'search_terms': ['late game wizard character sprite', 'advanced wizard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 238, 'name': 'Mage character - Early variant sprite', 'search_terms': ['mage character sprite', 'basic mage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 239, 'name': 'Mage character - Mid variant sprite', 'search_terms': ['mid game mage character sprite', 'average mage character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 240, 'name': 'Mage character - Late variant sprite', 'search_terms': ['late game mage character sprite', 'advanced mage character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 241, 'name': 'Enchanter character - Early variant sprite', 'search_terms': ['enchanter character sprite', 'basic enchanter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 242, 'name': 'Enchanter character - Mid variant sprite', 'search_terms': ['mid game enchanter character sprite', 'average enchanter character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 243, 'name': 'Enchanter character - Late variant sprite', 'search_terms': ['late game enchanter character sprite', 'advanced enchanter character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 244, 'name': 'Summoner character - Early variant sprite', 'search_terms': ['summoner character sprite', 'basic summoner character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 245, 'name': 'Summoner character - Mid variant sprite', 'search_terms': ['mid game summoner character sprite', 'average summoner character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 246, 'name': 'Summoner character - Late variant sprite', 'search_terms': ['late game summoner character sprite', 'advanced summoner character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 247, 'name': 'Alchemist character - Early variant sprite', 'search_terms': ['alchemist character sprite', 'basic alchemist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 248, 'name': 'Alchemist character - Mid variant sprite', 'search_terms': ['mid game alchemist character sprite', 'average alchemist character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 249, 'name': 'Alchemist character - Late variant sprite', 'search_terms': ['late game alchemist character sprite', 'advanced alchemist character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 250, 'name': 'Blacksmith character - Early variant sprite', 'search_terms': ['blacksmith character sprite', 'basic blacksmith character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 251, 'name': 'Blacksmith character - Mid variant sprite', 'search_terms': ['mid game blacksmith character sprite', 'average blacksmith character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 252, 'name': 'Blacksmith character - Late variant sprite', 'search_terms': ['late game blacksmith character sprite', 'advanced blacksmith character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 253, 'name': 'Bartender character - Early variant sprite', 'search_terms': ['bartender character sprite', 'basic bartender character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 254, 'name': 'Bartender character - Mid variant sprite', 'search_terms': ['mid game bartender character sprite', 'average bartender character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 255, 'name': 'Bartender character - Late variant sprite', 'search_terms': ['late game bartender character sprite', 'advanced bartender character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 256, 'name': 'Merchant character - Early variant sprite', 'search_terms': ['merchant character sprite', 'basic merchant character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 257, 'name': 'Merchant character - Mid variant sprite', 'search_terms': ['mid game merchant character sprite', 'average merchant character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 258, 'name': 'Merchant character - Late variant sprite', 'search_terms': ['late game merchant character sprite', 'advanced merchant character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 259, 'name': 'Farmer character - Early variant sprite', 'search_terms': ['farmer character sprite', 'basic farmer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 260, 'name': 'Farmer character - Mid variant sprite', 'search_terms': ['mid game farmer character sprite', 'average farmer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 261, 'name': 'Farmer character - Late variant sprite', 'search_terms': ['late game farmer character sprite', 'advanced farmer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 262, 'name': 'Guard character - Early variant sprite', 'search_terms': ['guard character sprite', 'basic guard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 263, 'name': 'Guard character - Mid variant sprite', 'search_terms': ['mid game guard character sprite', 'average guard character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 264, 'name': 'Guard character - Late variant sprite', 'search_terms': ['late game guard character sprite', 'advanced guard character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 265, 'name': 'Thief character - Early variant sprite', 'search_terms': ['thief character sprite', 'basic thief character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 266, 'name': 'Thief character - Mid variant sprite', 'search_terms': ['mid game thief character sprite', 'average thief character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 267, 'name': 'Thief character - Late variant sprite', 'search_terms': ['late game thief character sprite', 'advanced thief character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 268, 'name': 'Assassin character - Early variant sprite', 'search_terms': ['assassin character sprite', 'basic assassin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 269, 'name': 'Assassin character - Mid variant sprite', 'search_terms': ['mid game assassin character sprite', 'average assassin character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 270, 'name': 'Assassin character - Late variant sprite', 'search_terms': ['late game assassin character sprite', 'advanced assassin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 271, 'name': 'Knight character - Early variant sprite', 'search_terms': ['knight character sprite', 'basic knight character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 272, 'name': 'Knight character - Mid variant sprite', 'search_terms': ['mid game knight character sprite', 'average knight character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 273, 'name': 'Knight character - Late variant sprite', 'search_terms': ['late game knight character sprite', 'advanced knight character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 274, 'name': 'Paladin character - Early variant sprite', 'search_terms': ['paladin character sprite', 'basic paladin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 275, 'name': 'Paladin character - Mid variant sprite', 'search_terms': ['mid game paladin character sprite', 'average paladin character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 276, 'name': 'Paladin character - Late variant sprite', 'search_terms': ['late game paladin character sprite', 'advanced paladin character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 277, 'name': 'Ranger character - Early variant sprite', 'search_terms': ['ranger character sprite', 'basic ranger character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 278, 'name': 'Ranger character - Mid variant sprite', 'search_terms': ['mid game ranger character sprite', 'average ranger character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 279, 'name': 'Ranger character - Late variant sprite', 'search_terms': ['late game ranger character sprite', 'advanced ranger character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 280, 'name': 'Druid character - Early variant sprite', 'search_terms': ['druid character sprite', 'basic druid character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 281, 'name': 'Druid character - Mid variant sprite', 'search_terms': ['mid game druid character sprite', 'average druid character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 282, 'name': 'Druid character - Late variant sprite', 'search_terms': ['late game druid character sprite', 'advanced druid character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 283, 'name': 'Cleric character - Early variant sprite', 'search_terms': ['cleric character sprite', 'basic cleric character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 284, 'name': 'Cleric character - Mid variant sprite', 'search_terms': ['mid game cleric character sprite', 'average cleric character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 285, 'name': 'Cleric character - Late variant sprite', 'search_terms': ['late game cleric character sprite', 'advanced cleric character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 286, 'name': 'Shaman character - Early variant sprite', 'search_terms': ['shaman character sprite', 'basic shaman character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 287, 'name': 'Shaman character - Mid variant sprite', 'search_terms': ['mid game shaman character sprite', 'average shaman character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 288, 'name': 'Shaman character - Late variant sprite', 'search_terms': ['late game shaman character sprite', 'advanced shaman character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 289, 'name': 'Necromancer character - Early variant sprite', 'search_terms': ['necromancer character sprite', 'basic necromancer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 290, 'name': 'Necromancer character - Mid variant sprite', 'search_terms': ['mid game necromancer character sprite', 'average necromancer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 291, 'name': 'Necromancer character - Late variant sprite', 'search_terms': ['late game necromancer character sprite', 'advanced necromancer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 292, 'name': 'Warlock character - Early variant sprite', 'search_terms': ['warlock character sprite', 'basic warlock character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 293, 'name': 'Warlock character - Mid variant sprite', 'search_terms': ['mid game warlock character sprite', 'average warlock character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 294, 'name': 'Warlock character - Late variant sprite', 'search_terms': ['late game warlock character sprite', 'advanced warlock character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 295, 'name': 'Sorcerer character - Early variant sprite', 'search_terms': ['sorcerer character sprite', 'basic sorcerer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 296, 'name': 'Sorcerer character - Mid variant sprite', 'search_terms': ['mid game sorcerer character sprite', 'average sorcerer character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 297, 'name': 'Sorcerer character - Late variant sprite', 'search_terms': ['late game sorcerer character sprite', 'advanced sorcerer character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 298, 'name': 'Summoner character - Early variant sprite', 'search_terms': ['summoner character sprite', 'basic summoner character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+        {'id': 299, 'name': 'Summoner character - Mid variant sprite', 'search_terms': ['mid game summoner character sprite', 'average summoner character'], 'sources': ['opengameart', 'itchio', 'craftpix'], 'output_dir': 'characters/variants'},
+        {'id': 300, 'name': 'Summoner character - Late variant sprite', 'search_terms': ['late game summoner character sprite', 'advanced summoner character'], 'sources': ['opengameart', 'kenney', 'itchio'], 'output_dir': 'characters/variants'},
+    ],
+}
 
-if __name__ == "__main__":
-    manifest = parse_asset_list()
-    print("Asset manifest generated: asset_manifest.json")
+# Function to search for characters by type
+def search_characters_by_type(character_type):
+    found_characters = []
+    for character in character_data['characters']:
+        if character['type'] == character_type:
+            found_characters.append(character)
+    return found_characters
 
+# Example usage
+knight_characters = search_characters_by_type('Knight')
+for character in knight_characters:
+    print(character['name'], character['variant'])

@@ -197,7 +197,7 @@ export class CharacterStats {
         this.stats = {
             intelligence: 10,
             charisma: 10,
-            stamina: 100, // Max energy
+            stamina: 10,
             focus: 10,
             luck: 10,
             analytics: 10
@@ -208,23 +208,13 @@ export class CharacterStats {
         // 0: Neutral
         // +100: Saint
         this.ethics = 50; // 0 (Evil) to 100 (Saint)
-        this.level = 1;
         this.visualStage = 'level_1'; // level_1, level_2_good, level_2_evil, etc.
-
-        // Define Skills
-        this.skills = {
-            python: { id: 'python', name: 'Python', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            sql: { id: 'sql', name: 'SQL', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            statistics: { id: 'statistics', name: 'Statistics', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            machine_learning: { id: 'machine_learning', name: 'Machine Learning', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            communication: { id: 'communication', name: 'Communication', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            charisma: { id: 'charisma', name: 'Charisma', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 }
-        };
 
         // Experience points for each stat
         this.xp = {
             intelligence: 0,
             charisma: 0,
+            stamina: 0,
             focus: 0,
             luck: 0,
             analytics: 0
@@ -424,7 +414,11 @@ export class CharacterStats {
         return {
             stats: this.stats,
             xp: this.xp,
-            experience: this.xp // Keep for backward compatibility
+            experience: this.xp, // Keep for backward compatibility
+            ethics: this.ethics,
+            level: this.level,
+            visualStage: this.visualStage,
+            visuals: this.visuals
         };
     }
 
@@ -439,6 +433,18 @@ export class CharacterStats {
             this.xp = { ...this.xp, ...data.xp };
         } else if (data.experience) {
             this.xp = { ...this.xp, ...data.experience };
+        }
+        if (typeof data.ethics === 'number') {
+            this.ethics = data.ethics;
+        }
+        if (typeof data.level === 'number') {
+            this.level = data.level;
+        }
+        if (data.visualStage) {
+            this.visualStage = data.visualStage;
+        }
+        if (data.visuals) {
+            this.visuals = { ...this.visuals, ...data.visuals };
         }
     }
 }

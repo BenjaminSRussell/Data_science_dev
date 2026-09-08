@@ -1,100 +1,70 @@
-#!/usr/bin/env python3
-"""
-Create town map with roads, zones, and layered assets
-Follows 50 design criteria
-"""
-
+import logging
 import json
 from pathlib import Path
 from PIL import Image, ImageDraw
-import logging
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class TownMapGenerator:
-    def __init__(self, output_dir="assets/map"):
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Map configuration
-        self.map_config = {
-            'cols': 30,
+    def __init__(self, map_config=None, zones=None, output_dir=None):
+        self.map_config = map_config or {
             'rows': 30,
-            'tile_size': 20,  # 20px per tile = 600x600px map
-            'road_width': 1,   # 1 tile wide roads
+            'cols': 30,
+            'tile_size': 32
         }
-        
-        # Zone definitions
-        self.zones = {
-            'residential': {'color': (200, 220, 240), 'buildings': 'houses'},
-            'commercial': {'color': (240, 220, 200), 'buildings': 'shops'},
-            'education': {'color': (220, 240, 220), 'buildings': 'schools'},
-            'finance': {'color': (240, 240, 200), 'buildings': 'offices'},
-            'government': {'color': (220, 200, 240), 'buildings': 'public'},
-            'park': {'color': (200, 240, 200), 'buildings': 'none'}
+        self.zones = zones or {
+            'residential': {'color': (200, 230, 200), 'buildings': 'house'},
+            'commercial': {'color': (230, 220, 170), 'buildings': 'store'},
+            'education': {'color': (200, 200, 255), 'buildings': 'school'},
+            'park': {'color': (150, 200, 150), 'buildings': 'none'},
+            'finance': {'color': (255, 200, 150), 'buildings': 'bank'},
+            'government': {'color': (200, 180, 200), 'buildings': 'government'},
         }
-    
+        self.output_dir = Path(output_dir or 'maps') / 'town'
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
     def generate_map_data(self):
-        """Generate map data structure"""
-        logger.info("Generating map data...")
-        
-        map_data = {
-            'terrain': [],  # Base layer
-            'roads': [],    # Road layer
-            'zones': [],    # Zone layer
-            'buildings': [], # Building layer
-            'decorations': [] # Trees, etc.
+        roads = self._generate_roads()
+        zones = self._generate_zones(roads)
+        buildings = self._place_buildings(roads, zones)
+        decorations = self._add_decorations(roads, zones)
+        return {
+            'roads': roads,
+            'zones': zones,
+            'buildings': buildings,
+            'decorations': decorations
         }
-        
-        total_tiles = self.map_config['cols'] * self.map_config['rows']
-        
-        # Initialize terrain (all grass)
-        map_data['terrain'] = ['grass'] * total_tiles
-        
-        # Generate road network
-        map_data['roads'] = self._generate_roads()
-        
-        # Generate zones
-        map_data['zones'] = self._generate_zones(map_data['roads'])
-        
-        # Place buildings on roads
-        map_data['buildings'] = self._place_buildings(map_data['roads'], map_data['zones'])
-        
-        # Add decorations
-        map_data['decorations'] = self._add_decorations(map_data['roads'], map_data['zones'])
-        
-        return map_data
-    
+
     def _generate_roads(self):
-        """Generate road network"""
-        roads = [None] * (self.map_config['cols'] * self.map_config['rows'])
+        """Generate a road network with intersections and edge markers"""
+        roads = [None] * (self.map_config['rows'] * self.map_config['cols'])
         
-        # Main horizontal roads (every 6 rows)
-        for row in range(6, self.map_config['rows'], 6):
-            for col in range(self.map_config['cols']):
-                idx = row * self.map_config['cols'] + col
-                if col == 0 or col == self.map_config['cols'] - 1:
-                    roads[idx] = 'road_end_h'
-                elif col % 6 == 0:
-                    roads[idx] = 'road_intersection'
-                else:
-                    roads[idx] = 'road_main_h'
+        # Generate horizontal roads
+        for row in range(self.map_config['rows']):
+            if row % 6 == 0:
+                for col in range(self.map_config['cols']):
+                    idx = row * self.map_config['cols'] + col
+                    if col == 0:
+                        roads[idx] = 'road_end_h'
+                    elif col == self.map_config['cols'] - 1:
+                        roads[idx] = 'road_end_h'
+                    else:
+                        roads[idx] = 'road_h'
         
-        # Main vertical roads (every 6 columns)
-        for col in range(6, self.map_config['cols'], 6):
-            for row in range(self.map_config['rows']):
-                idx = row * self.map_config['cols'] + col
-                if row == 0 or row == self.map_config['rows'] - 1:
-                    if roads[idx] is None:
+        # Generate vertical roads
+        for col in range(self.map_config['cols']):
+            if col % 6 == 0:
+                for row in range(self.map_config['rows']):
+                    idx = row * self.map_config['cols'] + col
+                    if row == 0:
                         roads[idx] = 'road_end_v'
-                elif row % 6 == 0:
-                    roads[idx] = 'road_intersection'
-                elif roads[idx] is None:
-                    roads[idx] = 'road_main_v'
+                    elif row == self.map_config['rows'] - 1:
+                        roads[idx] = 'road_end_v'
+                    else:
+                        roads[idx] = 'road_v'
         
-        # Secondary roads (connect main roads)
-        for row in range(3, self.map_config['rows'], 6):
+        # Generate secondary roads
+        for row in range(self.map_config['rows']):
             if row % 6 != 0:
                 for col in range(self.map_config['cols']):
                     idx = row * self.map_config['cols'] + col
@@ -223,47 +193,27 @@ class TownMapGenerator:
         # Draw decorations
         tree_color = (50, 150, 50)
         for idx, decoration in enumerate(map_data['decorations']):
-            if decoration == 'tree':
+            if decoration:
                 row = idx // self.map_config['cols']
                 col = idx % self.map_config['cols']
-                x = col * self.map_config['tile_size'] + self.map_config['tile_size'] // 2
-                y = row * self.map_config['tile_size'] + self.map_config['tile_size'] // 2
-                # Draw simple circle for tree (would be replaced with actual asset)
-                radius = self.map_config['tile_size'] // 3
-                draw.ellipse([x - radius, y - radius, x + radius, y + radius], 
-                           fill=tree_color, outline=(30, 100, 30))
+                x = col * self.map_config['tile_size']
+                y = row * self.map_config['tile_size']
+                # Draw simple rectangle for now (would be replaced with actual asset)
+                draw.rectangle([x + 2, y + 2, x + self.map_config['tile_size'] - 2, y + self.map_config['tile_size'] - 2], 
+                             fill=tree_color, outline=(100, 80, 60))
         
         return img
     
-    def save_map(self, map_data, img):
-        """Save map data and image"""
-        # Save map data as JSON
-        map_json = {
-            'config': self.map_config,
-            'data': {
-                'roads': map_data['roads'],
-                'zones': map_data['zones'],
-                'buildings': map_data['buildings'],
-                'decorations': map_data['decorations']
-            }
-        }
-        
-        with open(self.output_dir / 'town_map_data.json', 'w') as f:
-            json.dump(map_json, f, indent=2)
-        
-        # Save map image
-        img.save(self.output_dir / 'town_map_base.png')
-        
-        logger.info(f"Map saved to {self.output_dir}")
-        return map_json
+    def save_map(self, map_data, asset_paths, filename):
+        img = self.render_map(map_data, asset_paths)
+        img.save(self.output_dir / filename)
+        logger.info(f"Map saved to {self.output_dir / filename}")
 
 def main():
+    logging.basicConfig(level=logging.INFO)
     generator = TownMapGenerator()
     map_data = generator.generate_map_data()
-    img = generator.render_map(map_data, {})
-    generator.save_map(map_data, img)
-    logger.info("Town map generated successfully!")
+    generator.save_map(map_data, {}, 'town_map.png')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
-

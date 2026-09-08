@@ -5,6 +5,46 @@
  */
 
 export const CHARACTER_STORIES = {
+    agent_smith: {
+        personalStory: {
+            background: "Investigates financial crimes. Very thorough and by-the-book. Has never lost a case.",
+            motivation: "Justice. Order. Taxes.",
+            secret: "He collects rare stamps. It's the only time he allows himself to be passionate.",
+            dream: "A perfect audit rate.",
+            fear: "Chaos.",
+            relationship: "Married to the Tax Code.",
+            turningPoint: "Finding a penny error in a billion-dollar ledger that exposed a massive fraud.",
+            philosophy: "Death and Taxes. I handle the latter."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "Numbers don't lie. People do. My job is to find the discrepancy between the two."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "Society is a contract. Taxes are the dues. You don't pay, you're stealing from everyone."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "Stamps. Tiny squares of history. Perfectly perforated. Organized. I find them... soothing."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'dream',
+                dialogue: "The perfect system. Where every transaction is accounted for. No shadows. No leaks."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'respect',
+                dialogue: "You keep clean books. I respect that. In my line of work, that's rare."
+            }
+        ]
+    },
+
     professor_higgins: {
         personalStory: {
             background: "Grew up in a small farming town, first in his family to attend college. Worked three jobs to pay for his education. Lost his father to cancer when he was 20, which inspired him to use data science for medical research.",
@@ -351,6 +391,46 @@ export const CHARACTER_STORIES = {
         ]
     },
 
+    james_wilson: {
+        personalStory: {
+            background: "Runs a top consulting firm. Former Ivy League, former Wall Street. Knows how to wear a suit and bill by the hour.",
+            motivation: "Solving high-level problems for the world's biggest companies (and getting paid well for it).",
+            secret: "He's burned out. The travel, the hotels, the PowerPoint decks... he sometimes dreams of quitting to run a quiet bookstore.",
+            dream: "To retire to a vineyard in Italy. No phones. No clients. Just grapes and time.",
+            fear: "Becoming irrelevant.",
+            relationship: "Divorced three times. \"Married to the firm.\"",
+            turningPoint: "Winning a massive government contract that saved his firm from bankruptcy.",
+            philosophy: "Perception is reality. If you look like the expert, you are the expert."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I've been in boardrooms you only read about in the news. The stakes are always high."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "It's not just about the data. It's about the narrative. Can you tell a story that justifies a billion-dollar decision?"
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'burnout',
+                dialogue: "Another airport lounge. Another hotel. Sometimes the glamour wears thin, you know?"
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'secret_dream',
+                dialogue: "Italy. A vineyard. No phones. No clients. Just grapes and time. That's the exit strategy."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'regret',
+                dialogue: "I've sacrificed a lot for this career. Families. Friends. Make sure you don't lose yourself in the hustle."
+            }
+        ]
+    },
+
     david_chen: {
         personalStory: {
             background: "Immigrant who came to the country with $50 in his pocket. Built a tech company from scratch, sold it for millions. Now invests in others' dreams.",
@@ -471,6 +551,46 @@ export const CHARACTER_STORIES = {
         ]
     },
 
+    robert_kim: {
+        personalStory: {
+            background: "Early-stage investor who made his money in the dot-com boom. Focuses on data-driven startups.",
+            motivation: "Finding diamonds in the rough. Loves the energy of early-stage founders.",
+            secret: "He relies heavily on his 'gut feeling' rather than just spreadsheets, which contradicts his analytical persona.",
+            dream: "To find a founder who reminds him of his younger self.",
+            fear: "Missing out on 'The Next Big Thing' (FOMO).",
+            relationship: "Family man. Often talks about his kids' coding projects.",
+            turningPoint: "Passing on a startup that became a unicorn. He vowed never to be too cautious again.",
+            philosophy: "I don't invest in ideas. I invest in people."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I was there in the 90s. The Wild West. We built the internet with duct tape and hope."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "Your spreadsheet looks nice. But tell me... why YOU? Why this? Why now?"
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "The numbers have to work, yes. But I look for the spark. The fire in the eyes. That's what sells me."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'regret',
+                dialogue: "I passed on a company once. They're worth billions now. It taught me that sometimes, you have to take the leap."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'dream',
+                dialogue: "I'm looking for the next generation. Someone with the vision to change things. Are you that person?"
+            }
+        ]
+    },
+
     jordan_kim: {
         personalStory: {
             background: "Former athlete who had to retire due to injury. Found purpose in helping others achieve their fitness goals. Uses exercise as therapy.",
@@ -547,6 +667,46 @@ export const CHARACTER_STORIES = {
                 relationshipLevel: 80,
                 topic: 'philosophy',
                 dialogue: "Nature doesn't rush, yet everything gets done. We should learn from that. Slow down. Breathe. Grow. At your own pace. That's the secret to peace."
+            }
+        ]
+    },
+
+    casey_lee: {
+        personalStory: {
+            background: "Marketing specialist who grew up on social media. Learned to speak Fluent Gen Z and ride trends before they peak. Started in a small agency, now runs campaigns that go viral.",
+            motivation: "Wants to prove that marketing is about people, not products. Believes in the power of storytelling to build tribes, not just sell things.",
+            secret: "Friday night? Her phone goes in a lockbox. Seriously. The scroll... it consumes you. She needs the digital detox to stay sane.",
+            dream: "To use the power of viral storytelling for something real. Not just selling shoes, but changing laws. Making a real impact on the world.",
+            fear: "That she'll lose herself to the scroll, that the trends will consume her, that she'll become the thing she fights against.",
+            relationship: "Single. Focused on her career. Has a few close friends, but mostly keeps to herself. Finds peace in the quiet after the digital detox.",
+            turningPoint: "When a campaign she ran raised 100k in 24 hours. Just by telling the right story. That's when she realized the power she held.",
+            philosophy: "It's not about the product. It's about the tribe. You find the story that resonates, and the rest follows."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "I speak Fluent Gen Z. It's a skill, I promise. Trends move fast."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "It's not about the product. It's about the tribe..."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "Friday night? My phone goes in a lockbox. Seriously. The scroll... it consumes you."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'impact',
+                dialogue: "We raised 100k. 24 hours. Just by telling the right story. That's power."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'dream',
+                dialogue: "Imagine using this power for something real. Not just selling shoes, but changing laws."
             }
         ]
     }

@@ -18,7 +18,7 @@ import { GameState } from './game/GameState.js';
 import { ScreenManager } from './ui/ScreenManager.js';
 import { ChartManager } from './charts/ChartManager.js';
 import { AudioManager } from './audio/AudioManager.js';
-import { SaveManager } from './save/SaveManager.js';
+import { SaveManager, MAX_SAVE_SLOTS } from './save/SaveManager.js';
 import { SaveSlotManager } from './ui/SaveSlotManager.js';
 import { MenuThemeSystem } from './game/MenuThemeSystem.js';
 import { MenuLogoDisplay } from './ui/MenuLogoDisplay.js';
@@ -66,7 +66,6 @@ import { WorkInteractionSystem } from './game/WorkInteractionSystem.js';
 import { RealisticDialogueSystem } from './game/RealisticDialogueSystem.js';
 import { RelationshipEmotionSystem } from './game/RelationshipEmotionSystem.js';
 import { WorldEvolutionSystem } from './game/WorldEvolutionSystem.js';
-import { InvestmentEcommerceSystem } from './game/InvestmentEcommerceSystem.js';
 import { StorylineManager } from './game/StorylineManager.js';
 import { StoryBeatsSystem } from './game/StoryBeatsSystem.js';
 import { CharacterArcSystem } from './game/CharacterArcSystem.js';
@@ -162,7 +161,11 @@ export class MainGame {
         try {
             logger.debug('Attempting to create GameState...');
             this.gameState = new GameState();
-            logger.debug('GameState created successfully', { money: this.gameState.money, reputation: this.gameState.reputation });
+this.officeManager = new OfficeManager(this.gameState);
+this.gameStore.setState({ officeManager: this.officeManager });
+logger.debug('GameState created successfully', { money: this.gameState.money, reputation: this.gameState.reputation });
+this.companyManagementSystem = new CompanyManagementSystem(this.gameState);
+this.gameStore.setState({ companyManagementSystem: this.companyManagementSystem });
         } catch (e) {
             logger.error('GameState creation failed:', e);
             throw e;
@@ -195,19 +198,20 @@ export class MainGame {
         this.characterStats = new CharacterStats(this.gameState);
 
         this.gameLoopId = null;
-        this.lastTime = 0;
-        this.bankSystem = null; // Will be initialized when needed
+this.lastTime = 0;
+this.bankSystem = null; // Will be initialized when needed
+this.companyManagementSystem = null; // Will be initialized when needed
 
-        // Bind methods
-        this.gameLoop = this.gameLoop.bind(this);
-        this.handleTimeAdvance = this.handleTimeAdvance.bind(this);
-        // this.init = this.init.bind(this); // specific bind not needed and causing issues
-        this.startNewGame = this.startNewGame.bind(this);
-        this.continueGame = this.continueGame.bind(this);
+// Bind methods
+this.gameLoop = this.gameLoop.bind(this);
+this.handleTimeAdvance = this.handleTimeAdvance.bind(this);
+this.init = this.init.bind(this);
+        // this.startNewGame = this.startNewGame.bind(this);
+this.continueGame = this.continueGame.bind(this);
 
-        logger.debug('MainGame constructor exit - all initialization complete', { hasSaveManager: !!this.saveManager, hasTaskSystem: !!this.taskSystem, hasScreenManager: !!this.screenManager });
+logger.debug('MainGame constructor exit - all initialization complete', { hasSaveManager: !!this.saveManager, hasTaskSystem: !!this.taskSystem, hasScreenManager: !!this.screenManager });
 
-        // this.init(); // Init is called in DOMContentLoaded
+// this.init(); // Init is called in DOMContentLoaded
     }
 
     /**
@@ -219,16 +223,16 @@ export class MainGame {
 
         // Sync Zustand store values to GameState
         this.gameState.money = store.money;
-        this.gameState.reputation = store.reputation;
-        this.gameState.rankIndex = store.rankIndex;
-        this.gameState.rent = store.rent;
-        this.gameState.bank = store.bank;
-        this.gameState.tasksCompleted = store.tasksCompleted;
-        this.gameState.perfectScores = store.perfectScores;
-        this.gameState.totalEarned = store.totalEarned;
-        this.gameState.weeklyIncome = store.weeklyIncome;
-        this.gameState.totalRatings = store.totalRatings;
-        this.gameState.ratingSum = store.ratingSum;
+this.gameState.reputation = store.reputation;
+this.gameState.rankIndex = store.rankIndex;
+this.gameState.rent = store.rent;
+this.gameState.bank = store.bank;
+this.gameState.tasksCompleted = store.tasksCompleted;
+this.gameState.perfectScores = store.perfectScores;
+this.gameState.totalEarned = store.totalEarned;
+this.gameState.weeklyIncome = store.weeklyIncome;
+this.gameState.totalRatings = store.totalRatings;
+this.gameState.ratingSum = store.ratingSum;m;
         this.gameState.unlockedChartTypes = store.unlockedChartTypes;
         this.gameState.purchasedItems = store.purchasedItems;
         this.gameState.unlockedTools = store.unlockedTools;
@@ -239,6 +243,10 @@ export class MainGame {
         this.gameState.musicEnabled = store.musicEnabled;
         this.gameState.currentLocation = store.currentLocation;
         this.gameState.chartConfig = store.chartConfig;
+        this.gameState.currentTask = store.currentTask;
+        this.gameState.unlockedThemes = store.unlockedThemes;
+        this.gameState.lastScore = store.lastScore;
+        this.gameState.settings = store.settings;
 
         // Subscribe to store changes to keep GameState in sync
         this.gameStore.subscribe((state) => {
@@ -263,6 +271,10 @@ export class MainGame {
             this.gameState.musicEnabled = state.musicEnabled;
             this.gameState.currentLocation = state.currentLocation;
             this.gameState.chartConfig = state.chartConfig;
+            this.gameState.currentTask = state.currentTask;
+            this.gameState.unlockedThemes = state.unlockedThemes;
+            this.gameState.lastScore = state.lastScore;
+            this.gameState.settings = state.settings;
         });
     }
 
@@ -295,12 +307,12 @@ export class MainGame {
         // Update button icon
         const themeBtn = document.getElementById('btn-theme-toggle');
         if (themeBtn) {
-            themeBtn.textContent = newTheme === 'light' ? '🌙' : '☀️';
+            themeBtn.textContent = newTheme === 'light' ? 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢' : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½';
         }
 
         // Show brief toast
-        if (this.game && this.game.showToast) {
-            this.game.showToast(`Switched to ${newTheme === 'light' ? 'Light' : 'Dark'} Mode`, 'info');
+        if (this.showToast) {
+            this.showToast(`Switched to ${newTheme === 'light' ? 'Light' : 'Dark'} Mode`, 'info');
         }
     }
 
@@ -633,6 +645,18 @@ export class MainGame {
     }
 
     /**
+     * Find the first empty save slot (0-4), or null if all are full
+     */
+    findEmptySaveSlot() {
+        for (let i = 0; i < 5; i++) {
+            if (!this.saveManager.hasSave(i)) {
+                return i;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Handle save slot selection
      */
     handleSlotSelection(slotIndex, isNewGame) {
@@ -769,7 +793,7 @@ export class MainGame {
         // Theme Toggle
         const themeBtn = document.getElementById('btn-theme-toggle');
         if (themeBtn) {
-            themeBtn.textContent = this.currentTheme === 'light' ? '🌙' : '☀️';
+            themeBtn.textContent = this.currentTheme === 'light' ? 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢' : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½';
             themeBtn.addEventListener('click', () => this.toggleTheme());
         }
 
@@ -779,15 +803,15 @@ export class MainGame {
             if (this.saveSlotManager) {
                 // Find first empty slot or use slot 0
                 let emptySlot = null;
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
                     if (!this.saveManager.hasSave(i)) {
                         emptySlot = i;
                         break;
                     }
+                    this.handleSlotSelection(0, true);
+                } else {
+                    this.handleSlotSelection(emptySlot, true);
                 }
-                // If no empty slot, use slot 0 (will overwrite)
-                const slotToUse = emptySlot !== null ? emptySlot : 0;
-                this.handleSlotSelection(slotToUse, true);
             } else {
                 // Fallback: start game directly if SaveSlotManager not initialized
                 this.startNewGame();
@@ -943,7 +967,9 @@ export class MainGame {
                 return;
             }
             const result = this.timeManager.sleep();
-            this.handleTimeAdvance(result.slotsSkipped); // triggers new day
+            // sleep() already advanced the clock; pass its events through so
+            // the day/week effects run exactly once (no double advance).
+            this.handleTimeAdvance(result.slotsSkipped, result.events);
             this.updateMapScreen();
             this.showToast('You slept well and feel refreshed!', 'success');
         });
@@ -1135,17 +1161,10 @@ export class MainGame {
         document.getElementById('btn-bank-take-loan')?.addEventListener('click', () => handleBankAction('loan', 'bank-loan-input'));
         document.getElementById('btn-bank-repay')?.addEventListener('click', () => handleBankAction('repay', 'bank-repay-input'));
 
-        // Auto-save on visibility change
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && this.gameState.isGameStarted) {
-                this.saveManager.saveGame(this.gameState, this.currentSaveSlot);
-            }
-        });
-
         // Listen for promotion events
         window.addEventListener('promotion', (e) => {
             const rank = e.detail.rank;
-            this.showToast(`Promoted to ${rank.title}!`, 'success');
+            this.uiUpdater.showPromotionAnimation(rank);
             this.audioManager.play('success');
             this.uiUpdater.updateAllUI();
         });
@@ -1195,29 +1214,6 @@ export class MainGame {
         // console.log('[DIAGNOSTIC]', message);
     }
 
-    showError(message) {
-        logger.error('Game Error:', message);
-        this.showDiagnostic('ERROR: ' + message);
-        const errDiv = DOMUtils.createElement('div', {
-            innerHTML: `<h2>Game Error</h2><p>${message}</p><button onclick="this.parentElement.remove()" style="padding:10px;margin-top:10px;">Close</button>`,
-            style: {
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: 'rgba(255,0,0,0.95)',
-                color: 'white',
-                padding: '20px',
-                fontFamily: 'monospace',
-                zIndex: '99999',
-                border: '3px solid #f00',
-                borderRadius: '10px',
-                maxWidth: '600px'
-            }
-        });
-        document.body.appendChild(errDiv);
-    }
-
     /**
      * Start a new game (optimized for fast loading)
      */
@@ -1225,7 +1221,7 @@ export class MainGame {
         // Use provided slot or find first empty slot, default to 0
         if (slotIndex === null) {
             // Find first empty slot
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
                 if (!this.saveManager.hasSave(i)) {
                     slotIndex = i;
                     break;
@@ -1271,6 +1267,13 @@ export class MainGame {
                     this.gameState.educationSystem = new EducationSystem(this.gameState);
                     this.gameState.worldEventManager = new WorldEventManager(this.gameState);
                     this.gameState.projectSystem = new ProjectSystem(this.gameState);
+                    // Link deferred systems to main class now that they exist
+                    this.crimeSystem = this.gameState.crimeSystem;
+                    this.romanceSystem = this.gameState.romanceSystem;
+                    this.legalSystem = this.gameState.legalSystem;
+                    this.educationSystem = this.gameState.educationSystem;
+                    this.worldEventManager = this.gameState.worldEventManager;
+                    this.projectSystem = this.gameState.projectSystem;
                 } catch (error) {
                     logger.warn('Error loading medium priority systems:', error);
                 }
@@ -1284,6 +1287,10 @@ export class MainGame {
                     this.gameState.contractSystem = new ContractSystem(this.gameState);
                     // NOTE: mapProgressionSystem is initialized later in startNewGame, don't duplicate here
                     // this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
+                    // Link deferred systems to main class now that they exist
+                    this.aiSystem = this.gameState.aiSystem;
+                    this.hardwareManager = this.gameState.hardwareManager;
+                    this.contractSystem = this.gameState.contractSystem;
                 } catch (error) {
                     logger.warn('Error loading low priority systems:', error);
                 }
@@ -1441,7 +1448,6 @@ export class MainGame {
             this.gameState.realisticDialogueSystem = new RealisticDialogueSystem();
             this.gameState.relationshipEmotionSystem = new RelationshipEmotionSystem(this.gameState);
             this.gameState.worldEvolutionSystem = new WorldEvolutionSystem(this.gameState);
-            this.gameState.investmentEcommerceSystem = new InvestmentEcommerceSystem(this.gameState);
             this.gameState.storylineManager = new StorylineManager(this.gameState);
             this.gameState.storyBeatsSystem = new StoryBeatsSystem(this.gameState);
             this.gameState.characterArcSystem = new CharacterArcSystem(this.gameState);
@@ -1506,15 +1512,9 @@ export class MainGame {
             this.npcManager = this.gameState.npcManager;
             this.newsManager = this.gameState.newsManager;
             this.stockMarket = this.gameState.stockMarket;
-            this.crimeSystem = this.gameState.crimeSystem;
-            this.romanceSystem = this.gameState.romanceSystem;
-            this.legalSystem = this.gameState.legalSystem;
-            this.educationSystem = this.gameState.educationSystem;
-            this.worldEventManager = this.gameState.worldEventManager;
-            this.projectSystem = this.gameState.projectSystem;
-            this.aiSystem = this.gameState.aiSystem;
-            this.hardwareManager = this.gameState.hardwareManager;
-            this.contractSystem = this.gameState.contractSystem;
+            // NOTE: crimeSystem, romanceSystem, legalSystem, educationSystem, worldEventManager,
+            // projectSystem, aiSystem, hardwareManager, contractSystem are linked inside their
+            // deferred setTimeout callbacks (they don't exist yet at this point).
             this.mapProgressionSystem = this.gameState.mapProgressionSystem;
 
             // Link new systems
@@ -1523,9 +1523,10 @@ export class MainGame {
             this.realisticDialogueSystem = this.gameState.realisticDialogueSystem;
             this.relationshipEmotionSystem = this.gameState.relationshipEmotionSystem;
             this.worldEvolutionSystem = this.gameState.worldEvolutionSystem;
-            this.investmentEcommerceSystem = this.gameState.investmentEcommerceSystem;
             this.storylineManager = this.gameState.storylineManager;
             this.storyBeatsSystem = this.gameState.storyBeatsSystem;
+            this.characterArcSystem = this.gameState.characterArcSystem;
+            this.npcMemorySystem = this.gameState.npcMemorySystem;
             // NOTE: mapProgressionSystem already linked above, don't duplicate
             this.ideSystem = this.gameState.ideSystem;
             this.locationBackgroundSystem = this.gameState.locationBackgroundSystem;
@@ -1705,8 +1706,9 @@ export class MainGame {
     /**
      * Continue saved game
      */
-    continueGame() {
+    continueGame(slotIndex = this.currentSaveSlot) {
         logger.debug('Continuing saved game...');
+        this.currentSaveSlot = slotIndex;
 
         // Initialize RPG systems if they don't exist (migration)
         if (!this.gameState.characterStats) this.gameState.characterStats = new CharacterStats();
@@ -1799,16 +1801,38 @@ export class MainGame {
         this.educationSystem = this.gameState.educationSystem;
         this.worldEventManager = this.gameState.worldEventManager;
         this.projectSystem = this.gameState.projectSystem;
-        this.projectSystem = this.gameState.projectSystem;
         this.aiSystem = this.gameState.aiSystem;
+
+        // Link story systems (may be null if save predates them)
+        this.storylineManager = this.gameState.storylineManager;
+        this.storyBeatsSystem = this.gameState.storyBeatsSystem;
+        this.characterArcSystem = this.gameState.characterArcSystem;
+        this.npcMemorySystem = this.gameState.npcMemorySystem;
 
         // Initialize BankSystem
         this.bankSystem = new BankSystem(this.gameState);
         // Link specific bank state if needed, but BankSystem constructor uses gameState directly
 
+        // Load deferred systems (not called when continuing a saved game)
+        setTimeout(() => this.loadDeferredSystems(), 50);
+
         // Reload save data now that subsystems are initialized
         logger.debug("Reloading save data for subsystems...");
-        this.saveManager.loadGame(this.gameState, this.currentSaveSlot);
+        this.saveManager.loadGame(this.gameState, slotIndex);
+
+        // Re-apply BankSystem default state: the reload above re-runs
+        // GameState.fromJSON, which sets bank to null when the save has no
+        // bank data, clobbering the default the BankSystem constructor set.
+        if (!this.gameState.bank) {
+            this.gameState.bank = {
+                savings: 0,
+                loan: 0,
+                loanInterestRate: 0.10, // 10% weekly initial
+                savingsInterestRate: 0.005, // 0.5% weekly
+                creditScore: 500, // 300-850
+                transactionHistory: []
+            };
+        }
 
         // Generate a new task if none exists
         if (!this.gameState.currentTask) {
@@ -2099,11 +2123,6 @@ export class MainGame {
                 const oldRank = this.gameState.rankIndex;
                 const promoted = this.economySystem.checkPromotion();
                 if (promoted) {
-                    const newRank = this.gameState.currentRank;
-                    this.showToast(`PROMOTED to ${newRank.title}!`, 'success');
-                    this.audioManager.play('success');
-                    this.uiUpdater.updateAllUI();
-
                     // Check for story beats (promotion)
                     if (this.storyBeatsSystem) {
                         if (oldRank === 0) {
@@ -2141,7 +2160,7 @@ export class MainGame {
             }
 
             // Auto-save
-            this.saveManager.saveGame(this.gameState);
+            this.saveManager.saveGame(this.gameState, this.currentSaveSlot);
 
         }, 2000);
     }
@@ -2230,7 +2249,7 @@ export class MainGame {
                     </div>
                     <div class="credits-section">
                         <h3>Technologies</h3>
-                        <p>Vanilla JavaScript • Chart.js • CSS3 • WebAssembly</p>
+                        <p>Vanilla JavaScript ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Chart.js ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ CSS3 ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ WebAssembly</p>
                     </div>
                 </div>
                 <button class="btn btn-primary" onclick="game.closeModal()">Close</button>
@@ -2292,17 +2311,57 @@ export class MainGame {
 
         if (!radioBtn || !radioMenu) return;
 
+        const openRadioMenu = () => {
+            radioMenu.classList.remove('hidden');
+            radioBtn.setAttribute('aria-expanded', 'true');
+            // Move focus to the first station so keyboard users can navigate
+            const firstStation = radioMenu.querySelector('.radio-station');
+            firstStation?.focus();
+        };
+
+        const closeRadioMenu = (returnFocus = false) => {
+            radioMenu.classList.add('hidden');
+            radioBtn.setAttribute('aria-expanded', 'false');
+            if (returnFocus) {
+                radioBtn.focus();
+            }
+        };
+
         // Toggle menu visibility
         radioBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            radioMenu.classList.toggle('hidden');
+            if (radioMenu.classList.contains('hidden')) {
+                openRadioMenu();
+            } else {
+                closeRadioMenu();
+            }
         });
 
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
             if (!radioBtn.contains(e.target) && !radioMenu.contains(e.target)) {
-                radioMenu.classList.add('hidden');
+                closeRadioMenu();
             }
+        });
+
+        // Close on Escape and return focus to the trigger button
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !radioMenu.classList.contains('hidden')) {
+                closeRadioMenu(true);
+            }
+        });
+
+        // Arrow-key navigation between stations while the menu is open
+        radioMenu.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+            const stations = Array.from(radioMenu.querySelectorAll('.radio-station'));
+            const index = stations.indexOf(document.activeElement);
+            if (index === -1) return;
+            e.preventDefault();
+            const next = e.key === 'ArrowDown'
+                ? (index + 1) % stations.length
+                : (index - 1 + stations.length) % stations.length;
+            stations[next].focus();
         });
 
         // Handle station selection
@@ -2311,7 +2370,7 @@ export class MainGame {
                 const stationId = station.dataset.station;
                 this.switchMusicStation(stationId);
                 this.updateRadioUI();
-                radioMenu.classList.add('hidden');
+                closeRadioMenu(true);
             });
         });
 
@@ -2339,6 +2398,15 @@ export class MainGame {
                 station.classList.add('active');
             }
         });
+
+        // Update the toolbar button label to reflect the current station
+        const radioBtn = document.getElementById('btn-music-radio');
+        if (radioBtn) {
+            const stationName = this.audioManager.getCurrentStationName();
+            radioBtn.textContent = this.audioManager.musicEnabled
+                ? `MUSIC: ${stationName}`
+                : 'MUSIC: OFF';
+        }
     }
 
     /**
@@ -2404,8 +2472,15 @@ export class MainGame {
             return;
         }
 
-        // Deduct cost and show success
+        // Deduct cost and add the new staff member
         this.gameState.money -= cost;
+        if (!this.gameState.staff) {
+            this.gameState.staff = [];
+        }
+        this.gameState.staff.push({
+            role: role,
+            salary: { 'junior': 150, 'senior': 400, 'expert': 1000 }[role] || 0
+        });
         this.uiUpdater.updateAllUI();
         this.showToast(`Hired ${role} staff member!`, 'success');
     }
@@ -2457,6 +2532,7 @@ export class MainGame {
             logger.warn('showError called with undefined message');
             return;
         }
+        logger.error('Game Error:', message);
         this.showToast(String(message), 'error');
     }
 
@@ -2651,21 +2727,35 @@ export class MainGame {
         MapHelpers.handleLocationAction(this, action);
     }
 
-    handleTimeAdvance(slots) {
+    handleTimeAdvance(slots, precomputedEvents = null) {
         if (!this.timeManager) {
             return;
         }
-        if (slots <= 0) return;
+        if (precomputedEvents === null && slots <= 0) return;
 
-        const events = this.timeManager.advanceTime(slots);
+        // If the caller already advanced time (e.g. sleep()), consume the
+        // events it returned instead of advancing a second time.
+        const events = precomputedEvents ?? this.timeManager.advanceTime(slots);
 
         // Handle events (new day, etc)
         events.forEach(event => {
             if (event.type === 'new_day') {
-                if (!this.newsManager) {
-                } else {
+                if (this.newsManager) {
                     this.newsManager.generateDailyNews();
+
+                    // Check for random events
+                    const triggeredEvents = this.newsManager.checkRandomEvents();
+                    for (const randomEvent of triggeredEvents) {
+                        this.newsManager.applyEventEffects(randomEvent);
+                        this.showToast(`${randomEvent.title} ${randomEvent.description}`, randomEvent.type === 'negative' ? 'warning' : 'success');
+                    }
                 }
+
+                // Roll for background world events (market crash, tech boom, etc.)
+                if (this.worldEventManager) {
+                    this.worldEventManager.processDay();
+                }
+
                 this.showToast('A new day has begun!', 'info');
 
                 // Expenses
@@ -2716,6 +2806,11 @@ export class MainGame {
                     }
                 }
 
+                // Heat decays slowly over time
+                if (this.crimeSystem) {
+                    this.crimeSystem.decayHeat();
+                }
+
                 this.showToast(`Paid weekly rent: -$${rent}`, 'warning');
                 this.audioManager.play('kaching'); // Or a sad sound?
 
@@ -2733,6 +2828,15 @@ export class MainGame {
 
                 if (this.gameState.money < -1000) {
                     this.showToast('CRITICAL: Eviction imminent! Earn money fast!', 'error');
+                }
+
+                // Check for map unlocks (mid_game / end_game)
+                if (this.gameState.mapProgressionSystem) {
+                    const unlockResult = this.gameState.mapProgressionSystem.checkMapUnlocks();
+                    if (unlockResult && unlockResult.unlocked) {
+                        this.showToast(unlockResult.message, 'success');
+                        this.updateMapScreen();
+                    }
                 }
 
                 // Check for game ending conditions
@@ -2856,6 +2960,12 @@ export class MainGame {
             return;
         }
 
+        // Verify character stats exist before mutating any state
+        if (!this.characterStats) {
+            this.showError('Character stats not initialized');
+            return;
+        }
+
         // Pay cost
         if (this.gameState.money < activity.cost) {
             this.showError("Not enough money!");
@@ -2865,10 +2975,6 @@ export class MainGame {
 
         // Do training
         this.timeManager.useEnergy(activity.energyCost);
-        if (!this.characterStats) {
-            this.showError('Character stats not initialized');
-            return;
-        }
         const results = this.characterStats.train(activityId);
 
         this.handleTimeAdvance(activity.timeSlots);
@@ -3064,7 +3170,7 @@ export class MainGame {
 
             // Update inbox UI if open
             if (this.researchInboxUI && this.researchInboxUI.isOpen) {
-                this.researchInboxUI.updateUnreadCount();
+                this.researchInboxUI.refresh();
             }
         } catch (error) {
             logger.error('Error updating inbox badge:', error);

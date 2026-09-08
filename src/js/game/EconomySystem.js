@@ -2,8 +2,6 @@
  * EconomySystem - Handles scoring, rewards, and progression
  */
 
-import { RANKS } from '../data/ranks.js';
-
 export class EconomySystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -28,11 +26,12 @@ export class EconomySystem {
         const bossModifier = task.boss.strictness || 1.0;
 
         // Calculate weighted average
+        // Divide by strictness so stricter bosses (higher strictness) are harder to please
         const rawScore = (
             chartAppropriateness * 0.4 +
             visualClarity * 0.3 +
             dataAccuracy * 0.3
-        ) * bossModifier;
+        ) / bossModifier;
 
         // Convert to stars (1-5)
         const stars = this.scoreToStars(rawScore);
@@ -122,26 +121,29 @@ export class EconomySystem {
      * Score visual clarity of the chart
      */
     scoreVisualClarity(chartConfig) {
-        let score = 70; // Base score
+        // No artificial base score: a chart with no legend, grid, labels,
+        // or title is genuinely hard to read and must be able to score low
+        // enough to earn a 1-star rating.
+        let score = 0;
 
         // Legend helps readability
         if (chartConfig.showLegend) {
-            score += 10;
+            score += 30;
         }
 
         // Grid helps precision reading
         if (chartConfig.showGrid) {
-            score += 5;
+            score += 20;
         }
 
         // Data labels can help (but can also clutter)
         if (chartConfig.showDataLabels) {
-            score += 3;
+            score += 10;
         }
 
         // Having a title is important
         if (chartConfig.title && chartConfig.title.trim().length > 0) {
-            score += 10;
+            score += 30;
         }
 
         // Add some randomness
@@ -159,11 +161,13 @@ export class EconomySystem {
         // - No data missing/truncated
         // - Proper axis scales
 
-        // For now, we'll give a good base score with variance
+        // For now, we'll give a good base score with variance.
+        // The floor is kept low enough that a genuinely bad chart (wrong
+        // type, no visual polish) can still fall into the 1-star band.
         const baseScore = 80;
         const variance = Math.random() * 20 - 5;
 
-        return Math.min(100, Math.max(60, baseScore + variance));
+        return Math.min(100, Math.max(0, baseScore + variance));
     }
 
     /**
@@ -195,10 +199,13 @@ export class EconomySystem {
         const multiplier = starMultipliers[stars] || 1.0;
 
         // Time bonus (if completed quickly)
-        // const elapsed = (Date.now() - task.startTime) / 1000;
-        // const timeBonus = elapsed < task.timeLimit / 2 ? 1.2 : 1.0;
+        let timeBonus = 1.0;
+        if (task.timeLimit && task.startTime) {
+            const elapsed = (Date.now() - task.startTime) / 1000;
+            timeBonus = elapsed < task.timeLimit / 2 ? 1.2 : 1.0;
+        }
 
-        return Math.round(baseReward * multiplier);
+        return Math.round(baseReward * multiplier * timeBonus);
     }
 
     /**

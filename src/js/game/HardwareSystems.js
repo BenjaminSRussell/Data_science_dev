@@ -33,8 +33,8 @@ export const HARDWARE_PARTS = {
         { id: 'gpu_gtx1650', name: 'GTX 1650', description: 'Entry level cuda.', price: 180, stats: { compute: 5, vram: 4 }, unlockRank: 2 },
         { id: 'gpu_rtx3060', name: 'RTX 3060', description: 'The people\'s champion.', price: 350, stats: { compute: 12, vram: 12 }, unlockRank: 3 },
         { id: 'gpu_rtx4070', name: 'RTX 4070', description: 'Serious ML training.', price: 600, stats: { compute: 25, vram: 12 }, unlockRank: 4 },
-        { id: 'gpu_rtx4090', name: 'RTX 4090', description: 'Melts power cables.', price: 1600, stats: { compute: 60, vram: 24 }, unlockRank: 5 },
-        { id: 'gpu_a4000', name: 'RTX A4000', description: 'Professional stable.', price: 1200, stats: { compute: 45, vram: 16 }, unlockRank: 6 },
+        { id: 'gpu_a4000', name: 'RTX A4000', description: 'Professional stable.', price: 1200, stats: { compute: 45, vram: 16 }, unlockRank: 5 },
+        { id: 'gpu_rtx4090', name: 'RTX 4090', description: 'Melts power cables.', price: 1600, stats: { compute: 60, vram: 24 }, unlockRank: 6 },
         { id: 'gpu_a6000', name: 'RTX A6000', description: 'VRAM monster.', price: 4500, stats: { compute: 100, vram: 48 }, unlockRank: 7 },
         { id: 'gpu_h100', name: 'H100 Tensor Core', description: 'Banned for export.', price: 30000, stats: { compute: 400, vram: 80 }, unlockRank: 8 },
         { id: 'gpu_pod', name: 'H100 NVL Pod', description: 'Training LLMs daily.', price: 100000, stats: { compute: 2000, vram: 500 }, unlockRank: 10 }
@@ -137,6 +137,7 @@ export class HardwareManager {
                 if (part.stats.cooling) stats.cooling += part.stats.cooling;
                 if (part.stats.noise) stats.noise += part.stats.noise;
                 if (part.stats.style) stats.aesthetics += part.stats.style;
+                if (part.stats.aesthetics) stats.aesthetics += part.stats.aesthetics;
                 if (part.stats.compute) stats.compute += part.stats.compute;
                 if (part.stats.productivity) stats.productivity = Math.max(stats.productivity, part.stats.productivity); // Max, not add
             }
@@ -149,6 +150,9 @@ export class HardwareManager {
 
         const part = HARDWARE_PARTS[type].find(p => p.id === partId);
         if (!part) return { success: false, message: "Part not found" };
+
+        const currentRank = this.gameState.currentRank?.level ?? 0;
+        if (part.unlockRank > currentRank) return { success: false, message: `Requires rank ${part.unlockRank}` };
 
         if (this.gameState.money < part.price) return { success: false, message: "Not enough money" };
 
@@ -174,7 +178,15 @@ export class HardwareManager {
 
     fromJSON(data) {
         if (!data) return;
-        this.ownedParts = data.ownedParts || this.ownedParts;
-        this.equippedParts = data.equippedParts || this.equippedParts;
+        if (data.ownedParts) {
+            for (const type of Object.keys(this.ownedParts)) {
+                if (data.ownedParts[type]) this.ownedParts[type] = data.ownedParts[type];
+            }
+        }
+        if (data.equippedParts) {
+            for (const type of Object.keys(this.equippedParts)) {
+                if (data.equippedParts[type]) this.equippedParts[type] = data.equippedParts[type];
+            }
+        }
     }
 }

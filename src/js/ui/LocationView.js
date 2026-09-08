@@ -115,9 +115,11 @@ export class LocationView {
         featuresContainer.innerHTML = '';
 
         features?.forEach((feature, index) => {
-            const featureEl = document.createElement('div');
+            const featureEl = document.createElement('button');
+            featureEl.type = 'button';
             featureEl.className = 'location-feature';
             featureEl.dataset.featureId = feature.id;
+            featureEl.setAttribute('aria-label', feature.name);
             featureEl.style.left = `${20 + (index % 5) * 15}%`;
             featureEl.style.top = `${30 + Math.floor(index / 5) * 20}%`;
             // Use icon image if available, otherwise use emoji
@@ -223,14 +225,14 @@ export class LocationView {
 
             // Update game state based on result
             if (result.result.energy) {
-                // Restore energy
-            }
-            if (result.result.skill) {
-                // Increase skill
-            }
-            if (result.result.money) {
-                // Change money
-            }
+    this.game.gameState.player.energy += result.result.energy;
+}
+if (result.result.skill) {
+    this.game.gameState.player.skill += result.result.skill;
+}
+if (result.result.money) {
+    this.game.gameState.player.money += result.result.money;
+}
         }
     }
 

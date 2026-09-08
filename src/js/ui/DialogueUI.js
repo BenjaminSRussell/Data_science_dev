@@ -117,9 +117,9 @@ export class DialogueUI {
 
         // Build dialogue tree for this NPC
         const relLevel = relationshipLevel || this.game?.gameState?.npcManager?.getRelationship?.(npc.id) || 0;
-        const dialogueTreeSystem = this.game?.gameState?.dialogueTreeSystem || this.game?.dialogueTreeSystem;
-        if (dialogueTreeSystem) {
-            this.currentTree = dialogueTreeSystem.getTree(npc.id, relLevel);
+        const treeSystem = this.game?.gameState?.dialogueTreeSystem || this.game?.dialogueTreeSystem || dialogueTreeSystem;
+        if (treeSystem) {
+            this.currentTree = treeSystem.getTree(npc.id, relLevel);
         } else {
             // Fallback: create simple tree
             this.currentTree = {
@@ -207,13 +207,20 @@ export class DialogueUI {
         textEl.textContent = '';
         textEl.classList.add('typing');
 
+        // Cancel any in-progress typing animation to avoid overlapping calls
+        if (this._typeTimer) {
+            clearTimeout(this._typeTimer);
+            this._typeTimer = null;
+        }
+
         let i = 0;
         const type = () => {
             if (i < text.length) {
                 textEl.textContent += text[i];
                 i++;
-                setTimeout(type, speed);
+                this._typeTimer = setTimeout(type, speed);
             } else {
+                this._typeTimer = null;
                 textEl.classList.remove('typing');
             }
         };
@@ -284,10 +291,9 @@ export class DialogueUI {
      */
     applyEffects(effects) {
         if (effects.relationship && this.game?.gameState?.npcManager) {
-            const currentRel = this.game.gameState.npcManager.getRelationship?.(this.currentNPC.id) || 0;
-            this.game.gameState.npcManager.setRelationship?.(
+            this.game.gameState.npcManager.modifyRelationship?.(
                 this.currentNPC.id,
-                currentRel + effects.relationship
+                effects.relationship
             );
         }
 
@@ -304,7 +310,11 @@ export class DialogueUI {
 
         if (effects.item && this.game?.gameState) {
             // Give item
-
+            const gameState = this.game.gameState;
+            const itemId = typeof effects.item === 'string' ? effects.item : effects.item.id;
+            if (itemId && !gameState.purchasedItems.includes(itemId)) {
+                gameState.purchasedItems.push(itemId);
+            }
         }
     }
 
@@ -324,6 +334,12 @@ export class DialogueUI {
         this.currentNPC = null;
         this.currentTree = null;
         this.currentNode = null;
+
+        // Stop any in-progress typing animation
+        if (this._typeTimer) {
+            clearTimeout(this._typeTimer);
+            this._typeTimer = null;
+        }
 
         if (this.onClose) {
             this.onClose();

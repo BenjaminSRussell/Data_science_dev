@@ -96,6 +96,11 @@ export class ScreenManager {
             }
         }
 
+        // Move keyboard focus into the newly shown screen so keyboard and
+        // screen-reader users are not silently dropped to <body> when the
+        // previous screen becomes display:none.
+        this.focusScreen(targetScreen);
+
         // Track history
         if (addToHistory && this.currentScreen !== screenId) {
             this.history.push(this.currentScreen);
@@ -122,6 +127,36 @@ export class ScreenManager {
                     this.mainGame.unifiedMapSystem.handleResize();
                 }
             }, 100);
+        }
+    }
+
+    /**
+     * Move keyboard focus into a screen after it becomes visible.
+     *
+     * When the previously focused element is hidden (display:none), focus
+     * silently falls back to <body>, leaving keyboard and screen-reader
+     * users stranded. Focusing the first focusable element inside the new
+     * screen (or the screen itself, made focusable via tabindex) keeps the
+     * user's place in the document.
+     */
+    focusScreen(screenEl) {
+        if (!screenEl || typeof screenEl.querySelector !== 'function') {
+            return;
+        }
+
+        const focusable = screenEl.querySelector(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+
+        if (focusable) {
+            focusable.focus();
+        } else {
+            // No focusable content: make the screen itself focusable so
+            // focus does not fall back to <body>.
+            if (!screenEl.hasAttribute('tabindex')) {
+                screenEl.setAttribute('tabindex', '-1');
+            }
+            screenEl.focus();
         }
     }
 

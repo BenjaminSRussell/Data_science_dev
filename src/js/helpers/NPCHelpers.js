@@ -111,7 +111,8 @@ export async function handleNPCTalk(game, npcId) {
     }
 
     // Update actions to choices
-    const actionsDiv = document.querySelector('#npc-modal .npc-actions');
+    const actionsDiv = document.querySelector('#npc-modal .npc-modal-actions');
+    if (!actionsDiv) return;
     actionsDiv.textContent = '';
 
     convo.choices.forEach((choice, index) => {
@@ -149,8 +150,9 @@ export function handleNPCResponse(game, result) {
  */
 export function handleNPCGift(game, npcId) {
     const result = game.gameState.npcManager?.giveGift(npcId, 'coffee');
+    if (!result) return;
     DOMUtils.updateElement('#npc-dialogue-area', {
-        innerHTML: result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess."
+        innerHTML: !result?.success ? "I don't accept gifts." : (result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess.")
     });
 }
 
@@ -178,7 +180,7 @@ export function updateRelationshipsScreen(game) {
 
     grid.textContent = '';
 
-    npcs.forEach(npc => {
+    const cards = npcs.map(npc => {
         const card = document.createElement('div');
         card.className = 'npc-card';
         card.dataset.npc = npc.id;
@@ -231,8 +233,19 @@ export function updateRelationshipsScreen(game) {
         card.appendChild(relationshipBar);
         card.appendChild(tier);
 
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', npc.name);
+
         card.addEventListener('click', () => {
             handleVisitNPC(game, npc.id);
+        });
+
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleVisitNPC(game, npc.id);
+            }
         });
 
         return card;

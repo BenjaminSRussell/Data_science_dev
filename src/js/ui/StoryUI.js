@@ -598,6 +598,15 @@ export class StoryUI {
                 modal.remove();
             }
         });
+
+        // Close on escape
+        const onEscape = (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', onEscape);
+            }
+        };
+        document.addEventListener('keydown', onEscape);
     }
 
     /**

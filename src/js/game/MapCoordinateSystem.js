@@ -179,18 +179,9 @@ export class MapCoordinateSystem {
      * Returns grid coordinates
      */
     findNPCHouseCoord(locationX, locationY) {
-        // Convert to grid coordinates if needed
-        let gridX, gridY;
-        if (locationX > 100 || locationY > 100) {
-            gridX = locationX;
-            gridY = locationY;
-        } else {
-            const containerWidth = this.gridSystem.totalWidth;
-            const containerHeight = this.gridSystem.totalHeight;
-            const grid = this.gridSystem.percentToGrid(locationX, locationY, containerWidth, containerHeight);
-            gridX = grid.x;
-            gridY = grid.y;
-        }
+        // All coordinates are grid coordinates (0-30)
+        const gridX = locationX;
+        const gridY = locationY;
         
         // Place house 2-4 tiles away from location
         const distance = 2 + Math.random() * 2;

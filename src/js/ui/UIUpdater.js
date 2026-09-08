@@ -11,7 +11,6 @@ import { OFFICE_LOCATIONS } from '../data/locations.js';
 import { LOCATIONS } from '../game/WorldMap.js';
 import { HARDWARE_PARTS, HARDWARE_TYPES } from '../game/HardwareSystems.js';
 import { LitUIManager } from './LitUIManager.js';
-import { useGameStore } from '../store/gameStore.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommonUtils } from '../utils/CommonUtils.js';
 import { logger } from '../utils/Logger.js';
@@ -42,69 +41,19 @@ export class UIUpdater {
 
     /**
      * Update top bar stats
-     * Phase 2: Uses LitUIManager (with fallback to DOM)
-     * Phase 4: Uses Zustand store
+     * Phase 2: Uses LitUIManager
      */
     updateTopBar() {
-        // Phase 4: Get state from Zustand store
-        const gameStore = this.game?.gameStore || useGameStore;
-        const state = gameStore.getState();
-        
-        // Try Lit component first
-        if (this.litUIManager) {
-            this.litUIManager.updateTopBar();
-        } else {
-            // Fallback to DOM manipulation (using DOMUtils)
-            DOMUtils.updateElement('#money-value', {
-                textContent: CommonUtils.formatCurrency(state.money ?? 0)
-            });
-            DOMUtils.updateElement('#reputation-value', {
-                textContent: CommonUtils.formatNumber(state.reputation ?? 0)
-            });
-            if (state.currentRank) {
-                DOMUtils.updateElement('#rank-value', {
-                    textContent: state.currentRank.title
-                });
-            }
-        }
+        this.litUIManager.updateTopBar();
     }
 
 
     /**
      * Update rank progress display
-     * Phase 2: Uses LitUIManager (with fallback to DOM)
-     * Phase 4: Uses Zustand store
+     * Phase 2: Uses LitUIManager
      */
     updateRankProgress() {
-        // Phase 4: Get state from Zustand store
-        const gameStore = this.game?.gameStore || useGameStore;
-        const state = gameStore.getState();
-        
-        // Try Lit component first
-        if (this.litUIManager) {
-            this.litUIManager.updateRankProgress();
-        } else {
-            // Fallback to DOM manipulation
-            const currentRankEl = document.getElementById('current-rank');
-            const progressEl = document.getElementById('rank-progress');
-            const nextRankEl = document.querySelector('.next-rank');
-
-            if (currentRankEl && state.currentRank) {
-                currentRankEl.textContent = state.currentRank.title || 'None';
-            }
-
-            if (progressEl) {
-                progressEl.style.width = `${state.progressToNextRank || 0}%`;
-            }
-
-            if (nextRankEl) {
-                if (state.nextRank) {
-                    nextRankEl.textContent = `Next: ${state.nextRank.title}`;
-                } else {
-                    nextRankEl.textContent = 'Max Rank Achieved!';
-                }
-            }
-        }
+        this.litUIManager.updateRankProgress();
     }
 
     /**
@@ -224,10 +173,12 @@ export class UIUpdater {
             });
         }
 
-        // Update task reward
+        // Update task reward (show the true payout range: 1-star to 5-star)
         if (task.potentialReward) {
+            const minReward = Math.round(task.potentialReward * 0.2);
+            const maxReward = Math.round(task.potentialReward * 1.3);
             DOMUtils.updateElement('#task-reward', {
-                textContent: CommonUtils.formatCurrency(task.potentialReward)
+                textContent: `${CommonUtils.formatCurrency(minReward)} - ${CommonUtils.formatCurrency(maxReward)}`
             });
         }
 
@@ -365,7 +316,7 @@ export class UIUpdater {
             const workBtn = document.getElementById('btn-work-project');
             workBtn.onclick = () => {
                 // Call main game work handler
-                game.handleWorkOnProject();
+                this.game.handleWorkOnProject();
             };
 
         } else {
@@ -525,7 +476,6 @@ export class UIUpdater {
                 </div>
             `;
         }).join('');
-        grid.innerHTML = libraryHTML;
         grid.innerHTML = libraryHTML;
     }
 
@@ -740,7 +690,7 @@ export class UIUpdater {
         const equipped = hm.equippedParts;
 
         // Map through hardware types to show current status and upgrade options
-        const types = [HARDWARE_TYPES.COOLING, HARDWARE_TYPES.CASE, HARDWARE_TYPES.MONITOR, HARDWARE_TYPES.GPU];
+        const types = [HARDWARE_TYPES.CPU, HARDWARE_TYPES.GPU, HARDWARE_TYPES.RAM, HARDWARE_TYPES.STORAGE, HARDWARE_TYPES.COOLING, HARDWARE_TYPES.CASE, HARDWARE_TYPES.MONITOR];
 
         const equipmentHTML = types.map(type => {
             const currentPartId = equipped[type];
@@ -795,6 +745,14 @@ export class UIUpdater {
         if (part.stats.compute) text.push(`Compute: ${part.stats.compute} TFLOPS`);
         if (part.stats.vram) text.push(`VRAM: ${part.stats.vram}GB`);
         if (part.stats.resolution) text.push(`Res: Level ${part.stats.resolution}`);
+        if (part.stats.aesthetics) text.push(`Aesthetics: +${part.stats.aesthetics}`);
+        if (part.stats.airflow) text.push(`Airflow: +${part.stats.airflow}`);
+        if (part.stats.noise_dampening) text.push(`Noise Dampening: +${part.stats.noise_dampening}`);
+        if (part.stats.refresh_rate) text.push(`Refresh: ${part.stats.refresh_rate}Hz`);
+        if (part.stats.productivity) text.push(`Productivity: x${part.stats.productivity}`);
+        if (part.stats.reliability) text.push(`Reliability: x${part.stats.reliability}`);
+        if (part.stats.style) text.push(`Style: +${part.stats.style}`);
+        if (part.stats.power_draw) text.push(`Power: ${part.stats.power_draw}W`);
 
         return `<div class="equipment-bonus">${text.join(', ')}</div>`;
     }
@@ -840,7 +798,7 @@ export class UIUpdater {
         if (savingsEl) savingsEl.textContent = `$${savings.toLocaleString()}`;
         if (loanEl) loanEl.textContent = `$${loan.toLocaleString()}`;
         if (creditScoreEl) creditScoreEl.textContent = creditScore;
-        if (loanLimitEl) loanLimitEl.textContent = `$${maxLoan.toLocaleString()}`;
+        if (loanLimitEl) loanLimitEl.textContent = `$${Math.max(0, maxLoan - loan).toLocaleString()}`;
         if (netWorthEl) netWorthEl.textContent = `$${netWorth.toLocaleString()}`;
     }
 }

@@ -173,7 +173,7 @@ export class WorkSystemValidator {
                     const filteredRows = table.querySelectorAll('tbody tr:not([style*="display: none"])');
                     
                     // Verify table didn't crash
-                    if (filteredRows.length >= 0) {
+                    if (filteredRows.length <= originalRowCount) {
                         results.passed++;
                     } else {
                         results.failed++;

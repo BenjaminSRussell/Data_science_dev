@@ -12,7 +12,7 @@ import { RANKS } from '../data/ranks.js';
 
 
 // Display visible debug info on page (wait for DOM)
-if (typeof document !== 'undefined') {
+if (import.meta.env.DEV && typeof document !== 'undefined') {
     const showDebug = () => {
         if (document.body) {
             const debugDiv = document.createElement('div');
@@ -35,7 +35,7 @@ if (typeof document !== 'undefined') {
 try {
     if (typeof localStorage === 'undefined') {
         console.error('[DEBUG] localStorage is not available!');
-        if (typeof document !== 'undefined') {
+        if (import.meta.env.DEV && typeof document !== 'undefined') {
             const errDiv = document.getElementById('debug-store-info');
             if (errDiv) errDiv.innerHTML = 'localStorage unavailable!';
         }
@@ -299,6 +299,7 @@ try {
                     tasksCompleted: state.tasksCompleted,
                     perfectScores: state.perfectScores,
                     totalEarned: state.totalEarned,
+                    totalSpent: state.totalSpent,
                     weeklyIncome: state.weeklyIncome,
                     totalRatings: state.totalRatings,
                     ratingSum: state.ratingSum,
@@ -316,7 +317,7 @@ try {
     );
 
     // #region agent log
-    if (typeof document !== 'undefined') {
+    if (import.meta.env.DEV && typeof document !== 'undefined') {
         const debugDiv = document.getElementById('debug-store-info');
         if (debugDiv) debugDiv.innerHTML = ' Zustand store created';
     }
@@ -329,7 +330,7 @@ try {
         name: error.name
     });
     // #region agent log
-    if (typeof document !== 'undefined') {
+    if (import.meta.env.DEV && typeof document !== 'undefined') {
         const debugDiv = document.getElementById('debug-store-info');
         if (debugDiv) {
             debugDiv.style.borderColor = '#f00';
@@ -421,10 +422,21 @@ try {
             const state = get();
             if (!state.canAfford(item.price)) return false;
             if (state.purchasedItems.includes(item.id)) return false;
+
             set({
                 money: state.money - item.price,
                 purchasedItems: [...state.purchasedItems, item.id]
             });
+
+            // Apply item effect
+            if (item.type === 'chart') {
+                get().unlockChartType(item.chartType);
+            } else if (item.type === 'tool') {
+                set((s) => ({
+                    unlockedTools: [...s.unlockedTools, item.toolId]
+                }));
+            }
+
             return true;
         },
         incrementTasksCompleted: () => set((state) => ({ tasksCompleted: state.tasksCompleted + 1 })),
@@ -446,12 +458,39 @@ try {
         updateChartConfig: (config) => set((state) => ({
             chartConfig: { ...state.chartConfig, ...config }
         })),
-        getSoftwareQualityMultiplier: () => ({
-            visualClarity: 1.0,
-            dataAccuracy: 1.0,
-            chartAppropriateness: 1.0,
-            speedBonus: 0
-        }),
+        getSoftwareQualityMultiplier: () => {
+            const state = get();
+            const multipliers = {
+                visualClarity: 1.0,
+                dataAccuracy: 1.0,
+                chartAppropriateness: 1.0,
+                speedBonus: 0
+            };
+
+            if (state.purchasedItems.includes('soft_ide_pro')) {
+                multipliers.visualClarity += 0.05;
+                multipliers.dataAccuracy += 0.03;
+            }
+            if (state.purchasedItems.includes('soft_automl')) {
+                multipliers.speedBonus += 0.10;
+                multipliers.chartAppropriateness += 0.03;
+            }
+            if (state.purchasedItems.includes('soft_cloud_basic')) {
+                multipliers.dataAccuracy += 0.05;
+                multipliers.speedBonus += 0.05;
+            }
+            if (state.purchasedItems.includes('soft_enterprise_db')) {
+                multipliers.dataAccuracy += 0.08;
+                multipliers.chartAppropriateness += 0.02;
+            }
+            if (state.purchasedItems.includes('soft_neural_arch')) {
+                multipliers.visualClarity += 0.10;
+                multipliers.chartAppropriateness += 0.08;
+                multipliers.dataAccuracy += 0.05;
+            }
+
+            return multipliers;
+        },
         reset: () => set({
             money: 100,
             reputation: 0,
@@ -495,7 +534,7 @@ try {
     }));
 
     // #region agent log
-    if (typeof document !== 'undefined') {
+    if (import.meta.env.DEV && typeof document !== 'undefined') {
         const debugDiv = document.getElementById('debug-store-info');
         if (debugDiv) {
             debugDiv.style.borderColor = '#ff0';

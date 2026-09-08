@@ -29,14 +29,14 @@ export class UILayerManager {
      * Get z-index for a layer
      */
     getZIndex(layer) {
-        return this.layers[layer] || 0;
+        return layer in this.layers ? this.layers[layer] : 0;
     }
 
     /**
      * Create a new layer
      */
     createLayer(name, zIndex) {
-        if (this.layers[name]) {
+        if (name in this.layers) {
             console.warn(`Layer ${name} already exists`);
             return;
         }
@@ -49,7 +49,7 @@ export class UILayerManager {
      * Add element to a layer
      */
     addToLayer(element, layer) {
-        if (!this.layers[layer]) {
+        if (!(layer in this.layers)) {
             console.warn(`Layer ${layer} does not exist`);
             return;
         }

@@ -58,15 +58,6 @@ export class RomanceProgressionSystem {
      * Determine partner's bias
      */
     determineBias(partner) {
-        // Each partner has a bias that affects their advice
-        const biases = {
-            'ethical': 'Always chooses ethical options',
-            'practical': 'Prefers practical solutions',
-            'ambitious': 'Encourages risk-taking',
-            'cautious': 'Prefers safe choices',
-            'creative': 'Suggests creative solutions'
-        };
-        
         // Assign based on personality
         if (partner.personality === 'professional') return 'practical';
         if (partner.personality === 'competitive') return 'ambitious';
@@ -119,15 +110,16 @@ export class RomanceProgressionSystem {
      * Get advice message
      */
     getAdviceMessage(bias, recommendation) {
+        const optionName = recommendation?.name || 'this option';
         const messages = {
-            'ethical': `I think we should choose the ethical option. It's the right thing to do.`,
-            'practical': `Let's go with the most practical solution. It makes the most sense.`,
-            'ambitious': `I think we should take the risk. The reward is worth it.`,
-            'cautious': `Let's be careful here. The safe option is better.`,
-            'creative': `What if we tried something different? The creative approach might work.`
+            'ethical': `I think we should choose "${optionName}". It's the right thing to do.`,
+            'practical': `Let's go with "${optionName}". It makes the most sense.`,
+            'ambitious': `I think we should take the risk with "${optionName}". The reward is worth it.`,
+            'cautious': `Let's be careful here and pick "${optionName}". The safe option is better.`,
+            'creative': `What if we tried "${optionName}"? The creative approach might work.`
         };
         
-        return messages[bias] || 'I think this is the best choice.';
+        return messages[bias] || `I think "${optionName}" is the best choice.`;
     }
     
     /**
@@ -138,9 +130,17 @@ export class RomanceProgressionSystem {
             return { success: false, message: 'No partner to work with' };
         }
         
+        // Look up the project to scale the bonus by its difficulty
+        const project = this.gameState.projectSystem?.activeProject?.id === projectId
+            ? this.gameState.projectSystem.activeProject
+            : this.gameState.projectSystem?.completedProjects?.find(p => p.id === projectId)
+              || this.gameState.projectSystem?.availableContracts?.find(c => c.id === projectId);
+        
+        const difficulty = project?.difficulty || 1;
+        
         // Combined income and skills
         const combinedIncome = (this.gameState.economySystem?.money || 0) + this.romancePartner.income;
-        const bonus = 1.5; // 50% bonus when working together
+        const bonus = 1.5 + (difficulty - 1) * 0.25; // 50% base bonus, +25% per difficulty level above 1
         
         return {
             success: true,

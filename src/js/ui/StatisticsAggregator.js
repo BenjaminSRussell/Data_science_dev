@@ -66,6 +66,9 @@ export class StatisticsAggregator {
                 
                 // Track session info
                 if (saveData.timestamp) {
+                    // Days played: from the save's start time (if known) to its last timestamp
+                    const startMs = state.startTime || saveData.timestamp;
+                    const days = Math.max(0, (saveData.timestamp - startMs) / (1000 * 60 * 60 * 24));
                     sessions.push({
                         slotIndex: i,
                         lastPlayed: saveData.timestamp,

@@ -1,141 +1,61 @@
-/**
- * Dialogue Testing System
- * Tests all dialogue options and ensures they work correctly
- */
+import { assert } from 'chai';
 
-export class DialogueTester {
+class DialogueTester {
     constructor(game) {
         this.game = game;
-        this.results = [];
-    }
-
-    async testAll() {
-        const npcManager = this.game.gameState?.npcManager;
-        if (!npcManager) {
-            return { error: 'NPC Manager not found' };
-        }
-
-        const npcs = npcManager.getAllNPCs?.() || [];
-        const results = {
-            total: npcs.length,
-            passed: 0,
-            failed: 0,
-            errors: [],
-            dialogueCount: 0,
-            optionCount: 0
-        };
-
-        for (const npc of npcs) {
-            try {
-                const npcResult = await this.testNPCDialogue(npc.id, npcManager);
-                results.passed += npcResult.passed ? 1 : 0;
-                results.failed += npcResult.passed ? 0 : 1;
-                results.dialogueCount += npcResult.dialogueCount || 0;
-                results.optionCount += npcResult.optionCount || 0;
-                
-                if (!npcResult.passed) {
-                    results.errors.push({ npc: npc.id, error: npcResult.error });
-                }
-            } catch (error) {
-                results.failed++;
-                results.errors.push({ npc: npc.id, error: error.message });
-            }
-        }
-
-        this.results = results;
-        return results;
     }
 
     async testNPCDialogue(npcId, npcManager) {
-        const result = {
-            npcId,
-            passed: false,
-            dialogueCount: 0,
-            optionCount: 0,
-            error: null
-        };
-
         try {
-            // Start conversation
-            if (!npcManager.startConversation) {
-                result.error = 'startConversation method not found';
-                return result;
-            }
-
-            npcManager.startConversation(npcId);
+            await npcManager.startConversation(npcId);
             await this.wait(200);
 
-            // Get current dialogue
-            const dialogue = npcManager.getCurrentDialogue?.();
-            if (!dialogue) {
-                result.error = 'No dialogue returned';
-                return result;
+            const npcDialogue = this.game.gameState.npcDialogue;
+            if (!npcDialogue) {
+                return { success: false, error: 'NPC dialogue not found' };
             }
 
-            result.dialogueCount = 1;
+            const { valid, issues } = this.validateDialogueLogic(npcDialogue);
+            if (!valid) {
+                return { success: false, issues };
+            }
 
-            // Test dialogue options
-            if (dialogue.options && Array.isArray(dialogue.options)) {
-                for (const option of dialogue.options) {
-                    result.optionCount++;
-                    
-                    // Test option selection
-                    if (npcManager.selectOption && typeof option.id === 'string') {
-                        try {
-                            npcManager.selectOption(option.id);
-                            await this.wait(100);
-                        } catch (optError) {
-                            result.error = `Option ${option.id} failed: ${optError.message}`;
-                            return result;
-                        }
-                    }
+            if (!npcDialogue.options) {
+                return { success: true };
+            }
+
+            for (const option of npcDialogue.options) {
+                if (!option.id) {
+                    return { success: false, error: `Option missing ID: ${option}` };
                 }
-            }
-
-            result.passed = true;
-        } catch (error) {
-            result.error = error.message;
-        }
-
-        return result;
-    }
-
-    async testDialogueFlow(npcId, optionPath = []) {
-        // Test a specific dialogue path
-        const npcManager = this.game.gameState?.npcManager;
-        if (!npcManager) return { error: 'NPC Manager not found' };
-
-        try {
-            npcManager.startConversation(npcId);
-            await this.wait(200);
-
-            for (const optionId of optionPath) {
-                npcManager.selectOption?.(optionId);
-                await this.wait(200);
+                try {
+                    npcManager.selectOption(option.id);
+                    await this.wait(200);
+                } catch (error) {
+                    return { success: false, error: `Error selecting option ${option.id}: ${error.message}` };
+                }
             }
 
             return { success: true };
         } catch (error) {
-            return { error: error.message };
+            return { success: false, error: error.message };
         }
     }
 
     validateDialogueLogic(dialogue) {
         const issues = [];
 
-        // Check dialogue structure
         if (!dialogue.text && !dialogue.message) {
             issues.push('Dialogue missing text/message');
         }
 
-        // Check options
         if (dialogue.options) {
             dialogue.options.forEach((option, index) => {
                 if (!option.id) {
                     issues.push(`Option ${index} missing ID`);
                 }
                 if (!option.text && !option.label) {
-                    issues.push(`Option ${index} missing text`);
+                    issues.push(`Option ${index} missing text/label`);
                 }
             });
         }
@@ -146,8 +66,39 @@ export class DialogueTester {
         };
     }
 
+    async testAll() {
+        const npcManager = this.game.gameState.npcManager;
+        const npcs = npcManager.npcs || [];
+        const results = {
+            passed: 0,
+            failed: 0,
+            dialogueCount: 0,
+            optionCount: 0
+        };
+
+        for (const npc of npcs) {
+            const npcId = npc.npcId;
+            const result = await this.testNPCDialogue(npcId, npcManager);
+            if (result.success) {
+                results.passed++;
+            } else {
+                results.failed++;
+                console.error(`Test failed for NPC ${npcId}: ${result.error}`);
+            }
+
+            const dialogue = this.game.gameState.npcDialogue;
+            if (dialogue) {
+                results.dialogueCount++;
+                results.optionCount += dialogue.options ? dialogue.options.length : 0;
+            }
+        }
+
+        return results;
+    }
+
     wait(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
+export default DialogueTester;

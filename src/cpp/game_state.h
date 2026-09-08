@@ -56,6 +56,9 @@ private:
   // Configuration
   static const int MAX_RANK = 6;
   static const int INITIAL_MONEY = 100;
+  static const int MIN_MONEY = 0;
+  static const int MIN_REPUTATION = 0;
+  static const int MIN_TOTAL_EARNED = 0;
 };
 
 #endif // GAME_STATE_H

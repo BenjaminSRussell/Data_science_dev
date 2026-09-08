@@ -13,8 +13,12 @@ let quotronTicker = null;
 export function updateStockMarketScreen(game) {
     if (!game.stockMarket) return;
 
-    // Initialize quotron ticker if not already done
-    if (!quotronTicker) {
+    // Initialize quotron ticker if not already done, or if the game's
+    // stock market instance has changed (e.g. new game or save load)
+    if (!quotronTicker || quotronTicker.stockMarket !== game.stockMarket) {
+        if (quotronTicker) {
+            quotronTicker.stop();
+        }
         quotronTicker = new QuotronTicker('quotron-ticker', game.stockMarket);
         quotronTicker.start();
     } else {
@@ -240,6 +244,7 @@ export function handleBuyStock(game, stockId) {
     if (!qty || qty <= 0) return;
 
     const result = game.stockMarket?.buyStock(stockId, qty);
+    if (!result) return;
     if (result.success) {
         game.showToast(`Bought ${qty} shares of ${result.stock.ticker}`, 'success');
         updateStockMarketScreen(game);
@@ -257,6 +262,7 @@ export function handleSellStock(game, stockId) {
     if (!qty || qty <= 0) return;
 
     const result = game.stockMarket?.sellStock(stockId, qty);
+    if (!result) return;
     if (result.success) {
         game.showToast(`Sold ${qty} shares of ${result.stock.ticker}`, 'success');
         updateStockMarketScreen(game);
@@ -275,9 +281,6 @@ export function handleCrime(game, type, params) {
     const result = game.crimeSystem.commitCrime(type, params);
     if (result.success) {
         game.showToast(result.message, 'success');
-        if (result.profit) {
-            game.showToast(`Profit: $${result.profit}`, 'success');
-        }
         updateStockMarketScreen(game);
         game.uiUpdater.updateAllUI();
     } else {
@@ -315,6 +318,9 @@ export function handleServeJailTime(game) {
 
     game.handleTimeAdvance(6);
     game.gameState.jailSentence--;
+    if (game.crimeSystem) {
+        game.crimeSystem.jailTimeServed = (game.crimeSystem.jailTimeServed || 0) + 1;
+    }
     document.getElementById('jail-time-left').textContent = `${game.gameState.jailSentence} days`;
 
     if (game.gameState.jailSentence <= 0) {

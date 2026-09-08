@@ -1,7 +1,7 @@
 /**
  * UnifiedMapSystem.js
  * Replaces all map renderers with PixiJS for better performance
- * Consolidates WorldMapRenderer, SimpleMapRenderer, CityMapRenderer, etc.
+ * Consolidates WorldMapRenderer, SimpleMapRenderer, etc.
  * 
  * Phase 1: Code Reduction - Using PixiJS instead of DOM manipulation
  */
@@ -665,7 +665,9 @@ export class UnifiedMapSystem {
             'social': 0xa855f7,
             'training': 0xef4444,
             'business': 0x64748b,
-            'elite': 0xffd700
+            'elite': 0xffd700,
+            'investment': 0x0ea5e9,
+            'shopping': 0xec4899
         };
         
         const buildingSizes = {
@@ -765,7 +767,15 @@ export class UnifiedMapSystem {
             });
             
             // Add icon content (emoji or image)
-            if (location.icon && !location.icon.startsWith('/')) {
+            if (location.icon && location.icon.startsWith('/')) {
+                const iconSprite = new PIXI.Sprite(PIXI.Texture.from(location.icon));
+                iconSprite.anchor.set(0.5);
+                iconSprite.x = x;
+                iconSprite.y = y;
+                iconSprite.width = 20;
+                iconSprite.height = 20;
+                this.layers.locations.addChild(iconSprite);
+            } else if (location.icon) {
                 const iconText = new PIXI.Text(location.icon, {
                     fontSize: 10,
                     fill: 0x333333

@@ -43,7 +43,7 @@
     /* Text Colors */
     --color-text-primary: #fafafa;
     --color-text-secondary: #a1a1aa;
-    --color-text-muted: #52525b;
+    --color-text-muted: #8a8a94;
     --color-text-accent: #ffffff;
 
     /* Glass Effect - Frosted Premium */
@@ -1866,8 +1866,19 @@ a:hover {
 }
 
 @media (max-width: 768px) {
+    #top-bar {
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+    }
+
     .top-bar-center {
-        display: none;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .top-bar-right {
+        flex-wrap: wrap;
+        gap: 0.25rem;
     }
 
     .menu-title {
@@ -2041,6 +2052,10 @@ a:hover {
 
     .stat-value {
         font-size: 0.9rem;
+    }
+
+    .shop-grid {
+        grid-template-columns: 1fr;
     }
 }
 

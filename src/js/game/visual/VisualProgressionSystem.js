@@ -101,8 +101,8 @@ export class VisualProgressionSystem {
         }
         
         // Calculate total skills
-        if (this.gameState.stats) {
-            stats.totalSkills = Object.values(this.gameState.stats).reduce((sum, val) => sum + (val || 0), 0);
+        if (this.gameState.characterStats && this.gameState.characterStats.skills) {
+            stats.totalSkills = Object.values(this.gameState.characterStats.skills).reduce((sum, s) => sum + (s.value || 0), 0);
         }
         
         return stats;

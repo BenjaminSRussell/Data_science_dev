@@ -24,20 +24,21 @@ export class ActTransitionScreen {
             overlay.classList.add('active');
         }, 100);
 
-        // Auto-advance after delay or on click
-        const continueBtn = overlay.querySelector('.act-continue-btn');
-        continueBtn.addEventListener('click', () => {
-            this.closeTransition(overlay);
-        });
-
         // Also close on escape
         const closeHandler = (e) => {
             if (e.key === 'Escape') {
-                this.closeTransition(overlay);
                 document.removeEventListener('keydown', closeHandler);
+                this.closeTransition(overlay);
             }
         };
         document.addEventListener('keydown', closeHandler);
+
+        // Auto-advance after delay or on click
+        const continueBtn = overlay.querySelector('.act-continue-btn');
+        continueBtn.addEventListener('click', () => {
+            document.removeEventListener('keydown', closeHandler);
+            this.closeTransition(overlay);
+        });
     }
 
     /**
@@ -134,6 +135,10 @@ export class ActTransitionScreen {
             items.push(`<div class="summary-item"><strong>Your Path:</strong> ${ethicsDesc}</div>`);
         }
 
+        if (summary.playtime) {
+            items.push(`<div class="summary-item"><strong>Time Played:</strong> ${summary.playtime} days</div>`);
+        }
+
         return items.length > 0 ? items.join('') : '<p>Your journey continues...</p>';
     }
 
@@ -145,41 +150,26 @@ export class ActTransitionScreen {
         if (!storylineManager) return '';
 
         const arc = storylineManager.getCurrentArc();
-        const ethics = this.game?.gameState?.characterStats?.ethics || 0;
+        if (!arc) return '';
 
-        let arcPreview = '';
-        
-        if (ethics < -30) {
-            arcPreview = `
-                <div class="arc-preview dark">
-                    <div class="arc-preview-icon"></div>
-                    <div class="arc-preview-text">
-                        <strong>The Dark Path</strong><br>
-                        Your choices have led you down a darker road. The world sees you differently now.
-                    </div>
+        const themeClass = {
+            corruption: 'dark',
+            integrity: 'light',
+            survival: 'balanced'
+        }[arc.theme] || 'balanced';
+
+        const challenges = (arc.challenges || []).map(c => c.replace(/_/g, ' ')).join(', ');
+
+        const arcPreview = `
+            <div class="arc-preview ${themeClass}">
+                <div class="arc-preview-icon"></div>
+                <div class="arc-preview-text">
+                    <strong>${arc.name}</strong><br>
+                    ${arc.description}
+                    ${challenges ? `<br><em>Challenges ahead: ${challenges}</em>` : ''}
                 </div>
-            `;
-        } else if (ethics > 30) {
-            arcPreview = `
-                <div class="arc-preview light">
-                    <div class="arc-preview-icon"></div>
-                    <div class="arc-preview-text">
-                        <strong>The Righteous Path</strong><br>
-                        You've stayed true to your values. Your integrity defines you.
-                    </div>
-                </div>
-            `;
-        } else {
-            arcPreview = `
-                <div class="arc-preview balanced">
-                    <div class="arc-preview-icon"></div>
-                    <div class="arc-preview-text">
-                        <strong>The Balanced Path</strong><br>
-                        You navigate the complexities of life, finding balance between ambition and ethics.
-                    </div>
-                </div>
-            `;
-        }
+            </div>
+        `;
 
         return `<div class="act-arc-preview">${arcPreview}</div>`;
     }
@@ -211,7 +201,8 @@ export class ActTransitionScreen {
             decisions: 0,
             progress: '',
             relationships: 0,
-            ethics: 0
+            ethics: 0,
+            playtime: 0
         };
 
         // Count decisions
@@ -234,6 +225,11 @@ export class ActTransitionScreen {
         // Ethics
         if (gameState.characterStats) {
             summary.ethics = gameState.characterStats.ethics || 0;
+        }
+
+        // Playtime
+        if (timeManager) {
+            summary.playtime = timeManager.totalDays || 0;
         }
 
         return summary;

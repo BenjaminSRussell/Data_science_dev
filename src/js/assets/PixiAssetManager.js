@@ -11,6 +11,7 @@ export class PixiAssetManager {
         this.manifest = null;
         this.loaded = false;
         this.loadProgress = 0;
+        this.initialized = false;
     }
 
     /**
@@ -19,7 +20,7 @@ export class PixiAssetManager {
      */
     async init(manifest) {
         // Check if Assets is already initialized
-        if (Assets.cache) {
+        if (this.initialized) {
             // Assets already initialized, just return success
             return true;
         }
@@ -43,10 +44,12 @@ export class PixiAssetManager {
 
         try {
             await Assets.init({ manifest: this.manifest });
+            this.initialized = true;
             return true;
         } catch (error) {
             // If error is about already being initialized, that's fine
             if (error.message && error.message.includes('already initialized')) {
+                this.initialized = true;
                 return true;
             }
             console.warn('Asset initialization failed:', error);

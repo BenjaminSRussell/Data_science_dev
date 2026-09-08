@@ -6,7 +6,6 @@ export class AudioManager {
     constructor() {
         this.soundEnabled = true;
         this.musicEnabled = true;
-        this.sounds = {};
         this.currentMusic = null;
         this.currentStation = 'lofi_beats'; // Default station
 
@@ -102,10 +101,9 @@ export class AudioManager {
             fail: { freq: 220, duration: 200 },
             complete: { freq: 660, duration: 100 },
             start: { freq: 440, duration: 100 },
-            purchase: { freq: 1000, duration: 75 },
-            promotion: { freq: 523, duration: 200 },
             kaching: { freq: 1200, duration: 100 },
-            error: { freq: 150, duration: 300 }
+            error: { freq: 150, duration: 300 },
+            keyboard_typing: { freq: 1400, duration: 30 }
         };
 
         const sound = sounds[soundName];
@@ -204,6 +202,20 @@ export class AudioManager {
         this.currentMusic.addEventListener('ended', () => {
             if (this.musicEnabled && this.currentStation === Object.keys(this.musicStations).find(key => this.musicStations[key] === station)) {
                 this.playRandomTrack(station);
+            }
+        });
+
+        // If the track fails to load (404, corrupt file, bad codec), try another
+        // track from the same station so one bad file doesn't silence it forever.
+        this.currentMusic.addEventListener('error', () => {
+            if (!this.musicEnabled) return;
+            console.warn(`Failed to load music track: ${url}. Trying another track.`);
+            const remaining = station.tracks.filter(t => t !== randomTrack);
+            if (remaining.length > 0) {
+                const retryStation = { ...station, tracks: remaining };
+                this.playRandomTrack(retryStation);
+            } else {
+                console.warn(`No other tracks available in station: ${station.name || 'unknown'}.`);
             }
         });
 

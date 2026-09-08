@@ -12,6 +12,44 @@ export class TaskSystem {
     }
 
     /**
+     * Get the current task (stored on gameState.currentTask)
+     */
+    getCurrentTask() {
+        return this.gameState.currentTask;
+    }
+
+    /**
+     * Complete the current task, awarding its potential reward.
+     * Returns the completed task, or null if there is no current task.
+     */
+    completeTask(taskId = null) {
+        const task = this.gameState.currentTask;
+        if (!task) return null;
+        if (taskId && task.id !== taskId) return null;
+
+        const reward = task.potentialReward || 0;
+        if (typeof this.gameState.addMoney === 'function') {
+            this.gameState.addMoney(reward);
+        } else if (typeof this.gameState.money === 'number') {
+            this.gameState.money += reward;
+        }
+
+        this.gameState.currentTask = null;
+        return task;
+    }
+
+    /**
+     * Work on the current task (no-op placeholder for dev tooling).
+     * Returns the current task, or null if there is none.
+     */
+    workOnTask(taskId = null) {
+        const task = this.gameState.currentTask;
+        if (!task) return null;
+        if (taskId && task.id !== taskId) return null;
+        return task;
+    }
+
+    /**
      * Generate a new task appropriate for player's rank
      */
     generateNewTask() {
@@ -77,6 +115,7 @@ export class TaskSystem {
             acceptableChartTypes: taskTemplate.acceptableChartTypes || taskTemplate.optimalChartTypes || ['bar'],
             potentialReward: potentialReward,
             startTime: Date.now(),
+            timeLimit: taskTemplate.timeLimit || 300,
             // Include additional metadata from comprehensive tasks
             domain: taskTemplate.domain,
             skills: taskTemplate.skills,
@@ -132,11 +171,15 @@ export class TaskSystem {
         const quarters = ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'];
         const baseRevenue = this.randomRange(80000, 150000);
 
+        const revenues = quarters.map((_, i) => {
+            const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
+            return Math.round(baseRevenue * growth);
+        });
+
         return {
             columns: ['Quarter', 'Revenue', 'Expenses', 'Profit'],
             rows: quarters.map((q, i) => {
-                const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
-                const revenue = Math.round(baseRevenue * growth);
+                const revenue = revenues[i];
                 const expenses = Math.round(revenue * (0.5 + Math.random() * 0.2));
                 const profit = revenue - expenses;
 
@@ -144,10 +187,7 @@ export class TaskSystem {
             }),
             labels: quarters,
             datasets: {
-                Revenue: quarters.map((_, i) => {
-                    const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
-                    return Math.round(baseRevenue * growth);
-                }),
+                Revenue: revenues,
                 Expenses: [],
                 Profit: []
             }
@@ -208,7 +248,8 @@ export class TaskSystem {
         let remaining = 100;
         const percentages = categories.map((_, i) => {
             if (i === categories.length - 1) return remaining;
-            const val = this.randomRange(10, Math.min(40, remaining - (categories.length - i - 1) * 5));
+            const cap = Math.max(10, Math.min(40, remaining - (categories.length - i - 1) * 5));
+            const val = this.randomRange(10, cap);
             remaining -= val;
             return val;
         });
@@ -299,12 +340,14 @@ export class TaskSystem {
                 description: 'Create a visualization showing quarterly sales performance.',
                 dataType: 'quarterly_sales',
                 requirements: ['Show trends', 'Compare values'],
-                optimalChartTypes: ['bar', 'line']
+                optimalChartTypes: ['bar', 'line'],
+                acceptableChartTypes: ['bar', 'line']
             },
             boss: BOSSES[0],
             data: this.generateQuarterlySalesData(),
             requirements: ['Show trends', 'Compare values'],
             optimalChartTypes: ['bar', 'line'],
+            acceptableChartTypes: ['bar', 'line'],
             potentialReward: 150,
             startTime: Date.now()
         };
@@ -336,7 +379,11 @@ export class TaskSystem {
         if (taskDesc) taskDesc.textContent = task.template.description;
 
         const taskReward = document.getElementById('task-reward');
-        if (taskReward) taskReward.textContent = `$${task.potentialReward}`;
+        if (taskReward) {
+            const minReward = Math.round(task.potentialReward * 0.2);
+            const maxReward = Math.round(task.potentialReward * 1.3);
+            taskReward.textContent = `$${minReward} - $${maxReward}`;
+        }
 
         // Update requirements
         const reqContainer = document.querySelector('.task-requirements');
@@ -369,7 +416,7 @@ export class TaskSystem {
         // Update header
         const thead = table.querySelector('thead tr');
         thead.innerHTML = data.columns.map((c, i) =>
-            `<th class="sortable-header" onclick="game.gameState.taskSystem.handleTableSort(${i})">${c} ↕</th>`
+            `<th class="sortable-header" onclick="game.taskSystem.handleTableSort(${i})">${c} ↕</th>`
         ).join('');
 
         // Update body
@@ -439,6 +486,7 @@ export class TaskSystem {
      * Helper: random number in range
      */
     randomRange(min, max) {
+        if (min > max) [min, max] = [max, min];
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 }
