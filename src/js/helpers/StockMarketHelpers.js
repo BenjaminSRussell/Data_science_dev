@@ -13,8 +13,12 @@ let quotronTicker = null;
 export function updateStockMarketScreen(game) {
     if (!game.stockMarket) return;
 
-    // Initialize quotron ticker if not already done
-    if (!quotronTicker) {
+    // Initialize quotron ticker if not already done, or if the game's
+    // stock market instance has changed (e.g. new game or save load)
+    if (!quotronTicker || quotronTicker.stockMarket !== game.stockMarket) {
+        if (quotronTicker) {
+            quotronTicker.stop();
+        }
         quotronTicker = new QuotronTicker('quotron-ticker', game.stockMarket);
         quotronTicker.start();
     } else {
