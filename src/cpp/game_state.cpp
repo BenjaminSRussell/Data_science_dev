@@ -1,5 +1,7 @@
 #include "game_state.h"
 #include <sstream>
+#include <vector>
+#include <string>
 
 GameState::GameState() { reset(); }
 
