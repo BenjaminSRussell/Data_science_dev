@@ -99,13 +99,7 @@ export class RealisticDialogueSystem {
      * Generate realistic dialogue based on context
      */
     generateDialogue(context) {
-        const {
-            speaker,
-            emotion = 'neutral',
-            relationship = 50,
-            situation = 'casual',
-            personality = 'friendly'
-        } = context;
+        const { speaker, emotion = 'neutral', relationship = 50, situation = 'casual', personality = 'friendly' } = context;
 
         let dialogue = "";
 
@@ -245,11 +239,3 @@ export class RealisticDialogueSystem {
         }
     }
 }
-
-
-
-
-
-
-
-
