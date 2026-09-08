@@ -218,6 +218,13 @@ class AITrainingStoryline {
      */
     transitionToPhase(phaseName) {
         this.currentPhase = phaseName;
+        // Track the highest phase ever reached so phase-gated content
+        // (e.g. research papers) can be unlocked even if the phase has
+        // already advanced past the required one.
+        const phaseOrder = ['pre_attention', 'attention_era', 'post_attention'];
+        if (phaseOrder.indexOf(phaseName) > phaseOrder.indexOf(this.highestPhaseReached)) {
+            this.highestPhaseReached = phaseName;
+        }
         const phase = this.timeline[phaseName];
         
         // Show notification
