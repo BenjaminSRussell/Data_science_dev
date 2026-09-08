@@ -77,6 +77,7 @@ export class TaskSystem {
             acceptableChartTypes: taskTemplate.acceptableChartTypes || taskTemplate.optimalChartTypes || ['bar'],
             potentialReward: potentialReward,
             startTime: Date.now(),
+            timeLimit: taskTemplate.timeLimit || 300,
             // Include additional metadata from comprehensive tasks
             domain: taskTemplate.domain,
             skills: taskTemplate.skills,
