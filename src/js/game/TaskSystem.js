@@ -299,12 +299,14 @@ export class TaskSystem {
                 description: 'Create a visualization showing quarterly sales performance.',
                 dataType: 'quarterly_sales',
                 requirements: ['Show trends', 'Compare values'],
-                optimalChartTypes: ['bar', 'line']
+                optimalChartTypes: ['bar', 'line'],
+                acceptableChartTypes: ['bar', 'line']
             },
             boss: BOSSES[0],
             data: this.generateQuarterlySalesData(),
             requirements: ['Show trends', 'Compare values'],
             optimalChartTypes: ['bar', 'line'],
+            acceptableChartTypes: ['bar', 'line'],
             potentialReward: 150,
             startTime: Date.now()
         };
