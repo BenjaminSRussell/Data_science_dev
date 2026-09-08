@@ -63,7 +63,7 @@ export class NPCMemorySystem {
         const decisionNPCs = {
             'first_job_offer': ['professor_higgins', 'sarah_martinez'], // Mentors care about career choices
             'whistleblower': ['professor_higgins', 'sarah_martinez', 'mike_johnson'], // Professional contacts
-            'criminal_opportunity': ['vinnie', 'the_broker'] // Criminal contacts
+            'criminal_opportunity': ['vinnie_shark', 'the_broker'] // Criminal contacts
         };
 
         if (decisionNPCs[decisionId]) {
