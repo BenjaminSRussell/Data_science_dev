@@ -29,7 +29,6 @@ class LowPolyGenerator:
         ]
         
         color = random.choice(self.palette)
-        draw.polygon(points, fill=color, outline=None)
         
         # Add eyes and mouth
         draw.ellipse((48, 48, 64, 64), fill=(255, 255, 255), outline=None)
@@ -112,73 +111,40 @@ class LowPolyGenerator:
         
         center_x, center_y = size[0] // 2, size[1] // 2
         
-        # Create Low-poly UI shape
-        if 'button' in element_type.lower():
-            # Button shape
-            points = [
-                (20, 20), (108, 20), (108, 108), (20, 108)
-            ]
-        elif 'panel' in element_type.lower():
-            # Panel shape
-            points = [
-                (10, 10), (118, 10), (118, 118), (10, 118)
-            ]
-        else:
-            # Generic polygonal
-            points = []
-            for i in range(8):
-                angle = i * 2 * math.pi / 8
-                radius = 40
-                x = center_x + radius * math.cos(angle)
-                y = center_y + radius * math.sin(angle)
-                points.append((x, y))
-        
-        color = random.choice(self.palette)
-        draw.polygon(points, fill=color, outline=None)
-        
-        # Gradient overlay
-        overlay = Image.new('RGBA', size, (0, 0, 0, 0))
-        overlay_draw = ImageDraw.Draw(overlay)
-        overlay_draw.ellipse(
-            [center_x - 30, center_y - 30, center_x + 30, center_y + 30],
-            fill=(255, 255, 255, 40), outline=None
-        )
-        
-        img = Image.alpha_composite(img, overlay)
-        img = img.filter(ImageFilter.GaussianBlur(radius=0.5))
+        if 'button' in element_type:
+            draw.polygon([
+                (center_x - 50, center_y - 20), (center_x + 50, center_y - 20),
+                (center_x + 50, center_y + 20), (center_x - 50, center_y + 20)
+            ], fill=random.choice(self.palette), outline=None)
+        elif 'slider' in element_type:
+            draw.polygon([
+                (center_x - 50, center_y - 20), (center_x + 50, center_y - 20),
+                (center_x + 50, center_y + 20), (center_x - 50, center_y + 20)
+            ], fill=random.choice(self.palette), outline=None)
+            draw.ellipse([
+                (center_x - 20, center_y - 10), (center_x + 20, center_y + 10)
+            ], fill=(255, 255, 255), outline=None)
         
         img.save(output_path, 'PNG', optimize=True)
         return True
     
-    def generate_low_poly_particle(self, output_path, particle_type, size=(32, 32)):
-        """Generate Low-poly particle effect"""
+    def generate_low_poly(self, output_path, shape, size=(64, 64)):
+        """Generate Low-poly shape"""
         img = Image.new('RGBA', size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
         
-        center_x, center_y = size[0] // 2, size[1] // 2
-        
-        # Create Low-poly particle shape
-        points = []
-        num_points = 5 + random.randint(0, 3)
-        for i in range(num_points):
-            angle = i * 2 * math.pi / num_points
-            radius = 10 + random.randint(-2, 2)
-            x = center_x + radius * math.cos(angle)
-            y = center_y + radius * math.sin(angle)
-            points.append((x, y))
-        
-        color = random.choice(self.palette)
-        draw.polygon(points, fill=color, outline=None)
-        
-        # Glow effect
-        overlay = Image.new('RGBA', size, (0, 0, 0, 0))
-        overlay_draw = ImageDraw.Draw(overlay)
-        overlay_draw.ellipse(
-            [center_x - 8, center_y - 8, center_x + 8, center_y + 8],
-            fill=(*color[:3], 100), outline=None
-        )
-        
-        img = Image.alpha_composite(img, overlay)
+        if 'triangle' in shape:
+            draw.polygon([
+                (size[0] // 2, 10), (10, size[1] - 10), (size[0] - 10, size[1] - 10)
+            ], fill=random.choice(self.palette), outline=None)
+        elif 'square' in shape:
+            draw.polygon([
+                (10, 10), (size[0] - 10, 10), (size[0] - 10, size[1] - 10), (10, size[1] - 10)
+            ], fill=random.choice(self.palette), outline=None)
+        elif 'circle' in shape:
+            draw.ellipse([
+                (10, 10), (size[0] - 10, size[1] - 10)
+            ], fill=random.choice(self.palette), outline=None)
         
         img.save(output_path, 'PNG', optimize=True)
         return True
