@@ -2330,6 +2330,15 @@ this.gameState.ratingSum = store.ratingSum;m;
                 station.classList.add('active');
             }
         });
+
+        // Update the toolbar button label to reflect the current station
+        const radioBtn = document.getElementById('btn-music-radio');
+        if (radioBtn) {
+            const stationName = this.audioManager.getCurrentStationName();
+            radioBtn.textContent = this.audioManager.musicEnabled
+                ? `MUSIC: ${stationName}`
+                : 'MUSIC: OFF';
+        }
     }
 
     /**
