@@ -191,7 +191,7 @@ export function handleTrainAI(game) {
     const result = game.aiSystem.train(10);
 
     game.showToast(`Trained AI! Gained ${result.xpGained} XP.`, 'success');
-    game.audioManager.play('keyboard_typing') || game.audioManager.play('click');
+    game.audioManager.play('keyboard_typing');
 
     if (game.aiSystem.checkLevelUp()) {
         game.showToast(`AI LEVEL UP! Now Level ${game.aiSystem.level}`, 'success');
