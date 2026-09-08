@@ -1513,6 +1513,8 @@ this.gameState.ratingSum = store.ratingSum;m;
             this.investmentEcommerceSystem = this.gameState.investmentEcommerceSystem;
             this.storylineManager = this.gameState.storylineManager;
             this.storyBeatsSystem = this.gameState.storyBeatsSystem;
+            this.characterArcSystem = this.gameState.characterArcSystem;
+            this.npcMemorySystem = this.gameState.npcMemorySystem;
             // NOTE: mapProgressionSystem already linked above, don't duplicate
             this.ideSystem = this.gameState.ideSystem;
             this.locationBackgroundSystem = this.gameState.locationBackgroundSystem;
@@ -1789,6 +1791,12 @@ this.gameState.ratingSum = store.ratingSum;m;
         this.projectSystem = this.gameState.projectSystem;
         this.projectSystem = this.gameState.projectSystem;
         this.aiSystem = this.gameState.aiSystem;
+
+        // Link story systems (may be null if save predates them)
+        this.storylineManager = this.gameState.storylineManager;
+        this.storyBeatsSystem = this.gameState.storyBeatsSystem;
+        this.characterArcSystem = this.gameState.characterArcSystem;
+        this.npcMemorySystem = this.gameState.npcMemorySystem;
 
         // Initialize BankSystem
         this.bankSystem = new BankSystem(this.gameState);
