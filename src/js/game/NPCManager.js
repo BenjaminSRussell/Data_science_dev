@@ -1159,6 +1159,9 @@ export class NPCManager {
                 if (req.day && this.gameState.timeManager?.totalDays < req.day) return false;
                 if (req.stat && this.gameState.characterStats?.getStat(req.stat) < req.value) return false;
                 if (req.reputation && this.gameState.reputation < req.reputation) return false;
+                if (req.ethics !== undefined && this.gameState.characterStats?.ethics < req.ethics) return false;
+                if (req.netWorth !== undefined && (this.gameState.money || 0) < req.netWorth) return false;
+                if (req.money !== undefined && (this.gameState.money || 0) < req.money) return false;
                 if (req.relationship) {
                     for (const [npcId, level] of Object.entries(req.relationship)) {
                         if (this.relationships[npcId] < level) return false;
