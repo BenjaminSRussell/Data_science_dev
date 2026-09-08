@@ -17,6 +17,10 @@ export class CompanyManagementSystem {
      * Start a new company
      */
     startCompany(name, type = 'consulting') {
+        if (this.playerCompany) {
+            return { success: false, message: 'You already have a company' };
+        }
+        
         this.playerCompany = {
             id: 'player_company_' + Date.now(),
             name: name,
@@ -36,6 +40,10 @@ export class CompanyManagementSystem {
      * Buy an existing company
      */
     buyCompany(companyId, price) {
+        if (this.playerCompany) {
+            return { success: false, message: 'You already have a company' };
+        }
+        
         if (this.gameState.economySystem.money < price) {
             return { success: false, message: 'Not enough money' };
         }
