@@ -313,6 +313,7 @@ export class GameState {
                 pullRequests: this.githubIssuesSystem.pullRequests
             } : null,
             researchPaperSystem: this.researchPaperSystem?.toJSON(),
+            gameEndingSystem: this.gameEndingSystem?.toJSON(),
             emotionalBreakdownSystem: this.emotionalBreakdownSystem ? {
                 activeBreakdowns: Array.from(this.emotionalBreakdownSystem.activeBreakdowns.values()),
                 breakdownHistory: this.emotionalBreakdownSystem.breakdownHistory
@@ -383,6 +384,7 @@ export class GameState {
         if (this.researchPaperSystem && data.researchPaperSystem) {
             this.researchPaperSystem.fromJSON(data.researchPaperSystem);
         }
+        if (this.gameEndingSystem && data.gameEndingSystem) this.gameEndingSystem.fromJSON(data.gameEndingSystem);
         if (this.emotionalBreakdownSystem && data.emotionalBreakdownSystem) {
             // Restore active breakdowns (saved as an array of {id, ...} objects)
             this.emotionalBreakdownSystem.activeBreakdowns = new Map(
