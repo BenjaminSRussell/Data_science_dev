@@ -58,7 +58,7 @@ export function updateLockBadges() {
         const text = badge.textContent.trim();
 
         // Replace emoji lock with icon
-        if (text === '') {
+        if (text === '🔒') {
             badge.textContent = '';
             const img = document.createElement('img');
             img.src = '/assets/icons/ui/lock.png';
@@ -69,7 +69,7 @@ export function updateLockBadges() {
         }
 
         // Replace vehicle emojis with icons
-        if (text === '') {
+        if (text === '🚌') {
             badge.textContent = '';
             const img = document.createElement('img');
             img.src = '/assets/icons/vehicles/bus_pass.png';
@@ -82,7 +82,7 @@ export function updateLockBadges() {
             badge.appendChild(img);
         }
 
-        if (text === '') {
+        if (text === '🚗') {
             badge.textContent = '';
             const img = document.createElement('img');
             img.src = '/assets/icons/vehicles/used_car.png';
