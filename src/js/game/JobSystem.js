@@ -198,6 +198,84 @@ export const JOB_CATEGORIES = {
                 realWorld: 'You prevent $2M in downtime, but maintenance workers fear for their jobs.'
             }
         ]
+    },
+    principal_scientist: {
+        name: 'Principal Scientist',
+        minReputation: 2500,
+        tasks: [
+            {
+                id: 'cross_company_data_platform',
+                name: 'Design Cross-Company Data Platform',
+                description: 'Architect a unified data platform for the entire organization',
+                difficulty: 11,
+                timeRequired: 40,
+                basePay: 4000,
+                skills: ['intelligence', 'analytics', 'charisma'],
+                xpReward: { intelligence: 80, analytics: 70, charisma: 30 },
+                realWorld: 'Three divisions, three data warehouses, zero trust. You spend months getting them to speak the same language.'
+            },
+            {
+                id: 'executive_decision_model',
+                name: 'Executive Decision Support Model',
+                description: 'Build a model that guides major business strategy',
+                difficulty: 12,
+                timeRequired: 45,
+                basePay: 4500,
+                skills: ['intelligence', 'analytics', 'charisma'],
+                xpReward: { intelligence: 85, analytics: 75, charisma: 35 },
+                realWorld: 'The board asks you to pick the next market. Your model says one thing, the CFO says another. You have to defend your numbers.'
+            },
+            {
+                id: 'industry_benchmark_study',
+                name: 'Industry-Wide Benchmark Study',
+                description: 'Analyze competitors across the entire industry',
+                difficulty: 11,
+                timeRequired: 38,
+                basePay: 3800,
+                skills: ['intelligence', 'analytics'],
+                xpReward: { intelligence: 75, analytics: 65 },
+                realWorld: 'You publish a report that reshapes how the whole industry thinks about pricing. Half of it is right.'
+            }
+        ]
+    },
+    chief_data_officer: {
+        name: 'Chief Data Officer',
+        minReputation: 5000,
+        tasks: [
+            {
+                id: 'company_data_strategy',
+                name: 'Company-Wide Data Strategy',
+                description: 'Define the data vision for the entire company',
+                difficulty: 13,
+                timeRequired: 60,
+                basePay: 8000,
+                skills: ['intelligence', 'analytics', 'charisma'],
+                xpReward: { intelligence: 100, analytics: 90, charisma: 50 },
+                realWorld: 'The CEO wants data to drive everything. You have to convince 500 employees to change how they work. Half of them are already planning your replacement.'
+            },
+            {
+                id: 'ai_transformation_program',
+                name: 'AI Transformation Program',
+                description: 'Lead the company\'s shift to AI-driven operations',
+                difficulty: 14,
+                timeRequired: 70,
+                basePay: 9000,
+                skills: ['intelligence', 'analytics', 'charisma'],
+                xpReward: { intelligence: 110, analytics: 100, charisma: 60 },
+                realWorld: 'You bet the company on AI. It works, but the board wants to know why the last three attempts failed. You have to explain it without losing your job.'
+            },
+            {
+                id: 'industry_data_standards',
+                name: 'Set Industry Data Standards',
+                description: 'Establish data standards adopted across the industry',
+                difficulty: 13,
+                timeRequired: 55,
+                basePay: 7500,
+                skills: ['intelligence', 'charisma'],
+                xpReward: { intelligence: 95, charisma: 70 },
+                realWorld: 'You get 20 competing companies to agree on a data standard. It takes a year, but now everyone speaks your language.'
+            }
+        ]
     }
 };
 
