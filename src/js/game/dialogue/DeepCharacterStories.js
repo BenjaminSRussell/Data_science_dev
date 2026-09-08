@@ -5,6 +5,46 @@
  */
 
 export const CHARACTER_STORIES = {
+    agent_smith: {
+        personalStory: {
+            background: "Investigates financial crimes. Very thorough and by-the-book. Has never lost a case.",
+            motivation: "Justice. Order. Taxes.",
+            secret: "He collects rare stamps. It's the only time he allows himself to be passionate.",
+            dream: "A perfect audit rate.",
+            fear: "Chaos.",
+            relationship: "Married to the Tax Code.",
+            turningPoint: "Finding a penny error in a billion-dollar ledger that exposed a massive fraud.",
+            philosophy: "Death and Taxes. I handle the latter."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "Numbers don't lie. People do. My job is to find the discrepancy between the two."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "Society is a contract. Taxes are the dues. You don't pay, you're stealing from everyone."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "Stamps. Tiny squares of history. Perfectly perforated. Organized. I find them... soothing."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'dream',
+                dialogue: "The perfect system. Where every transaction is accounted for. No shadows. No leaks."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'respect',
+                dialogue: "You keep clean books. I respect that. In my line of work, that's rare."
+            }
+        ]
+    },
+
     professor_higgins: {
         personalStory: {
             background: "Grew up in a small farming town, first in his family to attend college. Worked three jobs to pay for his education. Lost his father to cancer when he was 20, which inspired him to use data science for medical research.",
