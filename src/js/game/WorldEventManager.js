@@ -47,6 +47,8 @@ export class WorldEventManager {
      * Daily check for events
      */
     processDay() {
+        const days = this.gameState?.timeManager?.totalDays || 0;
+
         // Remove expired modifiers
         const currentDay = this.gameState?.timeManager?.totalDays || 0;
         this.activeModifiers = this.activeModifiers.filter(m => m.expiry > currentDay);
