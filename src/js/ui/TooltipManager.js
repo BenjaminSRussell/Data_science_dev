@@ -51,6 +51,7 @@ export class TooltipManager {
         };
 
         // Auto-update position
+        let stopAutoUpdate = null;
         if (this.autoUpdate) {
             this.autoUpdate(element, tooltip, this.updatePosition.bind(this, element, tooltip, options));
         }
@@ -65,6 +66,10 @@ export class TooltipManager {
             element: tooltip,
             update: () => this.updatePosition(element, tooltip, options),
             destroy: () => {
+                if (stopAutoUpdate) {
+                    stopAutoUpdate();
+                    stopAutoUpdate = null;
+                }
                 element.removeEventListener('mouseenter', showTooltip);
                 element.removeEventListener('mouseleave', hideTooltip);
                 element.removeEventListener('focus', showTooltip);
