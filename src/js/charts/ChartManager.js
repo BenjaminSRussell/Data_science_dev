@@ -40,6 +40,13 @@ const PALETTES = {
     ]
 };
 
+/**
+ * Replace the alpha channel of an rgba() color string
+ */
+function setAlpha(color, alpha) {
+    return color.replace(/rgba\(([^,]+,\s*[^,]+,\s*[^,]+),\s*[\d.]+\)/, `rgba($1, ${alpha})`);
+}
+
 export class ChartManager {
     constructor(game) {
         this.game = game;
@@ -134,8 +141,8 @@ export class ChartManager {
                 datasets: [{
                     label: primaryKey,
                     data: values,
-                    backgroundColor: type === 'line' ? palette[0].replace('0.8', '0.2') : palette,
-                    borderColor: type === 'line' ? palette[0] : palette.map(c => c.replace('0.8', '1')),
+                    backgroundColor: type === 'line' ? setAlpha(palette[0], 0.2) : palette,
+                    borderColor: type === 'line' ? palette[0] : palette.map(c => setAlpha(c, 1)),
                     borderWidth: type === 'line' ? 3 : 1,
                     tension: 0.3,
                     fill: type === 'line' ? true : undefined,
