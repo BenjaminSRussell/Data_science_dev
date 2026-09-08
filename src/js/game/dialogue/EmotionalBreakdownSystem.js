@@ -106,6 +106,11 @@ export class EmotionalBreakdownSystem {
      * Trigger emotional breakdown
      */
     triggerBreakdown(npcId, triggerType) {
+        // Guard: don't stack a second breakdown on an NPC that already has one in progress
+        for (const existing of this.activeBreakdowns.values()) {
+            if (existing.npcId === npcId && !existing.resolved) return null;
+        }
+        
         const npc = this.gameState.npcManager?.getNPC(npcId);
         if (!npc) return null;
         
