@@ -2402,8 +2402,15 @@ this.gameState.ratingSum = store.ratingSum;m;
             return;
         }
 
-        // Deduct cost and show success
+        // Deduct cost and add the new staff member
         this.gameState.money -= cost;
+        if (!this.gameState.staff) {
+            this.gameState.staff = [];
+        }
+        this.gameState.staff.push({
+            role: role,
+            salary: { 'junior': 150, 'senior': 400, 'expert': 1000 }[role] || 0
+        });
         this.uiUpdater.updateAllUI();
         this.showToast(`Hired ${role} staff member!`, 'success');
     }
