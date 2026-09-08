@@ -1,31 +1,22 @@
-/**
- * RelationshipEmotionSystem.js
- * Deep emotional relationship system that reacts to all player actions
- */
-
-export class RelationshipEmotionSystem {
+class RelationshipEmotionSystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.relationshipHistory = {};
         this.emotionalStates = {};
+        this.relationshipHistory = {};
         this.breakupThresholds = {
-            ethics: -30,
-            neglect: -40,
-            money: -50,
-            betrayal: -60
+            ethics: -20,
+            affection: 20,
+            trust: 15
         };
     }
 
     /**
-     * Update relationship based on action
+     * Update relationship and emotional state based on player action
      */
     updateRelationship(npcId, action, context = {}) {
         const npc = this.gameState.npcManager?.getNPC(npcId);
-        if (!npc) return;
-
         const currentRel = this.gameState.npcManager?.getRelationship(npcId) || 0;
         const ethics = this.gameState.characterStats?.ethics || 0;
-        const relationship = this.getRelationshipState(npcId);
 
         // Track emotional state
         this.updateEmotionalState(npcId, action, context);
@@ -281,4 +272,3 @@ export class RelationshipEmotionSystem {
         });
     }
 }
-
