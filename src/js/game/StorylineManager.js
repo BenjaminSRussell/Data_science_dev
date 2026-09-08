@@ -181,6 +181,34 @@ export class StorylineManager {
             }
         }
 
+        // Endgame decisions
+        if (phase === 'endgame') {
+            const hasSellDecision = this.majorDecisions.some(d => d.decisionId === 'sell_company');
+            if (!hasSellDecision) {
+                decisions.push({
+                    id: 'sell_company',
+                    title: 'The Exit Strategy',
+                    description: 'A tech giant offers to buy your entire operation. It is enough money to retire on an island. But they will dismantle your brand.',
+                    context: 'You built this from nothing. Is this the end, or just payday?',
+                    phase: 'endgame',
+                    choices: {
+                        sell: {
+                            message: 'You sign the papers. The wire transfer hits. You are rich, but unemployed. Was it worth it?',
+                            consequences: { money: 1000000, reputation: 200 },
+                            progress: 100,
+                            storyImpact: 'You sold out. You won capitalism, but lost your baby.'
+                        },
+                        keep: {
+                            message: 'You tear up the contract. You are in this for the long haul. The tech giant vows to crush you.',
+                            consequences: { reputation: 500, ethics: 50 },
+                            progress: 100,
+                            storyImpact: 'You stood tall. You are a titan now, independent and feared.'
+                        }
+                    }
+                });
+            }
+        }
+
         // Mid game decisions
         if (phase === 'mid') {
             const hasWhistleblowerDecision = this.majorDecisions.some(d => d.decisionId === 'whistleblower');
@@ -315,34 +343,6 @@ export class StorylineManager {
                 newPhase,
                 arc: this.currentArc
             };
-        }
-
-        // Endgame decisions
-        if (phase === 'endgame') {
-            const hasSellDecision = this.majorDecisions.some(d => d.decisionId === 'sell_company');
-            if (!hasSellDecision) {
-                decisions.push({
-                    id: 'sell_company',
-                    title: 'The Exit Strategy',
-                    description: 'A tech giant offers to buy your entire operation. It is enough money to retire on an island. But they will dismantle your brand.',
-                    context: 'You built this from nothing. Is this the end, or just payday?',
-                    phase: 'endgame',
-                    choices: {
-                        sell: {
-                            message: 'You sign the papers. The wire transfer hits. You are rich, but unemployed. Was it worth it?',
-                            consequences: { money: 1000000, reputation: 200 },
-                            progress: 100,
-                            storyImpact: 'You sold out. You won capitalism, but lost your baby.'
-                        },
-                        keep: {
-                            message: 'You tear up the contract. You are in this for the long haul. The tech giant vows to crush you.',
-                            consequences: { reputation: 500, ethics: 50 },
-                            progress: 100,
-                            storyImpact: 'You stood tall. You are a titan now, independent and feared.'
-                        }
-                    }
-                });
-            }
         }
 
         return { phaseChanged: false };
