@@ -1,144 +1,99 @@
 /**
- * BankSystem - Handles savings, loans, and interest
+ * Bank System - Handles financial transactions and interest calculations
  */
 
-export class BankSystem {
-    constructor(gameState) {
-        this.gameState = gameState;
+/**
+ * Bank class for managing player finances
+ */
+export class Bank {
+    constructor() {
+        this.savings = 0;
+        this.loan = 0;
+        this.loanInterestRate = 0.10;
+    }
 
-        // Default bank state if not exists
-        if (!this.gameState.bank) {
-            this.gameState.bank = {
-                savings: 0,
-                loan: 0,
-                loanInterestRate: 0.10, // 10% weekly initial
-                savingsInterestRate: 0.005, // 0.5% weekly
-                creditScore: 500, // 300-850
-                transactionHistory: []
-            };
+    /**
+     * Process weekly interest on savings and loan
+     */
+    processWeeklyInterest() {
+        let savingsInterest = 0;
+        let loanInterest = 0;
+
+        if (this.savings > 0) {
+            savingsInterest = Math.floor(this.savings * this.loanInterestRate);
+            this.savings += savingsInterest;
         }
+
+        if (this.loan > 0) {
+            loanInterest = Math.ceil(this.loan * this.loanInterestRate);
+            this.loan += loanInterest;
+        }
+
+        return { savingsInterest, loanInterest };
     }
 
     /**
      * Deposit money into savings
      */
     deposit(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
-        if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-
-        this.gameState.money -= amount;
-        this.gameState.bank.savings += amount;
-        this.logTransaction('Deposit', amount);
-
-        return { success: true, message: `Deposited $${amount}`, newBalance: this.gameState.bank.savings };
+        if (amount > 0) {
+            this.savings += amount;
+            return true;
+        }
+        return false;
     }
 
     /**
      * Withdraw money from savings
      */
     withdraw(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-        if (this.gameState.bank.savings < amount) return { success: false, message: "Insufficient savings" };
-
-        this.gameState.bank.savings -= amount;
-        this.gameState.money += amount;
-        this.logTransaction('Withdrawal', -amount);
-
-        return { success: true, message: `Withdrew $${amount}`, newBalance: this.gameState.bank.savings };
+        if (amount > 0 && this.savings >= amount) {
+            this.savings -= amount;
+            return true;
+        }
+        return false;
     }
 
     /**
      * Take out a loan
      */
     takeLoan(amount) {
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-        const maxLoan = this.calculateMaxLoan();
-        if (amount > maxLoan) return { success: false, message: `Loan limit exceeded (Max: $${maxLoan})` };
-
-        this.gameState.bank.loan += amount;
-        this.gameState.money += amount;
-        this.logTransaction('Loan Taken', amount);
-
-        return { success: true, message: `Loan taken: $${amount}` };
+        if (amount > 0) {
+            this.loan += amount;
+            return true;
+        }
+        return false;
     }
 
     /**
      * Repay loan
      */
     repayLoan(amount) {
-        if (amount <= 0) return { success: false, message: "Invalid amount" };
-        if (!this.gameState.bank) return { success: false, message: "Bank system not initialized" };
-        if (this.gameState.money < amount) return { success: false, message: "Insufficient funds" };
-        if (this.gameState.bank.loan <= 0) return { success: false, message: "No active loan" };
-
-        const payment = Math.min(amount, this.gameState.bank.loan);
-        this.gameState.money -= payment;
-        this.gameState.bank.loan -= payment;
-        this.logTransaction('Loan Repayment', -payment);
-
-        return { success: true, message: `Repaid $${payment} of loan` };
+        if (amount > 0 && this.loan >= amount) {
+            this.loan -= amount;
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Calculate weekly interest
+     * Serialize for saving
      */
-    processWeeklyInterest() {
-        const results = {
-            savingsInterest: 0,
-            loanInterest: 0
+    toJSON() {
+        return {
+            savings: this.savings,
+            loan: this.loan,
+            loanInterestRate: this.loanInterestRate
         };
-
-        if (!this.gameState.bank) return results;
-
-        // Savings interest
-        if (this.gameState.bank.savings > 0) {
-            results.savingsInterest = Math.floor(this.gameState.bank.savings * this.gameState.bank.savingsInterestRate);
-            this.gameState.bank.savings += results.savingsInterest;
-        }
-
-        // Loan interest
-        if (this.gameState.bank.loan > 0) {
-            results.loanInterest = Math.ceil(this.gameState.bank.loan * this.gameState.bank.loanInterestRate);
-            this.gameState.bank.loan += results.loanInterest;
-        }
-
-        return results;
     }
 
     /**
-     * Calculate max loan based on reputation and credit score
+     * Load from saved data
      */
-    calculateMaxLoan() {
-        if (!this.gameState.bank) return 0;
-        
-        // Base $1000 + $100 per reputation point
-        const reputation = this.gameState.reputation || 0;
-        let limit = 1000 + (reputation * 100);
-
-        // Multiplier based on credit score (simplified)
-        const creditMultiplier = this.gameState.bank.creditScore / 500;
-
-        return Math.floor(limit * creditMultiplier);
-    }
-
-    logTransaction(type, amount) {
-        if (!this.gameState.bank) return;
-        if (!this.gameState.bank.transactionHistory) {
-            this.gameState.bank.transactionHistory = [];
-        }
-        
-        this.gameState.bank.transactionHistory.unshift({
-            date: new Date().toISOString(), // In-game date would be better if passed, using real time for now unique ID
-            type,
-            amount,
-            balance: this.gameState.bank.savings
-        });
-
-        // Keep history short
-        if (this.gameState.bank.transactionHistory.length > 20) {
-            this.gameState.bank.transactionHistory.pop();
-        }
+    fromJSON(data) {
+        if (!data) return;
+        this.savings = data.savings || 0;
+        this.loan = data.loan || 0;
+        this.loanInterestRate = data.loanInterestRate || 0.10;
     }
 }
