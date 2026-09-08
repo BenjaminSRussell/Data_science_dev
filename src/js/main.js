@@ -2780,6 +2780,11 @@ this.gameState.ratingSum = store.ratingSum;m;
                     }
                 }
 
+                // Heat decays slowly over time
+                if (this.crimeSystem) {
+                    this.crimeSystem.decayHeat();
+                }
+
                 this.showToast(`Paid weekly rent: -$${rent}`, 'warning');
                 this.audioManager.play('kaching'); // Or a sad sound?
 
