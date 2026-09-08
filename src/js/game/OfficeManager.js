@@ -1,14 +1,8 @@
-/**
- * OfficeManager - Handles office upgrades, equipment, and staff
- */
-
-import { EQUIPMENT, OFFICES, STAFF_TYPES, MARKETING_CHANNELS } from '../data/tycoonData.js';
-
-export class OfficeManager {
+class OfficeManager {
     constructor(gameState) {
         this.gameState = gameState;
 
-        // Equipment levels (index into EQUIPMENT[type].levels)
+        // Initial equipment levels
         this.equipmentLevels = {
             computer: 0,
             desk: 0,
@@ -303,6 +297,14 @@ export class OfficeManager {
                 
                 <div class="office-info">
                     <span class="office-name">${office.icon} ${office.name}</span>
+                </div>
+                
+                <div class="office-bonuses">
+                    <span>Speed: ${bonuses.speed}</span>
+                    <span>Comfort: ${bonuses.comfort}</span>
+                    <span>Clarity: ${bonuses.clarity}</span>
+                    <span>Stamina: ${bonuses.stamina}</span>
+                    <span>Capability: ${bonuses.capability}</span>
                 </div>
             </div>
         `;
