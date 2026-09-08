@@ -150,6 +150,14 @@ function createDashboard(data) {
             return { success: false, message: 'Project not found.' };
         }
 
+        // Check if a project is already in progress
+        if (this.currentProject) {
+            return {
+                success: false,
+                message: `You already have an active project (${this.currentProject.name}). Finish or cancel it before starting a new one.`
+            };
+        }
+
         // Check if player has required skills
         const intelligence = this.gameState.characterStats?.getStat('intelligence') || 0;
         if (intelligence < project.difficulty * 10) {
