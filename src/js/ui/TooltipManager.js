@@ -1,107 +1,45 @@
 /**
  * TooltipManager.js
- * Manages tooltips using Floating UI for smart positioning
- * Priority 2: Visual Enhancement
+ * Handles creation and management of tooltips
+ * Phase 1: Replaces old tooltip logic with more dynamic options
  */
 
 export class TooltipManager {
-    constructor() {
-        this.tooltips = new Map();
-        this.initialized = false;
+    constructor(autoUpdateFn = null) {
+        this.tooltips = new WeakMap();
+        this.autoUpdate = autoUpdateFn;
     }
 
     /**
-     * Initialize Floating UI
+     * Create a tooltip for an element
      */
-    async initialize() {
-        if (this.initialized) return;
-
-        try {
-            const { computePosition, autoUpdate, flip, shift, offset, arrow } = await import('@floating-ui/dom');
-            this.computePosition = computePosition;
-            this.autoUpdate = autoUpdate;
-            this.flip = flip;
-            this.shift = shift;
-            this.offset = offset;
-            this.arrow = arrow;
-            this.initialized = true;
-            return true;
-        } catch (error) {
-            console.warn('Floating UI not available:', error);
-            return false;
-        }
-    }
-
-    /**
-     * Create tooltip for element
-     */
-    async createTooltip(element, content, options = {}) {
-        if (!this.initialized) {
-            await this.initialize();
-            if (!this.initialized) {
-                // Fallback to simple tooltip
-                return this.createSimpleTooltip(element, content);
-            }
+    createTooltip(element, content, options = {}) {
+        const existingTooltip = this.tooltips.get(element);
+        if (existingTooltip) {
+            existingTooltip.destroy();
         }
 
-        const {
-            placement = 'top',
-            offset: offsetValue = 8,
-            showArrow = true,
-            className = 'floating-tooltip'
-        } = options;
-
-        // Create tooltip element
-        let tooltip = this.tooltips.get(element);
-        if (!tooltip) {
-            tooltip = document.createElement('div');
-            tooltip.className = className;
-            tooltip.style.cssText = `
-                position: absolute;
-                background: rgba(17, 24, 39, 0.95);
-                color: #f9fafb;
-                padding: 0.5rem 0.75rem;
-                border-radius: 0.5rem;
-                font-size: 0.875rem;
-                pointer-events: none;
-                z-index: 10000;
-                opacity: 0;
-                transition: opacity 0.2s;
-                max-width: 300px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            `;
-            document.body.appendChild(tooltip);
-            this.tooltips.set(element, tooltip);
-        }
-
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
         tooltip.textContent = content;
+        tooltip.style.cssText = `
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        `;
+        document.body.appendChild(tooltip);
 
-        // Position tooltip
-        const updatePosition = async () => {
-            if (!this.computePosition) return;
-
-            try {
-                const { x, y, placement: finalPlacement } = await this.computePosition(element, tooltip, {
-                    placement,
-                    middleware: [
-                        this.offset(offsetValue),
-                        this.flip(),
-                        this.shift({ padding: 5 })
-                    ]
-                });
-
-                tooltip.style.left = `${x}px`;
-                tooltip.style.top = `${y}px`;
-            } catch (error) {
-                console.warn('Tooltip positioning error:', error);
-            }
-        };
-
-        // Show tooltip on hover
         const showTooltip = async () => {
             tooltip.style.display = 'block';
-            await updatePosition();
+            await this.updatePosition(element, tooltip, options);
             tooltip.style.opacity = '1';
         };
 
@@ -114,7 +52,7 @@ export class TooltipManager {
 
         // Auto-update position
         if (this.autoUpdate) {
-            this.autoUpdate(element, tooltip, updatePosition);
+            this.autoUpdate(element, tooltip, this.updatePosition.bind(this, element, tooltip, options));
         }
 
         // Event listeners
@@ -123,9 +61,9 @@ export class TooltipManager {
         element.addEventListener('focus', showTooltip);
         element.addEventListener('blur', hideTooltip);
 
-        return {
+        this.tooltips.set(element, {
             element: tooltip,
-            update: updatePosition,
+            update: () => this.updatePosition(element, tooltip, options),
             destroy: () => {
                 element.removeEventListener('mouseenter', showTooltip);
                 element.removeEventListener('mouseleave', hideTooltip);
@@ -134,7 +72,33 @@ export class TooltipManager {
                 tooltip.remove();
                 this.tooltips.delete(element);
             }
-        };
+        });
+
+        return this.tooltips.get(element);
+    }
+
+    /**
+     * Update tooltip position
+     */
+    updatePosition(element, tooltip, options = {}) {
+        const rect = element.getBoundingClientRect();
+        const offset = options.offset || { x: 0, y: 10 };
+
+        let x = rect.left + offset.x;
+        let y = rect.bottom + offset.y;
+
+        if (options.position === 'right') {
+            x = rect.right + offset.x;
+            y = rect.top + rect.height / 2 - tooltip.offsetHeight / 2;
+        }
+
+        if (options.position === 'left') {
+            x = rect.left - tooltip.offsetWidth - offset.x;
+            y = rect.top + rect.height / 2 - tooltip.offsetHeight / 2;
+        }
+
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
     }
 
     /**
@@ -186,7 +150,7 @@ export class TooltipManager {
     removeTooltip(element) {
         const tooltip = this.tooltips.get(element);
         if (tooltip) {
-            tooltip.remove();
+            tooltip.destroy();
             this.tooltips.delete(element);
         }
     }
@@ -195,7 +159,7 @@ export class TooltipManager {
      * Cleanup all tooltips
      */
     cleanup() {
-        this.tooltips.forEach(tooltip => tooltip.remove());
+        this.tooltips.forEach(tooltip => tooltip.destroy());
         this.tooltips.clear();
     }
 }
