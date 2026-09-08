@@ -1,6 +1,7 @@
 class OfficeManager {
     constructor(gameState) {
         this.gameState = gameState;
+this.gameStore = gameStore;
 
         // Initial equipment levels
         this.equipmentLevels = {
