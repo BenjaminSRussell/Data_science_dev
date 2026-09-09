@@ -2271,6 +2271,14 @@ export class MainGame {
         `;
 
         this.showModal(modalContent);
+
+        // Wire up the Music toggle to AudioManager.toggleMusic()
+        const musicToggle = document.getElementById('settings-music');
+        if (musicToggle) {
+            musicToggle.addEventListener('change', () => {
+                this.audioManager.toggleMusic();
+            });
+        }
     }
 
     /**
