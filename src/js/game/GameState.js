@@ -46,7 +46,7 @@ export class GameState {
 
         // Current state
         this.currentTask = null;
-        this.currentLocation = 'apartment'; // Start at apartment
+        this.currentLocation = 'home'; // Start at home
         this.bank = null; // Bank state (savings/loan)
 
         // Unlocked content
