@@ -2271,6 +2271,23 @@ export class MainGame {
         `;
 
         this.showModal(modalContent);
+
+        // Wire up change listeners for sound/music toggles
+        document.getElementById('settings-sound')?.addEventListener('change', () => {
+            this.audioManager.toggleSound();
+            const btn = document.getElementById('btn-sound');
+            if (btn) {
+                btn.textContent = this.audioManager.soundEnabled ? 'SOUND: ON' : 'SOUND: OFF';
+            }
+        });
+
+        document.getElementById('settings-music')?.addEventListener('change', () => {
+            this.audioManager.toggleMusic();
+            const radioBtn = document.getElementById('btn-music-radio');
+            if (radioBtn) {
+                radioBtn.textContent = this.audioManager.musicEnabled ? 'MUSIC: ON' : 'MUSIC: OFF';
+            }
+        });
     }
 
     /**
