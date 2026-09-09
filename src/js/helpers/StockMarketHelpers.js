@@ -293,13 +293,27 @@ export function handleCrime(game, type, params) {
  * Handle arrest when caught committing crime
  */
 export function handleArrest(game, reason) {
-    game.gameState.jailSentence = 30;
+    // Lawyer tier (LegalSystem.hireLawyer) mitigates the penalty:
+    // cheap: 20% reduction, average: 40%, expensive: 60%
+    const lawyerTier = game.gameState.legalSystem?.lawyer || null;
+    const reduction = { cheap: 0.2, average: 0.4, expensive: 0.6 }[lawyerTier] || 0;
+
+    const baseSentence = 30;
+    const baseFine = 5000;
+    const sentence = Math.max(1, Math.floor(baseSentence * (1 - reduction)));
+    const fine = Math.floor(baseFine * (1 - reduction));
+
+    game.gameState.jailSentence = sentence;
     game.screenManager.showScreen('screen-jail');
     document.getElementById('jail-time-left').textContent = `${game.gameState.jailSentence} days`;
 
-    game.gameState.reputation = Math.floor(game.gameState.reputation / 2);
-    game.gameState.money -= 5000;
-    game.showToast("You've been arrested! Reputation halved.", 'error');
+    game.gameState.reputation = Math.floor(game.gameState.reputation * (1 - reduction));
+    game.gameState.money -= fine;
+
+    const lawyerNote = lawyerTier
+        ? ` Your lawyer negotiated a ${Math.round(reduction * 100)}% reduction.`
+        : '';
+    game.showToast(`You've been arrested! ${sentence} days in jail, $${fine} fine.${lawyerNote}`, 'error');
     game.audioManager.play('error');
 }
 
