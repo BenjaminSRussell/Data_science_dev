@@ -23,13 +23,9 @@ void GameState::addReputation(int amount) { reputation += amount; }
 int GameState::getRankIndex() const { return rankIndex; }
 
 void GameState::setRankIndex(int index) {
-  if (index >= 0 && index <= MAX_RANK) {
+  if (index >= 0 && index <= Economy::MAX_RANK) {
     rankIndex = index;
   }
-}
-
-bool GameState::canPromote(int requiredRep) const {
-  return reputation >= requiredRep && rankIndex < MAX_RANK;
 }
 
 // Task tracking
