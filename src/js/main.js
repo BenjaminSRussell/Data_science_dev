@@ -958,12 +958,12 @@ export class MainGame {
                 if (locationEl && !locationEl.classList.contains('locked')) {
                     this.handleTravel(locationEl.dataset.location);
                 } else if (locationEl && locationEl.classList.contains('locked')) {
-                    // Show requirement info?
+                    // Show requirement info
                     const locId = locationEl.dataset.location;
-                    const loc = this.worldMap?.getAccessibleLocations().find(l => l.id === locId);
-                    if (!loc && this.worldMap) {
-                        // Find why it's locked from full list
-                        // For now just generic message
+                    const loc = this.worldMap?.getLocation(locId);
+                    if (loc && loc.unlockRequirement) {
+                        this.showError(`This location is locked. ${this._formatUnlockRequirement(loc.unlockRequirement)}`);
+                    } else {
                         this.showError("This location is locked.");
                     }
                 }
