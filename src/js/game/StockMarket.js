@@ -400,6 +400,7 @@ export class StockMarket {
         // Apply change
         const oldPrice = stock.price;
         stock.price = stock.price * magnitude;
+        if (stock.price < 0.01) stock.price = 0.01;
         stock.history.push(stock.price);
 
         // Add volatility
