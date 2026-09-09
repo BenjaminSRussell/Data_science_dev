@@ -8,7 +8,6 @@ export class ResearchPaperNotificationSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.inbox = [];
-        this.readPapers = new Set();
         this.papers = this.initializeResearchPapers();
         this.scheduledPapers = this.schedulePapers();
     }
@@ -367,7 +366,6 @@ export class ResearchPaperNotificationSystem {
         const notification = this.inbox.find(item => item.id === notificationId);
         if (notification) {
             notification.read = true;
-            this.readPapers.add(notification.paperId);
         }
     }
     
@@ -398,7 +396,6 @@ export class ResearchPaperNotificationSystem {
     toJSON() {
         return {
             inbox: this.inbox,
-            readPapers: Array.from(this.readPapers),
             papers: Object.fromEntries(
                 Object.entries(this.papers).map(([id, paper]) => [id, { unlocked: paper.unlocked }])
             )
@@ -410,7 +407,6 @@ export class ResearchPaperNotificationSystem {
      */
     fromJSON(data) {
         if (data.inbox) this.inbox = data.inbox;
-        if (data.readPapers) this.readPapers = new Set(data.readPapers);
         if (data.papers) {
             Object.entries(data.papers).forEach(([id, state]) => {
                 if (this.papers[id]) {
