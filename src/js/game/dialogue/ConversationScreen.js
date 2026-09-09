@@ -229,7 +229,9 @@ export class ConversationScreen {
             this.game.showToast?.(`Relationship ${change}${effects.relationship}`, 'info');
         }
         if (effects.xp) {
-            this.game.showToast(`Gained ${effects.xp} XP`, 'success');
+            const amount = effects.xpAmount || 20;
+            const skillName = this.game.gameState?.characterStats?.skills?.[effects.xp]?.name;
+            this.game.showToast(`Gained ${amount} XP${skillName ? ` in ${skillName}` : ''}`, 'success');
         }
     }
 
