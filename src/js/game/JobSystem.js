@@ -270,8 +270,9 @@ export class JobSystem {
         const task = this.findTask(taskId);
         if (!task) return null;
 
-        // Calculate pay based on quality
-        const pay = Math.floor(task.basePay * quality);
+        // Calculate pay based on quality, boosted by charisma (clientPay bonus)
+        const clientPayBonus = 1 + ((this.gameState.characterStats?.getTotalBonuses()?.clientPay || 0) / 100);
+        const pay = Math.floor(task.basePay * quality * clientPayBonus);
         
         // Apply XP rewards
         if (task.xpReward) {
