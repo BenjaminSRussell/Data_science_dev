@@ -51,11 +51,14 @@
             <div class="top-bar-left">
                 <span class="text-ui-heading" style="font-size: 1.2rem; margin: 0;">[ DATA SCIENCE TYCOON ]</span>
             </div>
-            <div class="top-bar-center" style="display: flex; gap: 1rem;">
+            <div class="top-bar-center" style="display: flex; gap: 1rem;" aria-live="polite" aria-atomic="false">
                 <div id="stat-money" style="color: #66cc66;">$ <span id="money-value">0</span></div>
                 <div id="stat-reputation" style="color: #66ccff;">REP: <span id="reputation-value">0</span></div>
                 <div id="stat-rank" style="color: #cca300;">RANK: <span id="rank-value">Data Entry Clerk</span></div>
             </div>
+            <!-- Visually hidden assertive region: rank promotions are significant milestones and get a dedicated, immediate announcement -->
+            <div id="rank-announcement" aria-live="assertive"
+                style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;"></div>
             <div class="top-bar-right" style="display: flex; gap: 0.5rem; position: relative;">
                 <button class="btn-grey" id="btn-research-inbox" title="Inbox">INBOX <span
                         id="inbox-unread-badge"></span></button>
