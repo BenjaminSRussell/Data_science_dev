@@ -10,6 +10,7 @@ export class CharacterArcSystem {
         this.arcHistory = [];
         this.startingState = null;
         this.currentState = null;
+        this.lastLoggedState = null;
     }
 
     /**
@@ -135,12 +136,19 @@ export class CharacterArcSystem {
     trackArcProgression() {
         if (!this.startingState) return;
 
+        // Measure deltas against the last logged milestone (or the starting
+        // state before the first one) rather than the fixed starting state.
+        // Otherwise, once any threshold is crossed (e.g. rank increases once),
+        // isSignificantChange() stays true forever and every updateCurrentState()
+        // call pushes a near-duplicate entry.
+        const baseline = this.lastLoggedState || this.startingState;
+
         const changes = {
-            ethics: this.currentState.ethics - this.startingState.ethics,
-            reputation: this.currentState.reputation - this.startingState.reputation,
-            rank: this.currentState.rank - this.startingState.rank,
-            money: this.currentState.money - this.startingState.money,
-            relationships: this.currentState.relationships - this.startingState.relationships
+            ethics: this.currentState.ethics - baseline.ethics,
+            reputation: this.currentState.reputation - baseline.reputation,
+            rank: this.currentState.rank - baseline.rank,
+            money: this.currentState.money - baseline.money,
+            relationships: this.currentState.relationships - baseline.relationships
         };
 
         // Determine arc direction
@@ -155,6 +163,8 @@ export class CharacterArcSystem {
                 changes,
                 direction: arcDirection
             });
+            // Reset the baseline so the next milestone is measured from here.
+            this.lastLoggedState = { ...this.currentState };
         }
     }
 
