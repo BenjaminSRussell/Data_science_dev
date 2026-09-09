@@ -21,7 +21,6 @@ export class IDESystem {
                 name: 'Simple Automation Script',
                 description: 'Write a Python script to automate data entry',
                 difficulty: 2,
-                timeRequired: 4,
                 basePay: 200,
                 skills: ['intelligence'],
                 language: 'python',
@@ -32,16 +31,12 @@ export class IDESystem {
     """
     # Your code here
     pass`,
-                tests: [
-                    { input: 'test_data.csv', expected: 'processed_data.csv' }
-                ]
             },
             {
                 id: 'data_cleaner',
                 name: 'Data Cleaning Tool',
                 description: 'Build a tool to clean messy datasets',
                 difficulty: 4,
-                timeRequired: 8,
                 basePay: 500,
                 skills: ['intelligence', 'analytics'],
                 language: 'python',
@@ -53,16 +48,12 @@ def clean_data(df):
     # Handle missing values
     # Your code here
     return df`,
-                tests: [
-                    { input: 'messy_data.csv', expected: 'clean_data.csv' }
-                ]
             },
             {
                 id: 'web_scraper',
                 name: 'Web Scraper',
                 description: 'Scrape data from websites (ethically)',
                 difficulty: 5,
-                timeRequired: 10,
                 basePay: 800,
                 skills: ['intelligence'],
                 language: 'python',
@@ -73,16 +64,12 @@ def scrape_website(url):
     # Your code here
     # Remember: respect robots.txt and rate limits
     pass`,
-                tests: [
-                    { input: 'https://example.com', expected: 'scraped_data.json' }
-                ]
             },
             {
                 id: 'api_integration',
                 name: 'API Integration',
                 description: 'Integrate with third-party APIs',
                 difficulty: 6,
-                timeRequired: 12,
                 basePay: 1200,
                 skills: ['intelligence', 'analytics'],
                 language: 'python',
@@ -94,16 +81,12 @@ def integrate_api(api_key):
     # Make API calls
     # Process responses
     pass`,
-                tests: [
-                    { input: 'api_key', expected: 'integrated_data.json' }
-                ]
             },
             {
                 id: 'ml_model',
                 name: 'Machine Learning Model',
                 description: 'Build a predictive ML model',
                 difficulty: 9,
-                timeRequired: 20,
                 basePay: 2500,
                 skills: ['intelligence', 'analytics'],
                 language: 'python',
@@ -116,16 +99,12 @@ def build_model(X, y):
     # Evaluate performance
     # Your code here
     pass`,
-                tests: [
-                    { input: 'training_data.csv', expected: 'model_accuracy > 0.8' }
-                ]
             },
             {
                 id: 'dashboard',
                 name: 'Data Dashboard',
                 description: 'Create an interactive data visualization dashboard',
                 difficulty: 7,
-                timeRequired: 16,
                 basePay: 1800,
                 skills: ['intelligence', 'analytics'],
                 language: 'javascript',
@@ -134,9 +113,6 @@ function createDashboard(data) {
     // Use Chart.js or D3.js
     // Your code here
 }`,
-                tests: [
-                    { input: 'data.json', expected: 'dashboard.html' }
-                ]
             }
         ];
     }
