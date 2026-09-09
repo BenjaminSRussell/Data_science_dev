@@ -204,24 +204,20 @@ export class EmotionalBreakdownSystem {
                 anger: [
                     "How could you?!",
                     "I trusted you!",
-                    "This is unacceptable!"
-                ],
-                rejection: [
+                    "This is unacceptable!",
                     "After everything?!",
                     "You're just like everyone else!",
                     "I should have known better!"
                 ]
             },
             fighting: {
-                betrayal: [
-                    "We're done.",
-                    "I can't believe I trusted you.",
-                    "Don't talk to me."
-                ],
                 rage: [
                     "Get away from me.",
                     "I don't want to see you right now.",
-                    "Leave me alone."
+                    "Leave me alone.",
+                    "We're done.",
+                    "I can't believe I trusted you.",
+                    "Don't talk to me."
                 ]
             }
         };
@@ -380,21 +376,21 @@ export class EmotionalBreakdownSystem {
                 hurt: 10,
                 breakdown: 15,
                 anger: 8,
-                betrayal: 5,
+                rage: 5,
                 jealousy: 12
             },
             neutral: {
                 hurt: 2,
                 breakdown: 3,
                 anger: -2,
-                betrayal: -5,
+                rage: -5,
                 jealousy: 0
             },
             negative: {
                 hurt: -10,
                 breakdown: -15,
                 anger: -20,
-                betrayal: -25,
+                rage: -25,
                 jealousy: -8
             }
         };
