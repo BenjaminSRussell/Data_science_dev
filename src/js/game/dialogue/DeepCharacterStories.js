@@ -549,6 +549,46 @@ export const CHARACTER_STORIES = {
                 dialogue: "Nature doesn't rush, yet everything gets done. We should learn from that. Slow down. Breathe. Grow. At your own pace. That's the secret to peace."
             }
         ]
+    },
+
+    bob_bagel: {
+        personalStory: {
+            background: "Grew up in Brooklyn, learned bagel-making from his grandfather. Moved to this town 20 years ago and opened his own shop. Has been perfecting his craft ever since.",
+            motivation: "Wants to prove that a small, local shop can stand up to the big chains. Believes in doing things the right way, no shortcuts.",
+            secret: "He filters the local tap water himself, but lets the 'imported NYC water' myth stand because it sells. He's never told anyone the truth.",
+            dream: "That one day a New Yorker will cry at the taste of his bagels. Not from sadness, but from pure joy.",
+            fear: "That the chain store on 5th will buy him out and take over his shop. He's been fighting them for years.",
+            relationship: "Lives alone. His grandfather raised him and taught him everything. He's close with a few regulars, but keeps most people at arm's length.",
+            turningPoint: "When he beat the chain store in the 'Bagel Wars' and proved his bagels were better. That's when he knew he was doing something right.",
+            philosophy: "A bagel is a promise. You make it, you keep it. No shortcuts. No exceptions."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "You call that a bagel? I've been making these for 20 years. You don't get to judge my craft."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "A bagel is a promise. You make it, you keep it. No shortcuts. No exceptions. That's the only way."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "The water... it's not from New York. I filter it myself. Local tap. But the myth sells. I let it stand."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'turningPoint',
+                dialogue: "That chain store on 5th... they kept circling. But I beat them. The 'Bagel Wars.' I proved my bagels were better. That's when I knew I was doing something right."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'dream',
+                dialogue: "I dream one day a New Yorker will cry at the taste. Not from sadness. From joy. That's when I'll know I did it right."
+            }
+        ]
     }
 };
 
