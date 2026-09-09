@@ -1378,6 +1378,9 @@ export class NPCManager {
             if (this.gameState.romanceSystem?.relationshipStatus === 'dating' && this.gameState.romanceSystem?.relationshipScore > 80) {
                 choices.push({ text: "I have a question... (Propose)", action: 'date_propose', effect: { relationship: 0 } });
             }
+            if (this.gameState.romanceSystem?.relationshipStatus === 'engaged') {
+                choices.push({ text: "Let's get married! ($20,000)", action: 'date_marry', effect: { relationship: 0 } });
+            }
         }
 
         return {
@@ -1507,6 +1510,10 @@ export class NPCManager {
             if (this.gameState.romanceSystem?.relationshipStatus === 'dating' && this.gameState.romanceSystem?.relationshipScore > 80) {
                 choices.push({ text: "I have a question... (Propose)", action: 'date_propose', effect: { relationship: 0 } });
             }
+            // Marry logic
+            if (this.gameState.romanceSystem?.relationshipStatus === 'engaged') {
+                choices.push({ text: "Let's get married! ($20,000)", action: 'date_marry', effect: { relationship: 0 } });
+            }
         }
 
         const choice = choices[choiceIndex];
@@ -1529,6 +1536,8 @@ export class NPCManager {
             let result;
             if (choice.action === 'date_propose') {
                 result = this.gameState.romanceSystem?.propose();
+            } else if (choice.action === 'date_marry') {
+                result = this.gameState.romanceSystem?.getMarried();
             } else {
                 const type = choice.action.replace('date_', '');
                 result = this.gameState.romanceSystem?.goOnDate(type);
