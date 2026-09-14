@@ -19,10 +19,13 @@ public:
   double getSalaryMultiplier(int rankIndex);
 
   // Check if promotion is available
-  bool canPromote(int reputation, int currentRank);
+  bool canPromote(int reputation, int currentRank) const;
 
   // Get required reputation for rank
-  int getRequiredReputation(int rankIndex);
+  int getRequiredReputation(int rankIndex) const;
+
+  // Highest rank index (shared with GameState)
+  static const int MAX_RANK = 6;
 
 private:
   // Rank thresholds
