@@ -395,7 +395,7 @@ export class ContractSystem {
         let bonuses = [];
         
         // Check bonus conditions
-        contract.bonusConditions.forEach(condition => {
+        (contract.bonusConditions || []).forEach(condition => {
             if (this.checkBonusCondition(condition)) {
                 const bonus = pay * condition.multiplier;
                 pay += bonus;
@@ -490,9 +490,22 @@ export class ContractSystem {
      */
     fromJSON(data) {
         if (!data) return;
-        this.activeContracts = data.activeContracts || [];
-        this.completedContracts = data.completedContracts || [];
-        this.availableContracts = data.availableContracts || [];
+        this.activeContracts = (data.activeContracts || []).map(c => this.normalizeContract(c));
+        this.completedContracts = (data.completedContracts || []).map(c => this.normalizeContract(c));
+        this.availableContracts = (data.availableContracts || []).map(c => this.normalizeContract(c));
+    }
+    
+    /**
+     * Normalize a contract restored from save data, filling in fields that
+     * older or corrupted saves may be missing so downstream code can assume
+     * a well-formed shape.
+     */
+    normalizeContract(contract) {
+        if (!contract || typeof contract !== 'object') return contract;
+        if (!Array.isArray(contract.bonusConditions)) {
+            contract.bonusConditions = [];
+        }
+        return contract;
     }
 }
 
