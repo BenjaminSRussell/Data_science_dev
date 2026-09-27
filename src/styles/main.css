@@ -1930,7 +1930,7 @@ a:hover {
         min-height: clamp(56px, 9vw, 72px);
     }
 
-    .btn-icon {
+    button .btn-icon {
         font-size: clamp(1.25rem, 3.2vw, 1.75rem);
         width: clamp(1.25rem, 3.2vw, 1.75rem);
         height: clamp(1.25rem, 3.2vw, 1.75rem);
