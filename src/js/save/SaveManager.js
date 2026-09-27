@@ -162,6 +162,11 @@ export class SaveManager {
      * @returns {string|null} Base64 encoded save data
      */
     exportSave(slotIndex = 0) {
+        if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
+            console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
+            return null;
+        }
+
         const saveKey = SAVE_KEY_PREFIX + slotIndex;
         const saveData = localStorage.getItem(saveKey);
         if (!saveData) return null;
@@ -178,6 +183,11 @@ export class SaveManager {
      */
     importSave(encodedData, gameState, slotIndex = 0) {
         try {
+            if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
+                console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
+                return false;
+            }
+
             const saveData = atob(encodedData);
             const parsed = JSON.parse(saveData);
 
