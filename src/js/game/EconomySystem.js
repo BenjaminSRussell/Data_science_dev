@@ -313,7 +313,7 @@ export class EconomySystem {
         let dailyCost = 0;
 
         // Food expenses: $15-50/day based on lifestyle/location
-        const foodBase = this.gameState.currentLocation === 'apartment' ? 15 : 25;
+        const foodBase = this.gameState.currentLocation === 'home' ? 15 : 25;
         const foodCost = foodBase + Math.floor(Math.random() * (foodBase * 2));
         dailyCost += foodCost;
 
