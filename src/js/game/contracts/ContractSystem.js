@@ -343,7 +343,7 @@ export class ContractSystem {
         // Check stats
         if (contract.requirements.stats) {
             for (const [stat, value] of Object.entries(contract.requirements.stats)) {
-                const playerStat = this.gameState.characterStats?.getStat(stat) || 0;
+                const playerStat = this.gameState.characterStats?.getStat?.(stat) || 0;
                 if (playerStat < value) {
                     return { success: false, reason: `Insufficient ${stat} (need ${value}, have ${playerStat})` };
                 }
