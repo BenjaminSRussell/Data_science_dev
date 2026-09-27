@@ -2103,6 +2103,8 @@ export class MainGame {
                     this.showToast(`PROMOTED to ${newRank.title}!`, 'success');
                     this.audioManager.play('success');
                     this.uiUpdater.updateAllUI();
+                    // Announce the promotion milestone to assistive technology
+                    this.uiUpdater.announceRankPromotion(newRank);
 
                     // Check for story beats (promotion)
                     if (this.storyBeatsSystem) {

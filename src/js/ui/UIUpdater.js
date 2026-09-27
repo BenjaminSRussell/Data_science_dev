@@ -446,6 +446,22 @@ export class UIUpdater {
     }
 
     /**
+     * Announce a rank promotion to assistive technology.
+     * Rank promotions are significant progression milestones, so they get a
+     * dedicated assertive live region (separate from the polite top-bar region
+     * that handles routine money/reputation ticks).
+     */
+    announceRankPromotion(rank) {
+        const el = document.getElementById('rank-announcement');
+        if (!el || !rank) return;
+        // Clear first so repeated promotions of the same rank are re-announced
+        el.textContent = '';
+        setTimeout(() => {
+            el.textContent = `Promoted to ${rank.title}. Salary now ${rank.salaryMultiplier}x.`;
+        }, 50);
+    }
+
+    /**
      * Show promotion animation
      */
     showPromotionAnimation(rank) {
