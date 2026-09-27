@@ -379,13 +379,6 @@ export class ResearchPaperNotificationSystem {
     }
     
     /**
-     * Get papers by phase
-     */
-    getPapersByPhase(phase) {
-        return Object.values(this.papers).filter(paper => paper.phase === phase && paper.unlocked);
-    }
-    
-    /**
      * Get breakthrough papers
      */
     getBreakthroughPapers() {
