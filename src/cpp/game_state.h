@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "economy.h"
+
 /**
  * GameState - Core game state management in C++
  * High-performance state management for WASM
@@ -26,7 +28,6 @@ public:
   // Rank management
   int getRankIndex() const;
   void setRankIndex(int index);
-  bool canPromote(int requiredRep) const;
 
   // Task tracking
   int getTasksCompleted() const;
@@ -54,7 +55,6 @@ private:
   int totalEarned;
 
   // Configuration
-  static const int MAX_RANK = 6;
   static const int INITIAL_MONEY = 100;
 };
 
