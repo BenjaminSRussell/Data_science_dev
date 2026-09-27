@@ -145,7 +145,7 @@ export class ChartManager {
                     pointHoverRadius: type === 'line' ? 7 : undefined
                 }]
             },
-            options: this.buildChartOptions(config, type)
+            options: this.buildChartOptions(config, type, primaryKey)
         };
     }
 
@@ -170,8 +170,20 @@ export class ChartManager {
     /**
      * Build chart options
      */
-    buildChartOptions(config, chartType) {
+    buildChartOptions(config, chartType, datasetName) {
         const isPolar = ['pie', 'doughnut', 'polarArea', 'radar'].includes(chartType);
+
+        // Only format y-axis ticks as currency when the plotted series is a
+        // currency metric (same heuristic used for the data table)
+        const columnName = (datasetName || '').toLowerCase();
+        const isCurrency = columnName.includes('revenue') ||
+                           columnName.includes('expense') ||
+                           columnName.includes('profit') ||
+                           columnName.includes('money') ||
+                           columnName.includes('cost') ||
+                           columnName.includes('price') ||
+                           columnName.includes('salary') ||
+                           columnName.includes('budget');
 
         return {
             responsive: true,
@@ -227,7 +239,10 @@ export class ChartManager {
                         color: '#9ca3af',
                         callback: function (value) {
                             if (value >= 1000) {
-                                return '$' + (value / 1000).toFixed(0) + 'k';
+                                if (isCurrency) {
+                                    return '$' + (value / 1000).toFixed(0) + 'k';
+                                }
+                                return (value / 1000).toFixed(0) + 'k';
                             }
                             return value;
                         }
