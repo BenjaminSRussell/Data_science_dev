@@ -235,10 +235,11 @@ export class GameEndingSystem {
     checkEducationCompletion() {
         if (this.gameState.educationSystem) {
             const completedCourses = this.gameState.educationSystem?.completedCourses || [];
-            const degrees = this.gameState.educationSystem?.degrees || [];
-            const allDegrees = degrees.every(d => d.acquired);
+            const degrees = this.gameState.educationSystem?.degrees || {};
+            const allDegrees = Object.values(degrees).every(d => d.acquired);
+            const totalCourses = Object.keys(this.gameState.educationSystem?.courses || {}).length;
             
-            if (completedCourses.length >= 10 && allDegrees) {
+            if (completedCourses.length >= totalCourses && allDegrees) {
                 return {
                     type: 'education_master',
                     title: 'Education Master',
