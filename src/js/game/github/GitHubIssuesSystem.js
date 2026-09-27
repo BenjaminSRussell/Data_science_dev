@@ -149,6 +149,21 @@ export class GitHubIssuesSystem {
     }
     
     /**
+     * Map an issue difficulty label to the intelligence required to take it on.
+     * Mirrors IDESystem.startProject(), which gates on `difficulty * 10` intelligence.
+     */
+    getRequiredIntelligence(difficulty) {
+        const difficultyToIntelligence = {
+            easy: 10,
+            medium: 20,
+            hard: 30,
+            very_hard: 40,
+            extreme: 50
+        };
+        return difficultyToIntelligence[difficulty] || 0;
+    }
+    
+    /**
      * Assign issue to player
      */
     assignIssue(issueId) {
@@ -159,6 +174,16 @@ export class GitHubIssuesSystem {
         
         if (issue.assignee) {
             return { success: false, message: 'Issue already assigned' };
+        }
+        
+        // Check if player has the intelligence to take on this issue's difficulty
+        const intelligence = this.gameState.characterStats?.getStat('intelligence') || 0;
+        const requiredIntelligence = this.getRequiredIntelligence(issue.difficulty);
+        if (intelligence < requiredIntelligence) {
+            return {
+                success: false,
+                message: `You need more intelligence (${requiredIntelligence} required).`
+            };
         }
         
         issue.assignee = 'player';
