@@ -27,13 +27,22 @@ EMSCRIPTEN_BINDINGS(DataScienceTycoon) {
         .constructor<>()
         .function("getMoney", &GameState::getMoney)
         .function("setMoney", &GameState::setMoney)
+        .function("addMoney", &GameState::addMoney)
         .function("getReputation", &GameState::getReputation)
         .function("setReputation", &GameState::setReputation)
+        .function("addReputation", &GameState::addReputation)
         .function("getRankIndex", &GameState::getRankIndex)
         .function("setRankIndex", &GameState::setRankIndex)
+        .function("canPromote", &GameState::canPromote)
         .function("getTasksCompleted", &GameState::getTasksCompleted)
         .function("incrementTasksCompleted", &GameState::incrementTasksCompleted)
-        .function("reset", &GameState::reset);
+        .function("getPerfectScores", &GameState::getPerfectScores)
+        .function("incrementPerfectScores", &GameState::incrementPerfectScores)
+        .function("getTotalEarned", &GameState::getTotalEarned)
+        .function("addToTotalEarned", &GameState::addToTotalEarned)
+        .function("reset", &GameState::reset)
+        .function("toJSON", &GameState::toJSON)
+        .function("fromJSON", &GameState::fromJSON);
     
     // DataGenerator class
     class_<DataGenerator>("DataGenerator")
@@ -41,6 +50,8 @@ EMSCRIPTEN_BINDINGS(DataScienceTycoon) {
         .function("generateQuarterlySales", &DataGenerator::generateQuarterlySalesJSON)
         .function("generateMonthlyRevenue", &DataGenerator::generateMonthlyRevenueJSON)
         .function("generateProductComparison", &DataGenerator::generateProductComparisonJSON)
+        .function("generateCategoryBreakdown", &DataGenerator::generateCategoryBreakdownJSON)
+        .function("generateTrendAnalysis", &DataGenerator::generateTrendAnalysisJSON)
         .function("generateRandomData", &DataGenerator::generateRandomDataJSON);
     
     // Scorer class
@@ -54,7 +65,9 @@ EMSCRIPTEN_BINDINGS(DataScienceTycoon) {
         .constructor<>()
         .function("calculateReward", &Economy::calculateReward)
         .function("calculateReputation", &Economy::calculateReputation)
-        .function("getSalaryMultiplier", &Economy::getSalaryMultiplier);
+        .function("getSalaryMultiplier", &Economy::getSalaryMultiplier)
+        .function("canPromote", &Economy::canPromote)
+        .function("getRequiredReputation", &Economy::getRequiredReputation);
     
     // Utility functions
     function("getVersion", &getVersion);
