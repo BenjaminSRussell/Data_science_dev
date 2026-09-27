@@ -8,7 +8,6 @@ export class WorkInteractionSystem {
         this.gameState = gameState;
         this.coworkers = this.generateCoworkers();
         this.boss = this.generateBoss();
-        this.workplaceTension = 0; // 0-100, affects relationships
     }
 
     /**
