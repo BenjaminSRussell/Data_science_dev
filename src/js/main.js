@@ -2262,6 +2262,14 @@ export class MainGame {
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
+                    <div class="option-group">
+                        <label>Music Volume</label>
+                        <input type="range" id="settings-music-volume" min="0" max="100" value="${Math.round(this.audioManager.musicVolume * 100)}" oninput="game.audioManager.setMusicVolume(this.value / 100)">
+                    </div>
+                    <div class="option-group">
+                        <label>Sound Effects Volume</label>
+                        <input type="range" id="settings-sound-volume" min="0" max="100" value="${Math.round(this.audioManager.soundVolume * 100)}" oninput="game.audioManager.setSoundVolume(this.value / 100)">
+                    </div>
                 </div>
                 <div class="settings-danger">
                     <button class="btn btn-danger" onclick="game.resetProgress()">Reset Progress</button>
