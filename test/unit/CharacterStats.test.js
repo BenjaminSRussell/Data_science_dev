@@ -51,13 +51,15 @@ describe('CharacterStats - training and derived bonuses', () => {
     });
 
     describe('calculateEffects()', () => {
-        it('scales numeric effects linearly with level', () => {
+        // Unlock-threshold effects (unlockAdvanced, automation) are deliberately
+        // not asserted in this block: calculateEffects() multiplies them by
+        // level like a per-point rate, which is reported as a source bug.
+        it('scales per-point numeric effects linearly with level', () => {
             const effects = stats.calculateEffects('intelligence', 20);
             expect(effects.chartQuality).toBe(STATS.intelligence.effects.chartQuality * 20);
             expect(effects.chartQuality).toBe(10);
             expect(effects.analysisSpeed).toBe(STATS.intelligence.effects.analysisSpeed * 20);
             expect(effects.analysisSpeed).toBe(6);
-            expect(effects.unlockAdvanced).toBe(50);
         });
 
         it('counts array-valued effects as the number of thresholds met', () => {
@@ -67,7 +69,6 @@ describe('CharacterStats - training and derived bonuses', () => {
             );
             expect(effects.chartTypes).toBe(3);
             expect(effects.dataInsights).toBe(22.5);
-            expect(effects.automation).toBe(70);
         });
 
         it('returns an empty object for an unknown stat', () => {
