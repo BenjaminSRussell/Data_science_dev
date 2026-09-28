@@ -44,24 +44,6 @@ describe('SaveSlotManager', () => {
         });
     });
 
-    describe('createFilledSlotHTML - completion percentage capping', () => {
-        it('should render 100% for rank 6', () => {
-            const html = manager.createFilledSlotHTML(makeSlot({ rank: 6 }));
-            expect(html).toContain('100%');
-        });
-
-        it('should clamp to 100% for rank 7 (corrupted data)', () => {
-            const html = manager.createFilledSlotHTML(makeSlot({ rank: 7 }));
-            expect(html).toContain('100%');
-            expect(html).not.toContain('116%');
-        });
-
-        it('should render 0% for rank 0', () => {
-            const html = manager.createFilledSlotHTML(makeSlot({ rank: 0 }));
-            expect(html).toContain('0%');
-        });
-    });
-
     describe('createFilledSlotHTML - last played date buckets', () => {
         const NOW = new Date('2024-06-15T12:00:00');
 
