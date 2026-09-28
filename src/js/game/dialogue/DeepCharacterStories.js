@@ -589,6 +589,45 @@ export const CHARACTER_STORIES = {
                 dialogue: "I dream one day a New Yorker will cry at the taste. Not from sadness. From joy. That's when I'll know I did it right."
             }
         ]
+    },
+    bella_lux: {
+        personalStory: {
+            background: "Always chasing the spotlight. Wants a partner who can fund her lifestyle.",
+            motivation: "Fame. Likes. Views.",
+            secret: "It's all fake. The leased car, the rented clothes. She's drowning in debt.",
+            dream: "To be famous for being famous.",
+            fear: "Irrelevance.",
+            relationship: "\"Single\" (for the engagement).",
+            turningPoint: "Her first viral video. She got addicted to the dopamine hit.",
+            philosophy: "Fake it 'til you make it. Then fake it some more."
+        },
+        storyReveals: [
+            {
+                relationshipLevel: 10,
+                topic: 'background',
+                dialogue: "Do you know who I am? I have 2 million followers. That's basically royalty."
+            },
+            {
+                relationshipLevel: 25,
+                topic: 'philosophy',
+                dialogue: "Perception is reality. If it looks expensive, it is expensive."
+            },
+            {
+                relationshipLevel: 40,
+                topic: 'secret',
+                dialogue: "This bag? Rented. The car? Leased. But the likes? Real. And that's all that matters."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'fear',
+                dialogue: "If I stop posting, do I disappear? Sometimes I think I might."
+            },
+            {
+                relationshipLevel: 80,
+                topic: 'vulnerability',
+                dialogue: "Maybe I want something real. Just one thing not for the 'gram. Could that be you?"
+            }
+        ]
     }
 };
 
