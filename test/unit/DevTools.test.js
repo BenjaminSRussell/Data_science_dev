@@ -88,6 +88,7 @@ describe('DevTools', () => {
     });
 
     it('constructs all 8 sub-tools and sets globals when in dev mode', () => {
+      setLocation({ hostname: 'localhost' });
       const tools = new DevTools(game);
       for (const C of Object.values(mockClasses)) {
         expect(C).toHaveBeenCalledTimes(1);
