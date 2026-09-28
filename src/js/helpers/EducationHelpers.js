@@ -8,7 +8,12 @@
  */
 export function handleStartExam(game, courseId) {
     const course = game.gameState.educationSystem.courses[courseId];
-    if (game.gameState.educationSystem.completedCourses.includes(courseId)) return;
+    const blocker = game.gameState.educationSystem.getEnrollmentBlocker(courseId);
+    if (blocker) {
+        game.showToast(blocker, 'error');
+        game.audioManager.play('error');
+        return;
+    }
     if (game.gameState.money < course.cost) {
         game.showToast('Tuition too high!', 'error');
         game.audioManager.play('error');

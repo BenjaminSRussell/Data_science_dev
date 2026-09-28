@@ -109,15 +109,26 @@ export class EducationSystem {
         };
     }
 
-    enroll(courseId) {
-        if (this.completedCourses.includes(courseId)) return { success: false, message: "Course already completed." };
+    /**
+     * Why a course cannot be started, or null when nothing but tuition stands in the way
+     */
+    getEnrollmentBlocker(courseId) {
+        if (this.completedCourses.includes(courseId)) return "Course already completed.";
 
-        const course = this.courses[courseId];
-        const missingPrereqs = (course.prereqs || []).filter(p => !this.completedCourses.includes(p));
+        const prereqs = this.courses[courseId]?.prereqs || [];
+        const missingPrereqs = prereqs.filter(p => !this.completedCourses.includes(p));
         if (missingPrereqs.length > 0) {
             const names = missingPrereqs.map(p => this.courses[p]?.name || p).join(', ');
-            return { success: false, message: `Prerequisites not met: ${names}.` };
+            return `Prerequisites not met: ${names}.`;
         }
+        return null;
+    }
+
+    enroll(courseId) {
+        const blocker = this.getEnrollmentBlocker(courseId);
+        if (blocker) return { success: false, message: blocker };
+
+        const course = this.courses[courseId];
         if (this.gameState.money < course.cost) return { success: false, message: "Cannot afford tuition." };
 
         this.gameState.money -= course.cost;
