@@ -154,14 +154,22 @@ describe('InvestmentEcommerceSystem (e-commerce)', () => {
             expect(system.ecommerceBusiness.inventory.p2).toBe(70);
         });
 
+        // Pins what processWeeklyOperations() does today: the whole
+        // marketingBudget is counted in that week's expenses. Whether it
+        // should recur weekly is an open product decision; update this test
+        // when that is decided.
         it('computes expenses exactly as marketingBudget + products.length*50 and adds profit to money', () => {
-            const moneyBefore = 9800;
-            mockGameState.money = moneyBefore;
+            mockGameState.money = 9800;
             system.startEcommerceBusiness('Shop', 0);
-            system.addProduct({ id: 'p1', name: 'A', cost: 0, price: 10, stock: 100 });
-            system.addProduct({ id: 'p2', name: 'B', cost: 0, price: 20, stock: 100 });
+            // Explicit non-zero costs: addProduct() charges `product.cost || 100`,
+            // so a cost of 0 would be charged as 100 rather than as free.
+            system.addProduct({ id: 'p1', name: 'A', cost: 100, price: 10, stock: 100 });
+            system.addProduct({ id: 'p2', name: 'B', cost: 100, price: 20, stock: 100 });
             system.ecommerceBusiness.marketingBudget = 5000;
             system.ecommerceBusiness.reputation = 50;
+
+            // 9800 - 0 (start) - 2*100 (products) = 9600
+            expect(mockGameState.money).toBe(9600);
 
             const result = system.processWeeklyOperations();
 
@@ -169,7 +177,8 @@ describe('InvestmentEcommerceSystem (e-commerce)', () => {
             expect(result.expenses).toBe(5100);
             // revenue = 900, profit = 900 - 5100 = -4200
             expect(result.profit).toBe(-4200);
-            expect(mockGameState.money).toBe(moneyBefore - 4200);
+            // 9600 - 4200 = 5400
+            expect(mockGameState.money).toBe(5400);
             expect(system.ecommerceBusiness.revenue).toBe(900);
             expect(system.ecommerceBusiness.expenses).toBe(5100);
         });
