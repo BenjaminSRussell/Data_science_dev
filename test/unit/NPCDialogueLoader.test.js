@@ -19,16 +19,17 @@ describe('NPCDialogueLoader', () => {
 
     describe('loadNPCDialogue de-duplication', () => {
         it('only performs the actual file load once when called twice for the same npcId', async () => {
-            const spy = vi
-                .spyOn(loader, 'loadDialogueFile')
-                .mockResolvedValue({ npcId: 'npc1', stages: {} });
+            // Real load of the shipped npcs/bob_bagel.js dialogue file
+            const spy = vi.spyOn(loader, 'loadDialogueFile');
 
-            const first = await loader.loadNPCDialogue('npc1');
-            const second = await loader.loadNPCDialogue('npc1');
+            const first = await loader.loadNPCDialogue('bob_bagel');
+            const second = await loader.loadNPCDialogue('bob_bagel');
 
             expect(spy).toHaveBeenCalledTimes(1);
-            expect(first).toEqual({ npcId: 'npc1', stages: {} });
+            expect(first.npcId).toBe('bob_bagel');
+            expect(first.stages).toBeTypeOf('object');
             expect(second).toBe(first);
+            expect(loader.loadedDialogues.get('bob_bagel')).toBe(first);
         });
 
         it('shares a single in-flight promise for two concurrent unawaited calls', async () => {
@@ -42,24 +43,36 @@ describe('NPCDialogueLoader', () => {
             const p1 = loader.loadNPCDialogue('npc2');
             const p2 = loader.loadNPCDialogue('npc2');
 
-            // Both calls share the same in-flight promise
+            // Both calls share the same in-flight load. (p1 and p2 themselves are
+            // distinct objects: every call to an async function returns a new promise.)
             expect(spy).toHaveBeenCalledTimes(1);
-            expect(p1).toBe(p2);
+            expect(loader.loadingPromises.size).toBe(1);
+            expect(loader.loadingPromises.has('npc2')).toBe(true);
+            expect(loader.loadedDialogues.has('npc2')).toBe(false);
 
             resolveLoad({ npcId: 'npc2', stages: {} });
             const [r1, r2] = await Promise.all([p1, p2]);
             expect(r1).toEqual({ npcId: 'npc2', stages: {} });
             expect(r2).toBe(r1);
+            expect(spy).toHaveBeenCalledTimes(1);
+            expect(loader.loadingPromises.has('npc2')).toBe(false);
+            expect(loader.loadedDialogues.get('npc2')).toBe(r1);
         });
     });
 
     describe('fallback behavior', () => {
         it('resolves to the fallback shape when both dynamic import and fetch fail', async () => {
-            vi.spyOn(loader, 'loadDialogueFile').mockRejectedValue(
-                new Error('No dialogue file found for missing_npc')
-            );
+            // Real loadDialogueFile: there is no npcs/missing_npc.js or .json
+            const spy = vi.spyOn(loader, 'loadDialogueFile');
 
             const result = await loader.loadNPCDialogue('missing_npc');
+
+            expect(spy).toHaveBeenCalledTimes(1);
+            await expect(spy.mock.results[0].value).rejects.toThrow(
+                'No dialogue file found for missing_npc'
+            );
+            expect(loader.loadingPromises.has('missing_npc')).toBe(false);
+            expect(loader.loadedDialogues.has('missing_npc')).toBe(false);
 
             expect(result).toEqual({
                 npcId: 'missing_npc',
