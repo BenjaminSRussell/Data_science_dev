@@ -13,7 +13,7 @@ def parse_asset_list():
     
     manifest = {
         'metadata': {
-            'total_assets': 950,
+            'total_assets': 0,
             'generated_from': 'MISSING_ASSETS_AND_PROBLEMS.md',
             'version': '1.0'
         },
@@ -218,11 +218,15 @@ def parse_asset_list():
     
     manifest['item_icons']['assets'] = item_icons
     
+    manifest['metadata']['total_assets'] = sum(
+        len(cat['assets']) for cat in manifest.values() if 'assets' in cat
+    )
+    
     # Save manifest
     with open('asset_manifest.json', 'w') as f:
         json.dump(manifest, f, indent=2)
     
-    print(f"Generated asset manifest with {sum(len(cat['assets']) for cat in manifest.values() if 'assets' in cat)} assets")
+    print(f"Generated asset manifest with {manifest['metadata']['total_assets']} assets")
     return manifest
 
 if __name__ == "__main__":
