@@ -28,8 +28,8 @@ describe('StatisticsAggregator', () => {
             expect(statsAggregator.formatPlaytime(5)).toBe('5h');
         });
 
-        it('should format 23.9 hours as "< 24h"', () => {
-            expect(statsAggregator.formatPlaytime(23.9)).toBe('< 24h');
+        it('should format 23.9 hours as "23h 54m" (still in the under-24-hours branch)', () => {
+            expect(statsAggregator.formatPlaytime(23.9)).toBe('23h 54m');
         });
 
         it('should format 48 hours as "2d"', () => {
