@@ -35,7 +35,9 @@ describe('LocationViewComponent behavior', () => {
             expect(bg).not.toBeNull();
             expect(bg.classList.contains('office')).toBe(true);
             expect(bg.classList.contains('time-morning')).toBe(true);
-            expect(bg.style.backgroundImage).toBe("url('/bg/office.png')");
+            // The serialized quote style differs between engines (jsdom uses
+            // double quotes, the template writes single); the path must match exactly.
+            expect(bg.style.backgroundImage).toMatch(/^url\((['"]?)\/bg\/office\.png\1\)$/);
 
             const title = component.shadowRoot.querySelector('.location-title');
             const description = component.shadowRoot.querySelector('.location-description');
