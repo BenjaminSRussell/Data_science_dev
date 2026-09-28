@@ -1,11 +1,12 @@
 /**
  * JobSystem Unit Tests
- * Verifies that completeTask applies pay to gameState.money,
+ * Verifies that completeTask applies pay to gameState.money with the charisma bonus,
  * reputation gating in getAvailableJobs(), and the save/load round trip
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { JobSystem, JOB_CATEGORIES } from '../../src/js/game/JobSystem.js';
+import { CharacterStats } from '../../src/js/game/CharacterStats.js';
 
 describe('JobSystem', () => {
     let gameState;
@@ -15,11 +16,9 @@ describe('JobSystem', () => {
         gameState = {
             money: 0,
             reputation: 0,
-            characterStats: {
-                addExperience: () => {},
-                getStat: () => 0
-            }
+            characterStats: new CharacterStats()
         };
+        gameState.characterStats.stats.charisma = 0;
         jobSystem = new JobSystem(gameState);
     });
 
@@ -61,6 +60,33 @@ describe('JobSystem', () => {
 
             expect(result).toBeNull();
             expect(gameState.money).toBe(500);
+        });
+    });
+
+    describe('completeTask charisma bonus', () => {
+        it('should pay 0.5% more per point of charisma', () => {
+            gameState.characterStats.stats.charisma = 40;
+
+            const result = jobSystem.completeTask('data_entry', 1.0);
+
+            expect(result.pay).toBe(60);
+            expect(gameState.money).toBe(60);
+        });
+
+        it('should round the boosted pay down', () => {
+            gameState.characterStats.stats.charisma = 10;
+
+            const result = jobSystem.completeTask('data_entry', 1.0);
+
+            expect(result.pay).toBe(52);
+        });
+
+        it('should pay the base amount when there are no character stats', () => {
+            gameState.characterStats = undefined;
+
+            const result = jobSystem.completeTask('data_entry', 1.0);
+
+            expect(result.pay).toBe(50);
         });
     });
 });
