@@ -113,13 +113,37 @@ describe('PositioningVerifier', () => {
             const el = document.createElement('div');
             el.id = 'abs-div';
             el.style.position = 'absolute';
+            // z-index is set so the transform warning is the only one raised
+            el.style.zIndex = '100';
 
             const issues = verifier.verifyElementPositioning(el, 'grid', { x: 1, y: 1 });
 
-            expect(issues).toHaveLength(1);
-            expect(issues[0].issue)
-                .toBe('Absolute positioned element not centered (missing transform)');
-            expect(issues[0].severity).toBe('warning');
+            expect(issues).toEqual([{
+                element: 'abs-div',
+                issue: 'Absolute positioned element not centered (missing transform)',
+                severity: 'warning'
+            }]);
+        });
+
+        it('warns about both missing transform and missing z-index for bare absolute positioning', () => {
+            const el = document.createElement('div');
+            el.id = 'abs-div';
+            el.style.position = 'absolute';
+
+            const issues = verifier.verifyElementPositioning(el, 'grid', { x: 1, y: 1 });
+
+            expect(issues).toEqual([
+                {
+                    element: 'abs-div',
+                    issue: 'Absolute positioned element not centered (missing transform)',
+                    severity: 'warning'
+                },
+                {
+                    element: 'abs-div',
+                    issue: 'Absolute positioned element missing z-index',
+                    severity: 'warning'
+                }
+            ]);
         });
 
         it('reports no issues for absolute positioning with transform and z-index', () => {
@@ -147,8 +171,11 @@ describe('PositioningVerifier', () => {
                 'Image missing object-fit',
                 'Image missing object-position'
             ]);
+            // The verifier reads img.src, which the DOM resolves against the
+            // document base URL, so the relative path comes back absolute.
+            const resolvedSrc = new URL('assets/test.png', document.baseURI).href;
             issues.forEach(i => {
-                expect(i.element).toBe('assets/test.png');
+                expect(i.element).toBe(resolvedSrc);
                 expect(i.severity).toBe('warning');
             });
         });
