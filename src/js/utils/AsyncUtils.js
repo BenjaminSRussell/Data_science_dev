@@ -139,9 +139,11 @@ export class AsyncUtils {
     static throttleAsync(func, limit) {
         let inThrottle;
         let lastResult;
+        let lastError;
         let lastArgs;
         let lastResolve;
         let lastReject;
+        let pendingResolvers = [];
 
         return function executedFunction(...args) {
             return new Promise((resolve, reject) => {
@@ -154,20 +156,30 @@ export class AsyncUtils {
                     func(...lastArgs)
                         .then(result => {
                             lastResult = result;
+                            lastError = undefined;
                             lastResolve(result);
+                            pendingResolvers.forEach(({ resolve: r }) => r(result));
                         })
                         .catch(error => {
+                            lastError = error;
                             lastReject(error);
+                            pendingResolvers.forEach(({ reject: r }) => r(error));
                         })
                         .finally(() => {
+                            pendingResolvers = [];
                             setTimeout(() => {
                                 inThrottle = false;
                             }, limit);
                         });
                 } else {
-                    // Return last result if available
+                    // Return last result if available, otherwise wait for the
+                    // in-flight call to settle so this promise always resolves.
                     if (lastResult !== undefined) {
                         lastResolve(lastResult);
+                    } else if (lastError !== undefined) {
+                        lastReject(lastError);
+                    } else {
+                        pendingResolvers.push({ resolve: lastResolve, reject: lastReject });
                     }
                 }
             });
