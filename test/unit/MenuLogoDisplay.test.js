@@ -59,12 +59,16 @@ describe('MenuLogoDisplay', () => {
         });
 
         it('does NOT collapse when money/tasks exist but rank is still 0', () => {
+            // A real save always has totalDays >= 1 (TimeManager starts at 1), so
+            // playtime is non-zero and the collapse condition
+            // (totalPlaytime === 0 && highestRank === 0) is false even at rank 0.
             saveManager = makeSaveManager([
-                { state: { timeManager: { totalDays: 0 }, rankIndex: 0, money: 500, tasksCompleted: 3 } }
+                { state: { timeManager: { totalDays: 1 }, rankIndex: 0, money: 500, tasksCompleted: 3 } }
             ]);
             display = new MenuLogoDisplay(saveManager);
             display.calculateStats();
             expect(display.stats).toHaveLength(6);
+            expect(display.stats.find(s => s.label === 'Highest Rank').value).toBe('Data Entry Clerk');
             expect(display.stats.find(s => s.label === 'Welcome')).toBeUndefined();
             expect(display.stats.find(s => s.label === 'Total Money Earned').value).toBe('$500');
             expect(display.stats.find(s => s.label === 'Total Tasks').value).toBe('3');
