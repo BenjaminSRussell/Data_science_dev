@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DOMUtils } from '../../src/js/utils/DOMUtils.js';
 
 function addDiv(id) {
@@ -25,32 +25,59 @@ describe('DOMUtils', () => {
             expect(element.textContent).toBe('');
             expect(element.innerHTML).toBe('');
             expect(element.style.cssText).toBe('');
-            expect(element.dataset).toEqual({});
-            expect(element.hasEventListeners('click')).toBe(false);
+            expect(Object.keys(element.dataset)).toEqual([]);
+            // No class, id, style or data-* attribute was written at all
+            expect(element.attributes.length).toBe(0);
         });
 
-        it('should set className, id, textContent, innerHTML, attributes, style, and dataset', () => {
+        it('should set className, id, textContent, attributes, style, and dataset', () => {
             const options = {
                 className: 'test-class',
                 id: 'test-id',
                 textContent: 'Hello',
-                innerHTML: '<span>World</span>',
                 attributes: { 'data-test': 'value' },
                 style: { color: 'red', fontSize: '16px' },
-                dataset: { key: 'value' },
-                listeners: { click: () => {} }
+                dataset: { key: 'value' }
             };
             const element = DOMUtils.createElement('div', options);
 
             expect(element.className).toBe('test-class');
             expect(element.id).toBe('test-id');
             expect(element.textContent).toBe('Hello');
-            expect(element.innerHTML).toBe('<span>World</span>');
             expect(element.getAttribute('data-test')).toBe('value');
             expect(element.style.color).toBe('red');
             expect(element.style.fontSize).toBe('16px');
             expect(element.dataset.key).toBe('value');
-            expect(element.hasEventListeners('click')).toBe(true);
+            expect(element.getAttribute('data-key')).toBe('value');
+        });
+
+        it('should set innerHTML, which replaces textContent when both are given', () => {
+            const element = DOMUtils.createElement('div', {
+                textContent: 'Hello',
+                innerHTML: '<span>World</span>'
+            });
+
+            expect(element.innerHTML).toBe('<span>World</span>');
+            expect(element.children.length).toBe(1);
+            expect(element.textContent).toBe('World');
+        });
+
+        it('should wire listeners via addEventListener', () => {
+            const onClick = vi.fn();
+            const onFocus = vi.fn();
+            const element = DOMUtils.createElement('button', {
+                listeners: { click: onClick, focus: onFocus }
+            });
+
+            const click = new Event('click');
+            element.dispatchEvent(click);
+
+            expect(onClick).toHaveBeenCalledTimes(1);
+            expect(onClick).toHaveBeenCalledWith(click);
+            expect(onFocus).not.toHaveBeenCalled();
+
+            element.dispatchEvent(new Event('focus'));
+            expect(onFocus).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -59,6 +86,22 @@ describe('DOMUtils', () => {
             const container = DOMUtils.createContainer({}, 'Hello', ' ', 'World');
             expect(container.tagName).toBe('DIV');
             expect(container.textContent).toBe('Hello World');
+            expect(container.childNodes.length).toBe(3);
+            container.childNodes.forEach(node => {
+                expect(node.nodeType).toBe(Node.TEXT_NODE);
+            });
+        });
+
+        it('should append string children as text, not markup', () => {
+            const container = DOMUtils.createContainer({}, '<b>bold</b>');
+            expect(container.children.length).toBe(0);
+            expect(container.textContent).toBe('<b>bold</b>');
+        });
+
+        it('should apply options to the container', () => {
+            const container = DOMUtils.createContainer({ className: 'box', id: 'box-id' }, 'Hello');
+            expect(container.className).toBe('box');
+            expect(container.id).toBe('box-id');
         });
 
         it('should create a container with DOM-node children', () => {
@@ -69,14 +112,15 @@ describe('DOMUtils', () => {
             const container = DOMUtils.createContainer({}, child1, child2);
             expect(container.tagName).toBe('DIV');
             expect(container.children.length).toBe(2);
-            expect(container.children[0].textContent).toBe('Hello');
-            expect(container.children[1].textContent).toBe('World');
+            expect(container.children[0]).toBe(child1);
+            expect(container.children[1]).toBe(child2);
         });
 
         it('should skip falsy children', () => {
             const container = DOMUtils.createContainer({}, 'Hello', null, undefined, false, 'World');
             expect(container.tagName).toBe('DIV');
-            expect(container.textContent).toBe('Hello World');
+            expect(container.childNodes.length).toBe(2);
+            expect(container.textContent).toBe('HelloWorld');
         });
     });
 
@@ -87,13 +131,15 @@ describe('DOMUtils', () => {
             document.body.appendChild(existingElement);
             const element = DOMUtils.getOrCreate('#test-id', 'div');
             expect(element).toBe(existingElement);
+            expect(document.body.children.length).toBe(1);
         });
 
         it('should create a new element and append it to the body', () => {
-            const element = DOMUtils.getOrCreate('#test-id', 'div');
-            expect(element.tagName).toBe('DIV');
+            const element = DOMUtils.getOrCreate('#test-id', 'section', { className: 'made' });
+            expect(element.tagName).toBe('SECTION');
             expect(element.id).toBe('test-id');
-            expect(document.body.contains(element)).toBe(true);
+            expect(element.className).toBe('made');
+            expect(element.parentNode).toBe(document.body);
         });
 
         it('should create a new element and append it to a specified parent', () => {
@@ -103,7 +149,7 @@ describe('DOMUtils', () => {
             const element = DOMUtils.getOrCreate('#child-id', 'div', { parent });
             expect(element.tagName).toBe('DIV');
             expect(element.id).toBe('child-id');
-            expect(parent.contains(element)).toBe(true);
+            expect(element.parentNode).toBe(parent);
         });
     });
 
