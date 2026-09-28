@@ -9,6 +9,11 @@
  * appends one character per tick until the full text is typed, then sets
  * `isTyping = false`. We drive it with `vi.useFakeTimers()` +
  * `advanceTimersByTime()` / `runAllTimersAsync()`.
+ *
+ * The first character is typed synchronously inside typeText(); each later
+ * character, and the final `isTyping = false`, needs one more 30ms tick.
+ * The component is a LitElement with the default render root, so its markup
+ * lives in `el.shadowRoot`, not in the element's light DOM.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -47,7 +52,9 @@ describe('DialogueComponent behavior', () => {
             expect(el.isOpen).toBe(true);
             expect(el.npc).toBe(npc);
             expect(el.currentNode).toBe(node);
-            expect(el.typingText).toBe('');
+            // typeText() runs its first step synchronously, so the first
+            // character is already there when open() returns.
+            expect(el.typingText).toBe('H');
             expect(el.isTyping).toBe(true);
         });
 
@@ -70,8 +77,19 @@ describe('DialogueComponent behavior', () => {
 
             el.open(npc, node);
 
-            // First tick fires immediately inside typeText(); advance one more
-            // tick to append the second character.
+            // First step runs immediately inside typeText().
+            expect(el.typingText).toBe('H');
+
+            // Just short of one tick: nothing new yet.
+            vi.advanceTimersByTime(29);
+            expect(el.typingText).toBe('H');
+
+            // One full tick appends the second character; typing is not
+            // finished until the following tick finds nothing left to type.
+            vi.advanceTimersByTime(1);
+            expect(el.typingText).toBe('Hi');
+            expect(el.isTyping).toBe(true);
+
             vi.advanceTimersByTime(30);
             expect(el.typingText).toBe('Hi');
             expect(el.isTyping).toBe(false);
@@ -90,7 +108,7 @@ describe('DialogueComponent behavior', () => {
             await vi.runAllTimersAsync();
             await el.updateComplete;
 
-            const buttons = el.querySelectorAll('.dialogue-choice');
+            const buttons = el.shadowRoot.querySelectorAll('.dialogue-choice');
             expect(buttons.length).toBe(2);
             expect(buttons[0].textContent.trim()).toBe('Yes');
             expect(buttons[1].textContent.trim()).toBe('No');
@@ -115,7 +133,7 @@ describe('DialogueComponent behavior', () => {
             await vi.runAllTimersAsync();
             await el.updateComplete;
 
-            const buttons = el.querySelectorAll('.dialogue-choice');
+            const buttons = el.shadowRoot.querySelectorAll('.dialogue-choice');
             expect(buttons.length).toBe(1);
             expect(buttons[0].textContent.trim()).toBe('Goodbye');
 
@@ -138,7 +156,7 @@ describe('DialogueComponent behavior', () => {
             await vi.runAllTimersAsync();
             await el.updateComplete;
 
-            const closeBtn = el.querySelector('.dialogue-close');
+            const closeBtn = el.shadowRoot.querySelector('.dialogue-close');
             expect(closeBtn).not.toBeNull();
 
             const handler = vi.fn();
@@ -160,7 +178,7 @@ describe('DialogueComponent behavior', () => {
             await vi.runAllTimersAsync();
             await el.updateComplete;
 
-            expect(el.querySelector('.dialogue-container')).not.toBeNull();
+            expect(el.shadowRoot.querySelector('.dialogue-container')).not.toBeNull();
 
             el.close();
 
@@ -170,7 +188,7 @@ describe('DialogueComponent behavior', () => {
             expect(el.typingText).toBe('');
 
             await el.updateComplete;
-            expect(el.querySelector('.dialogue-container')).toBeNull();
+            expect(el.shadowRoot.querySelector('.dialogue-container')).toBeNull();
         });
     });
 
