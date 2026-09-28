@@ -4,7 +4,6 @@
  * Cleanup: Uses centralized utilities
  */
 
-import { CameraSystem } from '../camera/CameraSystem.js';
 import { NPCs } from '../game/NPCManager.js';
 import { updateMapLocationIcons, updateLockBadges } from './MapIconRenderer.js';
 import { initializeMapRenderer } from '../game/MapSystemInitializer.js';
@@ -49,30 +48,12 @@ function initDOMCache() {
 }
 
 /**
- * Initialize camera system for the map
- */
-export function initializeCameraSystem(game) {
-    initDOMCache();
-    if (!game.cameraSystem && domCache.mapContainer) {
-        try {
-            game.cameraSystem = new CameraSystem(domCache.mapContainer);
-            if (game.gameState) {
-                game.gameState.cameraSystem = game.cameraSystem;
-            }
-        } catch (error) {
-            logger.warn('Camera system initialization failed:', error);
-        }
-    }
-}
-
-/**
  * Update the map screen with current state - Optimized O(n) single pass
  */
 export function updateMapScreen(game) {
     if (!game.worldMap || !game.timeManager) return;
 
     initDOMCache();
-    initializeCameraSystem(game);
 
     // Update all displays in single pass
     updateTimeDisplay(game);

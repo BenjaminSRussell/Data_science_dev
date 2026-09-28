@@ -88,7 +88,6 @@ import { NarrativeClaritySystem } from './game/NarrativeClaritySystem.js';
 import { AssetManager } from './assets/AssetManager.js';
 import { PerformanceManager } from './performance/PerformanceManager.js';
 import { UILayerManager } from './ui/UILayerManager.js';
-import { CameraSystem } from './camera/CameraSystem.js';
 import { NewsManager } from './game/NewsManager.js';
 import { StockMarket } from './game/StockMarket.js';
 import { CrimeSystem } from './game/CrimeSystem.js';
@@ -1380,19 +1379,6 @@ export class MainGame {
             this.animatedCharacterRenderer = new AnimatedCharacterRenderer(spriteManager);
             this.gameState.animatedCharacterRenderer = this.animatedCharacterRenderer;
             */
-
-            // Initialize filter manager
-            import('./visual/FilterManager.js').then(({ FilterManager }) => {
-                try {
-                    this.filterManager = new FilterManager();
-                    this.filterManager.initialize();
-                    this.gameState.filterManager = this.filterManager;
-                } catch (error) {
-                    logger.warn('FilterManager initialization failed:', error);
-                }
-            }).catch(error => {
-                logger.warn('FilterManager not available:', error);
-            });
 
             // Legacy Visual Systems (Phase 4 Cleanup)
             /*

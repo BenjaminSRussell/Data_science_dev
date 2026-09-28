@@ -5,7 +5,6 @@
 
 import { dialogueTreeSystem } from './DialogueTreeSystem.js';
 import { getNPCImage, getNPCFallback } from '../../utils/NPCImageMapper.js';
-import { ThreeCharacterRenderer } from '../../characters/ThreeCharacterRenderer.js';
 
 export class ConversationScreen {
     constructor(game) {
@@ -13,7 +12,13 @@ export class ConversationScreen {
         this.currentNPC = null;
         this.currentNode = null;
         this.screenElement = null;
-        this.threeRenderer = new ThreeCharacterRenderer();
+    }
+
+    /**
+     * The game's shared 3D renderer, when it has one
+     */
+    get threeRenderer() {
+        return this.game?.threeRenderer || null;
     }
 
     /**
@@ -110,7 +115,7 @@ export class ConversationScreen {
 
         // Render Avatar (3D or 2D)
         const container = this.screenElement.querySelector('#npc-avatar-container');
-        if (this.currentNPC.modelPath) {
+        if (this.currentNPC.modelPath && this.threeRenderer) {
             // Try rendering 3D model
             const element = this.threeRenderer.create3DCharacter(this.currentNPC.id, {
                 path: this.currentNPC.modelPath,
@@ -265,7 +270,7 @@ export class ConversationScreen {
      * Close conversation screen
      */
     close() {
-        if (this.currentNPC) {
+        if (this.currentNPC && this.threeRenderer) {
             this.threeRenderer.dispose(this.currentNPC.id);
         }
         if (this.screenElement) {

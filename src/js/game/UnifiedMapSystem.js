@@ -110,28 +110,6 @@ export class UnifiedMapSystem {
         // Initialize particle effects and tooltips (optional - lazy load)
         if (this.game?.gameState?.particleEffectManager) {
             this.particleManager = this.game.gameState.particleEffectManager;
-        } else if (this.app) {
-            // Initialize particle manager when app is ready (non-blocking)
-            import('../effects/ParticleEffectManager.js').then(({ ParticleEffectManager }) => {
-                try {
-                    this.particleManager = new ParticleEffectManager(this.app);
-                    this.particleManager.initialize().then(() => {
-                        if (this.game?.gameState) {
-                            this.game.gameState.particleEffectManager = this.particleManager;
-                        }
-                        // Update particle effects in game loop
-                        if (this.particleManager && this.app) {
-                            this.app.ticker.add((delta) => {
-                                this.particleManager.update(delta);
-                            });
-                        }
-                    });
-                } catch (error) {
-                    console.warn('ParticleEffectManager initialization failed:', error);
-                }
-            }).catch(error => {
-                console.warn('ParticleEffectManager not available:', error);
-            });
         }
         
         if (this.game?.gameState?.tooltipManager) {
