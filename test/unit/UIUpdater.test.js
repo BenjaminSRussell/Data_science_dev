@@ -1,109 +1,120 @@
-import { expect } from 'chai';
-import { stub } from 'sinon';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { UIUpdater } from '../../src/js/ui/UIUpdater.js';
+import { GameState } from '../../src/js/game/GameState.js';
+
+const BANK_ELEMENT_IDS = [
+    'bank-savings-balance',
+    'bank-loan-balance',
+    'bank-credit-score',
+    'bank-loan-limit',
+    'bank-net-worth'
+];
 
 describe('UIUpdater', () => {
     let uiUpdater;
-    let mockGame;
-    let mockGameState;
-    let mockBank;
-    let mockReputation;
-    let mockMoney;
-    let mockElements;
+    let gameState;
+    let elements;
 
     beforeEach(() => {
-        mockGameState = {
-            bank: {},
-            reputation: 0,
-            money: 0
-        };
-        mockGame = {
-            gameState: mockGameState
-        };
-        mockBank = {
-            creditScore: 500,
-            creditMultiplier: 1
-        };
-        mockReputation = 10;
-        mockMoney = 100;
-        mockElements = {
-            'bank-savings-balance': document.createElement('div'),
-            'bank-loan-balance': document.createElement('div'),
-            'bank-credit-score': document.createElement('div'),
-            'bank-loan-limit': document.createElement('div'),
-            'bank-net-worth': document.createElement('div')
-        };
+        // A fresh GameState starts with money 100, reputation 0 and no bank
+        gameState = new GameState();
 
-        Object.keys(mockElements).forEach(key => {
-            document.body.appendChild(mockElements[key]);
+        elements = {};
+        BANK_ELEMENT_IDS.forEach(id => {
+            const element = document.createElement('div');
+            element.id = id;
+            document.body.appendChild(element);
+            elements[id] = element;
         });
 
-        uiUpdater = new UIUpdater(mockGame);
+        uiUpdater = new UIUpdater({ gameState });
     });
 
     afterEach(() => {
-        Object.keys(mockElements).forEach(key => {
-            document.body.removeChild(mockElements[key]);
+        BANK_ELEMENT_IDS.forEach(id => {
+            document.body.removeChild(elements[id]);
         });
     });
 
     it('should return immediately if no gameState.bank', () => {
-        mockGameState.bank = undefined;
+        BANK_ELEMENT_IDS.forEach(id => {
+            elements[id].textContent = 'untouched';
+        });
+        expect(gameState.bank).toBe(null);
+
         uiUpdater.updateBankScreen();
-        expect(mockElements['bank-loan-limit'].textContent).to.equal('');
-        expect(mockElements['bank-net-worth'].textContent).to.equal('');
+
+        BANK_ELEMENT_IDS.forEach(id => {
+            expect(elements[id].textContent).toBe('untouched');
+        });
     });
 
     it('should default creditScore to 500 if missing', () => {
-        delete mockGameState.bank.creditScore;
-        mockGameState.bank.creditMultiplier = 2;
-        mockGameState.reputation = 10;
-        mockGameState.money = 100;
-        mockGameState.bank.savings = 50;
-        mockGameState.bank.loan = 200;
+        gameState.bank = { savings: 50, loan: 200 };
+        gameState.reputation = 10;
+        gameState.money = 100;
 
         uiUpdater.updateBankScreen();
-        const maxLoan = Math.floor((500 + 1000) * 2);
-        expect(mockElements['bank-loan-limit'].textContent).to.equal(maxLoan.toLocaleString());
-        const netWorth = mockGameState.money + mockGameState.bank.savings - mockGameState.bank.loan;
-        expect(mockElements['bank-net-worth'].textContent).to.equal(netWorth.toLocaleString());
+
+        expect(elements['bank-credit-score'].textContent).toBe('500');
+        // limit = 1000 + 10 * 100 = 2000, multiplier = 500 / 500 = 1
+        expect(elements['bank-loan-limit'].textContent).toBe(`$${(2000).toLocaleString()}`);
+        expect(elements['bank-net-worth'].textContent).toBe('$-50');
     });
 
     it('should calculate maxLoan with creditMultiplier exactly 1', () => {
-        mockGameState.bank = mockBank;
-        mockGameState.reputation = 10;
-        mockGameState.money = 100;
-        mockGameState.bank.savings = 50;
-        mockGameState.bank.loan = 200;
+        gameState.bank = { creditScore: 500, savings: 50, loan: 200 };
+        gameState.reputation = 10;
+        gameState.money = 100;
 
         uiUpdater.updateBankScreen();
-        const maxLoan = Math.floor((mockBank.creditScore + mockBank.creditScore) * 1);
-        expect(mockElements['bank-loan-limit'].textContent).to.equal(maxLoan.toLocaleString());
-        const netWorth = mockGameState.money + mockGameState.bank.savings - mockGameState.bank.loan;
-        expect(mockElements['bank-net-worth'].textContent).to.equal(netWorth.toLocaleString());
+
+        expect(elements['bank-credit-score'].textContent).toBe('500');
+        expect(elements['bank-loan-limit'].textContent).toBe(`$${(2000).toLocaleString()}`);
+        expect(elements['bank-net-worth'].textContent).toBe('$-50');
+    });
+
+    it('should scale maxLoan by creditScore / 500 and round it down', () => {
+        gameState.bank = { creditScore: 1000, savings: 0, loan: 0 };
+        gameState.reputation = 10;
+
+        uiUpdater.updateBankScreen();
+
+        // (1000 + 10 * 100) * (1000 / 500) = 4000
+        expect(elements['bank-credit-score'].textContent).toBe('1000');
+        expect(elements['bank-loan-limit'].textContent).toBe(`$${(4000).toLocaleString()}`);
+
+        gameState.bank.creditScore = 333;
+        gameState.reputation = 1;
+
+        uiUpdater.updateBankScreen();
+
+        // (1000 + 1 * 100) * (333 / 500) = 732.6, floored to 732
+        expect(elements['bank-loan-limit'].textContent).toBe('$732');
     });
 
     it('should handle negative netWorth', () => {
-        mockGameState.bank = mockBank;
-        mockGameState.reputation = 10;
-        mockGameState.money = 100;
-        mockGameState.bank.savings = 0;
-        mockGameState.bank.loan = 50;
+        gameState.bank = { creditScore: 500, savings: 50, loan: 200 };
+        gameState.reputation = 10;
+        gameState.money = 100;
 
         uiUpdater.updateBankScreen();
-        const netWorth = mockGameState.money + mockGameState.bank.savings - mockGameState.bank.loan;
-        expect(mockElements['bank-net-worth'].textContent).to.equal(netWorth.toLocaleString());
+
+        // 100 + 50 - 200 = -50
+        expect(elements['bank-net-worth'].textContent).toBe('$-50');
+        expect(elements['bank-savings-balance'].textContent).toBe('$50');
+        expect(elements['bank-loan-balance'].textContent).toBe('$200');
     });
 
     it('should render bank savings and loan as $0 when both are 0', () => {
-        mockGameState.bank = mockBank;
-        mockGameState.reputation = 10;
-        mockGameState.money = 100;
-        mockGameState.bank.savings = 0;
-        mockGameState.bank.loan = 0;
+        gameState.bank = { creditScore: 500, savings: 0, loan: 0 };
+        gameState.reputation = 10;
+        gameState.money = 100;
 
         uiUpdater.updateBankScreen();
-        expect(mockElements['bank-savings-balance'].textContent).to.equal('$0');
-        expect(mockElements['bank-loan-balance'].textContent).to.equal('$0');
+
+        expect(elements['bank-savings-balance'].textContent).toBe('$0');
+        expect(elements['bank-loan-balance'].textContent).toBe('$0');
+        expect(elements['bank-net-worth'].textContent).toBe('$100');
     });
 });
