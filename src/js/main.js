@@ -194,7 +194,6 @@ export class MainGame {
         this.characterStats = new CharacterStats(this.gameState);
 
         this.gameLoopId = null;
-        this.lastTime = 0;
         this.bankSystem = null; // Will be initialized when needed
 
         // Bind methods
@@ -2932,11 +2931,7 @@ export class MainGame {
     /**
      * Main Game Loop
      */
-    gameLoop(timestamp) {
-        if (!this.lastTime) this.lastTime = timestamp;
-        const deltaTime = timestamp - this.lastTime;
-        this.lastTime = timestamp;
-
+    gameLoop() {
         // Update day/night cycle
         if (this.dayNightCycle) {
             this.dayNightCycle.update();
