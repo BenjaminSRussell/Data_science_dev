@@ -1,54 +1,75 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { DOMUtils } from '../src/DOMUtils';
+import { DOMUtils } from '../../src/js/utils/DOMUtils.js';
+
+function addDiv(id) {
+    const div = document.createElement('div');
+    if (id) div.id = id;
+    document.body.appendChild(div);
+    return div;
+}
 
 describe('DOMUtils', () => {
     beforeEach(() => {
-        // Clear the query cache before each test
+        // queryCache is a static Map shared by every call, and the jsdom body
+        // is shared by every test in the file: reset both.
         DOMUtils.queryCache.clear();
+        document.body.innerHTML = '';
     });
 
     describe('query(selector, cache=true)', () => {
-        it('should return the cached element if cache is true', () => {
-            const div = document.createElement('div');
-            div.id = 'testDiv';
-            document.body.appendChild(div);
+        it('should populate the cache on the first call', () => {
+            const div = addDiv('testDiv');
 
-            const firstQuery = DOMUtils.query('#testDiv');
-            const secondQuery = DOMUtils.query('#testDiv');
-
-            expect(firstQuery).toBe(secondQuery);
+            expect(DOMUtils.query('#testDiv')).toBe(div);
+            expect(DOMUtils.queryCache.get('#testDiv')).toBe(div);
         });
 
-        it('should return a new element if the cached one is removed', () => {
-            const div = document.createElement('div');
-            div.id = 'testDiv';
-            document.body.appendChild(div);
-
+        it('should return the stale cached element after the live one is replaced', () => {
+            const original = addDiv('testDiv');
             const firstQuery = DOMUtils.query('#testDiv');
-            document.body.removeChild(div);
+
+            document.body.removeChild(original);
+            const replacement = addDiv('testDiv');
 
             const secondQuery = DOMUtils.query('#testDiv');
-            expect(firstQuery).not.toBe(secondQuery);
+            expect(firstQuery).toBe(original);
+            expect(secondQuery).toBe(original);
+            expect(secondQuery).not.toBe(replacement);
+        });
+
+        it('should not cache a selector that matched nothing', () => {
+            expect(DOMUtils.query('#testDiv')).toBe(null);
+            expect(DOMUtils.queryCache.has('#testDiv')).toBe(false);
+
+            const div = addDiv('testDiv');
+            expect(DOMUtils.query('#testDiv')).toBe(div);
         });
 
         it('should bypass cache if cache is false', () => {
-            const div = document.createElement('div');
-            div.id = 'testDiv';
-            document.body.appendChild(div);
+            const original = addDiv('testDiv');
+            DOMUtils.query('#testDiv');
 
-            const firstQuery = DOMUtils.query('#testDiv', false);
-            const secondQuery = DOMUtils.query('#testDiv', false);
+            document.body.removeChild(original);
+            const replacement = addDiv('testDiv');
 
-            expect(firstQuery).not.toBe(secondQuery);
+            // Re-queries the DOM instead of reading the cached entry...
+            expect(DOMUtils.query('#testDiv', false)).toBe(replacement);
+            // ...and leaves the cached entry as it was
+            expect(DOMUtils.queryCache.get('#testDiv')).toBe(original);
+        });
+
+        it('should not write to the cache if cache is false', () => {
+            const div = addDiv('testDiv');
+
+            expect(DOMUtils.query('#testDiv', false)).toBe(div);
+            expect(DOMUtils.queryCache.size).toBe(0);
         });
     });
 
     describe('queryAll(selector)', () => {
         it('should return an array of elements', () => {
-            const div1 = document.createElement('div');
-            const div2 = document.createElement('div');
-            document.body.appendChild(div1);
-            document.body.appendChild(div2);
+            const div1 = addDiv('first');
+            const div2 = addDiv('second');
 
             const elements = DOMUtils.queryAll('div');
 
@@ -56,59 +77,121 @@ describe('DOMUtils', () => {
             expect(elements.length).toBe(2);
             expect(elements[0]).toBe(div1);
             expect(elements[1]).toBe(div2);
+            expect(elements.map(element => element.id)).toEqual(['first', 'second']);
+        });
+
+        it('should return an empty array when nothing matches', () => {
+            expect(DOMUtils.queryAll('.missing')).toEqual([]);
         });
     });
 
     describe('updateElement(elementOrSelector, updates)', () => {
-        it('should update textContent, innerHTML, className, style, attributes, and dataset', () => {
-            const div = document.createElement('div');
-            div.id = 'testDiv';
-            document.body.appendChild(div);
+        it('should update textContent', () => {
+            const div = addDiv('testDiv');
+
+            DOMUtils.updateElement('#testDiv', { textContent: 'Hello' });
+
+            expect(div.textContent).toBe('Hello');
+        });
+
+        it('should update innerHTML, className, style, attributes, and dataset', () => {
+            const div = addDiv('testDiv');
 
             DOMUtils.updateElement('#testDiv', {
-                textContent: 'Hello',
                 innerHTML: '<span>World</span>',
                 className: 'testClass',
                 style: { color: 'red' },
-                attributes: { 'data-test': 'value' },
+                attributes: { 'aria-label': 'value' },
                 dataset: { test: 'datasetValue' }
             });
 
-            expect(div.textContent).toBe('Hello');
             expect(div.innerHTML).toBe('<span>World</span>');
             expect(div.className).toBe('testClass');
             expect(div.style.color).toBe('red');
-            expect(div.getAttribute('data-test')).toBe('value');
+            expect(div.getAttribute('aria-label')).toBe('value');
             expect(div.dataset.test).toBe('datasetValue');
         });
 
-        it('should do nothing if the selector does not exist', () => {
-            DOMUtils.updateElement('#nonExistentDiv', {
-                textContent: 'Hello'
+        it('should apply innerHTML after textContent when both are given', () => {
+            const div = addDiv('testDiv');
+
+            DOMUtils.updateElement('#testDiv', {
+                textContent: 'Hello',
+                innerHTML: '<span>World</span>'
             });
 
-            expect(DOMUtils.query('#nonExistentDiv')).toBe(null);
+            expect(div.innerHTML).toBe('<span>World</span>');
+            expect(div.textContent).toBe('World');
+        });
+
+        it('should accept an element as well as a selector', () => {
+            const div = document.createElement('div');
+
+            DOMUtils.updateElement(div, { textContent: 'Detached', className: 'direct' });
+
+            expect(div.textContent).toBe('Detached');
+            expect(div.className).toBe('direct');
+        });
+
+        it('should leave properties that are not in updates untouched', () => {
+            const div = addDiv('testDiv');
+            div.className = 'keep';
+            div.textContent = 'Keep me';
+
+            DOMUtils.updateElement('#testDiv', { style: { color: 'blue' } });
+
+            expect(div.className).toBe('keep');
+            expect(div.textContent).toBe('Keep me');
+            expect(div.style.color).toBe('blue');
+        });
+
+        it('should do nothing if the selector does not exist', () => {
+            const bystander = addDiv('bystander');
+
+            expect(() => DOMUtils.updateElement('#nonExistentDiv', {
+                textContent: 'Hello'
+            })).not.toThrow();
+
+            expect(document.body.children.length).toBe(1);
+            expect(bystander.textContent).toBe('');
         });
     });
 
     describe('remove(elementOrSelector)', () => {
         it('should remove the element from the DOM and clear the cache', () => {
-            const div = document.createElement('div');
-            div.id = 'testDiv';
-            document.body.appendChild(div);
+            const div = addDiv('testDiv');
+            DOMUtils.query('#testDiv');
+            expect(DOMUtils.queryCache.has('#testDiv')).toBe(true);
 
             DOMUtils.remove('#testDiv');
 
-            expect(DOMUtils.query('#testDiv')).toBe(null);
+            expect(div.parentNode).toBe(null);
             expect(document.getElementById('testDiv')).toBe(null);
+            expect(DOMUtils.queryCache.has('#testDiv')).toBe(false);
+            expect(DOMUtils.query('#testDiv')).toBe(null);
+        });
+
+        it('should run a fresh DOM query for the same id after removal', () => {
+            addDiv('testDiv');
+            DOMUtils.remove('#testDiv');
+
+            const replacement = addDiv('testDiv');
+
+            expect(DOMUtils.query('#testDiv')).toBe(replacement);
+        });
+
+        it('should accept an element as well as a selector', () => {
+            const div = addDiv('testDiv');
+
+            DOMUtils.remove(div);
+
+            expect(document.body.contains(div)).toBe(false);
         });
     });
 
     describe('toggleClass, show, hide, clear', () => {
         it('should toggle a class', () => {
-            const div = document.createElement('div');
-            div.id = 'testDiv';
-            document.body.appendChild(div);
+            const div = addDiv('testDiv');
 
             DOMUtils.toggleClass('#testDiv', 'testClass');
             expect(div.classList.contains('testClass')).toBe(true);
@@ -117,12 +200,21 @@ describe('DOMUtils', () => {
             expect(div.classList.contains('testClass')).toBe(false);
         });
 
+        it('should honour the force argument of toggleClass', () => {
+            const div = addDiv('testDiv');
+
+            DOMUtils.toggleClass('#testDiv', 'testClass', true);
+            DOMUtils.toggleClass('#testDiv', 'testClass', true);
+            expect(div.classList.contains('testClass')).toBe(true);
+
+            DOMUtils.toggleClass('#testDiv', 'testClass', false);
+            expect(div.classList.contains('testClass')).toBe(false);
+        });
+
         it('should show an element', () => {
-            const div = document.createElement('div');
-            div.id = 'testDiv';
+            const div = addDiv('testDiv');
             div.style.display = 'none';
             div.classList.add('hidden');
-            document.body.appendChild(div);
 
             DOMUtils.show('#testDiv');
             expect(div.style.display).toBe('');
@@ -130,9 +222,7 @@ describe('DOMUtils', () => {
         });
 
         it('should hide an element', () => {
-            const div = document.createElement('div');
-            div.id = 'testDiv';
-            document.body.appendChild(div);
+            const div = addDiv('testDiv');
 
             DOMUtils.hide('#testDiv');
             expect(div.style.display).toBe('none');
@@ -140,13 +230,12 @@ describe('DOMUtils', () => {
         });
 
         it('should clear an element', () => {
-            const div = document.createElement('div');
-            div.id = 'testDiv';
-            div.innerHTML = 'Hello World';
-            document.body.appendChild(div);
+            const div = addDiv('testDiv');
+            div.innerHTML = '<p>Hello</p><p>World</p>';
 
             DOMUtils.clear('#testDiv');
             expect(div.innerHTML).toBe('');
+            expect(div.childNodes.length).toBe(0);
         });
     });
 
@@ -161,6 +250,18 @@ describe('DOMUtils', () => {
             expect(fragment.childNodes.length).toBe(2);
             expect(fragment.childNodes[0].nodeName).toBe('DIV');
             expect(fragment.childNodes[1].nodeName).toBe('SPAN');
+        });
+
+        it('should contribute nothing for operations that return a falsy value or are not nodes', () => {
+            const fragment = DOMUtils.batch([
+                () => null,
+                () => undefined,
+                'not a node',
+                () => document.createElement('p')
+            ]);
+
+            expect(fragment.childNodes.length).toBe(1);
+            expect(fragment.childNodes[0].nodeName).toBe('P');
         });
     });
 });
