@@ -8,12 +8,14 @@ import { IntroSystem } from '../../src/js/game/IntroSystem.js';
 describe('IntroSystem', () => {
     let introSystem;
     let mockGameState;
+    let mockGame;
 
     beforeEach(() => {
         mockGameState = {
             currentJob: null
         };
-        introSystem = new IntroSystem({ gameState: mockGameState });
+        mockGame = { gameState: mockGameState, finishGameStart: vi.fn() };
+        introSystem = new IntroSystem(mockGame);
 
         // Mock DOM
         document.body.innerHTML = `
@@ -78,17 +80,18 @@ describe('IntroSystem', () => {
 
     describe('startGame', () => {
         it('should remove #intro-screen, remove welcomeOverlay, call finishGameStart()', () => {
-            const introScreen = document.getElementById('intro-screen');
-            const welcomeOverlay = document.createElement('div');
-            welcomeOverlay.id = 'welcomeOverlay';
-            document.body.appendChild(welcomeOverlay);
+            // applyForJob() builds the real welcome overlay and stores it on the instance
+            introSystem.applyForJob('junior_analyst');
+            const welcomeOverlay = introSystem.welcomeOverlay;
+            expect(document.body.contains(welcomeOverlay)).toBe(true);
+            expect(document.getElementById('intro-screen')).not.toBeNull();
+            expect(mockGame.finishGameStart).not.toHaveBeenCalled();
 
-            const finishGameStartSpy = vi.spyOn(introSystem, 'finishGameStart');
             introSystem.startGame();
 
-            expect(introScreen.style.display).toBe('none');
-            expect(document.getElementById('welcomeOverlay')).toBeNull();
-            expect(finishGameStartSpy).toHaveBeenCalled();
+            expect(document.getElementById('intro-screen')).toBeNull();
+            expect(document.body.contains(welcomeOverlay)).toBe(false);
+            expect(mockGame.finishGameStart).toHaveBeenCalledTimes(1);
         });
     });
 });
