@@ -1,4 +1,5 @@
-const GitHubIssuesSystem = require('../../src/js/game/github/GitHubIssuesSystem');
+import { describe, it, expect, beforeEach } from 'vitest';
+import { GitHubIssuesSystem } from '../../src/js/game/github/GitHubIssuesSystem.js';
 
 describe('GitHubIssuesSystem', () => {
     let system;
