@@ -24,6 +24,8 @@ export class CompanyManagementSystem {
             founded: this.gameState.timeManager?.totalDays || 1,
             capital: this.gameState.economySystem?.money || 0,
             reputation: 0,
+            contacts: 0,
+            skillPoints: 0,
             employees: [],
             clients: [],
             projects: []
@@ -48,6 +50,8 @@ export class CompanyManagementSystem {
             acquired: true,
             capital: price,
             reputation: 50,
+            contacts: 0,
+            skillPoints: 0,
             employees: [],
             clients: [],
             projects: []
@@ -111,7 +115,9 @@ export class CompanyManagementSystem {
             const level = candidate.skills?.[skill] || 0;
             productivity += level;
         });
-        return Math.min(100, productivity / this.skills.length);
+        // Skills learned at events (conferences, workshops) boost productivity
+        const skillBonus = (this.playerCompany?.skillPoints || 0) * 0.5;
+        return Math.min(100, productivity / this.skills.length + skillBonus);
     }
     
     /**
@@ -168,6 +174,20 @@ export class CompanyManagementSystem {
             { name: 'FinanceInc', needs: 'machine_learning', budget: 8000 },
             { name: 'StartupXYZ', needs: 'statistics', budget: 2000 }
         ];
+        
+        // Contacts made at events expand the pool of potential clients
+        const contacts = this.playerCompany?.contacts || 0;
+        const extraClients = [
+            { name: 'MediaGroup', needs: 'communication', budget: 4000 },
+            { name: 'LogisticsCo', needs: 'management', budget: 6000 },
+            { name: 'HealthTech', needs: 'programming', budget: 7000 },
+            { name: 'EduPlatform', needs: 'data_analysis', budget: 5500 },
+            { name: 'GreenEnergy', needs: 'statistics', budget: 6500 }
+        ];
+        
+        for (let i = 0; i < contacts && i < extraClients.length; i++) {
+            potentialClients.push(extraClients[i]);
+        }
         
         return potentialClients;
     }
@@ -228,8 +248,10 @@ export class CompanyManagementSystem {
     processEvent(event) {
         switch (event.benefit) {
             case 'contacts':
+                if (this.playerCompany) this.playerCompany.contacts += 3;
                 return { contacts: 3, message: 'You made new contacts' };
             case 'skills':
+                if (this.playerCompany) this.playerCompany.skillPoints += 5;
                 return { skills: 5, message: 'You learned new skills' };
             default:
                 return { message: 'You attended ' + event.name };
