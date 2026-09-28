@@ -962,11 +962,8 @@ export class MainGame {
                     // Show requirement info
                     const locId = locationEl.dataset.location;
                     const loc = this.worldMap?.getLocation(locId);
-                    if (loc && loc.unlockRequirement) {
-                        this.showError(`This location is locked. ${this._formatUnlockRequirement(loc.unlockRequirement)}`);
-                    } else {
-                        this.showError("This location is locked.");
-                    }
+                    const needs = loc?.unlockRequirement ? this._formatUnlockRequirement(loc.unlockRequirement) : '';
+                    this.showError(needs ? `This location is locked. ${needs}` : "This location is locked.");
                 }
             });
         }
@@ -2467,6 +2464,27 @@ export class MainGame {
     /**
      * Show error message
      */
+    /**
+     * Describe what a locked location needs, e.g. "Requires Charisma 40 and 1,000 reputation."
+     */
+    _formatUnlockRequirement(requirement) {
+        const needs = [];
+        if (requirement.stat) {
+            const statName = STATS[requirement.stat]?.name || requirement.stat;
+            needs.push(`${statName} ${requirement.value}`);
+        }
+        if (requirement.reputation) {
+            needs.push(`${requirement.reputation.toLocaleString()} reputation`);
+        }
+        if (requirement.money) {
+            needs.push(`$${requirement.money.toLocaleString()}`);
+        }
+        if (needs.length === 0) return '';
+
+        const last = needs.pop();
+        return `Requires ${needs.length ? `${needs.join(', ')} and ${last}` : last}.`;
+    }
+
     showError(message) {
         if (!message || message === undefined || message === 'undefined') {
             logger.warn('showError called with undefined message');
