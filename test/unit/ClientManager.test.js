@@ -62,9 +62,15 @@ describe('ClientManager', () => {
     describe('generateClient()', () => {
         it('returns null and pushes nothing when rankIndex excludes all CLIENT_TYPES', () => {
             // cap = ceil(rankIndex/2) + 1; rankIndex 0 -> cap 1, but to exclude ALL
-            // types (min complexity 1) we need cap < 1, i.e. rankIndex negative
-            manager.gameState.rankIndex = -1; // cap = ceil(-0.5)+1 = 0
+            // types (min complexity 1) we need cap < 1. rankIndex -1 is not enough:
+            // ceil(-0.5) is -0, so the cap is still 1. rankIndex -2 gives ceil(-1)+1 = 0.
+            manager.gameState.rankIndex = -2;
+            expect(CLIENT_TYPES.every(c => c.dataComplexity >= 1)).toBe(true);
+            const listener = vi.fn();
+            window.addEventListener('newjob', listener);
             const result = manager.generateClient();
+            window.removeEventListener('newjob', listener);
+            expect(listener).not.toHaveBeenCalled();
             expect(result).toBeNull();
             expect(manager.pendingJobs).toHaveLength(0);
         });
