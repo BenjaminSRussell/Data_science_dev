@@ -2,7 +2,7 @@
  * Unit tests for CompanyManagementSystem
  * Covers the non-money operational methods: startCompany, assignTask,
  * getEmployeeWorkStatus, findClients, acquireClient, scheduleMeeting,
- * attendEvent.
+ * attendEvent, and the rewards events give the company.
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -265,6 +265,53 @@ describe('CompanyManagementSystem', () => {
             expect(result.event.id).toBe('meetup');
             expect(result.result.contacts).toBe(3);
             expect(result.result.message).toBe('You made new contacts');
+        });
+    });
+
+    describe('event rewards', () => {
+        beforeEach(() => {
+            cms.startCompany('Acme Analytics');
+        });
+
+        it('should add 3 contacts to the company for each networking event attended', () => {
+            cms.attendEvent('networking');
+            cms.attendEvent('meetup');
+
+            expect(cms.playerCompany.contacts).toBe(6);
+        });
+
+        it('should offer one more client per contact, up to the five extra clients', () => {
+            cms.attendEvent('networking');
+            expect(cms.findClients().map(c => c.name)).toEqual([
+                'TechCorp', 'RetailCo', 'FinanceInc', 'StartupXYZ',
+                'MediaGroup', 'LogisticsCo', 'HealthTech'
+            ]);
+
+            cms.attendEvent('networking');
+            expect(cms.findClients()).toHaveLength(9);
+        });
+
+        it('should add 5 skill points for each conference or workshop attended', () => {
+            cms.attendEvent('conference');
+            cms.attendEvent('workshop');
+
+            expect(cms.playerCompany.skillPoints).toBe(10);
+        });
+
+        it('should raise productivity by half a point per skill point', () => {
+            const candidate = { skills: { data_analysis: 70 } };
+            expect(cms.calculateProductivity(candidate)).toBe(10);
+
+            cms.attendEvent('conference');
+
+            expect(cms.calculateProductivity(candidate)).toBe(12.5);
+        });
+
+        it('should not award anything when the player has no company', () => {
+            cms.playerCompany = null;
+
+            expect(() => cms.attendEvent('networking')).not.toThrow();
+            expect(cms.findClients()).toHaveLength(4);
         });
     });
 });
