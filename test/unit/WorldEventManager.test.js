@@ -50,8 +50,9 @@ describe('WorldEventManager', () => {
             manager.processDay();
 
             expect(mockGameState.stockMarket.triggerBoom).toHaveBeenCalledTimes(1);
+            expect(mockGameState.stockMarket.triggerCrash).not.toHaveBeenCalled(); // 0.001 is not < 0.001
             expect(mockGameState.newsManager.addNews).toHaveBeenCalledTimes(1);
-            expect(manager.events).toContainEqual({ id: 'tech_boom', day: 42 });
+            expect(manager.events).toEqual([{ id: 'tech_boom', day: 42 }]);
         });
 
         it('should skip tech_boom when the roll fails', () => {
@@ -64,20 +65,46 @@ describe('WorldEventManager', () => {
         });
 
         it('should skip a conditioned event without evaluating chance when condition is falsy', () => {
-            const randomSpy = vi.spyOn(Math, 'random');
-            manager.eventPool.throwaway = {
-                id: 'throwaway',
-                name: 'Throwaway',
-                chance: 1,
-                condition: () => false,
-                effect: vi.fn()
+            // A roll of 0 would trigger any event that reaches the chance check
+            const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+            const condition = vi.fn(() => false);
+            // The pool holds only the conditioned event: market_crash and tech_boom
+            // have no condition, so they would always roll Math.random().
+            manager.eventPool = {
+                throwaway: {
+                    id: 'throwaway',
+                    name: 'Throwaway',
+                    chance: 1,
+                    condition,
+                    effect: vi.fn()
+                }
             };
 
             manager.processDay();
 
+            expect(condition).toHaveBeenCalledWith(mockGameState);
             expect(randomSpy).not.toHaveBeenCalled();
             expect(manager.eventPool.throwaway.effect).not.toHaveBeenCalled();
             expect(manager.events).toEqual([]);
+        });
+
+        it('should roll and trigger a conditioned event when its condition is truthy', () => {
+            const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+            manager.eventPool = {
+                throwaway: {
+                    id: 'throwaway',
+                    name: 'Throwaway',
+                    chance: 1,
+                    condition: () => true,
+                    effect: vi.fn()
+                }
+            };
+
+            manager.processDay();
+
+            expect(randomSpy).toHaveBeenCalledTimes(1);
+            expect(manager.eventPool.throwaway.effect).toHaveBeenCalledWith(mockGameState);
+            expect(manager.events).toEqual([{ id: 'throwaway', day: 42 }]);
         });
     });
 
