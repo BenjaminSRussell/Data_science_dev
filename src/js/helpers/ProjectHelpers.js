@@ -161,7 +161,9 @@ export function simulateWorkTick(game) {
         basePower += (game.characterStats?.getStat('intelligence') || 0) * 0.5;
     }
 
-    let tickPower = basePower * 0.1;
+    // Apply focus/stamina task-speed bonus
+    const taskSpeedBonus = 1 + ((game.characterStats?.getTotalBonuses()?.taskSpeed || 0) / 100);
+    let tickPower = basePower * 0.1 * taskSpeedBonus;
     game.projectSystem.workOnProject(tickPower);
 }
 
