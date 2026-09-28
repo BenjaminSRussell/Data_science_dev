@@ -140,29 +140,22 @@ export class AsyncUtils {
         let inThrottle;
         let lastResult;
         let lastError;
-        let lastArgs;
-        let lastResolve;
-        let lastReject;
         let pendingResolvers = [];
 
         return function executedFunction(...args) {
             return new Promise((resolve, reject) => {
-                lastArgs = args;
-                lastResolve = resolve;
-                lastReject = reject;
-
                 if (!inThrottle) {
                     inThrottle = true;
-                    func(...lastArgs)
+                    func(...args)
                         .then(result => {
                             lastResult = result;
                             lastError = undefined;
-                            lastResolve(result);
+                            resolve(result);
                             pendingResolvers.forEach(({ resolve: r }) => r(result));
                         })
                         .catch(error => {
                             lastError = error;
-                            lastReject(error);
+                            reject(error);
                             pendingResolvers.forEach(({ reject: r }) => r(error));
                         })
                         .finally(() => {
@@ -175,11 +168,11 @@ export class AsyncUtils {
                     // Return last result if available, otherwise wait for the
                     // in-flight call to settle so this promise always resolves.
                     if (lastResult !== undefined) {
-                        lastResolve(lastResult);
+                        resolve(lastResult);
                     } else if (lastError !== undefined) {
-                        lastReject(lastError);
+                        reject(lastError);
                     } else {
-                        pendingResolvers.push({ resolve: lastResolve, reject: lastReject });
+                        pendingResolvers.push({ resolve, reject });
                     }
                 }
             });

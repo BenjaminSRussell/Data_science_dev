@@ -152,4 +152,75 @@ describe('AsyncUtils', () => {
             await expect(p).resolves.toBe('fast');
         });
     });
+
+    describe('throttleAsync', () => {
+        function deferred() {
+            let resolve;
+            let reject;
+            const promise = new Promise((res, rej) => {
+                resolve = res;
+                reject = rej;
+            });
+            return { promise, resolve, reject };
+        }
+
+        function track(promise) {
+            const state = { settled: false, value: undefined, error: undefined };
+            promise.then(
+                value => { state.settled = true; state.value = value; },
+                error => { state.settled = true; state.error = error; }
+            );
+            return state;
+        }
+
+        it('should resolve both calls when a second one arrives while the first is in flight', async () => {
+            const work = deferred();
+            const fn = vi.fn(() => work.promise);
+            const throttled = AsyncUtils.throttleAsync(fn, 100);
+
+            const first = track(throttled('a'));
+            const second = track(throttled('b'));
+            work.resolve('done');
+            await vi.advanceTimersByTimeAsync(0);
+
+            expect(fn).toHaveBeenCalledTimes(1);
+            expect(first).toEqual({ settled: true, value: 'done', error: undefined });
+            expect(second).toEqual({ settled: true, value: 'done', error: undefined });
+        });
+
+        it('should reject both calls when the in-flight call fails', async () => {
+            const work = deferred();
+            const throttled = AsyncUtils.throttleAsync(() => work.promise, 100);
+            const failure = new Error('boom');
+
+            const first = track(throttled('a'));
+            const second = track(throttled('b'));
+            work.reject(failure);
+            await vi.advanceTimersByTimeAsync(0);
+
+            expect(first).toEqual({ settled: true, value: undefined, error: failure });
+            expect(second).toEqual({ settled: true, value: undefined, error: failure });
+        });
+
+        it('should answer calls inside the limit with the last result without calling again', async () => {
+            const fn = vi.fn(async (value) => value);
+            const throttled = AsyncUtils.throttleAsync(fn, 100);
+
+            await expect(throttled('a')).resolves.toBe('a');
+            await expect(throttled('b')).resolves.toBe('a');
+
+            expect(fn).toHaveBeenCalledTimes(1);
+        });
+
+        it('should call the function again once the limit has passed', async () => {
+            const fn = vi.fn(async (value) => value);
+            const throttled = AsyncUtils.throttleAsync(fn, 100);
+
+            await throttled('a');
+            await vi.advanceTimersByTimeAsync(100);
+
+            await expect(throttled('b')).resolves.toBe('b');
+            expect(fn).toHaveBeenCalledTimes(2);
+        });
+    });
 });
