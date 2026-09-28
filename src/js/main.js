@@ -2931,7 +2931,7 @@ export class MainGame {
     /**
      * Main Game Loop
      */
-    gameLoop() {
+    gameLoop(timestamp) {
         // Update day/night cycle
         if (this.dayNightCycle) {
             this.dayNightCycle.update();
