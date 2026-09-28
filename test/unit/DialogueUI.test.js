@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DialogueUI } from '../../src/js/ui/DialogueUI.js';
-import { STATS } from '../../src/js/game/CharacterStats.js';
+import { STATS, CharacterStats } from '../../src/js/game/CharacterStats.js';
 
 /**
  * Build a minimal game mock sufficient to drive DialogueUI.open() into a
@@ -11,8 +11,12 @@ function makeGameMock() {
   const rootNode = {
     id: 'root',
     text: 'Root text',
-    choices: [{ id: 'close', text: 'Goodbye' }]
+    choices: [
+      { id: 'ask', text: 'Ask something', nextNode: 'gone' },
+      { id: 'close', text: 'Goodbye' }
+    ]
   };
+  // 'gone' is referenced by the 'ask' choice but is not a node of this tree
   const tree = {
     getRootNode: vi.fn(() => rootNode),
     getNode: vi.fn((id) => (id === 'root' ? rootNode : null))
@@ -23,10 +27,7 @@ function makeGameMock() {
         getRelationship: vi.fn(() => 0),
         setRelationship: vi.fn()
       },
-      characterStats: {
-        stats: {},
-        getStat: vi.fn((id) => 0)
-      },
+      characterStats: new CharacterStats(),
       dialogueTreeSystem: {
         getTree: vi.fn(() => tree)
       }
@@ -43,6 +44,8 @@ describe('DialogueUI', () => {
   let npc;
 
   beforeEach(() => {
+    // open() types the node text out with chained timeouts: keep them under control
+    vi.useFakeTimers();
     document.body.innerHTML = '';
     const mock = makeGameMock();
     game = mock.game;
@@ -67,24 +70,36 @@ describe('DialogueUI', () => {
       expect(game.gameState.npcManager.setRelationship).toHaveBeenCalledWith('npc-1', 50);
     });
 
-    it('caps statBoost at STATS maxLevel', () => {
-      const maxLevel = STATS.intelligence.maxLevel; // 100
-      game.gameState.characterStats.getStat.mockReturnValue(maxLevel);
-      game.gameState.characterStats.stats = { intelligence: maxLevel };
+    it('raises the boosted stat by one below the cap', () => {
+      const stats = game.gameState.characterStats;
+      expect(stats.getStat('intelligence')).toBe(10);
 
       ui.applyEffects({ statBoost: 'intelligence' });
 
-      expect(game.gameState.characterStats.stats.intelligence).toBe(maxLevel);
-      expect(game.gameState.characterStats.stats.intelligence).toBeLessThanOrEqual(100);
+      expect(stats.getStat('intelligence')).toBe(11);
+    });
+
+    it('caps statBoost at STATS maxLevel', () => {
+      const stats = game.gameState.characterStats;
+      expect(STATS.intelligence.maxLevel).toBe(100);
+      expect(STATS.luck.maxLevel).toBe(50);
+      stats.stats.intelligence = 100;
+      stats.stats.luck = 50;
+
+      ui.applyEffects({ statBoost: 'intelligence' });
+      ui.applyEffects({ statBoost: 'luck' });
+
+      expect(stats.getStat('intelligence')).toBe(100);
+      expect(stats.getStat('luck')).toBe(50);
     });
 
     it('does not mutate or throw when effects has no relevant keys', () => {
       const setRelationship = game.gameState.npcManager.setRelationship;
-      const stats = game.gameState.characterStats.stats;
+      const before = { ...game.gameState.characterStats.stats };
 
       expect(() => ui.applyEffects({})).not.toThrow();
       expect(setRelationship).not.toHaveBeenCalled();
-      expect(stats).toEqual({});
+      expect(game.gameState.characterStats.stats).toEqual(before);
     });
   });
 
@@ -93,7 +108,10 @@ describe('DialogueUI', () => {
       ui.open(npc);
       expect(ui.isOpen).toBe(true);
 
+      expect(ui.container.classList.contains('active')).toBe(true);
+
       ui.handleChoice('close');
+      expect(ui.container.classList.contains('active')).toBe(false);
       expect(ui.isOpen).toBeFalsy();
       expect(ui.currentNPC).toBeFalsy();
       expect(ui.currentTree).toBeFalsy();
@@ -133,23 +151,41 @@ describe('DialogueUI', () => {
         currentNode: ui.currentNode
       };
 
+      tree.getNode.mockClear();
+      tree.getRootNode.mockClear();
+      vi.runAllTimers(); // let the typing animation of open() finish
+
       ui.handleChoice('does-not-exist');
 
+      expect(tree.getNode).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+      expect(ui.isOpen).toBe(true);
       expect(ui.isOpen).toBe(before.isOpen);
       expect(ui.currentNPC).toBe(before.currentNPC);
       expect(ui.currentNode).toBe(before.currentNode);
     });
 
     it('schedules a 1000ms callback to show the root node when nextNode lookup fails', () => {
-      vi.useFakeTimers();
-      tree.getNode.mockImplementation((id) => (id === 'root' ? rootNode : null));
       ui.open(npc);
+      vi.runAllTimers(); // let the typing animation of open() finish
+      tree.getRootNode.mockClear();
+      const showNode = vi.spyOn(ui, 'showNode');
 
-      ui.handleChoice('some-choice');
+      // 'ask' is a real choice of the root node whose nextNode is not in the tree
+      ui.handleChoice('ask');
 
+      expect(tree.getNode).toHaveBeenLastCalledWith('gone');
+      expect(showNode).not.toHaveBeenCalled();
       expect(ui.currentNode).toBe(rootNode);
-      vi.advanceTimersByTime(1000);
-      expect(tree.getRootNode).toHaveBeenCalled();
+
+      vi.advanceTimersByTime(999);
+      expect(tree.getRootNode).not.toHaveBeenCalled();
+      expect(showNode).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(1);
+      expect(tree.getRootNode).toHaveBeenCalledTimes(1);
+      expect(showNode).toHaveBeenCalledTimes(1);
+      expect(showNode).toHaveBeenCalledWith(rootNode);
       expect(ui.currentNode).toBe(rootNode);
     });
   });
