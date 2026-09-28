@@ -134,7 +134,7 @@ export default {
             condition: { mentionDebt: true, judgment: true },
             emotion: 'defensive',
             dialogue: "Perception is reality. If it looks expensive, it is expensive.",
-            subtext: 'Her smile doesn't reach her eyes'
+            subtext: "Her smile doesn't reach her eyes"
         },
         {
             condition: { playerSupports: true, relationship: '>40' },
