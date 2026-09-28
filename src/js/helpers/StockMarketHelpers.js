@@ -300,6 +300,7 @@ export function handleArrest(game, reason) {
 
     const baseSentence = 30;
     const baseFine = 5000;
+    const baseReputationLoss = 0.5;
     const sentence = Math.max(1, Math.floor(baseSentence * (1 - reduction)));
     const fine = Math.floor(baseFine * (1 - reduction));
 
@@ -307,7 +308,8 @@ export function handleArrest(game, reason) {
     game.screenManager.showScreen('screen-jail');
     document.getElementById('jail-time-left').textContent = `${game.gameState.jailSentence} days`;
 
-    game.gameState.reputation = Math.floor(game.gameState.reputation * (1 - reduction));
+    const reputationLoss = baseReputationLoss * (1 - reduction);
+    game.gameState.reputation = Math.floor(game.gameState.reputation * (1 - reputationLoss));
     game.gameState.money -= fine;
 
     const lawyerNote = lawyerTier
