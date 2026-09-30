@@ -6,6 +6,7 @@
 
 import { dialogueTreeSystem } from '../game/dialogue/DialogueTreeSystem.js';
 import { STATS } from '../game/CharacterStats.js';
+import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
 
 export class DialogueUI {
     constructor(game) {
@@ -64,6 +65,8 @@ export class DialogueUI {
             <div class="dialogue-box">
                 <div class="dialogue-header">
                     <div class="char-avatar" id="dialogue-avatar">
+                        <img id="dialogue-avatar-image" style="display:none; width:100%; height:100%; object-fit:cover;" alt="NPC Avatar" />
+                        <div id="dialogue-avatar-icon" class="char-avatar-icon" style="display:none; font-size: 2rem;"></div>
                         <span class="char-avatar-initial" id="dialogue-avatar-initial">?</span>
                     </div>
                     <div class="dialogue-npc-info">
@@ -81,6 +84,25 @@ export class DialogueUI {
 
         const style = document.createElement('style');
         style.textContent = `
+            .char-avatar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                overflow: hidden;
+                background: rgba(0, 0, 0, 0.2);
+                flex-shrink: 0;
+            }
+            .char-avatar-icon {
+                font-size: 2rem;
+            }
+            .char-avatar-initial {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: rgba(255, 255, 255, 0.8);
+            }
             .dialogue-close {
                 background: rgba(255, 255, 255, 0.1);
                 border: none;
@@ -143,11 +165,38 @@ export class DialogueUI {
         // Fallback to DOM method
         const avatar = this.container?.querySelector('#dialogue-avatar');
         const initial = this.container?.querySelector('#dialogue-avatar-initial');
+        const avatarImage = this.container?.querySelector('#dialogue-avatar-image');
+        const avatarIcon = this.container?.querySelector('#dialogue-avatar-icon');
 
         if (avatar && initial) {
             const personality = npc.personality || 'friendly';
             avatar.setAttribute('data-personality', personality);
             initial.textContent = npc.name?.[0]?.toUpperCase() || '?';
+
+            // Load NPC image with fallback chain: image -> icon -> initial
+            if (avatarImage) {
+                const npcImage = getNPCImage(npc);
+                const fallbackIcon = getNPCFallback(npc);
+
+                avatarImage.src = npcImage;
+                avatarImage.style.display = 'block';
+                avatarImage.onerror = () => {
+                    // Image failed, show icon fallback
+                    avatarImage.style.display = 'none';
+                    if (avatarIcon && fallbackIcon) {
+                        avatarIcon.textContent = fallbackIcon;
+                        avatarIcon.style.display = '';
+                        initial.style.display = 'none';
+                    } else {
+                        // No icon, show initial
+                        initial.style.display = '';
+                    }
+                };
+                initial.style.display = 'none';
+                if (avatarIcon) {
+                    avatarIcon.style.display = 'none';
+                }
+            }
         }
 
         // Update NPC info
