@@ -53,13 +53,20 @@ export class ConversationScreen {
      * Start conversation
      */
     async startConversation() {
-        const conversation = await this.game.npcManager?.startConversation(this.currentNPC.id);
+        // Capture the NPC at call time to prevent race conditions with concurrent showConversation calls
+        const capturedNPC = this.currentNPC;
+        if (!capturedNPC) return;
+
+        const conversation = await this.game.npcManager?.startConversation(capturedNPC.id);
         if (!conversation) return;
 
-        const npcImage = getNPCImage(this.currentNPC);
-        const fallbackIcon = getNPCFallback(this.currentNPC);
-        const relationship = this.game.npcManager?.getRelationship(this.currentNPC.id) || 0;
-        const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || 0;
+        // Guard against stale calls: if this NPC is no longer current, bail out
+        if (this.currentNPC?.id !== capturedNPC.id) return;
+
+        const npcImage = getNPCImage(capturedNPC);
+        const fallbackIcon = getNPCFallback(capturedNPC);
+        const relationship = this.game.npcManager?.getRelationship(capturedNPC.id) || 0;
+        const tier = this.game.npcManager?.getRelationshipTier(capturedNPC.id) || 0;
 
         // Build conversation screen HTML
         this.screenElement.innerHTML = `
@@ -70,18 +77,18 @@ export class ConversationScreen {
                     </div>
                 </div>
                 <div class="conversation-npc-info">
-                    <div class="conversation-npc-name">${this.currentNPC.name}</div>
-                    <div class="conversation-npc-title">${this.currentNPC.title}</div>
+                    <div class="conversation-npc-name">${capturedNPC.name}</div>
+                    <div class="conversation-npc-title">${capturedNPC.title}</div>
                 </div>
                 <div class="conversation-relationship" style="color: ${tier.color}">
                     <span>${tier.label}</span>
                     <span>(${relationship})</span>
                 </div>
             </div>
-            
+
             <div class="conversation-body">
                 <div class="conversation-dialogue-area">
-                    <div class="conversation-dialogue-bubble ${this.currentNPC.personality}">
+                    <div class="conversation-dialogue-bubble ${capturedNPC.personality}">
                         <div class="conversation-dialogue-text" id="conversation-dialogue-text">
                             ${conversation.greeting}
                         </div>
@@ -110,10 +117,10 @@ export class ConversationScreen {
 
         // Render Avatar (3D or 2D)
         const container = this.screenElement.querySelector('#npc-avatar-container');
-        if (this.currentNPC.modelPath) {
+        if (capturedNPC.modelPath) {
             // Try rendering 3D model
-            const element = this.threeRenderer.create3DCharacter(this.currentNPC.id, {
-                path: this.currentNPC.modelPath,
+            const element = this.threeRenderer.create3DCharacter(capturedNPC.id, {
+                path: capturedNPC.modelPath,
                 width: 200,
                 height: 300
             });
@@ -122,8 +129,8 @@ export class ConversationScreen {
         } else {
             // Fallback to 2D Image
             container.innerHTML = `
-                <img src="${npcImage}" 
-                        alt="${this.currentNPC.name}"
+                <img src="${npcImage}"
+                        alt="${capturedNPC.name}"
                         style="width: 100%; height: 100%; object-fit: cover;"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="npc-avatar-fallback" style="display:none; font-size: 3rem;">
