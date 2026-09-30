@@ -111,7 +111,6 @@ export default {
     
     breakdowns: {
         low_relationship: {
-            trigger: { relationship: '<20' },
             emotion: 'hurt',
             dialogue: [
                 "I thought we were cool.",
@@ -121,7 +120,6 @@ export default {
             quickTime: 'comfort'
         },
         past_judgment: {
-            trigger: { judgment: true },
             emotion: 'anger',
             dialogue: [
                 "You're judging me for my past?!",
@@ -131,7 +129,6 @@ export default {
             quickTime: 'defuse'
         },
         betrayal: {
-            trigger: { betrayal: true },
             emotion: 'fighting',
             dialogue: [
                 "I trusted you.",
