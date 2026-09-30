@@ -264,7 +264,7 @@ export class MapProgressionSystem {
     fromJSON(data) {
         if (!data) return;
         this.currentMap = data.currentMap || 'early_game';
-        this.unlockedMaps = data.unlockedMaps || ['early_game'];
+        this.unlockedMaps = Array.isArray(data.unlockedMaps) && data.unlockedMaps.length > 0 ? data.unlockedMaps : ['early_game'];
         this.mapData = data.mapData || this.initializeMaps();
     }
 }
