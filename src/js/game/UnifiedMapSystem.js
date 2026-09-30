@@ -35,15 +35,6 @@ export class UnifiedMapSystem {
             settlements: null,
             ui: null // For labels, markers, etc.
         };
-        
-        // Cached graphics objects
-        this.cache = {
-            grass: null,
-            zones: new Map(),
-            roads: [],
-            buildings: new Map(),
-            locations: new Map()
-        };
     }
 
     /**
