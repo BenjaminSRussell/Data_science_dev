@@ -67,9 +67,10 @@ export function initializeCameraSystem(game) {
 
 /**
  * Update the map screen with current state - Optimized O(n) single pass
+ * Returns a Promise that resolves when map system initialization is complete
  */
 export function updateMapScreen(game) {
-    if (!game.worldMap || !game.timeManager) return;
+    if (!game.worldMap || !game.timeManager) return Promise.resolve();
 
     initDOMCache();
     initializeCameraSystem(game);
@@ -81,14 +82,14 @@ export function updateMapScreen(game) {
     updateLocationActions(game);
 
     // Use UnifiedMapSystem (PixiJS-based, replaces all old renderers)
+    let mapInitPromise = Promise.resolve();
+
     if (!game.unifiedMapSystem && domCache.mapContainer) {
         try {
-            import('../game/UnifiedMapSystem.js').then(({ UnifiedMapSystem }) => {
+            mapInitPromise = import('../game/UnifiedMapSystem.js').then(({ UnifiedMapSystem }) => {
                 game.unifiedMapSystem = new UnifiedMapSystem(domCache.mapContainer, game);
                 // Initialize map system
-                game.unifiedMapSystem.initialize().then(() => {
-
-                }).catch(err => {
+                return game.unifiedMapSystem.initialize().catch(err => {
                     console.error('UnifiedMapSystem initialization failed:', err);
                     // Fallback disabled - WorldMapRenderer causes import errors
                     // Game will continue without map renderer if UnifiedMapSystem fails
@@ -102,12 +103,13 @@ export function updateMapScreen(game) {
             });
         } catch (err) {
             console.warn('UnifiedMapSystem initialization error:', err);
+            mapInitPromise = Promise.reject(err);
         }
     } else if (game.unifiedMapSystem) {
         // Update existing unified map system
         // If not rendered yet, try to initialize
         if (!game.unifiedMapSystem.rendered) {
-            game.unifiedMapSystem.initialize().catch(err => {
+            mapInitPromise = game.unifiedMapSystem.initialize().catch(err => {
                 logger.warn('UnifiedMapSystem re-initialization failed:', err);
             });
         } else {
@@ -126,6 +128,8 @@ export function updateMapScreen(game) {
     // Update icons to use image assets
     updateMapLocationIcons(game);
     updateLockBadges();
+
+    return mapInitPromise;
 }
 
 /**

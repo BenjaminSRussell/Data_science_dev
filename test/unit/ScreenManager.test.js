@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ScreenManager } from '../../src/js/ui/ScreenManager.js';
 
 describe('ScreenManager', () => {
@@ -70,5 +70,37 @@ describe('ScreenManager', () => {
     screenManager.showScreen('screen-a');
     expect(screenManager.isScreenActive('screen-menu')).toBe(false);
     expect(screenManager.isScreenActive('screen-a')).toBe(true);
+  });
+
+  it('should call handleResize on map screen after updateMapScreen completes initialization on first visit', async () => {
+    // Create map screen element
+    const mapScreenHtml = '<section class="screen" id="screen-map"></section>';
+    document.body.innerHTML += mapScreenHtml;
+    screenManager.init();
+
+    // Create a mock unifiedMapSystem that will be assigned after a delay
+    const mockHandleResize = vi.fn();
+    const mockUnifiedMapSystem = {
+      handleResize: mockHandleResize,
+      initialize: vi.fn().mockResolvedValue(undefined),
+      rendered: false,
+      update: vi.fn(),
+    };
+
+    // Create mock game with updateMapScreen that simulates async initialization
+    mockMainGame.updateMapScreen = vi.fn(async () => {
+      // Simulate the async import and initialization happening after the function is called
+      await new Promise(resolve => setTimeout(resolve, 50));
+      mockMainGame.unifiedMapSystem = mockUnifiedMapSystem;
+    });
+
+    // Show the map screen
+    screenManager.showScreen('screen-map');
+
+    // Wait for the async operations to complete and handleResize to be called
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Verify that handleResize was called after initialization
+    expect(mockHandleResize).toHaveBeenCalled();
   });
 });
