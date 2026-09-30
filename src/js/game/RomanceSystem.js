@@ -26,6 +26,7 @@ export class RomanceSystem {
         if (!npc || !npc.romanceOptions) return { success: false, message: "They aren't interested." };
 
         if (this.partnerId && this.partnerId !== npcId) {
+            this.modifyHappiness(-25); // Partner is upset about cheating attempt
             return { success: false, message: "You are already seeing someone! Cheater!" };
         }
 
