@@ -248,8 +248,9 @@ export class StoryUI {
     updateStoryDisplay() {
         const storylineManager = this.game?.gameState?.storylineManager;
         if (!storylineManager) {
-            storylineManager.initialize();
+            return;
         }
+        storylineManager.initialize();
 
         const status = storylineManager.getStatus();
         const arc = status.arc || storylineManager.getCurrentArc();
