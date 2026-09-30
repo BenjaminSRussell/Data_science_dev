@@ -567,6 +567,9 @@ export function getStoryReveal(npcId, relationshipLevel, topic = null) {
     if (topic) {
         const topicReveal = reveals.find(r => r.topic === topic);
         if (topicReveal) return topicReveal;
+        // If a specific topic was requested but not found at this level, return null
+        // This allows the caller to fall back to personalStory
+        return null;
     }
 
     return reveals[0] || null;
