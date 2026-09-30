@@ -135,7 +135,7 @@ export class LitUIManager {
         button.label = label;
         button.icon = icon || '';
         button.variant = variant || 'primary';
-        button.onclick = onclick;
+        button.onClick = onclick;
         return button;
     }
 
