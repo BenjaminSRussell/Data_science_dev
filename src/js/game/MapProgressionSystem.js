@@ -168,26 +168,90 @@ export class MapProgressionSystem {
         this.currentMap = mapId;
 
         // Update world map with new locations
+        let locationsUpdated = true;
         if (this.gameState.worldMap) {
-            this.updateWorldMapLocations(map);
+            locationsUpdated = this.updateWorldMapLocations(map);
+        }
+
+        // Get NPCs that will follow to the new map
+        const followingNPCs = this.getNPCsThatFollow();
+
+        // Only report success if map transition and location update completed
+        if (!locationsUpdated && this.gameState.worldMap) {
+            return { success: false, message: 'Failed to update map locations.' };
         }
 
         return {
             success: true,
             map,
+            followingNPCs,
             message: `You've arrived in ${map.name}.`
         };
     }
 
     /**
      * Update world map with new locations
+     * Merges the map's locations into the world map's locationOverrides
      */
     updateWorldMapLocations(map) {
-        // This would integrate with WorldMap to add/update locations
-        map?.locations?.forEach(loc => {
-            // Add location to world map if it doesn't exist
-            // Implementation depends on WorldMap structure
+        if (!map || !map.locations || !this.gameState.worldMap) {
+            return false;
+        }
+
+        // Use the worldMap's addLocations method to merge locations
+        if (typeof this.gameState.worldMap.addLocations === 'function') {
+            const result = this.gameState.worldMap.addLocations(map.locations);
+            // Verify that locations were actually added to locationOverrides
+            if (result && map.locations.length > 0) {
+                // Check that at least one location is in locationOverrides
+                const firstLocId = map.locations[0].id;
+                return this.gameState.worldMap.locationOverrides &&
+                       this.gameState.worldMap.locationOverrides[firstLocId] !== undefined;
+            }
+            return result;
+        }
+
+        // Fallback: manually add locations to locationOverrides
+        if (!this.gameState.worldMap.locationOverrides) {
+            this.gameState.worldMap.locationOverrides = {};
+        }
+
+        let addedCount = 0;
+        map.locations.forEach(loc => {
+            if (loc && loc.id) {
+                // Create full location object and add to locationOverrides
+                this.gameState.worldMap.locationOverrides[loc.id] = {
+                    id: loc.id,
+                    name: loc.name || this._generateLocationName(loc.id),
+                    type: loc.type || 'location',
+                    position: { x: loc.x || 0, y: loc.y || 0 },
+                    travelTime: loc.travelTime || 1,
+                    requiresVehicle: loc.requiresVehicle || false,
+                    unlockRequirement: loc.unlockRequirement || null,
+                    activities: loc.activities || [],
+                    background: loc.background || 'url("/assets/locations/default/background.png")',
+                    ...loc
+                };
+                addedCount++;
+            }
         });
+
+        // Invalidate cache if locations were added
+        if (addedCount > 0 && this.gameState.worldMap._invalidateCache) {
+            this.gameState.worldMap._invalidateCache();
+        }
+
+        return addedCount > 0;
+    }
+
+    /**
+     * Generate a display name for a location ID
+     */
+    _generateLocationName(id) {
+        return id
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
     }
 
     /**

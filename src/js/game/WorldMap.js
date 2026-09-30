@@ -354,9 +354,63 @@ export class WorldMap {
     }
 
     /**
+     * Add or update locations from a map transition
+     * Merges new locations into the world map's locationOverrides
+     */
+    addLocations(locations) {
+        if (!locations || !Array.isArray(locations)) {
+            return false;
+        }
+
+        let addedCount = 0;
+        locations.forEach(loc => {
+            if (loc && loc.id) {
+                // Create a full location object for map-specific locations
+                // These locations have { id, x, y } and need to be expanded
+                this.locationOverrides[loc.id] = {
+                    id: loc.id,
+                    name: loc.name || this._generateLocationName(loc.id),
+                    type: loc.type || 'location',
+                    position: { x: loc.x || 0, y: loc.y || 0 },
+                    travelTime: loc.travelTime || 1,
+                    requiresVehicle: loc.requiresVehicle || false,
+                    unlockRequirement: loc.unlockRequirement || null,
+                    activities: loc.activities || [],
+                    background: loc.background || 'url("/assets/locations/default/background.png")',
+                    ...loc // Spread any additional properties
+                };
+                addedCount++;
+            }
+        });
+
+        if (addedCount > 0) {
+            this._invalidateCache();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Generate a display name for a location ID
+     */
+    _generateLocationName(id) {
+        // Convert snake_case to Title Case
+        return id
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+    /**
      * Get location by ID - O(1) lookup
+     * Checks locationOverrides first for map-specific locations
      */
     getLocation(locationId) {
+        // Check overrides first (map-specific locations)
+        if (this.locationOverrides[locationId]) {
+            return this.locationOverrides[locationId];
+        }
+        // Fall back to global locations
         return LOCATIONS_MAP.get(locationId);
     }
 
@@ -377,6 +431,7 @@ export class WorldMap {
 
     /**
      * Get all accessible locations - O(n) with caching
+     * Includes both global LOCATIONS and map-specific locationOverrides
      */
     getAccessibleLocations() {
         // Return cached result if valid
@@ -390,6 +445,28 @@ export class WorldMap {
 
         // Single pass through locations - O(n)
         for (const location of LOCATIONS) {
+            // Check vehicle requirement - O(1)
+            if (location.requiresVehicle === 'car' && accessLevel < 2) continue;
+            if (location.requiresVehicle === 'luxury_car' && accessLevel < 3) continue;
+            if (location.requiresVehicle === 'bus' && accessLevel < 1) continue;
+
+            // Unlock check - O(1)
+            if (location.unlockRequirement) {
+                const req = location.unlockRequirement;
+                if (req.stat) {
+                    const statVal = this.gameState.characterStats?.getStat(req.stat) || 0;
+                    if (statVal < req.value) continue;
+                }
+                if (req.reputation && this.gameState.reputation < (req.reputation || 0)) continue;
+                if (req.money && this.gameState.money < req.money) continue;
+            }
+
+            accessible.push(location);
+        }
+
+        // Also include map-specific locations from locationOverrides
+        for (const locationId in this.locationOverrides) {
+            const location = this.locationOverrides[locationId];
             // Check vehicle requirement - O(1)
             if (location.requiresVehicle === 'car' && accessLevel < 2) continue;
             if (location.requiresVehicle === 'luxury_car' && accessLevel < 3) continue;
