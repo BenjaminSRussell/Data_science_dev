@@ -38,7 +38,7 @@ import { MapProgressionSystem } from './game/MapProgressionSystem.js';
 import { dialogueTreeSystem } from './game/dialogue/DialogueTreeSystem.js';
 import { ConversationScreen } from './game/dialogue/ConversationScreen.js';
 import { IntroSystem } from './game/IntroSystem.js';
-import { DayNightCycle, TIME_OF_DAY } from './game/DayNightCycle.js';
+import { DayNightCycle } from './game/DayNightCycle.js';
 import { NotificationSystem } from './game/NotificationSystem.js';
 import { LocationDetailSystem } from './game/locations/LocationDetailSystem.js';
 import { OfficeManager } from './game/OfficeManager.js';
