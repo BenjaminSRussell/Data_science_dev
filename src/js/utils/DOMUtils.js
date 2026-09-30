@@ -86,7 +86,7 @@ export class DOMUtils {
     }
 
     /**
-     * Query all with caching
+     * Query all elements matching selector
      */
     static queryAll(selector) {
         return Array.from(document.querySelectorAll(selector));
