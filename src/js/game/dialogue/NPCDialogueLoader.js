@@ -79,12 +79,20 @@ export class NPCDialogueLoader {
                     greeting: "Hello.",
                     topics: []
                 },
+                friendly: {
+                    greeting: "Hey there.",
+                    topics: []
+                },
                 acquaintance: {
                     greeting: "Hey.",
                     topics: []
                 },
                 friend: {
                     greeting: "Hi there!",
+                    topics: []
+                },
+                close_friend: {
+                    greeting: "Hey buddy!",
                     topics: []
                 }
             },
