@@ -378,7 +378,7 @@ export class StoryUI {
         const storylineManager = this.game?.gameState?.storylineManager;
         if (!storylineManager) return;
 
-        const majorDecisions = storylineManager.majorDecisions || [];
+        const majorDecisions = decisions || [];
 
         if (majorDecisions.length === 0) {
             decisionsList.innerHTML = '<div class="no-decisions">No major decisions yet. Your story is just beginning.</div>';
