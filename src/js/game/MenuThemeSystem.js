@@ -77,8 +77,7 @@ export class MenuThemeSystem {
      * Initialize all available themes
      */
     initializeThemes() {
-        try {
-            return {
+        return {
             starter: {
                 id: 'starter',
                 name: 'Starter',
@@ -143,22 +142,7 @@ export class MenuThemeSystem {
                 pattern: 'linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px)',
                 background: 'linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%)'
             }
-            };
-        } catch (error) {
-            // Error initializing themes, return fallback
-            // Return minimal fallback themes object
-            return {
-                starter: {
-                    id: 'starter',
-                    name: 'Starter',
-                    unlocked: true,
-                    particleColors: ['rgba(139, 92, 246, 0.6)', 'rgba(167, 139, 250, 0.4)'],
-                    gradient: 'radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-                    pattern: 'linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
-                    background: 'linear-gradient(180deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%)'
-                }
-            };
-        }
+        };
     }
 
     /**
