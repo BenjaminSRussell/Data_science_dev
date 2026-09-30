@@ -91,4 +91,193 @@ describe('IntroSystem', () => {
             expect(finishGameStartSpy).toHaveBeenCalled();
         });
     });
+
+    describe('showIntro', () => {
+        beforeEach(() => {
+            // Setup DOM for video intro tests
+            document.body.innerHTML = `
+                <div id="screen-intro-video" class="hidden">
+                    <video id="intro-video"></video>
+                    <button id="btn-skip-video">Skip</button>
+                </div>
+                <div id="intro-screen"></div>
+            `;
+        });
+
+        it('should show video screen, handle onended, and show intro text (happy path)', async () => {
+            const videoScreen = document.getElementById('screen-intro-video');
+            const video = document.getElementById('intro-video');
+
+            // Mock video methods - jsdom doesn't implement these
+            video.play = vi.fn(() => Promise.resolve());
+            video.pause = vi.fn();
+
+            const showIntroTextSpy = vi.spyOn(introSystem, 'showIntroText');
+
+            introSystem.showIntro();
+
+            // After initial call, screen should be visible
+            expect(videoScreen.classList.contains('hidden')).toBe(false);
+
+            // Simulate video ending
+            video.onended();
+
+            // Video pause should have been called
+            expect(video.pause).toHaveBeenCalled();
+            // Screen should be hidden
+            expect(videoScreen.classList.contains('hidden')).toBe(true);
+            // showIntroText should have been called
+            expect(showIntroTextSpy).toHaveBeenCalled();
+        });
+
+        it('should fallback to showIntroText if video screen is missing', () => {
+            document.body.innerHTML = '<div id="intro-screen"></div>';
+
+            const showIntroTextSpy = vi.spyOn(introSystem, 'showIntroText');
+
+            introSystem.showIntro();
+
+            expect(showIntroTextSpy).toHaveBeenCalled();
+        });
+
+        it('should fallback to showIntroText if video element is missing', () => {
+            document.body.innerHTML = `
+                <div id="screen-intro-video"></div>
+                <div id="intro-screen"></div>
+            `;
+
+            const showIntroTextSpy = vi.spyOn(introSystem, 'showIntroText');
+
+            introSystem.showIntro();
+
+            expect(showIntroTextSpy).toHaveBeenCalled();
+        });
+
+        it('should handle video.play() rejection gracefully', async () => {
+            const videoScreen = document.getElementById('screen-intro-video');
+            const video = document.getElementById('intro-video');
+
+            // Mock video.play() to reject
+            video.play = vi.fn(() => Promise.reject(new Error('NotAllowedError')));
+            // Mock video methods
+            video.pause = vi.fn();
+
+            const showIntroTextSpy = vi.spyOn(introSystem, 'showIntroText');
+
+            introSystem.showIntro();
+
+            // Flush microtasks to allow promise rejection to be caught
+            await Promise.resolve();
+            await Promise.resolve();
+
+            // Despite rejection, finishVideo effects should occur
+            expect(video.pause).toHaveBeenCalled();
+            expect(videoScreen.classList.contains('hidden')).toBe(true);
+            expect(showIntroTextSpy).toHaveBeenCalled();
+        });
+
+        it('should call finishVideo when skip button is clicked', async () => {
+            const videoScreen = document.getElementById('screen-intro-video');
+            const video = document.getElementById('intro-video');
+            const skipBtn = document.getElementById('btn-skip-video');
+
+            // Mock video.play()
+            video.play = vi.fn(() => Promise.resolve());
+            video.pause = vi.fn();
+
+            const showIntroTextSpy = vi.spyOn(introSystem, 'showIntroText');
+
+            introSystem.showIntro();
+
+            // Initial state: screen visible
+            expect(videoScreen.classList.contains('hidden')).toBe(false);
+
+            // Simulate skip button click
+            skipBtn.onclick();
+
+            // Check effects are same as onended
+            expect(video.pause).toHaveBeenCalled();
+            expect(videoScreen.classList.contains('hidden')).toBe(true);
+            expect(showIntroTextSpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('showJobWelcome', () => {
+        it('should create overlay with job details, append to body, and store reference', () => {
+            const job = {
+                id: 'test_job',
+                title: 'Test Position',
+                company: 'Test Company',
+                salary: 500
+            };
+
+            introSystem.showJobWelcome(job);
+
+            // Check overlay was created and appended
+            const overlay = document.querySelector('.intro-screen.active');
+            expect(overlay).not.toBeNull();
+
+            // Check job details are in the overlay
+            expect(overlay.innerHTML).toContain('Test Position');
+            expect(overlay.innerHTML).toContain('Test Company');
+            expect(overlay.innerHTML).toContain('500');
+
+            // Check reference is stored
+            expect(introSystem.welcomeOverlay).toBe(overlay);
+        });
+
+        it('should create overlay with correct congratulations message structure', () => {
+            const job = {
+                id: 'analyst',
+                title: 'Data Analyst',
+                company: 'Tech Corp',
+                salary: 750
+            };
+
+            introSystem.showJobWelcome(job);
+
+            const overlay = document.querySelector('.intro-screen.active');
+            expect(overlay.querySelector('.intro-title')).not.toBeNull();
+            expect(overlay.querySelector('.intro-subtitle')).not.toBeNull();
+            expect(overlay.querySelector('.intro-story')).not.toBeNull();
+            expect(overlay.querySelector('#btn-intro-start-game')).not.toBeNull();
+        });
+    });
+
+    describe('createIntroScreen', () => {
+        it('should create screen with correct id and append to DOM', () => {
+            const screen = introSystem.createIntroScreen();
+
+            expect(screen.id).toBe('intro-screen');
+            expect(screen.className).toBe('intro-screen');
+        });
+
+        it('should have button that calls showJobApplication after setTimeout', async () => {
+            const screen = introSystem.createIntroScreen();
+            document.body.appendChild(screen);
+
+            const showJobApplicationSpy = vi.spyOn(introSystem, 'showJobApplication');
+
+            // Wait for setTimeout to execute
+            await new Promise(resolve => setTimeout(resolve, 10));
+
+            // Click the button
+            const btn = screen.querySelector('#btn-intro-find-job');
+            expect(btn).not.toBeNull();
+            btn.click();
+
+            expect(showJobApplicationSpy).toHaveBeenCalled();
+        });
+
+        it('should contain all required content sections', () => {
+            const screen = introSystem.createIntroScreen();
+
+            expect(screen.querySelector('.intro-content')).not.toBeNull();
+            expect(screen.querySelector('.intro-title')).not.toBeNull();
+            expect(screen.querySelector('.intro-subtitle')).not.toBeNull();
+            expect(screen.querySelector('.intro-story')).not.toBeNull();
+            expect(screen.querySelector('.intro-steps')).not.toBeNull();
+            expect(screen.querySelector('#btn-intro-find-job')).not.toBeNull();
+        });
+    });
 });
