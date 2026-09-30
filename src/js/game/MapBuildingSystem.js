@@ -58,7 +58,7 @@ export class MapBuildingSystem {
             if (zoneSystem) {
                 const zone = zoneSystem.findZoneForLocationType(location.type);
                 if (zone) {
-                    const availableBlock = this.blockSystem.findAvailableBlock(zone.type, size.width);
+                    const availableBlock = this.blockSystem.findAvailableBlock(zone.type, { width: size.width, height: size.height });
                     if (availableBlock) {
                         this.blockSystem.assignLocationToBlock(location.id, availableBlock.id);
                         block = availableBlock;
