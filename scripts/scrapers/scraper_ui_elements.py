@@ -17,6 +17,25 @@ from bs4 import BeautifulSoup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+
+def generate_search_patterns(element):
+    """
+    Generate search patterns for a UI element.
+
+    Args:
+        element: The UI element name (e.g., 'button', 'x', 'shield')
+
+    Returns:
+        A list of search pattern strings to use for scraping OpenGameArt
+    """
+    return [
+        f"low poly {element} ui",
+        f"lowpoly {element}",
+        f"3d {element} icon",
+        f"polygonal {element}"
+    ]
+
+
 class UIElementScraper:
     def __init__(self, output_dir="downloaded_assets/ui/elements"):
         self.output_dir = Path(output_dir)
@@ -67,15 +86,10 @@ class UIElementScraper:
     def scrape_opengameart_ui(self, element, max_results=10):
         """Scrape UI elements from OpenGameArt"""
         base_url = "https://opengameart.org"
-        searches = [
-            f"low poly {element} ui",
-            f"lowpoly {element}",
-            f"3d {element} icon",
-            f"polygonal {element}"
-        ]
-        
+        searches = generate_search_patterns(element)
+
         downloaded = 0
-        
+
         for search_term in searches:
             try:
                 search_url = f"{base_url}/art-search-advanced?keys={search_term.replace(' ', '+')}"
