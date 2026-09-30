@@ -22,9 +22,6 @@ export class OfficeManager {
 
         // Hired staff
         this.staff = [];
-
-        // Active marketing channels
-        this.activeMarketing = ['word_of_mouth'];
     }
 
     /**
@@ -189,7 +186,7 @@ export class OfficeManager {
      * Calculate daily marketing cost
      */
     getDailyMarketingCost() {
-        return this.activeMarketing.reduce((total, channelId) => {
+        return this.gameState.activeMarketingChannels.reduce((total, channelId) => {
             const channel = MARKETING_CHANNELS.find(m => m.id === channelId);
             return total + (channel?.costPerDay || 0);
         }, 0);
@@ -219,21 +216,14 @@ export class OfficeManager {
      * Toggle marketing channel
      */
     toggleMarketing(channelId) {
-        const index = this.activeMarketing.indexOf(channelId);
-        if (index === -1) {
-            this.activeMarketing.push(channelId);
-            return { active: true };
-        } else {
-            this.activeMarketing.splice(index, 1);
-            return { active: false };
-        }
+        return this.gameState.toggleMarketingChannel(channelId);
     }
 
     /**
      * Is marketing active
      */
     isMarketingActive(channelId) {
-        return this.activeMarketing.includes(channelId);
+        return this.gameState.isMarketingChannelActive(channelId);
     }
 
     /**
@@ -249,8 +239,7 @@ export class OfficeManager {
                 hiredAt: s.hiredAt,
                 happiness: s.happiness,
                 productivity: s.productivity
-            })),
-            activeMarketing: this.activeMarketing
+            }))
         };
     }
 
@@ -264,7 +253,6 @@ export class OfficeManager {
             computer: 0, desk: 0, monitor: 0, chair: 0, software: 0
         };
         this.currentOfficeIndex = data.currentOfficeIndex || 0;
-        this.activeMarketing = data.activeMarketing || ['word_of_mouth'];
 
         // Restore staff
         this.staff = (data.staff || []).map(s => ({
