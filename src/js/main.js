@@ -40,6 +40,7 @@ import { IntroSystem } from './game/IntroSystem.js';
 import { DayNightCycle, TIME_OF_DAY } from './game/DayNightCycle.js';
 import { NotificationSystem } from './game/NotificationSystem.js';
 import { LocationDetailSystem } from './game/locations/LocationDetailSystem.js';
+import { OfficeManager } from './game/OfficeManager.js';
 import { CompanyManagementSystem } from './game/company/CompanyManagementSystem.js';
 import { RomanceProgressionSystem } from './game/romance/RomanceProgressionSystem.js';
 import { JealousySystem } from './game/social/JealousySystem.js';
@@ -3115,6 +3116,12 @@ export class MainGame {
             if (!this.gameState.locationDetailSystem) {
                 this.gameState.locationDetailSystem = new LocationDetailSystem(this.gameState);
                 this.locationDetailSystem = this.gameState.locationDetailSystem;
+            }
+
+            // Office manager (documented tycoon system)
+            if (!this.gameState.officeManager) {
+                this.gameState.officeManager = new OfficeManager(this.gameState);
+                this.officeManager = this.gameState.officeManager;
             }
 
             // Company management
