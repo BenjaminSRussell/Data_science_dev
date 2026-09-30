@@ -10,6 +10,7 @@ export class SaveSlotManager {
         this.saveManager = saveManager;
         this.onSlotSelected = onSlotSelected; // Callback when slot is selected
         this.currentSlot = null;
+        this.slotMenuListeners = {}; // Track document click listeners by slot index
     }
 
     /**
@@ -166,6 +167,15 @@ export class SaveSlotManager {
         if (!dropdown) return;
 
         dropdown.innerHTML = '';
+
+        // Clear all tracked listeners before rebuilding slots
+        // This handles cases where slots transition from filled to empty (e.g., deleteSlot)
+        Object.keys(this.slotMenuListeners).forEach(slotIndex => {
+            if (this.slotMenuListeners[slotIndex]) {
+                document.removeEventListener('click', this.slotMenuListeners[slotIndex]);
+            }
+        });
+        this.slotMenuListeners = {};
 
         const slots = this.saveManager.getAllSlotsInfo();
         const hasSaves = slots.some(s => !s.isEmpty);
@@ -391,12 +401,20 @@ export class SaveSlotManager {
             this.toggleSlotMenu(card);
         });
 
+        // Remove old listener if it exists to prevent listener leak
+        if (this.slotMenuListeners[slotIndex]) {
+            document.removeEventListener('click', this.slotMenuListeners[slotIndex]);
+        }
+
         // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
+        const closeMenuListener = (e) => {
             if (!card.contains(e.target)) {
                 menu.classList.add('hidden');
             }
-        });
+        };
+
+        this.slotMenuListeners[slotIndex] = closeMenuListener;
+        document.addEventListener('click', closeMenuListener);
     }
 
     /**
