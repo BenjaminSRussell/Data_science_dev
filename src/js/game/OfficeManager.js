@@ -152,9 +152,7 @@ export class OfficeManager {
         const newStaff = {
             id: `staff_${Date.now()}`,
             type: staffType,
-            hiredAt: Date.now(),
-            happiness: 100,
-            productivity: 1.0
+            hiredAt: Date.now()
         };
 
         this.staff.push(newStaff);
@@ -203,19 +201,6 @@ export class OfficeManager {
     }
 
     /**
-     * Calculate team efficiency
-     */
-    getTeamEfficiency() {
-        if (this.staff.length === 0) return 1.0;
-
-        const totalEfficiency = this.staff.reduce((sum, s) =>
-            sum + s.type.efficiency * s.productivity, 0
-        );
-
-        return 1.0 + totalEfficiency;
-    }
-
-    /**
      * Toggle marketing channel
      */
     toggleMarketing(channelId) {
@@ -246,9 +231,7 @@ export class OfficeManager {
             staff: this.staff.map(s => ({
                 id: s.id,
                 typeId: s.type.id,
-                hiredAt: s.hiredAt,
-                happiness: s.happiness,
-                productivity: s.productivity
+                hiredAt: s.hiredAt
             })),
             activeMarketing: this.activeMarketing
         };
@@ -270,9 +253,7 @@ export class OfficeManager {
         this.staff = (data.staff || []).map(s => ({
             id: s.id,
             type: STAFF_TYPES.find(t => t.id === s.typeId),
-            hiredAt: s.hiredAt,
-            happiness: s.happiness,
-            productivity: s.productivity
+            hiredAt: s.hiredAt
         })).filter(s => s.type); // Filter out invalid staff
     }
 
