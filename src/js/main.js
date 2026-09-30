@@ -2323,7 +2323,8 @@ export class MainGame {
      * Switch music station
      */
     switchMusicStation(stationId) {
-        this.audioManager.switchStation(stationId);
+        // Call async function without awaiting to maintain backward compatibility
+        this.audioManager.switchStation(stationId).catch(e => console.log('Station switch failed:', e));
     }
 
     /**

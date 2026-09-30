@@ -9,6 +9,7 @@ export class AudioManager {
         this.sounds = {};
         this.currentMusic = null;
         this.currentStation = 'lofi_beats'; // Default station
+        this.fadeIntervals = new Map(); // Track fade intervals for cleanup
 
         // Define stations and their tracks
         this.musicStations = {
@@ -79,13 +80,86 @@ export class AudioManager {
     }
 
     /**
+     * Fade out audio and pause it
+     * @param {HTMLAudioElement} audio - The audio element to fade out
+     * @param {number} duration - Fade duration in milliseconds (default 500)
+     * @returns {Promise<void>} - Resolves when fade is complete
+     */
+    async fadeOutAndStop(audio, duration = 500) {
+        if (!audio) return;
+
+        // Clear any existing fade interval for this audio element
+        const fadeKey = `fadeOut_${Math.random()}`;
+        const startVolume = audio.volume;
+        const startTime = Date.now();
+
+        return new Promise(resolve => {
+            const intervalId = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                audio.volume = startVolume * (1 - progress);
+
+                if (progress >= 1) {
+                    clearInterval(intervalId);
+                    audio.volume = 0;
+                    audio.pause();
+                    resolve();
+                }
+            }, 16); // ~60fps
+
+            this.fadeIntervals.set(fadeKey, intervalId);
+        });
+    }
+
+    /**
+     * Fade in audio
+     * @param {HTMLAudioElement} audio - The audio element to fade in
+     * @param {number} targetVolume - Target volume to fade to (default musicVolume)
+     * @param {number} duration - Fade duration in milliseconds (default 500)
+     * @returns {Promise<void>} - Resolves when fade is complete
+     */
+    async fadeIn(audio, targetVolume, duration = 500) {
+        if (!audio) return;
+
+        audio.volume = 0;
+        const startTime = Date.now();
+
+        return new Promise(resolve => {
+            const intervalId = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                audio.volume = targetVolume * progress;
+
+                if (progress >= 1) {
+                    clearInterval(intervalId);
+                    audio.volume = targetVolume;
+                    resolve();
+                }
+            }, 16); // ~60fps
+
+            const fadeKey = `fadeIn_${Math.random()}`;
+            this.fadeIntervals.set(fadeKey, intervalId);
+        });
+    }
+
+    /**
+     * Clear all active fades
+     */
+    clearActiveFades() {
+        this.fadeIntervals.forEach(intervalId => {
+            clearInterval(intervalId);
+        });
+        this.fadeIntervals.clear();
+    }
+
+    /**
      * Initialize audio manager
      */
     async init() {
         // Preload common sounds (if any)
 
         // Set default station but don't auto-play unless enabled
-        // this.switchStation(this.currentStation); 
+        // this.switchStation(this.currentStation);
     }
 
     /**
@@ -150,17 +224,17 @@ export class AudioManager {
     /**
      * Toggle background music
      */
-    toggleMusic() {
+    async toggleMusic() {
         this.musicEnabled = !this.musicEnabled;
 
         if (this.currentMusic) {
             if (this.musicEnabled) {
                 this.currentMusic.play().catch(e => console.log('Audio play failed:', e));
             } else {
-                this.currentMusic.pause();
+                await this.fadeOutAndStop(this.currentMusic, 500);
             }
         } else if (this.musicEnabled && this.currentStation !== 'off') {
-            this.switchStation(this.currentStation);
+            await this.switchStation(this.currentStation);
         }
 
         return this.musicEnabled;
@@ -169,10 +243,10 @@ export class AudioManager {
     /**
      * Switch to a different music station
      */
-    switchStation(stationId) {
-        // Stop current music
+    async switchStation(stationId) {
+        // Stop current music with fade-out
         if (this.currentMusic) {
-            this.currentMusic.pause();
+            await this.fadeOutAndStop(this.currentMusic, 500);
             this.currentMusic = null;
         }
 
@@ -187,18 +261,18 @@ export class AudioManager {
 
         const station = this.musicStations[stationId];
         if (station && station.tracks && station.tracks.length > 0) {
-            this.playRandomTrack(station);
+            await this.playRandomTrack(station);
         }
     }
 
-    playRandomTrack(station) {
+    async playRandomTrack(station) {
         if (!this.musicEnabled) return;
 
         const randomTrack = station.tracks[Math.floor(Math.random() * station.tracks.length)];
         const url = `/assets/audio/music/${randomTrack}`;
 
         this.currentMusic = new Audio(url);
-        this.currentMusic.volume = this.musicVolume;
+        this.currentMusic.volume = 0; // Start at 0 for fade-in
 
         // When track ends, play another one from the same station
         this.currentMusic.addEventListener('ended', () => {
@@ -207,9 +281,13 @@ export class AudioManager {
             }
         });
 
-        this.currentMusic.play().catch(e => {
+        try {
+            await this.currentMusic.play();
+            // Fade in after play starts
+            await this.fadeIn(this.currentMusic, this.musicVolume, 500);
+        } catch (e) {
             console.log('Audio play failed (interaction likely needed):', e);
-        });
+        }
     }
 
     /**
@@ -230,12 +308,34 @@ export class AudioManager {
     }
 
     /**
-     * Set music volume
+     * Set music volume with fade
      */
-    setMusicVolume(volume) {
-        this.musicVolume = Math.max(0, Math.min(1, volume));
+    async setMusicVolume(volume) {
+        const targetVolume = Math.max(0, Math.min(1, volume));
+        this.musicVolume = targetVolume;
+
         if (this.currentMusic) {
-            this.currentMusic.volume = this.musicVolume;
+            // Fade to the new volume over 300ms (shorter than track transitions)
+            const startVolume = this.currentMusic.volume;
+            const startTime = Date.now();
+            const duration = 300;
+
+            return new Promise(resolve => {
+                const intervalId = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    this.currentMusic.volume = startVolume + (targetVolume - startVolume) * progress;
+
+                    if (progress >= 1) {
+                        clearInterval(intervalId);
+                        this.currentMusic.volume = targetVolume;
+                        resolve();
+                    }
+                }, 16); // ~60fps
+
+                const fadeKey = `fadeVolume_${Math.random()}`;
+                this.fadeIntervals.set(fadeKey, intervalId);
+            });
         }
     }
 }
