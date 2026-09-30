@@ -144,14 +144,28 @@ export class ContractGenerator {
                     timeRequired: 2,
                     difficulty: 1,
                     deliverables: ['Completed database', 'Accuracy report'],
-                    requiredStats: { focus: 10 }
+                    requiredStats: { focus: 10 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'focus',
+                            value: 15,
+                            multiplier: 0.1
+                        }
+                    ]
                 },
                 {
                     title: 'Invoice Data Entry',
                     description: 'Process and enter invoice data from last quarter.',
                     timeRequired: 3,
                     difficulty: 1,
-                    deliverables: ['Entered invoices', 'Summary report']
+                    deliverables: ['Entered invoices', 'Summary report'],
+                    bonusConditions: [
+                        {
+                            type: 'early_completion',
+                            multiplier: 0.15
+                        }
+                    ]
                 }
             ],
             DATA_CLEANING: [
@@ -161,14 +175,30 @@ export class ContractGenerator {
                     timeRequired: 4,
                     difficulty: 2,
                     deliverables: ['Cleaned dataset', 'Data quality report'],
-                    requiredStats: { intelligence: 15, focus: 10 }
+                    requiredStats: { intelligence: 15, focus: 10 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'intelligence',
+                            value: 20,
+                            multiplier: 0.15
+                        }
+                    ]
                 },
                 {
                     title: 'Merge Customer Databases',
                     description: 'Combine two customer databases, resolve conflicts, and deduplicate.',
                     timeRequired: 5,
                     difficulty: 3,
-                    deliverables: ['Merged database', 'Conflict resolution log']
+                    deliverables: ['Merged database', 'Conflict resolution log'],
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'intelligence',
+                            value: 25,
+                            multiplier: 0.2
+                        }
+                    ]
                 }
             ],
             DATA_ANALYSIS: [
@@ -178,14 +208,30 @@ export class ContractGenerator {
                     timeRequired: 6,
                     difficulty: 3,
                     deliverables: ['Analysis report', 'Visualizations'],
-                    requiredStats: { intelligence: 20, analytics: 15 }
+                    requiredStats: { intelligence: 20, analytics: 15 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'analytics',
+                            value: 20,
+                            multiplier: 0.15
+                        }
+                    ]
                 },
                 {
                     title: 'Customer Segmentation',
                     description: 'Segment customers by purchasing behavior and demographics.',
                     timeRequired: 8,
                     difficulty: 4,
-                    deliverables: ['Segmentation model', 'Customer profiles']
+                    deliverables: ['Segmentation model', 'Customer profiles'],
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'analytics',
+                            value: 25,
+                            multiplier: 0.2
+                        }
+                    ]
                 }
             ],
             VISUALIZATION: [
@@ -195,7 +241,15 @@ export class ContractGenerator {
                     timeRequired: 10,
                     difficulty: 4,
                     deliverables: ['Dashboard', 'User guide'],
-                    requiredStats: { intelligence: 25, analytics: 20 }
+                    requiredStats: { intelligence: 25, analytics: 20 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'analytics',
+                            value: 30,
+                            multiplier: 0.2
+                        }
+                    ]
                 }
             ],
             REPORTING: [
@@ -205,7 +259,14 @@ export class ContractGenerator {
                     timeRequired: 12,
                     difficulty: 5,
                     deliverables: ['Report document', 'Supporting data'],
-                    requiredStats: { intelligence: 30, analytics: 25 }
+                    requiredStats: { intelligence: 30, analytics: 25 },
+                    bonusConditions: [
+                        {
+                            type: 'reputation_threshold',
+                            value: 300,
+                            multiplier: 0.15
+                        }
+                    ]
                 }
             ],
             STATISTICAL_MODELING: [
@@ -215,7 +276,15 @@ export class ContractGenerator {
                     timeRequired: 15,
                     difficulty: 6,
                     deliverables: ['Model', 'Validation report'],
-                    requiredStats: { intelligence: 40, analytics: 35 }
+                    requiredStats: { intelligence: 40, analytics: 35 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'intelligence',
+                            value: 40,
+                            multiplier: 0.2
+                        }
+                    ]
                 }
             ],
             MACHINE_LEARNING: [
@@ -225,7 +294,20 @@ export class ContractGenerator {
                     timeRequired: 20,
                     difficulty: 8,
                     deliverables: ['Trained model', 'Performance metrics'],
-                    requiredStats: { intelligence: 50, analytics: 45 }
+                    requiredStats: { intelligence: 50, analytics: 45 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'intelligence',
+                            value: 50,
+                            multiplier: 0.25
+                        },
+                        {
+                            type: 'reputation_threshold',
+                            value: 800,
+                            multiplier: 0.15
+                        }
+                    ]
                 }
             ],
             PREDICTIVE_ANALYTICS: [
@@ -235,7 +317,15 @@ export class ContractGenerator {
                     timeRequired: 18,
                     difficulty: 7,
                     deliverables: ['Forecast model', 'Confidence intervals'],
-                    requiredStats: { intelligence: 45, analytics: 40 }
+                    requiredStats: { intelligence: 45, analytics: 40 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'analytics',
+                            value: 40,
+                            multiplier: 0.2
+                        }
+                    ]
                 }
             ],
             BUSINESS_INTELLIGENCE: [
@@ -245,7 +335,14 @@ export class ContractGenerator {
                     timeRequired: 25,
                     difficulty: 9,
                     deliverables: ['BI Platform', 'Training materials'],
-                    requiredStats: { intelligence: 60, analytics: 55 }
+                    requiredStats: { intelligence: 60, analytics: 55 },
+                    bonusConditions: [
+                        {
+                            type: 'reputation_threshold',
+                            value: 2000,
+                            multiplier: 0.2
+                        }
+                    ]
                 }
             ],
             DATA_ENGINEERING: [
@@ -255,7 +352,20 @@ export class ContractGenerator {
                     timeRequired: 30,
                     difficulty: 10,
                     deliverables: ['Pipeline design', 'Implementation plan'],
-                    requiredStats: { intelligence: 65, analytics: 60 }
+                    requiredStats: { intelligence: 65, analytics: 60 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'intelligence',
+                            value: 65,
+                            multiplier: 0.25
+                        },
+                        {
+                            type: 'reputation_threshold',
+                            value: 3000,
+                            multiplier: 0.15
+                        }
+                    ]
                 }
             ],
             CONSULTING: [
@@ -265,7 +375,14 @@ export class ContractGenerator {
                     timeRequired: 14,
                     difficulty: 8,
                     deliverables: ['Strategy document', 'Recommendations'],
-                    requiredStats: { intelligence: 55, charisma: 40 }
+                    requiredStats: { intelligence: 55, charisma: 40 },
+                    bonusConditions: [
+                        {
+                            type: 'reputation_threshold',
+                            value: 5000,
+                            multiplier: 0.2
+                        }
+                    ]
                 }
             ],
             EXECUTIVE: [
@@ -275,11 +392,18 @@ export class ContractGenerator {
                     timeRequired: 10,
                     difficulty: 9,
                     deliverables: ['Presentation', 'Executive summary'],
-                    requiredStats: { intelligence: 60, charisma: 50 }
+                    requiredStats: { intelligence: 60, charisma: 50 },
+                    bonusConditions: [
+                        {
+                            type: 'reputation_threshold',
+                            value: 10000,
+                            multiplier: 0.25
+                        }
+                    ]
                 }
             ]
         };
-        
+
         return templates[category] || [];
     }
     
