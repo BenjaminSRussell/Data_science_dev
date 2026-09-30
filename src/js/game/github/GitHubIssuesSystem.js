@@ -296,10 +296,19 @@ export class GitHubIssuesSystem {
                 difficulty: 'hard'
             }
         ];
-        
+
+        // Reward lookup table for all difficulty tiers
+        const rewardTable = {
+            'easy': { money: 200, reputation: 10 },
+            'medium': { money: 400, reputation: 20 },
+            'hard': { money: 600, reputation: 25 },
+            'very_hard': { money: 1000, reputation: 35 },
+            'extreme': { money: 1500, reputation: 50 }
+        };
+
         const template = issueTemplates[Math.floor(Math.random() * issueTemplates.length)];
         const issueNumber = this.openIssues.length + this.closedIssues.length + 1;
-        
+
         const issue = {
             id: `issue_${Date.now()}`,
             number: issueNumber,
@@ -311,12 +320,9 @@ export class GitHubIssuesSystem {
             createdAt: Date.now(),
             difficulty: template.difficulty,
             skills: ['python', 'data_science'],
-            reward: {
-                money: template.difficulty === 'easy' ? 200 : template.difficulty === 'medium' ? 400 : 600,
-                reputation: template.difficulty === 'easy' ? 10 : template.difficulty === 'medium' ? 20 : 30
-            }
+            reward: rewardTable[template.difficulty] || { money: 600, reputation: 25 }
         };
-        
+
         this.openIssues.push(issue);
         return issue;
     }
