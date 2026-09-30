@@ -84,7 +84,7 @@ export class StoryUI {
                             <div class="story-arc-description" id="story-arc-description">You navigate the complexities of life, trying to find balance.</div>
                             <div class="story-arc-progress">
                                 <div class="progress-label">Story Progress</div>
-                                <div class="progress-bar">
+                                <div class="progress-bar" role="progressbar" aria-label="Story progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="story-progress-bar">
                                     <div class="progress-fill" id="story-progress-fill" style="width: 0%"></div>
                                 </div>
                                 <div class="progress-text" id="story-progress-text">0%</div>
@@ -113,19 +113,19 @@ export class StoryUI {
                             <div class="phase-name" id="phase-name">Early Game</div>
                             <div class="phase-description" id="phase-description">You're just starting out. Every choice matters.</div>
                             <div class="phase-timeline">
-                                <div class="timeline-item ${this.getPhaseClass('early')}" data-phase="early">
+                                <div class="timeline-item ${this.getPhaseClass('early')}" data-phase="early" role="presentation">
                                     <div class="timeline-marker"></div>
                                     <div class="timeline-label">Act 1: Beginning</div>
                                 </div>
-                                <div class="timeline-item ${this.getPhaseClass('mid')}" data-phase="mid">
+                                <div class="timeline-item ${this.getPhaseClass('mid')}" data-phase="mid" role="presentation">
                                     <div class="timeline-marker"></div>
                                     <div class="timeline-label">Act 2: Rising Action</div>
                                 </div>
-                                <div class="timeline-item ${this.getPhaseClass('late')}" data-phase="late">
+                                <div class="timeline-item ${this.getPhaseClass('late')}" data-phase="late" role="presentation">
                                     <div class="timeline-marker"></div>
                                     <div class="timeline-label">Act 3: Climax</div>
                                 </div>
-                                <div class="timeline-item ${this.getPhaseClass('endgame')}" data-phase="endgame">
+                                <div class="timeline-item ${this.getPhaseClass('endgame')}" data-phase="endgame" role="presentation">
                                     <div class="timeline-marker"></div>
                                     <div class="timeline-label">Epilogue</div>
                                 </div>
@@ -266,9 +266,11 @@ export class StoryUI {
         // Update progress
         const progressFill = document.getElementById('story-progress-fill');
         const progressText = document.getElementById('story-progress-text');
+        const progressBar = document.getElementById('story-progress-bar');
         const progress = status.progress || 0;
         if (progressFill) progressFill.style.width = `${progress}%`;
         if (progressText) progressText.textContent = `${Math.round(progress)}%`;
+        if (progressBar) progressBar.setAttribute('aria-valuenow', Math.round(progress));
 
         // Update phase
         this.updatePhaseDisplay(status.phase);
@@ -351,15 +353,28 @@ export class StoryUI {
         // Update timeline
         document.querySelectorAll('.timeline-item').forEach(item => {
             item.classList.remove('active', 'completed');
+            item.removeAttribute('aria-current');
             const itemPhase = item.dataset.phase;
+            const phaseLabels = {
+                early: 'Act 1: Beginning',
+                mid: 'Act 2: Rising Action',
+                late: 'Act 3: Climax',
+                endgame: 'Epilogue'
+            };
+
             if (itemPhase === phase) {
                 item.classList.add('active');
+                item.setAttribute('aria-current', 'step');
+                item.setAttribute('aria-label', `Current phase: ${phaseLabels[itemPhase]}`);
             } else {
                 const phaseOrder = ['early', 'mid', 'late', 'endgame'];
                 const currentIndex = phaseOrder.indexOf(phase);
                 const itemIndex = phaseOrder.indexOf(itemPhase);
                 if (itemIndex < currentIndex) {
                     item.classList.add('completed');
+                    item.setAttribute('aria-label', `Completed: ${phaseLabels[itemPhase]}`);
+                } else {
+                    item.setAttribute('aria-label', `Upcoming: ${phaseLabels[itemPhase]}`);
                 }
             }
         });
