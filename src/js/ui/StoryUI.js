@@ -586,9 +586,20 @@ export class StoryUI {
         // Add click handlers
         modal.querySelectorAll('.decision-choice-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const choice = btn.dataset.choice;
-                this.handleDecisionChoice(decision.id, choice);
-                modal.remove();
+                try {
+                    const choice = btn.dataset.choice;
+                    this.handleDecisionChoice(decision.id, choice);
+                } catch (error) {
+                    // Show error to player
+                    if (this.game?.showToast) {
+                        this.game.showToast(`Decision failed: ${error.message}`, 'error');
+                    }
+                    // Log the error for debugging
+                    console.error('Error processing decision:', error);
+                } finally {
+                    // Always remove the modal, even if there was an error
+                    modal.remove();
+                }
             });
         });
 
