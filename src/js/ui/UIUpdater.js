@@ -857,7 +857,10 @@ export class UIUpdater {
             'eat_bagel': 'Eat Bagel',
             'coffee_network': 'Network over Coffee',
             'buy_flowers': 'Buy Flowers ($15)',
-            'buy_plant': 'Buy Office Plant ($25)'
+            'buy_plant': 'Buy Office Plant ($25)',
+            'browse_cars': 'Browse Vehicles',
+            'buy_car': 'Buy Vehicle',
+            'sell_car': 'Sell Vehicle'
         };
         return names[activity] || activity;
     }
