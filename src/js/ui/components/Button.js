@@ -79,7 +79,8 @@ export class Button extends BaseComponent {
 
     render() {
         return html`
-            <button 
+            <button
+                type="button"
                 class="${this.variant}"
                 ?disabled=${this.disabled}
                 @click=${this.handleClick}>
@@ -95,6 +96,13 @@ export class Button extends BaseComponent {
             this.onclick(e);
         }
         this.dispatchGameEvent('button-click', { label: this.label });
+    }
+
+    click() {
+        const button = this.shadowRoot.querySelector('button');
+        if (button) {
+            button.click();
+        }
     }
 }
 
