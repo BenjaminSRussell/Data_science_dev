@@ -9,8 +9,7 @@ export const NEWS_CATEGORIES = {
     tech: { icon: '', color: '#4ecdc4' },
     business: { icon: '', color: '#ffd93d' },
     economy: { icon: '', color: '#ff8548' },
-    local: { icon: '', color: '#a855f7' },
-    personal: { icon: '', color: '#ff6b9d' }
+    local: { icon: '', color: '#a855f7' }
 };
 
 // News templates
@@ -317,13 +316,18 @@ export class NewsManager {
             text = text.replace(`{${key}}`, value);
         }
 
+        // Get category styling from NEWS_CATEGORIES
+        const categoryStyle = NEWS_CATEGORIES[template.category] || {};
+
         const newsItem = {
             id: `news_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             category: template.category,
             text,
             timestamp: this.gameState.timeManager?.getDateString() || 'Today',
             effects: template.effects,
-            read: false
+            read: false,
+            color: categoryStyle.color,
+            icon: categoryStyle.icon
         };
 
         // Apply any immediate effects
