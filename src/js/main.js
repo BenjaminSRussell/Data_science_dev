@@ -197,6 +197,7 @@ export class MainGame {
         this.gameLoopId = null;
         this.lastTime = 0;
         this.bankSystem = null; // Will be initialized when needed
+        this.taskTimerIntervalId = null; // Track the task timer interval
 
         // Bind methods
         this.gameLoop = this.gameLoop.bind(this);
@@ -204,6 +205,9 @@ export class MainGame {
         // this.init = this.init.bind(this); // specific bind not needed and causing issues
         this.startNewGame = this.startNewGame.bind(this);
         this.continueGame = this.continueGame.bind(this);
+        this.updateTaskTimer = this.updateTaskTimer.bind(this);
+        this.startTaskTimer = this.startTaskTimer.bind(this);
+        this.stopTaskTimer = this.stopTaskTimer.bind(this);
 
         logger.debug('MainGame constructor exit - all initialization complete', { hasSaveManager: !!this.saveManager, hasTaskSystem: !!this.taskSystem, hasScreenManager: !!this.screenManager });
 
@@ -1645,6 +1649,9 @@ export class MainGame {
                 logger.debug('[finishGameStart]: UI updated');
             }
 
+            // Start task timer if task has a time limit
+            this.startTaskTimer();
+
             if (this.worldMap) {
                 this.updateMapScreen();
                 logger.debug('[finishGameStart]: map updated');
@@ -1814,6 +1821,9 @@ export class MainGame {
         if (!this.gameState.currentTask) {
             this.taskSystem.generateNewTask();
         }
+
+        // Start task timer if task has a time limit
+        this.startTaskTimer();
 
         // Update UI with loaded state
         this.uiUpdater.updateAllUI();
@@ -1998,6 +2008,9 @@ export class MainGame {
             return;
         }
 
+        // Stop the task timer when submitting
+        this.stopTaskTimer();
+
         // Calculate score
         const score = this.economySystem.evaluateChart(
             this.gameState.currentTask,
@@ -2157,8 +2170,83 @@ export class MainGame {
         this.uiUpdater.updateTaskDisplay();
         this.uiUpdater.updateAllUI();
 
+        // Start task timer if task has a time limit
+        this.startTaskTimer();
+
         // Show game screen
         this.screenManager.showScreen('screen-game');
+    }
+
+    /**
+     * Start the task timer countdown
+     */
+    startTaskTimer() {
+        // Stop any existing timer
+        this.stopTaskTimer();
+
+        const task = this.gameState.currentTask;
+        if (!task || !task.timeLimit) {
+            return; // No timer needed if task has no time limit
+        }
+
+        // Get the timer element
+        const timerElement = document.getElementById('task-timer');
+        if (!timerElement) {
+            return; // No timer element in DOM
+        }
+
+        // Unhide the timer
+        timerElement.classList.remove('hidden');
+
+        // Update timer immediately
+        this.updateTaskTimer();
+
+        // Start interval to update timer every second
+        this.taskTimerIntervalId = setInterval(() => {
+            this.updateTaskTimer();
+        }, 1000);
+    }
+
+    /**
+     * Update the task timer display
+     */
+    updateTaskTimer() {
+        const task = this.gameState.currentTask;
+        const timerElement = document.getElementById('task-timer');
+
+        if (!task || !task.timeLimit || !timerElement) {
+            return;
+        }
+
+        // Calculate remaining time
+        const elapsed = (Date.now() - task.startTime) / 1000;
+        const remaining = Math.max(0, task.timeLimit - elapsed);
+
+        // Format as MM:SS
+        const minutes = Math.floor(remaining / 60);
+        const seconds = Math.floor(remaining % 60);
+        timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        // Stop timer if time is up
+        if (remaining <= 0) {
+            this.stopTaskTimer();
+            timerElement.classList.add('time-expired');
+        }
+    }
+
+    /**
+     * Stop the task timer
+     */
+    stopTaskTimer() {
+        if (this.taskTimerIntervalId) {
+            clearInterval(this.taskTimerIntervalId);
+            this.taskTimerIntervalId = null;
+        }
+
+        const timerElement = document.getElementById('task-timer');
+        if (timerElement) {
+            timerElement.classList.add('hidden');
+        }
     }
 
     /**
