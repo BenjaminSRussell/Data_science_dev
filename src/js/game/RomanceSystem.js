@@ -64,11 +64,11 @@ export class RomanceSystem {
             case 'coffee':
                 cost = 20; happinessGain = 5; break;
             case 'dinner':
-                cost = 100; happinessGain = 10; break;
+                cost = 100; happinessGain = 25; break;
             case 'fancy_dinner':
-                cost = 500; happinessGain = 20; break;
+                cost = 500; happinessGain = 125; break;
             case 'vacation':
-                cost = 2000; happinessGain = 50; break;
+                cost = 2000; happinessGain = 500; break;
         }
 
         if (this.gameState.money < cost) return { success: false, message: "You can't afford that." };
