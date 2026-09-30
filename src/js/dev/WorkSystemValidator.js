@@ -112,13 +112,34 @@ export class WorkSystemValidator {
 
             headers.forEach((header, index) => {
                 try {
-                    // Click header to sort
-                    header.click();
-                    
+                    // Capture errors thrown by click handlers
+                    let handlerError = null;
+                    const errorHandler = (event) => {
+                        // Only capture actual Error objects, not other events
+                        if (event instanceof ErrorEvent) {
+                            handlerError = event.error;
+                        }
+                    };
+
+                    window.addEventListener('error', errorHandler);
+                    try {
+                        // Click header to sort
+                        header.click();
+                    } finally {
+                        window.removeEventListener('error', errorHandler);
+                    }
+
+                    // If handler threw, report it
+                    if (handlerError) {
+                        results.failed++;
+                        results.errors.push(`Sort column ${index} failed: ${handlerError.message}`);
+                        return; // Skip the setTimeout for this column
+                    }
+
                     // Wait for sort to complete
                     setTimeout(() => {
                         const sortedRows = Array.from(table.querySelectorAll('tbody tr'));
-                        
+
                         // Verify rows still exist (didn't crash)
                         if (sortedRows.length === originalRows.length) {
                             results.passed++;
@@ -247,8 +268,29 @@ export class WorkSystemValidator {
             const rows = table.querySelectorAll('tbody tr');
             if (rows.length > 0) {
                 try {
-                    rows[0].click();
-                    results.passed++;
+                    // Capture errors thrown by click handlers
+                    let handlerError = null;
+                    const errorHandler = (event) => {
+                        // Only capture actual Error objects, not other events
+                        if (event instanceof ErrorEvent) {
+                            handlerError = event.error;
+                        }
+                    };
+
+                    window.addEventListener('error', errorHandler);
+                    try {
+                        rows[0].click();
+                    } finally {
+                        window.removeEventListener('error', errorHandler);
+                    }
+
+                    // If handler threw, report it; otherwise count as passed
+                    if (handlerError) {
+                        results.failed++;
+                        results.errors.push(`Row click failed: ${handlerError.message}`);
+                    } else {
+                        results.passed++;
+                    }
                 } catch (error) {
                     results.failed++;
                     results.errors.push(`Row click failed: ${error.message}`);
