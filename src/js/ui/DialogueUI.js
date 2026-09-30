@@ -17,6 +17,7 @@ export class DialogueUI {
         this.currentTree = null;
         this.currentNode = null;
         this.onClose = null;
+        this.typeTimeoutId = null;
 
         this.createContainer();
     }
@@ -207,14 +208,25 @@ export class DialogueUI {
         textEl.textContent = '';
         textEl.classList.add('typing');
 
+        // Check if user prefers reduced motion
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (prefersReducedMotion) {
+            // Show text immediately
+            textEl.textContent = text;
+            textEl.classList.remove('typing');
+            return;
+        }
+
         let i = 0;
         const type = () => {
             if (i < text.length) {
                 textEl.textContent += text[i];
                 i++;
-                setTimeout(type, speed);
+                this.typeTimeoutId = setTimeout(type, speed);
             } else {
                 textEl.classList.remove('typing');
+                this.typeTimeoutId = null;
             }
         };
         type();
@@ -313,6 +325,12 @@ export class DialogueUI {
      * Phase 2: Uses Lit component if available
      */
     close() {
+        // Clear any pending type animation timeout
+        if (this.typeTimeoutId !== null) {
+            clearTimeout(this.typeTimeoutId);
+            this.typeTimeoutId = null;
+        }
+
         // Use Lit component if available
         if (this.litComponent) {
             this.litComponent.close();
