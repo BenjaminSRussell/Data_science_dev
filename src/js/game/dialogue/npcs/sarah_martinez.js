@@ -110,7 +110,6 @@ export default {
     
     breakdowns: {
         low_relationship: {
-            trigger: { relationship: '<20' },
             emotion: 'hurt',
             dialogue: [
                 "I thought we understood each other.",
@@ -120,7 +119,6 @@ export default {
             quickTime: 'comfort'
         },
         work_life_stress: {
-            trigger: { stress: 'high' },
             emotion: 'crying',
             dialogue: [
                 "I can't do this anymore.",
@@ -130,7 +128,6 @@ export default {
             quickTime: 'support'
         },
         rejection: {
-            trigger: { rejection: true },
             emotion: 'yelling',
             dialogue: [
                 "After everything I've shared?!",

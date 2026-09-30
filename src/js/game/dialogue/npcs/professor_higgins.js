@@ -145,7 +145,6 @@ export default {
     
     breakdowns: {
         low_relationship: {
-            trigger: { relationship: '<20' },
             emotion: 'hurt',
             dialogue: [
                 "I thought we had a connection.",
@@ -155,7 +154,6 @@ export default {
             quickTime: 'comfort'
         },
         relationship_drop: {
-            trigger: { relationshipDrop: '>10' },
             emotion: 'crying',
             dialogue: [
                 "I... I don't understand.",
