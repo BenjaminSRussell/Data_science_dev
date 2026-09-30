@@ -1659,6 +1659,7 @@ export class MainGame {
                 logger.warn('NewsManager not initialized, skipping news generation');
             } else {
                 this.newsManager.generateDailyNews();
+                this.updateNewsBadge();
                 logger.debug('[finishGameStart]: news generated');
             }
 
@@ -2803,6 +2804,7 @@ export class MainGame {
             if (event.type === 'new_day') {
                 if (this.newsManager) {
                     this.newsManager.generateDailyNews();
+                    this.updateNewsBadge();
                 }
                 this.showToast('A new day has begun!', 'info');
 
@@ -3205,6 +3207,28 @@ export class MainGame {
         }
     }
 
+    updateNewsBadge() {
+        try {
+            if (!this.newsManager) return;
+
+            const unreadCount = this.newsManager.getUnreadCount();
+            const badge = document.getElementById('news-unread-badge');
+            const button = document.getElementById('btn-nav-newspaper');
+
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.classList.remove('hidden');
+                    if (button) button.classList.add('has-unread');
+                } else {
+                    badge.classList.add('hidden');
+                    if (button) button.classList.remove('has-unread');
+                }
+            }
+        } catch (error) {
+            logger.error('Error updating news badge:', error);
+        }
+    }
 
     finishWorkingSession(ticks, totalTicks) {
         ProjectHelpers.finishWorkingSession(this, ticks, totalTicks);

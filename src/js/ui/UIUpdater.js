@@ -587,6 +587,19 @@ export class UIUpdater {
             if (textEl) textEl.textContent = article.description;
         });
 
+        // Mark headline and articles as read when newspaper is displayed
+        if (paper.headline) {
+            this.game?.newsManager?.markAsRead(paper.headline.id);
+        }
+        paper?.articles?.forEach(article => {
+            this.game?.newsManager?.markAsRead(article.id);
+        });
+
+        // Update the news badge
+        if (this.game?.updateNewsBadge) {
+            this.game.updateNewsBadge();
+        }
+
         // Close button
         const closeBtn = document.getElementById('btn-close-paper');
         if (closeBtn) {

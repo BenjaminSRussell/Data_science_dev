@@ -163,6 +163,14 @@ function updateNewsTicker(game) {
     if (latestNews.length > 0) {
         const newsText = latestNews.map(n => `[${n.category}] ${n.text}`).join('    •    ');
         domCache.newsEl.textContent = newsText + '    •    ' + newsText;
+
+        // Mark news as read when displayed in ticker
+        latestNews.forEach(n => game.newsManager.markAsRead(n.id));
+
+        // Update the news badge
+        if (game.updateNewsBadge) {
+            game.updateNewsBadge();
+        }
     }
 }
 
