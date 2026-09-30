@@ -379,10 +379,10 @@ export class LocationDetailSystem {
      * Interact with a location feature
      */
     interactWithFeature(locationId, featureId) {
-        const details = this.getLocationDetails(locationId);
-        if (!details) return null;
-        
-        const feature = details.features.find(f => f.id === featureId);
+        const features = this.getLocationFeatures(locationId);
+        if (features.length === 0) return null;
+
+        const feature = features.find(f => f.id === featureId);
         if (!feature) return null;
         
         return {
