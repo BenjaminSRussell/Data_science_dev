@@ -119,9 +119,9 @@ export class DirtyDataSystem {
             date: this.gameState.timeManager?.totalDays || 1,
             caught: true
         });
-        
-        // Severe consequences
-        this.reputation -= action.consequences.reputation * 2;
+
+        // Severe consequences (double the penalty)
+        this.reputation += action.consequences.reputation * 2;
         
         // Legal trouble
         if (this.gameState.legalSystem) {

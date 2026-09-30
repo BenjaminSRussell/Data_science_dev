@@ -835,6 +835,11 @@ export class MainGame {
             this.nextTask();
         });
 
+        // Dirty data options button
+        document.getElementById('btn-dirty-options')?.addEventListener('click', () => {
+            this.showDirtyDataOptions();
+        });
+
         // Navigation buttons
         document.getElementById('btn-nav-career')?.addEventListener('click', () => {
             this.screenManager.showScreen('screen-career');
@@ -2159,6 +2164,198 @@ export class MainGame {
 
         // Show game screen
         this.screenManager.showScreen('screen-game');
+    }
+
+    /**
+     * Show dirty data options to the player
+     * Presents unethical data work choices through dialogue UI
+     */
+    showDirtyDataOptions() {
+        if (!this.dirtyDataSystem) return;
+
+        const options = this.dirtyDataSystem.getDirtyOptions();
+        const currentRepLevel = this.dirtyDataSystem.getReputationLevel();
+
+        // Build dialogue choices from dirty data options
+        const choices = options.map(option => ({
+            id: option.id,
+            text: `${option.name} (Risk: ${option.risk}%, Reward: $${option.reward})`
+        }));
+
+        // Add option to back out
+        choices.push({
+            id: 'cancel_dirty',
+            text: 'Nevermind, I\'ll play it safe'
+        });
+
+        // Create a fake NPC for the dialogue
+        const dialogueNPC = {
+            id: 'dirty_data',
+            name: 'Opportunity',
+            title: `Unethical Options (Rep: ${currentRepLevel.toUpperCase()})`,
+            personality: 'corrupt'
+        };
+
+        // Build the dialogue tree
+        const dialogueTree = {
+            getRootNode: () => ({
+                id: 'root',
+                text: `You see an opportunity for some unethical data work. Your current ethical standing: ${currentRepLevel}. What will you do?`,
+                choices: choices
+            }),
+            getNode: (id) => {
+                const option = options.find(opt => opt.id === id);
+                if (!option) return null;
+                return {
+                    id: id,
+                    text: `${option.name}\n\nDescription: ${option.description}\n\nRisk: ${option.risk}%\nReward: $${option.reward}`,
+                    choices: [
+                        { id: 'confirm_' + id, text: 'Do it' },
+                        { id: 'cancel_action', text: 'Back away' }
+                    ]
+                };
+            }
+        };
+
+        // Store the dialogue tree for handling
+        this.dirtyDataDialogueTree = dialogueTree;
+
+        // Open dialogue through DialogueUI
+        if (this.dialogueUI) {
+            this.dialogueUI.currentNPC = dialogueNPC;
+            this.dialogueUI.currentTree = dialogueTree;
+            this.dialogueUI.currentNode = dialogueTree.getRootNode();
+            this.dialogueUI.showNode(this.dialogueUI.currentNode);
+
+            if (this.dialogueUI.container) {
+                this.dialogueUI.container.classList.add('active');
+            }
+            this.dialogueUI.isOpen = true;
+
+            // Override the handleChoice method to handle dirty data choices
+            const originalHandleChoice = this.dialogueUI.handleChoice.bind(this.dialogueUI);
+            this.dialogueUI.handleChoice = (choiceId) => {
+                if (choiceId === 'cancel_dirty' || choiceId === 'cancel_action') {
+                    this.dialogueUI.close();
+                    return;
+                }
+
+                if (choiceId.startsWith('confirm_')) {
+                    const actionId = choiceId.replace('confirm_', '');
+                    this.performDirtyAction(actionId);
+                    return;
+                }
+
+                // Check if it's one of the dirty data option IDs
+                const option = options.find(opt => opt.id === choiceId);
+                if (option) {
+                    const nextNode = dialogueTree.getNode(choiceId);
+                    if (nextNode) {
+                        this.dialogueUI.showNode(nextNode);
+                    }
+                    return;
+                }
+
+                // Default behavior
+                originalHandleChoice(choiceId);
+            };
+        }
+    }
+
+    /**
+     * Perform a dirty data action
+     */
+    performDirtyAction(actionId) {
+        if (!this.dirtyDataSystem) return;
+
+        const result = this.dirtyDataSystem.performAction(actionId);
+        const option = this.dirtyDataSystem.getDirtyOptions().find(opt => opt.id === actionId);
+
+        if (!option) return;
+
+        // Build result message
+        let resultMessage = '';
+        if (result.caught) {
+            resultMessage = `<div class="dirty-action-caught">
+                <h3>CAUGHT!</h3>
+                <p>${result.message}</p>
+                <p>Reputation damage: ${Math.abs(option.consequences.reputation * 2)}</p>
+                <p>Your ethical standing is now: <strong>${this.dirtyDataSystem.getReputationLevel().toUpperCase()}</strong></p>
+            </div>`;
+        } else {
+            resultMessage = `<div class="dirty-action-success">
+                <h3>SUCCESS!</h3>
+                <p>${result.message}</p>
+                <p>Reward: +$${result.reward}</p>
+                <p>Reputation damage: ${Math.abs(option.consequences.reputation)}</p>
+                <p>Your ethical standing is now: <strong>${this.dirtyDataSystem.getReputationLevel().toUpperCase()}</strong></p>
+            </div>`;
+        }
+
+        // Apply reward if successful
+        if (result.success && !result.caught) {
+            this.gameState.money = (this.gameState.money || 0) + result.reward;
+        }
+
+        // Show modal with result
+        this.showModal(resultMessage);
+
+        // Close dialogue
+        if (this.dialogueUI) {
+            this.dialogueUI.close();
+        }
+
+        // Update UI to show new stats
+        this.uiUpdater.updateAllUI();
+        this.updateDirtyReputationDisplay();
+    }
+
+    /**
+     * Update dirty reputation display
+     */
+    updateDirtyReputationDisplay() {
+        if (!this.dirtyDataSystem) return;
+
+        const repLevel = this.dirtyDataSystem.getReputationLevel();
+        const unethicalCount = this.dirtyDataSystem.unethicalActions.length;
+
+        // Update or create display element
+        let repDisplay = document.getElementById('dirty-reputation-display');
+        if (!repDisplay) {
+            repDisplay = document.createElement('div');
+            repDisplay.id = 'dirty-reputation-display';
+            repDisplay.className = 'dirty-reputation-display';
+            const statsPanel = document.querySelector('.stats-panel') || document.querySelector('.text-ui');
+            if (statsPanel) {
+                statsPanel.appendChild(repDisplay);
+            }
+        }
+
+        const colorClass = {
+            'clean': 'rep-clean',
+            'questionable': 'rep-questionable',
+            'bad': 'rep-bad',
+            'terrible': 'rep-terrible'
+        }[repLevel] || 'rep-clean';
+
+        repDisplay.className = `dirty-reputation-display ${colorClass}`;
+        repDisplay.innerHTML = `
+            <div class="ascii-box" style="margin-top: 1rem;">
+                <div class="text-ui-heading">ETHICS RATING</div>
+                <div class="text-stat-row">
+                    <span class="text-stat-label">Status:</span>
+                    <span class="text-stat-value">${repLevel.toUpperCase()}</span>
+                </div>
+                <div class="text-stat-row">
+                    <span class="text-stat-label">Unethical Actions:</span>
+                    <span class="text-stat-value">${unethicalCount}</span>
+                </div>
+                ${unethicalCount > 0 ? `<div class="text-stat-row">
+                    <span class="text-stat-label">Reputation Hit:</span>
+                    <span class="text-stat-value">${this.dirtyDataSystem.reputation}</span>
+                </div>` : ''}
+            </div>
+        `;
     }
 
     /**
