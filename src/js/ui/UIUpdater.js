@@ -843,4 +843,33 @@ export class UIUpdater {
         if (loanLimitEl) loanLimitEl.textContent = `$${maxLoan.toLocaleString()}`;
         if (netWorthEl) netWorthEl.textContent = `$${netWorth.toLocaleString()}`;
     }
+
+    /**
+     * Update heat meter display
+     */
+    updateHeatMeter() {
+        const heat = this.gameState.crimeSystem?.heat || 0;
+
+        // Update stock market heat display
+        const heatValue = document.getElementById('heat-value');
+        if (heatValue) {
+            heatValue.textContent = Math.floor(heat);
+        }
+
+        const heatMeterFill = document.getElementById('heat-meter-fill');
+        if (heatMeterFill) {
+            heatMeterFill.style.width = `${heat}%`;
+        }
+
+        // Update jail screen heat display
+        const jailHeatValue = document.getElementById('jail-heat-value');
+        if (jailHeatValue) {
+            jailHeatValue.textContent = Math.floor(heat);
+        }
+
+        const jailHeatMeterFill = document.getElementById('jail-heat-meter-fill');
+        if (jailHeatMeterFill) {
+            jailHeatMeterFill.style.width = `${heat}%`;
+        }
+    }
 }
