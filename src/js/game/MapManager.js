@@ -12,7 +12,6 @@ import { MapBlockSystem } from './MapBlockSystem.js';
 import { MapBuildingSystem } from './MapBuildingSystem.js';
 import { MapAssetPlacer } from './MapAssetPlacer.js';
 import { MapEnvironmentSystem } from './MapEnvironmentSystem.js';
-import { MapNavigationSystem } from './MapNavigationSystem.js';
 import { LOCATIONS } from './WorldMap.js';
 
 export class MapManager {
@@ -39,10 +38,7 @@ export class MapManager {
         
         // Initialize environment system
         this.environmentSystem = new MapEnvironmentSystem(this.gridSystem, this.roadSystem, this.zoneSystem, this.assetPlacer);
-        
-        // Initialize navigation system
-        this.navigationSystem = new MapNavigationSystem(this.gridSystem, this.roadSystem);
-        
+
         // Initialize road renderer
         this.roadRenderer = new MapRoadRenderer(this.gridSystem, this.roadSystem, this.container);
         
@@ -140,13 +136,6 @@ export class MapManager {
      */
     getBuildingSystem() {
         return this.buildingSystem;
-    }
-
-    /**
-     * Get navigation system
-     */
-    getNavigationSystem() {
-        return this.navigationSystem;
     }
 
     /**
