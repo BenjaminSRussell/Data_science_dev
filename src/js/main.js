@@ -1586,6 +1586,12 @@ export class MainGame {
             }
 
             logger.debug('[startNewGame]: managers linked');
+
+            // Apply initial stat bonuses to game systems
+            if (this.characterStats && this.timeManager) {
+                this.characterStats.applyBonusesToTimeManager(this.timeManager);
+            }
+
             this.showLoadingProgress('Ready!', 100);
             logger.debug('[startNewGame]: core systems initialized, showing intro');
 
@@ -1809,6 +1815,11 @@ export class MainGame {
         // Reload save data now that subsystems are initialized
         logger.debug("Reloading save data for subsystems...");
         this.saveManager.loadGame(this.gameState, this.currentSaveSlot);
+
+        // Apply stat bonuses to game systems
+        if (this.characterStats && this.timeManager) {
+            this.characterStats.applyBonusesToTimeManager(this.timeManager);
+        }
 
         // Generate a new task if none exists
         if (!this.gameState.currentTask) {
@@ -2870,6 +2881,9 @@ export class MainGame {
             return;
         }
         const results = this.characterStats.train(activityId);
+
+        // Apply stat-based bonuses to game systems
+        this.characterStats.applyBonusesToTimeManager(this.timeManager);
 
         this.handleTimeAdvance(activity.timeSlots);
 
