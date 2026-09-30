@@ -733,22 +733,26 @@ export class DevMenu {
     }
 
     async testAllOptions() {
-        // Test all clickable options/buttons
-        const buttons = document.querySelectorAll('button:not([disabled]), .clickable, [role="button"]');
-        const results = { tested: 0, errors: [] };
-
-        for (const btn of Array.from(buttons).slice(0, 50)) { // Limit to 50
-            try {
-                btn.click();
-                results.tested++;
-                await new Promise(resolve => setTimeout(resolve, 50));
-            } catch (error) {
-                results.errors.push({ element: btn.id || btn.className, error: error.message });
-            }
+        // Use the real OptionTester instead of the unsafe duplicate
+        if (!window.devTools?.optionTester) {
+            this.game.showError('OptionTester not initialized');
+            return;
         }
 
-        console.log('Option test results:', results);
-        this.game.showToast(`Options tested: ${results.tested}, Errors: ${results.errors.length}`, 'info');
+        try {
+            const results = await window.devTools.optionTester.testAll();
+
+            console.log('Option test results:', results);
+            this.game.showToast(`Options tested: ${results.total}, Passed: ${results.passed}, Failed: ${results.failed}`, 'info');
+
+            // Display detailed results if there were failures
+            if (results.failed > 0) {
+                console.warn('Failed tests:', results.errors);
+            }
+        } catch (error) {
+            console.error('Option testing failed:', error);
+            this.game.showError(`Test failed: ${error.message}`);
+        }
     }
 
     checkForCrashes() {
