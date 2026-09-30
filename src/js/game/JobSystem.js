@@ -211,6 +211,36 @@ export class JobSystem {
     }
 
     /**
+     * Apply for a job category
+     */
+    applyForJob(categoryId) {
+        const category = JOB_CATEGORIES[categoryId];
+        if (!category) {
+            return { success: false, reason: 'Job category not found' };
+        }
+
+        const reputation = this.gameState.reputation || 0;
+        if (reputation < category.minReputation) {
+            return {
+                success: false,
+                reason: `Insufficient reputation. Required: ${category.minReputation}, Current: ${reputation}`
+            };
+        }
+
+        // Set current job
+        this.currentJob = {
+            category: categoryId,
+            name: category.name,
+            startedAt: Date.now()
+        };
+
+        // Add to job history
+        this.jobHistory.push({ ...this.currentJob });
+
+        return { success: true, job: this.currentJob };
+    }
+
+    /**
      * Get available jobs based on reputation
      */
     getAvailableJobs() {

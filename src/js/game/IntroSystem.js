@@ -310,6 +310,21 @@ export class IntroSystem {
             startDate: Date.now()
         };
 
+        // Also apply for job in JobSystem to wire it into the game loop
+        // Map starter jobs to JobSystem categories
+        // All starter jobs are entry-level positions
+        const jobSystemCategoryMap = {
+            'data_entry_clerk': 'entry_level',
+            'junior_analyst': 'entry_level',
+            'freelance': 'entry_level',
+            'intern': 'entry_level'
+        };
+
+        const jobSystemCategory = jobSystemCategoryMap[jobId];
+        if (jobSystemCategory && this.game.gameState.jobSystem) {
+            this.game.gameState.jobSystem.applyForJob(jobSystemCategory);
+        }
+
         // Close job application screen
         const jobScreen = document.getElementById('job-application-screen');
         if (jobScreen) jobScreen.classList.remove('active');
