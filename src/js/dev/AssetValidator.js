@@ -125,6 +125,15 @@ export class AssetValidator {
                     if (sheet.url) paths.push(sheet.url);
                 });
             }
+
+            // Also check low-poly character sprites (base, walk, idle)
+            // These are plain string paths, unlike spriteSheets which have .url property
+            const characterSprites = ['base', 'walk', 'idle'];
+            characterSprites.forEach(key => {
+                if (manifest.characters?.[key] && typeof manifest.characters[key] === 'string') {
+                    paths.push(manifest.characters[key]);
+                }
+            });
         }
 
         // Also check common sprite paths
