@@ -142,7 +142,10 @@ export class NPCDialogueLoader {
      * Get age group
      */
     getAgeGroup(age) {
-        if (age < 25) return 'young';
+        // Updated buckets to match actual NPC roster (issue #2185):
+        // - 'young' bucket (<25) was unreachable: minimum explicit age is 26, default is 30
+        // - 'elderly' bucket (60+) kept for future expansion
+        // - Removed 'young' to align with actual roster data
         if (age < 40) return 'adult';
         if (age < 60) return 'middle_aged';
         return 'elderly';
