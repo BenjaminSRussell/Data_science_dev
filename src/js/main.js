@@ -87,7 +87,6 @@ import { NarrativeClaritySystem } from './game/NarrativeClaritySystem.js';
 // Keep old imports for fallback
 import { AssetManager } from './assets/AssetManager.js';
 import { PerformanceManager } from './performance/PerformanceManager.js';
-import { UILayerManager } from './ui/UILayerManager.js';
 import { CameraSystem } from './camera/CameraSystem.js';
 import { NewsManager } from './game/NewsManager.js';
 import { StockMarket } from './game/StockMarket.js';
@@ -1467,7 +1466,6 @@ export class MainGame {
                     // Phase 4: Initialize particle effects (will be set up when PixiJS app is ready)
                     this.gameState.particleEffectManager = null;
                     this.gameState.performanceManager = new PerformanceManager();
-                    this.gameState.uiLayerManager = new UILayerManager();
 
                     // Register visual subsystems (moved inside setTimeout to avoid null reference)
                     if (this.gameState.visualSystem && this.gameState.animationManager) {
@@ -1547,7 +1545,6 @@ export class MainGame {
             this.interactionManager = this.gameState.interactionManager || null;
             this.tooltipManager = this.gameState.tooltipManager || null;
             this.performanceManager = this.gameState.performanceManager;
-            this.uiLayerManager = this.gameState.uiLayerManager;
 
             // Initialize camera system for map (lazy initialization when map is accessed)
             // Camera will be initialized in updateMapScreen() when needed

@@ -125,7 +125,6 @@ export class GameState {
         this.animationManager = null;
         this.assetManager = null;
         this.performanceManager = null;
-        this.uiLayerManager = null;
         this.cameraSystem = null;
         
         // Additional state
