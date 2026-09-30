@@ -96,6 +96,14 @@ export class DialogueUI {
                 background: rgba(239, 68, 68, 0.3);
                 color: #ef4444;
             }
+            .dialogue-close:focus-visible {
+                outline: 2px solid #60a5fa;
+                outline-offset: 2px;
+            }
+            .dialogue-choice:focus-visible {
+                outline: 2px solid #60a5fa;
+                outline-offset: 2px;
+            }
         `;
         document.head.appendChild(style);
 
@@ -166,6 +174,16 @@ export class DialogueUI {
             this.container.classList.add('active');
         }
         this.isOpen = true;
+
+        // Focus first choice on initial open for keyboard navigation
+        if (this.container) {
+            setTimeout(() => {
+                const firstChoice = this.container.querySelector('.dialogue-choice');
+                if (firstChoice) {
+                    firstChoice.focus();
+                }
+            }, 0);
+        }
     }
 
     /**
