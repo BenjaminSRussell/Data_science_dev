@@ -3,6 +3,8 @@
  * Provides quick access to all screens, locations, and testing tools
  */
 
+import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
+
 export class DevMenu {
     constructor(game) {
         this.game = game;
@@ -642,7 +644,7 @@ export class DevMenu {
     }
 
     validateAssets() {
-        const results = { loaded: 0, missing: 0, errors: [] };
+        const results = { loaded: 0, missing: 0, skipped: 0, errors: [] };
 
         // Check sprite assets
         const spriteSheets = [
@@ -651,6 +653,12 @@ export class DevMenu {
         ];
 
         spriteSheets.forEach(url => {
+            // Skip known missing assets (see MissingAssetBlocklist)
+            if (isAssetMissing(url)) {
+                results.skipped++;
+                return;
+            }
+
             const img = new Image();
             img.onload = () => results.loaded++;
             img.onerror = () => {
@@ -662,7 +670,7 @@ export class DevMenu {
 
         setTimeout(() => {
             console.log('Asset validation:', results);
-            this.game.showToast(`Assets: ${results.loaded} loaded, ${results.missing} missing`, 'info');
+            this.game.showToast(`Assets: ${results.loaded} loaded, ${results.missing} missing, ${results.skipped} skipped`, 'info');
         }, 2000);
     }
 

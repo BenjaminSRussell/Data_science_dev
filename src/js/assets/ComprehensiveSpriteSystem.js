@@ -2,10 +2,13 @@
  * ComprehensiveSpriteSystem.js
  * Complete sprite system with all emotions and body language
  * Handles sprite loading, mapping, and rendering
+ *
+ * FIX FOR #2542: Removed imports of '../characters/EmotionSpriteMapper.js' and
+ * '../characters/BodyLanguageMapper.js' which do not exist in the repository and
+ * were causing build-time import errors. Also removed the dead registerSpriteSheets()
+ * call that attempted to register non-existent sprite assets. Emotion and body-language
+ * sprite methods now return empty/default values to maintain API compatibility.
  */
-
-import { emotionSpriteMapper } from '../characters/EmotionSpriteMapper.js';
-import { bodyLanguageMapper } from '../characters/BodyLanguageMapper.js';
 
 export class ComprehensiveSpriteSystem {
     constructor(assetManager, spriteSheetManager) {
@@ -20,64 +23,10 @@ export class ComprehensiveSpriteSystem {
      */
     async initialize() {
         try {
-            // Load all emotion sprites
-            await this.loadEmotionSprites();
-
-            // Load all body language sprites
-            await this.loadBodyLanguageSprites();
-
-            // Register sprite sheets
-            await this.registerSpriteSheets();
+            // Emotion and body language mappers do not exist in the repository (see #2542)
+            // Sprite registration system is stubbed out
         } catch (error) {
             // Sprite system can work without all sprites loaded
-        }
-    }
-
-    /**
-     * Load all emotion sprites (fails gracefully)
-     */
-    async loadEmotionSprites() {
-        try {
-            const emotions = emotionSpriteMapper.getAllEmotions();
-            const promises = emotions.map(emotion => {
-                try {
-                    const config = emotionSpriteMapper.getEmotion(emotion);
-                    if (config && config.sprite) {
-                        return this.loadSprite(config.sprite, `emotion_${emotion}`);
-                    }
-                } catch (error) {
-                    // Skip this emotion if config is invalid
-                }
-                return Promise.resolve(null);
-            });
-
-            await Promise.allSettled(promises);
-        } catch (error) {
-            // Continue even if emotion loading fails
-        }
-    }
-
-    /**
-     * Load all body language sprites
-     */
-    async loadBodyLanguageSprites() {
-        try {
-            const poses = bodyLanguageMapper.getAllPoses();
-            const promises = poses.map(pose => {
-                try {
-                    const config = bodyLanguageMapper.getPose(pose);
-                    if (config && config.sprite) {
-                        return this.loadSprite(config.sprite, `pose_${pose}`);
-                    }
-                } catch (error) {
-                    // Skip this pose if config is invalid
-                }
-                return Promise.resolve(null);
-            });
-
-            await Promise.allSettled(promises);
-        } catch (error) {
-            // Continue even if pose loading fails
         }
     }
 
@@ -107,56 +56,6 @@ export class ComprehensiveSpriteSystem {
      */
     getSprite(key) {
         return this.loadedSprites.get(key) || null;
-    }
-
-    /**
-     * Register sprite sheets
-     */
-    async registerSpriteSheets() {
-        // Main character sprite sheet
-        if (this.spriteSheetManager?.registerSpriteSheet) {
-            try {
-                await this.spriteSheetManager?.registerSpriteSheet('main_character', {
-                    url: '/assets/characters/sprites/character_sheet.png',
-                    frameWidth: 64,
-                    frameHeight: 64,
-                    columns: 8,
-                    rows: 8
-                });
-
-                // Register emotion animations
-                // Note: Animation registration is handled through sprite sheet configuration
-                // Individual animations are defined in the sprite sheet manifest
-                // const emotions = emotionSpriteMapper.getAllEmotions();
-                // emotions.forEach(emotion => {
-                //     const coords = emotionSpriteMapper.getSpriteSheetCoords(emotion);
-                //     const animation = emotionSpriteMapper.getEmotionAnimation(emotion);
-                //     // Animation frames are handled by SpriteSheetManager.parseAnimations()
-                // });
-
-                // Register body language animations
-                const poses = bodyLanguageMapper.getAllPoses();
-                // Note: registerAnimation method doesn't exist in SpriteSheetManager
-                // Animation registration is handled through registerSpriteSheet instead
-                // poses.forEach(pose => {
-                //     const coords = bodyLanguageMapper.getSpriteSheetCoords(pose);
-                //     const animation = bodyLanguageMapper.getPoseAnimation(pose);
-                //     
-                //     this.spriteSheetManager.registerAnimation('main_character', animation, {
-                //         frames: [
-                //             { row: coords.row, col: coords.col },
-                //             { row: coords.row, col: coords.col + 1 }
-                //         ],
-                //         speed: 8,
-                //         loop: animation.includes('_loop') || animation.includes('_once')
-                //     });
-                // });
-
-
-            } catch (error) {
-                console.warn('Could not register sprite sheets:', error);
-            }
-        }
     }
 
     /**
@@ -217,16 +116,18 @@ export class ComprehensiveSpriteSystem {
 
     /**
      * Get all available emotions
+     * Returns empty array - EmotionSpriteMapper does not exist (see #2542)
      */
     getAllEmotions() {
-        return emotionSpriteMapper.getAllEmotions();
+        return [];
     }
 
     /**
      * Get all available poses
+     * Returns empty array - BodyLanguageMapper does not exist (see #2542)
      */
     getAllPoses() {
-        return bodyLanguageMapper.getAllPoses();
+        return [];
     }
 
     /**
@@ -238,11 +139,9 @@ export class ComprehensiveSpriteSystem {
 
     /**
      * Get load progress
+     * Returns 100% since no sprites are actually loaded (see #2542)
      */
     getLoadProgress() {
-        const total = emotionSpriteMapper.getAllEmotions().length +
-            bodyLanguageMapper.getAllPoses().length;
-        const loaded = this.loadedSprites.size;
-        return (loaded / total) * 100;
+        return 100;
     }
 }

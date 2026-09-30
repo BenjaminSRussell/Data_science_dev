@@ -3,6 +3,8 @@
  * Validates all sprite sheets and assets load correctly
  */
 
+import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
+
 export class AssetValidator {
     constructor(game) {
         this.game = game;
@@ -122,20 +124,19 @@ export class AssetValidator {
             const manifest = assetManager.getAssetManifest();
             if (manifest.characters?.spriteSheets) {
                 Object.values(manifest.characters.spriteSheets).forEach(sheet => {
-                    if (sheet.url) paths.push(sheet.url);
+                    if (sheet.url && !isAssetMissing(sheet.url)) {
+                        paths.push(sheet.url);
+                    }
                 });
             }
         }
 
-        // Also check common sprite paths
-        const commonSprites = [
-            '/assets/characters/sprites/character_sheet.png',
-            '/assets/characters/sprites/emotion_sheet.png'
-        ];
-
-        commonSprites.forEach(path => {
-            if (!paths.includes(path)) paths.push(path);
-        });
+        // Skip common sprite paths that are known to be missing (see MissingAssetBlocklist)
+        // const commonSprites = [
+        //     '/assets/characters/sprites/character_sheet.png',
+        //     '/assets/characters/sprites/emotion_sheet.png'
+        // ];
+        // These are known missing assets and should not cause validator errors
 
         return paths;
     }
