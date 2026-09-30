@@ -1610,6 +1610,11 @@ export class NPCManager {
             this.gameState.money += effects.money;
         }
 
+        // Reputation change
+        if (effects.reputation) {
+            this.gameState.reputation += effects.reputation;
+        }
+
         // Flags (Quest tracking)
         if (effects.flag) {
             const state = this.getNPCState(npcId);
