@@ -1323,6 +1323,30 @@ a:hover {
     transform: scale(1.1);
 }
 
+/* Quality Button */
+.quality-btn {
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border, #444);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.quality-btn:hover {
+    background: var(--color-bg-elevated);
+    border-color: var(--color-text-secondary);
+}
+
+.quality-btn.active {
+    background: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+    color: #09090b;
+    font-weight: 600;
+}
+
 /* Toggle Switch */
 .toggle {
     position: relative;

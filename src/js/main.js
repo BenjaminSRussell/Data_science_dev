@@ -2244,6 +2244,10 @@ export class MainGame {
      * Show settings modal
      */
     showSettings() {
+        const performanceManager = this.gameState?.performanceManager;
+        const currentQuality = performanceManager?.quality || 'auto';
+        const currentFPS = performanceManager?.getFPS() || 0;
+
         const modalContent = `
             <div class="settings-modal">
                 <h2>Settings</h2>
@@ -2262,6 +2266,19 @@ export class MainGame {
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
+                    <div class="option-group" style="border-top: 1px solid #444; padding-top: 1rem; margin-top: 1rem;">
+                        <label>Graphics Quality</label>
+                        <div id="quality-controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <button class="quality-btn ${currentQuality === 'auto' ? 'active' : ''}" data-quality="auto">Auto</button>
+                            <button class="quality-btn ${currentQuality === 'low' ? 'active' : ''}" data-quality="low">Low</button>
+                            <button class="quality-btn ${currentQuality === 'medium' ? 'active' : ''}" data-quality="medium">Medium</button>
+                            <button class="quality-btn ${currentQuality === 'high' ? 'active' : ''}" data-quality="high">High</button>
+                            <button class="quality-btn ${currentQuality === 'ultra' ? 'active' : ''}" data-quality="ultra">Ultra</button>
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #999;">
+                            Current FPS: <span id="fps-display">${currentFPS}</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="settings-danger">
                     <button class="btn btn-danger" onclick="game.resetProgress()">Reset Progress</button>
@@ -2271,6 +2288,49 @@ export class MainGame {
         `;
 
         this.showModal(modalContent);
+        this.attachSettingsEventListeners();
+    }
+
+    /**
+     * Attach event listeners to settings modal elements
+     */
+    attachSettingsEventListeners() {
+        // Quality buttons
+        const qualityButtons = document.querySelectorAll('.quality-btn');
+        qualityButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const quality = btn.dataset.quality;
+                if (this.gameState?.performanceManager) {
+                    this.gameState.performanceManager.setQuality(quality);
+
+                    // Update button states
+                    qualityButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Update FPS display
+                    const fpsDisplay = document.getElementById('fps-display');
+                    if (fpsDisplay) {
+                        fpsDisplay.textContent = this.gameState.performanceManager.getFPS();
+                    }
+                }
+            });
+        });
+
+        // Start live FPS updates while modal is open
+        const fpsDisplay = document.getElementById('fps-display');
+        if (fpsDisplay && this.gameState?.performanceManager) {
+            const updateFPS = () => {
+                fpsDisplay.textContent = this.gameState.performanceManager.getFPS();
+            };
+            const fpsInterval = setInterval(updateFPS, 500);
+
+            // Stop updates when modal closes (listen for closeModal calls)
+            const originalCloseModal = this.closeModal.bind(this);
+            this.closeModal = () => {
+                clearInterval(fpsInterval);
+                originalCloseModal();
+            };
+        }
     }
 
     /**
