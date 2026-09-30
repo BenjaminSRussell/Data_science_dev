@@ -3,6 +3,8 @@
  * Helper functions for education system, exams, and certifications
  */
 
+import { modalAccessibilityManager } from '../ui/ModalAccessibilityManager.js';
+
 /**
  * Handle starting an exam
  */
@@ -27,21 +29,25 @@ export function handleStartExam(game, courseId) {
 
     // Show Modal
     const modal = document.getElementById('modal-exam');
-    modal.classList.remove('hidden');
-    modal.classList.add('active');
+    const startButton = document.getElementById('btn-start-exam');
 
     document.getElementById('exam-title').textContent = `${course.name} Exam`;
     document.getElementById('exam-intro').classList.remove('hidden');
     document.getElementById('exam-questions').classList.add('hidden');
     document.getElementById('exam-results').classList.add('hidden');
 
+    // Use the accessibility manager to open the modal with proper focus management
+    modalAccessibilityManager.openModal(modal, {
+        triggerElement: document.activeElement, // Store the element that triggered this
+        focusTarget: startButton // Focus the start button
+    });
+
     // Bind Start Button
     document.getElementById('btn-start-exam').onclick = () => startExamQuestions(game);
 
     // Bind Close Button
     document.querySelector('#modal-exam .close-modal').onclick = () => {
-        modal.classList.remove('active');
-        modal.classList.add('hidden');
+        modalAccessibilityManager.closeModal(modal);
     };
 }
 
@@ -147,8 +153,7 @@ export function finishExam(game) {
         closeBtn.onclick = () => {
             const modal = document.getElementById('modal-exam');
             if (modal) {
-                modal.classList.remove('active');
-                modal.classList.add('hidden');
+                modalAccessibilityManager.closeModal(modal);
             }
             if (game.updateMapScreen) {
                 game.updateMapScreen();

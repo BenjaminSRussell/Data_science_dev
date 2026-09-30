@@ -115,6 +115,7 @@ import * as NPCHelpers from './helpers/NPCHelpers.js';
 import * as StockMarketHelpers from './helpers/StockMarketHelpers.js';
 import * as EducationHelpers from './helpers/EducationHelpers.js';
 import * as ProjectHelpers from './helpers/ProjectHelpers.js';
+import { modalAccessibilityManager } from './ui/ModalAccessibilityManager.js';
 
 let game = null; // Declare game instance
 
@@ -2363,10 +2364,32 @@ export class MainGame {
         const modalContent = document.getElementById('modal-content');
 
         modalContent.innerHTML = content;
-        container.classList.remove('hidden');
+
+        // Extract or create title for aria-labelledby
+        const heading = modalContent.querySelector('h1, h2, h3, h4, h5, h6');
+        if (heading && !heading.id) {
+            heading.id = `modal-title-${Date.now()}`;
+        }
+
+        // Update aria-labelledby to point to the actual heading
+        if (heading && heading.id) {
+            container.setAttribute('aria-labelledby', heading.id);
+        } else {
+            // Fallback if no heading found
+            container.removeAttribute('aria-labelledby');
+        }
 
         // Close on backdrop click
         container.querySelector('.modal-backdrop').onclick = () => this.closeModal();
+
+        // Store the trigger element (button that opened the modal) for focus restoration
+        const triggerElement = document.activeElement;
+
+        // Use accessibility manager to open the modal with proper focus management
+        modalAccessibilityManager.openModal(container, {
+            triggerElement: triggerElement,
+            focusTarget: heading || null
+        });
     }
 
     /**
@@ -2374,7 +2397,7 @@ export class MainGame {
      */
     closeModal() {
         const container = document.getElementById('modal-container');
-        container.classList.add('hidden');
+        modalAccessibilityManager.closeModal(container);
     }
 
     /**

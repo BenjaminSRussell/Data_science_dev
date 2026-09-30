@@ -4,6 +4,8 @@
  * Priority 1: Story Visibility
  */
 
+import { modalAccessibilityManager } from './ModalAccessibilityManager.js';
+
 export class StoryUI {
     constructor(game) {
         this.game = game;
@@ -556,11 +558,19 @@ export class StoryUI {
 
         const modal = document.createElement('div');
         modal.className = 'story-decision-modal';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+
+        // Create unique title ID for aria-labelledby
+        const titleId = `decision-modal-title-${Date.now()}`;
+        modal.setAttribute('aria-labelledby', titleId);
+
         modal.innerHTML = `
             <div class="decision-modal-content">
                 <div class="decision-modal-header">
-                    <h3 class="decision-modal-title">${decision.title}</h3>
+                    <h3 class="decision-modal-title" id="${titleId}">${decision.title}</h3>
                     <div class="decision-modal-importance">Major Decision</div>
+                    <button class="decision-modal-close" aria-label="Close decision">×</button>
                 </div>
                 <div class="decision-modal-description">${decision.description}</div>
                 <div class="decision-modal-choices">
@@ -583,20 +593,41 @@ export class StoryUI {
 
         document.body.appendChild(modal);
 
-        // Add click handlers
+        // Close handler
+        const closeModal = () => {
+            modalAccessibilityManager.closeModal(modal);
+            modal.remove();
+        };
+
+        // Add click handlers for choices
         modal.querySelectorAll('.decision-choice-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const choice = btn.dataset.choice;
                 this.handleDecisionChoice(decision.id, choice);
-                modal.remove();
+                closeModal();
             });
         });
+
+        // Close button handler
+        const closeBtn = modal.querySelector('.decision-modal-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
 
         // Close on background click
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.remove();
+                closeModal();
             }
+        });
+
+        // Store the current active element for focus restoration
+        const triggerElement = document.activeElement;
+
+        // Open modal with accessibility manager for focus management and escape key handling
+        modalAccessibilityManager.openModal(modal, {
+            triggerElement: triggerElement,
+            focusTarget: modal.querySelector('.decision-choice-btn') // Focus first choice button
         });
     }
 
