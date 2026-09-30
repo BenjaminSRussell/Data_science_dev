@@ -535,7 +535,7 @@ export class UIUpdater {
     updateNewspaperScreen() {
         const paper = this.game?.newsManager?.getDailyPaper();
         if (!paper) {
-            console.warn("No paper found!");
+            logger.warn("No paper found!");
             return;
         }
 
