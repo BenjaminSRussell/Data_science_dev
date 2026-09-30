@@ -33,12 +33,10 @@ export class LocationBackgroundSystem {
                 executive: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
             },
             library: {
-                default: 'linear-gradient(135deg, #8b5a2b 0%, #3c2a14 100%)',
-                modern: 'linear-gradient(135deg, #4a5568 0%, #2d3748 100%)'
+                default: 'linear-gradient(135deg, #8b5a2b 0%, #3c2a14 100%)'
             },
             gym: {
-                default: 'linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)',
-                premium: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                default: 'linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)'
             },
             downtown: {
                 day: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
