@@ -5,7 +5,6 @@
 
 import { logger } from './Logger.js';
 import { DOMUtils } from './DOMUtils.js';
-import { CommonUtils } from './CommonUtils.js';
 
 export class CodeCleanup {
     /**
