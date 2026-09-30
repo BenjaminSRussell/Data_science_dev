@@ -113,7 +113,7 @@ export class ClientManager {
             data: null, // Data is assigned when job is accepted
             status: 'pending',
             createdAt: Date.now(),
-            expiresAt: Date.now() + (1000 * 60 * 5), // 5 minute window to accept
+            expiresAt: Date.now() + (1000 * 60 * 5 * clientType.patience), // 5 minute window scaled by client patience
             progress: 0
         };
     }
