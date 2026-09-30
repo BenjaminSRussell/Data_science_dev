@@ -218,7 +218,7 @@ export class ResearchInboxUI {
                     </div>
                     ${paper.url ? `
                         <div class="paper-detail-link">
-                            <a href="${paper.url}" target="_blank" class="paper-link-btn">
+                            <a href="${paper.url}" target="_blank" rel="noopener noreferrer" class="paper-link-btn">
                                  Read Paper
                             </a>
                         </div>
