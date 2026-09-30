@@ -234,7 +234,7 @@ export class UIUpdater {
         // Update task reward
         if (task.potentialReward) {
             DOMUtils.updateElement('#task-reward', {
-                textContent: CommonUtils.formatCurrency(task.potentialReward)
+                textContent: `$${task.potentialReward.toLocaleString()}`
             });
         }
 
@@ -395,7 +395,7 @@ export class UIUpdater {
                         <h4 class="contract-title">${c.title}</h4>
                         <p class="contract-desc">${c.description}</p>
                         <div class="contract-rewards">
-                            <span class="reward-money">$${c.reward}</span>
+                            <span class="reward-money">$${c.reward.toLocaleString()}</span>
                             <span class="reward-xp">${Object.keys(c.xpReward || {}).join(', ')} XP</span>
                         </div>
                         <button class="btn btn-sm btn-primary btn-accept-contract" 
@@ -537,7 +537,7 @@ export class UIUpdater {
                         <strong>Effect:</strong> ${lib.gameEffect}
                     </div>
                     <div class="lib-footer">
-                        <div class="lib-cost">$${lib.cost}</div>
+                        <div class="lib-cost">$${lib.cost.toLocaleString()}</div>
                         ${owned
                     ? '<button class="btn btn-sm btn-ghost disabled">Learned</button>'
                     : `<button class="btn btn-sm btn-primary" 
