@@ -13,7 +13,7 @@ export class GitHubIssuesSystem {
         this.repositories = this.initializeRepositories();
         this.generateInitialIssues();
     }
-    
+
     /**
      * Initialize repositories
      */
@@ -48,7 +48,7 @@ export class GitHubIssuesSystem {
             }
         ];
     }
-    
+
     /**
      * Generate initial GitHub issues
      */
@@ -121,33 +121,33 @@ export class GitHubIssuesSystem {
             }
         ];
     }
-    
+
     /**
      * Get open issues
      */
     getOpenIssues(filters = {}) {
         let issues = [...this.openIssues];
-        
+
         // Filter by repository
         if (filters.repository) {
             issues = issues.filter(issue => issue.repository === filters.repository);
         }
-        
+
         // Filter by difficulty
         if (filters.difficulty) {
             issues = issues.filter(issue => issue.difficulty === filters.difficulty);
         }
-        
+
         // Filter by labels
         if (filters.labels && filters.labels.length > 0) {
-            issues = issues.filter(issue => 
+            issues = issues.filter(issue =>
                 filters.labels.some(label => issue.labels.includes(label))
             );
         }
-        
+
         return issues;
     }
-    
+
     /**
      * Assign issue to player
      */
@@ -156,21 +156,21 @@ export class GitHubIssuesSystem {
         if (!issue) {
             return { success: false, message: 'Issue not found' };
         }
-        
+
         if (issue.assignee) {
             return { success: false, message: 'Issue already assigned' };
         }
-        
+
         issue.assignee = 'player';
         issue.assignedAt = Date.now();
-        
+
         return {
             success: true,
             issue: issue,
             message: `Assigned issue #${issue.number}: ${issue.title}`
         };
     }
-    
+
     /**
      * Complete issue (creates pull request)
      */
@@ -179,7 +179,7 @@ export class GitHubIssuesSystem {
         if (!issue) {
             return { success: false, message: 'Issue not assigned to you' };
         }
-        
+
         // Create pull request
         const pullRequest = {
             id: `pr_${Date.now()}`,
@@ -194,15 +194,15 @@ export class GitHubIssuesSystem {
             reviews: [],
             mergeable: true
         };
-        
+
         this.pullRequests.push(pullRequest);
-        
+
         // Move issue to closed
         this.openIssues = this.openIssues.filter(i => i.id !== issueId);
         issue.status = 'closed';
         issue.closedAt = Date.now();
         this.closedIssues.push(issue);
-        
+
         // Apply rewards
         if (issue.reward) {
             if (issue.reward.money) {
@@ -212,7 +212,7 @@ export class GitHubIssuesSystem {
                 this.gameState.reputation += issue.reward.reputation;
             }
         }
-        
+
         return {
             success: true,
             pullRequest: pullRequest,
@@ -220,24 +220,24 @@ export class GitHubIssuesSystem {
             message: `Created pull request #${pullRequest.number} for issue #${issue.number}`
         };
     }
-    
+
     /**
      * Get pull requests
      */
     getPullRequests(filters = {}) {
         let prs = [...this.pullRequests];
-        
+
         if (filters.status) {
             prs = prs.filter(pr => pr.status === filters.status);
         }
-        
+
         if (filters.repository) {
             prs = prs.filter(pr => pr.repository === filters.repository);
         }
-        
+
         return prs;
     }
-    
+
     /**
      * Merge pull request
      */
@@ -246,26 +246,26 @@ export class GitHubIssuesSystem {
         if (!pr) {
             return { success: false, message: 'Pull request not found' };
         }
-        
+
         if (pr.status !== 'open') {
             return { success: false, message: 'Pull request already merged or closed' };
         }
-        
+
         // Check if reviews are required
         if (pr.reviews.length < 1) {
             return { success: false, message: 'Pull request needs at least 1 review' };
         }
-        
+
         pr.status = 'merged';
         pr.mergedAt = Date.now();
-        
+
         return {
             success: true,
             pullRequest: pr,
             message: `Merged pull request #${pr.number}`
         };
     }
-    
+
     /**
      * Generate new issue (randomly)
      */
@@ -301,7 +301,7 @@ export class GitHubIssuesSystem {
         const rewardTable = {
             'easy': { money: 200, reputation: 10 },
             'medium': { money: 400, reputation: 20 },
-            'hard': { money: 600, reputation: 25 },
+            'hard': { money: 600, reputation: 30 },
             'very_hard': { money: 1000, reputation: 35 },
             'extreme': { money: 1500, reputation: 50 }
         };
@@ -320,11 +320,10 @@ export class GitHubIssuesSystem {
             createdAt: Date.now(),
             difficulty: template.difficulty,
             skills: ['python', 'data_science'],
-            reward: rewardTable[template.difficulty] || { money: 600, reputation: 25 }
+            reward: rewardTable[template.difficulty]
         };
 
         this.openIssues.push(issue);
         return issue;
     }
 }
-
