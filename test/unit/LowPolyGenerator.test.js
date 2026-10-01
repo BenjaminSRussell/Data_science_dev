@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 
 const projectRoot = path.resolve(__dirname, '../../');
-const generatorScript = path.join(projectRoot, 'scripts/generators/generate_more_low_poly.py');
+const generatorScript = path.join(projectRoot, 'scripts/archive/generators/generate_more_low_poly.py');
 
 describe('LowPolyGenerator', () => {
     let testOutputDir = '';
@@ -90,7 +90,7 @@ describe('LowPolyGenerator', () => {
         const testScript = `
 import sys
 sys.path.insert(0, '${projectRoot}')
-from scripts.generators.generate_more_low_poly import LowPolyGenerator
+from scripts.archive.generators.generate_more_low_poly import LowPolyGenerator
 
 gen = LowPolyGenerator('${testOutputDir}')
 result = gen.fill_category('vehicles/sprites', 3, 0)
@@ -124,7 +124,7 @@ print(f'Generated {result} vehicle assets')
         const testScript = `
 import sys
 sys.path.insert(0, '${projectRoot}')
-from scripts.generators.generate_more_low_poly import LowPolyGenerator
+from scripts.archive.generators.generate_more_low_poly import LowPolyGenerator
 
 gen = LowPolyGenerator('${testOutputDir}')
 result = gen.fill_category('map/assets', 3, 0)
