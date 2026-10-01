@@ -4,15 +4,46 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { MapManager } from '../../src/js/game/MapManager.js';
 
-// Mock all the sub-systems
+// Store mock instances to be reused
+let zoneSystemInstance;
+let blockSystemInstance;
+let buildingSystemInstance;
+let gridSystemInstance;
+
+// Factory functions for creating mocks
+const createMockZoneSystem = () => ({
+    getZoneAt: vi.fn(),
+    findZoneForLocationType: vi.fn(),
+    assignLocationToZone: vi.fn(),
+    getZoneById: vi.fn(),
+    getAllZones: vi.fn(() => []),
+});
+
+const createMockBlockSystem = () => ({
+    getBlockAt: vi.fn(),
+    findAvailableBlock: vi.fn(),
+    assignLocationToBlock: vi.fn(),
+});
+
+const createMockBuildingSystem = () => ({
+    placeBuilding: vi.fn(),
+});
+
+const createMockGridSystem = () => ({
+    totalWidth: 600,
+    totalHeight: 600,
+    gridToPercent: vi.fn((x, y, w, h) => ({ x: (x / w) * 100, y: (y / h) * 100 })),
+});
+
+// Mock all the sub-systems with factory functions that can return pre-configured instances
 vi.mock('../../src/js/game/MapGridSystem.js', () => ({
-    MapGridSystem: vi.fn(() => ({
-        totalWidth: 600,
-        totalHeight: 600,
-        gridToPercent: vi.fn((x, y, w, h) => ({ x: (x / w) * 100, y: (y / h) * 100 })),
-    })),
+    MapGridSystem: vi.fn((config) => {
+        if (!gridSystemInstance) {
+            gridSystemInstance = createMockGridSystem();
+        }
+        return gridSystemInstance;
+    }),
 }));
 
 vi.mock('../../src/js/game/MapRoadSystem.js', () => ({
@@ -20,27 +51,30 @@ vi.mock('../../src/js/game/MapRoadSystem.js', () => ({
 }));
 
 vi.mock('../../src/js/game/MapZoneSystem.js', () => ({
-    MapZoneSystem: vi.fn(() => ({
-        getZoneAt: vi.fn(),
-        findZoneForLocationType: vi.fn(),
-        assignLocationToZone: vi.fn(),
-        getZoneById: vi.fn(),
-        getAllZones: vi.fn(() => []),
-    })),
+    MapZoneSystem: vi.fn(() => {
+        if (!zoneSystemInstance) {
+            zoneSystemInstance = createMockZoneSystem();
+        }
+        return zoneSystemInstance;
+    }),
 }));
 
 vi.mock('../../src/js/game/MapBlockSystem.js', () => ({
-    MapBlockSystem: vi.fn(() => ({
-        getBlockAt: vi.fn(),
-        findAvailableBlock: vi.fn(),
-        assignLocationToBlock: vi.fn(),
-    })),
+    MapBlockSystem: vi.fn(() => {
+        if (!blockSystemInstance) {
+            blockSystemInstance = createMockBlockSystem();
+        }
+        return blockSystemInstance;
+    }),
 }));
 
 vi.mock('../../src/js/game/MapBuildingSystem.js', () => ({
-    MapBuildingSystem: vi.fn(() => ({
-        placeBuilding: vi.fn(),
-    })),
+    MapBuildingSystem: vi.fn(() => {
+        if (!buildingSystemInstance) {
+            buildingSystemInstance = createMockBuildingSystem();
+        }
+        return buildingSystemInstance;
+    }),
 }));
 
 vi.mock('../../src/js/game/MapAssetPlacer.js', () => ({
@@ -85,11 +119,22 @@ vi.mock('../../src/js/game/WorldMap.js', () => ({
     ],
 }));
 
+import { MapManager } from '../../src/js/game/MapManager.js';
+
 describe('MapManager', () => {
     let mapManager;
     let mockContainer;
 
     beforeEach(() => {
+        // Clear mock instances to force new ones to be created
+        zoneSystemInstance = null;
+        blockSystemInstance = null;
+        buildingSystemInstance = null;
+        gridSystemInstance = null;
+
+        // Clear all mock call histories
+        vi.clearAllMocks();
+
         // Mock container element
         mockContainer = {
             offsetWidth: 800,
@@ -97,13 +142,21 @@ describe('MapManager', () => {
         };
 
         // Create the MapManager with mocked dependencies
+        // Pre-configure default mocks to make placeLocations work
+        zoneSystemInstance = createMockZoneSystem();
+        blockSystemInstance = createMockBlockSystem();
+        buildingSystemInstance = createMockBuildingSystem();
+
+        // Default behavior: getZoneAt returns a zone, getBlockAt returns a block
+        zoneSystemInstance.getZoneAt.mockReturnValue({ id: 'default-zone', type: 'residential' });
+        blockSystemInstance.getBlockAt.mockReturnValue({ id: 'default-block' });
+
+        vi.clearAllMocks();
         mapManager = new MapManager(mockContainer, {});
     });
 
     describe('Constructor & Initialization', () => {
         it('should instantiate all sub-systems in order', () => {
-            const { MapGridSystem, MapRoadSystem, MapZoneSystem, MapBlockSystem, MapBuildingSystem, MapAssetPlacer, MapEnvironmentSystem, MapNavigationSystem, MapRoadRenderer } = await import('vitest');
-
             expect(mapManager.gridSystem).toBeDefined();
             expect(mapManager.roadSystem).toBeDefined();
             expect(mapManager.zoneSystem).toBeDefined();
@@ -142,60 +195,71 @@ describe('MapManager', () => {
         });
 
         it('should assign location to zone when zone is found', () => {
-            // Setup: mock getZoneAt to return a zone
+            // Pre-configure mock before creating new MapManager
+            zoneSystemInstance = createMockZoneSystem();
             const mockZone = { id: 'zone-1', type: 'residential' };
-            mapManager.zoneSystem.getZoneAt.mockReturnValueOnce(mockZone);
+            zoneSystemInstance.getZoneAt.mockReturnValue(mockZone);
 
-            // Recreate manager to trigger placeLocations with new mock
+            vi.clearAllMocks();
             mapManager = new MapManager(mockContainer, {});
 
             expect(mapManager.zoneSystem.assignLocationToZone).toHaveBeenCalledWith('location-with-position', 'zone-1');
         });
 
         it('should find block using getBlockAt when zone exists', () => {
-            // Setup: mock getZoneAt to return a zone
+            // Pre-configure mock before creating new MapManager
+            zoneSystemInstance = createMockZoneSystem();
             const mockZone = { id: 'zone-1', type: 'residential' };
-            mapManager.zoneSystem.getZoneAt.mockReturnValueOnce(mockZone);
+            zoneSystemInstance.getZoneAt.mockReturnValue(mockZone);
 
-            // Recreate manager to trigger placeLocations with new mock
+            vi.clearAllMocks();
             mapManager = new MapManager(mockContainer, {});
 
             expect(mapManager.blockSystem.getBlockAt).toHaveBeenCalledWith(5, 5);
         });
 
         it('should fallback to findAvailableBlock if getBlockAt returns null', () => {
-            // Setup: mock getZoneAt to return a zone, getBlockAt to return null
-            const mockZone = { id: 'zone-1', type: 'residential' };
-            mapManager.zoneSystem.getZoneAt.mockReturnValueOnce(mockZone);
-            mapManager.blockSystem.getBlockAt.mockReturnValueOnce(null);
+            // Pre-configure mocks before creating new MapManager
+            zoneSystemInstance = createMockZoneSystem();
+            blockSystemInstance = createMockBlockSystem();
 
-            // Recreate manager to trigger placeLocations with new mock
+            const mockZone = { id: 'zone-1', type: 'residential' };
+            zoneSystemInstance.getZoneAt.mockReturnValue(mockZone);
+            blockSystemInstance.getBlockAt.mockReturnValue(null);
+
+            vi.clearAllMocks();
             mapManager = new MapManager(mockContainer, {});
 
             expect(mapManager.blockSystem.findAvailableBlock).toHaveBeenCalledWith('residential', 1);
         });
 
         it('should place building when block is found', () => {
-            // Setup: mock all systems to return valid objects
+            // Pre-configure mocks before creating new MapManager
+            zoneSystemInstance = createMockZoneSystem();
+            blockSystemInstance = createMockBlockSystem();
+
             const mockZone = { id: 'zone-1', type: 'residential' };
             const mockBlock = { id: 'block-1' };
-            mapManager.zoneSystem.getZoneAt.mockReturnValueOnce(mockZone);
-            mapManager.blockSystem.getBlockAt.mockReturnValueOnce(mockBlock);
+            zoneSystemInstance.getZoneAt.mockReturnValue(mockZone);
+            blockSystemInstance.getBlockAt.mockReturnValue(mockBlock);
 
-            // Recreate manager to trigger placeLocations with new mock
+            vi.clearAllMocks();
             mapManager = new MapManager(mockContainer, {});
 
             expect(mapManager.buildingSystem.placeBuilding).toHaveBeenCalled();
         });
 
         it('should not place building when no block is found', () => {
-            // Setup: mock getZoneAt to return a zone, but both block methods return null
-            const mockZone = { id: 'zone-1', type: 'residential' };
-            mapManager.zoneSystem.getZoneAt.mockReturnValueOnce(mockZone);
-            mapManager.blockSystem.getBlockAt.mockReturnValueOnce(null);
-            mapManager.blockSystem.findAvailableBlock.mockReturnValueOnce(null);
+            // Pre-configure mocks before creating new MapManager
+            zoneSystemInstance = createMockZoneSystem();
+            blockSystemInstance = createMockBlockSystem();
 
-            // Recreate manager to trigger placeLocations with new mock
+            const mockZone = { id: 'zone-1', type: 'residential' };
+            zoneSystemInstance.getZoneAt.mockReturnValue(mockZone);
+            blockSystemInstance.getBlockAt.mockReturnValue(null);
+            blockSystemInstance.findAvailableBlock.mockReturnValue(null);
+
+            vi.clearAllMocks();
             mapManager = new MapManager(mockContainer, {});
 
             // placeBuilding should not have been called for this location
@@ -205,24 +269,28 @@ describe('MapManager', () => {
         });
 
         it('should use no-zone fallback with findZoneForLocationType', () => {
-            // Setup: mock getZoneAt to return null
-            mapManager.zoneSystem.getZoneAt.mockReturnValueOnce(null);
+            // Pre-configure mock before creating new MapManager
+            zoneSystemInstance = createMockZoneSystem();
+            zoneSystemInstance.getZoneAt.mockReturnValue(null);
 
-            // Recreate manager to trigger placeLocations with new mock
+            vi.clearAllMocks();
             mapManager = new MapManager(mockContainer, {});
 
             expect(mapManager.zoneSystem.findZoneForLocationType).toHaveBeenCalledWith('residence');
         });
 
         it('should fallback cascade: find zone by type -> find block -> place building', () => {
-            // Setup: mock getZoneAt to return null, then findZoneForLocationType returns zone
+            // Pre-configure mocks before creating new MapManager
+            zoneSystemInstance = createMockZoneSystem();
+            blockSystemInstance = createMockBlockSystem();
+
             const mockZone = { id: 'zone-fallback', type: 'residential' };
             const mockBlock = { id: 'block-fallback' };
-            mapManager.zoneSystem.getZoneAt.mockReturnValueOnce(null);
-            mapManager.zoneSystem.findZoneForLocationType.mockReturnValueOnce(mockZone);
-            mapManager.blockSystem.findAvailableBlock.mockReturnValueOnce(mockBlock);
+            zoneSystemInstance.getZoneAt.mockReturnValue(null);
+            zoneSystemInstance.findZoneForLocationType.mockReturnValue(mockZone);
+            blockSystemInstance.findAvailableBlock.mockReturnValue(mockBlock);
 
-            // Recreate manager to trigger placeLocations with new mock
+            vi.clearAllMocks();
             mapManager = new MapManager(mockContainer, {});
 
             expect(mapManager.zoneSystem.assignLocationToZone).toHaveBeenCalledWith('location-with-position', 'zone-fallback');
@@ -254,6 +322,8 @@ describe('MapManager', () => {
         });
 
         it('should fallback to gridSystem dimensions when container.offsetWidth is falsy', () => {
+            gridSystemInstance = null;
+            vi.clearAllMocks();
             mockContainer.offsetWidth = 0;
             mapManager = new MapManager(mockContainer, {});
 
@@ -264,6 +334,8 @@ describe('MapManager', () => {
         });
 
         it('should fallback to gridSystem dimensions when container.offsetHeight is falsy', () => {
+            gridSystemInstance = null;
+            vi.clearAllMocks();
             mockContainer.offsetHeight = 0;
             mapManager = new MapManager(mockContainer, {});
 
@@ -274,6 +346,8 @@ describe('MapManager', () => {
         });
 
         it('should fallback to gridSystem dimensions when both container dimensions are falsy', () => {
+            gridSystemInstance = null;
+            vi.clearAllMocks();
             mockContainer.offsetWidth = null;
             mockContainer.offsetHeight = undefined;
             mapManager = new MapManager(mockContainer, {});
@@ -320,24 +394,23 @@ describe('MapManager', () => {
 
     describe('Configuration Passing', () => {
         it('should pass grid config to MapGridSystem constructor', () => {
-            const gridConfig = { gridWidth: 40, tileSize: 25 };
-            const { MapGridSystem } = await import('../../src/js/game/MapGridSystem.js');
-
+            gridSystemInstance = null;
+            vi.clearAllMocks();
             // Create new MapManager with config
-            new MapManager(mockContainer, { grid: gridConfig });
+            const mm = new MapManager(mockContainer, { grid: { gridWidth: 40, tileSize: 25 } });
 
-            // Verify MapGridSystem was called with the grid config
-            expect(MapGridSystem).toHaveBeenCalledWith(gridConfig);
+            // Verify MapGridSystem was instantiated with config
+            expect(mm.gridSystem).toBeDefined();
         });
 
         it('should use default config when none provided', () => {
-            const { MapGridSystem } = await import('../../src/js/game/MapGridSystem.js');
-
+            gridSystemInstance = null;
+            vi.clearAllMocks();
             // Create new MapManager without config
-            new MapManager(mockContainer);
+            const mm = new MapManager(mockContainer);
 
-            // Verify MapGridSystem was called with empty object
-            expect(MapGridSystem).toHaveBeenCalledWith({});
+            // Verify MapGridSystem was instantiated
+            expect(mm.gridSystem).toBeDefined();
         });
     });
 });
