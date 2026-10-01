@@ -540,10 +540,6 @@ export class WorldMap {
             this.currentVehicle = 'walking';
         }
 
-        // Adjust reputation (lose some reputation for selling)
-        this.gameState.reputation -= Math.floor(vehicle.reputation * 0.5);
-
-        // Invalidate cache (vehicle change affects accessibility)
         this._invalidateCache();
 
         return { success: true, vehicle, salePrice };

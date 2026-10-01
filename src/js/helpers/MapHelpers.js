@@ -468,8 +468,13 @@ export function updateEnvironmentForLocation(game, locationId) {
  */
 export function handleLocationAction(game, action) {
     // Handle car-related activities
-    if (action === 'browse_cars' || action === 'buy_car') {
-        handleBrowseOrBuyCars(game);
+    if (action === 'browse_cars') {
+        handleBrowseCars(game);
+        return;
+    }
+
+    if (action === 'buy_car') {
+        handleBuyCar(game);
         return;
     }
 
@@ -512,9 +517,10 @@ export function handleLocationAction(game, action) {
 }
 
 /**
- * Handle browse or buy cars action - O(n) where n is number of vehicles
+ * Handle browse cars action - O(n) where n is number of vehicles
+ * Shows available vehicles without purchase prompt
  */
-function handleBrowseOrBuyCars(game) {
+function handleBrowseCars(game) {
     if (!game.worldMap) {
         game.showError("Vehicle shop temporarily unavailable");
         return;
@@ -537,7 +543,7 @@ function handleBrowseOrBuyCars(game) {
         return;
     }
 
-    // Create a simple dialog to browse vehicles
+    // Create a browse display without purchase prompt
     const message = vehicleList
         .map(v => {
             const status = v.owned ? '(Owned)' : `$${v.price.toLocaleString()}`;
@@ -545,14 +551,58 @@ function handleBrowseOrBuyCars(game) {
         })
         .join('\n');
 
+    game.showToast(`Available Vehicles:\n\n${message}`, 'info');
+}
+
+/**
+ * Handle buy car action - O(n) where n is number of vehicles
+ * Prompts player to select and purchase a vehicle
+ */
+function handleBuyCar(game) {
+    if (!game.worldMap) {
+        game.showError("Vehicle shop temporarily unavailable");
+        return;
+    }
+
+    const ownedVehicles = game.worldMap.ownedVehicles || new Set();
+
+    // Build vehicle list from VEHICLES constant (skip walking)
+    const vehicleList = VEHICLES
+        .filter(v => v.id !== 'walking')
+        .map(v => ({
+            id: v.id,
+            name: v.name,
+            price: v.price,
+            owned: ownedVehicles.has(v.id)
+        }));
+
+    if (vehicleList.length === 0) {
+        game.showError("Vehicle shop temporarily unavailable");
+        return;
+    }
+
+    // Create a simple dialog to purchase vehicles
+    const message = vehicleList
+        .map(v => {
+            const status = v.owned ? '(Owned)' : `$${v.price.toLocaleString()}`;
+            return `${v.name}: ${status}`;
+        })
+        .join('\n');
+
+    // Use vehicle ID (e.g., 'used_car') as default - more robust than name matching
     const selected = prompt(
-        `Available Vehicles:\n\n${message}\n\nEnter vehicle name to purchase (or cancel):`,
-        'sedan'
+        `Available Vehicles:\n\n${message}\n\nEnter vehicle ID to purchase (or cancel):`,
+        'used_car'
     );
 
     if (!selected) return;
 
-    const selectedVehicle = vehicleList.find(v => v.name.toLowerCase() === selected.toLowerCase());
+    // Match by vehicle ID first, then by name as fallback for user convenience
+    let selectedVehicle = vehicleList.find(v => v.id === selected);
+    if (!selectedVehicle) {
+        selectedVehicle = vehicleList.find(v => v.name.toLowerCase() === selected.toLowerCase());
+    }
+
     if (!selectedVehicle) {
         game.showError(`Vehicle "${selected}" not found`);
         return;
@@ -611,14 +661,20 @@ function handleSellCar(game) {
         .map(v => `${v.name}: $${v.salePrice.toLocaleString()}`)
         .join('\n');
 
+    // Use vehicle ID as default for more reliable matching
     const selected = prompt(
-        `Vehicles for Sale:\n\n${message}\n\nEnter vehicle name to sell (or cancel):`,
-        ''
+        `Vehicles for Sale:\n\n${message}\n\nEnter vehicle ID to sell (or cancel):`,
+        vehicleList.length > 0 ? vehicleList[0].id : ''
     );
 
     if (!selected) return;
 
-    const selectedVehicle = vehicleList.find(v => v.name.toLowerCase() === selected.toLowerCase());
+    // Match by vehicle ID first, then by name as fallback
+    let selectedVehicle = vehicleList.find(v => v.id === selected);
+    if (!selectedVehicle) {
+        selectedVehicle = vehicleList.find(v => v.name.toLowerCase() === selected.toLowerCase());
+    }
+
     if (!selectedVehicle) {
         game.showError(`Vehicle "${selected}" not found`);
         return;
