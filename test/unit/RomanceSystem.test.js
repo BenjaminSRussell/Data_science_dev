@@ -33,110 +33,94 @@ describe('RomanceSystem', () => {
             expect(gameState.money).toBe(10000 - 20);
         });
 
-        it('should scale happiness proportionally with cost to maintain consistent efficiency', () => {
-            // Extract the happiness values by checking the code's behavior
-            // We verify that expensive dates give proportionally more happiness than cheap ones
-
-            const results = [];
+        it('should make expensive dates cost-efficient at realistic gameplay scores', () => {
+            // In realistic gameplay, dating starts at score 50 (askOnDate sets it).
+            // This test verifies that all date types have similar cost-per-happiness efficiency
+            // at that realistic score, fixing the original issue where vacation was ~10x worse than coffee.
+            // On the old code (before the fix): vacation from score 50 gives only 50 pts ($40/pt), coffee gives 5 pts ($4/pt)
+            // With the fix and raised cap: vacation from score 50 gives ~450 pts (~$4.44/pt), all dates are ~$4/pt
 
             const dateTypes = [
-                { type: 'coffee', expectedCost: 20 },
-                { type: 'dinner', expectedCost: 100 },
-                { type: 'fancy_dinner', expectedCost: 500 },
-                { type: 'vacation', expectedCost: 2000 }
+                { type: 'coffee', cost: 20 },
+                { type: 'dinner', cost: 100 },
+                { type: 'fancy_dinner', cost: 500 },
+                { type: 'vacation', cost: 2000 }
             ];
 
-            dateTypes.forEach(({ type, expectedCost }) => {
-                // Start at a low relationship to get some happiness gain
-                // Use different starting points to avoid cap issues
-                const startRelationship = type === 'vacation' ? -300 : (type === 'fancy_dinner' ? -50 : 0);
-
-                // Use actual starting score (game caps at 0 minimum)
-                const actualStart = Math.max(0, startRelationship);
-                romanceSystem.relationshipScore = actualStart;
+            // Test at the realistic starting score for dating (50, set by askOnDate)
+            const results = [];
+            dateTypes.forEach(({ type, cost }) => {
+                romanceSystem.relationshipScore = 50;
                 gameState.money = 100000;
 
+                const startScore = romanceSystem.relationshipScore;
                 const result = romanceSystem.goOnDate(type);
 
                 expect(result.success).toBe(true);
 
-                // Get the actual happiness gain (accounts for capping)
-                const actualHappinessGain = romanceSystem.relationshipScore - actualStart;
-
-                // Calculate cost per unit happiness based on the intended design
-                // by looking at cost scaling: 20->100->500->2000 = 5x multiplier each step
-                // and happiness should scale the same way
-                const costRatio = expectedCost / 20; // Ratio to base coffee cost
-                const expectedHappinessGain = 5 * costRatio; // Should scale proportionally with cost
+                const actualGain = romanceSystem.relationshipScore - startScore;
+                const costPerHappiness = cost / actualGain;
 
                 results.push({
                     type,
-                    cost: expectedCost,
-                    actualHappiness: actualHappinessGain,
-                    expectedHappiness: expectedHappinessGain,
-                    costRatio,
-                    costPerHappiness: expectedCost / expectedHappinessGain
+                    cost,
+                    actualGain,
+                    costPerHappiness
                 });
             });
 
-            // Verify that cost-per-happiness ratios are equal (flat efficiency)
-            const baseEfficiency = results[0].costPerHappiness;
-            results.forEach((result) => {
-                expect(Math.abs(result.costPerHappiness - baseEfficiency)).toBeLessThan(0.01);
-            });
+            // Verify that all date types have cost-per-happiness within 50% of coffee
+            // This would FAIL on the old code (vacation $40/pt vs coffee $4/pt)
+            // and PASS with the fix (all around $4/pt)
+            const coffeeEfficiency = results[0].costPerHappiness;
+
+            expect(results[1].costPerHappiness / coffeeEfficiency).toBeLessThan(1.5); // dinner
+            expect(results[2].costPerHappiness / coffeeEfficiency).toBeLessThan(1.5); // fancy_dinner
+            expect(results[3].costPerHappiness / coffeeEfficiency).toBeLessThan(1.5); // vacation
         });
 
-        it('should not make vacation strictly worse than coffee when comparing their design efficiency', () => {
-            // Rather than testing actual capped values, verify the underlying cost-efficiency
-            // is better or equal for more expensive options.
-            // This tests that the game designer's intended values make vacation a reasonable choice.
+        it('should make vacation a reasonable choice compared to cheaper dates', () => {
+            // Verify that expensive dates actually provide proportionally better value than cheap ones.
+            // This is the core fix for issue #2190: vacation was 10x worse per dollar than coffee.
 
-            // We verify this by checking that the cost scales proportionally with intended happiness gain
-            // Coffee: $20 for 5 happiness
-            // Vacation: $2000 for how much happiness?
-            // If designed well: $2000 should give 5 * (2000/20) = 500 happiness
-            // This gives the same cost-per-happiness efficiency: $4 per happiness
-
-            // Extract actual cost amounts from a transaction
-            romanceSystem.relationshipScore = 50;
-            gameState.money = 100000;
-            const coffeeResult = romanceSystem.goOnDate('coffee');
-            const coffeeCost = 100000 - gameState.money;
+            // At realistic score range where most gameplay happens (50-100),
+            // vacation should not be strictly worse than coffee.
+            // With the raised cap, vacation from score 50 gives enough points to be cost-competitive.
 
             romanceSystem.relationshipScore = 50;
             gameState.money = 100000;
-            const vacationResult = romanceSystem.goOnDate('vacation');
-            const vacationCost = 100000 - gameState.money;
 
-            // Verify cost ratio is as expected (1:100)
-            expect(vacationCost / coffeeCost).toBe(100);
-
-            // Now verify that the INTENDED happiness gain (not capped) is also 100x
-            // Coffee gives 5, so vacation should give 500 (even if capped to max 100 in practice)
-            // We can't directly verify this without examining the source, but we can verify
-            // that vacation is not the WORST choice by checking actual gain when possible
-
-            // Test at low starting score where we can see meaningful gains
-            romanceSystem.relationshipScore = 0;
-            gameState.money = 10000;
             romanceSystem.goOnDate('coffee');
-            const coffeeGainFrom0 = romanceSystem.relationshipScore;
+            const coffeeStartScore = 50;
+            const coffeeEndScore = romanceSystem.relationshipScore;
+            const coffeeGain = coffeeEndScore - coffeeStartScore;
+            const coffeeCostPerPoint = 20 / coffeeGain;
 
-            romanceSystem.relationshipScore = 0;
-            gameState.money = 10000;
+            romanceSystem.relationshipScore = 50;
+            gameState.money = 100000;
+
             romanceSystem.goOnDate('vacation');
-            const vacationGainFrom0 = romanceSystem.relationshipScore;
+            const vacationStartScore = 50;
+            const vacationEndScore = romanceSystem.relationshipScore;
+            const vacationGain = vacationEndScore - vacationStartScore;
+            const vacationCostPerPoint = 2000 / vacationGain;
 
-            // Vacation should give more total happiness (even if it means reaching 100)
-            expect(vacationGainFrom0).toBeGreaterThanOrEqual(coffeeGainFrom0);
+            // Vacation cost-per-point should be within 2x of coffee (not 10x worse as in the original)
+            expect(vacationCostPerPoint).toBeLessThan(coffeeCostPerPoint * 2);
+
+            // Verify the actual gains are meaningful
+            // Coffee gives 5, vacation should give ~450 (score 50 -> 500, clamped)
+            expect(coffeeGain).toBe(5);
+            expect(vacationGain).toBeGreaterThan(400); // vacation significantly more than coffee
         });
     });
 
     describe('modifyHappiness', () => {
-        it('should clamp happiness between 0 and 100', () => {
-            romanceSystem.relationshipScore = 80;
+        it('should clamp happiness between 0 and 500', () => {
+            // Raised cap to 500 to allow expensive dates to have meaningful value
+            romanceSystem.relationshipScore = 480;
             romanceSystem.modifyHappiness(50);
-            expect(romanceSystem.relationshipScore).toBe(100);
+            expect(romanceSystem.relationshipScore).toBe(500);
 
             romanceSystem.relationshipScore = 10;
             romanceSystem.modifyHappiness(-20);

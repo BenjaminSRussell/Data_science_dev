@@ -79,7 +79,7 @@ export class RomanceSystem {
     }
 
     modifyHappiness(amount) {
-        this.relationshipScore = Math.max(0, Math.min(100, this.relationshipScore + amount));
+        this.relationshipScore = Math.max(0, Math.min(500, this.relationshipScore + amount));
     }
 
     propose() {
