@@ -64,7 +64,8 @@ describe('StockMarketHelpers', () => {
             handleSellStock: vi.fn(),
             handleCrime: vi.fn(),
             uiUpdater: {
-                updateAllUI: vi.fn()
+                updateAllUI: vi.fn(),
+                updateHeatMeter: vi.fn() // added to UIUpdater by #2024
             }
         };
     });
