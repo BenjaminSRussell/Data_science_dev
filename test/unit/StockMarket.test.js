@@ -118,6 +118,34 @@ describe('StockMarket', () => {
             });
         });
 
+        it('should record the 3% move as lastChangePct/lastChange on tech stocks', () => {
+            const techStocks = stockMarket.stocks.filter(s => s.sector === 'Tech');
+            expect(techStocks.length).toBeGreaterThan(0);
+            const originalPrices = techStocks.map(s => s.price);
+
+            stockMarket.triggerBoom();
+
+            techStocks.forEach((stock, index) => {
+                expect(stock.lastChangePct).toBeCloseTo(0.03, 10);
+                expect(stock.lastChange).toBeCloseTo(originalPrices[index] * 0.03, 5);
+            });
+        });
+
+        it('should cap tech stock history at 100 entries', () => {
+            const techStocks = stockMarket.stocks.filter(s => s.sector === 'Tech');
+            techStocks.forEach(stock => {
+                stock.history = Array.from({ length: 100 }, (_, i) => i + 1);
+            });
+
+            stockMarket.triggerBoom();
+
+            techStocks.forEach(stock => {
+                expect(stock.history.length).toBe(100);
+                expect(stock.history[0]).toBe(2); // oldest entry dropped
+                expect(stock.history[99]).toBeCloseTo(stock.price, 10);
+            });
+        });
+
         it('should call updateIndices', () => {
             const spy = vi.spyOn(stockMarket, 'updateIndices');
 
