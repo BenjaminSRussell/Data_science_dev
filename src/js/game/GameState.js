@@ -54,7 +54,8 @@ export class GameState {
         this.purchasedItems = []; // Shop items
         this.unlockedThemes = ['default'];
         this.unlockedTools = []; // Software tools
-        this.unlockedPerks = []; // Unlocked perks
+        this.unlockedPerks = []; // Unlocked perks (effects: PERK_EFFECTS in data/shopItems.js)
+        this.secondChanceUsedOn = null; // Day key on which the second_chance perk was last used
         this.unlockedLibraries = [];
 
         // Marketing channels - single source of truth for both ClientManager and OfficeManager
@@ -272,6 +273,38 @@ export class GameState {
     }
 
     /**
+     * Whether a shop perk has been purchased
+     */
+    hasPerk(perkId) {
+        return this.unlockedPerks.includes(perkId);
+    }
+
+    /**
+     * Key identifying the current in-game day (for once-per-day perks)
+     */
+    getDayKey() {
+        const tm = this.timeManager;
+        if (!tm) return 'no-clock';
+        return `${tm.year}-${tm.month}-${tm.day}`;
+    }
+
+    /**
+     * second_chance perk: one task retry per in-game day
+     */
+    canUseSecondChance() {
+        return this.hasPerk('second_chance') && this.secondChanceUsedOn !== this.getDayKey();
+    }
+
+    /**
+     * Consume today's second_chance retry. Returns false if unavailable.
+     */
+    useSecondChance() {
+        if (!this.canUseSecondChance()) return false;
+        this.secondChanceUsedOn = this.getDayKey();
+        return true;
+    }
+
+    /**
      * Check if player can afford an item
      */
     canAfford(price) {
@@ -322,6 +355,7 @@ export class GameState {
             unlockedChartTypes: this.unlockedChartTypes,
             unlockedTools: this.unlockedTools,
             unlockedPerks: this.unlockedPerks,
+            secondChanceUsedOn: this.secondChanceUsedOn,
             purchasedItems: this.purchasedItems,
             isGameStarted: this.isGameStarted,
             tutorialCompleted: this.tutorialCompleted,
@@ -387,6 +421,7 @@ export class GameState {
         this.unlockedChartTypes = data.unlockedChartTypes ?? ['bar', 'line', 'pie'];
         this.unlockedTools = data.unlockedTools ?? [];
         this.unlockedPerks = data.unlockedPerks ?? [];
+        this.secondChanceUsedOn = data.secondChanceUsedOn ?? null;
         this.purchasedItems = data.purchasedItems ?? [];
         this.isGameStarted = data.isGameStarted ?? false;
         this.tutorialCompleted = data.tutorialCompleted ?? false;

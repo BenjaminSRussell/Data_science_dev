@@ -57,7 +57,7 @@ export const SHOP_ITEMS = [
         price: 350
     },
 
-    // Perks
+    // Perks (effects: see PERK_EFFECTS below)
     {
         id: "perk_time_bonus",
         name: "Time Extension",
@@ -171,3 +171,17 @@ export const SHOP_ITEMS = [
         price: 2500
     }
 ];
+
+/**
+ * Gameplay effects of the shop perks (perkId -> tuning). Each value matches
+ * the perk's advertised description above; read by GameState, TaskSystem,
+ * EconomySystem and UIUpdater.
+ */
+export const PERK_EFFECTS = Object.freeze({
+    time_bonus: { extraSeconds: 30 },        // "+30 seconds on all tasks"
+    boss_favor: { scoreMultiplier: 1.1 },    // "Bosses are 10% more lenient"
+    bonus_multiplier: { moneyMultiplier: 1.15 }, // "+15% money from all tasks"
+    rep_boost: { repMultiplier: 1.2 },       // "+20% reputation from tasks"
+    second_chance: { retriesPerDay: 1 },     // "Retry one task per day"
+    insight: { showOptimalChartHint: true }  // "See hints for optimal chart type"
+});

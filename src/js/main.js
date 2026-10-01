@@ -837,6 +837,10 @@ export class MainGame {
             this.nextTask();
         });
 
+        document.getElementById('btn-retry-task')?.addEventListener('click', () => {
+            this.retryTask();
+        });
+
         // Navigation buttons
         document.getElementById('btn-nav-career')?.addEventListener('click', () => {
             this.screenManager.showScreen('screen-career');
@@ -2090,6 +2094,12 @@ export class MainGame {
             this.gameState.money += score.moneyEarned;
             this.gameState.reputation += score.repEarned;
 
+            // second_chance perk: offer a retry when the result was not perfect
+            document.getElementById('btn-retry-task')?.classList.toggle(
+                'hidden',
+                !(score.stars < 5 && this.gameState.canUseSecondChance?.())
+            );
+
             // Show money particle effect if significant amount
             if (score.moneyEarned > 100 && this.unifiedMapSystem?.particleManager) {
                 // Get screen center or task completion location
@@ -2167,9 +2177,27 @@ export class MainGame {
     }
 
     /**
+     * Redo the current task using the second_chance perk (once per day)
+     */
+    retryTask() {
+        document.getElementById('btn-retry-task')?.classList.add('hidden');
+        if (!this.taskSystem.retryCurrentTask()) {
+            this.showToast('No second chance available today.', 'info');
+            return;
+        }
+
+        this.uiUpdater.updateTaskDisplay();
+        this.uiUpdater.updateAllUI();
+        this.startTaskTimer();
+        this.screenManager.showScreen('screen-game');
+    }
+
+    /**
      * Move to the next task
      */
     nextTask() {
+        document.getElementById('btn-retry-task')?.classList.add('hidden');
+
         // Generate new task
         this.taskSystem.generateNewTask();
 

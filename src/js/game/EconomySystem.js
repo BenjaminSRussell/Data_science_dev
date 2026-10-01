@@ -3,10 +3,18 @@
  */
 
 import { RANKS } from '../data/ranks.js';
+import { PERK_EFFECTS } from '../data/shopItems.js';
 
 export class EconomySystem {
     constructor(gameState) {
         this.gameState = gameState;
+    }
+
+    /**
+     * Whether the player owns a shop perk (see PERK_EFFECTS)
+     */
+    hasPerk(perkId) {
+        return this.gameState.unlockedPerks?.includes(perkId) ?? false;
     }
 
     /**
@@ -28,18 +36,30 @@ export class EconomySystem {
         const bossModifier = task.boss.strictness || 1.0;
 
         // Calculate weighted average
-        const rawScore = (
+        let rawScore = (
             chartAppropriateness * 0.4 +
             visualClarity * 0.3 +
             dataAccuracy * 0.3
         ) * bossModifier;
 
+        // boss_favor perk: bosses are 10% more lenient
+        if (this.hasPerk('boss_favor')) {
+            rawScore = Math.min(100, rawScore * PERK_EFFECTS.boss_favor.scoreMultiplier);
+        }
+
         // Convert to stars (1-5)
         const stars = this.scoreToStars(rawScore);
 
         // Calculate rewards
-        const moneyEarned = this.calculateMoneyReward(task, stars);
-        const repEarned = this.calculateRepReward(stars);
+        let moneyEarned = this.calculateMoneyReward(task, stars);
+        let repEarned = this.calculateRepReward(stars);
+
+        // second_chance retry: only pay out the improvement over what earlier
+        // attempts at this task already earned, so a retry is not a double payout
+        if (task.previousReward) {
+            moneyEarned = Math.max(0, moneyEarned - task.previousReward.money);
+            repEarned = Math.max(0, repEarned - task.previousReward.rep);
+        }
 
         // Track stats
         this.gameState.totalRatings++;
@@ -202,7 +222,12 @@ export class EconomySystem {
             timeBonus = elapsed < task.timeLimit / 2 ? 1.2 : 1.0;
         }
 
-        return Math.round(baseReward * multiplier * timeBonus);
+        // bonus_multiplier perk: +15% money from all tasks
+        const perkMultiplier = this.hasPerk('bonus_multiplier')
+            ? PERK_EFFECTS.bonus_multiplier.moneyMultiplier
+            : 1.0;
+
+        return Math.round(baseReward * multiplier * timeBonus * perkMultiplier);
     }
 
     /**
@@ -217,7 +242,12 @@ export class EconomySystem {
             5: 30
         };
 
-        return repRewards[stars] || 10;
+        const rep = repRewards[stars] || 10;
+
+        // rep_boost perk: +20% reputation from tasks
+        return this.hasPerk('rep_boost')
+            ? Math.round(rep * PERK_EFFECTS.rep_boost.repMultiplier)
+            : rep;
     }
 
     /**

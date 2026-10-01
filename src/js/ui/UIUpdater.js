@@ -240,6 +240,7 @@ export class UIUpdater {
             DOMUtils.updateElement(requirementsContainer, {
                 innerHTML: requirementsHTML
             });
+            this.game?.taskSystem?.appendChartInsight(requirementsContainer, task);
         }
 
         // Update task reward
