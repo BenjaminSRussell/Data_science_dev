@@ -112,21 +112,25 @@ export class StoryUI {
                         <div class="story-phase-info" id="story-phase-info">
                             <div class="phase-name" id="phase-name">Early Game</div>
                             <div class="phase-description" id="phase-description">You're just starting out. Every choice matters.</div>
-                            <div class="phase-timeline">
-                                <div class="timeline-item ${this.getPhaseClass('early')}" data-phase="early" role="presentation">
-                                    <div class="timeline-marker"></div>
+                            <div class="phase-timeline" role="list" aria-label="Story phases">
+                                <div class="timeline-item ${this.getPhaseClass('early')}" data-phase="early" role="listitem">
+                                    <div class="timeline-marker" aria-hidden="true"></div>
+                                    <span class="visually-hidden timeline-status">${this.getPhaseStatusText('early')}</span>
                                     <div class="timeline-label">Act 1: Beginning</div>
                                 </div>
-                                <div class="timeline-item ${this.getPhaseClass('mid')}" data-phase="mid" role="presentation">
-                                    <div class="timeline-marker"></div>
+                                <div class="timeline-item ${this.getPhaseClass('mid')}" data-phase="mid" role="listitem">
+                                    <div class="timeline-marker" aria-hidden="true"></div>
+                                    <span class="visually-hidden timeline-status">${this.getPhaseStatusText('mid')}</span>
                                     <div class="timeline-label">Act 2: Rising Action</div>
                                 </div>
-                                <div class="timeline-item ${this.getPhaseClass('late')}" data-phase="late" role="presentation">
-                                    <div class="timeline-marker"></div>
+                                <div class="timeline-item ${this.getPhaseClass('late')}" data-phase="late" role="listitem">
+                                    <div class="timeline-marker" aria-hidden="true"></div>
+                                    <span class="visually-hidden timeline-status">${this.getPhaseStatusText('late')}</span>
                                     <div class="timeline-label">Act 3: Climax</div>
                                 </div>
-                                <div class="timeline-item ${this.getPhaseClass('endgame')}" data-phase="endgame" role="presentation">
-                                    <div class="timeline-marker"></div>
+                                <div class="timeline-item ${this.getPhaseClass('endgame')}" data-phase="endgame" role="listitem">
+                                    <div class="timeline-marker" aria-hidden="true"></div>
+                                    <span class="visually-hidden timeline-status">${this.getPhaseStatusText('endgame')}</span>
                                     <div class="timeline-label">Epilogue</div>
                                 </div>
                             </div>
@@ -162,6 +166,16 @@ export class StoryUI {
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * Screen-reader status prefix for a timeline phase (visually hidden)
+     */
+    getPhaseStatusText(phase) {
+        const phaseClass = this.getPhaseClass(phase);
+        if (phaseClass === 'active') return 'Current phase: ';
+        if (phaseClass === 'completed') return 'Completed: ';
+        return 'Upcoming: ';
     }
 
     /**
@@ -356,28 +370,28 @@ export class StoryUI {
             item.classList.remove('active', 'completed');
             item.removeAttribute('aria-current');
             const itemPhase = item.dataset.phase;
-            const phaseLabels = {
-                early: 'Act 1: Beginning',
-                mid: 'Act 2: Rising Action',
-                late: 'Act 3: Climax',
-                endgame: 'Epilogue'
-            };
+            const status = item.querySelector('.timeline-status');
+            let statusText;
 
             if (itemPhase === phase) {
                 item.classList.add('active');
                 item.setAttribute('aria-current', 'step');
-                item.setAttribute('aria-label', `Current phase: ${phaseLabels[itemPhase]}`);
+                statusText = 'Current phase: ';
             } else {
                 const phaseOrder = ['early', 'mid', 'late', 'endgame'];
                 const currentIndex = phaseOrder.indexOf(phase);
                 const itemIndex = phaseOrder.indexOf(itemPhase);
                 if (itemIndex < currentIndex) {
                     item.classList.add('completed');
-                    item.setAttribute('aria-label', `Completed: ${phaseLabels[itemPhase]}`);
+                    statusText = 'Completed: ';
                 } else {
-                    item.setAttribute('aria-label', `Upcoming: ${phaseLabels[itemPhase]}`);
+                    statusText = 'Upcoming: ';
                 }
             }
+
+            // Status is announced via visually-hidden text inside the list
+            // item (aria-label is not reliably read on generic elements)
+            if (status) status.textContent = statusText;
         });
     }
 

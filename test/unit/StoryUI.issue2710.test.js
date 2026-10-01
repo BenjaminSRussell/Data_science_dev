@@ -126,24 +126,46 @@ describe('StoryUI Accessibility', () => {
             expect(activeItem.getAttribute('aria-current')).to.equal('step');
         });
 
-        it('should have aria-label for completed timeline phases', () => {
+        it('should expose the timeline as a list of listitems', () => {
+            storyUI.initialize();
+            storyUI.updateStoryDisplay();
+
+            const timeline = document.querySelector('.phase-timeline');
+            expect(timeline.getAttribute('role')).to.equal('list');
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                expect(item.getAttribute('role')).to.equal('listitem');
+                expect(item.getAttribute('role')).to.not.equal('presentation');
+                expect(item.hasAttribute('aria-label')).to.be.false;
+            });
+        });
+
+        it('should announce the active phase via visually-hidden status text', () => {
+            storyUI.initialize();
+            storyUI.updateStoryDisplay();
+
+            const status = document.querySelector('.timeline-item.active .timeline-status');
+            expect(status.classList.contains('visually-hidden')).to.be.true;
+            expect(status.textContent).to.include('Current phase');
+        });
+
+        it('should announce completed timeline phases via visually-hidden status text', () => {
             storyUI.initialize();
             storyUI.updateStoryDisplay();
 
             const completedItems = document.querySelectorAll('.timeline-item.completed');
             completedItems.forEach(item => {
-                expect(item.getAttribute('aria-label')).to.exist;
-                expect(item.getAttribute('aria-label')).to.include('Completed');
+                expect(item.querySelector('.timeline-status').textContent).to.include('Completed');
             });
         });
 
-        it('should have aria-label for inactive timeline phases', () => {
+        it('should announce upcoming timeline phases via visually-hidden status text', () => {
             storyUI.initialize();
             storyUI.updateStoryDisplay();
 
             const timelineItems = document.querySelectorAll('.timeline-item:not(.active):not(.completed)');
+            expect(timelineItems.length).to.be.greaterThan(0);
             timelineItems.forEach(item => {
-                expect(item.getAttribute('aria-label')).to.exist;
+                expect(item.querySelector('.timeline-status').textContent).to.include('Upcoming');
             });
         });
     });
