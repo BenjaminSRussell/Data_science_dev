@@ -1,10 +1,10 @@
 /**
  * NPCDialogueLoader Tests
  * Tests for getAgeGroup method which had unreachable buckets
- * Issue #2185: 'young' (<25) and 'elderly' (60+) were unreachable
+ * Issue #2185: 'young' (<25) and 'elderly' (60+) were unreachable and have been removed
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NPCDialogueLoader } from '../../src/js/game/dialogue/NPCDialogueLoader.js';
 
 describe('NPCDialogueLoader', () => {
@@ -47,11 +47,12 @@ describe('NPCDialogueLoader', () => {
             expect(loader.getAgeGroup(59)).toBe('middle_aged');
         });
 
-        it('should return "elderly" for ages 60 and above', () => {
-            // Currently unreachable in roster, but should still work if/when added
-            expect(loader.getAgeGroup(60)).toBe('elderly');
-            expect(loader.getAgeGroup(65)).toBe('elderly');
-            expect(loader.getAgeGroup(100)).toBe('elderly');
+        it('should return "middle_aged" for ages 60 and above (elderly bucket removed)', () => {
+            // Narrowed buckets per issue #2185: 'elderly' (60+) was unreachable in current roster
+            // Ages 60+ now map to 'middle_aged' since no NPCs in the roster are that old
+            expect(loader.getAgeGroup(60)).toBe('middle_aged');
+            expect(loader.getAgeGroup(65)).toBe('middle_aged');
+            expect(loader.getAgeGroup(100)).toBe('middle_aged');
         });
 
         it('should not produce "young" bucket with current roster', () => {
@@ -66,7 +67,8 @@ describe('NPCDialogueLoader', () => {
             });
         });
 
-        it('should handle realistic age range for current roster', () => {
+        it('should only produce "adult" and "middle_aged" buckets for current roster', () => {
+            // Narrowed buckets: only 'adult' and 'middle_aged' match actual roster data
             // Current roster ages: 26-58 explicit, 30 for defaults
             // All should be either 'adult' or 'middle_aged'
             const rosterAges = [26, 28, 28, 28, 28, 28, 29, 30, 34, 35, 41, 42, 42, 52, 52, 58];
