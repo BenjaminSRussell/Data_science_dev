@@ -943,7 +943,7 @@ export class MainGame {
                 return;
             }
             const result = this.timeManager.sleep();
-            this.handleTimeAdvance(result.slotsSkipped); // triggers new day
+            this.processTimeEvents(result.events); // Process daily/weekly events from sleep
             this.updateMapScreen();
             this.showToast('You slept well and feel refreshed!', 'success');
         });
@@ -2651,13 +2651,10 @@ export class MainGame {
         MapHelpers.handleLocationAction(this, action);
     }
 
-    handleTimeAdvance(slots) {
-        if (!this.timeManager) {
+    processTimeEvents(events) {
+        if (!events || !Array.isArray(events)) {
             return;
         }
-        if (slots <= 0) return;
-
-        const events = this.timeManager.advanceTime(slots);
 
         // Handle events (new day, etc)
         events.forEach(event => {
@@ -2747,6 +2744,16 @@ export class MainGame {
 
         this.updateMapScreen(); // Update visuals
         this.uiUpdater.updateAllUI(); // Money updated
+    }
+
+    handleTimeAdvance(slots) {
+        if (!this.timeManager) {
+            return;
+        }
+        if (slots <= 0) return;
+
+        const events = this.timeManager.advanceTime(slots);
+        this.processTimeEvents(events);
     }
 
     /**
