@@ -5,6 +5,8 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DevMenu } from '../../src/js/dev/DevMenu.js';
+import { GameState } from '../../src/js/game/GameState.js';
+import { GameEndingSystem } from '../../src/js/game/GameEndingSystem.js';
 
 describe('DevMenu', () => {
     let devMenu;
@@ -39,32 +41,47 @@ describe('DevMenu', () => {
     });
 
     describe('testEndingScreen', () => {
-        it('should trigger ending with correct parameters', () => {
+        let gameState;
+        let endingSystem;
+
+        beforeEach(() => {
+            gameState = new GameState();
+            endingSystem = new GameEndingSystem(gameState);
+            gameState.gameEndingSystem = endingSystem;
+            mockGame.gameState = gameState;
+            mockGame.showGameEnding = vi.fn();
+        });
+
+        it('should show the ending modal with the preview data', () => {
             devMenu.testEndingScreen();
 
-            expect(mockGameEndingSystem.triggerEnding).toHaveBeenCalledWith({
+            expect(mockGame.showGameEnding).toHaveBeenCalledWith({
                 type: 'debug_preview',
                 title: 'Debug: Ending Preview',
                 message: 'This is a dev-menu preview.',
                 showEnding: true
             });
+            expect(mockGame.showToast).toHaveBeenCalledWith('Ending screen preview shown', 'success');
         });
 
-        it('should show success toast when ending screen is triggered', () => {
+        it('should not mutate persisted ending state', () => {
             devMenu.testEndingScreen();
 
-            expect(mockGame.showToast).toHaveBeenCalledWith('Ending screen triggered', 'success');
+            expect(endingSystem.endingTriggered).toBe(false);
+            expect(gameState.gameEnding).toBeNull();
+            expect(endingSystem.toJSON().endingTriggered).toBe(false);
+            expect(gameState.toJSON().gameEnding ?? null).toBeNull();
         });
 
-        it('should show error when GameEndingSystem is not available', () => {
-            devMenu.game.gameState.gameEndingSystem = null;
+        it('should show error when the ending screen is not available', () => {
+            delete mockGame.showGameEnding;
             devMenu.testEndingScreen();
 
-            expect(mockGame.showError).toHaveBeenCalledWith('GameEndingSystem not available');
+            expect(mockGame.showError).toHaveBeenCalledWith('Ending screen not available');
         });
 
         it('should handle errors gracefully', () => {
-            mockGameEndingSystem.triggerEnding.mockImplementation(() => {
+            mockGame.showGameEnding.mockImplementation(() => {
                 throw new Error('Test error');
             });
 
@@ -100,7 +117,8 @@ describe('DevMenu', () => {
             expect(endingButton).toBeTruthy();
         });
 
-        it('should trigger ending screen when button is clicked', () => {
+        it('should preview the ending screen when button is clicked', () => {
+            mockGame.showGameEnding = vi.fn();
             devMenu.populateTesting();
 
             const buttons = document.querySelectorAll('#dev-testing .dev-btn');
@@ -108,10 +126,12 @@ describe('DevMenu', () => {
                 btn.textContent.includes('Test Ending Screen')
             );
 
+            expect(endingButton).toBeDefined();
             if (endingButton) {
                 endingButton.click();
 
-                expect(mockGameEndingSystem.triggerEnding).toHaveBeenCalledWith({
+                expect(mockGameEndingSystem.triggerEnding).not.toHaveBeenCalled();
+                expect(mockGame.showGameEnding).toHaveBeenCalledWith({
                     type: 'debug_preview',
                     title: 'Debug: Ending Preview',
                     message: 'This is a dev-menu preview.',

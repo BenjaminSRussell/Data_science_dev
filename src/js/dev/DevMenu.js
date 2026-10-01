@@ -630,16 +630,20 @@ export class DevMenu {
 
     testEndingScreen() {
         try {
-            if (this.game.gameState?.gameEndingSystem) {
-                this.game.gameState.gameEndingSystem.triggerEnding({
+            // Preview only: render the ending modal directly instead of going
+            // through GameEndingSystem.triggerEnding(), which would set
+            // endingTriggered / gameState.gameEnding and get saved, blocking
+            // the real ending for the rest of the playthrough.
+            if (typeof this.game.showGameEnding === 'function') {
+                this.game.showGameEnding({
                     type: 'debug_preview',
                     title: 'Debug: Ending Preview',
                     message: 'This is a dev-menu preview.',
                     showEnding: true
                 });
-                this.game.showToast('Ending screen triggered', 'success');
+                this.game.showToast('Ending screen preview shown', 'success');
             } else {
-                this.game.showError('GameEndingSystem not available');
+                this.game.showError('Ending screen not available');
             }
         } catch (error) {
             console.error('Error triggering ending screen:', error);
