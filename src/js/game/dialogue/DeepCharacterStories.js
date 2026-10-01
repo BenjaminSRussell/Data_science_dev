@@ -266,7 +266,7 @@ export const CHARACTER_STORIES = {
                         text: "Focus on speed and efficiency. Get it done fast.",
                         flag: 'emma_project_efficiency',
                         response: "Efficiency... yes. We have so much to get through. Scaling it up is the logical choice.",
-                        effects: { analytics: 5, relationship: 5 }
+                        effects: { xp: 'analytics', xpAmount: 5, relationship: 5 }
                     },
                     {
                         text: "Preserve the notes and human touches. The context.",
