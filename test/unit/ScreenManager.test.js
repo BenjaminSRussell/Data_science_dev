@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ScreenManager } from '../../src/js/ui/ScreenManager.js';
 
 describe('ScreenManager', () => {
@@ -8,21 +8,24 @@ describe('ScreenManager', () => {
   beforeEach(() => {
     mockMainGame = {
       gsapAnimator: null,
+      showToast: vi.fn(),
     };
     screenManager = new ScreenManager(mockMainGame);
     document.body.innerHTML = `
+      <div id="top-bar"></div>
       <section class="screen" id="screen-menu"></section>
       <section class="screen" id="screen-a"></section>
       <section class="screen" id="screen-b"></section>
+      <div id="toast-container" class="toast-container"></div>
     `;
     screenManager.init();
   });
 
   it('should initialize screens correctly', () => {
-    expect(screenManager.screens.size).toBe(3);
-    expect(screenManager.screens.has('screen-menu')).toBe(true);
-    expect(screenManager.screens.has('screen-a')).toBe(true);
-    expect(screenManager.screens.has('screen-b')).toBe(true);
+    expect(Object.keys(screenManager.screens).length).toBe(3);
+    expect(screenManager.screens['screen-menu']).toBeDefined();
+    expect(screenManager.screens['screen-a']).toBeDefined();
+    expect(screenManager.screens['screen-b']).toBeDefined();
   });
 
   it('should log an error and return if showScreen is called with an unknown id', () => {
@@ -70,5 +73,40 @@ describe('ScreenManager', () => {
     screenManager.showScreen('screen-a');
     expect(screenManager.isScreenActive('screen-menu')).toBe(false);
     expect(screenManager.isScreenActive('screen-a')).toBe(true);
+  });
+
+  it('should re-scan DOM and cache screens added after init() - issue #1364 recovery', () => {
+    // Simulate a screen that was added to the DOM after init() but not in the cache
+    // (like the screen-story timing bug mentioned in the issue)
+    const newScreen = document.createElement('section');
+    newScreen.className = 'screen';
+    newScreen.id = 'screen-late-loaded';
+    document.body.appendChild(newScreen);
+
+    // Verify the screen is not in the cache yet
+    expect(screenManager.screens['screen-late-loaded']).toBeUndefined();
+
+    // Call showScreen with the late-loaded screen ID
+    screenManager.showScreen('screen-late-loaded');
+
+    // Should find it in the DOM and cache it
+    expect(screenManager.screens['screen-late-loaded']).toBeDefined();
+    expect(screenManager.screens['screen-late-loaded']).toBe(newScreen);
+
+    // Should have made it the current screen and added proper classes
+    expect(screenManager.currentScreen).toBe('screen-late-loaded');
+    expect(newScreen.classList.contains('active')).toBe(true);
+  });
+
+  it('should display error toast when screen truly cannot be found - issue #1364 user feedback', () => {
+    // Try to show a screen that doesn't exist and won't be in DOM
+    screenManager.showScreen('screen-nonexistent');
+
+    // Should display an error toast to the player using mainGame.showToast
+    // which uses the existing .toast.error CSS pattern (z-index: var(--z-toast)=300)
+    expect(mockMainGame.showToast).toHaveBeenCalledWith(
+      expect.stringContaining('Screen could not be loaded'),
+      'error'
+    );
   });
 });
