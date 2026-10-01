@@ -10,7 +10,6 @@ import { npcDialogueLoader } from './NPCDialogueLoader.js';
 export class RelationshipDialogueSystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.dialogueCache = new Map();
     }
     
     /**
