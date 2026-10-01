@@ -25,6 +25,19 @@ vi.mock('chart.js/auto', () => {
     return { default: mockChart };
 });
 
+// getCurrentConfig() was removed from ChartManager as dead code (#2255);
+// these tests now read the same facts straight off the rendered preview chart.
+function previewSummary(chartManager) {
+    const chart = chartManager.previewChart;
+    if (!chart) return null;
+    return {
+        type: chart.config.type,
+        hasLegend: chart.options.plugins?.legend?.display,
+        hasTitle: !!chart.options.plugins?.title?.text,
+        hasGrid: chart.options.scales?.x?.grid?.display
+    };
+}
+
 describe('ChartManager', () => {
     let chartManager;
     let mockGame;
@@ -476,9 +489,9 @@ describe('ChartManager', () => {
         });
     });
 
-    describe('getCurrentConfig', () => {
+    describe('preview chart configuration', () => {
         it('should return null when no previewChart exists', () => {
-            expect(chartManager.getCurrentConfig()).toBeNull();
+            expect(previewSummary(chartManager)).toBeNull();
         });
 
         it('should return correct config when previewChart exists', () => {
@@ -499,7 +512,7 @@ describe('ChartManager', () => {
 
             chartManager.createPreviewChart(data, config);
 
-            const currentConfig = chartManager.getCurrentConfig();
+            const currentConfig = previewSummary(chartManager);
 
             expect(currentConfig).not.toBeNull();
             expect(currentConfig).toHaveProperty('type');
@@ -508,7 +521,7 @@ describe('ChartManager', () => {
             expect(currentConfig).toHaveProperty('hasGrid');
         });
 
-        it('should return correct type from getCurrentConfig', () => {
+        it('should return correct type in the preview chart', () => {
             const data = {
                 labels: ['A', 'B'],
                 datasets: { 'Values': [10, 20] }
@@ -525,11 +538,11 @@ describe('ChartManager', () => {
 
             chartManager.createPreviewChart(data, config);
 
-            const currentConfig = chartManager.getCurrentConfig();
+            const currentConfig = previewSummary(chartManager);
             expect(currentConfig.type).toBe('line');
         });
 
-        it('should return correct hasLegend from getCurrentConfig', () => {
+        it('should return correct hasLegend in the preview chart', () => {
             const data = {
                 labels: ['A', 'B'],
                 datasets: { 'Values': [10, 20] }
@@ -545,7 +558,7 @@ describe('ChartManager', () => {
             };
 
             chartManager.createPreviewChart(data, configWithLegend);
-            let currentConfig = chartManager.getCurrentConfig();
+            let currentConfig = previewSummary(chartManager);
             expect(currentConfig.hasLegend).toBe(true);
 
             // Reset and test without legend
@@ -560,11 +573,11 @@ describe('ChartManager', () => {
             };
 
             chartManager.createPreviewChart(data, configWithoutLegend);
-            currentConfig = chartManager.getCurrentConfig();
+            currentConfig = previewSummary(chartManager);
             expect(currentConfig.hasLegend).toBe(false);
         });
 
-        it('should return correct hasTitle from getCurrentConfig', () => {
+        it('should return correct hasTitle in the preview chart', () => {
             const data = {
                 labels: ['A', 'B'],
                 datasets: { 'Values': [10, 20] }
@@ -580,7 +593,7 @@ describe('ChartManager', () => {
             };
 
             chartManager.createPreviewChart(data, configWithTitle);
-            let currentConfig = chartManager.getCurrentConfig();
+            let currentConfig = previewSummary(chartManager);
             expect(currentConfig.hasTitle).toBe(true);
 
             // Reset and test without title
@@ -595,11 +608,11 @@ describe('ChartManager', () => {
             };
 
             chartManager.createPreviewChart(data, configWithoutTitle);
-            currentConfig = chartManager.getCurrentConfig();
+            currentConfig = previewSummary(chartManager);
             expect(currentConfig.hasTitle).toBe(false);
         });
 
-        it('should return correct hasGrid from getCurrentConfig', () => {
+        it('should return correct hasGrid in the preview chart', () => {
             const data = {
                 labels: ['A', 'B'],
                 datasets: { 'Values': [10, 20] }
@@ -615,7 +628,7 @@ describe('ChartManager', () => {
             };
 
             chartManager.createPreviewChart(data, configWithGrid);
-            let currentConfig = chartManager.getCurrentConfig();
+            let currentConfig = previewSummary(chartManager);
             expect(currentConfig.hasGrid).toBe(true);
 
             // Reset and test without grid
@@ -630,7 +643,7 @@ describe('ChartManager', () => {
             };
 
             chartManager.createPreviewChart(data, configWithoutGrid);
-            currentConfig = chartManager.getCurrentConfig();
+            currentConfig = previewSummary(chartManager);
             expect(currentConfig.hasGrid).toBe(false);
         });
     });
@@ -868,14 +881,14 @@ describe('ChartManager', () => {
 
             chartManager.createPreviewChart(data, config);
 
-            const currentConfig = chartManager.getCurrentConfig();
+            const currentConfig = previewSummary(chartManager);
             expect(currentConfig.type).toBe('bar');
             expect(currentConfig.hasLegend).toBe(true);
             expect(currentConfig.hasTitle).toBe(true);
             expect(currentConfig.hasGrid).toBe(true);
         });
 
-        it('should update preview chart and reflect changes in getCurrentConfig', () => {
+        it('should update preview chart and reflect changes in the preview chart', () => {
             const data = {
                 labels: ['A', 'B'],
                 datasets: { 'Values': [10, 20] }
@@ -891,7 +904,7 @@ describe('ChartManager', () => {
             };
 
             chartManager.createPreviewChart(data, configBar);
-            let currentConfig = chartManager.getCurrentConfig();
+            let currentConfig = previewSummary(chartManager);
             expect(currentConfig.type).toBe('bar');
 
             const configLine = {
@@ -904,7 +917,7 @@ describe('ChartManager', () => {
             };
 
             chartManager.updatePreviewChart(data, configLine);
-            currentConfig = chartManager.getCurrentConfig();
+            currentConfig = previewSummary(chartManager);
 
             expect(currentConfig.type).toBe('line');
             expect(currentConfig.hasLegend).toBe(false);
