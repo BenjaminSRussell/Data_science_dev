@@ -511,6 +511,41 @@ export class WorldMap {
     }
 
     /**
+     * Sell a vehicle - O(1)
+     * Returns 50% of the vehicle's purchase price
+     */
+    sellVehicle(vehicleId) {
+        const vehicle = VEHICLES_MAP.get(vehicleId);
+        if (!vehicle) return { success: false, reason: 'Unknown vehicle' };
+
+        if (!this.ownedVehicles.has(vehicleId)) { // Set.has is O(1)
+            return { success: false, reason: 'You don\'t own this vehicle' };
+        }
+
+        if (vehicleId === 'walking') {
+            return { success: false, reason: 'Cannot sell the walking option' };
+        }
+
+        // Calculate sale price (50% of purchase price)
+        const salePrice = Math.floor(vehicle.price * 0.5);
+
+        // Remove from owned vehicles
+        this.ownedVehicles.delete(vehicleId); // Set.delete is O(1)
+
+        // Credit money
+        this.gameState.money += salePrice;
+
+        // Fall back to walking if selling current vehicle
+        if (this.currentVehicle === vehicleId) {
+            this.currentVehicle = 'walking';
+        }
+
+        this._invalidateCache();
+
+        return { success: true, vehicle, salePrice };
+    }
+
+    /**
      * Get activities available at current location - O(1)
      */
     getCurrentActivities() {
