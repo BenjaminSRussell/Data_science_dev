@@ -31,10 +31,10 @@ describe('Button', () => {
             expect(internalButton.hasAttribute('disabled')).to.be.false;
         });
 
-        it('should not fire onclick callback when disabled and clicked', async () => {
+        it('should not fire onClick callback when disabled and clicked', async () => {
             let callbackFired = false;
             button.disabled = true;
-            button.onclick = () => {
+            button.onClick = () => {
                 callbackFired = true;
             };
             await button.updateComplete;
@@ -105,11 +105,11 @@ describe('Button', () => {
         });
     });
 
-    describe('onclick callback', () => {
-        it('should fire onclick callback on real click', async () => {
+    describe('onClick callback', () => {
+        it('should fire onClick callback on real click', async () => {
             let callbackFired = false;
             let eventPassed = null;
-            button.onclick = (e) => {
+            button.onClick = (e) => {
                 callbackFired = true;
                 eventPassed = e;
             };
@@ -123,9 +123,9 @@ describe('Button', () => {
             expect(eventPassed).to.not.be.null;
         });
 
-        it('should fire onclick callback when using host element click()', async () => {
+        it('should fire onClick callback when using host element click()', async () => {
             let callbackFired = false;
-            button.onclick = () => {
+            button.onClick = () => {
                 callbackFired = true;
             };
             button.label = 'Test';
@@ -136,8 +136,8 @@ describe('Button', () => {
             expect(callbackFired).to.be.true;
         });
 
-        it('should not fire onclick callback if callback is not set', async () => {
-            button.onclick = null;
+        it('should not fire onClick callback if callback is not set', async () => {
+            button.onClick = null;
             button.label = 'Test';
             await button.updateComplete;
 
@@ -158,7 +158,7 @@ describe('Button', () => {
     });
 
     describe('button-click event (removed in #2132)', () => {
-        it('should call onclick but not dispatch the unused button-click event', async () => {
+        it('should call onClick but not dispatch the unused button-click event', async () => {
             let eventFired = false;
             const onclick = vi.fn();
 
@@ -167,7 +167,7 @@ describe('Button', () => {
             });
 
             button.label = 'Click Me';
-            button.onclick = onclick;
+            button.onClick = onclick;
             await button.updateComplete;
 
             const internalButton = button.shadowRoot.querySelector('button');
@@ -175,6 +175,15 @@ describe('Button', () => {
 
             expect(onclick).toHaveBeenCalledOnce();
             expect(eventFired).to.be.false;
+        });
+    });
+
+    describe('click() before first render', () => {
+        it('should not throw when the element has no shadowRoot yet', () => {
+            const detached = document.createElement('game-button');
+            // Not connected, so Lit has not rendered and shadowRoot is null
+            expect(detached.shadowRoot).to.equal(null);
+            expect(() => detached.click()).not.to.throw();
         });
     });
 });
