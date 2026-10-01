@@ -190,14 +190,13 @@ export class TimeManager {
      * Skip to next day (rest/sleep)
      */
     sleep() {
-        const slotsToAdvance = this.getRemainingSlots();
         this.timeSlot = 5; // Set to night
         const events = this.advanceTime(1); // Advance to next day
 
         // Full energy restore from sleeping
         this.energy = this.maxEnergy;
 
-        return { slotsSkipped: slotsToAdvance, events };
+        return { events };
     }
 
     /**

@@ -10,7 +10,6 @@ import { npcDialogueLoader } from './NPCDialogueLoader.js';
 export class RelationshipDialogueSystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.dialogueCache = new Map();
     }
     
     /**
@@ -73,14 +72,17 @@ export class RelationshipDialogueSystem {
     
     /**
      * Get breakdown dialogue
+     * Note: Breakdown selection is caller-driven by design.
+     * The caller must determine which breakdown to use based on game state.
+     * This method returns the dialogue for a given breakdown type.
      */
     async getBreakdownDialogue(npcId, breakdownType) {
         const dialogue = await npcDialogueLoader.loadNPCDialogue(npcId);
         if (!dialogue) return null;
-        
+
         const breakdown = dialogue.breakdowns?.[breakdownType];
         if (!breakdown) return null;
-        
+
         const dialogues = breakdown.dialogue;
         return Array.isArray(dialogues)
             ? dialogues[Math.floor(Math.random() * dialogues.length)]

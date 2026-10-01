@@ -3,6 +3,8 @@
  * Validates all sprite sheets and assets load correctly
  */
 
+import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
+
 export class AssetValidator {
     constructor(game) {
         this.game = game;
@@ -15,18 +17,22 @@ export class AssetValidator {
             audio: await this.validateAudio(),
             total: 0,
             loaded: 0,
-            failed: 0
+            failed: 0,
+            knownMissing: 0
         };
 
-        results.total = (results.sprites?.total || 0) + 
-                       (results.images?.total || 0) + 
+        results.total = (results.sprites?.total || 0) +
+                       (results.images?.total || 0) +
                        (results.audio?.total || 0);
-        results.loaded = (results.sprites?.loaded || 0) + 
-                        (results.images?.loaded || 0) + 
+        results.loaded = (results.sprites?.loaded || 0) +
+                        (results.images?.loaded || 0) +
                         (results.audio?.loaded || 0);
-        results.failed = (results.sprites?.failed || 0) + 
-                        (results.images?.failed || 0) + 
+        results.failed = (results.sprites?.failed || 0) +
+                        (results.images?.failed || 0) +
                         (results.audio?.failed || 0);
+        results.knownMissing = (results.sprites?.knownMissing || 0) +
+                              (results.images?.knownMissing || 0) +
+                              (results.audio?.knownMissing || 0);
 
         return results;
     }
@@ -37,6 +43,7 @@ export class AssetValidator {
             total: spritePaths.length,
             loaded: 0,
             failed: 0,
+            knownMissing: 0,
             errors: []
         };
 
@@ -46,6 +53,8 @@ export class AssetValidator {
         imageResults.forEach((result, index) => {
             if (result.loaded) {
                 results.loaded++;
+            } else if (result.isKnownMissing) {
+                results.knownMissing++;
             } else {
                 results.failed++;
                 results.errors.push({
@@ -65,6 +74,7 @@ export class AssetValidator {
             total: imagePaths.length,
             loaded: 0,
             failed: 0,
+            knownMissing: 0,
             errors: []
         };
 
@@ -74,6 +84,8 @@ export class AssetValidator {
         imageResults.forEach((result, index) => {
             if (result.loaded) {
                 results.loaded++;
+            } else if (result.isKnownMissing) {
+                results.knownMissing++;
             } else {
                 results.failed++;
                 results.errors.push({
@@ -92,6 +104,7 @@ export class AssetValidator {
             total: audioPaths.length,
             loaded: 0,
             failed: 0,
+            knownMissing: 0,
             errors: []
         };
 
@@ -101,6 +114,8 @@ export class AssetValidator {
         audioResults.forEach((result, index) => {
             if (result.loaded) {
                 results.loaded++;
+            } else if (result.isKnownMissing) {
+                results.knownMissing++;
             } else {
                 results.failed++;
                 results.errors.push({
@@ -122,20 +137,24 @@ export class AssetValidator {
             const manifest = assetManager.getAssetManifest();
             if (manifest.characters?.spriteSheets) {
                 Object.values(manifest.characters.spriteSheets).forEach(sheet => {
-                    if (sheet.url) paths.push(sheet.url);
+                    if (sheet.url && !isAssetMissing(sheet.url)) {
+                        paths.push(sheet.url);
+                    }
                 });
             }
+
+            // Also check low-poly character sprites (base, walk, idle)
+            // These are plain string paths, unlike spriteSheets which have .url property
+            const characterSprites = ['base', 'walk', 'idle'];
+            characterSprites.forEach(key => {
+                if (manifest.characters?.[key] && typeof manifest.characters[key] === 'string') {
+                    paths.push(manifest.characters[key]);
+                }
+            });
         }
 
-        // Also check common sprite paths
-        const commonSprites = [
-            '/assets/characters/sprites/character_sheet.png',
-            '/assets/characters/sprites/emotion_sheet.png'
-        ];
-
-        commonSprites.forEach(path => {
-            if (!paths.includes(path)) paths.push(path);
-        });
+        // The old hard-coded character_sheet.png / emotion_sheet.png paths were
+        // removed (#2542): those sheets never existed (see MissingAssetBlocklist).
 
         return paths;
     }
@@ -178,6 +197,11 @@ export class AssetValidator {
     }
 
     async validateImage(path) {
+        // Skip validation for known-missing assets
+        if (isAssetMissing(path)) {
+            return { loaded: false, error: 'Known missing', isKnownMissing: true };
+        }
+
         return new Promise((resolve) => {
             const img = new Image();
             const timeout = setTimeout(() => {
@@ -199,6 +223,11 @@ export class AssetValidator {
     }
 
     async validateAudioFile(path) {
+        // Skip validation for known-missing assets
+        if (isAssetMissing(path)) {
+            return { loaded: false, error: 'Known missing', isKnownMissing: true };
+        }
+
         return new Promise((resolve) => {
             const audio = new Audio();
             const timeout = setTimeout(() => {

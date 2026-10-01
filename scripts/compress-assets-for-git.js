@@ -28,7 +28,7 @@ const stats = {
     files: []
 };
 
-async function compressImage(inputPath, outputPath = null) {
+export async function compressImage(inputPath, outputPath = null) {
     if (!outputPath) {
         outputPath = inputPath; // Overwrite original
     }
@@ -45,12 +45,12 @@ async function compressImage(inputPath, outputPath = null) {
 
         // Get file extension
         const ext = path.extname(inputPath).toLowerCase();
-        
+
         let buffer;
         if (ext === '.png') {
             // Compress PNG with sharp
             buffer = await sharp(inputPath)
-                .png({ 
+                .png({
                     quality: COMPRESSION_QUALITY,
                     compressionLevel: 9,
                     adaptiveFiltering: true,
@@ -60,7 +60,7 @@ async function compressImage(inputPath, outputPath = null) {
         } else if (['.jpg', '.jpeg'].includes(ext)) {
             // Compress JPEG
             buffer = await sharp(inputPath)
-                .jpeg({ 
+                .jpeg({
                     quality: JPEG_QUALITY,
                     mozjpeg: true
                 })
@@ -75,9 +75,9 @@ async function compressImage(inputPath, outputPath = null) {
         // Check if compressed file exceeds 50MB
         if (compressedSize > MAX_FILE_SIZE) {
             stats.errors++;
-            return { 
-                error: true, 
-                message: `Compressed file would be ${(compressedSize / 1024 / 1024).toFixed(2)}MB (exceeds 50MB limit)` 
+            return {
+                error: true,
+                message: `Compressed file would be ${(compressedSize / 1024 / 1024).toFixed(2)}MB (exceeds 50MB limit)`
             };
         }
 
@@ -85,7 +85,7 @@ async function compressImage(inputPath, outputPath = null) {
         if (compressedSize < originalSize) {
             fs.writeFileSync(outputPath, buffer);
             const savings = ((originalSize - compressedSize) / originalSize * 100).toFixed(1);
-            
+
             stats.compressed++;
             stats.totalOriginalSize += originalSize;
             stats.totalCompressedSize += compressedSize;
@@ -213,9 +213,13 @@ async function findAndCompressAssets() {
     console.log(`\n📄 Report saved to: ${path.relative(rootDir, reportPath)}`);
 }
 
-// Run compression
-findAndCompressAssets().catch(error => {
-    console.error('❌ Compression failed:', error);
-    process.exit(1);
-});
+// Run compression only when script is the main entry point. Compare real
+// file paths, not URLs: import.meta.url is percent-encoded (spaces become
+// %20) and symlink-resolved, while process.argv[1] is a raw path.
+if (process.argv[1] && __filename === fs.realpathSync(path.resolve(process.argv[1]))) {
+    findAndCompressAssets().catch(error => {
+        console.error('❌ Compression failed:', error);
+        process.exit(1);
+    });
+}
 

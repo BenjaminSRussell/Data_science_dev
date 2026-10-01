@@ -31,13 +31,31 @@ export class UIUpdater {
 
     /**
      * Update all UI elements
+     * Calls core update methods that refresh globally without requiring specific parameters.
+     * NOTE: updateShopScreen() and updateLibraryScreen() are NOT called here because they
+     * require a specific category parameter. The current category selection is only stored
+     * transiently in the DOM (button dataset), not in gameState. Calling these with
+     * hard-coded defaults would silently reset the user's selected category on every
+     * updateAllUI() call from any of 20+ call sites, causing a regression.
+     * Call these methods separately when you have the specific category to display.
      */
     updateAllUI() {
+        // Global UI elements (always visible)
         this.updateTopBar();
         this.updateRankProgress();
         this.updateChartTypeGrid();
         this.updateSoftwareDisplay();
         this.updateBankScreen();
+
+        // Screen-specific UI elements (no category-specific display)
+        this.updateTaskDisplay();
+        this.updateCareerScreen();
+        this.updateNewspaperScreen();
+
+        // Location-specific layout (only if a current location exists)
+        if (this.gameState?.currentLocation) {
+            this.updateLocationLayout(this.gameState.currentLocation);
+        }
     }
 
     /**
@@ -222,12 +240,13 @@ export class UIUpdater {
             DOMUtils.updateElement(requirementsContainer, {
                 innerHTML: requirementsHTML
             });
+            this.game?.taskSystem?.appendChartInsight(requirementsContainer, task);
         }
 
         // Update task reward
         if (task.potentialReward) {
             DOMUtils.updateElement('#task-reward', {
-                textContent: CommonUtils.formatCurrency(task.potentialReward)
+                textContent: `$${task.potentialReward.toLocaleString()}`
             });
         }
 
@@ -347,7 +366,7 @@ export class UIUpdater {
 
         if (ps.activeProject) {
             activeContainer.classList.remove('hidden');
-            contractsGrid.parentElement.querySelector('h3').classList.add('hidden'); // Hide "Available Contracts" header
+            document.getElementById('available-contracts-header').classList.add('hidden'); // Hide "Available Contracts" header
             contractsGrid.classList.add('hidden');
 
             // Update Active Project UI
@@ -370,7 +389,7 @@ export class UIUpdater {
 
         } else {
             activeContainer.classList.add('hidden');
-            contractsGrid.parentElement.querySelector('h3').classList.remove('hidden');
+            document.getElementById('available-contracts-header').classList.remove('hidden');
             contractsGrid.classList.remove('hidden');
 
             // --- Available Contracts View ---
@@ -386,7 +405,7 @@ export class UIUpdater {
                         <h4 class="contract-title">${c.title}</h4>
                         <p class="contract-desc">${c.description}</p>
                         <div class="contract-rewards">
-                            <span class="reward-money">$${c.reward}</span>
+                            <span class="reward-money">$${c.reward.toLocaleString()}</span>
                             <span class="reward-xp">${Object.keys(c.xpReward || {}).join(', ')} XP</span>
                         </div>
                         <button class="btn btn-sm btn-primary btn-accept-contract" 
@@ -512,7 +531,7 @@ export class UIUpdater {
                         <strong>Effect:</strong> ${lib.gameEffect}
                     </div>
                     <div class="lib-footer">
-                        <div class="lib-cost">$${lib.cost}</div>
+                        <div class="lib-cost">$${lib.cost.toLocaleString()}</div>
                         ${owned
                     ? '<button class="btn btn-sm btn-ghost disabled">Learned</button>'
                     : `<button class="btn btn-sm btn-primary" 
@@ -535,7 +554,7 @@ export class UIUpdater {
     updateNewspaperScreen() {
         const paper = this.game?.newsManager?.getDailyPaper();
         if (!paper) {
-            console.warn("No paper found!");
+            logger.warn("No paper found!");
             return;
         }
 
@@ -790,11 +809,16 @@ export class UIUpdater {
 
     renderPartStats(part) {
         let text = [];
-        if (part.stats.cooling) text.push(`Cooling: +${part.stats.cooling}`);
-        if (part.stats.noise) text.push(`Noise: ${part.stats.noise}dB`);
-        if (part.stats.compute) text.push(`Compute: ${part.stats.compute} TFLOPS`);
-        if (part.stats.vram) text.push(`VRAM: ${part.stats.vram}GB`);
-        if (part.stats.resolution) text.push(`Res: Level ${part.stats.resolution}`);
+        // Check for !== undefined to allow 0 values (e.g., vram: 0 on integrated GPU)
+        if (part.stats.cooling !== undefined) text.push(`Cooling: +${part.stats.cooling}`);
+        if (part.stats.noise !== undefined) text.push(`Noise: ${part.stats.noise}dB`);
+        if (part.stats.compute !== undefined) text.push(`Compute: ${part.stats.compute} TFLOPS`);
+        if (part.stats.vram !== undefined) text.push(`VRAM: ${part.stats.vram}GB`);
+        if (part.stats.resolution !== undefined) text.push(`Res: Level ${part.stats.resolution}`);
+        if (part.stats.aesthetics !== undefined) text.push(`Aesthetics: ${part.stats.aesthetics}`);
+        if (part.stats.airflow !== undefined) text.push(`Airflow: ${part.stats.airflow}`);
+        if (part.stats.noise_dampening !== undefined) text.push(`Noise Dampening: ${part.stats.noise_dampening}`);
+        if (part.stats.style !== undefined) text.push(`Style: ${part.stats.style}`);
 
         return `<div class="equipment-bonus">${text.join(', ')}</div>`;
     }
@@ -808,7 +832,10 @@ export class UIUpdater {
             'eat_bagel': 'Eat Bagel',
             'coffee_network': 'Network over Coffee',
             'buy_flowers': 'Buy Flowers ($15)',
-            'buy_plant': 'Buy Office Plant ($25)'
+            'buy_plant': 'Buy Office Plant ($25)',
+            'browse_cars': 'Browse Vehicles',
+            'buy_car': 'Buy Vehicle',
+            'sell_car': 'Sell Vehicle'
         };
         return names[activity] || activity;
     }
@@ -842,5 +869,34 @@ export class UIUpdater {
         if (creditScoreEl) creditScoreEl.textContent = creditScore;
         if (loanLimitEl) loanLimitEl.textContent = `$${maxLoan.toLocaleString()}`;
         if (netWorthEl) netWorthEl.textContent = `$${netWorth.toLocaleString()}`;
+    }
+
+    /**
+     * Update heat meter display
+     */
+    updateHeatMeter() {
+        const heat = this.gameState.crimeSystem?.heat || 0;
+
+        // Update stock market heat display
+        const heatValue = document.getElementById('heat-value');
+        if (heatValue) {
+            heatValue.textContent = Math.floor(heat);
+        }
+
+        const heatMeterFill = document.getElementById('heat-meter-fill');
+        if (heatMeterFill) {
+            heatMeterFill.style.width = `${heat}%`;
+        }
+
+        // Update jail screen heat display
+        const jailHeatValue = document.getElementById('jail-heat-value');
+        if (jailHeatValue) {
+            jailHeatValue.textContent = Math.floor(heat);
+        }
+
+        const jailHeatMeterFill = document.getElementById('jail-heat-meter-fill');
+        if (jailHeatMeterFill) {
+            jailHeatMeterFill.style.width = `${heat}%`;
+        }
     }
 }

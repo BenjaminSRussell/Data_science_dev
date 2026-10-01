@@ -3,16 +3,6 @@
  * Creates dynamic world that changes over time
  */
 
-// News categories
-export const NEWS_CATEGORIES = {
-    market: { icon: '', color: '#6bcb77' },
-    tech: { icon: '', color: '#4ecdc4' },
-    business: { icon: '', color: '#ffd93d' },
-    economy: { icon: '', color: '#ff8548' },
-    local: { icon: '', color: '#a855f7' },
-    personal: { icon: '', color: '#ff6b9d' }
-};
-
 // News templates
 export const NEWS_TEMPLATES = [
     // Market news

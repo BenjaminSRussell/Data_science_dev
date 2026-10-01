@@ -5,10 +5,64 @@
 import { TASKS } from '../data/tasks.js';
 import { BOSSES } from '../data/bosses.js';
 import { COMPREHENSIVE_DATA_SCIENCE_TASKS } from '../data/comprehensive_datascience_tasks.js';
+import { PERK_EFFECTS } from '../data/shopItems.js';
 
 export class TaskSystem {
     constructor(gameState) {
         this.gameState = gameState;
+    }
+
+    hasPerk(perkId) {
+        return this.gameState.unlockedPerks?.includes(perkId) ?? false;
+    }
+
+    /**
+     * Task time limit including the time_bonus perk (+30s on all tasks)
+     */
+    getTimeLimit(taskTemplate) {
+        const base = taskTemplate.timeLimit;
+        if (!base) return base; // untimed tasks stay untimed
+        return this.hasPerk('time_bonus') ? base + PERK_EFFECTS.time_bonus.extraSeconds : base;
+    }
+
+    /**
+     * insight perk: hint text naming the optimal chart type(s), or null
+     */
+    getChartInsight(task) {
+        if (!task || !this.hasPerk('insight')) return null;
+        const optimal = task.optimalChartTypes || [];
+        if (optimal.length === 0) return null;
+        return `Insight: best chart ${optimal.length > 1 ? 'types' : 'type'} - ${optimal.join(', ')}`;
+    }
+
+    /**
+     * Append the insight hint (if any) to a requirements container
+     */
+    appendChartInsight(container, task) {
+        const hint = this.getChartInsight(task);
+        if (!container || !hint) return;
+        const tag = document.createElement('span');
+        tag.className = 'requirement-tag insight-hint';
+        tag.textContent = hint;
+        container.appendChild(tag);
+    }
+
+    /**
+     * second_chance perk: let the player redo the current task once per day.
+     * Earlier attempts' payouts are remembered so the retry only pays the
+     * improvement. Returns false if no retry is available.
+     */
+    retryCurrentTask() {
+        const task = this.gameState.currentTask;
+        if (!task || !this.gameState.useSecondChance?.()) return false;
+
+        const last = this.gameState.lastScore;
+        task.previousReward = {
+            money: (task.previousReward?.money || 0) + (last?.moneyEarned || 0),
+            rep: (task.previousReward?.rep || 0) + (last?.repEarned || 0)
+        };
+        task.startTime = Date.now();
+        return true;
     }
 
     /**
@@ -77,6 +131,7 @@ export class TaskSystem {
             acceptableChartTypes: taskTemplate.acceptableChartTypes || taskTemplate.optimalChartTypes || ['bar'],
             potentialReward: potentialReward,
             startTime: Date.now(),
+            timeLimit: this.getTimeLimit(taskTemplate),
             // Include additional metadata from comprehensive tasks
             domain: taskTemplate.domain,
             skills: taskTemplate.skills,
@@ -232,8 +287,8 @@ export class TaskSystem {
 
         let value = this.randomRange(1000, 5000);
         const trend = weeks.map(() => {
-            value = value + this.randomRange(-200, 500);
-            return Math.max(500, value);
+            value = Math.max(500, value + this.randomRange(-200, 500));
+            return value;
         });
 
         return {
@@ -344,6 +399,7 @@ export class TaskSystem {
             reqContainer.innerHTML = task.requirements
                 .map(r => `<span class="requirement-tag">${r}</span>`)
                 .join('');
+            this.appendChartInsight(reqContainer, task);
         }
 
         // Update data table

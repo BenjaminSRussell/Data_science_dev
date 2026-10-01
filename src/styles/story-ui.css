@@ -42,8 +42,8 @@
     background: #222;
     border: 1px solid #444;
     color: #ddd;
-    width: 40px;
-    height: 40px;
+    min-width: 44px;
+    min-height: 44px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -55,6 +55,11 @@
 .close-btn:hover {
     background: #333;
     border-color: #666;
+}
+
+.close-btn:focus-visible {
+    outline: 2px solid #666;
+    outline-offset: 2px;
 }
 
 /* Story Content */
@@ -145,6 +150,19 @@
     color: #888;
     margin-bottom: 1.5rem;
     line-height: 1.6;
+}
+
+/* Text for screen readers only */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .phase-timeline {

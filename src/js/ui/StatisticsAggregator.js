@@ -147,13 +147,7 @@ export class StatisticsAggregator {
      * Format money
      */
     formatMoney(amount) {
-        if (amount < 1000) {
-            return `$${amount.toLocaleString()}`;
-        } else if (amount < 1000000) {
-            return `$${(amount / 1000).toFixed(1)}K`;
-        } else {
-            return `$${(amount / 1000000).toFixed(2)}M`;
-        }
+        return `$${(amount ?? 0).toLocaleString()}`;
     }
 
     /**

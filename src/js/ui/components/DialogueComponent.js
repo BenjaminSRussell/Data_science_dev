@@ -153,6 +153,7 @@ export class DialogueComponent extends BaseComponent {
         this.isOpen = false;
         this.typingText = '';
         this.isTyping = false;
+        this.typeTimeoutId = null;
     }
 
     render() {
@@ -225,16 +226,34 @@ export class DialogueComponent extends BaseComponent {
      * Phase 3: Can be enhanced with GSAP if needed
      */
     typeText(text, speed = 30) {
+        // Stop any animation still typing the previous node's text
+        if (this.typeTimeoutId !== null) {
+            clearTimeout(this.typeTimeoutId);
+            this.typeTimeoutId = null;
+        }
+
         this.typingText = '';
         this.isTyping = true;
+
+        // Check if user prefers reduced motion
+        const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+
+        if (prefersReducedMotion) {
+            // Show text immediately
+            this.typingText = text;
+            this.isTyping = false;
+            return;
+        }
+
         let i = 0;
         const type = () => {
             if (i < text.length) {
                 this.typingText += text[i];
                 i++;
-                setTimeout(type, speed);
+                this.typeTimeoutId = setTimeout(type, speed);
             } else {
                 this.isTyping = false;
+                this.typeTimeoutId = null;
             }
         };
         type();
@@ -252,6 +271,12 @@ export class DialogueComponent extends BaseComponent {
      * Close dialogue
      */
     close() {
+        // Clear any pending type animation timeout
+        if (this.typeTimeoutId !== null) {
+            clearTimeout(this.typeTimeoutId);
+            this.typeTimeoutId = null;
+        }
+
         this.isOpen = false;
         this.npc = null;
         this.currentNode = null;

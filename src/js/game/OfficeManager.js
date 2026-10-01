@@ -22,9 +22,6 @@ export class OfficeManager {
 
         // Hired staff
         this.staff = [];
-
-        // Active marketing channels
-        this.activeMarketing = ['word_of_mouth'];
     }
 
     /**
@@ -152,9 +149,7 @@ export class OfficeManager {
         const newStaff = {
             id: `staff_${Date.now()}`,
             type: staffType,
-            hiredAt: Date.now(),
-            happiness: 100,
-            productivity: 1.0
+            hiredAt: Date.now()
         };
 
         this.staff.push(newStaff);
@@ -189,7 +184,7 @@ export class OfficeManager {
      * Calculate daily marketing cost
      */
     getDailyMarketingCost() {
-        return this.activeMarketing.reduce((total, channelId) => {
+        return this.gameState.activeMarketingChannels.reduce((total, channelId) => {
             const channel = MARKETING_CHANNELS.find(m => m.id === channelId);
             return total + (channel?.costPerDay || 0);
         }, 0);
@@ -203,37 +198,17 @@ export class OfficeManager {
     }
 
     /**
-     * Calculate team efficiency
-     */
-    getTeamEfficiency() {
-        if (this.staff.length === 0) return 1.0;
-
-        const totalEfficiency = this.staff.reduce((sum, s) =>
-            sum + s.type.efficiency * s.productivity, 0
-        );
-
-        return 1.0 + totalEfficiency;
-    }
-
-    /**
      * Toggle marketing channel
      */
     toggleMarketing(channelId) {
-        const index = this.activeMarketing.indexOf(channelId);
-        if (index === -1) {
-            this.activeMarketing.push(channelId);
-            return { active: true };
-        } else {
-            this.activeMarketing.splice(index, 1);
-            return { active: false };
-        }
+        return this.gameState.toggleMarketingChannel(channelId);
     }
 
     /**
      * Is marketing active
      */
     isMarketingActive(channelId) {
-        return this.activeMarketing.includes(channelId);
+        return this.gameState.isMarketingChannelActive(channelId);
     }
 
     /**
@@ -246,11 +221,8 @@ export class OfficeManager {
             staff: this.staff.map(s => ({
                 id: s.id,
                 typeId: s.type.id,
-                hiredAt: s.hiredAt,
-                happiness: s.happiness,
-                productivity: s.productivity
-            })),
-            activeMarketing: this.activeMarketing
+                hiredAt: s.hiredAt
+            }))
         };
     }
 
@@ -264,15 +236,12 @@ export class OfficeManager {
             computer: 0, desk: 0, monitor: 0, chair: 0, software: 0
         };
         this.currentOfficeIndex = data.currentOfficeIndex || 0;
-        this.activeMarketing = data.activeMarketing || ['word_of_mouth'];
 
         // Restore staff
         this.staff = (data.staff || []).map(s => ({
             id: s.id,
             type: STAFF_TYPES.find(t => t.id === s.typeId),
-            hiredAt: s.hiredAt,
-            happiness: s.happiness,
-            productivity: s.productivity
+            hiredAt: s.hiredAt
         })).filter(s => s.type); // Filter out invalid staff
     }
 

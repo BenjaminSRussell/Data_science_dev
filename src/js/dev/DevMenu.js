@@ -3,6 +3,8 @@
  * Provides quick access to all screens, locations, and testing tools
  */
 
+import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
+
 export class DevMenu {
     constructor(game) {
         this.game = game;
@@ -402,8 +404,13 @@ export class DevMenu {
             container.appendChild(btn);
         });
 
-        // Test all dialogues button
-        const testAllBtn = this.createButton('Test All', () => this.testAllDialogues(), 'primary');
+        // Test all dialogues button - wired to DialogueTester.testAll()
+        const testAllBtn = this.createButton('Test All', async () => {
+            if (window.devTools?.dialogueTester?.testAll) {
+                const results = await window.devTools.dialogueTester.testAll();
+                this.game.showToast(`Dialogues tested: ${results.passed} passed, ${results.failed} failed`, 'info');
+            }
+        }, 'primary');
         container.appendChild(testAllBtn);
 
         // Setup test dialogue button
@@ -512,6 +519,10 @@ export class DevMenu {
             this.testSpreadsheets();
         }));
 
+        container.appendChild(this.createButton('Test Ending Screen', () => {
+            this.testEndingScreen();
+        }));
+
         container.appendChild(this.createButton('Validate Assets', () => {
             this.validateAssets();
         }));
@@ -535,30 +546,6 @@ export class DevMenu {
         container.appendChild(this.createButton('Check Crashes', () => {
             this.checkForCrashes();
         }));
-    }
-
-    async testAllDialogues() {
-        const npcManager = this.game.gameState?.npcManager;
-        if (!npcManager) return;
-
-        const npcs = npcManager.getAllNPCs?.() || [];
-        const results = { passed: 0, failed: 0, errors: [] };
-
-        for (const npc of npcs) {
-            try {
-                if (npcManager.startConversation) {
-                    npcManager.startConversation(npc.id);
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    results.passed++;
-                }
-            } catch (error) {
-                results.failed++;
-                results.errors.push({ npc: npc.id, error: error.message });
-            }
-        }
-
-        console.log('Dialogue test results:', results);
-        this.game.showToast(`Dialogues tested: ${results.passed} passed, ${results.failed} failed`, 'info');
     }
 
     testAllCharts() {
@@ -641,8 +628,31 @@ export class DevMenu {
         this.game.showToast(`Spreadsheet tests: ${results.passed} passed, ${results.failed} failed`, 'info');
     }
 
+    testEndingScreen() {
+        try {
+            // Preview only: render the ending modal directly instead of going
+            // through GameEndingSystem.triggerEnding(), which would set
+            // endingTriggered / gameState.gameEnding and get saved, blocking
+            // the real ending for the rest of the playthrough.
+            if (typeof this.game.showGameEnding === 'function') {
+                this.game.showGameEnding({
+                    type: 'debug_preview',
+                    title: 'Debug: Ending Preview',
+                    message: 'This is a dev-menu preview.',
+                    showEnding: true
+                });
+                this.game.showToast('Ending screen preview shown', 'success');
+            } else {
+                this.game.showError('Ending screen not available');
+            }
+        } catch (error) {
+            console.error('Error triggering ending screen:', error);
+            this.game.showError(`Error: ${error.message}`);
+        }
+    }
+
     validateAssets() {
-        const results = { loaded: 0, missing: 0, errors: [] };
+        const results = { loaded: 0, missing: 0, knownMissing: 0, errors: [] };
 
         // Check sprite assets
         const spriteSheets = [
@@ -651,6 +661,12 @@ export class DevMenu {
         ];
 
         spriteSheets.forEach(url => {
+            // Check if asset is known to be missing first
+            if (isAssetMissing(url)) {
+                results.knownMissing++;
+                return;
+            }
+
             const img = new Image();
             img.onload = () => results.loaded++;
             img.onerror = () => {
@@ -662,7 +678,10 @@ export class DevMenu {
 
         setTimeout(() => {
             console.log('Asset validation:', results);
-            this.game.showToast(`Assets: ${results.loaded} loaded, ${results.missing} missing`, 'info');
+            const msg = results.knownMissing > 0
+                ? `Assets: ${results.loaded} loaded, ${results.missing} missing, ${results.knownMissing} known-missing`
+                : `Assets: ${results.loaded} loaded, ${results.missing} missing`;
+            this.game.showToast(msg, 'info');
         }, 2000);
     }
 
@@ -733,22 +752,26 @@ export class DevMenu {
     }
 
     async testAllOptions() {
-        // Test all clickable options/buttons
-        const buttons = document.querySelectorAll('button:not([disabled]), .clickable, [role="button"]');
-        const results = { tested: 0, errors: [] };
-
-        for (const btn of Array.from(buttons).slice(0, 50)) { // Limit to 50
-            try {
-                btn.click();
-                results.tested++;
-                await new Promise(resolve => setTimeout(resolve, 50));
-            } catch (error) {
-                results.errors.push({ element: btn.id || btn.className, error: error.message });
-            }
+        // Use the real OptionTester instead of the unsafe duplicate
+        if (!window.devTools?.optionTester) {
+            this.game.showError('OptionTester not initialized');
+            return;
         }
 
-        console.log('Option test results:', results);
-        this.game.showToast(`Options tested: ${results.tested}, Errors: ${results.errors.length}`, 'info');
+        try {
+            const results = await window.devTools.optionTester.testAll();
+
+            console.log('Option test results:', results);
+            this.game.showToast(`Options tested: ${results.total}, Passed: ${results.passed}, Failed: ${results.failed}`, 'info');
+
+            // Display detailed results if there were failures
+            if (results.failed > 0) {
+                console.warn('Failed tests:', results.errors);
+            }
+        } catch (error) {
+            console.error('Option testing failed:', error);
+            this.game.showError(`Test failed: ${error.message}`);
+        }
     }
 
     checkForCrashes() {

@@ -345,7 +345,7 @@ export class WorldMap {
         this.currentLocation = 'home';
         this.currentVehicle = 'walking';
         this.ownedVehicles = new Set(['walking']); // Use Set for O(1) lookups
-        this.visitedLocations = new Set(['home']); // Use Set for O(1) lookups
+        // Map-specific locations added by switchMap() (#2014)
         this.locationOverrides = {};
 
         // Cache for accessible locations (invalidated on state change)
@@ -354,9 +354,65 @@ export class WorldMap {
     }
 
     /**
+     * Add or update locations from a map transition
+     * Only adds NEW locations not already in LOCATIONS array
+     * Does not override existing LOCATIONS entries
+     */
+    addLocations(locations) {
+        if (!locations || !Array.isArray(locations)) {
+            return false;
+        }
+
+        let addedCount = 0;
+        locations.forEach(loc => {
+            if (loc && loc.id) {
+                // Skip if location already exists in LOCATIONS
+                if (LOCATIONS_MAP.has(loc.id)) {
+                    return;
+                }
+                // Only add truly new locations to locationOverrides
+                this.locationOverrides[loc.id] = {
+                    id: loc.id,
+                    name: loc.name || this._generateLocationName(loc.id),
+                    type: loc.type || 'location',
+                    position: { x: loc.x || 0, y: loc.y || 0 },
+                    travelTime: loc.travelTime || 1,
+                    activities: loc.activities || [],
+                    background: loc.background || 'url("/assets/locations/default/background.png")',
+                    ...loc // Spread any additional properties
+                };
+                addedCount++;
+            }
+        });
+
+        if (addedCount > 0) {
+            this._invalidateCache();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Generate a display name for a location ID
+     */
+    _generateLocationName(id) {
+        // Convert snake_case to Title Case
+        return id
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+    /**
      * Get location by ID - O(1) lookup
+     * Checks locationOverrides first for map-specific locations
      */
     getLocation(locationId) {
+        // Check overrides first (map-specific locations)
+        if (this.locationOverrides[locationId]) {
+            return this.locationOverrides[locationId];
+        }
+        // Fall back to global locations
         return LOCATIONS_MAP.get(locationId);
     }
 
@@ -377,6 +433,7 @@ export class WorldMap {
 
     /**
      * Get all accessible locations - O(n) with caching
+     * Includes both global LOCATIONS and map-specific locationOverrides
      */
     getAccessibleLocations() {
         // Return cached result if valid
@@ -390,6 +447,28 @@ export class WorldMap {
 
         // Single pass through locations - O(n)
         for (const location of LOCATIONS) {
+            // Check vehicle requirement - O(1)
+            if (location.requiresVehicle === 'car' && accessLevel < 2) continue;
+            if (location.requiresVehicle === 'luxury_car' && accessLevel < 3) continue;
+            if (location.requiresVehicle === 'bus' && accessLevel < 1) continue;
+
+            // Unlock check - O(1)
+            if (location.unlockRequirement) {
+                const req = location.unlockRequirement;
+                if (req.stat) {
+                    const statVal = this.gameState.characterStats?.getStat(req.stat) || 0;
+                    if (statVal < req.value) continue;
+                }
+                if (req.reputation && this.gameState.reputation < (req.reputation || 0)) continue;
+                if (req.money && this.gameState.money < req.money) continue;
+            }
+
+            accessible.push(location);
+        }
+
+        // Also include map-specific locations from locationOverrides
+        for (const locationId in this.locationOverrides) {
+            const location = this.locationOverrides[locationId];
             // Check vehicle requirement - O(1)
             if (location.requiresVehicle === 'car' && accessLevel < 2) continue;
             if (location.requiresVehicle === 'luxury_car' && accessLevel < 3) continue;
@@ -449,7 +528,6 @@ export class WorldMap {
         const actualSlots = Math.max(0, Math.ceil(baseTravelTime / vehicle.travelSpeed));
 
         this.currentLocation = locationId;
-        this.visitedLocations.add(locationId); // Set.add is O(1)
 
         // Invalidate cache
         this._invalidateCache();
@@ -511,11 +589,38 @@ export class WorldMap {
     }
 
     /**
-     * Get activities available at current location - O(1)
+     * Sell a vehicle - O(1)
+     * Returns 50% of the vehicle's purchase price
      */
-    getCurrentActivities() {
-        const location = this.getCurrentLocation();
-        return location?.activities || [];
+    sellVehicle(vehicleId) {
+        const vehicle = VEHICLES_MAP.get(vehicleId);
+        if (!vehicle) return { success: false, reason: 'Unknown vehicle' };
+
+        if (!this.ownedVehicles.has(vehicleId)) { // Set.has is O(1)
+            return { success: false, reason: 'You don\'t own this vehicle' };
+        }
+
+        if (vehicleId === 'walking') {
+            return { success: false, reason: 'Cannot sell the walking option' };
+        }
+
+        // Calculate sale price (50% of purchase price)
+        const salePrice = Math.floor(vehicle.price * 0.5);
+
+        // Remove from owned vehicles
+        this.ownedVehicles.delete(vehicleId); // Set.delete is O(1)
+
+        // Credit money
+        this.gameState.money += salePrice;
+
+        // Fall back to walking if selling current vehicle
+        if (this.currentVehicle === vehicleId) {
+            this.currentVehicle = 'walking';
+        }
+
+        this._invalidateCache();
+
+        return { success: true, vehicle, salePrice };
     }
 
     /**
@@ -526,7 +631,6 @@ export class WorldMap {
             currentLocation: this.currentLocation,
             currentVehicle: this.currentVehicle,
             ownedVehicles: Array.from(this.ownedVehicles), // Convert Set to Array
-            visitedLocations: Array.from(this.visitedLocations), // Convert Set to Array
             locationOverrides: this.locationOverrides
         };
     }
@@ -539,7 +643,6 @@ export class WorldMap {
         this.currentLocation = data.currentLocation || 'home';
         this.currentVehicle = data.currentVehicle || 'walking';
         this.ownedVehicles = new Set(data.ownedVehicles || ['walking']);
-        this.visitedLocations = new Set(data.visitedLocations || ['home']);
         this.locationOverrides = data.locationOverrides || {};
         this._invalidateCache();
     }

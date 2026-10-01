@@ -54,7 +54,12 @@ export class GameState {
         this.purchasedItems = []; // Shop items
         this.unlockedThemes = ['default'];
         this.unlockedTools = []; // Software tools
+        this.unlockedPerks = []; // Unlocked perks (effects: PERK_EFFECTS in data/shopItems.js)
+        this.secondChanceUsedOn = null; // Day key on which the second_chance perk was last used
         this.unlockedLibraries = [];
+
+        // Marketing channels - single source of truth for both ClientManager and OfficeManager
+        this.activeMarketingChannels = ['word_of_mouth'];
 
         // Game configuration
         this.chartConfig = {
@@ -125,7 +130,6 @@ export class GameState {
         this.animationManager = null;
         this.assetManager = null;
         this.performanceManager = null;
-        this.uiLayerManager = null;
         this.cameraSystem = null;
         
         // Additional state
@@ -175,6 +179,46 @@ export class GameState {
      */
     isChartTypeUnlocked(type) {
         return true; // Liberalization: All charts unlocked by default!
+    }
+
+    /**
+     * Toggle a marketing channel (activate if inactive, deactivate if active)
+     */
+    toggleMarketingChannel(channelId) {
+        const index = this.activeMarketingChannels.indexOf(channelId);
+        if (index === -1) {
+            this.activeMarketingChannels.push(channelId);
+            return { active: true };
+        } else {
+            this.activeMarketingChannels.splice(index, 1);
+            return { active: false };
+        }
+    }
+
+    /**
+     * Activate a marketing channel
+     */
+    activateMarketingChannel(channelId) {
+        if (!this.activeMarketingChannels.includes(channelId)) {
+            this.activeMarketingChannels.push(channelId);
+        }
+    }
+
+    /**
+     * Deactivate a marketing channel
+     */
+    deactivateMarketingChannel(channelId) {
+        const index = this.activeMarketingChannels.indexOf(channelId);
+        if (index !== -1) {
+            this.activeMarketingChannels.splice(index, 1);
+        }
+    }
+
+    /**
+     * Check if a marketing channel is active
+     */
+    isMarketingChannelActive(channelId) {
+        return this.activeMarketingChannels.includes(channelId);
     }
 
     /**
@@ -229,6 +273,38 @@ export class GameState {
     }
 
     /**
+     * Whether a shop perk has been purchased
+     */
+    hasPerk(perkId) {
+        return this.unlockedPerks.includes(perkId);
+    }
+
+    /**
+     * Key identifying the current in-game day (for once-per-day perks)
+     */
+    getDayKey() {
+        const tm = this.timeManager;
+        if (!tm) return 'no-clock';
+        return `${tm.year}-${tm.month}-${tm.day}`;
+    }
+
+    /**
+     * second_chance perk: one task retry per in-game day
+     */
+    canUseSecondChance() {
+        return this.hasPerk('second_chance') && this.secondChanceUsedOn !== this.getDayKey();
+    }
+
+    /**
+     * Consume today's second_chance retry. Returns false if unavailable.
+     */
+    useSecondChance() {
+        if (!this.canUseSecondChance()) return false;
+        this.secondChanceUsedOn = this.getDayKey();
+        return true;
+    }
+
+    /**
      * Check if player can afford an item
      */
     canAfford(price) {
@@ -250,6 +326,8 @@ export class GameState {
             this.unlockChartType(item.chartType);
         } else if (item.type === 'tool') {
             this.unlockedTools.push(item.toolId);
+        } else if (item.type === 'perk') {
+            this.unlockedPerks.push(item.perkId);
         } else if (item.type === 'software') {
             // Software items are tracked in purchasedItems, no additional action needed
             // Software quality effects are calculated dynamically
@@ -276,12 +354,15 @@ export class GameState {
             ratingSum: this.ratingSum,
             unlockedChartTypes: this.unlockedChartTypes,
             unlockedTools: this.unlockedTools,
+            unlockedPerks: this.unlockedPerks,
+            secondChanceUsedOn: this.secondChanceUsedOn,
             purchasedItems: this.purchasedItems,
             isGameStarted: this.isGameStarted,
             tutorialCompleted: this.tutorialCompleted,
             soundEnabled: this.soundEnabled,
             musicEnabled: this.musicEnabled,
             unlockedLibraries: this.unlockedLibraries || [],
+            activeMarketingChannels: this.activeMarketingChannels,
 
             // Sub-systems
             worldMap: this.worldMap?.toJSON(),
@@ -313,11 +394,6 @@ export class GameState {
                 pullRequests: this.githubIssuesSystem.pullRequests
             } : null,
             researchPaperSystem: this.researchPaperSystem?.toJSON(),
-            emotionalBreakdownSystem: this.emotionalBreakdownSystem ? {
-                activeBreakdowns: Array.from(this.emotionalBreakdownSystem.activeBreakdowns.values()),
-                breakdownHistory: this.emotionalBreakdownSystem.breakdownHistory
-            } : null,
-            
             // Phase 1 Visual Systems (save quality settings)
             performanceManager: this.performanceManager ? {
                 quality: this.performanceManager.quality
@@ -344,12 +420,15 @@ export class GameState {
         this.ratingSum = data.ratingSum ?? 0;
         this.unlockedChartTypes = data.unlockedChartTypes ?? ['bar', 'line', 'pie'];
         this.unlockedTools = data.unlockedTools ?? [];
+        this.unlockedPerks = data.unlockedPerks ?? [];
+        this.secondChanceUsedOn = data.secondChanceUsedOn ?? null;
         this.purchasedItems = data.purchasedItems ?? [];
         this.isGameStarted = data.isGameStarted ?? false;
         this.tutorialCompleted = data.tutorialCompleted ?? false;
         this.soundEnabled = data.soundEnabled ?? true;
         this.musicEnabled = data.musicEnabled ?? true;
         this.unlockedLibraries = data.unlockedLibraries || [];
+        this.activeMarketingChannels = data.activeMarketingChannels ?? ['word_of_mouth'];
 
         // Restore sub-systems
         if (this.worldMap && data.worldMap) this.worldMap.fromJSON(data.worldMap);
@@ -383,11 +462,6 @@ export class GameState {
         if (this.researchPaperSystem && data.researchPaperSystem) {
             this.researchPaperSystem.fromJSON(data.researchPaperSystem);
         }
-        if (this.emotionalBreakdownSystem && data.emotionalBreakdownSystem) {
-            // Restore breakdown history
-            this.emotionalBreakdownSystem.breakdownHistory = data.emotionalBreakdownSystem.breakdownHistory || [];
-        }
-        
         // Restore Phase 1 Visual Systems settings
         if (this.performanceManager && data.performanceManager) {
             this.performanceManager.setQuality(data.performanceManager.quality || 'auto');

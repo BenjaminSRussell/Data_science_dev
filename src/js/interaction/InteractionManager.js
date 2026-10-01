@@ -36,7 +36,7 @@ export class InteractionManager {
             console.warn('interactjs not available for draggable');
             return null;
         }
-        
+
         const {
             onStart = null,
             onMove = null,
@@ -46,7 +46,10 @@ export class InteractionManager {
             inertia = false
         } = options;
 
-        const position = { x: 0, y: 0 };
+        // WeakMap to store per-element position objects
+        // Fixes the shared-state bug: each element matched by the selector
+        // gets its own position object, not a single shared object
+        const elementPositions = new WeakMap();
 
         return interactLib(selector).draggable({
             listeners: {
@@ -54,10 +57,18 @@ export class InteractionManager {
                     if (onStart) onStart(event);
                 },
                 move(event) {
+                    const target = event.target;
+                    // Get or create position object for this element
+                    let position = elementPositions.get(target);
+                    if (!position) {
+                        position = { x: 0, y: 0 };
+                        elementPositions.set(target, position);
+                    }
+
                     position.x += event.dx;
                     position.y += event.dy;
 
-                    event.target.style.transform = `translate(${position.x}px, ${position.y}px)`;
+                    target.style.transform = `translate(${position.x}px, ${position.y}px)`;
 
                     if (onMove) onMove(event, position);
                 },

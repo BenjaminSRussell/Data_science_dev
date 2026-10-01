@@ -7,6 +7,7 @@
 export class TooltipManager {
     constructor() {
         this.tooltips = new Map();
+        this.tooltipListeners = new Map();
         this.initialized = false;
     }
 
@@ -123,16 +124,17 @@ export class TooltipManager {
         element.addEventListener('focus', showTooltip);
         element.addEventListener('blur', hideTooltip);
 
+        // Store listeners for cleanup
+        this.tooltipListeners.set(element, {
+            showTooltip,
+            hideTooltip
+        });
+
         return {
             element: tooltip,
             update: updatePosition,
             destroy: () => {
-                element.removeEventListener('mouseenter', showTooltip);
-                element.removeEventListener('mouseleave', hideTooltip);
-                element.removeEventListener('focus', showTooltip);
-                element.removeEventListener('blur', hideTooltip);
-                tooltip.remove();
-                this.tooltips.delete(element);
+                this.removeTooltip(element);
             }
         };
     }
@@ -186,6 +188,16 @@ export class TooltipManager {
     removeTooltip(element) {
         const tooltip = this.tooltips.get(element);
         if (tooltip) {
+            // Remove event listeners
+            const listeners = this.tooltipListeners.get(element);
+            if (listeners) {
+                element.removeEventListener('mouseenter', listeners.showTooltip);
+                element.removeEventListener('mouseleave', listeners.hideTooltip);
+                element.removeEventListener('focus', listeners.showTooltip);
+                element.removeEventListener('blur', listeners.hideTooltip);
+                this.tooltipListeners.delete(element);
+            }
+            // Remove tooltip element
             tooltip.remove();
             this.tooltips.delete(element);
         }
@@ -195,7 +207,10 @@ export class TooltipManager {
      * Cleanup all tooltips
      */
     cleanup() {
-        this.tooltips.forEach(tooltip => tooltip.remove());
+        this.tooltips.forEach((tooltip, element) => {
+            this.removeTooltip(element);
+        });
         this.tooltips.clear();
+        this.tooltipListeners.clear();
     }
 }

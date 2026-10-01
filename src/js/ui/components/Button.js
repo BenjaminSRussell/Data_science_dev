@@ -13,7 +13,7 @@ export class Button extends BaseComponent {
         icon: { type: String },
         variant: { type: String },
         disabled: { type: Boolean },
-        onclick: { type: Function, attribute: false }
+        onClick: { type: Function, attribute: false }
     };
 
     static styles = css`
@@ -74,12 +74,13 @@ export class Button extends BaseComponent {
         this.icon = '';
         this.variant = 'primary';
         this.disabled = false;
-        this.onclick = null;
+        this.onClick = null;
     }
 
     render() {
         return html`
-            <button 
+            <button
+                type="button"
                 class="${this.variant}"
                 ?disabled=${this.disabled}
                 @click=${this.handleClick}>
@@ -91,10 +92,18 @@ export class Button extends BaseComponent {
 
     handleClick(e) {
         if (this.disabled) return;
-        if (this.onclick) {
-            this.onclick(e);
+        if (this.onClick) {
+            this.onClick(e);
         }
-        this.dispatchGameEvent('button-click', { label: this.label });
+    }
+
+    click() {
+        // Forward click to the internal button to keep native semantics.
+        // shadowRoot is null until the first render, so guard it.
+        const button = this.shadowRoot?.querySelector('button');
+        if (button) {
+            button.click();
+        }
     }
 }
 

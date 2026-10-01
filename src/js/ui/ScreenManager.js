@@ -26,10 +26,25 @@ export class ScreenManager {
      * Show a specific screen
      */
     showScreen(screenId, addToHistory = true) {
-        const targetScreen = this.screens[screenId];
+        let targetScreen = this.screens[screenId];
+
+        if (!targetScreen) {
+            // Try to re-query the DOM for the screen in case it was added after init()
+            // This self-heals timing bugs like screen-story caching issue
+            const screenElement = document.getElementById(screenId);
+            if (screenElement && screenElement.classList.contains('screen')) {
+                targetScreen = screenElement;
+                this.screens[screenId] = targetScreen; // Cache it for next time
+            }
+        }
 
         if (!targetScreen) {
             console.error(`Screen not found: ${screenId}`);
+            // Display visible error state to player using the existing toast pattern
+            // (reuses .toast.error CSS with proper z-index: var(--z-toast)=300)
+            if (this.mainGame && this.mainGame.showToast) {
+                this.mainGame.showToast('Screen could not be loaded. Please try again or refresh the page.', 'error');
+            }
             return;
         }
 
@@ -113,9 +128,9 @@ export class ScreenManager {
         // Initialize map renderer when map screen is shown
         if (screenId === 'screen-map' && this.mainGame) {
             // Small delay to ensure DOM is ready and screen is visible
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (this.mainGame.updateMapScreen) {
-                    this.mainGame.updateMapScreen();
+                    await this.mainGame.updateMapScreen();
                 }
                 // Also trigger resize to ensure map gets correct dimensions
                 if (this.mainGame.unifiedMapSystem && this.mainGame.unifiedMapSystem.handleResize) {

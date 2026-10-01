@@ -37,11 +37,11 @@ import { MapProgressionSystem } from './game/MapProgressionSystem.js';
 import { dialogueTreeSystem } from './game/dialogue/DialogueTreeSystem.js';
 import { ConversationScreen } from './game/dialogue/ConversationScreen.js';
 import { IntroSystem } from './game/IntroSystem.js';
-import { DayNightCycle, TIME_OF_DAY } from './game/DayNightCycle.js';
+import { DayNightCycle } from './game/DayNightCycle.js';
 import { NotificationSystem } from './game/NotificationSystem.js';
 import { LocationDetailSystem } from './game/locations/LocationDetailSystem.js';
+import { OfficeManager } from './game/OfficeManager.js';
 import { CompanyManagementSystem } from './game/company/CompanyManagementSystem.js';
-import { RomanceProgressionSystem } from './game/romance/RomanceProgressionSystem.js';
 import { JealousySystem } from './game/social/JealousySystem.js';
 import { DemandingBossSystem } from './game/work/DemandingBossSystem.js';
 import { GameplaySettings } from './game/settings/GameplaySettings.js';
@@ -57,7 +57,6 @@ import { AITrainingStoryline } from './game/ai/AITrainingStoryline.js';
 import { GitHubIssuesSystem } from './game/github/GitHubIssuesSystem.js';
 import { ResearchPaperNotificationSystem } from './game/research/ResearchPaperNotificationSystem.js';
 import { ResearchInboxUI } from './ui/ResearchInboxUI.js';
-import { EmotionalBreakdownSystem } from './game/dialogue/EmotionalBreakdownSystem.js';
 import { RelationshipDialogueSystem } from './game/dialogue/RelationshipDialogueSystem.js';
 import { ComprehensiveSpriteSystem } from './assets/ComprehensiveSpriteSystem.js';
 import { getTextIcon } from './utils/IconMapper.js';
@@ -87,7 +86,6 @@ import { NarrativeClaritySystem } from './game/NarrativeClaritySystem.js';
 // Keep old imports for fallback
 import { AssetManager } from './assets/AssetManager.js';
 import { PerformanceManager } from './performance/PerformanceManager.js';
-import { UILayerManager } from './ui/UILayerManager.js';
 import { CameraSystem } from './camera/CameraSystem.js';
 import { NewsManager } from './game/NewsManager.js';
 import { StockMarket } from './game/StockMarket.js';
@@ -197,6 +195,7 @@ export class MainGame {
         this.gameLoopId = null;
         this.lastTime = 0;
         this.bankSystem = null; // Will be initialized when needed
+        this.taskTimerIntervalId = null; // Track the task timer interval
 
         // Bind methods
         this.gameLoop = this.gameLoop.bind(this);
@@ -204,6 +203,9 @@ export class MainGame {
         // this.init = this.init.bind(this); // specific bind not needed and causing issues
         this.startNewGame = this.startNewGame.bind(this);
         this.continueGame = this.continueGame.bind(this);
+        this.updateTaskTimer = this.updateTaskTimer.bind(this);
+        this.startTaskTimer = this.startTaskTimer.bind(this);
+        this.stopTaskTimer = this.stopTaskTimer.bind(this);
 
         logger.debug('MainGame constructor exit - all initialization complete', { hasSaveManager: !!this.saveManager, hasTaskSystem: !!this.taskSystem, hasScreenManager: !!this.screenManager });
 
@@ -835,6 +837,10 @@ export class MainGame {
             this.nextTask();
         });
 
+        document.getElementById('btn-retry-task')?.addEventListener('click', () => {
+            this.retryTask();
+        });
+
         // Navigation buttons
         document.getElementById('btn-nav-career')?.addEventListener('click', () => {
             this.screenManager.showScreen('screen-career');
@@ -943,8 +949,7 @@ export class MainGame {
                 return;
             }
             const result = this.timeManager.sleep();
-            this.handleTimeAdvance(result.slotsSkipped); // triggers new day
-            this.updateMapScreen();
+            this.processTimeEvents(result.events); // Process daily/weekly events; also refreshes the map
             this.showToast('You slept well and feel refreshed!', 'success');
         });
 
@@ -1467,7 +1472,6 @@ export class MainGame {
                     // Phase 4: Initialize particle effects (will be set up when PixiJS app is ready)
                     this.gameState.particleEffectManager = null;
                     this.gameState.performanceManager = new PerformanceManager();
-                    this.gameState.uiLayerManager = new UILayerManager();
 
                     // Register visual subsystems (moved inside setTimeout to avoid null reference)
                     if (this.gameState.visualSystem && this.gameState.animationManager) {
@@ -1547,7 +1551,6 @@ export class MainGame {
             this.interactionManager = this.gameState.interactionManager || null;
             this.tooltipManager = this.gameState.tooltipManager || null;
             this.performanceManager = this.gameState.performanceManager;
-            this.uiLayerManager = this.gameState.uiLayerManager;
 
             // Initialize camera system for map (lazy initialization when map is accessed)
             // Camera will be initialized in updateMapScreen() when needed
@@ -1586,6 +1589,12 @@ export class MainGame {
             }
 
             logger.debug('[startNewGame]: managers linked');
+
+            // Apply initial stat bonuses to game systems
+            if (this.characterStats && this.timeManager) {
+                this.characterStats.applyBonusesToTimeManager(this.timeManager);
+            }
+
             this.showLoadingProgress('Ready!', 100);
             logger.debug('[startNewGame]: core systems initialized, showing intro');
 
@@ -1644,6 +1653,9 @@ export class MainGame {
                 this.uiUpdater.updateAllUI();
                 logger.debug('[finishGameStart]: UI updated');
             }
+
+            // Start task timer if task has a time limit
+            this.startTaskTimer();
 
             if (this.worldMap) {
                 this.updateMapScreen();
@@ -1810,10 +1822,18 @@ export class MainGame {
         logger.debug("Reloading save data for subsystems...");
         this.saveManager.loadGame(this.gameState, this.currentSaveSlot);
 
+        // Apply stat bonuses to game systems
+        if (this.characterStats && this.timeManager) {
+            this.characterStats.applyBonusesToTimeManager(this.timeManager);
+        }
+
         // Generate a new task if none exists
         if (!this.gameState.currentTask) {
             this.taskSystem.generateNewTask();
         }
+
+        // Start task timer if task has a time limit
+        this.startTaskTimer();
 
         // Update UI with loaded state
         this.uiUpdater.updateAllUI();
@@ -1899,8 +1919,9 @@ export class MainGame {
         ProjectHelpers.updateStatsScreen(this);
     }
 
-    // NOTE: handleTimeAdvance is defined later in the file (line ~1595)
-    // This duplicate definition has been removed to prevent method override bugs
+    // NOTE: handleTimeAdvance(slots) is defined once, further down next to
+    // processTimeEvents(); an earlier duplicate definition was removed to
+    // prevent method override bugs
 
     /**
      * Open the chart studio
@@ -1998,6 +2019,9 @@ export class MainGame {
             return;
         }
 
+        // Stop the task timer when submitting
+        this.stopTaskTimer();
+
         // Calculate score
         const score = this.economySystem.evaluateChart(
             this.gameState.currentTask,
@@ -2069,6 +2093,12 @@ export class MainGame {
             // Apply rewards to game state
             this.gameState.money += score.moneyEarned;
             this.gameState.reputation += score.repEarned;
+
+            // second_chance perk: offer a retry when the result was not perfect
+            document.getElementById('btn-retry-task')?.classList.toggle(
+                'hidden',
+                !(score.stars < 5 && this.gameState.canUseSecondChance?.())
+            );
 
             // Show money particle effect if significant amount
             if (score.moneyEarned > 100 && this.unifiedMapSystem?.particleManager) {
@@ -2147,9 +2177,27 @@ export class MainGame {
     }
 
     /**
+     * Redo the current task using the second_chance perk (once per day)
+     */
+    retryTask() {
+        document.getElementById('btn-retry-task')?.classList.add('hidden');
+        if (!this.taskSystem.retryCurrentTask()) {
+            this.showToast('No second chance available today.', 'info');
+            return;
+        }
+
+        this.uiUpdater.updateTaskDisplay();
+        this.uiUpdater.updateAllUI();
+        this.startTaskTimer();
+        this.screenManager.showScreen('screen-game');
+    }
+
+    /**
      * Move to the next task
      */
     nextTask() {
+        document.getElementById('btn-retry-task')?.classList.add('hidden');
+
         // Generate new task
         this.taskSystem.generateNewTask();
 
@@ -2157,8 +2205,83 @@ export class MainGame {
         this.uiUpdater.updateTaskDisplay();
         this.uiUpdater.updateAllUI();
 
+        // Start task timer if task has a time limit
+        this.startTaskTimer();
+
         // Show game screen
         this.screenManager.showScreen('screen-game');
+    }
+
+    /**
+     * Start the task timer countdown
+     */
+    startTaskTimer() {
+        // Stop any existing timer
+        this.stopTaskTimer();
+
+        const task = this.gameState.currentTask;
+        if (!task || !task.timeLimit) {
+            return; // No timer needed if task has no time limit
+        }
+
+        // Get the timer element
+        const timerElement = document.getElementById('task-timer');
+        if (!timerElement) {
+            return; // No timer element in DOM
+        }
+
+        // Unhide the timer
+        timerElement.classList.remove('hidden');
+
+        // Update timer immediately
+        this.updateTaskTimer();
+
+        // Start interval to update timer every second
+        this.taskTimerIntervalId = setInterval(() => {
+            this.updateTaskTimer();
+        }, 1000);
+    }
+
+    /**
+     * Update the task timer display
+     */
+    updateTaskTimer() {
+        const task = this.gameState.currentTask;
+        const timerElement = document.getElementById('task-timer');
+
+        if (!task || !task.timeLimit || !timerElement) {
+            return;
+        }
+
+        // Calculate remaining time
+        const elapsed = (Date.now() - task.startTime) / 1000;
+        const remaining = Math.max(0, task.timeLimit - elapsed);
+
+        // Format as MM:SS
+        const minutes = Math.floor(remaining / 60);
+        const seconds = Math.floor(remaining % 60);
+        timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        // Stop timer if time is up
+        if (remaining <= 0) {
+            this.stopTaskTimer();
+            timerElement.classList.add('time-expired');
+        }
+    }
+
+    /**
+     * Stop the task timer
+     */
+    stopTaskTimer() {
+        if (this.taskTimerIntervalId) {
+            clearInterval(this.taskTimerIntervalId);
+            this.taskTimerIntervalId = null;
+        }
+
+        const timerElement = document.getElementById('task-timer');
+        if (timerElement) {
+            timerElement.classList.add('hidden');
+        }
     }
 
     /**
@@ -2244,6 +2367,10 @@ export class MainGame {
      * Show settings modal
      */
     showSettings() {
+        const performanceManager = this.gameState?.performanceManager;
+        const currentQuality = performanceManager?.quality || 'auto';
+        const currentFPS = performanceManager?.getFPS() || 0;
+
         const modalContent = `
             <div class="settings-modal">
                 <h2>Settings</h2>
@@ -2262,6 +2389,19 @@ export class MainGame {
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
+                    <div class="option-group" style="border-top: 1px solid #444; padding-top: 1rem; margin-top: 1rem;">
+                        <label>Graphics Quality</label>
+                        <div id="quality-controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <button class="quality-btn ${currentQuality === 'auto' ? 'active' : ''}" data-quality="auto">Auto</button>
+                            <button class="quality-btn ${currentQuality === 'low' ? 'active' : ''}" data-quality="low">Low</button>
+                            <button class="quality-btn ${currentQuality === 'medium' ? 'active' : ''}" data-quality="medium">Medium</button>
+                            <button class="quality-btn ${currentQuality === 'high' ? 'active' : ''}" data-quality="high">High</button>
+                            <button class="quality-btn ${currentQuality === 'ultra' ? 'active' : ''}" data-quality="ultra">Ultra</button>
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #999;">
+                            Current FPS: <span id="fps-display">${currentFPS}</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="settings-danger">
                     <button class="btn btn-danger" onclick="game.resetProgress()">Reset Progress</button>
@@ -2271,6 +2411,49 @@ export class MainGame {
         `;
 
         this.showModal(modalContent);
+        this.attachSettingsEventListeners();
+    }
+
+    /**
+     * Attach event listeners to settings modal elements
+     */
+    attachSettingsEventListeners() {
+        // Quality buttons
+        const qualityButtons = document.querySelectorAll('.quality-btn');
+        qualityButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const quality = btn.dataset.quality;
+                if (this.gameState?.performanceManager) {
+                    this.gameState.performanceManager.setQuality(quality);
+
+                    // Update button states
+                    qualityButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Update FPS display
+                    const fpsDisplay = document.getElementById('fps-display');
+                    if (fpsDisplay) {
+                        fpsDisplay.textContent = this.gameState.performanceManager.getFPS();
+                    }
+                }
+            });
+        });
+
+        // Start live FPS updates while modal is open
+        const fpsDisplay = document.getElementById('fps-display');
+        if (fpsDisplay && this.gameState?.performanceManager) {
+            const updateFPS = () => {
+                fpsDisplay.textContent = this.gameState.performanceManager.getFPS();
+            };
+            const fpsInterval = setInterval(updateFPS, 500);
+
+            // Stop updates when modal closes (listen for closeModal calls)
+            const originalCloseModal = this.closeModal.bind(this);
+            this.closeModal = () => {
+                clearInterval(fpsInterval);
+                originalCloseModal();
+            };
+        }
     }
 
     /**
@@ -2323,7 +2506,8 @@ export class MainGame {
      * Switch music station
      */
     switchMusicStation(stationId) {
-        this.audioManager.switchStation(stationId);
+        // Call async function without awaiting to maintain backward compatibility
+        this.audioManager.switchStation(stationId).catch(e => console.log('Station switch failed:', e));
     }
 
     /**
@@ -2604,7 +2788,7 @@ export class MainGame {
     // ========== MAP METHODS (delegated to MapHelpers) ==========
 
     updateMapScreen() {
-        MapHelpers.updateMapScreen(this);
+        return MapHelpers.updateMapScreen(this);
     }
 
     // Map rendering handled by SimpleMapRenderer - no separate building/house rendering needed
@@ -2651,13 +2835,10 @@ export class MainGame {
         MapHelpers.handleLocationAction(this, action);
     }
 
-    handleTimeAdvance(slots) {
-        if (!this.timeManager) {
+    processTimeEvents(events) {
+        if (!events || !Array.isArray(events)) {
             return;
         }
-        if (slots <= 0) return;
-
-        const events = this.timeManager.advanceTime(slots);
 
         // Handle events (new day, etc)
         events.forEach(event => {
@@ -2747,6 +2928,16 @@ export class MainGame {
 
         this.updateMapScreen(); // Update visuals
         this.uiUpdater.updateAllUI(); // Money updated
+    }
+
+    handleTimeAdvance(slots) {
+        if (!this.timeManager) {
+            return;
+        }
+        if (slots <= 0) return;
+
+        const events = this.timeManager.advanceTime(slots);
+        this.processTimeEvents(events);
     }
 
     /**
@@ -2870,6 +3061,9 @@ export class MainGame {
             return;
         }
         const results = this.characterStats.train(activityId);
+
+        // Apply stat-based bonuses to game systems
+        this.characterStats.applyBonusesToTimeManager(this.timeManager);
 
         this.handleTimeAdvance(activity.timeSlots);
 
@@ -3117,16 +3311,16 @@ export class MainGame {
                 this.locationDetailSystem = this.gameState.locationDetailSystem;
             }
 
+            // Office manager (documented tycoon system)
+            if (!this.gameState.officeManager) {
+                this.gameState.officeManager = new OfficeManager(this.gameState);
+                this.officeManager = this.gameState.officeManager;
+            }
+
             // Company management
             if (!this.gameState.companyManagement) {
                 this.gameState.companyManagement = new CompanyManagementSystem(this.gameState);
                 this.companyManagement = this.gameState.companyManagement;
-            }
-
-            // Romance progression
-            if (!this.gameState.romanceProgression) {
-                this.gameState.romanceProgression = new RomanceProgressionSystem(this.gameState);
-                this.romanceProgression = this.gameState.romanceProgression;
             }
 
             // Jealousy system
@@ -3226,10 +3420,6 @@ export class MainGame {
                     this.researchInboxUI = null;
                 }
             }
-
-            // Initialize emotional breakdown system
-            this.gameState.emotionalBreakdownSystem = new EmotionalBreakdownSystem(this.gameState);
-            this.emotionalBreakdownSystem = this.gameState.emotionalBreakdownSystem;
 
             // Initialize relationship dialogue system
             this.gameState.relationshipDialogueSystem = new RelationshipDialogueSystem(this.gameState);

@@ -266,7 +266,7 @@ export const CHARACTER_STORIES = {
                         text: "Focus on speed and efficiency. Get it done fast.",
                         flag: 'emma_project_efficiency',
                         response: "Efficiency... yes. We have so much to get through. Scaling it up is the logical choice.",
-                        effects: { logic: 5, relationship: 5 }
+                        effects: { xp: 'analytics', xpAmount: 5, relationship: 5 }
                     },
                     {
                         text: "Preserve the notes and human touches. The context.",
@@ -567,6 +567,9 @@ export function getStoryReveal(npcId, relationshipLevel, topic = null) {
     if (topic) {
         const topicReveal = reveals.find(r => r.topic === topic);
         if (topicReveal) return topicReveal;
+        // If a specific topic was requested but not found at this level, return null
+        // This allows the caller to fall back to personalStory
+        return null;
     }
 
     return reveals[0] || null;

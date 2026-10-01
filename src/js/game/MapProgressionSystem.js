@@ -167,27 +167,34 @@ export class MapProgressionSystem {
 
         this.currentMap = mapId;
 
-        // Update world map with new locations
+        // Update world map with new locations if worldMap exists
         if (this.gameState.worldMap) {
             this.updateWorldMapLocations(map);
         }
 
+        // Get NPCs that will follow to the new map
+        const followingNPCs = this.getNPCsThatFollow();
+
         return {
             success: true,
             map,
+            followingNPCs,
             message: `You've arrived in ${map.name}.`
         };
     }
 
     /**
      * Update world map with new locations
+     * Delegates to worldMap's addLocations method
      */
     updateWorldMapLocations(map) {
-        // This would integrate with WorldMap to add/update locations
-        map?.locations?.forEach(loc => {
-            // Add location to world map if it doesn't exist
-            // Implementation depends on WorldMap structure
-        });
+        if (!map || !map.locations || !this.gameState.worldMap) {
+            return false;
+        }
+
+        // Use the worldMap's addLocations method to merge new locations
+        // addLocations handles collision avoidance and only adds truly new locations
+        return this.gameState.worldMap.addLocations(map.locations);
     }
 
     /**
@@ -264,7 +271,7 @@ export class MapProgressionSystem {
     fromJSON(data) {
         if (!data) return;
         this.currentMap = data.currentMap || 'early_game';
-        this.unlockedMaps = data.unlockedMaps || ['early_game'];
+        this.unlockedMaps = Array.isArray(data.unlockedMaps) && data.unlockedMaps.length > 0 ? data.unlockedMaps : ['early_game'];
         this.mapData = data.mapData || this.initializeMaps();
     }
 }

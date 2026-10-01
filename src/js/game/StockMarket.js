@@ -465,6 +465,47 @@ export class StockMarket {
     }
 
     /**
+     * Trigger a market crash
+     * Reduces all market trends dramatically
+     */
+    triggerCrash() {
+        Object.keys(this.marketTrends).forEach(market => {
+            this.marketTrends[market] -= 0.05; // -5% daily during crash
+        });
+        this.updateIndices();
+    }
+
+    /**
+     * Trigger a tech boom
+     * Increases tech-heavy markets and tech sector
+     */
+    triggerBoom() {
+        this.marketTrends['US'] += 0.02;
+        this.marketTrends['ASIA'] += 0.015;
+
+        // Apply tech sector boost through individual stock manipulation
+        const techStocks = this.stocks?.filter(s => s.sector === 'Tech') || [];
+        const boostPct = 0.03; // 3% boost to tech stocks
+        techStocks.forEach(stock => {
+            const oldPrice = stock.price;
+            stock.price = oldPrice * (1 + boostPct);
+
+            // Track the move like Stock.update() does, so indices, gainers
+            // and UI change arrows see the boom
+            stock.lastChange = stock.price - oldPrice;
+            stock.lastChangePct = boostPct;
+
+            // Keep the same 100-day history cap as the regular update path
+            stock.history.push(stock.price);
+            if (stock.history.length > 100) {
+                stock.history.shift();
+            }
+        });
+
+        this.updateIndices();
+    }
+
+    /**
      * Serialize state for saving
      */
     toJSON() {

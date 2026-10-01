@@ -121,7 +121,7 @@ export class DetailedMapSystem {
         this.landmarks = [
             { id: 'city_hall', name: 'City Hall', type: 'government', x: 50, y: 50 },
             { id: 'central_park', name: 'Central Park', type: 'park', x: 30, y: 30 },
-            { id: 'main_plaza', name: 'Main Plaza', type: 'public', x: 50, y: 50 },
+            { id: 'main_plaza', name: 'Main Plaza', type: 'public', x: 70, y: 50 },
             { id: 'river', name: 'City River', type: 'natural', x: 20, y: 0, width: 5, height: 100 }
         ];
     }

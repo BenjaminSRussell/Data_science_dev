@@ -11,7 +11,6 @@ export class ClientManager {
         this.activeClients = [];
         this.pendingJobs = [];
         this.completedJobs = [];
-        this.marketingActive = ['word_of_mouth'];
     }
 
     /**
@@ -20,8 +19,8 @@ export class ClientManager {
     generateLeads() {
         let totalLeads = 0;
 
-        // Calculate leads from all active marketing channels
-        for (const channelId of this.marketingActive) {
+        // Calculate leads from all active marketing channels (from shared GameState)
+        for (const channelId of this.gameState.activeMarketingChannels) {
             const channel = MARKETING_CHANNELS.find(m => m.id === channelId);
             if (channel) {
                 totalLeads += channel.leadsPerDay;
@@ -113,7 +112,7 @@ export class ClientManager {
             data: null, // Data is assigned when job is accepted
             status: 'pending',
             createdAt: Date.now(),
-            expiresAt: Date.now() + (1000 * 60 * 5), // 5 minute window to accept
+            expiresAt: Date.now() + (1000 * 60 * 5 * clientType.patience), // 5 minute window scaled by client patience
             progress: 0
         };
     }
@@ -277,7 +276,7 @@ export class ClientManager {
      * Calculate daily marketing cost
      */
     getDailyMarketingCost() {
-        return this.marketingActive.reduce((total, channelId) => {
+        return this.gameState.activeMarketingChannels.reduce((total, channelId) => {
             const channel = MARKETING_CHANNELS.find(m => m.id === channelId);
             return total + (channel?.costPerDay || 0);
         }, 0);
@@ -287,19 +286,14 @@ export class ClientManager {
      * Activate a marketing channel
      */
     activateMarketing(channelId) {
-        if (!this.marketingActive.includes(channelId)) {
-            this.marketingActive.push(channelId);
-        }
+        this.gameState.activateMarketingChannel(channelId);
     }
 
     /**
      * Deactivate a marketing channel
      */
     deactivateMarketing(channelId) {
-        const index = this.marketingActive.indexOf(channelId);
-        if (index !== -1) {
-            this.marketingActive.splice(index, 1);
-        }
+        this.gameState.deactivateMarketingChannel(channelId);
     }
 
     /**

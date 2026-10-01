@@ -6,6 +6,7 @@
 
 import { dialogueTreeSystem } from '../game/dialogue/DialogueTreeSystem.js';
 import { STATS } from '../game/CharacterStats.js';
+import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
 
 export class DialogueUI {
     constructor(game) {
@@ -17,6 +18,8 @@ export class DialogueUI {
         this.currentTree = null;
         this.currentNode = null;
         this.onClose = null;
+        this.typeTimeoutId = null;
+        this.choiceTimeoutId = null; // pending return-to-root after a dead-end choice
 
         this.createContainer();
     }
@@ -64,6 +67,8 @@ export class DialogueUI {
             <div class="dialogue-box">
                 <div class="dialogue-header">
                     <div class="char-avatar" id="dialogue-avatar">
+                        <img id="dialogue-avatar-image" style="display:none; width:100%; height:100%; object-fit:cover;" alt="NPC Avatar" />
+                        <div id="dialogue-avatar-icon" class="char-avatar-icon" style="display:none; font-size: 2rem;"></div>
                         <span class="char-avatar-initial" id="dialogue-avatar-initial">?</span>
                     </div>
                     <div class="dialogue-npc-info">
@@ -81,6 +86,25 @@ export class DialogueUI {
 
         const style = document.createElement('style');
         style.textContent = `
+            .char-avatar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                overflow: hidden;
+                background: rgba(0, 0, 0, 0.2);
+                flex-shrink: 0;
+            }
+            .char-avatar-icon {
+                font-size: 2rem;
+            }
+            .char-avatar-initial {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: rgba(255, 255, 255, 0.8);
+            }
             .dialogue-close {
                 background: rgba(255, 255, 255, 0.1);
                 border: none;
@@ -95,6 +119,14 @@ export class DialogueUI {
             .dialogue-close:hover {
                 background: rgba(239, 68, 68, 0.3);
                 color: #ef4444;
+            }
+            .dialogue-close:focus-visible {
+                outline: 2px solid #60a5fa;
+                outline-offset: 2px;
+            }
+            .dialogue-choice:focus-visible {
+                outline: 2px solid #60a5fa;
+                outline-offset: 2px;
             }
         `;
         document.head.appendChild(style);
@@ -117,10 +149,11 @@ export class DialogueUI {
 
         // Build dialogue tree for this NPC
         const relLevel = relationshipLevel || this.game?.gameState?.npcManager?.getRelationship?.(npc.id) || 0;
-        const dialogueTreeSystem = this.game?.gameState?.dialogueTreeSystem || this.game?.dialogueTreeSystem;
-        if (dialogueTreeSystem) {
-            this.currentTree = dialogueTreeSystem.getTree(npc.id, relLevel);
-        } else {
+        const treeSystem = this.game?.gameState?.dialogueTreeSystem || this.game?.dialogueTreeSystem || dialogueTreeSystem;
+        // getTree() returns null for NPCs without dialogue data; fall back to
+        // a simple greeting tree in that case too.
+        this.currentTree = treeSystem?.getTree(npc.id, relLevel) || null;
+        if (!this.currentTree) {
             // Fallback: create simple tree
             this.currentTree = {
                 getRootNode: () => ({
@@ -143,11 +176,38 @@ export class DialogueUI {
         // Fallback to DOM method
         const avatar = this.container?.querySelector('#dialogue-avatar');
         const initial = this.container?.querySelector('#dialogue-avatar-initial');
+        const avatarImage = this.container?.querySelector('#dialogue-avatar-image');
+        const avatarIcon = this.container?.querySelector('#dialogue-avatar-icon');
 
         if (avatar && initial) {
             const personality = npc.personality || 'friendly';
             avatar.setAttribute('data-personality', personality);
             initial.textContent = npc.name?.[0]?.toUpperCase() || '?';
+
+            // Load NPC image with fallback chain: image -> icon -> initial
+            if (avatarImage) {
+                const npcImage = getNPCImage(npc);
+                const fallbackIcon = getNPCFallback(npc);
+
+                avatarImage.src = npcImage;
+                avatarImage.style.display = 'block';
+                avatarImage.onerror = () => {
+                    // Image failed, show icon fallback
+                    avatarImage.style.display = 'none';
+                    if (avatarIcon && fallbackIcon) {
+                        avatarIcon.textContent = fallbackIcon;
+                        avatarIcon.style.display = '';
+                        initial.style.display = 'none';
+                    } else {
+                        // No icon, show initial
+                        initial.style.display = '';
+                    }
+                };
+                initial.style.display = 'none';
+                if (avatarIcon) {
+                    avatarIcon.style.display = 'none';
+                }
+            }
         }
 
         // Update NPC info
@@ -158,14 +218,14 @@ export class DialogueUI {
             if (titleEl) titleEl.textContent = npc.title || npc.type || '???';
         }
 
-        // Show root node
-        this.showNode(this.currentNode);
-
-        // Show container
+        // Show container first so showChoices() can move focus into it
         if (this.container) {
             this.container.classList.add('active');
         }
         this.isOpen = true;
+
+        // Show root node (showChoices focuses the first choice)
+        this.showNode(this.currentNode);
     }
 
     /**
@@ -203,18 +263,32 @@ export class DialogueUI {
      * Type out text with animation
      */
     typeText(text, speed = 30) {
+        // Stop any animation still typing the previous node's text
+        this.cancelTyping();
+
         const textEl = this.container.querySelector('#dialogue-text');
         textEl.textContent = '';
         textEl.classList.add('typing');
+
+        // Check if user prefers reduced motion
+        const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+
+        if (prefersReducedMotion) {
+            // Show text immediately
+            textEl.textContent = text;
+            textEl.classList.remove('typing');
+            return;
+        }
 
         let i = 0;
         const type = () => {
             if (i < text.length) {
                 textEl.textContent += text[i];
                 i++;
-                setTimeout(type, speed);
+                this.typeTimeoutId = setTimeout(type, speed);
             } else {
                 textEl.classList.remove('typing');
+                this.typeTimeoutId = null;
             }
         };
         type();
@@ -234,6 +308,20 @@ export class DialogueUI {
             btn.addEventListener('click', () => this.handleChoice(choice.id));
             choicesEl.appendChild(btn);
         });
+
+        // The previously focused button was just removed; move keyboard focus
+        // to the first new choice so keyboard users are not dropped to <body>
+        choicesEl.querySelector('.dialogue-choice')?.focus();
+    }
+
+    /**
+     * Cancel a running typewriter animation
+     */
+    cancelTyping() {
+        if (this.typeTimeoutId !== null) {
+            clearTimeout(this.typeTimeoutId);
+            this.typeTimeoutId = null;
+        }
     }
 
     /**
@@ -272,9 +360,13 @@ export class DialogueUI {
         if (nextNode) {
             this.showNode(nextNode);
         } else {
-            // No next node - close or return to root
-            setTimeout(() => {
-                this.showNode(this.currentTree.getRootNode());
+            // No next node - return to root (cancelled if the dialogue closes)
+            clearTimeout(this.choiceTimeoutId);
+            this.choiceTimeoutId = setTimeout(() => {
+                this.choiceTimeoutId = null;
+                if (this.currentTree) {
+                    this.showNode(this.currentTree.getRootNode());
+                }
             }, 1000);
         }
     }
@@ -313,6 +405,13 @@ export class DialogueUI {
      * Phase 2: Uses Lit component if available
      */
     close() {
+        // Clear any pending type animation and return-to-root timeouts
+        this.cancelTyping();
+        if (this.choiceTimeoutId !== null) {
+            clearTimeout(this.choiceTimeoutId);
+            this.choiceTimeoutId = null;
+        }
+
         // Use Lit component if available
         if (this.litComponent) {
             this.litComponent.close();
