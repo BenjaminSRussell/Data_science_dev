@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { vi } from 'vitest';
 import { Button } from '../../src/js/ui/components/Button.js';
 
 describe('Button', () => {
@@ -156,24 +157,24 @@ describe('Button', () => {
         });
     });
 
-    describe('dispatchGameEvent', () => {
-        it('should dispatch button-click event', async () => {
+    describe('button-click event (removed in #2132)', () => {
+        it('should call onclick but not dispatch the unused button-click event', async () => {
             let eventFired = false;
-            let eventDetail;
+            const onclick = vi.fn();
 
-            button.addEventListener('button-click', (e) => {
+            button.addEventListener('button-click', () => {
                 eventFired = true;
-                eventDetail = e.detail;
             });
 
             button.label = 'Click Me';
+            button.onclick = onclick;
             await button.updateComplete;
 
             const internalButton = button.shadowRoot.querySelector('button');
             internalButton.click();
 
-            expect(eventFired).to.be.true;
-            expect(eventDetail.label).to.equal('Click Me');
+            expect(onclick).toHaveBeenCalledOnce();
+            expect(eventFired).to.be.false;
         });
     });
 });
