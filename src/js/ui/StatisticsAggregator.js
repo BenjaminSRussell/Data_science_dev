@@ -147,17 +147,7 @@ export class StatisticsAggregator {
      * Format money
      */
     formatMoney(amount) {
-        const isNegative = amount < 0;
-        const absAmount = Math.abs(amount);
-        const sign = isNegative ? '-' : '';
-
-        if (absAmount < 1000) {
-            return `$${sign}${absAmount.toLocaleString()}`;
-        } else if (absAmount < 1000000) {
-            return `$${sign}${(absAmount / 1000).toFixed(1)}K`;
-        } else {
-            return `$${sign}${(absAmount / 1000000).toFixed(2)}M`;
-        }
+        return `$${(amount ?? 0).toLocaleString()}`;
     }
 
     /**
