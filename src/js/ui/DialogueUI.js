@@ -227,7 +227,7 @@ export class DialogueUI {
         textEl.classList.add('typing');
 
         // Check if user prefers reduced motion
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
 
         if (prefersReducedMotion) {
             // Show text immediately
