@@ -36,6 +36,7 @@ import { ContractSystem } from './game/contracts/ContractSystem.js';
 import { MapProgressionSystem } from './game/MapProgressionSystem.js';
 import { dialogueTreeSystem } from './game/dialogue/DialogueTreeSystem.js';
 import { ConversationScreen } from './game/dialogue/ConversationScreen.js';
+import { DialogueUI } from './ui/DialogueUI.js';
 import { IntroSystem } from './game/IntroSystem.js';
 import { DayNightCycle, TIME_OF_DAY } from './game/DayNightCycle.js';
 import { NotificationSystem } from './game/NotificationSystem.js';
@@ -2173,6 +2174,11 @@ export class MainGame {
     showDirtyDataOptions() {
         if (!this.dirtyDataSystem) return;
 
+        // Initialize dialogueUI if not already created
+        if (!this.dialogueUI) {
+            this.dialogueUI = new DialogueUI(this);
+        }
+
         const options = this.dirtyDataSystem.getDirtyOptions();
         const currentRepLevel = this.dirtyDataSystem.getReputationLevel();
 
@@ -2185,7 +2191,7 @@ export class MainGame {
         // Add option to back out
         choices.push({
             id: 'cancel_dirty',
-            text: 'Nevermind, I\'ll play it safe'
+            text: 'Nevermind, I'll play it safe'
         });
 
         // Create a fake NPC for the dialogue
@@ -2208,7 +2214,12 @@ export class MainGame {
                 if (!option) return null;
                 return {
                     id: id,
-                    text: `${option.name}\n\nDescription: ${option.description}\n\nRisk: ${option.risk}%\nReward: $${option.reward}`,
+                    text: `${option.name}
+
+Description: ${option.description}
+
+Risk: ${option.risk}%
+Reward: $${option.reward}`,
                     choices: [
                         { id: 'confirm_' + id, text: 'Do it' },
                         { id: 'cancel_action', text: 'Back away' }
@@ -2232,8 +2243,12 @@ export class MainGame {
             }
             this.dialogueUI.isOpen = true;
 
+            // Store the original handleChoice method (if not already stored)
+            if (!this.dialogueUI._originalHandleChoice) {
+                this.dialogueUI._originalHandleChoice = this.dialogueUI.handleChoice.bind(this.dialogueUI);
+            }
+
             // Override the handleChoice method to handle dirty data choices
-            const originalHandleChoice = this.dialogueUI.handleChoice.bind(this.dialogueUI);
             this.dialogueUI.handleChoice = (choiceId) => {
                 if (choiceId === 'cancel_dirty' || choiceId === 'cancel_action') {
                     this.dialogueUI.close();
@@ -2256,16 +2271,25 @@ export class MainGame {
                     return;
                 }
 
-                // Default behavior
-                originalHandleChoice(choiceId);
+                // Default behavior - use original handleChoice
+                if (this.dialogueUI._originalHandleChoice) {
+                    this.dialogueUI._originalHandleChoice(choiceId);
+                }
             };
+
+            // Set up onClose callback to restore original handleChoice
+            this.dialogueUI.setOnClose(() => {
+                if (this.dialogueUI && this.dialogueUI._originalHandleChoice) {
+                    this.dialogueUI.handleChoice = this.dialogueUI._originalHandleChoice;
+                    this.dialogueUI._originalHandleChoice = null;
+                }
+            });
         }
     }
 
     /**
      * Perform a dirty data action
-     */
-    performDirtyAction(actionId) {
+     */    performDirtyAction(actionId) {
         if (!this.dirtyDataSystem) return;
 
         const result = this.dirtyDataSystem.performAction(actionId);
