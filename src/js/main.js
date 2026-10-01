@@ -2668,6 +2668,18 @@ export class MainGame {
                 }
                 this.showToast('A new day has begun!', 'info');
 
+                // Update stock market with today's news events
+                if (this.gameState.stockMarket) {
+                    // Gather news events from the daily paper
+                    const dailyPaper = this.newsManager?.getDailyPaper();
+                    const newsEvents = [];
+                    if (dailyPaper?.headline) newsEvents.push(dailyPaper.headline);
+                    if (dailyPaper?.articles) newsEvents.push(...dailyPaper.articles);
+
+                    // Update stock market prices based on news events
+                    this.gameState.stockMarket.update(newsEvents, []);
+                }
+
                 // Expenses
                 if (this.gameState.economySystem) {
                     const { expenses } = this.gameState.economySystem.processDailyFinances();
