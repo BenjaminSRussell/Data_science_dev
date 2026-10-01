@@ -2760,7 +2760,7 @@ export class MainGame {
     // ========== MAP METHODS (delegated to MapHelpers) ==========
 
     updateMapScreen() {
-        MapHelpers.updateMapScreen(this);
+        return MapHelpers.updateMapScreen(this);
     }
 
     // Map rendering handled by SimpleMapRenderer - no separate building/house rendering needed

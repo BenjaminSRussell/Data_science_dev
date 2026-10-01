@@ -128,9 +128,9 @@ export class ScreenManager {
         // Initialize map renderer when map screen is shown
         if (screenId === 'screen-map' && this.mainGame) {
             // Small delay to ensure DOM is ready and screen is visible
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (this.mainGame.updateMapScreen) {
-                    this.mainGame.updateMapScreen();
+                    await this.mainGame.updateMapScreen();
                 }
                 // Also trigger resize to ensure map gets correct dimensions
                 if (this.mainGame.unifiedMapSystem && this.mainGame.unifiedMapSystem.handleResize) {
