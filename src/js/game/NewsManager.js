@@ -3,15 +3,6 @@
  * Creates dynamic world that changes over time
  */
 
-// News categories
-export const NEWS_CATEGORIES = {
-    market: { icon: '', color: '#6bcb77' },
-    tech: { icon: '', color: '#4ecdc4' },
-    business: { icon: '', color: '#ffd93d' },
-    economy: { icon: '', color: '#ff8548' },
-    local: { icon: '', color: '#a855f7' }
-};
-
 // News templates
 export const NEWS_TEMPLATES = [
     // Market news
@@ -316,18 +307,13 @@ export class NewsManager {
             text = text.replace(`{${key}}`, value);
         }
 
-        // Get category styling from NEWS_CATEGORIES
-        const categoryStyle = NEWS_CATEGORIES[template.category] || {};
-
         const newsItem = {
             id: `news_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             category: template.category,
             text,
             timestamp: this.gameState.timeManager?.getDateString() || 'Today',
             effects: template.effects,
-            read: false,
-            color: categoryStyle.color,
-            icon: categoryStyle.icon
+            read: false
         };
 
         // Apply any immediate effects
