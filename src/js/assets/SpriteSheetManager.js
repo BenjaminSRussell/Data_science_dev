@@ -123,10 +123,17 @@ export class SpriteSheetManager {
     getCurrentFrame(sheetId, animationName, frameIndex) {
         const animation = this.getAnimationFrames(sheetId, animationName);
         if (!animation) return null;
-        
-        const frame = animation.frames[frameIndex % animation.frames.length];
+
+        // Use sign-safe modulo to correctly handle negative indices
+        const len = animation.frames.length;
+        const safeIndex = ((frameIndex % len) + len) % len;
+        const frame = animation.frames[safeIndex];
+
+        // Return null if frame is undefined instead of returning a partial object
+        if (!frame) return null;
+
         const sheet = this.spriteSheets.get(sheetId);
-        
+
         return {
             sheet: sheet.image,
             ...frame
