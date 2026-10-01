@@ -1,123 +1,23 @@
 /**
- * Unit tests for MainGame.showGameEnding()
+ * Unit tests for GameEndingModal.createGameEndingModal()
  *
- * Tests the showGameEnding method implementation without importing the full
- * MainGame class (which has circular dependencies and missing modules in tests).
- * This test file contains a copy of the actual implementation from main.js
- * to ensure proper test coverage of all requirements.
+ * Tests the real showGameEnding implementation extracted to GameEndingModal.js.
+ * This tests the actual production code (not a copy), so future regressions
+ * to the real method will be caught.
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { createGameEndingModal } from '../../src/js/ui/GameEndingModal.js';
 
-// The showGameEnding method implementation from MainGame.prototype
-// This is extracted for testing purposes to avoid import issues with MainGame
-// The test verifies this implementation matches the production code behavior
-function createShowGameEndingMethod() {
-    return function showGameEnding(endingData) {
-        if (!endingData) return;
-
-        // Create ending modal
-        const modal = document.createElement('div');
-        modal.id = 'game-ending-modal';
-        modal.className = 'modal active';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-family: 'Arial', sans-serif;
-        `;
-
-        const stats = this.gameState.gameEndingSystem?.getEndingStats() || {};
-
-        modal.innerHTML = `
-            <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 40px; border-radius: 20px; max-width: 600px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-                <h1 style="font-size: 48px; margin: 0 0 20px 0; color: #fbbf24; text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);">
-                    ${endingData.title || 'Victory!'}
-                </h1>
-                <p style="font-size: 20px; margin: 0 0 30px 0; color: #e2e8f0;">
-                    ${endingData.message || 'Congratulations on completing your journey!'}
-                </p>
-                <div style="background: rgba(15, 23, 42, 0.8); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
-                    <h3 style="margin-top: 0; color: #fbbf24;">Career Statistics</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
-                        <div><strong>Final Rank:</strong> ${stats.rankTitle || 'Unknown'}</div>
-                        <div><strong>Days Played:</strong> ${stats.days || 0}</div>
-                        <div><strong>Total Money:</strong> $${(stats.money || 0).toLocaleString()}</div>
-                        <div><strong>Reputation:</strong> ${stats.reputation || 0}</div>
-                        <div><strong>Tasks Completed:</strong> ${stats.tasksCompleted || 0}</div>
-                        <div><strong>Perfect Scores:</strong> ${stats.perfectScores || 0}</div>
-                        <div><strong>Contracts:</strong> ${stats.contractsCompleted || 0}</div>
-                        <div><strong>Projects:</strong> ${stats.projectsCompleted || 0}</div>
-                    </div>
-                </div>
-                <div style="margin-top: 30px;">
-                    <button id="btn-ending-new-game" style="
-                        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                        color: white;
-                        border: none;
-                        padding: 15px 30px;
-                        font-size: 18px;
-                        border-radius: 10px;
-                        cursor: pointer;
-                        margin: 0 10px;
-                        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-                    ">New Game</button>
-                    <button id="btn-ending-continue" style="
-                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                        color: white;
-                        border: none;
-                        padding: 15px 30px;
-                        font-size: 18px;
-                        border-radius: 10px;
-                        cursor: pointer;
-                        margin: 0 10px;
-                        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-                    ">Continue Playing</button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Button handlers
-        document.getElementById('btn-ending-new-game').onclick = () => {
-            if (confirm('Start a new game? Your current progress will be lost.')) {
-                this.startNewGame();
-                modal.remove();
-            }
-        };
-
-        document.getElementById('btn-ending-continue').onclick = () => {
-            modal.remove();
-            // Allow player to continue playing even after ending
-        };
-
-        // Play victory sound
-        if (this.audioManager?.play) {
-            this.audioManager.play('kaching');
-        }
-    };
-}
-
-describe('MainGame.showGameEnding()', () => {
-    let game;
-    let mockGameState;
+describe('MainGame.showGameEnding() via GameEndingModal.createGameEndingModal()', () => {
     let mockGameEndingSystem;
-    let showGameEnding;
+    let mockContext;
 
     beforeEach(() => {
         // Clear DOM
         document.body.innerHTML = '';
 
-        // Create minimal mock for gameState
+        // Create minimal mock for gameState.gameEndingSystem
         mockGameEndingSystem = {
             getEndingStats: vi.fn(() => ({
                 rankTitle: 'Senior Developer',
@@ -131,20 +31,14 @@ describe('MainGame.showGameEnding()', () => {
             }))
         };
 
-        mockGameState = {
-            gameEndingSystem: mockGameEndingSystem
-        };
-
-        // Create a minimal game-like object for testing
-        game = {
-            gameState: mockGameState,
+        // Create a mock context object that simulates the MainGame instance
+        mockContext = {
+            gameState: {
+                gameEndingSystem: mockGameEndingSystem
+            },
             startNewGame: vi.fn(),
             audioManager: { play: vi.fn() }
         };
-
-        // Get the showGameEnding method
-        showGameEnding = createShowGameEndingMethod();
-        game.showGameEnding = showGameEnding.bind(game);
     });
 
     afterEach(() => {
@@ -160,7 +54,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             expect(modal).not.toBeNull();
@@ -168,12 +62,12 @@ describe('MainGame.showGameEnding()', () => {
         });
 
         it('should return early when called with null', () => {
-            game.showGameEnding(null);
+            createGameEndingModal(null, mockContext);
             expect(document.getElementById('game-ending-modal')).toBeNull();
         });
 
         it('should return early when called with undefined', () => {
-            game.showGameEnding(undefined);
+            createGameEndingModal(undefined, mockContext);
             expect(document.getElementById('game-ending-modal')).toBeNull();
         });
     });
@@ -185,7 +79,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'You completed the game!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             expect(modal.innerHTML).toContain('Victory!');
@@ -197,7 +91,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: null
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             expect(modal.innerHTML).toContain('Congratulations on completing your journey!');
@@ -209,7 +103,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: ''
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             expect(modal.innerHTML).toContain('Victory!');
@@ -222,7 +116,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'Custom Message'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             expect(modal.innerHTML).toContain('Custom Title');
@@ -248,7 +142,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             expect(modal.innerHTML).toContain('Senior Developer');
@@ -269,7 +163,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             // Should contain 0 for missing numeric fields
@@ -277,14 +171,14 @@ describe('MainGame.showGameEnding()', () => {
         });
 
         it('should fall back to "Unknown" for missing rankTitle when gameEndingSystem is undefined', () => {
-            game.gameState.gameEndingSystem = undefined;
+            mockContext.gameState.gameEndingSystem = undefined;
 
             const endingData = {
                 title: 'Victory!',
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             // Should contain Unknown for missing rankTitle
@@ -292,14 +186,14 @@ describe('MainGame.showGameEnding()', () => {
         });
 
         it('should use empty object stats when gameEndingSystem is undefined', () => {
-            game.gameState.gameEndingSystem = undefined;
+            mockContext.gameState.gameEndingSystem = undefined;
 
             const endingData = {
                 title: 'Victory!',
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             // All numeric stats should default to 0
@@ -319,7 +213,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const newGameButton = document.getElementById('btn-ending-new-game');
             expect(newGameButton).not.toBeNull();
@@ -327,7 +221,7 @@ describe('MainGame.showGameEnding()', () => {
             newGameButton.click();
 
             expect(window.confirm).toHaveBeenCalledWith('Start a new game? Your current progress will be lost.');
-            expect(game.startNewGame).toHaveBeenCalled();
+            expect(mockContext.startNewGame).toHaveBeenCalled();
             expect(document.getElementById('game-ending-modal')).toBeNull();
         });
 
@@ -339,13 +233,13 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const newGameButton = document.getElementById('btn-ending-new-game');
             newGameButton.click();
 
             expect(window.confirm).toHaveBeenCalled();
-            expect(game.startNewGame).not.toHaveBeenCalled();
+            expect(mockContext.startNewGame).not.toHaveBeenCalled();
             expect(document.getElementById('game-ending-modal')).not.toBeNull();
         });
 
@@ -355,34 +249,34 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const continueButton = document.getElementById('btn-ending-continue');
             expect(continueButton).not.toBeNull();
 
             continueButton.click();
 
-            expect(game.startNewGame).not.toHaveBeenCalled();
+            expect(mockContext.startNewGame).not.toHaveBeenCalled();
             expect(document.getElementById('game-ending-modal')).toBeNull();
         });
     });
 
     describe('audio playback', () => {
         it('should play kaching sound if audioManager is available', () => {
-            game.audioManager = { play: vi.fn() };
+            mockContext.audioManager = { play: vi.fn() };
 
             const endingData = {
                 title: 'Victory!',
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
-            expect(game.audioManager.play).toHaveBeenCalledWith('kaching');
+            expect(mockContext.audioManager.play).toHaveBeenCalledWith('kaching');
         });
 
         it('should handle missing audioManager gracefully', () => {
-            game.audioManager = undefined;
+            mockContext.audioManager = undefined;
 
             const endingData = {
                 title: 'Victory!',
@@ -390,7 +284,7 @@ describe('MainGame.showGameEnding()', () => {
             };
 
             expect(() => {
-                game.showGameEnding(endingData);
+                createGameEndingModal(endingData, mockContext);
             }).not.toThrow();
 
             expect(document.getElementById('game-ending-modal')).not.toBeNull();
@@ -404,7 +298,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             expect(modal.style.position).toBe('fixed');
@@ -420,7 +314,7 @@ describe('MainGame.showGameEnding()', () => {
                 message: 'You won!'
             };
 
-            game.showGameEnding(endingData);
+            createGameEndingModal(endingData, mockContext);
 
             const modal = document.getElementById('game-ending-modal');
             expect(modal.className).toContain('modal');
