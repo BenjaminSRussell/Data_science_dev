@@ -7,6 +7,7 @@
 import { TopBar } from './components/TopBar.js';
 import { ProgressBar } from './components/ProgressBar.js';
 import { LocationViewComponent } from './components/LocationViewComponent.js';
+import { logger } from '../utils/Logger.js';
 
 export class LitUIManager {
     constructor(game) {
@@ -32,7 +33,7 @@ export class LitUIManager {
             topBarEl.appendChild(topBar);
             this.components.set('topBar', topBar);
         } else if (!topBarEl && !this.warnedAboutTopBarMount) {
-            console.warn('LitUIManager: #top-bar-container element not found, Lit TopBar component will not mount');
+            logger.warn('LitUIManager: #top-bar-container element not found, Lit TopBar component will not mount');
             this.warnedAboutTopBarMount = true;
         }
 
@@ -44,7 +45,7 @@ export class LitUIManager {
             rankProgressEl.appendChild(progressBar);
             this.components.set('rankProgress', progressBar);
         } else if (!rankProgressEl && !this.warnedAboutRankProgressMount) {
-            console.warn('LitUIManager: #rank-progress-container element not found, Lit ProgressBar component will not mount');
+            logger.warn('LitUIManager: #rank-progress-container element not found, Lit ProgressBar component will not mount');
             this.warnedAboutRankProgressMount = true;
         }
     }
@@ -73,7 +74,7 @@ export class LitUIManager {
         } else {
             // Fallback to old method if component not available
             if (!this.warnedAboutTopBarFallback) {
-                console.warn('LitUIManager: TopBar component not available, falling back to DOM manipulation');
+                logger.warn('LitUIManager: TopBar component not available, falling back to DOM manipulation');
                 this.warnedAboutTopBarFallback = true;
             }
             this.updateTopBarFallback();
@@ -114,7 +115,7 @@ export class LitUIManager {
         } else {
             // Fallback to old method
             if (!this.warnedAboutRankProgressFallback) {
-                console.warn('LitUIManager: RankProgress component not available, falling back to DOM manipulation');
+                logger.warn('LitUIManager: RankProgress component not available, falling back to DOM manipulation');
                 this.warnedAboutRankProgressFallback = true;
             }
             this.updateRankProgressFallback();
@@ -157,7 +158,7 @@ export class LitUIManager {
                             document.getElementById('location-view-container');
             if (!container) {
                 if (!this.warnedAboutLocationViewContainer) {
-                    console.warn('LitUIManager: location view container element not found');
+                    logger.warn('LitUIManager: location view container element not found');
                     this.warnedAboutLocationViewContainer = true;
                 }
                 return;

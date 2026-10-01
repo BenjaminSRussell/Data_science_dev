@@ -1,30 +1,32 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { LitUIManager } from '../../src/js/ui/LitUIManager';
+import { logger } from '../../src/js/utils/Logger.js';
 
 describe('LitUIManager', () => {
     let litUIManager;
-    let consoleWarnSpy;
+    let warnSpy;
 
     beforeEach(() => {
-        consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        // LitUIManager reports through the shared logger (like UIUpdater)
+        warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
         litUIManager = new LitUIManager({ gameState: {} });
     });
 
     afterEach(() => {
-        consoleWarnSpy.mockRestore();
+        warnSpy.mockRestore();
     });
 
     describe('initialize()', () => {
         it('should warn when top-bar-container element is missing', () => {
             litUIManager.initialize();
-            expect(consoleWarnSpy.mock.calls.length).toBe(2);
-            expect(consoleWarnSpy.mock.calls[0][0]).toContain('#top-bar-container');
+            expect(warnSpy.mock.calls.length).toBe(2);
+            expect(warnSpy.mock.calls[0][0]).toContain('#top-bar-container');
         });
 
         it('should warn when rank-progress-container element is missing', () => {
             litUIManager.initialize();
-            expect(consoleWarnSpy.mock.calls.length).toBe(2);
-            expect(consoleWarnSpy.mock.calls[1][0]).toContain('#rank-progress-container');
+            expect(warnSpy.mock.calls.length).toBe(2);
+            expect(warnSpy.mock.calls[1][0]).toContain('#rank-progress-container');
         });
 
         it('should only warn once about missing containers on multiple calls', () => {
@@ -32,7 +34,7 @@ describe('LitUIManager', () => {
             litUIManager.initialize();
             litUIManager.initialize();
             // Should warn twice (once for each container), not more
-            expect(consoleWarnSpy.mock.calls.length).toBe(2);
+            expect(warnSpy.mock.calls.length).toBe(2);
         });
 
         it('should not warn when top-bar-container exists', () => {
@@ -43,7 +45,7 @@ describe('LitUIManager', () => {
             litUIManager.initialize();
 
             // Should still warn about rank-progress-container but not top-bar-container
-            const warnings = consoleWarnSpy.mock.calls.map(call => call[0]);
+            const warnings = warnSpy.mock.calls.map(call => call[0]);
             expect(warnings.some(w => w.includes('#top-bar-container'))).toBe(false);
             expect(warnings.some(w => w.includes('#rank-progress-container'))).toBe(true);
 
@@ -58,7 +60,7 @@ describe('LitUIManager', () => {
             litUIManager.initialize();
 
             // Should still warn about top-bar-container but not rank-progress-container
-            const warnings = consoleWarnSpy.mock.calls.map(call => call[0]);
+            const warnings = warnSpy.mock.calls.map(call => call[0]);
             expect(warnings.some(w => w.includes('#top-bar-container'))).toBe(true);
             expect(warnings.some(w => w.includes('#rank-progress-container'))).toBe(false);
 
@@ -75,7 +77,7 @@ describe('LitUIManager', () => {
 
             litUIManager.initialize();
 
-            expect(consoleWarnSpy.mock.calls.length).toBe(0);
+            expect(warnSpy.mock.calls.length).toBe(0);
 
             document.body.removeChild(topBarContainer);
             document.body.removeChild(rankProgressContainer);
@@ -85,16 +87,16 @@ describe('LitUIManager', () => {
     describe('updateTopBar()', () => {
         it('should warn when topBar component is not available', () => {
             litUIManager.updateTopBar();
-            expect(consoleWarnSpy.mock.calls.length).toBe(1);
-            expect(consoleWarnSpy.mock.calls[0][0]).toContain('TopBar');
-            expect(consoleWarnSpy.mock.calls[0][0]).toContain('falling back');
+            expect(warnSpy.mock.calls.length).toBe(1);
+            expect(warnSpy.mock.calls[0][0]).toContain('TopBar');
+            expect(warnSpy.mock.calls[0][0]).toContain('falling back');
         });
 
         it('should only warn once about missing topBar on multiple calls', () => {
             litUIManager.updateTopBar();
             litUIManager.updateTopBar();
             litUIManager.updateTopBar();
-            expect(consoleWarnSpy.mock.calls.length).toBe(1);
+            expect(warnSpy.mock.calls.length).toBe(1);
         });
 
         it('should not warn when topBar component is available', () => {
@@ -106,23 +108,23 @@ describe('LitUIManager', () => {
 
             litUIManager.updateTopBar();
 
-            expect(consoleWarnSpy.mock.calls.length).toBe(0);
+            expect(warnSpy.mock.calls.length).toBe(0);
         });
     });
 
     describe('updateRankProgress()', () => {
         it('should warn when rankProgress component is not available', () => {
             litUIManager.updateRankProgress();
-            expect(consoleWarnSpy.mock.calls.length).toBe(1);
-            expect(consoleWarnSpy.mock.calls[0][0]).toContain('RankProgress');
-            expect(consoleWarnSpy.mock.calls[0][0]).toContain('falling back');
+            expect(warnSpy.mock.calls.length).toBe(1);
+            expect(warnSpy.mock.calls[0][0]).toContain('RankProgress');
+            expect(warnSpy.mock.calls[0][0]).toContain('falling back');
         });
 
         it('should only warn once about missing rankProgress on multiple calls', () => {
             litUIManager.updateRankProgress();
             litUIManager.updateRankProgress();
             litUIManager.updateRankProgress();
-            expect(consoleWarnSpy.mock.calls.length).toBe(1);
+            expect(warnSpy.mock.calls.length).toBe(1);
         });
 
         it('should not warn when rankProgress component is available', () => {
@@ -134,22 +136,22 @@ describe('LitUIManager', () => {
 
             litUIManager.updateRankProgress();
 
-            expect(consoleWarnSpy.mock.calls.length).toBe(0);
+            expect(warnSpy.mock.calls.length).toBe(0);
         });
     });
 
     describe('updateLocationView()', () => {
         it('should warn when location view container is not found', () => {
             litUIManager.updateLocationView('location1', {}, '', '');
-            expect(consoleWarnSpy.mock.calls.length).toBe(1);
-            expect(consoleWarnSpy.mock.calls[0][0]).toContain('location view container');
+            expect(warnSpy.mock.calls.length).toBe(1);
+            expect(warnSpy.mock.calls[0][0]).toContain('location view container');
         });
 
         it('should only warn once about missing location view container on multiple calls', () => {
             litUIManager.updateLocationView('location1', {}, '', '');
             litUIManager.updateLocationView('location2', {}, '', '');
             litUIManager.updateLocationView('location3', {}, '', '');
-            expect(consoleWarnSpy.mock.calls.length).toBe(1);
+            expect(warnSpy.mock.calls.length).toBe(1);
         });
 
         it('should not warn when location-view container exists', () => {
@@ -159,7 +161,7 @@ describe('LitUIManager', () => {
 
             litUIManager.updateLocationView('location1', {}, '', '');
 
-            expect(consoleWarnSpy.mock.calls.length).toBe(0);
+            expect(warnSpy.mock.calls.length).toBe(0);
 
             document.body.removeChild(locationViewContainer);
         });
@@ -171,7 +173,7 @@ describe('LitUIManager', () => {
 
             litUIManager.updateLocationView('location1', {}, '', '');
 
-            expect(consoleWarnSpy.mock.calls.length).toBe(0);
+            expect(warnSpy.mock.calls.length).toBe(0);
 
             document.body.removeChild(locationViewContainer);
         });
