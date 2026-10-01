@@ -10,6 +10,7 @@ export class AudioManager {
         this.currentMusic = null;
         this.currentStation = 'lofi_beats'; // Default station
         this.fadeIntervals = new Map(); // Track fade intervals for cleanup
+        this.switchingPromise = null; // Mutex to serialize station switches
 
         // Define stations and their tracks
         this.musicStations = {
@@ -88,8 +89,7 @@ export class AudioManager {
     async fadeOutAndStop(audio, duration = 500) {
         if (!audio) return;
 
-        // Clear any existing fade interval for this audio element
-        const fadeKey = `fadeOut_${Math.random()}`;
+        const fadeKey = Math.random().toString(36).slice(2);
         const startVolume = audio.volume;
         const startTime = Date.now();
 
@@ -101,6 +101,7 @@ export class AudioManager {
 
                 if (progress >= 1) {
                     clearInterval(intervalId);
+                    this.fadeIntervals.delete(fadeKey);
                     audio.volume = 0;
                     audio.pause();
                     resolve();
@@ -122,6 +123,7 @@ export class AudioManager {
         if (!audio) return;
 
         audio.volume = 0;
+        const fadeKey = Math.random().toString(36).slice(2);
         const startTime = Date.now();
 
         return new Promise(resolve => {
@@ -132,12 +134,12 @@ export class AudioManager {
 
                 if (progress >= 1) {
                     clearInterval(intervalId);
+                    this.fadeIntervals.delete(fadeKey);
                     audio.volume = targetVolume;
                     resolve();
                 }
             }, 16); // ~60fps
 
-            const fadeKey = `fadeIn_${Math.random()}`;
             this.fadeIntervals.set(fadeKey, intervalId);
         });
     }
@@ -229,7 +231,14 @@ export class AudioManager {
 
         if (this.currentMusic) {
             if (this.musicEnabled) {
-                this.currentMusic.play().catch(e => console.log('Audio play failed:', e));
+                // Re-enable music: restore volume by fading in
+                try {
+                    await this.currentMusic.play().catch(e => console.log('Audio play failed:', e));
+                    // Fade in volume after play starts
+                    await this.fadeIn(this.currentMusic, this.musicVolume, 500);
+                } catch (e) {
+                    console.log('Toggle music re-enable failed:', e);
+                }
             } else {
                 await this.fadeOutAndStop(this.currentMusic, 500);
             }
@@ -242,8 +251,38 @@ export class AudioManager {
 
     /**
      * Switch to a different music station
+     * Uses a queue to prevent concurrent station switches from racing
      */
     async switchStation(stationId) {
+        // Create a new promise that chains off the previous one
+        const previousPromise = this.switchingPromise;
+        let resolveSwitch;
+        this.switchingPromise = new Promise(resolve => {
+            resolveSwitch = resolve;
+        });
+
+        // Wait for the previous switch to complete
+        if (previousPromise) {
+            try {
+                await previousPromise;
+            } catch (e) {
+                // Ignore errors from previous switch
+            }
+        }
+
+        try {
+            // Perform the actual switch
+            await this._doSwitchStation(stationId);
+        } finally {
+            // Resolve this switch so the next one can proceed
+            resolveSwitch();
+        }
+    }
+
+    /**
+     * Internal method to perform the actual station switch (protected by queue)
+     */
+    async _doSwitchStation(stationId) {
         // Stop current music with fade-out
         if (this.currentMusic) {
             await this.fadeOutAndStop(this.currentMusic, 500);
@@ -319,6 +358,7 @@ export class AudioManager {
             const startVolume = this.currentMusic.volume;
             const startTime = Date.now();
             const duration = 300;
+            const fadeKey = Math.random().toString(36).slice(2);
 
             return new Promise(resolve => {
                 const intervalId = setInterval(() => {
@@ -328,12 +368,12 @@ export class AudioManager {
 
                     if (progress >= 1) {
                         clearInterval(intervalId);
+                        this.fadeIntervals.delete(fadeKey);
                         this.currentMusic.volume = targetVolume;
                         resolve();
                     }
                 }, 16); // ~60fps
 
-                const fadeKey = `fadeVolume_${Math.random()}`;
                 this.fadeIntervals.set(fadeKey, intervalId);
             });
         }
