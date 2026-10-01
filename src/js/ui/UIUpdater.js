@@ -808,11 +808,16 @@ export class UIUpdater {
 
     renderPartStats(part) {
         let text = [];
-        if (part.stats.cooling) text.push(`Cooling: +${part.stats.cooling}`);
-        if (part.stats.noise) text.push(`Noise: ${part.stats.noise}dB`);
-        if (part.stats.compute) text.push(`Compute: ${part.stats.compute} TFLOPS`);
-        if (part.stats.vram) text.push(`VRAM: ${part.stats.vram}GB`);
-        if (part.stats.resolution) text.push(`Res: Level ${part.stats.resolution}`);
+        // Check for !== undefined to allow 0 values (e.g., vram: 0 on integrated GPU)
+        if (part.stats.cooling !== undefined) text.push(`Cooling: +${part.stats.cooling}`);
+        if (part.stats.noise !== undefined) text.push(`Noise: ${part.stats.noise}dB`);
+        if (part.stats.compute !== undefined) text.push(`Compute: ${part.stats.compute} TFLOPS`);
+        if (part.stats.vram !== undefined) text.push(`VRAM: ${part.stats.vram}GB`);
+        if (part.stats.resolution !== undefined) text.push(`Res: Level ${part.stats.resolution}`);
+        if (part.stats.aesthetics !== undefined) text.push(`Aesthetics: ${part.stats.aesthetics}`);
+        if (part.stats.airflow !== undefined) text.push(`Airflow: ${part.stats.airflow}`);
+        if (part.stats.noise_dampening !== undefined) text.push(`Noise Dampening: ${part.stats.noise_dampening}`);
+        if (part.stats.style !== undefined) text.push(`Style: ${part.stats.style}`);
 
         return `<div class="equipment-bonus">${text.join(', ')}</div>`;
     }
