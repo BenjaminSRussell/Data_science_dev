@@ -34,3 +34,12 @@ Static code analysis to find common bugs.
 
 **Usage**: `node scripts/static-bug-check.js`
 
+## Archived Scripts
+
+The `archive/` subdirectory contains generator and scraper scripts that are no longer actively used in the project. These include:
+
+- **generators/** - Asset generation scripts (outputs no longer consumed by the game)
+- **scrapers/** - Asset scraper scripts (never integrated into the build pipeline)
+
+These were bootstrap tools designed for one-time or manual use. If they become relevant again in the future, they can be re-integrated with proper documentation and npm script wiring. See `archive/README.md` for details.
+
