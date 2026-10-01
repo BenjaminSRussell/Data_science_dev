@@ -98,8 +98,9 @@ export class LocationView {
             </div>
         `;
 
-        // Render features
-        this.renderFeatures(details.features);
+        // Render features using getLocationFeatures() instead of direct access
+        const features = this.game.locationDetailSystem?.getLocationFeatures(locationId) || [];
+        this.renderFeatures(features);
 
         // Render characters in location
         this.renderCharacters(locationId);
