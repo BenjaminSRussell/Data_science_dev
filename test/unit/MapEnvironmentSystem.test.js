@@ -192,7 +192,7 @@ describe('MapEnvironmentSystem', () => {
         });
 
         it('should only add elements when assetPlacer.placeAsset returns true', () => {
-            const zone = { id: 'res-1', bounds: { minX: 0, maxX: 5, minY: 0, maxY: 5 } };
+            const zone = { id: 'res-1', bounds: { minX: 10, maxX: 20, minY: 10, maxY: 20 } };
             let callCount = 0;
 
             // Make assetPlacer return true only on odd calls
@@ -201,19 +201,21 @@ describe('MapEnvironmentSystem', () => {
                 return callCount % 2 === 1;
             });
 
-            // Mock isRoad to ensure we have near-road positions
             mockRoadSystem.isRoad.mockImplementation((x, y) => {
-                // Return true for some neighbors but false for the position itself or neighbors
-                return false;
+                // Create a grid of roads so many positions are near roads
+                return (x % 4 === 1) || (y % 4 === 1);
             });
 
             mapEnvironmentSystem.addStreetTrees(zone);
 
-            // All elements should have type tree
+            // All elements should have type tree and belong to the zone
             const allTreesCorrect = mapEnvironmentSystem.environmentElements.every((el) => {
                 return el.type === 'tree' && el.zoneId === zone.id;
             });
             expect(allTreesCorrect).toBe(true);
+
+            // Verify assetPlacer was called (meaning road logic didn't skip all iterations)
+            expect(mockAssetPlacer.placeAsset).toHaveBeenCalled();
         });
 
         it('should only place street trees near roads', () => {
@@ -238,29 +240,36 @@ describe('MapEnvironmentSystem', () => {
 
         it('should create street tree objects with correct properties', () => {
             const zone = { id: 'res-1', bounds: { minX: 5, maxX: 10, minY: 5, maxY: 10 } };
-            mockRoadSystem.isRoad.mockReturnValue(false);
+
+            // Mock isRoad to have near-road positions
+            mockRoadSystem.isRoad.mockImplementation((x, y) => {
+                // Create roads on the boundaries so that positions in the zone are near roads
+                return y === 4 || y === 11 || x === 4 || x === 11;
+            });
+
             mockAssetPlacer.placeAsset.mockReturnValue(true);
 
             mapEnvironmentSystem.addStreetTrees(zone);
 
-            if (mapEnvironmentSystem.environmentElements.length > 0) {
-                mapEnvironmentSystem.environmentElements.forEach((tree) => {
-                    expect(tree).toHaveProperty('id');
-                    expect(tree.id).toMatch(/^street-tree-res-1-\d+$/);
-                    expect(tree.type).toBe('tree');
-                    expect(tree).toHaveProperty('x');
-                    expect(tree).toHaveProperty('y');
-                    expect(tree.width).toBe(1);
-                    expect(tree.height).toBe(1);
-                    expect(tree.zoneId).toBe(zone.id);
-                });
-            }
+            // Should have created trees since we have near-road positions
+            expect(mapEnvironmentSystem.environmentElements.length).toBeGreaterThan(0);
+
+            mapEnvironmentSystem.environmentElements.forEach((tree) => {
+                expect(tree).toHaveProperty('id');
+                expect(tree.id).toMatch(/^street-tree-res-1-\d+$/);
+                expect(tree.type).toBe('tree');
+                expect(tree).toHaveProperty('x');
+                expect(tree).toHaveProperty('y');
+                expect(tree.width).toBe(1);
+                expect(tree.height).toBe(1);
+                expect(tree.zoneId).toBe(zone.id);
+            });
         });
     });
 
     describe('addCommercialDecorations', () => {
         it('should not place elements on road positions', () => {
-            const zone = { id: 'com-1', bounds: { minX: 0, maxX: 2, minY: 0, maxY: 2 } };
+            const zone = { id: 'com-1', bounds: { minX: 0, maxX: 8, minY: 0, maxY: 8 } };
             mockRoadSystem.isRoad.mockReturnValue(true);
             mockAssetPlacer.placeAsset.mockReturnValue(true);
 
@@ -468,20 +477,20 @@ describe('MapEnvironmentSystem', () => {
         it('should respect road system and assetPlacer together', () => {
             const zone = { id: 'res-1', bounds: { minX: 0, maxX: 5, minY: 0, maxY: 5 } };
 
-            // Every other position is a road
-            let callCount = 0;
-            mockRoadSystem.isRoad.mockImplementation(() => {
-                callCount++;
-                return callCount % 2 === 0;
+            // Make some positions near roads
+            mockRoadSystem.isRoad.mockImplementation((x, y) => {
+                // Positions (1, 0), (1, 1), (3, 0) are roads
+                return (x === 1 && y === 0) || (x === 1 && y === 1) || (x === 3 && y === 0);
             });
 
             mockAssetPlacer.placeAsset.mockReturnValue(true);
 
             mapEnvironmentSystem.addStreetTrees(zone);
 
-            // No elements should be added because every other call to isRoad returns true
-            // (street trees need isNearRoad to be true but isRoad(x,y) to be false)
-            expect(mapEnvironmentSystem.environmentElements.length).toBeGreaterThanOrEqual(0);
+            // All placed elements should not be on road positions
+            mapEnvironmentSystem.environmentElements.forEach((el) => {
+                expect(mockRoadSystem.isRoad(el.x, el.y)).toBe(false);
+            });
         });
     });
 });
