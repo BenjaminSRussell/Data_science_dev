@@ -6,7 +6,6 @@
 
 import { TopBar } from './components/TopBar.js';
 import { ProgressBar } from './components/ProgressBar.js';
-import { Button } from './components/Button.js';
 import { LocationViewComponent } from './components/LocationViewComponent.js';
 
 export class LitUIManager {
@@ -145,18 +144,6 @@ export class LitUIManager {
                 nextRankEl.textContent = 'Max Rank Achieved!';
             }
         }
-    }
-
-    /**
-     * Create button using Lit component
-     */
-    createButton(label, icon, variant, onclick) {
-        const button = document.createElement('game-button');
-        button.label = label;
-        button.icon = icon || '';
-        button.variant = variant || 'primary';
-        button.onclick = onclick;
-        return button;
     }
 
     /**
