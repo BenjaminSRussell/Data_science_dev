@@ -31,7 +31,13 @@ export class UIUpdater {
 
     /**
      * Update all UI elements
-     * Calls all registered screen update methods to ensure complete UI refresh
+     * Calls core update methods that refresh globally without requiring specific parameters.
+     * NOTE: updateShopScreen() and updateLibraryScreen() are NOT called here because they
+     * require a specific category parameter. The current category selection is only stored
+     * transiently in the DOM (button dataset), not in gameState. Calling these with
+     * hard-coded defaults would silently reset the user's selected category on every
+     * updateAllUI() call from any of 20+ call sites, causing a regression.
+     * Call these methods separately when you have the specific category to display.
      */
     updateAllUI() {
         // Global UI elements (always visible)
@@ -41,11 +47,9 @@ export class UIUpdater {
         this.updateSoftwareDisplay();
         this.updateBankScreen();
 
-        // Screen-specific UI elements (may be hidden but need refresh when shown)
+        // Screen-specific UI elements (no category-specific display)
         this.updateTaskDisplay();
         this.updateCareerScreen();
-        this.updateShopScreen(); // Uses default category 'tools'
-        this.updateLibraryScreen(); // Uses default category 'all'
         this.updateNewspaperScreen();
 
         // Location-specific layout (only if a current location exists)

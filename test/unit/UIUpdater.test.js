@@ -1,6 +1,11 @@
 /**
  * UIUpdater Tests
- * Verifies that updateAllUI() calls all screen update methods
+ * Verifies that updateAllUI() updates core UI elements without resetting category-dependent screens.
+ *
+ * Key regression test: updateShopScreen() and updateLibraryScreen() should NOT be called from
+ * updateAllUI() because they require a category parameter that is not available in that context.
+ * Calling them with hard-coded defaults would silently reset the user's selected category on
+ * every updateAllUI() call, causing a regression.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -142,14 +147,20 @@ describe('UIUpdater', () => {
             expect(uiUpdater.updateCareerScreen).toHaveBeenCalled();
         });
 
-        it('should call updateShopScreen', () => {
+        it('should NOT call updateShopScreen to prevent category-reset regression', () => {
+            // updateShopScreen requires a category parameter that is not available in updateAllUI() context.
+            // The current category selection is only stored transiently in the DOM, not in gameState.
+            // Calling with hard-coded defaults would silently reset the user's selected category.
             uiUpdater.updateAllUI();
-            expect(uiUpdater.updateShopScreen).toHaveBeenCalled();
+            expect(uiUpdater.updateShopScreen).not.toHaveBeenCalled();
         });
 
-        it('should call updateLibraryScreen', () => {
+        it('should NOT call updateLibraryScreen to prevent category-reset regression', () => {
+            // updateLibraryScreen requires a category parameter that is not available in updateAllUI() context.
+            // The current category selection is only stored transiently in the DOM, not in gameState.
+            // Calling with hard-coded defaults would silently reset the user's selected category.
             uiUpdater.updateAllUI();
-            expect(uiUpdater.updateLibraryScreen).toHaveBeenCalled();
+            expect(uiUpdater.updateLibraryScreen).not.toHaveBeenCalled();
         });
 
         it('should call updateNewspaperScreen', () => {
@@ -169,10 +180,10 @@ describe('UIUpdater', () => {
             expect(uiUpdater.updateLocationLayout).not.toHaveBeenCalled();
         });
 
-        it('should update all UI elements in one call', () => {
+        it('should update core UI elements without category-dependent screens', () => {
             uiUpdater.updateAllUI();
 
-            // Verify all required methods were called
+            // Verify core methods that don't need specific parameters were called
             expect(uiUpdater.updateTopBar).toHaveBeenCalled();
             expect(uiUpdater.updateRankProgress).toHaveBeenCalled();
             expect(uiUpdater.updateChartTypeGrid).toHaveBeenCalled();
@@ -180,10 +191,12 @@ describe('UIUpdater', () => {
             expect(uiUpdater.updateBankScreen).toHaveBeenCalled();
             expect(uiUpdater.updateTaskDisplay).toHaveBeenCalled();
             expect(uiUpdater.updateCareerScreen).toHaveBeenCalled();
-            expect(uiUpdater.updateShopScreen).toHaveBeenCalled();
-            expect(uiUpdater.updateLibraryScreen).toHaveBeenCalled();
             expect(uiUpdater.updateNewspaperScreen).toHaveBeenCalled();
             expect(uiUpdater.updateLocationLayout).toHaveBeenCalled();
+
+            // Verify category-dependent methods are NOT called to prevent category-reset regression
+            expect(uiUpdater.updateShopScreen).not.toHaveBeenCalled();
+            expect(uiUpdater.updateLibraryScreen).not.toHaveBeenCalled();
         });
     });
 });
