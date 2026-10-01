@@ -21,6 +21,11 @@ export function updateStockMarketScreen(game) {
         quotronTicker.refresh();
     }
 
+    // Update heat meter display
+    if (game.uiUpdater) {
+        game.uiUpdater.updateHeatMeter();
+    }
+
     // Update market indices display
     updateMarketIndices(game);
 
@@ -270,7 +275,10 @@ export function handleSellStock(game, stockId) {
  * Handle committing crimes (stock manipulation, etc.)
  */
 export function handleCrime(game, type, params) {
-    if (!confirm(" This is illegal! If caught, you could go to jail. Proceed?")) return;
+    const heat = game.crimeSystem?.heat || 0;
+    const riskMessage = `This is illegal! If caught, you could go to jail. Proceed?\n\nCurrent Heat Level: ${Math.floor(heat)}/100`;
+
+    if (!confirm(riskMessage)) return;
 
     const result = game.crimeSystem.commitCrime(type, params);
     if (result.success) {
@@ -296,6 +304,11 @@ export function handleArrest(game, reason) {
     game.gameState.jailSentence = 30;
     game.screenManager.showScreen('screen-jail');
     document.getElementById('jail-time-left').textContent = `${game.gameState.jailSentence} days`;
+
+    // Update heat meter on jail screen
+    if (game.uiUpdater) {
+        game.uiUpdater.updateHeatMeter();
+    }
 
     game.gameState.reputation = Math.floor(game.gameState.reputation / 2);
     game.gameState.money -= 5000;

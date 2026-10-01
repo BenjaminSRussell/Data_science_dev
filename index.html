@@ -644,6 +644,15 @@
                         <span class="label" style="color: #888; display: block;">LIQUID CASH</span>
                         <span class="value" id="liquid-cash" style="font-size: 1.2rem;">$0.00</span>
                     </div>
+                    <div class="market-stat">
+                        <span class="label" style="color: #888; display: block;">HEAT LEVEL</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="value" id="heat-value" style="font-size: 1.2rem;">0</span>
+                            <div id="heat-meter-bar" style="width: 100px; height: 20px; background: #1a1a1a; border: 1px solid #555; position: relative; overflow: hidden;">
+                                <div id="heat-meter-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #66cc66, #ccaa33, #cc6633, #cc3333); transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Market Indices -->
@@ -1351,6 +1360,13 @@
                 <div class="jail-stats glass-card" style="margin: 30px auto; max-width: 400px; padding: 20px;">
                     <div style="margin-bottom: 10px;">Sentence Remaining: <span id="jail-time-left"
                             style="color: #e74c3c; font-weight: bold;">0 days</span></div>
+                    <div style="margin-bottom: 15px; padding-top: 10px; border-top: 1px solid #555;">
+                        <div style="color: #888; margin-bottom: 5px;">Current Heat Level: <span id="jail-heat-value"
+                            style="color: #cc3333; font-weight: bold;">0</span></div>
+                        <div id="jail-heat-meter-bar" style="width: 100%; height: 25px; background: #1a1a1a; border: 1px solid #555; position: relative; overflow: hidden;">
+                            <div id="jail-heat-meter-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #66cc66, #ccaa33, #cc6633, #cc3333); transition: width 0.3s;"></div>
+                        </div>
+                    </div>
                     <button class="btn-cartoon btn-danger" id="btn-serve-time"
                         onclick="game.handleServeJailTime()">Serve Time (Skip Day)</button>
                     <button class="btn-cartoon" id="btn-bribe-guard" onclick="game.handleBribeGuard()"
