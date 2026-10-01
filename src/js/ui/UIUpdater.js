@@ -31,13 +31,27 @@ export class UIUpdater {
 
     /**
      * Update all UI elements
+     * Calls all registered screen update methods to ensure complete UI refresh
      */
     updateAllUI() {
+        // Global UI elements (always visible)
         this.updateTopBar();
         this.updateRankProgress();
         this.updateChartTypeGrid();
         this.updateSoftwareDisplay();
         this.updateBankScreen();
+
+        // Screen-specific UI elements (may be hidden but need refresh when shown)
+        this.updateTaskDisplay();
+        this.updateCareerScreen();
+        this.updateShopScreen(); // Uses default category 'tools'
+        this.updateLibraryScreen(); // Uses default category 'all'
+        this.updateNewspaperScreen();
+
+        // Location-specific layout (only if a current location exists)
+        if (this.gameState?.currentLocation) {
+            this.updateLocationLayout(this.gameState.currentLocation);
+        }
     }
 
     /**
