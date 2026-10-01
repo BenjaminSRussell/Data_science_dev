@@ -113,24 +113,6 @@ describe('Vehicle Selling', () => {
             expect(worldMap._cacheInvalid).toBe(true);
         });
 
-        it('should adjust reputation when selling', () => {
-            const initialReputation = gameState.reputation;
-
-            // Buy a vehicle (gains reputation)
-            worldMap.buyVehicle('sedan');
-            const reputationAfterBuy = gameState.reputation;
-            expect(reputationAfterBuy).toBeGreaterThan(initialReputation);
-
-            // Sell the vehicle (loses some reputation)
-            worldMap.sellVehicle('sedan');
-            const reputationAfterSell = gameState.reputation;
-
-            // Should lose half the reputation gained
-            const vehicle = VEHICLES_MAP.get('sedan');
-            const reputationLoss = Math.floor(vehicle.reputation * 0.5);
-            expect(reputationAfterSell).toBe(reputationAfterBuy - reputationLoss);
-        });
-
         it('should handle selling and re-buying a vehicle', () => {
             // Buy a vehicle
             const vehicle = VEHICLES_MAP.get('used_car');
@@ -150,6 +132,23 @@ describe('Vehicle Selling', () => {
             // Buy it again
             worldMap.buyVehicle('used_car');
             expect(worldMap.ownedVehicles.has('used_car')).toBe(true);
+        });
+
+        it('should not adjust reputation when selling (issue #1702 fix)', () => {
+            const initialReputation = gameState.reputation;
+
+            // Buy a vehicle (gains reputation)
+            worldMap.buyVehicle('sedan');
+            const reputationAfterBuy = gameState.reputation;
+            expect(reputationAfterBuy).toBeGreaterThan(initialReputation);
+
+            // Sell the vehicle - reputation should NOT change
+            const reputationBeforeSell = gameState.reputation;
+            worldMap.sellVehicle('sedan');
+            const reputationAfterSell = gameState.reputation;
+
+            // Reputation should remain the same after selling (not decreased)
+            expect(reputationAfterSell).toBe(reputationBeforeSell);
         });
     });
 });
