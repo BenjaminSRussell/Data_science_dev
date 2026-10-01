@@ -355,7 +355,8 @@ export class WorldMap {
 
     /**
      * Add or update locations from a map transition
-     * Merges new locations into the world map's locationOverrides
+     * Only adds NEW locations not already in LOCATIONS array
+     * Does not override existing LOCATIONS entries
      */
     addLocations(locations) {
         if (!locations || !Array.isArray(locations)) {
@@ -365,16 +366,17 @@ export class WorldMap {
         let addedCount = 0;
         locations.forEach(loc => {
             if (loc && loc.id) {
-                // Create a full location object for map-specific locations
-                // These locations have { id, x, y } and need to be expanded
+                // Skip if location already exists in LOCATIONS
+                if (LOCATIONS_MAP.has(loc.id)) {
+                    return;
+                }
+                // Only add truly new locations to locationOverrides
                 this.locationOverrides[loc.id] = {
                     id: loc.id,
                     name: loc.name || this._generateLocationName(loc.id),
                     type: loc.type || 'location',
                     position: { x: loc.x || 0, y: loc.y || 0 },
                     travelTime: loc.travelTime || 1,
-                    requiresVehicle: loc.requiresVehicle || false,
-                    unlockRequirement: loc.unlockRequirement || null,
                     activities: loc.activities || [],
                     background: loc.background || 'url("/assets/locations/default/background.png")',
                     ...loc // Spread any additional properties

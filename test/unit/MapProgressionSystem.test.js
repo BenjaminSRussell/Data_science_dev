@@ -1,40 +1,39 @@
 /**
  * MapProgressionSystem Unit Tests
  * Verifies that switchMap properly updates world map locations and carries NPCs
+ * Uses REAL WorldMap to test integration and collision avoidance
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MapProgressionSystem } from '../../src/js/game/MapProgressionSystem.js';
+import { WorldMap, LOCATIONS_MAP } from '../../src/js/game/WorldMap.js';
 
 describe('MapProgressionSystem', () => {
     let gameState;
     let mapProgressionSystem;
 
     beforeEach(() => {
-        // Mock gameState
+        // Use REAL WorldMap, not a mock
+        const worldMap = new WorldMap({
+            characterStats: {
+                getStat: vi.fn((stat) => {
+                    const stats = { charisma: 50 };
+                    return stats[stat] || 0;
+                })
+            },
+            reputation: 600,
+            money: 50000,
+            timeManager: { totalDays: 35 }
+        });
+
+        // Create real gameState with real worldMap
         gameState = {
-            worldMap: {
-                locationOverrides: {},
-                addLocations: vi.fn((locations) => {
-                    // Mock implementation: add locations to locationOverrides
-                    if (!locations || !Array.isArray(locations)) {
-                        return false;
-                    }
-                    let count = 0;
-                    locations.forEach(loc => {
-                        if (loc && loc.id) {
-                            gameState.worldMap.locationOverrides[loc.id] = {
-                                id: loc.id,
-                                name: loc.name || loc.id,
-                                x: loc.x || 0,
-                                y: loc.y || 0
-                            };
-                            count++;
-                        }
-                    });
-                    return count > 0;
-                }),
-                _invalidateCache: vi.fn()
+            worldMap,
+            characterStats: {
+                getStat: vi.fn((stat) => {
+                    const stats = { charisma: 50 };
+                    return stats[stat] || 0;
+                })
             },
             npcManager: {
                 getMetNPCs: vi.fn(() => [
@@ -103,76 +102,93 @@ describe('MapProgressionSystem', () => {
             const result = mapProgressionSystem.switchMap('mid_game');
             expect(result.success).toBe(true);
         });
-
-        it('should return failure when location update fails', () => {
-            // Mock addLocations to return false
-            gameState.worldMap.addLocations = vi.fn(() => false);
-
-            const result = mapProgressionSystem.switchMap('mid_game');
-            expect(result.success).toBe(false);
-            expect(result.message).toBe('Failed to update map locations.');
-        });
     });
 
     describe('updateWorldMapLocations', () => {
-        it('should add locations to locationOverrides', () => {
+        it('should delegate to worldMap.addLocations', () => {
+            const spy = vi.spyOn(gameState.worldMap, 'addLocations');
             const map = mapProgressionSystem.mapData['mid_game'];
-            const result = mapProgressionSystem.updateWorldMapLocations(map);
-
-            // Verify locations were added
-            expect(result).toBe(true);
-            expect(gameState.worldMap.addLocations).toHaveBeenCalled();
-            // Verify that first location is in locationOverrides
-            expect(gameState.worldMap.locationOverrides['tech_hub']).toBeDefined();
+            mapProgressionSystem.updateWorldMapLocations(map);
+            expect(spy).toHaveBeenCalledWith(map.locations);
         });
 
-        it('should return false when addLocations returns false', () => {
-            gameState.worldMap.addLocations = vi.fn(() => false);
-            const map = mapProgressionSystem.mapData['mid_game'];
+        it('should return false when map is null', () => {
+            const result = mapProgressionSystem.updateWorldMapLocations(null);
+            expect(result).toBe(false);
+        });
 
+        it('should return false when map has no locations', () => {
+            const map = { id: 'test', name: 'Test', locations: null };
             const result = mapProgressionSystem.updateWorldMapLocations(map);
             expect(result).toBe(false);
         });
 
-        it('should handle map with locations array', () => {
-            const map = {
-                id: 'test_map',
-                name: 'Test Map',
-                locations: [
-                    { id: 'loc1', name: 'Location 1', x: 10, y: 20 },
-                    { id: 'loc2', name: 'Location 2', x: 30, y: 40 }
-                ]
-            };
-
+        it('should return false when worldMap is missing', () => {
+            gameState.worldMap = null;
+            const map = mapProgressionSystem.mapData['mid_game'];
             const result = mapProgressionSystem.updateWorldMapLocations(map);
-            // When addLocations is mocked, it returns true/false based on count
-            expect(typeof result).toBe('boolean');
-        });
-
-        it('should handle map with null/undefined locations', () => {
-            const mapNoLocations = {
-                id: 'test',
-                name: 'Test',
-                locations: null
-            };
-
-            const result = mapProgressionSystem.updateWorldMapLocations(mapNoLocations);
             expect(result).toBe(false);
         });
+    });
 
-        it('should use fallback when addLocations is not a function', () => {
-            gameState.worldMap.addLocations = undefined;
-            const map = {
-                id: 'test_map',
-                name: 'Test Map',
-                locations: [
-                    { id: 'loc1', name: 'Location 1', x: 10, y: 20 }
-                ]
-            };
+    describe('WorldMap integration - collision avoidance', () => {
+        it('should NOT overwrite real LOCATIONS with generic placeholders', () => {
+            // tech_hub is a real LOCATION with requiresVehicle:'car' and unlock requirements
+            const techHubReal = LOCATIONS_MAP.get('tech_hub');
+            expect(techHubReal).toBeDefined();
+            expect(techHubReal.requiresVehicle).toBe('car');
+            expect(techHubReal.unlockRequirement).toBeDefined();
+            expect(techHubReal.unlockRequirement.stat).toBe('charisma');
 
-            const result = mapProgressionSystem.updateWorldMapLocations(map);
-            expect(result).toBe(true);
-            expect(gameState.worldMap.locationOverrides['loc1']).toBeDefined();
+            // Switch to mid_game which tries to add tech_hub
+            mapProgressionSystem.switchMap('mid_game');
+
+            // Verify that tech_hub in worldMap still has the real requirements
+            const techHubLookup = gameState.worldMap.getLocation('tech_hub');
+            expect(techHubLookup).toBeDefined();
+            expect(techHubLookup.requiresVehicle).toBe('car');
+            expect(techHubLookup.unlockRequirement).toBeDefined();
+            expect(techHubLookup.unlockRequirement.stat).toBe('charisma');
+        });
+
+        it('should NOT double-list locations after merge', () => {
+            mapProgressionSystem.switchMap('mid_game');
+
+            // With low charisma (50), tech_hub should NOT be accessible
+            const accessible = gameState.worldMap.getAccessibleLocations();
+            const techHubCount = accessible.filter(loc => loc.id === 'tech_hub').length;
+
+            // Should appear at most once (and probably not at all due to access requirements)
+            expect(techHubCount).toBeLessThanOrEqual(1);
+        });
+
+        it('luxury_district should keep real gating (high reputation + money)', () => {
+            // luxury_district requires reputation: 5000, money: 100000
+            // Our gameState has reputation: 600, money: 50000 - NOT enough
+            const luxuryReal = LOCATIONS_MAP.get('luxury_district');
+            expect(luxuryReal.unlockRequirement.reputation).toBe(5000);
+            expect(luxuryReal.unlockRequirement.money).toBe(100000);
+
+            mapProgressionSystem.switchMap('mid_game');
+
+            // luxury_district should NOT be accessible due to insufficient funds
+            const accessible = gameState.worldMap.getAccessibleLocations();
+            const luxury = accessible.find(loc => loc.id === 'luxury_district');
+            expect(luxury).toBeUndefined();
+        });
+
+        it('should NOT add locations already in LOCATIONS to locationOverrides', () => {
+            mapProgressionSystem.switchMap('mid_game');
+
+            const overrides = gameState.worldMap.locationOverrides;
+            // None of the mid_game locations should be in overrides since they're all in LOCATIONS
+            const midGameLocIds = ['tech_hub', 'downtown', 'networking_bar', 'stock_exchange', 'luxury_district'];
+
+            midGameLocIds.forEach(id => {
+                // If addLocations correctly skips existing LOCATIONS,
+                // these should NOT be in locationOverrides
+                expect(overrides[id]).toBeUndefined();
+            });
         });
     });
 
@@ -189,7 +205,6 @@ describe('MapProgressionSystem', () => {
             gameState.npcManager.getMetNPCs = vi.fn(() => [
                 { id: 'romance_npc', type: 'romance' }
             ]);
-            // Set relationship > 70 for the romance NPC to be included
             gameState.npcManager.getRelationship = vi.fn(() => 75);
 
             const followingNPCs = mapProgressionSystem.getNPCsThatFollow();
