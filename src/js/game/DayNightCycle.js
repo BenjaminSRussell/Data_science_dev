@@ -4,10 +4,16 @@
  * Changes map appearance based on time
  */
 
+export const TIME_OF_DAY = Object.freeze({
+    MORNING: 'morning',
+    NOON: 'noon',
+    NIGHT: 'night'
+});
+
 export class DayNightCycle {
     constructor(gameState) {
         this.gameState = gameState;
-        this.currentTimeOfDay = 'morning';
+        this.currentTimeOfDay = TIME_OF_DAY.MORNING;
     }
 
     /**
@@ -15,22 +21,22 @@ export class DayNightCycle {
      */
     getTimeOfDay() {
         if (!this.gameState.timeManager) {
-            return 'morning';
+            return TIME_OF_DAY.MORNING;
         }
 
         const slot = this.gameState.timeManager?.timeSlot;
 
         // Morning: slots 0-1 (early morning, late morning)
         if (slot <= 1) {
-            return 'morning';
+            return TIME_OF_DAY.MORNING;
         }
         // Noon: slots 2-3 (afternoon, late afternoon)
         else if (slot <= 3) {
-            return 'noon';
+            return TIME_OF_DAY.NOON;
         }
         // Night: slots 4-5 (evening, night)
         else {
-            return 'night';
+            return TIME_OF_DAY.NIGHT;
         }
     }
 

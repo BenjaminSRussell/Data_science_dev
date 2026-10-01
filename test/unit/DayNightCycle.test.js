@@ -115,51 +115,48 @@ describe('DayNightCycle', () => {
         });
     });
 
-    describe('update() - callback invocation', () => {
-        it('should not invoke onTimeChange callback when phase does not change', () => {
-            const callbackSpy = vi.fn();
-            dayNightCycle.onTimeChange = callbackSpy;
+    describe('update() - phase change detection', () => {
+        // #2002 removed the never-used onTimeChange callback; the observable
+        // side effect of a phase change is updateMapAppearance().
+        it('should not refresh map appearance when phase does not change', () => {
+            const spy = vi.spyOn(dayNightCycle, 'updateMapAppearance');
             dayNightCycle.currentTimeOfDay = TIME_OF_DAY.MORNING;
             timeManager.timeSlot = 0;
 
             dayNightCycle.update();
 
-            expect(callbackSpy).not.toHaveBeenCalled();
+            expect(spy).not.toHaveBeenCalled();
         });
 
-        it('should invoke onTimeChange callback once when phase changes', () => {
-            const callbackSpy = vi.fn();
-            dayNightCycle.onTimeChange = callbackSpy;
+        it('should refresh map appearance once when phase changes', () => {
+            const spy = vi.spyOn(dayNightCycle, 'updateMapAppearance');
             dayNightCycle.currentTimeOfDay = TIME_OF_DAY.MORNING;
             timeManager.timeSlot = 2;
 
             dayNightCycle.update();
 
-            expect(callbackSpy).toHaveBeenCalledOnce();
-            expect(callbackSpy).toHaveBeenCalledWith(TIME_OF_DAY.MORNING, TIME_OF_DAY.NOON);
+            expect(spy).toHaveBeenCalledOnce();
+            expect(dayNightCycle.currentTimeOfDay).toBe(TIME_OF_DAY.NOON);
         });
 
-        it('should pass correct old and new time to onTimeChange callback', () => {
-            const callbackSpy = vi.fn();
-            dayNightCycle.onTimeChange = callbackSpy;
+        it('should move from NOON to NIGHT when slot reaches evening', () => {
             dayNightCycle.currentTimeOfDay = TIME_OF_DAY.NOON;
             timeManager.timeSlot = 4;
 
             dayNightCycle.update();
 
-            expect(callbackSpy).toHaveBeenCalledWith(TIME_OF_DAY.NOON, TIME_OF_DAY.NIGHT);
+            expect(dayNightCycle.currentTimeOfDay).toBe(TIME_OF_DAY.NIGHT);
         });
 
-        it('should not invoke callback a second time when called again with same phase', () => {
-            const callbackSpy = vi.fn();
-            dayNightCycle.onTimeChange = callbackSpy;
+        it('should not refresh a second time when called again with same phase', () => {
+            const spy = vi.spyOn(dayNightCycle, 'updateMapAppearance');
             dayNightCycle.currentTimeOfDay = TIME_OF_DAY.MORNING;
             timeManager.timeSlot = 1;
 
             dayNightCycle.update();
             dayNightCycle.update();
 
-            expect(callbackSpy).not.toHaveBeenCalled();
+            expect(spy).not.toHaveBeenCalled();
         });
     });
 
@@ -247,8 +244,8 @@ describe('DayNightCycle', () => {
             expect(dayNightCycle.currentTimeOfDay).toBe(TIME_OF_DAY.MORNING);
         });
 
-        it('should initialize with null onTimeChange callback', () => {
-            expect(dayNightCycle.onTimeChange).toBeNull();
+        it('should not expose the removed onTimeChange callback (#2002)', () => {
+            expect(dayNightCycle.onTimeChange).toBeUndefined();
         });
 
         it('should store gameState reference', () => {
