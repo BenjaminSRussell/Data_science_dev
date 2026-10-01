@@ -86,6 +86,9 @@ export function handleAnswerQuestion(game, answerIndex) {
         exam.score++;
     }
 
+    // Play audio feedback for the answer
+    game.audioManager.play(answerIndex === q.correct ? 'success' : 'fail');
+
     exam.currentQuestionIndex++;
 
     if (exam.currentQuestionIndex < exam.questions.length) {
