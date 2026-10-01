@@ -14,8 +14,6 @@ export class UnifiedMapSystem {
         this.container = container;
         this.game = game;
         this.gridSize = 30; // 30×30 grid for local maps
-        this.worldGridSize = 50; // 50×50 for world map
-        this.currentView = 'local'; // 'world' or 'local'
         this.currentArea = null;
         this.rendered = false;
         
@@ -30,9 +28,6 @@ export class UnifiedMapSystem {
             roads: null,
             buildings: null,
             locations: null,
-            water: null,
-            mountains: null,
-            settlements: null,
             ui: null // For labels, markers, etc.
         };
         
@@ -96,42 +91,16 @@ export class UnifiedMapSystem {
         
         // Create layer containers in z-order
         this.createLayers();
-        
-        // Render based on current view
-        if (this.currentView === 'world') {
-            await this.renderWorldMap();
-        } else {
-            await this.renderLocalMap();
-        }
+
+        // Render local map
+        await this.renderLocalMap();
         
         // Handle resize
         window.addEventListener('resize', () => this.handleResize());
         
-        // Initialize particle effects and tooltips (optional - lazy load)
+        // Initialize particle effects (optional - lazy load)
         if (this.game?.gameState?.particleEffectManager) {
             this.particleManager = this.game.gameState.particleEffectManager;
-        } else if (this.app) {
-            // Initialize particle manager when app is ready (non-blocking)
-            import('../effects/ParticleEffectManager.js').then(({ ParticleEffectManager }) => {
-                try {
-                    this.particleManager = new ParticleEffectManager(this.app);
-                    this.particleManager.initialize().then(() => {
-                        if (this.game?.gameState) {
-                            this.game.gameState.particleEffectManager = this.particleManager;
-                        }
-                        // Update particle effects in game loop
-                        if (this.particleManager && this.app) {
-                            this.app.ticker.add((delta) => {
-                                this.particleManager.update(delta);
-                            });
-                        }
-                    });
-                } catch (error) {
-                    console.warn('ParticleEffectManager initialization failed:', error);
-                }
-            }).catch(error => {
-                console.warn('ParticleEffectManager not available:', error);
-            });
         }
         
         if (this.game?.gameState?.tooltipManager) {
@@ -167,8 +136,8 @@ export class UnifiedMapSystem {
      */
     createLayers() {
         const layerOrder = [
-            'grass', 'zones', 'parks', 'water', 'mountains',
-            'roads', 'buildings', 'settlements', 'locations', 'ui'
+            'grass', 'zones', 'parks',
+            'roads', 'buildings', 'locations', 'ui'
         ];
         
         layerOrder.forEach(layerName => {
@@ -180,38 +149,9 @@ export class UnifiedMapSystem {
     }
 
     /**
-     * Render world map (mountains, water, settlements)
-     */
-    async renderWorldMap() {
-        this.currentView = 'world';
-        const gridSize = this.worldGridSize;
-        
-        // Clear existing content
-        Object.values(this.layers).forEach(layer => {
-            if (layer) layer.removeChildren();
-        });
-        
-        // Render terrain (grass)
-        this.renderWorldTerrain();
-        
-        // Render water
-        this.renderWorldWater();
-        
-        // Render mountains
-        this.renderWorldMountains();
-        
-        // Render settlements
-        this.renderWorldSettlements();
-        
-        // Add navigation controls
-        this.addWorldNavigation();
-    }
-
-    /**
      * Render local map (city/town view)
      */
     async renderLocalMap() {
-        this.currentView = 'local';
         const gridSize = this.gridSize;
         
         // Clear existing content
@@ -227,214 +167,6 @@ export class UnifiedMapSystem {
         this.renderLocalBuildings();
         this.renderLocalLocations();
         this.renderPlayerMarker();
-    }
-
-    /**
-     * Render world terrain (grass base)
-     */
-    renderWorldTerrain() {
-        const { width, height } = this.app.screen;
-        
-        // Create grass texture with pattern
-        const grass = new PIXI.Graphics();
-        
-        // Base color
-        grass.beginFill(0x7cb342);
-        grass.drawRect(0, 0, width, height);
-        
-        // Add texture pattern using repeating rectangles
-        grass.beginFill(0x6a9a3a);
-        for (let x = 0; x < width; x += 20) {
-            for (let y = 0; y < height; y += 20) {
-                if ((x + y) % 40 === 0) {
-                    grass.drawRect(x, y, 20, 20);
-                }
-            }
-        }
-        
-        // Add radial gradients effect (using overlays)
-        const overlay1 = new PIXI.Graphics();
-        overlay1.beginFill(0x8bc34a, 0.3);
-        overlay1.drawCircle(width * 0.2, height * 0.3, width * 0.3);
-        
-        const overlay2 = new PIXI.Graphics();
-        overlay2.beginFill(0x8bc34a, 0.3);
-        overlay2.drawCircle(width * 0.8, height * 0.7, width * 0.3);
-        
-        this.layers.grass.addChild(grass);
-        this.layers.grass.addChild(overlay1);
-        this.layers.grass.addChild(overlay2);
-    }
-
-    /**
-     * Render world water (rivers, lakes, coast)
-     */
-    renderWorldWater() {
-        const { width, height } = this.app.screen;
-        
-        // River (diagonal from top-left to bottom-right)
-        const river = new PIXI.Graphics();
-        river.beginFill(0x1565c0);
-        river.drawRoundedRect(
-            width * 0.15,
-            height * 0.1,
-            width * 0.03,
-            height * 0.8,
-            25
-        );
-        // Rotate river
-        river.rotation = 0.436; // ~25 degrees
-        river.pivot.set(width * 0.15, height * 0.1);
-        this.layers.water.addChild(river);
-        
-        // Lake (central area)
-        const lake = new PIXI.Graphics();
-        lake.beginFill(0x1565c0);
-        lake.drawEllipse(
-            width * 0.46, // 40% + 6% for center
-            height * 0.575, // 50% + 7.5% for center
-            width * 0.06, // 12% / 2
-            height * 0.075 // 15% / 2
-        );
-        lake.interactive = true;
-        lake.cursor = 'pointer';
-        lake.on('pointerdown', (e) => {
-            if (this.particleManager) {
-                const localPos = e.data.getLocalPosition(lake);
-                this.particleManager.createWaterRipple(
-                    lake.x + localPos.x,
-                    lake.y + localPos.y,
-                    this.layers.water
-                );
-            }
-        });
-        this.layers.water.addChild(lake);
-        
-        // Coastline (bottom area)
-        const coast = new PIXI.Graphics();
-        coast.beginFill(0x0d47a1);
-        coast.drawRect(0, height * 0.8, width, height * 0.2);
-        coast.interactive = true;
-        coast.cursor = 'pointer';
-        coast.on('pointerdown', (e) => {
-            if (this.particleManager) {
-                const localPos = e.data.getLocalPosition(coast);
-                this.particleManager.createWaterRipple(
-                    localPos.x,
-                    localPos.y,
-                    this.layers.water
-                );
-            }
-        });
-        this.layers.water.addChild(coast);
-        
-        // Add particle effects for water waves
-        if (this.particleManager) {
-            // Add water ripple effects along the coast
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => {
-                    this.particleManager.createWaterRipple(
-                        width * (0.1 + i * 0.2),
-                        height * 0.85,
-                        this.layers.water
-                    );
-                }, i * 500);
-            }
-        } else {
-            // Fallback: Simple overlay for wave effect
-            const waves = new PIXI.Graphics();
-            waves.lineStyle(2, 0xffffff, 0.15);
-            for (let i = 0; i < 10; i++) {
-                waves.moveTo(0, height * 0.8 + i * 4);
-                waves.lineTo(width, height * 0.8 + i * 4);
-            }
-            this.layers.water.addChild(waves);
-        }
-    }
-
-    /**
-     * Render world mountains
-     */
-    renderWorldMountains() {
-        const { width, height } = this.app.screen;
-        
-        // Mountain range 1 (left side)
-        const mountains1 = new PIXI.Graphics();
-        mountains1.beginFill(0x5d4037);
-        mountains1.moveTo(width * 0.1, height * 0.3);
-        mountains1.lineTo(width * 0.15, height * 0.1);
-        mountains1.lineTo(width * 0.2, height * 0.3);
-        mountains1.closePath();
-        this.layers.mountains.addChild(mountains1);
-        
-        // Mountain range 2 (right side)
-        const mountains2 = new PIXI.Graphics();
-        mountains2.beginFill(0x6d4c41);
-        mountains2.moveTo(width * 0.7, height * 0.4);
-        mountains2.lineTo(width * 0.75, height * 0.15);
-        mountains2.lineTo(width * 0.8, height * 0.4);
-        mountains2.closePath();
-        this.layers.mountains.addChild(mountains2);
-    }
-
-    /**
-     * Render world settlements (towns, cities)
-     */
-    renderWorldSettlements() {
-        const { width, height } = this.app.screen;
-        
-        const settlements = [
-            { id: 'starting_town', name: 'Starting Town', type: 'town', x: 0.2, y: 0.7, size: 40, color: 0x9ccc65 },
-            { id: 'main_city', name: 'Main City', type: 'city', x: 0.45, y: 0.45, size: 60, color: 0x7a8ba3 },
-            { id: 'mountain_town', name: 'Mountain Town', type: 'town', x: 0.15, y: 0.25, size: 35, color: 0xd4a574 }
-        ];
-        
-        settlements?.forEach(settlement => {
-            const marker = new PIXI.Graphics();
-            
-            if (settlement.type === 'city') {
-                // Rectangular for cities
-                marker.beginFill(settlement.color);
-                marker.lineStyle(3, 0x000000, 0.4);
-                marker.drawRoundedRect(
-                    width * settlement.x - settlement.size / 2,
-                    height * settlement.y - settlement.size / 2,
-                    settlement.size,
-                    settlement.size,
-                    8
-                );
-            } else {
-                // Circular for towns
-                marker.beginFill(settlement.color);
-                marker.lineStyle(3, 0x000000, 0.4);
-                marker.drawCircle(
-                    width * settlement.x,
-                    height * settlement.y,
-                    settlement.size / 2
-                );
-            }
-            
-            marker.interactive = true;
-            marker.cursor = 'pointer';
-            marker.on('pointerdown', () => {
-                this.zoomToLocalMap(settlement);
-            });
-            
-            // Add label
-            const label = new PIXI.Text(settlement.name, {
-                fontSize: 12,
-                fill: 0xffffff,
-                fontWeight: 'bold',
-                stroke: 0x000000,
-                strokeThickness: 2
-            });
-            label.anchor.set(0.5);
-            label.x = width * settlement.x;
-            label.y = height * settlement.y + settlement.size / 2 + 15;
-            
-            this.layers.settlements.addChild(marker);
-            this.layers.ui.addChild(label);
-        });
     }
 
     /**
@@ -864,50 +596,6 @@ export class UnifiedMapSystem {
     }
 
     /**
-     * Add world map navigation controls
-     */
-    addWorldNavigation() {
-        // Navigation button (can be enhanced with UI library later)
-        const button = new PIXI.Graphics();
-        button.beginFill(0x4a5568, 0.8);
-        button.lineStyle(2, 0xffffff);
-        button.drawRoundedRect(10, 10, 120, 40, 5);
-        
-        const buttonText = new PIXI.Text('View Local Map', {
-            fontSize: 14,
-            fill: 0xffffff,
-            fontWeight: 'bold'
-        });
-        buttonText.anchor.set(0.5);
-        buttonText.x = 70;
-        buttonText.y = 30;
-        
-        button.addChild(buttonText);
-        button.interactive = true;
-        button.cursor = 'pointer';
-        button.on('pointerdown', () => {
-            this.renderLocalMap();
-        });
-        
-        this.layers.ui.addChild(button);
-    }
-
-    /**
-     * Zoom to local map from world map
-     */
-    zoomToLocalMap(area) {
-        this.currentArea = area;
-        this.renderLocalMap();
-    }
-
-    /**
-     * Show world map
-     */
-    showWorldMap() {
-        this.renderWorldMap();
-    }
-
-    /**
      * Handle window resize
      */
     handleResize() {
@@ -932,14 +620,10 @@ export class UnifiedMapSystem {
         // Only resize if we have valid dimensions
         if (width > 0 && height > 0) {
             this.app.renderer.resize(width, height);
-            
+
             // Re-render if needed
             if (this.rendered) {
-                if (this.currentView === 'world') {
-                    this.renderWorldMap();
-                } else {
-                    this.renderLocalMap();
-                }
+                this.renderLocalMap();
             }
         }
     }
@@ -952,13 +636,11 @@ export class UnifiedMapSystem {
             this.initialize();
         } else {
             // Update dynamic elements (locations, player marker)
-            if (this.currentView === 'local') {
-                // Clear and re-render locations layer
-                this.layers.locations.removeChildren();
-                this.layers.ui.removeChildren();
-                this.renderLocalLocations();
-                this.renderPlayerMarker();
-            }
+            // Clear and re-render locations layer
+            this.layers.locations.removeChildren();
+            this.layers.ui.removeChildren();
+            this.renderLocalLocations();
+            this.renderPlayerMarker();
         }
     }
 
