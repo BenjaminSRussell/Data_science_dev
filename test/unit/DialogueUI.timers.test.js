@@ -1,12 +1,13 @@
 /**
- * DialogueUI (DOM path) timer hygiene:
+ * DialogueUI (DOM path) timer hygiene and choice focus:
  * - typeText cancels a typewriter run that is still in progress
  * - close() cancels handleChoice's delayed return-to-root
+ * - showChoices moves keyboard focus to the first new choice
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DialogueUI } from '../../src/js/ui/DialogueUI.js';
 
-describe('DialogueUI timers', () => {
+describe('DialogueUI timers and focus', () => {
     let ui;
 
     beforeEach(() => {
@@ -43,5 +44,16 @@ describe('DialogueUI timers', () => {
 
         expect(showNode).not.toHaveBeenCalled();
         expect(ui.choiceTimeoutId).toBeNull();
+    });
+
+    it('showChoices focuses the first newly rendered choice', () => {
+        ui.open({ id: 'nobody_here', name: 'Nobody' });
+        const choices = ui.container.querySelectorAll('.dialogue-choice');
+        choices[choices.length - 1].focus();
+
+        ui.showChoices([{ id: 'a', text: 'Alpha' }, { id: 'b', text: 'Beta' }]);
+
+        expect(document.activeElement.textContent).toBe('Alpha');
+        expect(document.activeElement.classList.contains('dialogue-choice')).toBe(true);
     });
 });

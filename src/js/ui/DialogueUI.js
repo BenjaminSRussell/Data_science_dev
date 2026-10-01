@@ -218,24 +218,14 @@ export class DialogueUI {
             if (titleEl) titleEl.textContent = npc.title || npc.type || '???';
         }
 
-        // Show root node
-        this.showNode(this.currentNode);
-
-        // Show container
+        // Show container first so showChoices() can move focus into it
         if (this.container) {
             this.container.classList.add('active');
         }
         this.isOpen = true;
 
-        // Focus first choice on initial open for keyboard navigation
-        if (this.container) {
-            setTimeout(() => {
-                const firstChoice = this.container.querySelector('.dialogue-choice');
-                if (firstChoice) {
-                    firstChoice.focus();
-                }
-            }, 0);
-        }
+        // Show root node (showChoices focuses the first choice)
+        this.showNode(this.currentNode);
     }
 
     /**
@@ -318,6 +308,10 @@ export class DialogueUI {
             btn.addEventListener('click', () => this.handleChoice(choice.id));
             choicesEl.appendChild(btn);
         });
+
+        // The previously focused button was just removed; move keyboard focus
+        // to the first new choice so keyboard users are not dropped to <body>
+        choicesEl.querySelector('.dialogue-choice')?.focus();
     }
 
     /**
