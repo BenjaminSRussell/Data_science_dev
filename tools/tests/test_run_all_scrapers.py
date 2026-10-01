@@ -1,8 +1,8 @@
 import sys
 import os
 import subprocess
+import logging
 from unittest.mock import Mock, patch, call
-import pytest
 
 # Add scripts/scrapers to path so we can import run_all_scrapers
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../scripts/scrapers')))
@@ -65,7 +65,7 @@ class TestRunScraper:
 class TestMainResultsMapping:
     """Test main() results aggregation (issue requirement 5)"""
 
-    def test_main_processes_all_scrapers_alternating_results(self):
+    def test_main_processes_all_scrapers_alternating_results(self, caplog):
         """Issue #5: main() processes all 7 scrapers and correctly maps outcomes
 
         This test verifies:
@@ -73,11 +73,13 @@ class TestMainResultsMapping:
         - Results dict correctly maps scraper name to boolean outcome
         - Summary counts successful vs total are correct (4/7 in this case)
         """
+        caplog.set_level(logging.INFO)
+
         mock_result = Mock()
         mock_result.stdout = "output"
         mock_result.stderr = ""
 
-        # Alternating success/failure: True, False, True, False, True, False, True
+        # Alternating success/failure: True, False, True, False, True, False, True (4 successes)
         return_codes = [0, 1, 0, 1, 0, 1, 0]
         call_count = [0]
 
@@ -90,14 +92,46 @@ class TestMainResultsMapping:
         # Verify main() runs without errors with alternating results
         with patch('run_all_scrapers.subprocess.run', side_effect=mock_run_side_effect):
             with patch('run_all_scrapers.time.sleep'):
-                # If this completes without error, main() correctly processed all scrapers
                 main()
 
         # Verify all 7 scrapers were processed
         assert call_count[0] == 7, f"Expected 7 scraper calls, got {call_count[0]}"
 
-    def test_main_all_success_scenario(self):
-        """Test main() when all scrapers succeed (7/7)"""
+        # Verify results dict correctly maps each scraper name to the right boolean outcome
+        # Expected: Character Sprites (TRUE), Location Backdrops (FALSE), Map Assets (TRUE),
+        #           Icons (FALSE), Vehicles (TRUE), UI Elements (FALSE), Particle Effects (TRUE)
+        log_output = caplog.text
+
+        # Check that each scraper's result is logged with the correct status
+        assert "Character Sprites: ✅ SUCCESS" in log_output, \
+            "Character Sprites should be SUCCESS (returncode=0)"
+        assert "Location Backdrops: ❌ FAILED" in log_output, \
+            "Location Backdrops should be FAILED (returncode=1)"
+        assert "Map Assets: ✅ SUCCESS" in log_output, \
+            "Map Assets should be SUCCESS (returncode=0)"
+        assert "Icons: ❌ FAILED" in log_output, \
+            "Icons should be FAILED (returncode=1)"
+        assert "Vehicles: ✅ SUCCESS" in log_output, \
+            "Vehicles should be SUCCESS (returncode=0)"
+        assert "UI Elements: ❌ FAILED" in log_output, \
+            "UI Elements should be FAILED (returncode=1)"
+        assert "Particle Effects: ✅ SUCCESS" in log_output, \
+            "Particle Effects should be SUCCESS (returncode=0)"
+
+        # Verify the final successful/total summary matches the mocked outcomes
+        assert "Total: 4/7 scrapers completed successfully" in log_output, \
+            "Summary should show 4/7 successful (4 successes, 3 failures)"
+
+    def test_main_all_success_scenario(self, caplog):
+        """Test main() when all scrapers succeed (7/7)
+
+        Verifies:
+        - All 7 scrapers are processed
+        - Results dict correctly maps all scraper names to True
+        - Summary shows 7/7 successful
+        """
+        caplog.set_level(logging.INFO)
+
         mock_result = Mock()
         mock_result.returncode = 0
         mock_result.stdout = "output"
@@ -116,8 +150,27 @@ class TestMainResultsMapping:
         # Verify all 7 scrapers were processed
         assert call_count[0] == 7, f"Expected 7 scraper calls, got {call_count[0]}"
 
-    def test_main_all_failure_scenario(self):
-        """Test main() when all scrapers fail (0/7)"""
+        log_output = caplog.text
+
+        # Verify all scrapers are logged as SUCCESS
+        for scraper in SCRAPERS:
+            assert f"{scraper['name']}: ✅ SUCCESS" in log_output, \
+                f"{scraper['name']} should be mapped to SUCCESS"
+
+        # Verify the final summary shows all successful
+        assert "Total: 7/7 scrapers completed successfully" in log_output, \
+            "Summary should show 7/7 successful"
+
+    def test_main_all_failure_scenario(self, caplog):
+        """Test main() when all scrapers fail (0/7)
+
+        Verifies:
+        - All 7 scrapers are processed
+        - Results dict correctly maps all scraper names to False
+        - Summary shows 0/7 successful
+        """
+        caplog.set_level(logging.INFO)
+
         mock_result = Mock()
         mock_result.returncode = 1
         mock_result.stdout = ""
@@ -135,6 +188,17 @@ class TestMainResultsMapping:
 
         # Verify all 7 scrapers were processed despite failures
         assert call_count[0] == 7, f"Expected 7 scraper calls, got {call_count[0]}"
+
+        log_output = caplog.text
+
+        # Verify all scrapers are logged as FAILED
+        for scraper in SCRAPERS:
+            assert f"{scraper['name']}: ❌ FAILED" in log_output, \
+                f"{scraper['name']} should be mapped to FAILED"
+
+        # Verify the final summary shows no successful
+        assert "Total: 0/7 scrapers completed successfully" in log_output, \
+            "Summary should show 0/7 successful"
 
 
 class TestMainSleepBehavior:
