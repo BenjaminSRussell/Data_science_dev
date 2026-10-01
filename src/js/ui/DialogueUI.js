@@ -19,6 +19,7 @@ export class DialogueUI {
         this.currentNode = null;
         this.onClose = null;
         this.typeTimeoutId = null;
+        this.choiceTimeoutId = null; // pending return-to-root after a dead-end choice
 
         this.createContainer();
     }
@@ -272,6 +273,9 @@ export class DialogueUI {
      * Type out text with animation
      */
     typeText(text, speed = 30) {
+        // Stop any animation still typing the previous node's text
+        this.cancelTyping();
+
         const textEl = this.container.querySelector('#dialogue-text');
         textEl.textContent = '';
         textEl.classList.add('typing');
@@ -317,6 +321,16 @@ export class DialogueUI {
     }
 
     /**
+     * Cancel a running typewriter animation
+     */
+    cancelTyping() {
+        if (this.typeTimeoutId !== null) {
+            clearTimeout(this.typeTimeoutId);
+            this.typeTimeoutId = null;
+        }
+    }
+
+    /**
      * Handle player choice
      */
     handleChoice(choiceId) {
@@ -352,9 +366,13 @@ export class DialogueUI {
         if (nextNode) {
             this.showNode(nextNode);
         } else {
-            // No next node - close or return to root
-            setTimeout(() => {
-                this.showNode(this.currentTree.getRootNode());
+            // No next node - return to root (cancelled if the dialogue closes)
+            clearTimeout(this.choiceTimeoutId);
+            this.choiceTimeoutId = setTimeout(() => {
+                this.choiceTimeoutId = null;
+                if (this.currentTree) {
+                    this.showNode(this.currentTree.getRootNode());
+                }
             }, 1000);
         }
     }
@@ -393,10 +411,11 @@ export class DialogueUI {
      * Phase 2: Uses Lit component if available
      */
     close() {
-        // Clear any pending type animation timeout
-        if (this.typeTimeoutId !== null) {
-            clearTimeout(this.typeTimeoutId);
-            this.typeTimeoutId = null;
+        // Clear any pending type animation and return-to-root timeouts
+        this.cancelTyping();
+        if (this.choiceTimeoutId !== null) {
+            clearTimeout(this.choiceTimeoutId);
+            this.choiceTimeoutId = null;
         }
 
         // Use Lit component if available

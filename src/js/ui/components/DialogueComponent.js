@@ -226,6 +226,12 @@ export class DialogueComponent extends BaseComponent {
      * Phase 3: Can be enhanced with GSAP if needed
      */
     typeText(text, speed = 30) {
+        // Stop any animation still typing the previous node's text
+        if (this.typeTimeoutId !== null) {
+            clearTimeout(this.typeTimeoutId);
+            this.typeTimeoutId = null;
+        }
+
         this.typingText = '';
         this.isTyping = true;
 
