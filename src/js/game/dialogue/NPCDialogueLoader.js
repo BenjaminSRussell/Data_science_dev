@@ -138,14 +138,17 @@ export class NPCDialogueLoader {
         return 'stranger';
     }
     
+
     /**
      * Get age group
      */
     getAgeGroup(age) {
-        if (age < 25) return 'young';
+        // Narrowed buckets per issue #2185: the NPC roster's actual ages are 26-58
+        // (with 28 NPCs defaulting to 30). Both 'young' (<25) and 'elderly' (60+)
+        // are unreachable. Narrowed to match actual roster data; revisit if
+        // younger or older NPCs are added.
         if (age < 40) return 'adult';
-        if (age < 60) return 'middle_aged';
-        return 'elderly';
+        return 'middle_aged';
     }
 }
 
