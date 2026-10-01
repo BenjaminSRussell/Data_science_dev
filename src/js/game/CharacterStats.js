@@ -185,7 +185,7 @@ export class CharacterStats {
         // -100: Pure Evil (Wolf of Wall Street)
         // 0: Neutral
         // +100: Saint
-        this.ethics = 50; // 0 (Evil) to 100 (Saint)
+        this.ethics = 0; // Zero-centered: negative is evil, positive is ethical
         this.level = 1;
         this.visualStage = 'level_1'; // level_1, level_2_good, level_2_evil, etc.
 
@@ -239,9 +239,9 @@ export class CharacterStats {
             if (currentTier === 'basic') {
                 newStage = 'level_1';
             } else if (currentTier === 'mid') {
-                newStage = this.ethics >= 50 ? 'level_2_good' : 'level_2_evil';
+                newStage = this.ethics > 0 ? 'level_2_good' : 'level_2_evil';
             } else if (currentTier === 'premium') {
-                newStage = this.ethics >= 50 ? 'level_3_good' : 'level_3_evil';
+                newStage = this.ethics > 0 ? 'level_3_good' : 'level_3_evil';
             }
         } else {
             // Fallback to old threshold logic if visualProgressionSystem not provided
@@ -249,12 +249,12 @@ export class CharacterStats {
 
             // Level 2 Threshold: $5,000
             if (netWorth >= 5000 && this.visualStage === 'level_1') {
-                newStage = this.ethics >= 50 ? 'level_2_good' : 'level_2_evil';
+                newStage = this.ethics > 0 ? 'level_2_good' : 'level_2_evil';
             }
 
             // Level 3 Threshold: $50,000
             else if (netWorth >= 50000 && this.visualStage.startsWith('level_2')) {
-                newStage = this.ethics >= 50 ? 'level_3_good' : 'level_3_evil';
+                newStage = this.ethics > 0 ? 'level_3_good' : 'level_3_evil';
             }
         }
 

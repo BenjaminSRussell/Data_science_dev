@@ -140,7 +140,7 @@ describe('VisualProgressionSystem and CharacterStats Synchronization', () => {
 
         it('should handle ethics alignment when evolving to level_2 with evil ethics', () => {
             mockGameState.money = 10000;
-            characterStats.ethics = 30; // Evil ethics
+            characterStats.ethics = -30; // Evil ethics (zero-centered scale, #2639)
 
             visualProgressionSystem.checkMilestones();
             const evolution = characterStats.checkEvolution(10000, visualProgressionSystem);
