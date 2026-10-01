@@ -35,14 +35,27 @@ describe('AssetValidator', () => {
     });
 
     describe('validateSprites', () => {
+        // #2542 removed the hard-coded character_sheet/emotion_sheet paths and
+        // filters blocklisted manifest sheets out of getSpritePaths(), so
+        // known-missing sprite sheets never reach the network at all.
         it('should not make network requests for known-missing sprite assets', async () => {
+            mockGame.assetManager = {
+                getAssetManifest: () => ({
+                    characters: {
+                        spriteSheets: {
+                            legacy: { url: '/assets/characters/sprites/character_sheet.png' },
+                            emotions: { url: '/assets/characters/sprites/emotion_sheet.png' }
+                        }
+                    }
+                })
+            };
+            const validateImage = vi.spyOn(assetValidator, 'validateImage');
+
             const results = await assetValidator.validateSprites();
 
-            // Should have at least 2 known-missing assets (the common sprites)
-            expect(results.knownMissing).toBeGreaterThanOrEqual(2);
-
-            // Should not have attempted network requests for known-missing assets
-            expect(results.errors.length).toBeLessThan(results.total);
+            expect(validateImage).not.toHaveBeenCalled();
+            expect(results.total).toBe(0);
+            expect(results.errors).toEqual([]);
         });
 
         it('should track known-missing assets separately from unexpected failures', async () => {
@@ -51,9 +64,7 @@ describe('AssetValidator', () => {
             expect(results).toHaveProperty('knownMissing');
             expect(results).toHaveProperty('failed');
             expect(results).toHaveProperty('loaded');
-
-            // known-missing should be >= 2 (character_sheet.png and emotion_sheet.png)
-            expect(results.knownMissing).toBeGreaterThanOrEqual(2);
+            expect(results.failed).toBe(0);
         });
     });
 
@@ -97,8 +108,8 @@ describe('AssetValidator', () => {
             expect(results).toHaveProperty('failed');
             expect(results).toHaveProperty('knownMissing');
 
-            // The two known sprite sheets should be in knownMissing
-            expect(results.knownMissing).toBeGreaterThanOrEqual(2);
+            // Known-missing assets never count as failures
+            expect(results.failed).toBe(0);
         });
     });
 });

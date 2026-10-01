@@ -139,55 +139,17 @@ export class VisualProgressionSystem {
             applied: true,
             timestamp: Date.now()
         });
-        
-        // Update sprite sheets
-        this.upgradeSpriteSheets(tier);
-        
+
         // Update backgrounds
         this.upgradeBackgrounds(tier);
-        
+
         // Update world appearance
         this.upgradeWorldAppearance(tier);
-        
+
         // Update UI elements
         this.upgradeUI(tier);
     }
-    
-    /**
-     * Upgrade sprite sheets based on tier
-     */
-    upgradeSpriteSheets(tier) {
-        const spriteSheetManager = this.gameState?.spriteSheetManager;
-        if (!spriteSheetManager) return;
-        
-        // Register better sprite sheets for higher tiers
-        const spriteSheets = {
-            basic: {
-                url: '/assets/characters/sprites/basic_character_sheet.png',
-                quality: 'low'
-            },
-            mid: {
-                url: '/assets/characters/sprites/mid_character_sheet.png',
-                quality: 'medium'
-            },
-            premium: {
-                url: '/assets/characters/sprites/premium_character_sheet.png',
-                quality: 'high'
-            }
-        };
-        
-        const sheet = spriteSheets[tier];
-        if (sheet) {
-            spriteSheetManager.registerSpriteSheet(`character_${tier}`, {
-                url: sheet.url,
-                frameWidth: tier === 'premium' ? 128 : 64,
-                frameHeight: tier === 'premium' ? 128 : 64,
-                columns: 8,
-                rows: 8
-            });
-        }
-    }
-    
+
     /**
      * Upgrade backgrounds based on tier
      */

@@ -137,7 +137,9 @@ export class AssetValidator {
             const manifest = assetManager.getAssetManifest();
             if (manifest.characters?.spriteSheets) {
                 Object.values(manifest.characters.spriteSheets).forEach(sheet => {
-                    if (sheet.url) paths.push(sheet.url);
+                    if (sheet.url && !isAssetMissing(sheet.url)) {
+                        paths.push(sheet.url);
+                    }
                 });
             }
 
@@ -151,15 +153,8 @@ export class AssetValidator {
             });
         }
 
-        // Also check common sprite paths
-        const commonSprites = [
-            '/assets/characters/sprites/character_sheet.png',
-            '/assets/characters/sprites/emotion_sheet.png'
-        ];
-
-        commonSprites.forEach(path => {
-            if (!paths.includes(path)) paths.push(path);
-        });
+        // The old hard-coded character_sheet.png / emotion_sheet.png paths were
+        // removed (#2542): those sheets never existed (see MissingAssetBlocklist).
 
         return paths;
     }

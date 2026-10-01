@@ -13,7 +13,7 @@ describe('AssetValidator', () => {
                 characters: {
                     spriteSheets: {
                         main: {
-                            url: '/assets/characters/sprites/character_sheet.png',
+                            url: '/assets/characters/sprites/player_sheet.png',
                             frameWidth: 64,
                             frameHeight: 64
                         },
@@ -43,8 +43,12 @@ describe('AssetValidator', () => {
     describe('getSpritePaths', () => {
         it('should include spriteSheet paths from manifest', () => {
             const paths = validator.getSpritePaths();
-            expect(paths).toContain('/assets/characters/sprites/character_sheet.png');
-            expect(paths).toContain('/assets/characters/sprites/emotion_sheet.png');
+            expect(paths).toContain('/assets/characters/sprites/player_sheet.png');
+        });
+
+        it('should drop manifest sprite sheets listed in MissingAssetBlocklist (#2542)', () => {
+            const paths = validator.getSpritePaths();
+            expect(paths).not.toContain('/assets/characters/sprites/emotion_sheet.png');
         });
 
         it('should include base, walk, and idle sprite paths from manifest', () => {
@@ -60,7 +64,7 @@ describe('AssetValidator', () => {
                 characters: {
                     spriteSheets: {
                         main: {
-                            url: '/assets/characters/sprites/character_sheet.png'
+                            url: '/assets/characters/sprites/player_sheet.png'
                         }
                     }
                     // No base, walk, idle
@@ -68,14 +72,13 @@ describe('AssetValidator', () => {
             }));
 
             const paths = validator.getSpritePaths();
-            expect(paths).toContain('/assets/characters/sprites/character_sheet.png');
-            expect(paths.length).toBeGreaterThan(0);
+            expect(paths).toEqual(['/assets/characters/sprites/player_sheet.png']);
         });
 
-        it('should include common sprite paths', () => {
+        it('should not add the removed hard-coded sprite sheets (#2542)', () => {
             const paths = validator.getSpritePaths();
-            expect(paths).toContain('/assets/characters/sprites/character_sheet.png');
-            expect(paths).toContain('/assets/characters/sprites/emotion_sheet.png');
+            expect(paths).not.toContain('/assets/characters/sprites/character_sheet.png');
+            expect(paths).not.toContain('/assets/characters/sprites/emotion_sheet.png');
         });
 
         it('should not duplicate paths', () => {
@@ -90,7 +93,7 @@ describe('AssetValidator', () => {
                 characters: {
                     spriteSheets: {
                         main: {
-                            url: '/assets/characters/sprites/character_sheet.png'
+                            url: '/assets/characters/sprites/player_sheet.png'
                         }
                     },
                     base: { url: '/some/path' }, // Object instead of string
@@ -101,7 +104,7 @@ describe('AssetValidator', () => {
 
             const paths = validator.getSpritePaths();
             // Should only include the spriteSheet paths, not the non-string base/walk/idle
-            expect(paths).toContain('/assets/characters/sprites/character_sheet.png');
+            expect(paths).toEqual(['/assets/characters/sprites/player_sheet.png']);
             // Should not include the object/null/undefined values
             expect(paths).not.toContain(undefined);
             expect(paths).not.toContain(null);
@@ -110,9 +113,8 @@ describe('AssetValidator', () => {
         it('should work when game or assetManager is null', () => {
             const nullValidator = new AssetValidator(null);
             const paths = nullValidator.getSpritePaths();
-            // Should still return common sprite paths
-            expect(paths).toContain('/assets/characters/sprites/character_sheet.png');
-            expect(paths).toContain('/assets/characters/sprites/emotion_sheet.png');
+            // No manifest and no hard-coded fallbacks (#2542): nothing to validate
+            expect(paths).toEqual([]);
         });
     });
 });
