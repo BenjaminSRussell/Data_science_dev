@@ -181,22 +181,13 @@ describe('TimeManager', () => {
             expect(timeManager.energy).toBe(100);
         });
 
-        it('should return correct slotsSkipped from timeSlot 0', () => {
-            timeManager.timeSlot = 0;
+        // sleep() advances time itself and no longer returns slotsSkipped
+        // (#2396): callers advancing by it again was the double-advance bug.
+        it.each([0, 3, 5])('should advance exactly one day from timeSlot %i', (slot) => {
+            timeManager.timeSlot = slot;
             const result = timeManager.sleep();
-            expect(result.slotsSkipped).toBe(6); // 6 - 0 = 6
-        });
-
-        it('should return correct slotsSkipped from timeSlot 3', () => {
-            timeManager.timeSlot = 3;
-            const result = timeManager.sleep();
-            expect(result.slotsSkipped).toBe(3); // 6 - 3 = 3
-        });
-
-        it('should return correct slotsSkipped from timeSlot 5', () => {
-            timeManager.timeSlot = 5;
-            const result = timeManager.sleep();
-            expect(result.slotsSkipped).toBe(1); // 6 - 5 = 1
+            expect(timeManager.totalDays).toBe(2);
+            expect(result.slotsSkipped).toBeUndefined();
         });
 
         it('should emit events for the new day', () => {
@@ -214,8 +205,8 @@ describe('TimeManager', () => {
             for (let slot = 0; slot < 6; slot++) {
                 const tm = new TimeManager();
                 tm.timeSlot = slot;
-                const result = tm.sleep();
-                expect(result.slotsSkipped).toBe(6 - slot);
+                tm.sleep();
+                expect(tm.totalDays).toBe(2);
                 expect(tm.timeSlot).toBe(0);
                 expect(tm.energy).toBe(tm.maxEnergy);
             }
