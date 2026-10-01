@@ -949,8 +949,7 @@ export class MainGame {
                 return;
             }
             const result = this.timeManager.sleep();
-            this.processTimeEvents(result.events); // Process daily/weekly events from sleep
-            this.updateMapScreen();
+            this.processTimeEvents(result.events); // Process daily/weekly events; also refreshes the map
             this.showToast('You slept well and feel refreshed!', 'success');
         });
 
@@ -1920,8 +1919,9 @@ export class MainGame {
         ProjectHelpers.updateStatsScreen(this);
     }
 
-    // NOTE: handleTimeAdvance is defined later in the file (line ~1595)
-    // This duplicate definition has been removed to prevent method override bugs
+    // NOTE: handleTimeAdvance(slots) is defined once, further down next to
+    // processTimeEvents(); an earlier duplicate definition was removed to
+    // prevent method override bugs
 
     /**
      * Open the chart studio
