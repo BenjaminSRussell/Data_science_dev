@@ -345,7 +345,7 @@ export class WorldMap {
         this.currentLocation = 'home';
         this.currentVehicle = 'walking';
         this.ownedVehicles = new Set(['walking']); // Use Set for O(1) lookups
-        this.visitedLocations = new Set(['home']); // Use Set for O(1) lookups
+        // Map-specific locations added by switchMap() (#2014)
         this.locationOverrides = {};
 
         // Cache for accessible locations (invalidated on state change)
@@ -528,7 +528,6 @@ export class WorldMap {
         const actualSlots = Math.max(0, Math.ceil(baseTravelTime / vehicle.travelSpeed));
 
         this.currentLocation = locationId;
-        this.visitedLocations.add(locationId); // Set.add is O(1)
 
         // Invalidate cache
         this._invalidateCache();
@@ -625,14 +624,6 @@ export class WorldMap {
     }
 
     /**
-     * Get activities available at current location - O(1)
-     */
-    getCurrentActivities() {
-        const location = this.getCurrentLocation();
-        return location?.activities || [];
-    }
-
-    /**
      * Serialize for saving
      */
     toJSON() {
@@ -640,7 +631,6 @@ export class WorldMap {
             currentLocation: this.currentLocation,
             currentVehicle: this.currentVehicle,
             ownedVehicles: Array.from(this.ownedVehicles), // Convert Set to Array
-            visitedLocations: Array.from(this.visitedLocations), // Convert Set to Array
             locationOverrides: this.locationOverrides
         };
     }
@@ -653,7 +643,6 @@ export class WorldMap {
         this.currentLocation = data.currentLocation || 'home';
         this.currentVehicle = data.currentVehicle || 'walking';
         this.ownedVehicles = new Set(data.ownedVehicles || ['walking']);
-        this.visitedLocations = new Set(data.visitedLocations || ['home']);
         this.locationOverrides = data.locationOverrides || {};
         this._invalidateCache();
     }
