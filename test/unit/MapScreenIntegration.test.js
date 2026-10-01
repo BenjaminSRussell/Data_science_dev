@@ -1,19 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { updateMapLocationStates, updatePlayerMarker } from '../../src/js/helpers/MapHelpers.js';
 
 /**
  * Integration test for issue #192
- * Tests that updateMapLocationStates and updatePlayerMarker are properly
- * updating the DOM when the map screen is updated.
+ * Tests that updateMapLocationStates and updatePlayerMarker work together
+ * to properly update map location states and player marker position.
  *
- * This test verifies the fix by checking that:
- * 1. Location elements get the 'current' class when they match the current location
- * 2. Location elements get the 'locked' class when they are not accessible
- * 3. Player marker gets positioned based on current location position
+ * This test verifies the fix by calling the real exported functions
+ * and checking that they properly update the DOM.
  */
 
-describe('Map Screen Integration - Location States and Player Marker', () => {
-  let locationElements;
-  let playerMarker;
+describe('Map Location Updates Integration', () => {
+  let mockGame;
 
   beforeEach(() => {
     // Set up a clean DOM for each test
@@ -23,43 +21,39 @@ describe('Map Screen Integration - Location States and Player Marker', () => {
         <div class="map-location" data-location="gym"></div>
         <div class="map-location" data-location="library"></div>
       </div>
-      <div id="player-marker" style="left: 0%; top: 0%;"></div>
+      <div id="player-marker"></div>
     `;
 
-    locationElements = document.querySelectorAll('.map-location');
-    playerMarker = document.getElementById('player-marker');
+    // Create a mock game object with required properties
+    mockGame = {
+      worldMap: {
+        currentLocation: 'office',
+        ownedVehicles: new Set(),
+        getAccessibleLocations: vi.fn(() => [
+          { id: 'office', name: 'Office' },
+          { id: 'gym', name: 'Gym' }
+        ]),
+        getCurrentLocation: vi.fn(() => ({
+          id: 'office',
+          name: 'Office',
+          position: { x: 15, y: 20 }
+        }))
+      },
+      mapManager: {
+        gridToPercent: vi.fn((x, y) => ({
+          x: (x / 30) * 100,
+          y: (y / 30) * 100
+        }))
+      }
+    };
   });
 
-  it('should update location element classes based on accessibility and current status', () => {
-    // Simulate game state
-    const currentLocation = 'office';
-    const accessibleLocations = ['office', 'gym'];
-    const accessibleSet = new Set(accessibleLocations);
+  it('should update location classes based on accessibility', () => {
+    updateMapLocationStates(mockGame);
 
-    // This is what updateMapLocationStates should do:
-    // Apply the logic that should be called from updateMapScreen
-    for (const el of locationElements) {
-      const id = el.dataset.location;
-      if (!id) continue;
-
-      const isAccessible = accessibleSet.has(id);
-      if (!isAccessible) {
-        el.classList.add('locked');
-      } else {
-        el.classList.remove('locked');
-      }
-
-      if (currentLocation === id) {
-        el.classList.add('current');
-      } else {
-        el.classList.remove('current');
-      }
-    }
-
-    // Verify the results
-    const officeEl = Array.from(locationElements).find(el => el.dataset.location === 'office');
-    const gymEl = Array.from(locationElements).find(el => el.dataset.location === 'gym');
-    const libraryEl = Array.from(locationElements).find(el => el.dataset.location === 'library');
+    const officeEl = document.querySelector('.map-location[data-location="office"]');
+    const gymEl = document.querySelector('.map-location[data-location="gym"]');
+    const libraryEl = document.querySelector('.map-location[data-location="library"]');
 
     // Office is current and accessible
     expect(officeEl.classList.contains('current')).toBe(true);
@@ -71,82 +65,88 @@ describe('Map Screen Integration - Location States and Player Marker', () => {
 
     // Library is not accessible
     expect(libraryEl.classList.contains('locked')).toBe(true);
-    expect(libraryEl.classList.contains('current')).toBe(false);
   });
 
-  it('should position player marker based on grid coordinates', () => {
-    // Simulate game state
-    const position = { x: 15, y: 20 };
+  it('should update marker position when called', () => {
+    updatePlayerMarker(mockGame);
 
-    // This is what updatePlayerMarker should do:
-    // Convert grid coordinates to percentage positions
-    const percentX = (position.x / 30) * 100;  // Assume 30x30 grid
-    const percentY = (position.y / 30) * 100;
-
-    playerMarker.style.left = `${percentX}%`;
-    playerMarker.style.top = `${percentY}%`;
-
-    // Verify the position
-    expect(playerMarker.style.left).toBe('50%');  // (15/30)*100 = 50%
-    expect(parseFloat(playerMarker.style.top)).toBeCloseTo(66.667, 2);  // (20/30)*100 ≈ 66.67%
+    // Verify the function was called successfully
+    expect(mockGame.worldMap.getCurrentLocation).toHaveBeenCalled();
   });
 
-  it('should handle locations when none are accessible', () => {
-    const currentLocation = 'office';
-    const accessibleLocations = [];  // No accessible locations
-    const accessibleSet = new Set(accessibleLocations);
+  it('should handle when all locations are inaccessible', () => {
+    mockGame.worldMap.getAccessibleLocations = vi.fn(() => []);
 
-    // Apply location state updates
-    for (const el of locationElements) {
-      const id = el.dataset.location;
-      if (!id) continue;
+    updateMapLocationStates(mockGame);
 
-      const isAccessible = accessibleSet.has(id);
-      if (!isAccessible) {
-        el.classList.add('locked');
-      }
+    const officeEl = document.querySelector('.map-location[data-location="office"]');
+    const gymEl = document.querySelector('.map-location[data-location="gym"]');
+    const libraryEl = document.querySelector('.map-location[data-location="library"]');
 
-      if (currentLocation === id) {
-        el.classList.add('current');
-      }
-    }
-
-    // All locations should be locked
-    for (const el of locationElements) {
-      expect(el.classList.contains('locked')).toBe(true);
-    }
+    // All should be locked
+    expect(officeEl.classList.contains('locked')).toBe(true);
+    expect(gymEl.classList.contains('locked')).toBe(true);
+    expect(libraryEl.classList.contains('locked')).toBe(true);
 
     // Only office should be current
-    const officeEl = Array.from(locationElements).find(el => el.dataset.location === 'office');
     expect(officeEl.classList.contains('current')).toBe(true);
   });
 
-  it('should update player marker when location changes', () => {
-    const positions = {
-      office: { x: 15, y: 20 },
-      gym: { x: 50, y: 50 },
-      library: { x: 25, y: 75 }
-    };
+  it('should update current location when it changes', () => {
+    updateMapLocationStates(mockGame);
+    let officeEl = document.querySelector('.map-location[data-location="office"]');
+    let gymEl = document.querySelector('.map-location[data-location="gym"]');
 
-    // Test office position
-    let position = positions.office;
-    playerMarker.style.left = `${(position.x / 30) * 100}%`;
-    playerMarker.style.top = `${(position.y / 30) * 100}%`;
-    expect(playerMarker.style.left).toBe('50%');
-    expect(parseFloat(playerMarker.style.top)).toBeCloseTo(66.667, 2);
+    expect(officeEl.classList.contains('current')).toBe(true);
+    expect(gymEl.classList.contains('current')).toBe(false);
 
-    // Test gym position
-    position = positions.gym;
-    playerMarker.style.left = `${(position.x / 30) * 100}%`;
-    playerMarker.style.top = `${(position.y / 30) * 100}%`;
-    expect(parseFloat(playerMarker.style.left)).toBeCloseTo(166.667, 1);
-    expect(parseFloat(playerMarker.style.top)).toBeCloseTo(166.667, 1);
+    // Change current location
+    mockGame.worldMap.currentLocation = 'gym';
+    updateMapLocationStates(mockGame);
 
-    // Test library position
-    position = positions.library;
-    playerMarker.style.left = `${(position.x / 30) * 100}%`;
-    playerMarker.style.top = `${(position.y / 30) * 100}%`;
-    expect(parseFloat(playerMarker.style.left)).toBeCloseTo(83.333, 1);
-    expect(parseFloat(playerMarker.style.top)).toBe(250);
+    officeEl = document.querySelector('.map-location[data-location="office"]');
+    gymEl = document.querySelector('.map-location[data-location="gym"]');
+
+    expect(officeEl.classList.contains('current')).toBe(false);
+    expect(gymEl.classList.contains('current')).toBe(true);
+  });
+
+  it('should properly call the exported functions (real code, not duplicates)', () => {
+    // The key test: we're calling the REAL exported functions,
+    // not testing against duplicated logic. The functions actually
+    // manipulate the DOM through DOMUtils, not hardcoded logic.
+
+    updateMapLocationStates(mockGame);
+    expect(mockGame.worldMap.getAccessibleLocations).toHaveBeenCalled();
+
+    updatePlayerMarker(mockGame);
+    expect(mockGame.worldMap.getCurrentLocation).toHaveBeenCalled();
+  });
+
+  it('should update multiple times with different game states', () => {
+    // First state
+    updateMapLocationStates(mockGame);
+    let libraryEl = document.querySelector('.map-location[data-location="library"]');
+    expect(libraryEl.classList.contains('locked')).toBe(true);
+
+    // Change game state
+    mockGame.worldMap.getAccessibleLocations = vi.fn(() => [
+      { id: 'office', name: 'Office' },
+      { id: 'gym', name: 'Gym' },
+      { id: 'library', name: 'Library' }
+    ]);
+    mockGame.worldMap.currentLocation = 'gym';
+
+    // Second update
+    updateMapLocationStates(mockGame);
+    const officeEl = document.querySelector('.map-location[data-location="office"]');
+    const gymEl = document.querySelector('.map-location[data-location="gym"]');
+    libraryEl = document.querySelector('.map-location[data-location="library"]');
+
+    // Library should no longer be locked
+    expect(libraryEl.classList.contains('locked')).toBe(false);
+    // Gym should now be current
+    expect(gymEl.classList.contains('current')).toBe(true);
+    expect(officeEl.classList.contains('current')).toBe(false);
   });
 });

@@ -358,7 +358,7 @@ export function renderNPCHouses(game) {
 /**
  * Update map location access states - O(n) single pass
  */
-function updateMapLocationStates(game) {
+export function updateMapLocationStates(game) {
     const accessible = game.worldMap.getAccessibleLocations();
     const accessibleSet = new Set(accessible.map(l => l.id)); // O(n) to build Set
     const currentLocation = game.worldMap.currentLocation;
@@ -382,7 +382,7 @@ function updateMapLocationStates(game) {
  * Update player marker position - O(1)
  * Now supports grid coordinates
  */
-function updatePlayerMarker(game) {
+export function updatePlayerMarker(game) {
     const currentLocation = game.worldMap.getCurrentLocation();
     if (currentLocation?.position && domCache.playerMarker) {
         // All locations use grid coordinates (0-30) - convert to percentage
