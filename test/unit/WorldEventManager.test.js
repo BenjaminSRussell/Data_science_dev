@@ -63,7 +63,7 @@ describe('WorldEventManager', () => {
 
             // Try to trigger same event again - should not add duplicate
             worldEventManager.triggerEvent(event);
-            expect(worldEventManager.activeModifiers.length).toBe(1, 'Event should not be triggered twice while already active');
+            expect(worldEventManager.activeModifiers.length).toBe(1);
         });
 
         it('should allow different events to be active simultaneously', () => {
@@ -97,15 +97,22 @@ describe('WorldEventManager', () => {
         it('should remove expired modifiers', () => {
             const event = worldEventManager.eventPool.market_crash;
 
-            // Trigger event
+            // Trigger event at day 0
             worldEventManager.triggerEvent(event);
             expect(worldEventManager.activeModifiers.length).toBe(1);
 
-            // Advance time beyond expiry
-            mockGameState.timeManager.totalDays = 100;
+            // Advance time beyond expiry (event expires at day 0 + 7 = 7, so advance to day 7 or beyond)
+            mockGameState.timeManager.totalDays = 8;
+            
+            // Mock Math.random to prevent new events from triggering
+            const originalRandom = Math.random;
+            Math.random = vi.fn(() => 1.0); // Very high value to prevent any event rolls
+            
             worldEventManager.processDay();
 
-            expect(worldEventManager.activeModifiers.length).toBe(0, 'Expired modifiers should be removed');
+            expect(worldEventManager.activeModifiers.length).toBe(0);
+            
+            Math.random = originalRandom;
         });
 
         it('should trigger new events based on chance', () => {
@@ -115,8 +122,8 @@ describe('WorldEventManager', () => {
 
             worldEventManager.processDay();
 
-            // Should have triggered at least one event (if chance > 0.0001)
-            expect(worldEventManager.activeModifiers.length).toBeGreaterThanOrEqual(0);
+            // Should have triggered at least one event since 0.0001 < 0.001 (market_crash chance)
+            expect(worldEventManager.activeModifiers.length).toBeGreaterThan(0);
 
             Math.random = originalRandom;
         });
@@ -128,14 +135,19 @@ describe('WorldEventManager', () => {
             worldEventManager.triggerEvent(event);
             expect(worldEventManager.activeModifiers.length).toBe(1);
 
+            // Mock Math.random to prevent new events from triggering
+            const originalRandom = Math.random;
+            Math.random = vi.fn(() => 1.0); // Prevent event rolls
+            
             // Simulate daily processing - event should still be active
-            const initialModifierCount = worldEventManager.activeModifiers.length;
             worldEventManager.processDay();
 
             // Same event should not be triggered again while active
             const activeIds = worldEventManager.activeModifiers.map(m => m.id);
             const crashCount = activeIds.filter(id => id === 'market_crash').length;
-            expect(crashCount).toBe(1, 'Market crash should only be active once');
+            expect(crashCount).toBe(1);
+            
+            Math.random = originalRandom;
         });
     });
 

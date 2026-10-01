@@ -7,7 +7,7 @@ export class EventSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.upcomingEvents = [];
-        this.activeEvents = [];
+        this.activeEvents = []; // { event, expiry }
         this.eventHistory = [];
         this.initializeEvents();
     }
@@ -111,6 +111,16 @@ export class EventSystem {
     }
     
     /**
+     * Remove expired active events
+     */
+    clearExpiredEvents() {
+        const currentDay = this.gameState?.timeManager?.totalDays || 0;
+        this.activeEvents = this.activeEvents.filter(active => {
+            return active.expiry > currentDay;
+        });
+    }
+    
+    /**
      * Check for events today
      */
     checkTodayEvents() {
@@ -140,11 +150,19 @@ export class EventSystem {
         if (!event) return null;
 
         // Guard: don't trigger if this event is already active
-        if (this.activeEvents.some(e => e.id === eventId)) {
+        if (this.activeEvents.some(active => active.event.id === eventId)) {
             return null;
         }
 
-        this.activeEvents.push(event);
+        // Calculate expiry: recurring events (no year field) expire after 1 day to allow re-triggering
+        // Non-recurring events expire after 1 day as well to prevent duplicates on same day
+        const currentDay = this.gameState?.timeManager?.totalDays || 0;
+        const duration = event.duration || 1; // Default 1 day
+        
+        this.activeEvents.push({
+            event: event,
+            expiry: currentDay + duration
+        });
         
         // Handle event based on type
         switch (event.type) {

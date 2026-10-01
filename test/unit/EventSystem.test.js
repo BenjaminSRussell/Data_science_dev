@@ -39,10 +39,10 @@ describe('EventSystem', () => {
             eventSystem.triggerEvent(event.id);
 
             expect(eventSystem.activeEvents.length).toBe(1);
-            expect(eventSystem.activeEvents[0].id).toBe(event.id);
+            expect(eventSystem.activeEvents[0].event.id).toBe(event.id);
         });
 
-        it('should not trigger the same event twice (already active guard)', () => {
+        it('should not trigger the same event twice on same day', () => {
             const event = eventSystem.upcomingEvents[0];
             const eventId = event.id;
 
@@ -52,7 +52,7 @@ describe('EventSystem', () => {
 
             // Try to trigger same event again - should not add duplicate
             eventSystem.triggerEvent(eventId);
-            expect(eventSystem.activeEvents.length).toBe(1, 'Event should not be added twice when already active');
+            expect(eventSystem.activeEvents.length).toBe(1);
         });
 
         it('should allow different events to be active simultaneously', () => {
@@ -96,6 +96,42 @@ describe('EventSystem', () => {
             const result = eventSystem.triggerEvent('test_bull');
             expect(result.type).toBe('bull');
             expect(mockGameState.stockMarket.boost).toHaveBeenCalledWith(20);
+        });
+    });
+
+    describe('clearExpiredEvents', () => {
+        it('should remove expired active events', () => {
+            const event = eventSystem.upcomingEvents[0];
+            
+            // Trigger event
+            eventSystem.triggerEvent(event.id);
+            expect(eventSystem.activeEvents.length).toBe(1);
+
+            // Advance time beyond expiry
+            mockGameState.timeManager.totalDays = 10;
+            eventSystem.clearExpiredEvents();
+
+            expect(eventSystem.activeEvents.length).toBe(0);
+        });
+
+        it('should allow recurring events to trigger again after expiry', () => {
+            // Find a recurring office party event
+            const officeParty = eventSystem.upcomingEvents.find(e => e.id === 'office_party_0');
+            expect(officeParty).toBeDefined();
+
+            // First trigger on day 1
+            eventSystem.triggerEvent('office_party_0');
+            expect(eventSystem.activeEvents.length).toBe(1);
+
+            // Advance one day - event should expire
+            mockGameState.timeManager.totalDays = 2;
+            eventSystem.clearExpiredEvents();
+            expect(eventSystem.activeEvents.length).toBe(0);
+
+            // Try to trigger same event again - should succeed because it expired
+            const result = eventSystem.triggerEvent('office_party_0');
+            expect(result).not.toBeNull();
+            expect(eventSystem.activeEvents.length).toBe(1);
         });
     });
 
