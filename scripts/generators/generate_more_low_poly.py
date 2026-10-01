@@ -179,9 +179,9 @@ class LowPolyGenerator:
         """Generate Low-poly particle effect"""
         img = Image.new('RGBA', size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
-        
+
         center_x, center_y = size[0] // 2, size[1] // 2
-        
+
         # Create Low-poly particle shape
         points = []
         num_points = 5 + random.randint(0, 3)
@@ -191,10 +191,10 @@ class LowPolyGenerator:
             x = center_x + radius * math.cos(angle)
             y = center_y + radius * math.sin(angle)
             points.append((x, y))
-        
+
         color = random.choice(self.palette)
         draw.polygon(points, fill=color, outline=None)
-        
+
         # Glow effect
         overlay = Image.new('RGBA', size, (0, 0, 0, 0))
         overlay_draw = ImageDraw.Draw(overlay)
@@ -202,9 +202,174 @@ class LowPolyGenerator:
             [center_x - 8, center_y - 8, center_x + 8, center_y + 8],
             fill=(*color[:3], 100), outline=None
         )
-        
+
         img = Image.alpha_composite(img, overlay)
-        
+
+        img.save(output_path, 'PNG', optimize=True)
+        return True
+
+    def generate_low_poly_vehicle(self, output_path, vehicle_type, size=(128, 128)):
+        """Generate Low-poly vehicle sprite"""
+        img = Image.new('RGBA', size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+
+        center_x, center_y = size[0] // 2, size[1] // 2
+
+        # Create Low-poly vehicle shape based on type
+        if 'car' in vehicle_type.lower():
+            # Car body (rectangular with polygonal wheels)
+            body_points = [
+                (center_x - 40, center_y - 20),
+                (center_x + 40, center_y - 20),
+                (center_x + 45, center_y + 10),
+                (center_x - 45, center_y + 10)
+            ]
+        elif 'truck' in vehicle_type.lower():
+            # Truck shape (larger rectangle)
+            body_points = [
+                (center_x - 50, center_y - 20),
+                (center_x + 50, center_y - 20),
+                (center_x + 55, center_y + 15),
+                (center_x - 55, center_y + 15)
+            ]
+        elif 'bike' in vehicle_type.lower():
+            # Bike shape (narrow, elongated)
+            body_points = [
+                (center_x - 30, center_y - 15),
+                (center_x + 30, center_y - 15),
+                (center_x + 32, center_y + 15),
+                (center_x - 32, center_y + 15)
+            ]
+        else:
+            # Generic vehicle shape
+            body_points = [
+                (center_x - 35, center_y - 15),
+                (center_x + 35, center_y - 15),
+                (center_x + 40, center_y + 15),
+                (center_x - 40, center_y + 15)
+            ]
+
+        body_color = random.choice(self.palette)
+        draw.polygon(body_points, fill=body_color, outline=None)
+
+        # Add wheels (circles)
+        wheel_color = (64, 64, 64)  # Grey wheels
+        wheel_radius = 8
+        wheel_y = center_y + 20
+        draw.ellipse(
+            [center_x - 30 - wheel_radius, wheel_y - wheel_radius,
+             center_x - 30 + wheel_radius, wheel_y + wheel_radius],
+            fill=wheel_color, outline=None
+        )
+        draw.ellipse(
+            [center_x + 30 - wheel_radius, wheel_y - wheel_radius,
+             center_x + 30 + wheel_radius, wheel_y + wheel_radius],
+            fill=wheel_color, outline=None
+        )
+
+        # Apply gradient overlay
+        overlay = Image.new('RGBA', size, (0, 0, 0, 0))
+        overlay_draw = ImageDraw.Draw(overlay)
+        for i in range(50):
+            alpha = int(20 * (1 - i / 50))
+            radius = int(size[0] * 0.3 * (i / 50))
+            overlay_draw.ellipse(
+                [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
+                fill=(255, 255, 255, alpha), outline=None
+            )
+
+        img = Image.alpha_composite(img, overlay)
+        img = img.filter(ImageFilter.GaussianBlur(radius=0.5))
+
+        img.save(output_path, 'PNG', optimize=True)
+        return True
+
+    def generate_low_poly_map_asset(self, output_path, asset_type, size=(128, 128)):
+        """Generate Low-poly map asset"""
+        img = Image.new('RGBA', size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+
+        center_x, center_y = size[0] // 2, size[1] // 2
+
+        # Create Low-poly map asset shape based on type
+        if 'tree' in asset_type.lower():
+            # Tree shape (polygonal trunk and foliage)
+            trunk_points = [
+                (center_x - 8, center_y + 10),
+                (center_x + 8, center_y + 10),
+                (center_x + 10, center_y + 50),
+                (center_x - 10, center_y + 50)
+            ]
+            trunk_color = (139, 69, 19)  # Brown
+            draw.polygon(trunk_points, fill=trunk_color, outline=None)
+
+            # Foliage (polygonal)
+            foliage_points = []
+            for i in range(6):
+                angle = (i * 2 * math.pi / 6)
+                radius = 25
+                x = center_x + radius * math.cos(angle)
+                y = center_y - 10 + radius * math.sin(angle)
+                foliage_points.append((x, y))
+
+            foliage_color = random.choice([
+                (34, 197, 94),   # Light Green
+                (16, 185, 129),  # Green
+                (59, 130, 246)   # Blue (water features)
+            ])
+            draw.polygon(foliage_points, fill=foliage_color, outline=None)
+
+        elif 'rock' in asset_type.lower():
+            # Rock shape (irregular polygon)
+            rock_points = [
+                (center_x - 25, center_y - 15),
+                (center_x + 20, center_y - 20),
+                (center_x + 30, center_y + 10),
+                (center_x + 15, center_y + 35),
+                (center_x - 20, center_y + 30),
+                (center_x - 30, center_y + 10)
+            ]
+            rock_color = (120, 120, 120)  # Grey
+            draw.polygon(rock_points, fill=rock_color, outline=None)
+
+        elif 'water' in asset_type.lower():
+            # Water shape (wavy polygon)
+            water_points = [
+                (center_x - 50, center_y),
+                (center_x + 50, center_y),
+                (center_x + 50, center_y + 50),
+                (center_x - 50, center_y + 50)
+            ]
+            water_color = (59, 130, 246)  # Blue
+            draw.polygon(water_points, fill=water_color, outline=None)
+
+        else:
+            # Generic map asset shape
+            asset_points = []
+            for i in range(5):
+                angle = (i * 2 * math.pi / 5)
+                radius = 30
+                x = center_x + radius * math.cos(angle)
+                y = center_y + radius * math.sin(angle)
+                asset_points.append((x, y))
+
+            asset_color = random.choice(self.palette)
+            draw.polygon(asset_points, fill=asset_color, outline=None)
+
+        # Apply gradient overlay
+        overlay = Image.new('RGBA', size, (0, 0, 0, 0))
+        overlay_draw = ImageDraw.Draw(overlay)
+        for i in range(50):
+            alpha = int(15 * (1 - i / 50))
+            radius = int(size[0] * 0.4 * (i / 50))
+            overlay_draw.ellipse(
+                [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
+                fill=(255, 255, 255, alpha), outline=None
+            )
+
+        img = Image.alpha_composite(img, overlay)
+        img = img.filter(ImageFilter.GaussianBlur(radius=0.5))
+
         img.save(output_path, 'PNG', optimize=True)
         return True
     
@@ -253,21 +418,41 @@ class LowPolyGenerator:
                 if self.generate_low_poly_particle(output_path, particle_type):
                     generated += 1
                     self.generated.append({'category': category, 'path': str(output_path)})
-        
+
+        elif 'vehicle' in category:
+            vehicle_types = ['car', 'truck', 'bike', 'bus', 'jeep', 'van']
+            for i in range(needed):
+                vehicle_type = vehicle_types[i % len(vehicle_types)]
+                output_path = category_path / f"generated_low_poly_{vehicle_type}_{i:04d}.png"
+                if self.generate_low_poly_vehicle(output_path, vehicle_type):
+                    generated += 1
+                    self.generated.append({'category': category, 'path': str(output_path)})
+
+        elif 'map' in category:
+            map_asset_types = ['tree', 'rock', 'water', 'bush', 'cliff', 'bridge']
+            for i in range(needed):
+                asset_type = map_asset_types[i % len(map_asset_types)]
+                output_path = category_path / f"generated_low_poly_{asset_type}_{i:04d}.png"
+                if self.generate_low_poly_map_asset(output_path, asset_type):
+                    generated += 1
+                    self.generated.append({'category': category, 'path': str(output_path)})
+
         logger.info(f"Generated {generated} assets for {category}")
         return generated
     
     def run(self):
         """Generate Low-poly assets to fill gaps"""
         logger.info("Starting Low-poly asset generation...")
-        
+
         # Target counts
         targets = {
             'characters/sprites': 1000,
             'icons/items': 250,
             'icons/features': 250,
             'ui/elements': 300,
-            'effects/particles': 200
+            'effects/particles': 200,
+            'vehicles/sprites': 300,
+            'map/assets': 500
         }
         
         # Count current assets
