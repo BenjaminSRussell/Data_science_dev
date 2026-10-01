@@ -213,8 +213,10 @@ async function findAndCompressAssets() {
     console.log(`\n📄 Report saved to: ${path.relative(rootDir, reportPath)}`);
 }
 
-// Run compression only when script is the main entry point
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run compression only when script is the main entry point. Compare real
+// file paths, not URLs: import.meta.url is percent-encoded (spaces become
+// %20) and symlink-resolved, while process.argv[1] is a raw path.
+if (process.argv[1] && __filename === fs.realpathSync(path.resolve(process.argv[1]))) {
     findAndCompressAssets().catch(error => {
         console.error('❌ Compression failed:', error);
         process.exit(1);

@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url'; // node: prefix so jsdom test runs get the Node builtin
 
 function countLines(filePath) {
     try {
@@ -88,8 +88,10 @@ export function scanDirectory(dir, includeLines = false) {
 }
 
 // CLI code - only runs when this script is executed directly
-if (process.argv[1].endsWith('generate-file-inventory.js')) {
-    const __filename = fileURLToPath(import.meta.url);
+// (compare decoded real file paths: import.meta.url is percent-encoded and
+// symlink-resolved, process.argv[1] is neither)
+const __filename = fileURLToPath(import.meta.url);
+if (process.argv[1] && __filename === fs.realpathSync(path.resolve(process.argv[1]))) {
     const __dirname = path.dirname(__filename);
     const rootDir = path.dirname(__dirname);
 
