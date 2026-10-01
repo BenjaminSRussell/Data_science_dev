@@ -11,6 +11,12 @@ let blockSystemInstance;
 let buildingSystemInstance;
 let gridSystemInstance;
 
+// Track constructor call order
+const constructorCallOrder = [];
+
+// Track the last config passed to MapGridSystem
+let lastGridSystemConfig;
+
 // Factory functions for creating mocks
 const createMockZoneSystem = () => ({
     getZoneAt: vi.fn(),
@@ -39,6 +45,8 @@ const createMockGridSystem = () => ({
 // Mock all the sub-systems with factory functions that can return pre-configured instances
 vi.mock('../../src/js/game/MapGridSystem.js', () => ({
     MapGridSystem: vi.fn((config) => {
+        constructorCallOrder.push('MapGridSystem');
+        lastGridSystemConfig = config;
         if (!gridSystemInstance) {
             gridSystemInstance = createMockGridSystem();
         }
@@ -47,11 +55,14 @@ vi.mock('../../src/js/game/MapGridSystem.js', () => ({
 }));
 
 vi.mock('../../src/js/game/MapRoadSystem.js', () => ({
-    MapRoadSystem: vi.fn(),
+    MapRoadSystem: vi.fn(() => {
+        constructorCallOrder.push('MapRoadSystem');
+    }),
 }));
 
 vi.mock('../../src/js/game/MapZoneSystem.js', () => ({
     MapZoneSystem: vi.fn(() => {
+        constructorCallOrder.push('MapZoneSystem');
         if (!zoneSystemInstance) {
             zoneSystemInstance = createMockZoneSystem();
         }
@@ -61,6 +72,7 @@ vi.mock('../../src/js/game/MapZoneSystem.js', () => ({
 
 vi.mock('../../src/js/game/MapBlockSystem.js', () => ({
     MapBlockSystem: vi.fn(() => {
+        constructorCallOrder.push('MapBlockSystem');
         if (!blockSystemInstance) {
             blockSystemInstance = createMockBlockSystem();
         }
@@ -70,6 +82,7 @@ vi.mock('../../src/js/game/MapBlockSystem.js', () => ({
 
 vi.mock('../../src/js/game/MapBuildingSystem.js', () => ({
     MapBuildingSystem: vi.fn(() => {
+        constructorCallOrder.push('MapBuildingSystem');
         if (!buildingSystemInstance) {
             buildingSystemInstance = createMockBuildingSystem();
         }
@@ -78,24 +91,34 @@ vi.mock('../../src/js/game/MapBuildingSystem.js', () => ({
 }));
 
 vi.mock('../../src/js/game/MapAssetPlacer.js', () => ({
-    MapAssetPlacer: vi.fn(),
+    MapAssetPlacer: vi.fn(() => {
+        constructorCallOrder.push('MapAssetPlacer');
+    }),
 }));
 
 vi.mock('../../src/js/game/MapEnvironmentSystem.js', () => ({
-    MapEnvironmentSystem: vi.fn(() => ({
-        initialize: vi.fn(),
-    })),
+    MapEnvironmentSystem: vi.fn(() => {
+        constructorCallOrder.push('MapEnvironmentSystem');
+        return {
+            initialize: vi.fn(),
+        };
+    }),
 }));
 
 vi.mock('../../src/js/game/MapNavigationSystem.js', () => ({
-    MapNavigationSystem: vi.fn(),
+    MapNavigationSystem: vi.fn(() => {
+        constructorCallOrder.push('MapNavigationSystem');
+    }),
 }));
 
 vi.mock('../../src/js/game/MapRoadRenderer.js', () => ({
-    MapRoadRenderer: vi.fn(() => ({
-        render: vi.fn(),
-        update: vi.fn(),
-    })),
+    MapRoadRenderer: vi.fn(() => {
+        constructorCallOrder.push('MapRoadRenderer');
+        return {
+            render: vi.fn(),
+            update: vi.fn(),
+        };
+    }),
 }));
 
 // Mock LOCATIONS with test data
@@ -132,6 +155,10 @@ describe('MapManager', () => {
         buildingSystemInstance = null;
         gridSystemInstance = null;
 
+        // Clear constructor call order tracking
+        constructorCallOrder.length = 0;
+        lastGridSystemConfig = undefined;
+
         // Clear all mock call histories
         vi.clearAllMocks();
 
@@ -152,20 +179,26 @@ describe('MapManager', () => {
         blockSystemInstance.getBlockAt.mockReturnValue({ id: 'default-block' });
 
         vi.clearAllMocks();
+        constructorCallOrder.length = 0;
+        lastGridSystemConfig = undefined;
         mapManager = new MapManager(mockContainer, {});
     });
 
     describe('Constructor & Initialization', () => {
         it('should instantiate all sub-systems in order', () => {
-            expect(mapManager.gridSystem).toBeDefined();
-            expect(mapManager.roadSystem).toBeDefined();
-            expect(mapManager.zoneSystem).toBeDefined();
-            expect(mapManager.blockSystem).toBeDefined();
-            expect(mapManager.buildingSystem).toBeDefined();
-            expect(mapManager.assetPlacer).toBeDefined();
-            expect(mapManager.environmentSystem).toBeDefined();
-            expect(mapManager.navigationSystem).toBeDefined();
-            expect(mapManager.roadRenderer).toBeDefined();
+            // Verify systems were created in the correct order using our tracked call order
+            const expectedOrder = [
+                'MapGridSystem',
+                'MapRoadSystem',
+                'MapZoneSystem',
+                'MapBlockSystem',
+                'MapBuildingSystem',
+                'MapAssetPlacer',
+                'MapEnvironmentSystem',
+                'MapNavigationSystem',
+                'MapRoadRenderer',
+            ];
+            expect(constructorCallOrder).toEqual(expectedOrder);
         });
 
         it('should call placeLocations() after instantiation', () => {
@@ -174,7 +207,12 @@ describe('MapManager', () => {
         });
 
         it('should call environmentSystem.initialize() after placeLocations()', () => {
-            expect(mapManager.environmentSystem.initialize).toHaveBeenCalled();
+            // Get the mocked zoneSystem to check call order
+            const zoneSystemInitialization = mapManager.zoneSystem.assignLocationToZone.mock.invocationCallOrder[0];
+            const environmentInitialization = mapManager.environmentSystem.initialize.mock.invocationCallOrder[0];
+
+            // Verify initialize was called after zone assignments (placeLocations)
+            expect(environmentInitialization).toBeGreaterThan(zoneSystemInitialization);
         });
 
         it('should store container reference', () => {
@@ -306,10 +344,43 @@ describe('MapManager', () => {
         });
 
         it('should not directly access zone/block/building/environment', () => {
-            // Just verify that render only calls roadRenderer
+            // Clear all mocks to capture only render() calls
+            vi.clearAllMocks();
             mapManager.render();
-            // Count calls to roadRenderer.render (should be 1)
+
+            // Verify roadRenderer.render was called
             expect(mapManager.roadRenderer.render).toHaveBeenCalledTimes(1);
+
+            // Verify that zone/block/building/environment systems were NOT called directly
+            // Get all methods that should not be called during render
+            const zoneSystemMethods = [
+                'getZoneAt',
+                'findZoneForLocationType',
+                'assignLocationToZone',
+                'getZoneById',
+                'getAllZones',
+            ];
+            const blockSystemMethods = [
+                'getBlockAt',
+                'findAvailableBlock',
+                'assignLocationToBlock',
+            ];
+            const buildingSystemMethods = ['placeBuilding'];
+            const environmentSystemMethods = ['initialize'];
+
+            // Assert none of these were called
+            zoneSystemMethods.forEach(method => {
+                expect(mapManager.zoneSystem[method]).not.toHaveBeenCalled();
+            });
+            blockSystemMethods.forEach(method => {
+                expect(mapManager.blockSystem[method]).not.toHaveBeenCalled();
+            });
+            buildingSystemMethods.forEach(method => {
+                expect(mapManager.buildingSystem[method]).not.toHaveBeenCalled();
+            });
+            environmentSystemMethods.forEach(method => {
+                expect(mapManager.environmentSystem[method]).not.toHaveBeenCalled();
+            });
         });
     });
 
@@ -395,22 +466,29 @@ describe('MapManager', () => {
     describe('Configuration Passing', () => {
         it('should pass grid config to MapGridSystem constructor', () => {
             gridSystemInstance = null;
+            constructorCallOrder.length = 0;
+            lastGridSystemConfig = undefined;
             vi.clearAllMocks();
-            // Create new MapManager with config
-            const mm = new MapManager(mockContainer, { grid: { gridWidth: 40, tileSize: 25 } });
 
-            // Verify MapGridSystem was instantiated with config
-            expect(mm.gridSystem).toBeDefined();
+            // Create new MapManager with config
+            const gridConfig = { gridWidth: 40, tileSize: 25 };
+            const mm = new MapManager(mockContainer, { grid: gridConfig });
+
+            // Verify MapGridSystem was instantiated with the config object
+            expect(lastGridSystemConfig).toEqual(gridConfig);
         });
 
         it('should use default config when none provided', () => {
             gridSystemInstance = null;
+            constructorCallOrder.length = 0;
+            lastGridSystemConfig = undefined;
             vi.clearAllMocks();
+
             // Create new MapManager without config
             const mm = new MapManager(mockContainer);
 
-            // Verify MapGridSystem was instantiated
-            expect(mm.gridSystem).toBeDefined();
+            // Verify MapGridSystem was instantiated with empty object (default config)
+            expect(lastGridSystemConfig).toEqual({});
         });
     });
 });
