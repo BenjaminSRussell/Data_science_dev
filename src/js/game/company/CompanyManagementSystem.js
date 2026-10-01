@@ -70,7 +70,7 @@ export class CompanyManagementSystem {
         }
         
         const employee = {
-            id: 'emp_' + Date.now(),
+            id: 'emp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
             name: candidate.name,
             skills: candidate.skills || {},
             experience: candidate.experience || 0,
