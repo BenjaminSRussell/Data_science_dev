@@ -10,26 +10,18 @@ export const STATS = {
         name: 'Intelligence',
         icon: '',
         color: '#4ecdc4',
-        description: 'Affects chart quality and complex analysis',
+        description: 'Enhances learning and pattern recognition',
         maxLevel: 100,
-        effects: {
-            chartQuality: 0.5,     // +0.5% per point
-            analysisSpeed: 0.3,   // +0.3% per point
-            unlockAdvanced: 50    // Unlock advanced features at 50
-        }
+        effects: {}  // Note: historically included chartQuality, analysisSpeed, unlockAdvanced but these were never consumed by gameplay
     },
     charisma: {
         id: 'charisma',
         name: 'Charisma',
         icon: '',
         color: '#a855f7',
-        description: 'Better negotiations and relationships',
+        description: 'Improves interpersonal influence and communication',
         maxLevel: 100,
-        effects: {
-            clientPay: 0.5,        // +0.5% pay per point
-            relationshipGain: 1,  // +1% relationship gain
-            unlockVC: 60          // Unlock VC path at 60
-        }
+        effects: {}  // Note: historically included clientPay, relationshipGain, unlockVC but these were never consumed by gameplay
     },
     stamina: {
         id: 'stamina',
@@ -39,9 +31,7 @@ export const STATS = {
         description: 'Work more hours without fatigue',
         maxLevel: 100,
         effects: {
-            maxEnergy: 1,         // +1 max energy per point
-            recoveryRate: 0.2,    // +0.2% recovery
-            workHours: 0.05       // +0.05 extra time slots
+            maxEnergy: 1         // +1 max energy per point (wired to TimeManager)
         }
     },
     focus: {
@@ -49,39 +39,27 @@ export const STATS = {
         name: 'Focus',
         icon: '',
         color: '#ffd93d',
-        description: 'Complete tasks faster',
+        description: 'Improve concentration and reduce distractions',
         maxLevel: 100,
-        effects: {
-            taskSpeed: 0.8,       // +0.8% task speed per point
-            errorReduction: 0.3, // -0.3% errors
-            multitask: 30         // Unlock multitasking at 30
-        }
+        effects: {}  // Note: historically included taskSpeed, errorReduction, multitask but these were never consumed by gameplay
     },
     luck: {
         id: 'luck',
         name: 'Luck',
         icon: '',
         color: '#6bcb77',
-        description: 'Random bonuses and market wins',
+        description: 'Influence randomness and fortune',
         maxLevel: 50, // Luck caps lower
-        effects: {
-            bonusChance: 1,       // +1% bonus event chance
-            marketTiming: 0.5,    // +0.5% better market timing
-            rareClients: 0.3      // +0.3% rare client chance
-        }
+        effects: {}  // Note: historically included bonusChance, marketTiming, rareClients but these were never consumed by gameplay
     },
     analytics: {
         id: 'analytics',
         name: 'Analytics',
         icon: '',
         color: '#ff8548',
-        description: 'Unlock advanced chart types and tools',
+        description: 'Develop data analysis and insight capabilities',
         maxLevel: 100,
-        effects: {
-            chartTypes: [10, 25, 40, 60, 80], // Unlock levels
-            dataInsights: 0.5,    // +0.5% insight quality
-            automation: 70        // Unlock automation at 70
-        }
+        effects: {}  // Note: historically included chartTypes, dataInsights, automation but these were never consumed by gameplay
     }
 };
 
@@ -426,15 +404,26 @@ export class CharacterStats {
     /**
      * Calculate total stat-based bonuses
      */
+    /**
+     * Get total bonuses that are actually wired to gameplay systems.
+     * Note: Historically this method returned chartQuality, taskSpeed, clientPay,
+     * bonusChance, and workSlots, but none of these were ever consumed by any
+     * gameplay code. Only maxEnergy is currently wired (to TimeManager).
+     */
     getTotalBonuses() {
         return {
-            chartQuality: this.stats.intelligence * 0.5 + this.stats.analytics * 0.3,
-            taskSpeed: this.stats.focus * 0.8 + this.stats.stamina * 0.2,
-            clientPay: this.stats.charisma * 0.5,
-            bonusChance: this.stats.luck * 1,
-            maxEnergy: 100 + this.stats.stamina,
-            workSlots: 6 + Math.floor(this.stats.stamina / 20)
+            maxEnergy: 100 + this.stats.stamina
         };
+    }
+
+    /**
+     * Apply stat-based bonuses to TimeManager
+     * This syncs the computed bonuses with actual game systems
+     */
+    applyBonusesToTimeManager(timeManager) {
+        if (!timeManager) return;
+        const bonuses = this.getTotalBonuses();
+        timeManager.setMaxEnergy(bonuses.maxEnergy);
     }
 
     /**
