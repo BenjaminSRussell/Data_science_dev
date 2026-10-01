@@ -54,6 +54,7 @@ export class GameState {
         this.purchasedItems = []; // Shop items
         this.unlockedThemes = ['default'];
         this.unlockedTools = []; // Software tools
+        this.unlockedPerks = []; // Unlocked perks
         this.unlockedLibraries = [];
 
         // Game configuration
@@ -249,6 +250,8 @@ export class GameState {
             this.unlockChartType(item.chartType);
         } else if (item.type === 'tool') {
             this.unlockedTools.push(item.toolId);
+        } else if (item.type === 'perk') {
+            this.unlockedPerks.push(item.perkId);
         } else if (item.type === 'software') {
             // Software items are tracked in purchasedItems, no additional action needed
             // Software quality effects are calculated dynamically
@@ -275,6 +278,7 @@ export class GameState {
             ratingSum: this.ratingSum,
             unlockedChartTypes: this.unlockedChartTypes,
             unlockedTools: this.unlockedTools,
+            unlockedPerks: this.unlockedPerks,
             purchasedItems: this.purchasedItems,
             isGameStarted: this.isGameStarted,
             tutorialCompleted: this.tutorialCompleted,
@@ -343,6 +347,7 @@ export class GameState {
         this.ratingSum = data.ratingSum ?? 0;
         this.unlockedChartTypes = data.unlockedChartTypes ?? ['bar', 'line', 'pie'];
         this.unlockedTools = data.unlockedTools ?? [];
+        this.unlockedPerks = data.unlockedPerks ?? [];
         this.purchasedItems = data.purchasedItems ?? [];
         this.isGameStarted = data.isGameStarted ?? false;
         this.tutorialCompleted = data.tutorialCompleted ?? false;
