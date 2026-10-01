@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { OfficeManager } from '../../src/js/game/OfficeManager.js';
+import { GameState } from '../../src/js/game/GameState.js';
 import { OFFICES, STAFF_TYPES, EQUIPMENT } from '../../src/js/data/tycoonData.js';
 
 /**
@@ -190,6 +191,13 @@ describe('OfficeManager', () => {
     });
 
     describe('Marketing', () => {
+        // #1969: marketing channel state lives on GameState, so these tests
+        // need the real GameState rather than the plain money stub.
+        beforeEach(() => {
+            mockGameState = new GameState();
+            officeManager = new OfficeManager(mockGameState);
+        });
+
         it('should toggle marketing channels', () => {
             const result1 = officeManager.toggleMarketing('social_media');
             expect(result1.active).toBe(true);

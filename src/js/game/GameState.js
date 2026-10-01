@@ -57,6 +57,9 @@ export class GameState {
         this.unlockedPerks = []; // Unlocked perks
         this.unlockedLibraries = [];
 
+        // Marketing channels - single source of truth for both ClientManager and OfficeManager
+        this.activeMarketingChannels = ['word_of_mouth'];
+
         // Game configuration
         this.chartConfig = {
             type: 'bar',
@@ -178,6 +181,46 @@ export class GameState {
     }
 
     /**
+     * Toggle a marketing channel (activate if inactive, deactivate if active)
+     */
+    toggleMarketingChannel(channelId) {
+        const index = this.activeMarketingChannels.indexOf(channelId);
+        if (index === -1) {
+            this.activeMarketingChannels.push(channelId);
+            return { active: true };
+        } else {
+            this.activeMarketingChannels.splice(index, 1);
+            return { active: false };
+        }
+    }
+
+    /**
+     * Activate a marketing channel
+     */
+    activateMarketingChannel(channelId) {
+        if (!this.activeMarketingChannels.includes(channelId)) {
+            this.activeMarketingChannels.push(channelId);
+        }
+    }
+
+    /**
+     * Deactivate a marketing channel
+     */
+    deactivateMarketingChannel(channelId) {
+        const index = this.activeMarketingChannels.indexOf(channelId);
+        if (index !== -1) {
+            this.activeMarketingChannels.splice(index, 1);
+        }
+    }
+
+    /**
+     * Check if a marketing channel is active
+     */
+    isMarketingChannelActive(channelId) {
+        return this.activeMarketingChannels.includes(channelId);
+    }
+
+    /**
      * Get software quality multiplier based on purchased software
      * Returns an object with quality bonuses
      */
@@ -285,6 +328,7 @@ export class GameState {
             soundEnabled: this.soundEnabled,
             musicEnabled: this.musicEnabled,
             unlockedLibraries: this.unlockedLibraries || [],
+            activeMarketingChannels: this.activeMarketingChannels,
 
             // Sub-systems
             worldMap: this.worldMap?.toJSON(),
@@ -349,6 +393,7 @@ export class GameState {
         this.soundEnabled = data.soundEnabled ?? true;
         this.musicEnabled = data.musicEnabled ?? true;
         this.unlockedLibraries = data.unlockedLibraries || [];
+        this.activeMarketingChannels = data.activeMarketingChannels ?? ['word_of_mouth'];
 
         // Restore sub-systems
         if (this.worldMap && data.worldMap) this.worldMap.fromJSON(data.worldMap);
