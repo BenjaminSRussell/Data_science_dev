@@ -77,8 +77,6 @@ export const MISSING_ASSETS = new Set([
     "assets/characters/emotions/sad.png",
     "assets/characters/emotions/angry.png",
     "assets/characters/emotions/neutral.png",
-    "assets/npcs/the_hacker.png",
-    "assets/icons/vehicles/sedan.png",
     "assets/characters/sprites/basic_character_sheet.png",
     "assets/characters/sprites/mid_character_sheet.png",
     "assets/characters/sprites/premium_character_sheet.png",
