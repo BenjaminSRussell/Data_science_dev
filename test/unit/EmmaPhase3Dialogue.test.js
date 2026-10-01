@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { GameState } from '../../src/js/game/GameState.js';
 import { NPCManager } from '../../src/js/game/NPCManager.js';
 import { CHARACTER_STORIES } from '../../src/js/game/dialogue/DeepCharacterStories.js';
-import { STATS } from '../../src/js/game/CharacterStats.js';
+import { STATS, CharacterStats } from '../../src/js/game/CharacterStats.js';
 
 describe('Emma Bloom Phase 3 Dialogue Effects', () => {
     it('should have phase_3 dialogue in Emma Bloom story', () => {
@@ -19,7 +19,7 @@ describe('Emma Bloom Phase 3 Dialogue Effects', () => {
         const emmaStory = CHARACTER_STORIES['emma_bloom'];
         const phase3 = emmaStory.phases.find(p => p.id === 'phase_3');
 
-        const validStats = Object.keys(STATS).concat(['relationship', 'money', 'xp', 'flag', 'reputation', 'ethics']);
+        const validStats = Object.keys(STATS).concat(['relationship', 'money', 'xp', 'xpAmount', 'flag', 'reputation', 'ethics']);
 
         phase3.options.forEach((option, index) => {
             expect(option.effects).toBeDefined();
@@ -30,14 +30,16 @@ describe('Emma Bloom Phase 3 Dialogue Effects', () => {
         });
     });
 
-    it('efficiency option should use analytics (not invalid logic stat)', () => {
+    it('efficiency option should use xp/xpAmount shape for analytics (not bare analytics or invalid logic)', () => {
         const emmaStory = CHARACTER_STORIES['emma_bloom'];
         const phase3 = emmaStory.phases.find(p => p.id === 'phase_3');
         const efficiencyOption = phase3.options[0];
 
         expect(efficiencyOption.text).toContain('Focus on speed and efficiency');
-        expect(efficiencyOption.effects).toHaveProperty('analytics');
+        expect(efficiencyOption.effects).toHaveProperty('xp', 'analytics');
+        expect(efficiencyOption.effects).toHaveProperty('xpAmount', 5);
         expect(efficiencyOption.effects).not.toHaveProperty('logic');
+        expect(efficiencyOption.effects).not.toHaveProperty('analytics');
     });
 
     it('accessibility option should have reputation effect', () => {
@@ -51,16 +53,37 @@ describe('Emma Bloom Phase 3 Dialogue Effects', () => {
 
     it('applyChoiceEffects should handle reputation when applied', () => {
         const gameState = new GameState();
+        gameState.characterStats = new CharacterStats();
         const npcManager = new NPCManager(gameState);
 
         gameState.reputation = 0;
-
         npcManager.relationships['emma_bloom'] = 55;
-        npcManager.startConversation('emma_bloom');
+
+        // Mock a conversation with emma_bloom to satisfy applyChoiceEffects requirement
+        npcManager.currentConversation = { npc: { id: 'emma_bloom' } };
 
         const effects = { reputation: 10, relationship: 5 };
         npcManager.applyChoiceEffects(effects);
 
         expect(gameState.reputation).toBe(10);
+    });
+
+    it('applyChoiceEffects should apply analytics XP for efficiency option', () => {
+        const gameState = new GameState();
+        gameState.characterStats = new CharacterStats();
+        const npcManager = new NPCManager(gameState);
+
+        npcManager.relationships['emma_bloom'] = 55;
+
+        // Mock a conversation with emma_bloom to satisfy applyChoiceEffects requirement
+        npcManager.currentConversation = { npc: { id: 'emma_bloom' } };
+
+        const initialAnalyticsXP = gameState.characterStats.xp['analytics'] || 0;
+
+        const effects = { xp: 'analytics', xpAmount: 5, relationship: 5 };
+        npcManager.applyChoiceEffects(effects);
+
+        const finalAnalyticsXP = gameState.characterStats.xp['analytics'] || 0;
+        expect(finalAnalyticsXP).toBe(initialAnalyticsXP + 5);
     });
 });
