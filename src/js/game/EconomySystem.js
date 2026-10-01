@@ -154,6 +154,10 @@ export class EconomySystem {
      * Score data accuracy - implements real rubric for high-difficulty tasks
      * For high-difficulty (8+), checks chart type appropriateness
      * For lower difficulties, uses simpler scoring
+     *
+     * SCOPING NOTE: Full data accuracy checks (correct columns mapped, axis scales)
+     * require data fields not currently available in chartConfig. This implements
+     * chart type matching only. See issue #264 for original requirements.
      */
     scoreDataAccuracy(task, chartConfig) {
         // For high-difficulty tasks (8+), implement a real rubric
@@ -162,7 +166,8 @@ export class EconomySystem {
         }
 
         // For lower difficulties, use simpler scoring with some variance
-        const baseScore = 75;
+        // Kept at original baseScore of 80 per issue requirements
+        const baseScore = 80;
         const variance = Math.random() * 20 - 5;
         return Math.min(100, Math.max(60, baseScore + variance));
     }
@@ -171,7 +176,11 @@ export class EconomySystem {
      * Score data accuracy for high-difficulty tasks (difficulty >= 8)
      * Implements a checkable rubric based on:
      * - Chart type appropriateness (optimal vs acceptable vs wrong)
-     * - Data type consistency
+     *
+     * NOTE: Does NOT duplicate scoreChartAppropriateness logic. Checks only whether
+     * the chart type explicitly matches the task's requirements (optimal/acceptable lists).
+     * The data type appropriateness matrix is already used by scoreChartAppropriateness,
+     * so this method avoids double-counting by checking only explicit requirements.
      */
     scoreDataAccuracyHighDifficulty(task, chartConfig) {
         const selectedType = chartConfig.type;
@@ -197,58 +206,8 @@ export class EconomySystem {
             score -= 12;
         }
 
-        // Additional scoring based on data type appropriateness
-        score += this.scoreDataTypeAppropriately(task, chartConfig, selectedType);
-
         // Ensure score stays in valid range
         return Math.min(100, Math.max(0, score));
-    }
-
-    /**
-     * Score how well the selected chart type matches the data type
-     */
-    scoreDataTypeAppropriately(task, chartConfig, selectedType) {
-        const dataType = task.dataType || 'default';
-        const typeAppropriatenessMap = this.getDataTypeAppropriatenessMap();
-
-        // Get the score for this data type + chart combination
-        const dataTypeScores = typeAppropriatenessMap[dataType] || typeAppropriatenessMap['default'];
-        const appropriateness = dataTypeScores[selectedType] || 0.5;
-
-        // Convert appropriateness ratio (0-1) to score adjustment (-5 to +5)
-        return (appropriateness - 0.5) * 10;
-    }
-
-    /**
-     * Get a map of data type to chart type appropriateness (0-1 scale)
-     */
-    getDataTypeAppropriatenessMap() {
-        return {
-            'quarterly_sales': {
-                bar: 0.95, line: 0.85, pie: 0.40, scatter: 0.30, doughnut: 0.45, radar: 0.35
-            },
-            'monthly_revenue': {
-                bar: 0.75, line: 0.95, pie: 0.30, scatter: 0.50, doughnut: 0.35, radar: 0.40
-            },
-            'product_comparison': {
-                bar: 0.95, line: 0.50, pie: 0.60, scatter: 0.45, doughnut: 0.55, radar: 0.70
-            },
-            'category_breakdown': {
-                bar: 0.60, line: 0.30, pie: 0.95, scatter: 0.25, doughnut: 0.90, radar: 0.40
-            },
-            'trend_analysis': {
-                bar: 0.50, line: 0.95, pie: 0.20, scatter: 0.70, doughnut: 0.25, radar: 0.30
-            },
-            'customer_demographics': {
-                bar: 0.85, line: 0.40, pie: 0.90, scatter: 0.35, doughnut: 0.85, radar: 0.50
-            },
-            'performance_metrics': {
-                bar: 0.70, line: 0.45, pie: 0.40, scatter: 0.35, doughnut: 0.45, radar: 0.95
-            },
-            'default': {
-                bar: 0.70, line: 0.70, pie: 0.60, scatter: 0.50, doughnut: 0.55, radar: 0.50
-            }
-        };
     }
 
     /**
