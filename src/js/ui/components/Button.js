@@ -94,7 +94,6 @@ export class Button extends BaseComponent {
         if (this.onclick) {
             this.onclick(e);
         }
-        this.dispatchGameEvent('button-click', { label: this.label });
     }
 }
 
