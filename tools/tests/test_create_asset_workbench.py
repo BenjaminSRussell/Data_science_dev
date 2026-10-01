@@ -38,6 +38,9 @@ def temp_workspace(tmp_path, monkeypatch):
         module, "TODO_PLACEHOLDER_SOURCE", str(placeholder_path)
     )
 
+    # Change to the temporary directory so relative paths work correctly
+    monkeypatch.chdir(tmp_path)
+
     return {
         "tmp_path": tmp_path,
         "manifest_path": manifest_path,
