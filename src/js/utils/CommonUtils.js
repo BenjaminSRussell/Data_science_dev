@@ -9,7 +9,7 @@ export class CommonUtils {
      * Format currency
      */
     static formatCurrency(amount, currency = '$') {
-        return `${currency}${amount.toLocaleString()}`;
+        return `${currency}${(amount ?? 0).toLocaleString()}`;
     }
 
     /**
