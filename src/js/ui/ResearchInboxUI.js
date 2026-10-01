@@ -180,52 +180,68 @@ export class ResearchInboxUI {
         // Mark as read
         this.researchPaperSystem.markAsRead(notificationId);
 
-        // Create detail modal
-        const modal = document.createElement('div');
-        modal.className = 'paper-detail-modal';
-        modal.innerHTML = `
-            <div class="paper-detail-content">
-                <div class="paper-detail-header">
-                    <h2>${paper.title}</h2>
-                    <button class="paper-detail-close">×</button>
-                </div>
-                <div class="paper-detail-body">
-                    <div class="paper-detail-meta">
-                        <div class="meta-item">
-                            <strong>Authors:</strong> ${paper.authors}
-                        </div>
-                        <div class="meta-item">
-                            <strong>Year:</strong> ${paper.year}
-                        </div>
-                        <div class="meta-item">
-                            <strong>Venue:</strong> ${paper.venue}
-                        </div>
-                        ${paper.isBreakthrough ? '<div class="breakthrough-banner"> BREAKTHROUGH PAPER</div>' : ''}
-                    </div>
-                    <div class="paper-detail-description">
-                        <h3>Description</h3>
-                        <p>${paper.description}</p>
-                    </div>
-                    <div class="paper-detail-impact">
-                        <h3>Impact</h3>
-                        <p>${paper.impact}</p>
-                    </div>
-                    <div class="paper-detail-keywords">
-                        <h3>Keywords</h3>
-                        <div class="keywords-list">
-                            ${paper.keywords.map(kw => `<span class="keyword">${kw}</span>`).join('')}
-                        </div>
-                    </div>
-                    ${paper.url ? `
-                        <div class="paper-detail-link">
-                            <a href="${paper.url}" target="_blank" rel="noopener noreferrer" class="paper-link-btn">
-                                 Read Paper
-                            </a>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        `;
+        // Create detail modal. Built with DOM APIs and textContent so paper
+        // fields can never inject markup.
+        const el = (tag, className, text) => {
+            const node = document.createElement(tag);
+            if (className) node.className = className;
+            if (text !== undefined) node.textContent = text;
+            return node;
+        };
+        const section = (className, heading, child) => {
+            const div = el('div', className);
+            div.append(el('h3', null, heading), child);
+            return div;
+        };
+        const metaItem = (label, value) => {
+            const div = el('div', 'meta-item');
+            div.append(el('strong', null, `${label}:`), ` ${value ?? ''}`);
+            return div;
+        };
+
+        const modal = el('div', 'paper-detail-modal');
+        const content = el('div', 'paper-detail-content');
+
+        const header = el('div', 'paper-detail-header');
+        const closeBtn = el('button', 'paper-detail-close', '×');
+        closeBtn.type = 'button';
+        closeBtn.setAttribute('aria-label', 'Close');
+        header.append(el('h2', null, paper.title ?? ''), closeBtn);
+
+        const body = el('div', 'paper-detail-body');
+        const meta = el('div', 'paper-detail-meta');
+        meta.append(
+            metaItem('Authors', paper.authors),
+            metaItem('Year', paper.year),
+            metaItem('Venue', paper.venue)
+        );
+        if (paper.isBreakthrough) {
+            meta.append(el('div', 'breakthrough-banner', ' BREAKTHROUGH PAPER'));
+        }
+
+        const keywordsList = el('div', 'keywords-list');
+        (paper.keywords || []).forEach(kw => keywordsList.append(el('span', 'keyword', kw)));
+
+        body.append(
+            meta,
+            section('paper-detail-description', 'Description', el('p', null, paper.description ?? '')),
+            section('paper-detail-impact', 'Impact', el('p', null, paper.impact ?? '')),
+            section('paper-detail-keywords', 'Keywords', keywordsList)
+        );
+
+        const safeUrl = ResearchInboxUI.safeHttpUrl(paper.url);
+        if (safeUrl) {
+            const linkWrap = el('div', 'paper-detail-link');
+            const link = el('a', 'paper-link-btn', ' Read Paper');
+            link.href = safeUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            linkWrap.append(link);
+            body.append(linkWrap);
+        }
+
+        content.append(header, body);
+        modal.append(content);
 
         document.body.appendChild(modal);
 
@@ -240,11 +256,13 @@ export class ResearchInboxUI {
             ));
         };
 
+        // All listeners are tied to this controller; aborting removes them.
+        const listeners = new AbortController();
+        const { signal } = listeners;
+
         // Handler to close the modal
         const closeModal = () => {
-            // Remove event listeners
-            document.removeEventListener('keydown', handleKeydown);
-            contentDiv.removeEventListener('keydown', handleTabTrap);
+            listeners.abort();
 
             // Remove modal
             modal.remove();
@@ -257,6 +275,10 @@ export class ResearchInboxUI {
 
         // Handle Escape key
         const handleKeydown = (e) => {
+            if (!modal.isConnected) {
+                listeners.abort();
+                return;
+            }
             if (e.key === 'Escape') {
                 closeModal();
             }
@@ -288,20 +310,30 @@ export class ResearchInboxUI {
         };
 
         // Close button
-        modal.querySelector('.paper-detail-close').addEventListener('click', () => {
+        closeBtn.addEventListener('click', () => {
             closeModal();
-        });
+        }, { signal });
 
         // Close on outside click
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 closeModal();
             }
-        });
+        }, { signal });
 
         // Add keyboard event listeners
-        document.addEventListener('keydown', handleKeydown);
-        contentDiv.addEventListener('keydown', handleTabTrap);
+        document.addEventListener('keydown', handleKeydown, { signal });
+        contentDiv.addEventListener('keydown', handleTabTrap, { signal });
+
+        // If the modal is removed some other way (screen change, body
+        // re-render), drop the document-level listeners too
+        if (modal.parentNode) {
+            const removalObserver = new MutationObserver(() => {
+                if (!modal.isConnected) listeners.abort();
+            });
+            removalObserver.observe(modal.parentNode, { childList: true });
+            signal.addEventListener('abort', () => removalObserver.disconnect());
+        }
 
         // Focus on the first focusable element
         const focusableElements = getFocusableElements();
@@ -313,6 +345,20 @@ export class ResearchInboxUI {
         this.renderPapers(this.getActiveTab());
     }
     
+    /**
+     * Return the URL if it is an absolute http(s) URL, otherwise null
+     * (blocks javascript:, data: and other schemes from paper data)
+     */
+    static safeHttpUrl(url) {
+        if (typeof url !== 'string' || url.trim() === '') return null;
+        try {
+            const parsed = new URL(url.trim());
+            return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null;
+        } catch {
+            return null;
+        }
+    }
+
     /**
      * Get active tab
      */
