@@ -6,10 +6,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock all dependencies before importing handleLocationAction
-vi.mock('../../src/js/camera/CameraSystem.js', () => ({
-    CameraSystem: {}
-}));
-
 vi.mock('../../src/js/game/NPCManager.js', () => ({
     NPCs: {}
 }));
@@ -64,8 +60,8 @@ describe('MapHelpers', () => {
 
             handleLocationAction(mockGame, 'eat_bagel');
 
-            // eat_bagel costs 0, so money should not change
-            expect(mockGame.gameState.money).toBe(initialMoney);
+            // eat_bagel costs 5, so money should decrease by 5
+            expect(mockGame.gameState.money).toBe(initialMoney - 5);
             // Should gain 12 energy
             expect(mockGame.timeManager.gainEnergy).toHaveBeenCalledWith(12);
             // Should show success toast
@@ -104,15 +100,18 @@ describe('MapHelpers', () => {
             expect(mockGame.audioManager.play).toHaveBeenCalledWith('kaching');
         });
 
-        it('should reject action if insufficient funds for eat_bagel would cost money', () => {
-            // Note: eat_bagel costs 0, so this shouldn't trigger the error
-            mockGame.gameState.money = 0;
+        it('should reject eat_bagel action if insufficient funds', () => {
+            // eat_bagel costs 5, so this should trigger the error
+            mockGame.gameState.money = 2;
 
             handleLocationAction(mockGame, 'eat_bagel');
 
-            // Should still work because cost is 0
-            expect(mockGame.timeManager.gainEnergy).toHaveBeenCalledWith(12);
-            expect(mockGame.showError).not.toHaveBeenCalled();
+            // Should show error
+            expect(mockGame.showError).toHaveBeenCalledWith('Not enough money!');
+            // Should not gain energy
+            expect(mockGame.timeManager.gainEnergy).not.toHaveBeenCalled();
+            // Money should not change
+            expect(mockGame.gameState.money).toBe(2);
         });
 
         it('should reject action if insufficient funds for coffee_network would cost money', () => {

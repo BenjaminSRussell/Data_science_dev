@@ -88,7 +88,6 @@ import { NarrativeClaritySystem } from './game/NarrativeClaritySystem.js';
 import { AssetManager } from './assets/AssetManager.js';
 import { PerformanceManager } from './performance/PerformanceManager.js';
 import { UILayerManager } from './ui/UILayerManager.js';
-import { CameraSystem } from './camera/CameraSystem.js';
 import { NewsManager } from './game/NewsManager.js';
 import { StockMarket } from './game/StockMarket.js';
 import { CrimeSystem } from './game/CrimeSystem.js';

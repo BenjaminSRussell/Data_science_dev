@@ -4,7 +4,6 @@
  * Cleanup: Uses centralized utilities
  */
 
-import { CameraSystem } from '../camera/CameraSystem.js';
 import { NPCs } from '../game/NPCManager.js';
 import { updateMapLocationIcons, updateLockBadges } from './MapIconRenderer.js';
 import { initializeMapRenderer } from '../game/MapSystemInitializer.js';
@@ -49,30 +48,12 @@ function initDOMCache() {
 }
 
 /**
- * Initialize camera system for the map
- */
-export function initializeCameraSystem(game) {
-    initDOMCache();
-    if (!game.cameraSystem && domCache.mapContainer) {
-        try {
-            game.cameraSystem = new CameraSystem(domCache.mapContainer);
-            if (game.gameState) {
-                game.gameState.cameraSystem = game.cameraSystem;
-            }
-        } catch (error) {
-            logger.warn('Camera system initialization failed:', error);
-        }
-    }
-}
-
-/**
  * Update the map screen with current state - Optimized O(n) single pass
  */
 export function updateMapScreen(game) {
     if (!game.worldMap || !game.timeManager) return;
 
     initDOMCache();
-    initializeCameraSystem(game);
 
     // Update all displays in single pass
     updateTimeDisplay(game);
@@ -471,7 +452,7 @@ export function handleLocationAction(game, action) {
         'eat_donut': { cost: 5, energyGain: 10, message: "Yum!" },
         'buy_coffee': { cost: 4, energyGain: 15, message: "Caffeine boost! +15 Energy" },
         'buy_bagel': { cost: 6, energyGain: 12, message: "Tasty bagel! +12 Energy" },
-        'eat_bagel': { cost: 0, energyGain: 12, message: "Yum!" },
+        'eat_bagel': { cost: 5, energyGain: 12, message: "Yum!" },
         'coffee_network': { cost: 0, energyGain: 10, message: "Great connections! +10 Energy" },
         'buy_flowers': { cost: 15, energyGain: 0, message: "Smells nice! You feel happier." },
         'buy_plant': { cost: 25, energyGain: 0, message: "A nice plant for your office. (Visual only for now)" }
