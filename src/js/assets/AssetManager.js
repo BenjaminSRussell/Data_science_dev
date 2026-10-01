@@ -42,10 +42,10 @@ export class AssetManager {
                     }
                 },
                 // Low-poly character sprites (1000 available)
-                // Using generated Low-poly characters from downloaded_assets
-                base: '/downloaded_assets/characters/sprites/generated_low_poly_character_0000.png',
-                walk: '/downloaded_assets/characters/sprites/generated_low_poly_character_0001.png',
-                idle: '/downloaded_assets/characters/sprites/generated_low_poly_character_0002.png',
+                // Using available NPC character assets as fallback
+                base: '/assets/npcs/player_young.png',
+                walk: '/assets/npcs/alex_young.png',
+                idle: '/assets/npcs/mentor_0.png',
                 emotions: {
                     // Basic emotions (using SVG files that exist)
                     happy: '/assets/characters/emotions/happy.svg',
