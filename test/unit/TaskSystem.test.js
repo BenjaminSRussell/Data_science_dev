@@ -190,30 +190,59 @@ describe('TaskSystem', () => {
                 expect(task).toBeDefined();
                 expect(task.id).toBeDefined();
                 expect(task.data).toBeDefined();
+
+                // Verify the task came from COMPREHENSIVE_DATA_SCIENCE_TASKS by checking for domain field
+                // (comprehensive tasks have domain, subdomain, skills, tools, etc. that basic TASKS don't have)
+                expect(task.domain).toBeDefined();
+                const taskFoundInComprehensive = COMPREHENSIVE_DATA_SCIENCE_TASKS.some(t => t.id === task.template.id);
+                expect(taskFoundInComprehensive).toBe(true);
             }
         });
 
         it('should filter tasks by difficulty within tolerance of 0.5', () => {
             mockGameState.rankIndex = 1; // difficulty = 1
-
-            // Mock to track which tasks are being considered
-            const filterSpy = vi.spyOn(Array.prototype, 'filter');
+            const difficulty = taskSystem.getDifficultyForRank(mockGameState.rankIndex);
+            expect(difficulty).toBe(1); // Verify test setup
 
             const task = taskSystem.generateNewTask();
 
             expect(task).toBeDefined();
             expect(task.id).toBeDefined();
 
-            filterSpy.mockRestore();
+            // Verify the generated task has difficulty within 0.5 of the expected difficulty
+            const taskDifficulty = typeof task.template.difficulty === 'number'
+                ? task.template.difficulty
+                : parseInt(task.template.difficulty) || 1;
+
+            expect(Math.abs(taskDifficulty - difficulty)).toBeLessThanOrEqual(0.5);
         });
 
-        it('should fall back to generateFallbackTask when no tasks match', () => {
-            // Test the fallback task generation directly
-            const fallbackTask = taskSystem.generateFallbackTask();
+        it('should fall back to generateFallbackTask when zero match (assert console.warn)', () => {
+            // Mock console.warn to verify it's called
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-            expect(fallbackTask).toBeDefined();
-            expect(fallbackTask.template.name).toBe('Basic Sales Report');
-            expect(fallbackTask.potentialReward).toBe(150);
+            // Temporarily replace COMPREHENSIVE_DATA_SCIENCE_TASKS and TASKS with empty arrays
+            // to force zero matches
+            const originalComprehensiveTasks = COMPREHENSIVE_DATA_SCIENCE_TASKS.splice(0);
+            const originalTasks = TASKS.splice(0);
+
+            try {
+                // Now generateNewTask should find no tasks and fall back
+                const task = taskSystem.generateNewTask();
+
+                // Verify console.warn was called
+                expect(warnSpy).toHaveBeenCalledWith('No tasks found for difficulty:', expect.any(Number));
+
+                // Verify we got the fallback task
+                expect(task).toBeDefined();
+                expect(task.template.name).toBe('Basic Sales Report');
+                expect(task.potentialReward).toBe(150);
+            } finally {
+                // Restore the original arrays
+                COMPREHENSIVE_DATA_SCIENCE_TASKS.push(...originalComprehensiveTasks);
+                TASKS.push(...originalTasks);
+                warnSpy.mockRestore();
+            }
         });
     });
 
