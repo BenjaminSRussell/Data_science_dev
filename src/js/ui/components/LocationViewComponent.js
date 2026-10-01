@@ -102,7 +102,7 @@ export class LocationViewComponent extends BaseComponent {
             : '';
 
         return html`
-            <div class="location-background ${this.locationId} time-${this.timeOfDay}" 
+            <div class="location-background"
                  style="${backgroundStyle}">
                 <div class="location-content">
                     <h2 class="location-title">${this.locationDetails.name}</h2>
