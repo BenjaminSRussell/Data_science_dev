@@ -5,7 +5,6 @@
  */
 
 import { CameraSystem } from '../camera/CameraSystem.js';
-import { NPCs } from '../game/NPCManager.js';
 import { updateMapLocationIcons, updateLockBadges } from './MapIconRenderer.js';
 import { initializeMapRenderer } from '../game/MapSystemInitializer.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
