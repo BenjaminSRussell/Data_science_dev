@@ -79,6 +79,8 @@ export function updateMapScreen(game) {
     updateEnergyDisplay(game);
     updateNewsTicker(game);
     updateLocationActions(game);
+    updateMapLocationStates(game);
+    updatePlayerMarker(game);
 
     // Use UnifiedMapSystem (PixiJS-based, replaces all old renderers)
     if (!game.unifiedMapSystem && domCache.mapContainer) {
