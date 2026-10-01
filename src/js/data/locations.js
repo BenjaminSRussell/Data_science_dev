@@ -9,8 +9,8 @@ export const OFFICE_LOCATIONS = [
         description: "Your humble beginnings - a desk in your apartment",
         rankRequired: 0,
         background: 'url("/assets/backgrounds/locations/home.png")',
-        ambiance: "",
-        elements: ["", "", "", ""],
+        ambiance: "🏠",
+        elements: ["💻", "☕", "📚", "🪴"],
         unlockMessage: "Welcome to your home office! Time to start your data science journey."
     },
     {
@@ -19,8 +19,8 @@ export const OFFICE_LOCATIONS = [
         description: "An open floor plan at a fast-moving startup",
         rankRequired: 1,
         background: 'url("/assets/backgrounds/locations/tech_hub.png")',
-        ambiance: "",
-        elements: ["", "", "", ""],
+        ambiance: "🚀",
+        elements: ["💡", "🎯", "📊", "🍕"],
         unlockMessage: "You've joined a startup! The energy is electric."
     },
     {
@@ -29,8 +29,8 @@ export const OFFICE_LOCATIONS = [
         description: "A sleek office in a downtown high-rise",
         rankRequired: 3,
         background: 'url("/assets/backgrounds/locations/office.png")',
-        ambiance: "",
-        elements: ["", "", "", ""],
+        ambiance: "🏢",
+        elements: ["🖥️", "📈", "☕", "🏆"],
         unlockMessage: "Welcome to the big leagues - corner office views await!"
     },
     {
@@ -39,8 +39,8 @@ export const OFFICE_LOCATIONS = [
         description: "A cutting-edge R&D facility",
         rankRequired: 5,
         background: 'url("/assets/backgrounds/locations/tech_hub.png")',
-        ambiance: "",
-        elements: ["", "", "", ""],
+        ambiance: "🔬",
+        elements: ["🧪", "🔮", "💎", "⚡"],
         unlockMessage: "You've made it to the Innovation Lab - where data dreams come true!"
     },
     {
@@ -49,8 +49,8 @@ export const OFFICE_LOCATIONS = [
         description: "The penthouse office with a view of the city",
         rankRequired: 6,
         background: 'url("/assets/backgrounds/locations/downtown.png")',
-        ambiance: "",
-        elements: ["", "", "", ""],
+        ambiance: "👔",
+        elements: ["🌆", "🥂", "🏅", "💼"],
         unlockMessage: "You've reached the top! The C-Suite is yours."
     },
     {
@@ -59,8 +59,8 @@ export const OFFICE_LOCATIONS = [
         description: "Fresh donuts and coffee available 24/7",
         rankRequired: 0,
         background: "linear-gradient(180deg, #ffeaa7 0%, #ff7675 100%)",
-        ambiance: "",
-        elements: ["", "", "", ""],
+        ambiance: "🍩",
+        elements: ["🍩", "☕", "🍰", "🥛"],
         unlockMessage: "",
         hidden: true // Not selectable in Office Upgrade menu
     },
@@ -70,8 +70,8 @@ export const OFFICE_LOCATIONS = [
         description: "New York style bagels",
         rankRequired: 0,
         background: "linear-gradient(180deg, #fab1a0 0%, #e17055 100%)",
-        ambiance: "",
-        elements: ["", "", "", ""],
+        ambiance: "🥯",
+        elements: ["🥯", "☕", "🥪", "🧀"],
         unlockMessage: "",
         hidden: true
     },
@@ -81,8 +81,8 @@ export const OFFICE_LOCATIONS = [
         description: "A fragrant oasis in the city",
         rankRequired: 0,
         background: "linear-gradient(180deg, #55efc4 0%, #00b894 100%)",
-        ambiance: "",
-        elements: ["", "", "", ""],
+        ambiance: "💐",
+        elements: ["🌻", "🌹", "🌷", "🪴"],
         unlockMessage: "",
         hidden: true
     }
@@ -135,28 +135,28 @@ export const WEATHER_EFFECTS = [
         name: "Clear",
         weight: 50,
         cssClass: "weather-clear",
-        icon: ""
+        icon: "☀️"
     },
     {
         id: "cloudy",
         name: "Cloudy",
         weight: 25,
         cssClass: "weather-cloudy",
-        icon: ""
+        icon: "☁️"
     },
     {
         id: "rainy",
         name: "Rainy",
         weight: 15,
         cssClass: "weather-rainy",
-        icon: ""
+        icon: "🌧️"
     },
     {
         id: "snowy",
         name: "Snowy",
         weight: 10,
         cssClass: "weather-snowy",
-        icon: ""
+        icon: "❄️"
     }
 ];
 
