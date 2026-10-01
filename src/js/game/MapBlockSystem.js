@@ -181,13 +181,17 @@ export class MapBlockSystem {
     /**
      * Find available block for location placement
      */
-    findAvailableBlock(zoneType, minSize = 1) {
+    findAvailableBlock(zoneType, minDimensions = { width: 1, height: 1 }) {
         const blocks = this.getBlocksByZoneType(zoneType);
-        
+
+        // Handle both legacy single parameter and new object parameter
+        const minWidth = minDimensions.width || minDimensions;
+        const minHeight = minDimensions.height || minDimensions;
+
         // Filter by size and availability
-        const available = blocks.filter(block => 
-            block.bounds.width >= minSize &&
-            block.bounds.height >= minSize &&
+        const available = blocks.filter(block =>
+            block.bounds.width >= minWidth &&
+            block.bounds.height >= minHeight &&
             block.locations.length === 0 // No locations yet
         );
         
