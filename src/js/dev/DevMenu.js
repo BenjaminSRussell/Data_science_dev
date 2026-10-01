@@ -404,8 +404,13 @@ export class DevMenu {
             container.appendChild(btn);
         });
 
-        // Test all dialogues button
-        const testAllBtn = this.createButton('Test All', () => this.testAllDialogues(), 'primary');
+        // Test all dialogues button - wired to DialogueTester.testAll()
+        const testAllBtn = this.createButton('Test All', async () => {
+            if (window.devTools?.dialogueTester?.testAll) {
+                const results = await window.devTools.dialogueTester.testAll();
+                this.game.showToast(`Dialogues tested: ${results.passed} passed, ${results.failed} failed`, 'info');
+            }
+        }, 'primary');
         container.appendChild(testAllBtn);
 
         // Setup test dialogue button
@@ -541,30 +546,6 @@ export class DevMenu {
         container.appendChild(this.createButton('Check Crashes', () => {
             this.checkForCrashes();
         }));
-    }
-
-    async testAllDialogues() {
-        const npcManager = this.game.gameState?.npcManager;
-        if (!npcManager) return;
-
-        const npcs = npcManager.getAllNPCs?.() || [];
-        const results = { passed: 0, failed: 0, errors: [] };
-
-        for (const npc of npcs) {
-            try {
-                if (npcManager.startConversation) {
-                    npcManager.startConversation(npc.id);
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    results.passed++;
-                }
-            } catch (error) {
-                results.failed++;
-                results.errors.push({ npc: npc.id, error: error.message });
-            }
-        }
-
-        console.log('Dialogue test results:', results);
-        this.game.showToast(`Dialogues tested: ${results.passed} passed, ${results.failed} failed`, 'info');
     }
 
     testAllCharts() {
