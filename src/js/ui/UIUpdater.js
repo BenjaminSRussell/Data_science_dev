@@ -365,7 +365,7 @@ export class UIUpdater {
 
         if (ps.activeProject) {
             activeContainer.classList.remove('hidden');
-            contractsGrid.parentElement.querySelector('h3').classList.add('hidden'); // Hide "Available Contracts" header
+            document.getElementById('available-contracts-header').classList.add('hidden'); // Hide "Available Contracts" header
             contractsGrid.classList.add('hidden');
 
             // Update Active Project UI
@@ -388,7 +388,7 @@ export class UIUpdater {
 
         } else {
             activeContainer.classList.add('hidden');
-            contractsGrid.parentElement.querySelector('h3').classList.remove('hidden');
+            document.getElementById('available-contracts-header').classList.remove('hidden');
             contractsGrid.classList.remove('hidden');
 
             // --- Available Contracts View ---
