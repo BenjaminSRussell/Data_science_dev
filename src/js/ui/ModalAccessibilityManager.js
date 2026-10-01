@@ -8,6 +8,7 @@ export class ModalAccessibilityManager {
     constructor() {
         this.focusStack = []; // Stack to track which element opened each modal
         this.activeModals = new Set(); // Track which modals are currently open
+        this.escapeHandlers = new Map(); // Store escape key handlers by modal element for cleanup
     }
 
     /**
@@ -31,11 +32,7 @@ export class ModalAccessibilityManager {
 
         // Mark modal as open
         modalElement.classList.remove('hidden');
-        if (modalElement.classList.contains('active')) {
-            // Already marked active
-        } else {
-            modalElement.classList.add('active');
-        }
+        modalElement.classList.add('active');
 
         // Move focus into the modal
         this.setInitialFocus(modalElement, options.focusTarget);
@@ -56,6 +53,13 @@ export class ModalAccessibilityManager {
 
         // Remove from active modals
         this.activeModals.delete(modalElement);
+
+        // Remove escape key handler to prevent memory leak
+        if (this.escapeHandlers.has(modalElement)) {
+            const handler = this.escapeHandlers.get(modalElement);
+            document.removeEventListener('keydown', handler);
+            this.escapeHandlers.delete(modalElement);
+        }
 
         // Hide the modal
         modalElement.classList.add('hidden');
@@ -158,7 +162,7 @@ export class ModalAccessibilityManager {
      * @param {HTMLElement} modalElement - The modal element
      */
     setupEscapeKeyHandler(modalElement) {
-        if (!modalElement || modalElement.dataset.escapeSetup === 'true') return;
+        if (!modalElement || this.escapeHandlers.has(modalElement)) return;
 
         const handler = (e) => {
             if (e.key === 'Escape') {
@@ -169,11 +173,9 @@ export class ModalAccessibilityManager {
             }
         };
 
-        modalElement.dataset.escapeSetup = 'true';
+        // Store the handler so it can be removed later
+        this.escapeHandlers.set(modalElement, handler);
         document.addEventListener('keydown', handler);
-
-        // Store the handler on the element for potential cleanup
-        modalElement.dataset.escapeHandler = handler.toString();
     }
 
     /**
@@ -215,6 +217,12 @@ export class ModalAccessibilityManager {
             const focusData = this.focusStack[this.focusStack.length - 1];
             this.closeModal(focusData.modal);
         }
+
+        // Clean up any remaining escape handlers
+        this.escapeHandlers.forEach((handler, modalElement) => {
+            document.removeEventListener('keydown', handler);
+        });
+        this.escapeHandlers.clear();
     }
 }
 

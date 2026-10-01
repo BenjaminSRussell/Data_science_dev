@@ -302,8 +302,8 @@ describe('Modal Accessibility', () => {
         it('should set up escape key handler', () => {
             manager.openModal(mockModal);
 
-            // Check that escape handler was set up
-            expect(mockModal.dataset.escapeSetup).toBe('true');
+            // Check that escape handler was set up and stored in the Map
+            expect(manager.escapeHandlers.has(mockModal)).toBe(true);
         });
 
         it('should close modal on escape key when active', async () => {
@@ -491,6 +491,124 @@ describe('Modal Accessibility', () => {
                 storyModal.parentNode?.removeChild(storyModal);
                 triggerBtn.parentNode?.removeChild(triggerBtn);
             }
+        });
+    });
+
+    describe('Escape handler cleanup - prevent memory leak', () => {
+        it('should store escape handler in escapeHandlers Map when opening modal', () => {
+            expect(manager.escapeHandlers.size).toBe(0);
+
+            manager.openModal(mockModal);
+
+            expect(manager.escapeHandlers.size).toBe(1);
+            expect(manager.escapeHandlers.has(mockModal)).toBe(true);
+        });
+
+        it('should remove escape handler from Map when closing modal', () => {
+            manager.openModal(mockModal);
+            expect(manager.escapeHandlers.size).toBe(1);
+
+            manager.closeModal(mockModal);
+
+            expect(manager.escapeHandlers.size).toBe(0);
+            expect(manager.escapeHandlers.has(mockModal)).toBe(false);
+        });
+
+        it('should not register duplicate handlers when opening same modal', () => {
+            manager.openModal(mockModal);
+            const handlerCount1 = manager.escapeHandlers.size;
+
+            // Try to set up handler again - should not create duplicate
+            manager.setupEscapeKeyHandler(mockModal);
+
+            expect(manager.escapeHandlers.size).toBe(handlerCount1);
+        });
+
+        it('should prevent memory leak: each new modal gets exactly one handler', () => {
+            const modal1 = document.createElement('div');
+            modal1.className = 'modal hidden';
+            document.body.appendChild(modal1);
+
+            const modal2 = document.createElement('div');
+            modal2.className = 'modal hidden';
+            document.body.appendChild(modal2);
+
+            const modal3 = document.createElement('div');
+            modal3.className = 'modal hidden';
+            document.body.appendChild(modal3);
+
+            try {
+                manager.openModal(modal1);
+                expect(manager.escapeHandlers.size).toBe(1);
+
+                manager.openModal(modal2);
+                expect(manager.escapeHandlers.size).toBe(2);
+
+                manager.openModal(modal3);
+                expect(manager.escapeHandlers.size).toBe(3);
+
+                // Close them
+                manager.closeModal(modal3);
+                expect(manager.escapeHandlers.size).toBe(2);
+
+                manager.closeModal(modal2);
+                expect(manager.escapeHandlers.size).toBe(1);
+
+                manager.closeModal(modal1);
+                expect(manager.escapeHandlers.size).toBe(0);
+            } finally {
+                modal1.parentNode?.removeChild(modal1);
+                modal2.parentNode?.removeChild(modal2);
+                modal3.parentNode?.removeChild(modal3);
+            }
+        });
+
+        it('should clean up all handlers when closeAllModals is called', () => {
+            const modal1 = document.createElement('div');
+            modal1.className = 'modal hidden';
+            document.body.appendChild(modal1);
+
+            const modal2 = document.createElement('div');
+            modal2.className = 'modal hidden';
+            document.body.appendChild(modal2);
+
+            try {
+                manager.openModal(mockModal);
+                manager.openModal(modal1);
+                manager.openModal(modal2);
+
+                expect(manager.escapeHandlers.size).toBe(3);
+
+                manager.closeAllModals();
+
+                expect(manager.escapeHandlers.size).toBe(0);
+                expect(manager.focusStack.length).toBe(0);
+            } finally {
+                modal1.parentNode?.removeChild(modal1);
+                modal2.parentNode?.removeChild(modal2);
+            }
+        });
+    });
+
+    describe('No-op classList pattern fix', () => {
+        it('should simply add active class without unnecessary if check', () => {
+            expect(mockModal.classList.contains('hidden')).toBe(true);
+            expect(mockModal.classList.contains('active')).toBe(false);
+
+            manager.openModal(mockModal);
+
+            expect(mockModal.classList.contains('hidden')).toBe(false);
+            expect(mockModal.classList.contains('active')).toBe(true);
+        });
+
+        it('should handle calling classList.add multiple times safely', () => {
+            manager.openModal(mockModal);
+            expect(mockModal.classList.contains('active')).toBe(true);
+
+            // Opening again (though in real usage this shouldn't happen without closing first)
+            // classList.add is idempotent
+            mockModal.classList.add('active');
+            expect(mockModal.classList.contains('active')).toBe(true);
         });
     });
 });
