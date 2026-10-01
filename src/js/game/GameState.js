@@ -388,6 +388,10 @@ export class GameState {
             this.researchPaperSystem.fromJSON(data.researchPaperSystem);
         }
         if (this.emotionalBreakdownSystem && data.emotionalBreakdownSystem) {
+            // Restore active breakdowns (Map reconstruction from saved array)
+            this.emotionalBreakdownSystem.activeBreakdowns = new Map(
+                (data.emotionalBreakdownSystem.activeBreakdowns || []).map(breakdown => [breakdown.id, breakdown])
+            );
             // Restore breakdown history
             this.emotionalBreakdownSystem.breakdownHistory = data.emotionalBreakdownSystem.breakdownHistory || [];
         }
