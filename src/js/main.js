@@ -57,7 +57,6 @@ import { AITrainingStoryline } from './game/ai/AITrainingStoryline.js';
 import { GitHubIssuesSystem } from './game/github/GitHubIssuesSystem.js';
 import { ResearchPaperNotificationSystem } from './game/research/ResearchPaperNotificationSystem.js';
 import { ResearchInboxUI } from './ui/ResearchInboxUI.js';
-import { EmotionalBreakdownSystem } from './game/dialogue/EmotionalBreakdownSystem.js';
 import { RelationshipDialogueSystem } from './game/dialogue/RelationshipDialogueSystem.js';
 import { ComprehensiveSpriteSystem } from './assets/ComprehensiveSpriteSystem.js';
 import { getTextIcon } from './utils/IconMapper.js';
@@ -3393,10 +3392,6 @@ export class MainGame {
                     this.researchInboxUI = null;
                 }
             }
-
-            // Initialize emotional breakdown system
-            this.gameState.emotionalBreakdownSystem = new EmotionalBreakdownSystem(this.gameState);
-            this.emotionalBreakdownSystem = this.gameState.emotionalBreakdownSystem;
 
             // Initialize relationship dialogue system
             this.gameState.relationshipDialogueSystem = new RelationshipDialogueSystem(this.gameState);

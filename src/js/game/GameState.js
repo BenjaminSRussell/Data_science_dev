@@ -316,11 +316,6 @@ export class GameState {
                 pullRequests: this.githubIssuesSystem.pullRequests
             } : null,
             researchPaperSystem: this.researchPaperSystem?.toJSON(),
-            emotionalBreakdownSystem: this.emotionalBreakdownSystem ? {
-                activeBreakdowns: Array.from(this.emotionalBreakdownSystem.activeBreakdowns.values()),
-                breakdownHistory: this.emotionalBreakdownSystem.breakdownHistory
-            } : null,
-            
             // Phase 1 Visual Systems (save quality settings)
             performanceManager: this.performanceManager ? {
                 quality: this.performanceManager.quality
@@ -387,15 +382,6 @@ export class GameState {
         if (this.researchPaperSystem && data.researchPaperSystem) {
             this.researchPaperSystem.fromJSON(data.researchPaperSystem);
         }
-        if (this.emotionalBreakdownSystem && data.emotionalBreakdownSystem) {
-            // Restore active breakdowns (Map reconstruction from saved array)
-            this.emotionalBreakdownSystem.activeBreakdowns = new Map(
-                (data.emotionalBreakdownSystem.activeBreakdowns || []).map(breakdown => [breakdown.id, breakdown])
-            );
-            // Restore breakdown history
-            this.emotionalBreakdownSystem.breakdownHistory = data.emotionalBreakdownSystem.breakdownHistory || [];
-        }
-        
         // Restore Phase 1 Visual Systems settings
         if (this.performanceManager && data.performanceManager) {
             this.performanceManager.setQuality(data.performanceManager.quality || 'auto');
