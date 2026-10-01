@@ -42,8 +42,8 @@
     background: #222;
     border: 1px solid #444;
     color: #ddd;
-    width: 40px;
-    height: 40px;
+    min-width: 44px;
+    min-height: 44px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -55,6 +55,11 @@
 .close-btn:hover {
     background: #333;
     border-color: #666;
+}
+
+.close-btn:focus-visible {
+    outline: 2px solid #666;
+    outline-offset: 2px;
 }
 
 /* Story Content */
