@@ -1,3 +1,4 @@
+import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
 /**
  * Developer Menu System
  * Provides quick access to all screens, locations, and testing tools
@@ -651,6 +652,10 @@ export class DevMenu {
         ];
 
         spriteSheets.forEach(url => {
+            if (isAssetMissing(url)) {
+                results.errors.push(url + ' (blocklisted — skipped)');
+                return;
+            }
             const img = new Image();
             img.onload = () => results.loaded++;
             img.onerror = () => {
