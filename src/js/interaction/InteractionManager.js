@@ -46,16 +46,22 @@ export class InteractionManager {
             inertia = false
         } = options;
 
-        const position = { x: 0, y: 0 };
+        // Per-element accumulators — a shared {x,y} skews every other match (#2645)
+        const positions = new WeakMap();
 
         return interactLib(selector).draggable({
             listeners: {
                 start(event) {
+                    if (!positions.has(event.target)) {
+                        positions.set(event.target, { x: 0, y: 0 });
+                    }
                     if (onStart) onStart(event);
                 },
                 move(event) {
+                    const position = positions.get(event.target) || { x: 0, y: 0 };
                     position.x += event.dx;
                     position.y += event.dy;
+                    positions.set(event.target, position);
 
                     event.target.style.transform = `translate(${position.x}px, ${position.y}px)`;
 

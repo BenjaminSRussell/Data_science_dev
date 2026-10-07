@@ -152,7 +152,8 @@ export function updateRelationshipsScreen(game) {
 
         const avatarText = DOMUtils.createElement('div', {
             className: 'npc-avatar-text',
-            innerHTML: getTextIcon(fallbackIcon),
+            // Prefer per-NPC mapped icon (textIcon); fall back to generic
+            innerHTML: textIcon || getTextIcon(fallbackIcon),
             style: { display: 'none' }
         });
 

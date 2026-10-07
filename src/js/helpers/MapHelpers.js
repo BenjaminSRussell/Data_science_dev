@@ -473,6 +473,8 @@ export function handleLocationAction(game, action) {
         'eat_donut': { cost: 5, energyGain: 10, message: "Yum!" },
         'buy_coffee': { cost: 4, energyGain: 15, message: "Caffeine boost! +15 Energy" },
         'buy_bagel': { cost: 6, energyGain: 12, message: "Tasty bagel! +12 Energy" },
+        'eat_bagel': { cost: 0, energyGain: 12, message: "Ate your bagel! +12 Energy" },
+        'coffee_network': { cost: 4, energyGain: 5, relationshipGain: 2, message: "Networked over coffee! +5 Energy" },
         'buy_flowers': { cost: 15, energyGain: 0, message: "Smells nice! You feel happier." },
         'buy_plant': { cost: 25, energyGain: 0, message: "A nice plant for your office. (Visual only for now)" }
     };
@@ -492,6 +494,9 @@ export function handleLocationAction(game, action) {
     game.gameState.money -= actionData.cost;
     if (actionData.energyGain > 0) {
         game.timeManager.gainEnergy(actionData.energyGain);
+    }
+    if (actionData.relationshipGain && game.npcManager?.boostNearbyRelationships) {
+        game.npcManager.boostNearbyRelationships(actionData.relationshipGain);
     }
 
     game.uiUpdater.updateAllUI();

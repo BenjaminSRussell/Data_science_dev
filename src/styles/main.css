@@ -2073,3 +2073,7 @@ a:hover {
     }
 
 }
+
+/* Exam pass/fail status (#2648) */
+.success-text { color: #16a34a; font-weight: 700; }
+.error-text { color: #dc2626; font-weight: 700; }
