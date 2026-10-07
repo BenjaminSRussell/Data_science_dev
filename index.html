@@ -650,6 +650,23 @@
                         <span class="label" style="color: #888; display: block;">LIQUID CASH</span>
                         <span class="value" id="liquid-cash" style="font-size: 1.2rem;">$0.00</span>
                     </div>
+                    <div class="market-stat" title="Heat raises the risk of every illegal action. It cools off by 5 per day.">
+                        <span class="label" style="color: #888; display: block;">HEAT</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="value" id="heat-value" style="font-size: 1.2rem;">0</span>
+                            <div id="heat-meter-bar" role="meter" aria-label="Heat" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 100px; height: 12px; background: #1a1a1a; border: 1px solid #555; overflow: hidden;">
+                                <div id="heat-meter-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #66cc66, #ccaa33, #cc6633, #cc3333); transition: width 0.3s;"></div>
+                            </div>
+                            <span id="heat-investigation" class="hidden" style="color: #cc3333; font-size: 0.8rem;">UNDER INVESTIGATION</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Off-the-books actions (shown once ethics drop below -10) -->
+                <div id="shady-dealings" class="hidden ascii-box" style="margin-bottom: 1rem; border-color: #cc3333;">
+                    <span class="label" style="color: #cc3333; display: block;">OFF THE BOOKS</span>
+                    <button class="btn-cartoon btn-sm btn-danger" onclick="game.handleCrime('rathole')">Hide Cash (Tax Evasion)</button>
+                    <button class="btn-cartoon btn-sm btn-danger" onclick="game.handleCrime('fabricate_data')">Fabricate Client Results</button>
                 </div>
 
                 <!-- Market Indices -->
@@ -1357,6 +1374,8 @@
                 <div class="jail-stats glass-card" style="margin: 30px auto; max-width: 400px; padding: 20px;">
                     <div style="margin-bottom: 10px;">Sentence Remaining: <span id="jail-time-left"
                             style="color: #e74c3c; font-weight: bold;">0 days</span></div>
+                    <div style="margin-bottom: 15px;">Heat: <span id="jail-heat-value"
+                            style="color: #cc3333; font-weight: bold;">0</span>/100</div>
                     <button class="btn-cartoon btn-danger" id="btn-serve-time"
                         onclick="game.handleServeJailTime()">Serve Time (Skip Day)</button>
                     <button class="btn-cartoon" id="btn-bribe-guard" onclick="game.handleBribeGuard()"

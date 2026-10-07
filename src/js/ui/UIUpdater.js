@@ -895,4 +895,27 @@ export class UIUpdater {
         if (loanLimitEl) loanLimitEl.textContent = `$${maxLoan.toLocaleString()}`;
         if (netWorthEl) netWorthEl.textContent = `$${netWorth.toLocaleString()}`;
     }
+
+    /**
+     * Update the heat meter on the stock market and jail screens
+     */
+    updateHeatMeter() {
+        const crime = this.gameState?.crimeSystem;
+        const heat = Math.max(0, Math.min(100, Math.floor(crime?.heat || 0)));
+
+        const heatValue = document.getElementById('heat-value');
+        if (heatValue) heatValue.textContent = heat;
+
+        const bar = document.getElementById('heat-meter-bar');
+        if (bar) bar.setAttribute('aria-valuenow', String(heat));
+
+        const fill = document.getElementById('heat-meter-fill');
+        if (fill) fill.style.width = `${heat}%`;
+
+        const investigation = document.getElementById('heat-investigation');
+        if (investigation) investigation.classList.toggle('hidden', !crime?.isUnderInvestigation);
+
+        const jailHeat = document.getElementById('jail-heat-value');
+        if (jailHeat) jailHeat.textContent = heat;
+    }
 }

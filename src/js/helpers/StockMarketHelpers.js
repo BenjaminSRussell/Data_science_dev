@@ -21,6 +21,12 @@ export function updateStockMarketScreen(game) {
         quotronTicker.refresh();
     }
 
+    // Update heat meter display
+    game.uiUpdater?.updateHeatMeter?.();
+
+    // Off-the-books actions (only offered once ethics have slipped)
+    updateShadyDealings(game);
+
     // Update market indices display
     updateMarketIndices(game);
 
@@ -85,6 +91,7 @@ export function updateStockMarketScreen(game) {
                 illegalActionsHtml = `
                     <div class="stock-actions-illegal" style="margin-top: 5px; border-top: 1px dashed red; padding-top: 5px;">
                         <button class="btn-cartoon btn-sm btn-danger" onclick="game.handleCrime('pump_dump', '${stock.id}')"> Pump & Dump</button>
+                        <button class="btn-cartoon btn-sm btn-danger" onclick="game.handleCrime('insider_trading', '${stock.id}')"> Insider Tip</button>
                     </div>
                 `;
             }
@@ -271,8 +278,26 @@ export function handleSellStock(game, stockId) {
 /**
  * Handle committing crimes (stock manipulation, etc.)
  */
+export function updateShadyDealings(game) {
+    const panel = document.getElementById('shady-dealings');
+    if (!panel) return;
+    const unlocked = (game.characterStats?.ethics ?? 0) < -10;
+    panel.classList.toggle('hidden', !unlocked);
+}
+
 export function handleCrime(game, type, params) {
-    if (!confirm(" This is illegal! If caught, you could go to jail. Proceed?")) return;
+    const heat = Math.floor(game.crimeSystem?.heat || 0);
+    if (!confirm(`This is illegal! If caught, you could go to jail. Proceed?\n\nCurrent heat: ${heat}/100`)) return;
+
+    if (type === 'rathole' && params === undefined) {
+        const input = prompt('How much cash do you want to hide from the taxman?', '1000');
+        if (input === null) return;
+        params = Number(input);
+        if (!Number.isFinite(params) || params <= 0) {
+            game.showToast('Enter a positive amount.', 'warning');
+            return;
+        }
+    }
 
     const result = game.crimeSystem.commitCrime(type, params);
     if (result.success) {
@@ -287,6 +312,7 @@ export function handleCrime(game, type, params) {
             handleArrest(game, result.message);
         } else {
             game.showToast(result.message, 'warning');
+            game.uiUpdater?.updateHeatMeter?.();
         }
     }
 }
@@ -308,6 +334,7 @@ export function handleArrest(game, reason) {
     game.gameState.jailSentence = sentence;
     game.screenManager.showScreen('screen-jail');
     document.getElementById('jail-time-left').textContent = `${game.gameState.jailSentence} days`;
+    game.uiUpdater?.updateHeatMeter?.();
 
     game.gameState.reputation = Math.floor(game.gameState.reputation * (1 - reduction));
     game.gameState.money -= fine;
@@ -331,6 +358,7 @@ export function handleServeJailTime(game) {
 
     game.handleTimeAdvance(6);
     game.gameState.jailSentence--;
+    game.gameState.crimeSystem?.serveJailDay?.();
     document.getElementById('jail-time-left').textContent = `${game.gameState.jailSentence} days`;
 
     if (game.gameState.jailSentence <= 0) {

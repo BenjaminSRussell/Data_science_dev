@@ -318,6 +318,9 @@ export class StockMarket {
             stock.update(this.marketTrends, sectorEffects, this.activeWorldEvents, this.stocks);
         });
 
+        // Artificially pumped prices deflate back toward their real level
+        this.unwindManipulation();
+
         // Update market indices
         this.updateIndices();
 
@@ -395,27 +398,49 @@ export class StockMarket {
         const stock = this.stocks?.find(s => s.id === stockId);
         if (!stock) return false;
 
-        // Record the manipulation to apply in next update or now
-        // For simplicity, apply immediate price shock
-
-        let change = 0;
-        if (type === 'pump' || type === 'insider_pump') {
-            change = (magnitude - 1); // e.g. 1.5 -> +0.5 (50%)
-        } else if (type === 'crash') {
-            change = -(1 - magnitude);
+        // Apply an immediate price shock. A manipulated price is artificial, so
+        // it is recorded and unwinds back to the pre-manipulation price over the
+        // next few market updates (the "dump"). Re-pumping a stock that is still
+        // unwinding keeps the original base price, so repeated pumps can't ratchet
+        // the "real" price up permanently.
+        if (!stock.manipulation) {
+            stock.manipulation = {
+                basePrice: stock.price,
+                baseVolatility: stock.volatility,
+                daysLeft: 0
+            };
         }
+        stock.manipulation.daysLeft = 3;
 
-        // Apply change
-        const oldPrice = stock.price;
         stock.price = stock.price * magnitude;
         if (stock.price < 0.01) stock.price = 0.01;
         stock.history.push(stock.price);
+        if (stock.history.length > 100) stock.history.shift();
 
-        // Add volatility
-        stock.volatility += 0.2; // Becomes unstable
-
+        // Manipulated stocks become unstable (capped so repeated pumps can't
+        // push volatility without bound)
+        stock.volatility = Math.min(stock.manipulation.baseVolatility + 0.4, stock.volatility + 0.2);
 
         return true;
+    }
+
+    /**
+     * Unwind price manipulation: move each manipulated stock a share of the way
+     * back to its pre-manipulation price and volatility.
+     */
+    unwindManipulation() {
+        this.stocks?.forEach(stock => {
+            const m = stock.manipulation;
+            if (!m) return;
+            const share = 1 / Math.max(1, m.daysLeft);
+            stock.price = Math.max(0.01, stock.price - (stock.price - m.basePrice) * share);
+            stock.volatility = stock.volatility - (stock.volatility - m.baseVolatility) * share;
+            m.daysLeft--;
+            if (m.daysLeft <= 0) {
+                stock.volatility = m.baseVolatility;
+                delete stock.manipulation;
+            }
+        });
     }
 
     buyStock(stockId, quantity) {
@@ -516,7 +541,8 @@ export class StockMarket {
                 history: stock.history,
                 volatility: stock.volatility,
                 lastChange: stock.lastChange,
-                lastChangePct: stock.lastChangePct
+                lastChangePct: stock.lastChangePct,
+                manipulation: stock.manipulation || null
             })),
             portfolio: {
                 holdings: this.portfolio.holdings,
@@ -559,6 +585,8 @@ export class StockMarket {
                     stock.volatility = sData.volatility;
                     stock.lastChange = sData.lastChange || 0;
                     stock.lastChangePct = sData.lastChangePct || 0;
+                    if (sData.manipulation) stock.manipulation = { ...sData.manipulation };
+                    else delete stock.manipulation;
                 }
             });
         }
