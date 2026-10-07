@@ -12,6 +12,12 @@ export class LitUIManager {
     constructor(game) {
         this.game = game;
         this.components = new Map();
+        // Guards to prevent console spam
+        this.warnedAboutTopBarMount = false;
+        this.warnedAboutRankProgressMount = false;
+        this.warnedAboutTopBarFallback = false;
+        this.warnedAboutRankProgressFallback = false;
+        this.warnedAboutLocationViewContainer = false;
     }
 
     /**
@@ -25,6 +31,9 @@ export class LitUIManager {
             topBar.game = this.game;
             topBarEl.appendChild(topBar);
             this.components.set('topBar', topBar);
+        } else if (!topBarEl && !this.warnedAboutTopBarMount) {
+            console.warn('LitUIManager: #top-bar-container element not found, Lit TopBar component will not mount');
+            this.warnedAboutTopBarMount = true;
         }
 
         // Initialize ProgressBar for rank if element exists
@@ -34,6 +43,9 @@ export class LitUIManager {
             progressBar.showValue = true;
             rankProgressEl.appendChild(progressBar);
             this.components.set('rankProgress', progressBar);
+        } else if (!rankProgressEl && !this.warnedAboutRankProgressMount) {
+            console.warn('LitUIManager: #rank-progress-container element not found, Lit ProgressBar component will not mount');
+            this.warnedAboutRankProgressMount = true;
         }
     }
 
@@ -45,7 +57,7 @@ export class LitUIManager {
         const topBar = this.components.get('topBar');
         // Phase 4: Get state from Zustand store
         const gameStore = this.game?.gameStore || (typeof useGameStore !== 'undefined' ? useGameStore : null);
-        
+
         if (topBar && gameStore) {
             const state = gameStore.getState();
             // Create a compatible object for updateFromGameState
@@ -60,6 +72,10 @@ export class LitUIManager {
             topBar.updateFromGameState(this.game.gameState);
         } else {
             // Fallback to old method if component not available
+            if (!this.warnedAboutTopBarFallback) {
+                console.warn('LitUIManager: TopBar component not available, falling back to DOM manipulation');
+                this.warnedAboutTopBarFallback = true;
+            }
             this.updateTopBarFallback();
         }
     }
@@ -97,6 +113,10 @@ export class LitUIManager {
             progressBar.label = `Rank: ${gameState.currentRank?.title || 'None'}`;
         } else {
             // Fallback to old method
+            if (!this.warnedAboutRankProgressFallback) {
+                console.warn('LitUIManager: RankProgress component not available, falling back to DOM manipulation');
+                this.warnedAboutRankProgressFallback = true;
+            }
             this.updateRankProgressFallback();
         }
     }
@@ -131,12 +151,18 @@ export class LitUIManager {
      */
     updateLocationView(locationId, locationDetails, backgroundImage, timeOfDay) {
         let locationView = this.components.get('locationView');
-        
+
         if (!locationView) {
-            const container = document.getElementById('location-view') || 
+            const container = document.getElementById('location-view') ||
                             document.getElementById('location-view-container');
-            if (!container) return;
-            
+            if (!container) {
+                if (!this.warnedAboutLocationViewContainer) {
+                    console.warn('LitUIManager: location view container element not found');
+                    this.warnedAboutLocationViewContainer = true;
+                }
+                return;
+            }
+
             locationView = document.createElement('location-view-component');
             locationView.game = this.game;
             container.appendChild(locationView);
