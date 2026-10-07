@@ -25,6 +25,35 @@ export class OfficeManager {
 
         // Active marketing channels
         this.activeMarketing = ['word_of_mouth'];
+
+        // Keep the visual office tier in sync with the real office progression
+        this.syncOfficeLevel();
+    }
+
+    /**
+     * Map an OFFICES id to the background-tier string used by
+     * LocationBackgroundSystem.getOfficeBackground().
+     */
+    static OFFICE_LEVEL_MAP = {
+        bedroom: 'small',
+        home_office: 'small',
+        coworking: 'medium',
+        small_office: 'medium',
+        office_floor: 'large',
+        headquarters: 'executive'
+    };
+
+    /**
+     * Sync gameState.officeLevel to the current office so the location
+     * background reflects the real office progression.
+     */
+    syncOfficeLevel() {
+        const office = this.currentOffice;
+        if (!office) return;
+        const level = OfficeManager.OFFICE_LEVEL_MAP[office.id] || 'small';
+        if (this.gameState.officeLevel !== level) {
+            this.gameState.officeLevel = level;
+        }
     }
 
     /**
@@ -109,6 +138,9 @@ export class OfficeManager {
         const nextOffice = OFFICES[this.currentOfficeIndex + 1];
         this.gameState.money -= nextOffice.price;
         this.currentOfficeIndex++;
+
+        // Keep the visual office tier in sync with the real office progression
+        this.syncOfficeLevel();
 
         window.dispatchEvent(new CustomEvent('officeupgraded', {
             detail: { office: this.currentOffice }
@@ -265,6 +297,9 @@ export class OfficeManager {
         };
         this.currentOfficeIndex = data.currentOfficeIndex || 0;
         this.activeMarketing = data.activeMarketing || ['word_of_mouth'];
+
+        // Re-derive the visual office tier from the restored office index
+        this.syncOfficeLevel();
 
         // Restore staff
         this.staff = (data.staff || []).map(s => ({
