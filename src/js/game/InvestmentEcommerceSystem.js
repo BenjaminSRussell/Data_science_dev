@@ -55,10 +55,16 @@ export class InvestmentEcommerceSystem {
         }
 
         const revenue = shares * currentPrice;
-        const profit = revenue - (shares * stock.avgPrice);
+        const costBasis = shares * stock.avgPrice;
+        const profit = revenue - costBasis;
 
         this.gameState.money += revenue;
         stock.shares -= shares;
+        // Keep initialInvestment aligned with remaining cost basis (#15).
+        this.portfolio.initialInvestment = Math.max(
+            0,
+            (this.portfolio.initialInvestment || 0) - costBasis,
+        );
 
         if (stock.shares === 0) {
             delete this.portfolio.stocks[stockId];
