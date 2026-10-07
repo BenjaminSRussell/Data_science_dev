@@ -45,21 +45,33 @@ export async function handleNPCTalk(game, npcId) {
         dialogArea.innerHTML = `"${convo.greeting}"`;
     }
 
-    // Update actions to choices (markup may use npc-modal-actions)
-    const actionsDiv = document.querySelector(
+    renderNPCChoices(game, convo.choices);
+}
+
+function getNPCActionsContainer() {
+    return document.querySelector(
         '#npc-modal .npc-modal-actions, #npc-modal .npc-actions, .dialogue-container .dialogue-choices'
     );
+}
+
+/**
+ * Render the current conversation choices as buttons in the NPC modal
+ */
+export function renderNPCChoices(game, choices = []) {
+    const actionsDiv = getNPCActionsContainer();
     if (!actionsDiv) {
         logger.warn('NPC actions container not found');
         return;
     }
     actionsDiv.textContent = '';
 
-    convo.choices.forEach((choice, index) => {
+    choices.forEach((choice, index) => {
         const btn = document.createElement('button');
         btn.className = 'btn-cartoon btn-sm';
         btn.textContent = choice.text;
         btn.onclick = () => {
+            // Disable every button so a choice can't be applied twice
+            actionsDiv.querySelectorAll('button').forEach(b => { b.disabled = true; });
             const result = game.gameState.npcManager.makeChoice(index);
             handleNPCResponse(game, result);
         };
@@ -72,17 +84,30 @@ export async function handleNPCTalk(game, npcId) {
  */
 export function handleNPCResponse(game, result) {
     if (!result) return;
-    DOMUtils.updateElement('#npc-dialogue-area', {
-        innerHTML: "Interesting... (Relationship Changed)"
-    });
 
-    setTimeout(() => {
-        const modal = DOMUtils.query('#npc-modal');
-        if (modal) {
-            modal.className = 'modal hidden';
-        }
-        game.showToast('Conversation finished.', 'success');
-    }, 1500);
+    // Show what the NPC actually said, plus the relationship change
+    DOMUtils.updateElement('#npc-dialogue-area', {
+        textContent: result.text ? `"${result.text}"` : '...'
+    });
+    if (result.effects?.relationship) {
+        const sign = result.effects.relationship > 0 ? '+' : '';
+        game.showToast?.(`Relationship ${sign}${result.effects.relationship}`, 'info');
+    } else if (result.isSpecialAction && !result.success) {
+        game.showToast?.(result.text, 'warning');
+    }
+
+    if (result.ended || !result.choices || result.choices.length === 0) {
+        setTimeout(() => {
+            const modal = DOMUtils.query('#npc-modal');
+            if (modal) {
+                modal.className = 'modal hidden';
+            }
+            game.showToast?.('Conversation finished.', 'success');
+        }, 1500);
+        return;
+    }
+
+    renderNPCChoices(game, result.choices);
 }
 
 /**
@@ -94,9 +119,15 @@ export function handleNPCGift(game, npcId) {
         game.showToast?.('Unable to give gift right now.', 'error');
         return;
     }
+    if (!result.success) {
+        game.showToast?.(result.message || 'Unable to give gift right now.', 'warning');
+        return;
+    }
     DOMUtils.updateElement('#npc-dialogue-area', {
-        innerHTML: result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess."
+        textContent: result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess."
     });
+    game.showToast?.(`Gift given (-$${result.cost}). Relationship ${result.relationshipGain >= 0 ? '+' : ''}${result.relationshipGain}`, 'info');
+    game.uiUpdater?.updateAllUI?.();
 }
 
 /**

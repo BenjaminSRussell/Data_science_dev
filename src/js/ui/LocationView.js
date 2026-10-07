@@ -147,8 +147,11 @@ export class LocationView {
         if (!charactersContainer) return;
 
         // Get NPCs at this location
-        const npcs = this.game.gameState.npcManager?.getAllNPCs() || [];
-        const locationNPCs = npcs.filter(npc => npc.location === locationId);
+        // Only NPCs whose unlock requirements are met appear here
+        const npcManager = this.game.gameState.npcManager;
+        const locationNPCs = npcManager?.getNPCsAtLocation
+            ? npcManager.getNPCsAtLocation(locationId).map(npc => npcManager.getAllNPCs().find(n => n.id === npc.id) || npc)
+            : [];
 
         locationNPCs?.forEach((npc, index) => {
             // Check for 3D model

@@ -42,18 +42,25 @@ export class RomanceProgressionSystem {
      * Calculate partner income
      */
     calculatePartnerIncome(partner) {
-        // Base income based on partner's job/title
-        const incomeMap = {
-            'professor': 6000,
-            'analyst': 5000,
-            'manager': 7000,
-            'consultant': 5500,
-            'researcher': 4500
-        };
-        
-        return incomeMap[partner.type] || 4000;
+        // An explicit income on the NPC wins; otherwise estimate from their job title
+        if (typeof partner?.income === 'number') return partner.income;
+        const title = (partner?.title || '').toLowerCase();
+        const incomeByKeyword = [
+            ['professor', 6000],
+            ['engineer', 7500],
+            ['manager', 7000],
+            ['consultant', 5500],
+            ['analyst', 5000],
+            ['researcher', 4500],
+            ['influencer', 8000],
+            ['librarian', 3500],
+            ['teacher', 3500],
+            ['artist', 3000]
+        ];
+        const match = incomeByKeyword.find(([keyword]) => title.includes(keyword));
+        return match ? match[1] : 4000;
     }
-    
+
     /**
      * Determine partner's bias
      */

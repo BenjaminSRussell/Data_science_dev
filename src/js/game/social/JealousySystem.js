@@ -29,21 +29,27 @@ export class JealousySystem {
     /**
      * Determine if NPC should be jealous
      */
-    shouldBeJealous(npc, playerSuccess) {
-        // Competitive NPCs are more likely to be jealous
+    shouldBeJealous(npc, playerSuccess = {}) {
+        // Only NPCs the player actually knows can resent their success
+        const npcManager = this.gameState.npcManager;
+        if (npcManager?.metNPCs && !npcManager.metNPCs.includes(npc.id)) return false;
+
+        const relevant = playerSuccess.type === 'career' || playerSuccess.type === 'financial';
+
+        // Competitive NPCs resent career/financial wins
         if (npc.personality === 'competitive') {
-            return true;
+            return relevant;
         }
-        
+
         // NPCs in similar field
         if (npc.type === 'business' || npc.type === 'mentor') {
-            return playerSuccess.type === 'career' || playerSuccess.type === 'financial';
+            return relevant;
         }
-        
+
         // Random chance for others
         return Math.random() < 0.3;
     }
-    
+
     /**
      * Increase jealousy level
      */
@@ -80,14 +86,18 @@ export class JealousySystem {
      * Stop talking to player
      */
     stopTalking(npcId) {
-        const npc = this.gameState.npcManager?.getNPC(npcId);
+        const npcManager = this.gameState.npcManager;
+        const npc = npcManager?.getNPC(npcId);
         if (!npc) return;
-        
-        // Mark NPC as not talking
-        npc.willNotTalk = true;
-        npc.jealousyMessage = this.getJealousyMessage(npc);
+
+        // Store on per-save NPC state (saved with the game), never on the
+        // shared static NPC definition
+        const flags = npcManager.getNPCFlags?.(npcId);
+        if (!flags) return;
+        flags.willNotTalk = true;
+        flags.jealousyMessage = this.getJealousyMessage(npc);
     }
-    
+
     /**
      * Get jealousy message
      */
@@ -112,9 +122,10 @@ export class JealousySystem {
         
         // If jealousy drops, NPC might start talking again
         if (newLevel < 50) {
-            const npc = this.gameState.npcManager?.getNPC(npcId);
-            if (npc) {
-                npc.willNotTalk = false;
+            const flags = this.gameState.npcManager?.getNPCFlags?.(npcId);
+            if (flags) {
+                flags.willNotTalk = false;
+                delete flags.jealousyMessage;
             }
         }
     }

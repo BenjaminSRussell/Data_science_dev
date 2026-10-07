@@ -107,8 +107,32 @@ export const PERSONALITY_TRAITS = {
     professional: { relationshipGain: 1.0, dialogueTone: 'formal' },
     competitive: { relationshipGain: 0.8, dialogueTone: 'challenging' },
     mysterious: { relationshipGain: 0.9, dialogueTone: 'cryptic' },
-    generous: { relationshipGain: 1.1, dialogueTone: 'helpful' }
+    generous: { relationshipGain: 1.1, dialogueTone: 'helpful' },
+    aggressive: { relationshipGain: 0.7, dialogueTone: 'blunt' },
+    greedy: { relationshipGain: 0.9, dialogueTone: 'transactional' },
+    high_maintenance: { relationshipGain: 0.8, dialogueTone: 'demanding' },
+    hostile: { relationshipGain: 0.5, dialogueTone: 'cold' }
 };
+
+// Used when an NPC's personality has no entry above
+export const DEFAULT_PERSONALITY_TRAIT = { relationshipGain: 1.0, dialogueTone: 'neutral' };
+
+/**
+ * Look up personality traits with a safe fallback for unknown personalities.
+ */
+export function getPersonalityTrait(personality) {
+    return PERSONALITY_TRAITS[personality] || DEFAULT_PERSONALITY_TRAIT;
+}
+
+// Gift prices; anything unlisted costs DEFAULT_GIFT_COST
+export const GIFT_COSTS = { coffee: 5, books: 25, flowers: 30, tech_gadgets: 150, wine: 40, jewelry: 300 };
+export const DEFAULT_GIFT_COST = 20;
+
+// Order in which the generic (non-tree) conversation advances
+const CONVERSATION_STAGES = ['greeting', 'ask_advice', 'business_talk', 'farewell'];
+
+// Dialogue data uses a few skill names that aren't CharacterStats stat IDs
+const XP_STAT_ALIASES = { python: 'analytics', statistics: 'intelligence', sql: 'analytics' };
 
 // Base NPC definitions
 export const NPCs = [
@@ -160,13 +184,13 @@ export const NPCs = [
         icon: '',
         image: '/assets/characters/bosses/martinez.png', // Temporary high-quality replacement
         type: 'business',
-        personality: 'friendly',
+        personality: 'professional', // public networker mask over a competitive introvert (story_line/mike_johnson.txt)
         location: 'networking_bar',
         unlockRequirement: { stat: 'charisma', value: 20 },
         gifts: ['drinks', 'business_cards'],
         dialogueTopics: ['marketing', 'data', 'business'],
         benefits: { clientReferrals: true, premiumClients: true },
-        backstory: 'Runs marketing for a Fortune 500. Always looking for good analysts.',
+        backstory: 'Ex-athlete turned marketing director at a Fortune 500. Known as a natural networker, though the events secretly drain him. Always looking for good analysts.',
         description: 'A charismatic marketing executive who understands the power of data-driven decisions. Known for his extensive network and ability to connect the right people.',
         age: 41,
         interests: ['networking', 'marketing analytics', 'golf'],
@@ -185,7 +209,7 @@ export const NPCs = [
         gifts: ['tech_gadgets', 'investment_tips'],
         dialogueTopics: ['startups', 'funding', 'growth'],
         benefits: { startupOpportunities: true, investorIntros: true },
-        backstory: 'Founded two successful startups. Now runs an accelerator program.'
+        backstory: 'Dropped out of college at 19 to found her first company. Failed twice before her AI startup took off. Treats every failure as data.'
     },
 
     // Investors
@@ -213,7 +237,6 @@ export const NPCs = [
         name: 'Victoria Sterling',
         title: 'VC Partner',
         icon: '',
-        image: '/downloaded_assets/ui/elements/generated_low_poly_panel_0241.png',
         type: 'investor',
         personality: 'professional',
         location: 'luxury_district',
@@ -229,7 +252,6 @@ export const NPCs = [
         name: 'Donna',
         title: 'Donut Shop Owner',
         icon: '',
-        image: '/downloaded_assets/misc/placeholders/placeholder_placeholders_043.png',
         type: 'shopkeeper',
         personality: 'friendly',
         location: 'donut_shop',
@@ -247,7 +269,6 @@ export const NPCs = [
         name: 'Bob',
         title: 'Bagel Expert',
         icon: '',
-        image: '/downloaded_assets/misc/placeholders/placeholder_placeholders_042.png',
         type: 'shopkeeper',
         personality: 'generous',
         location: 'bagel_shop',
@@ -265,7 +286,6 @@ export const NPCs = [
         name: 'Flora',
         title: 'Florist',
         icon: '',
-        image: '/downloaded_assets/misc/placeholders/placeholder_placeholders_040.png',
         type: 'shopkeeper',
         personality: 'friendly',
         location: 'flower_store',
@@ -285,7 +305,7 @@ export const NPCs = [
     {
         id: 'alex_rivera',
         name: 'Alex Rivera',
-        title: 'Fellow Freelancer',
+        title: 'Security Consultant',
         icon: '',
         image: '/assets/characters/bosses/kim.png', // Temporary high-quality replacement
         type: 'friend',
@@ -295,8 +315,8 @@ export const NPCs = [
         gifts: ['coffee', 'snacks'],
         dialogueTopics: ['freelancing', 'life', 'hobbies'],
         benefits: { moralBoost: true, jobSharing: true },
-        backstory: 'Started freelancing the same time as you. Currently struggling to find steady work.',
-        description: 'A fellow freelancer trying to make it in the data science world. Shares your struggles and dreams. Always up for a coffee chat.',
+        backstory: 'Former teenage hacker who got a second chance from a judge. Now a security consultant who hacks legally through bug bounties and audits.',
+        description: 'An ethical hacker turned security consultant who knows what a second chance is worth. Dreams of teaching at-risk kids to code. Always up for a coffee chat.',
         age: 26,
         interests: ['coding', 'startups', 'coffee shops'],
         favoriteTopics: ['freelance life', 'side projects', 'mutual support']
@@ -306,14 +326,13 @@ export const NPCs = [
         name: 'Jordan Kim',
         title: 'Gym Buddy',
         icon: '',
-        image: '/downloaded_assets/misc/placeholders/placeholder_placeholders_021.png',
         type: 'friend',
         personality: 'friendly',
         location: 'gym',
         unlockRequirement: { stat: 'stamina', value: 15 },
         gifts: ['protein', 'sports_gear'],
         dialogueTopics: ['fitness', 'motivation', 'life'],
-        backstory: 'Personal trainer who believes in work-life balance.',
+        backstory: 'Former athlete whose career ended with an injury. Found purpose coaching others and uses the gym as therapy for his own depression.',
         description: 'An enthusiastic personal trainer who combines fitness expertise with motivational support. Believes that physical health enhances mental performance.',
         age: 29,
         interests: ['weightlifting', 'nutrition', 'mental health'],
@@ -358,7 +377,6 @@ export const NPCs = [
         name: 'Gordon "The Broker"',
         title: 'Stock Operator',
         icon: '',
-        image: '/downloaded_assets/ui/elements/generated_low_poly_panel_0296.png',
         type: 'criminal',
         personality: 'greedy',
         location: 'stock_exchange',
@@ -440,7 +458,6 @@ export const NPCs = [
         name: 'Marcus Thompson',
         title: 'Data Engineering Lead',
         icon: '',
-        image: '/downloaded_assets/ui/elements/generated_low_poly_star_0279.png',
         type: 'mentor',
         personality: 'generous',
         location: 'tech_hub',
@@ -827,7 +844,7 @@ export const DIALOGUE_TREES = {
         'reading_topic': {
             text: "Oh, this? It's a fascinating book on Neural Networks. I love how they mimic the human brain.",
             choices: [
-                { text: "I love algorithms! I'm a Data Scientist.", next: 'algorithms_topic', effect: { relationship: 5, xp: 'python' } },
+                { text: "I love algorithms! I'm a Data Scientist.", next: 'algorithms_topic', effect: { relationship: 5, xp: 'analytics' } },
                 { text: "Sounds complicated.", next: 'root', effect: { relationship: -1 } }
             ]
         },
@@ -945,7 +962,7 @@ export const DIALOGUE_TREES = {
         'root': {
             text: "Good day. Have you completed the reading on Bayesian Inference?",
             choices: [
-                { text: "Yes, Professor. Fascinating stuff.", next: 'theory_topic', effect: { relationship: 2, xp: 'statistics' } },
+                { text: "Yes, Professor. Fascinating stuff.", next: 'theory_topic', effect: { relationship: 2, xp: 'intelligence' } },
                 { text: "I'm here about the exam.", next: 'exam_topic', effect: { relationship: 0 } },
                 { text: "Not yet.", next: 'lecture_topic', effect: { relationship: -1 } }
             ]
@@ -986,7 +1003,7 @@ export const DIALOGUE_TREES = {
         'corporate_topic': {
             text: "We actually need some data cleaning done. It's boring work, but pays okay.",
             choices: [
-                { text: "I'll take it.", next: 'root', effect: { relationship: 5, money: 300, energy: -20, xp: 'python' } },
+                { text: "I'll take it.", next: 'root', effect: { relationship: 5, money: 300, energy: -20, xp: 'analytics' } },
                 { text: "I'm too expensive for cleaning.", next: 'root', effect: { relationship: -1 } }
             ]
         }
@@ -1037,7 +1054,7 @@ export const DIALOGUE_TREES = {
         'root': {
             text: "Oh, it's you. Still playing with Excel spreadsheets?",
             choices: [
-                { text: "I use Python actually.", next: 'tech_topic', effect: { relationship: 0, xp: 'python' } },
+                { text: "I use Python actually.", next: 'tech_topic', effect: { relationship: 0, xp: 'analytics' } },
                 { text: "I'm doing better than you.", next: 'rival_topic', effect: { relationship: -2 } },
                 { text: "Go away, Brad.", next: 'root', effect: { relationship: -5 } }
             ]
@@ -1098,6 +1115,13 @@ export class NPCManager {
         // Track interaction history
         this.interactionHistory = {};
 
+        // Fractional relationship change carried between interactions so small
+        // personality-scaled gains/losses aren't rounded away (or amplified)
+        this.relationshipCarry = {};
+
+        // Last in-game day a gift was given to each NPC (gift cooldown)
+        this.lastGiftDay = {};
+
         // NPCs met
         this.metNPCs = [];
 
@@ -1141,7 +1165,9 @@ export class NPCManager {
             relationships: this.relationships,
             npcStates: this.npcStates,
             interactionHistory: this.interactionHistory,
-            metNPCs: this.metNPCs
+            metNPCs: this.metNPCs,
+            relationshipCarry: this.relationshipCarry,
+            lastGiftDay: this.lastGiftDay
         };
     }
 
@@ -1151,6 +1177,8 @@ export class NPCManager {
         this.npcStates = data.npcStates || {};
         this.interactionHistory = data.interactionHistory || {};
         this.metNPCs = data.metNPCs || [];
+        this.relationshipCarry = data.relationshipCarry || {};
+        this.lastGiftDay = data.lastGiftDay || {};
 
         // Re-init if needed to ensure all NPCs exist
         this.initializeRelationships();
@@ -1160,24 +1188,44 @@ export class NPCManager {
      * Get available NPCs at a location
      */
     getNPCsAtLocation(locationId) {
-        return NPCs.filter(npc => {
-            if (npc.location !== locationId) return false;
+        return NPCs.filter(npc => npc.location === locationId && this.isNPCUnlocked(npc));
+    }
 
-            // Check unlock requirements
-            if (npc.unlockRequirement) {
-                const req = npc.unlockRequirement;
-                if (req.day && this.gameState.timeManager?.totalDays < req.day) return false;
-                if (req.stat && this.gameState.characterStats?.getStat(req.stat) < req.value) return false;
-                if (req.reputation && this.gameState.reputation < req.reputation) return false;
-                if (req.relationship) {
-                    for (const [npcId, level] of Object.entries(req.relationship)) {
-                        if (this.relationships[npcId] < level) return false;
-                    }
-                }
+    /**
+     * Player net worth: cash + bank savings + stock portfolio - loans
+     */
+    getPlayerNetWorth() {
+        const gs = this.gameState;
+        const savings = gs.bank?.savings || 0;
+        const loan = gs.bank?.loan || 0;
+        const portfolio = gs.stockMarket?.getPortfolioValue?.() || 0;
+        return (gs.money || 0) + savings + portfolio - loan;
+    }
+
+    /**
+     * Whether an NPC's unlockRequirement is satisfied. A positive ethics
+     * requirement is a minimum (e.g. emma_bloom needs >= 20); a negative one is
+     * a maximum (criminal contacts only deal with players at or below it).
+     */
+    isNPCUnlocked(npc) {
+        const req = npc?.unlockRequirement;
+        if (!req) return true;
+        const gs = this.gameState;
+        if (req.day && (gs.timeManager?.totalDays || 0) < req.day) return false;
+        if (req.stat && (gs.characterStats?.getStat?.(req.stat) || 0) < req.value) return false;
+        if (req.reputation && (gs.reputation || 0) < req.reputation) return false;
+        if (req.money && (gs.money || 0) < req.money) return false;
+        if (req.netWorth && this.getPlayerNetWorth() < req.netWorth) return false;
+        if (req.ethics !== undefined) {
+            const ethics = gs.characterStats?.ethics ?? 0;
+            if (req.ethics >= 0 ? ethics < req.ethics : ethics > req.ethics) return false;
+        }
+        if (req.relationship) {
+            for (const [npcId, level] of Object.entries(req.relationship)) {
+                if ((this.relationships[npcId] || 0) < level) return false;
             }
-
-            return true;
-        });
+        }
+        return true;
     }
 
     /**
@@ -1259,14 +1307,47 @@ export class NPCManager {
         const npc = this.getNPC(npcId);
         if (!npc) return;
 
-        const personality = PERSONALITY_TRAITS[npc.personality];
-        const adjustedAmount = Math.floor(amount * personality.relationshipGain);
+        const personality = getPersonalityTrait(npc.personality);
 
-        this.relationships[npcId] = Math.max(0, Math.min(100,
-            (this.relationships[npcId] || 0) + adjustedAmount
-        ));
+        // Scale by personality, then apply whole points and carry the fraction
+        // over to the next interaction. Truncating toward zero keeps gains and
+        // losses symmetric (Math.floor used to erase small gains and amplify
+        // small losses).
+        const exact = amount * personality.relationshipGain + (this.relationshipCarry[npcId] || 0);
+        const applied = Math.trunc(exact);
+        this.relationshipCarry[npcId] = Math.round((exact - applied) * 1000) / 1000;
+
+        const before = this.relationships[npcId] || 0;
+        this.relationships[npcId] = Math.max(0, Math.min(100, before + applied));
+
+        // Don't bank progress past the 0/100 bounds
+        if ((this.relationships[npcId] === 100 && this.relationshipCarry[npcId] > 0) ||
+            (this.relationships[npcId] === 0 && this.relationshipCarry[npcId] < 0)) {
+            this.relationshipCarry[npcId] = 0;
+        }
 
         return this.relationships[npcId];
+    }
+
+    /**
+     * Set a relationship to an absolute value (clamped to 0-100).
+     */
+    setRelationship(npcId, value) {
+        if (!this.getNPC(npcId)) return undefined;
+        const v = Number(value);
+        if (!Number.isFinite(v)) return this.relationships[npcId] || 0;
+        this.relationships[npcId] = Math.max(0, Math.min(100, Math.round(v)));
+        this.relationshipCarry[npcId] = 0;
+        return this.relationships[npcId];
+    }
+
+    /**
+     * Per-save flags for an NPC (stored in npcStates, which is saved).
+     */
+    getNPCFlags(npcId) {
+        const state = this.getNPCState(npcId);
+        if (!state.flags) state.flags = {};
+        return state.flags;
     }
 
     /**
@@ -1275,6 +1356,21 @@ export class NPCManager {
     async startConversation(npcId) {
         const npc = this.getNPC(npcId);
         if (!npc) return null;
+
+        // A jealous NPC refuses to talk (see JealousySystem.stopTalking)
+        const flags = this.getNPCFlags(npcId);
+        if (flags.willNotTalk) {
+            this.currentConversation = { npc, relationship: this.relationships[npcId] || 0, stage: 'farewell', currentNode: 'root', choices: [], ended: true };
+            return {
+                npc,
+                greeting: flags.jealousyMessage || `${npc.name} doesn't want to talk right now.`,
+                choices: [],
+                relationship: this.relationships[npcId] || 0,
+                tier: this.getRelationshipTier(npcId),
+                dialogueTree: null,
+                refused: true
+            };
+        }
 
         const relationship = this.relationships[npcId] || 0;
         const isFirstMeeting = !this.metNPCs.includes(npcId);
@@ -1349,58 +1445,298 @@ export class NPCManager {
             isFirstMeeting,
             stage: 'greeting',
             currentNode: 'root',
-            dialogueTree: dialogueTree
+            dialogueTree: dialogueTree,
+            choices: []
         };
-
-        // Get choices from dialogue tree or fallback
-        const updatedRelationship = relationship; // FIX: Define before using
-        let choices = [];
-        if (rootNode && rootNode.choices) {
-            choices = rootNode.choices.filter(choice => {
-                // Check conditions
-                if (choice.conditions) {
-                    if (choice.conditions.relationship && updatedRelationship < choice.conditions.relationship) {
-                        return false;
-                    }
-                }
-                return true;
-            });
-        } else {
-            choices = this.getAvailableChoices('greeting', updatedRelationship);
+        // Authored DIALOGUE_TREES conversations always start from the root
+        if (DIALOGUE_TREES[npcId]) {
+            this.getNPCState(npcId).currentNode = 'root';
         }
 
-        // Add "Ask on Date" if eligible and single
-        if (!this.gameState.romanceSystem?.partnerId && npc.romanceOptions && relationship >= 30) {
-            choices.push({
-                text: "Would you like to go on a date?",
-                action: 'date_ask',
-                effect: { relationship: 0 }
-            });
-        }
-
-        // Add Date Night choices if partner
-        if (this.gameState.romanceSystem?.partnerId === npc.id) {
-            choices = [
-                { text: "Let's grab a coffee ($20)", action: 'date_coffee', effect: { relationship: 0 } },
-                { text: "Dinner tonight? ($100)", action: 'date_dinner', effect: { relationship: 0 } },
-                { text: "Weekend Trip! ($2000)", action: 'date_vacation', effect: { relationship: 0 } }
-            ];
-            if (this.gameState.romanceSystem?.relationshipStatus === 'dating' && this.gameState.romanceSystem?.relationshipScore > 80) {
-                choices.push({ text: "I have a question... (Propose)", action: 'date_propose', effect: { relationship: 0 } });
-            }
-            if (this.gameState.romanceSystem?.relationshipStatus === 'engaged') {
-                choices.push({ text: "Let's get married! ($20,000)", action: 'date_marry', effect: { relationship: 0 } });
-            }
-        }
+        // The same list is rendered and later resolved by makeChoice(), so the
+        // index the player clicks always matches the choice that runs.
+        const choices = this.buildConversationChoices();
 
         return {
             npc,
             greeting: greetingText.replace('{name}', npc.name),
             choices: choices,
-            relationship: updatedRelationship,
+            relationship: relationship,
             tier: this.getRelationshipTier(npcId),
             dialogueTree: dialogueTree
         };
+    }
+
+    /**
+     * Date-night choices offered to the player's partner. Mirrors the four
+     * date types RomanceSystem.goOnDate() supports.
+     */
+    getDateChoices() {
+        const romance = this.gameState.romanceSystem;
+        const choices = [
+            { text: "Let's grab a coffee ($20)", action: 'date_coffee', effect: {} },
+            { text: "Dinner tonight? ($100)", action: 'date_dinner', effect: {} },
+            { text: "Fancy dinner? ($500)", action: 'date_fancy_dinner', effect: {} },
+            { text: "Weekend Trip! ($2000)", action: 'date_vacation', effect: {} }
+        ];
+        // Proposing is offered to anyone dating; proposing before the
+        // relationship is ready (score < 80) is rejected by RomanceSystem.propose()
+        if (romance?.relationshipStatus === 'dating') {
+            choices.push({ text: "I have a question... (Propose)", action: 'date_propose', effect: {} });
+        }
+        if (romance?.relationshipStatus === 'engaged') {
+            choices.push({ text: "Let's get married! ($20,000)", action: 'date_marry', effect: {} });
+        }
+        return choices;
+    }
+
+    /**
+     * Build (and remember) the choices for the current conversation position.
+     * Sources, in priority order: authored DIALOGUE_TREES node, generated
+     * dialogue-tree node, legacy DIALOGUE_CHOICES stage. Romance choices are
+     * layered on top.
+     */
+    buildConversationChoices() {
+        const conv = this.currentConversation;
+        if (!conv) return [];
+        const npc = conv.npc;
+        const relationship = this.relationships[npc.id] || 0;
+        conv.relationship = relationship;
+
+        let choices;
+        if (this.gameState.romanceSystem?.partnerId === npc.id && conv.currentNode === 'root' && conv.stage === 'greeting') {
+            // Partner: the opening menu is the date menu
+            choices = this.getDateChoices();
+        } else {
+            choices = this.getAvailableChoices(conv.stage, relationship);
+            if (conv.currentNode === 'root' && conv.stage === 'greeting' &&
+                !this.gameState.romanceSystem?.partnerId && npc.romanceOptions && relationship >= 30) {
+                choices.push({ text: "Would you like to go on a date?", action: 'date_ask', effect: {} });
+            }
+        }
+
+        conv.choices = choices;
+        return choices;
+    }
+
+    /**
+     * Get available dialogue choices for the current conversation position
+     */
+    getAvailableChoices(stage, relationship) {
+        const conv = this.currentConversation;
+        const npcId = conv ? conv.npc.id : null;
+
+        // 1. Authored deep dialogue tree
+        if (npcId && DIALOGUE_TREES[npcId]) {
+            const state = this.getNPCState(npcId);
+            const node = DIALOGUE_TREES[npcId][state.currentNode || 'root'] || DIALOGUE_TREES[npcId].root;
+            if (node) {
+                return (node.choices || [])
+                    .filter(c => !c.requiredRelationship || relationship >= c.requiredRelationship)
+                    .map(c => ({ ...c }));
+            }
+        }
+
+        // 2. Generated dialogue tree (DialogueTreeSystem): choice.id is the next node
+        const tree = conv?.dialogueTree;
+        if (tree?.getNode) {
+            const node = tree.getNode(conv.currentNode || 'root');
+            if (node?.choices?.length) {
+                return node.choices
+                    .filter(c => !c.conditions?.relationship || relationship >= c.conditions.relationship)
+                    .map(c => ({ text: c.text, next: c.id, effect: {}, treeNode: true }));
+            }
+        }
+
+        // 3. Legacy staged choices
+        const choices = DIALOGUE_CHOICES[stage] || DIALOGUE_CHOICES['greeting'];
+        return choices
+            .filter(c => !c.requiredRelationship || relationship >= c.requiredRelationship)
+            .map(c => ({ ...c }));
+    }
+
+    /**
+     * Advance the legacy staged conversation to the next stage that has any
+     * choices available at the current relationship level.
+     * @returns {boolean} false when the conversation is over
+     */
+    advanceStage(relationship) {
+        const conv = this.currentConversation;
+        let idx = CONVERSATION_STAGES.indexOf(conv.stage);
+        while (++idx < CONVERSATION_STAGES.length) {
+            const stage = CONVERSATION_STAGES[idx];
+            const available = (DIALOGUE_CHOICES[stage] || [])
+                .filter(c => !c.requiredRelationship || relationship >= c.requiredRelationship);
+            if (available.length) {
+                conv.stage = stage;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    makeChoice(choiceIndex) {
+        const conv = this.currentConversation;
+        if (!conv) return null;
+        if (conv.ended) return null;
+        const npcId = conv.npc.id;
+
+        const choice = (conv.choices || [])[choiceIndex];
+        if (!choice) return null;
+
+        const romance = this.gameState.romanceSystem;
+        const specialResult = (result) => ({
+            success: !!result?.success,
+            text: result?.message || "That isn't possible right now.",
+            effects: {},
+            newRelationship: this.relationships[npcId],
+            tier: this.getRelationshipTier(npcId),
+            isSpecialAction: true,
+            isTreeAction: false,
+            choices: this.buildConversationChoices()
+        });
+
+        // Romance actions (romanceSystem may not exist yet)
+        if (choice.action === 'date_ask') {
+            return specialResult(romance?.askOnDate?.(npcId));
+        }
+        if (choice.action && choice.action.startsWith('date_')) {
+            let result;
+            if (choice.action === 'date_propose') {
+                result = romance?.propose?.();
+            } else if (choice.action === 'date_marry') {
+                result = romance?.getMarried?.();
+            } else {
+                result = romance?.goOnDate?.(choice.action.replace('date_', ''));
+            }
+            return specialResult(result);
+        }
+
+        // Apply the choice's own effects
+        const effects = { ...(choice.effect || {}) };
+        this.applyChoiceEffects(effects);
+        this.recordInteraction(npcId, choice.text);
+
+        // Work out the NPC's reply and where the conversation goes next
+        let replyText = null;
+        let ended = false;
+        if (choice.next && DIALOGUE_TREES[npcId]) {
+            const node = DIALOGUE_TREES[npcId][choice.next];
+            this.getNPCState(npcId).currentNode = node ? choice.next : 'root';
+            conv.currentNode = this.getNPCState(npcId).currentNode;
+            replyText = node?.text || null;
+        } else if (choice.next && conv.dialogueTree?.getNode) {
+            const tree = conv.dialogueTree;
+            const exists = tree.nodes?.has ? tree.nodes.has(choice.next) : true;
+            const node = exists ? tree.getNode(choice.next) : null;
+            replyText = node?.text || null;
+            if (node?.effects && Object.keys(node.effects).length) {
+                this.applyChoiceEffects(node.effects);
+                Object.entries(node.effects).forEach(([k, v]) => {
+                    effects[k] = typeof v === 'number' && typeof effects[k] === 'number' ? effects[k] + v : v;
+                });
+            }
+            // Leaf nodes return to the root menu; the goodbye node ends the chat
+            if (choice.next === 'goodbye') {
+                ended = true;
+            } else {
+                conv.currentNode = node?.choices?.length ? node.id : 'root';
+            }
+        } else {
+            const reaction = (effects.relationship || 0) > 0 ? 'positive' : (effects.relationship || 0) < 0 ? 'negative' : 'neutral';
+            replyText = this.getGenericReply(conv.npc, reaction);
+            if (conv.stage === 'farewell' || !this.advanceStage(this.relationships[npcId] || 0)) {
+                ended = true;
+            }
+        }
+
+        conv.ended = ended;
+        const choices = ended ? [] : this.buildConversationChoices();
+
+        return {
+            success: true,
+            text: replyText || this.getGenericReply(conv.npc, 'neutral'),
+            playerText: choice.text,
+            effects,
+            newRelationship: this.relationships[npcId],
+            tier: this.getRelationshipTier(npcId),
+            isTreeAction: true,
+            choices,
+            ended
+        };
+    }
+
+    /**
+     * Short NPC reaction used when the dialogue data has no authored reply.
+     */
+    getGenericReply(npc, reaction) {
+        const replies = {
+            positive: ["I appreciate that.", "Ha, good point!", "I like the way you think."],
+            neutral: ["Hm, I see.", "Fair enough.", "Okay."],
+            negative: ["...Right.", "If you say so.", "Not sure I agree."]
+        };
+        const pool = replies[reaction] || replies.neutral;
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    /**
+     * Record a conversation choice in the saved interaction history.
+     */
+    recordInteraction(npcId, text) {
+        const day = this.gameState.timeManager?.totalDays ?? 0;
+        if (!this.interactionHistory[npcId]) this.interactionHistory[npcId] = [];
+        this.interactionHistory[npcId].push({ day, text });
+        if (this.interactionHistory[npcId].length > 20) this.interactionHistory[npcId].shift();
+        const state = this.getNPCState(npcId);
+        if (!Array.isArray(state.history)) state.history = [];
+        state.history.push(text);
+        if (state.history.length > 20) state.history.shift();
+    }
+
+    /**
+     * Apply choice effects
+     */
+    applyChoiceEffects(effects) {
+        const npcId = this.currentConversation.npc.id;
+        const stats = this.gameState.characterStats;
+        const flags = this.getNPCFlags(npcId);
+
+        if (effects.relationship) {
+            this.modifyRelationship(npcId, effects.relationship);
+        }
+
+        // XP rewards (map dialogue skill names onto real stat IDs)
+        if (effects.xp) {
+            const statId = XP_STAT_ALIASES[effects.xp] || effects.xp;
+            effects.xp = statId;
+            stats?.addExperience?.(statId, effects.xpAmount || 20);
+        }
+
+        if (effects.ethics) stats?.modifyEthics?.(effects.ethics);
+        if (effects.money) this.gameState.money += effects.money;
+        if (effects.reputation) this.gameState.reputation += effects.reputation;
+
+        // Energy: negative spends, positive restores
+        if (effects.energy) {
+            const tm = this.gameState.timeManager;
+            if (effects.energy < 0) {
+                if (tm?.useEnergy) {
+                    if (!tm.useEnergy(-effects.energy).success) tm.energy = 0;
+                }
+            } else {
+                tm?.restoreEnergy?.(effects.energy);
+            }
+        }
+
+        // Stamina / motivation are trainable stats
+        if (effects.stamina) stats?.addExperience?.('stamina', effects.stamina);
+        if (effects.motivation) stats?.addExperience?.('focus', effects.motivation);
+
+        // One-off perks are recorded as per-save NPC flags for other systems
+        ['studyBoost', 'favor', 'referralChance', 'projectChance', 'investmentInfo', 'giftBonus', 'unlockScheme']
+            .forEach(key => { if (effects[key]) flags[key] = true; });
+
+        if (effects.flag) flags[effects.flag] = true;
     }
 
     /**
@@ -1450,11 +1786,13 @@ export class NPCManager {
     getGreetingPool(relationship, isFirstMeeting) {
         if (isFirstMeeting) {
             return DIALOGUE_TEMPLATES.first_meeting;
-        } else if (relationship < 20) {
+        // Boundaries match getRelationshipTier(): stranger/acquaintance (<30),
+        // friend (<60), close friend (<85), best friend
+        } else if (relationship < 30) {
             return DIALOGUE_TEMPLATES.low_relationship;
-        } else if (relationship < 50) {
+        } else if (relationship < 60) {
             return DIALOGUE_TEMPLATES.medium_relationship;
-        } else if (relationship < 80) {
+        } else if (relationship < 85) {
             return DIALOGUE_TEMPLATES.high_relationship;
         } else {
             return DIALOGUE_TEMPLATES.max_relationship;
@@ -1462,167 +1800,28 @@ export class NPCManager {
     }
 
     /**
-     * Get available dialogue choices
-     */
-    getAvailableChoices(stage, relationship) {
-        // Tree Logic
-        const npcId = this.currentConversation ? this.currentConversation.npc.id : null;
-        if (npcId && DIALOGUE_TREES[npcId]) {
-            const state = this.getNPCState(npcId);
-            const node = DIALOGUE_TREES[npcId][state.currentNode || 'root'];
-
-            if (node) {
-                // Filter choices by requirements
-                return node.choices.filter(c => {
-                    let met = true;
-                    if (c.requiredRelationship && relationship < c.requiredRelationship) met = false;
-                    return met;
-                });
-            }
-        }
-
-        // Fallback to legacy choices
-        const choices = DIALOGUE_CHOICES[stage] || DIALOGUE_CHOICES['greeting'];
-
-        // Filter by relationship requirement
-        return choices.filter(c => {
-            if (!c.requiredRelationship) return true;
-            return relationship >= c.requiredRelationship;
-        });
-    }
-
-    makeChoice(choiceIndex) {
-        if (!this.currentConversation) return null;
-
-        // Re-get choices to include dynamic ones
-        let choices = this.getAvailableChoices(this.currentConversation.stage, this.currentConversation.relationship);
-
-        // Dynamic Choices injection logic
-        // 1. Ask Date (if single)
-        if (!this.gameState.romanceSystem?.partnerId &&
-            this.currentConversation.npc.romanceOptions &&
-            this.currentConversation.relationship >= 30) {
-            choices.push({
-                text: "Would you like to go on a date?",
-                action: 'date_ask',
-                effect: { relationship: 0 }
-            });
-        }
-
-        // 2. Date Night (if partner)
-        if (this.gameState.romanceSystem?.partnerId === this.currentConversation.npc.id) {
-            choices.push(
-                { text: "Let's grab a coffee ($20)", action: 'date_coffee', effect: { relationship: 0 } },
-                { text: "Dinner tonight? ($100)", action: 'date_dinner', effect: { relationship: 0 } },
-                { text: "Weekend Trip! ($2000)", action: 'date_vacation', effect: { relationship: 0 } }
-            );
-            // Propose logic
-            if (this.gameState.romanceSystem?.relationshipStatus === 'dating' && this.gameState.romanceSystem?.relationshipScore > 80) {
-                choices.push({ text: "I have a question... (Propose)", action: 'date_propose', effect: { relationship: 0 } });
-            }
-            // Marry logic
-            if (this.gameState.romanceSystem?.relationshipStatus === 'engaged') {
-                choices.push({ text: "Let's get married! ($20,000)", action: 'date_marry', effect: { relationship: 0 } });
-            }
-        }
-
-        const choice = choices[choiceIndex];
-        if (!choice) return null;
-
-        // Handle special actions
-        if (choice.action === 'date_ask') {
-            const result = this.gameState.romanceSystem?.askOnDate(this.currentConversation.npc.id);
-            return {
-                success: result.success,
-                text: result.message,
-                effects: {},
-                newRelationship: this.relationships[this.currentConversation.npc.id],
-                isSpecialAction: true
-            };
-        }
-
-        // Handle Dating Actions
-        if (choice.action && choice.action.startsWith('date_')) {
-            let result;
-            if (choice.action === 'date_propose') {
-                result = this.gameState.romanceSystem?.propose();
-            } else if (choice.action === 'date_marry') {
-                result = this.gameState.romanceSystem?.getMarried();
-            } else {
-                const type = choice.action.replace('date_', '');
-                result = this.gameState.romanceSystem?.goOnDate(type);
-            }
-
-            return {
-                success: result.success,
-                text: result.message,
-                effects: {},
-                newRelationship: this.relationships[this.currentConversation.npc.id],
-                isSpecialAction: true
-            };
-        }
-
-        // Apply choice effects
-        const effects = choice.effect || {};
-        this.applyChoiceEffects(effects);
-
-        // Return result
-        return {
-            success: true,
-            text: choice.text,
-            effects,
-            newRelationship: this.relationships[this.currentConversation.npc.id],
-            tier: this.getRelationshipTier(this.currentConversation.npc.id),
-            isTreeAction: false
-        };
-    }
-
-    /**
-     * Apply choice effects
-     */
-    applyChoiceEffects(effects) {
-        const npcId = this.currentConversation.npc.id;
-
-        // Apply relationship change
-        if (effects.relationship) {
-            this.modifyRelationship(npcId, effects.relationship);
-        }
-
-        // XP rewards
-        if (effects.xp) {
-            const amount = effects.xpAmount || 20;
-            this.gameState.characterStats?.addExperience(effects.xp, amount);
-        }
-
-        // Ethics change
-        if (effects.ethics) {
-            this.gameState.characterStats?.modifyEthics(effects.ethics);
-        }
-
-        // Money change
-        if (effects.money) {
-            this.gameState.money += effects.money;
-        }
-
-        // Reputation change
-        if (effects.reputation) {
-            this.gameState.reputation += effects.reputation;
-        }
-
-        // Flags (Quest tracking)
-        if (effects.flag) {
-            const state = this.getNPCState(npcId);
-            if (!state.flags) state.flags = {};
-            state.flags[effects.flag] = true;
-        }
-    }
-
-    /**
-     * Give gift to NPC
+     * Give gift to NPC. Gifts cost money and each NPC accepts at most one per
+     * in-game day. Rivals (empty gift list) refuse gifts outright.
      */
     giveGift(npcId, giftId) {
         const npc = this.getNPC(npcId);
         if (!npc) return { success: false, reason: 'NPC not found' };
+
+        if (!Array.isArray(npc.gifts) || npc.gifts.length === 0) {
+            return { success: false, reason: 'refuses gifts', message: `${npc.name} won't accept gifts from you.` };
+        }
+
+        const today = this.gameState.timeManager?.totalDays ?? 0;
+        if (this.lastGiftDay[npcId] === today) {
+            return { success: false, reason: 'cooldown', message: `You already gave ${npc.name} a gift today.` };
+        }
+
+        const cost = GIFT_COSTS[giftId] ?? DEFAULT_GIFT_COST;
+        if ((this.gameState.money ?? 0) < cost) {
+            return { success: false, reason: 'insufficient funds', message: `You need $${cost} for that gift.` };
+        }
+        this.gameState.money -= cost;
+        this.lastGiftDay[npcId] = today;
 
         // Mark as met if not already
         if (!this.metNPCs.includes(npcId)) {
@@ -1630,26 +1829,25 @@ export class NPCManager {
         }
 
         const likesGift = npc.gifts.includes(giftId);
-        const relationshipGain = likesGift ? 15 : 5; // Liked gift = +15, generic = +5
+        const baseGain = likesGift ? 15 : 5; // Liked gift = +15, generic = +5
 
         // Progressive relationship: Higher relationships get less gain (harder to maintain)
         const currentRel = this.relationships[npcId] || 0;
-        let adjustedGain = relationshipGain;
-        if (currentRel > 60) adjustedGain = Math.max(3, relationshipGain * 0.5); // Harder to gain at high levels
-        if (currentRel > 85) adjustedGain = Math.max(2, relationshipGain * 0.3); // Very hard at max levels
+        let adjustedGain = baseGain;
+        if (currentRel > 60) adjustedGain = Math.max(3, baseGain * 0.5);
+        if (currentRel > 85) adjustedGain = Math.max(2, baseGain * 0.3);
 
+        const before = this.relationships[npcId] || 0;
         this.modifyRelationship(npcId, adjustedGain);
+        const newRelationship = this.relationships[npcId];
 
         return {
             success: true,
             liked: likesGift,
-            relationshipGain,
-            newRelationship: this.relationships[npcId]
+            cost,
+            // What was actually applied (after diminishing returns, personality and clamping)
+            relationshipGain: newRelationship - before,
+            newRelationship
         };
     }
-
 }
-
-
-
-
