@@ -36,7 +36,7 @@ export class UILayerManager {
      * Create a new layer
      */
     createLayer(name, zIndex) {
-        if (this.layers[name]) {
+        if (Object.prototype.hasOwnProperty.call(this.layers, name)) {
             console.warn(`Layer ${name} already exists`);
             return;
         }
@@ -49,7 +49,7 @@ export class UILayerManager {
      * Add element to a layer
      */
     addToLayer(element, layer) {
-        if (!this.layers[layer]) {
+        if (!Object.prototype.hasOwnProperty.call(this.layers, layer)) {
             console.warn(`Layer ${layer} does not exist`);
             return;
         }

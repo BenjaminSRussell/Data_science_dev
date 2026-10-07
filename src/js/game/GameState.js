@@ -4,20 +4,7 @@
  */
 
 import { RANKS } from '../data/ranks.js';
-import { CHART_TYPES } from '../data/chartTypes.js';
-import { JobSystem } from './JobSystem.js';
-import { WorkInteractionSystem } from './WorkInteractionSystem.js';
-import { RealisticDialogueSystem } from './RealisticDialogueSystem.js';
-import { RelationshipEmotionSystem } from './RelationshipEmotionSystem.js';
-import { WorldEvolutionSystem } from './WorldEvolutionSystem.js';
-import { InvestmentEcommerceSystem } from './InvestmentEcommerceSystem.js';
-import { StorylineManager } from './StorylineManager.js';
-import { MapProgressionSystem } from './MapProgressionSystem.js';
-import { IDESystem } from './IDESystem.js';
-import { LocationBackgroundSystem } from './LocationBackgroundSystem.js';
-import { WeeklyNewsSystem } from './WeeklyNewsSystem.js';
-import { ScreenThemeManager } from './ScreenThemeManager.js';
-import { MapCoordinateSystem } from './MapCoordinateSystem.js';
+
 
 export class GameState {
     constructor() {

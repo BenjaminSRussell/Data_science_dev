@@ -112,25 +112,31 @@ export class TooltipManager {
             }, 200);
         };
 
-        // Auto-update position
-        if (this.autoUpdate) {
-            this.autoUpdate(element, tooltip, updatePosition);
+        // Bind listeners / autoUpdate once per element (#39/#40)
+        if (!tooltip._tipBound) {
+            let stopAutoUpdate = null;
+            if (this.autoUpdate) {
+                stopAutoUpdate = this.autoUpdate(element, tooltip, updatePosition) || null;
+            }
+            element.addEventListener('mouseenter', showTooltip);
+            element.addEventListener('mouseleave', hideTooltip);
+            element.addEventListener('focus', showTooltip);
+            element.addEventListener('blur', hideTooltip);
+            tooltip._tipBound = { showTooltip, hideTooltip, stopAutoUpdate };
         }
 
-        // Event listeners
-        element.addEventListener('mouseenter', showTooltip);
-        element.addEventListener('mouseleave', hideTooltip);
-        element.addEventListener('focus', showTooltip);
-        element.addEventListener('blur', hideTooltip);
-
+        const bound = tooltip._tipBound;
         return {
             element: tooltip,
             update: updatePosition,
             destroy: () => {
-                element.removeEventListener('mouseenter', showTooltip);
-                element.removeEventListener('mouseleave', hideTooltip);
-                element.removeEventListener('focus', showTooltip);
-                element.removeEventListener('blur', hideTooltip);
+                if (bound) {
+                    element.removeEventListener('mouseenter', bound.showTooltip);
+                    element.removeEventListener('mouseleave', bound.hideTooltip);
+                    element.removeEventListener('focus', bound.showTooltip);
+                    element.removeEventListener('blur', bound.hideTooltip);
+                    if (typeof bound.stopAutoUpdate === 'function') bound.stopAutoUpdate();
+                }
                 tooltip.remove();
                 this.tooltips.delete(element);
             }
