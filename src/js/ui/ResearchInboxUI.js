@@ -242,7 +242,14 @@ export class ResearchInboxUI {
         });
         
         // Update inbox display
-        this.renderPapers(this.getActiveTab());
+        if (this.litComponent) {
+            this.litComponent.updatePapers(
+                this.researchPaperSystem.getInbox(),
+                this.researchPaperSystem.getUnreadCount()
+            );
+        } else {
+            this.renderPapers(this.getActiveTab());
+        }
     }
     
     /**
