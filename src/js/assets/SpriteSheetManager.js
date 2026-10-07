@@ -47,7 +47,7 @@ export class SpriteSheetManager {
             
             img.onerror = () => {
                 console.error(`Failed to load sprite sheet: ${sheet.url}`);
-                reject(false);
+                reject(new Error(`Failed to load sprite sheet: ${sheet.url}`));
             };
             
             img.src = sheet.url;
@@ -122,11 +122,16 @@ export class SpriteSheetManager {
      */
     getCurrentFrame(sheetId, animationName, frameIndex) {
         const animation = this.getAnimationFrames(sheetId, animationName);
-        if (!animation) return null;
-        
-        const frame = animation.frames[frameIndex % animation.frames.length];
+        if (!animation || !animation.frames || animation.frames.length === 0) return null;
+
+        // JS % keeps the dividend's sign: (-1 % 4) === -1, which indexes undefined (#2555).
+        const len = animation.frames.length;
+        const idx = ((Number(frameIndex) % len) + len) % len;
+        const frame = animation.frames[idx];
+        if (!frame) return null;
         const sheet = this.spriteSheets.get(sheetId);
-        
+        if (!sheet) return null;
+
         return {
             sheet: sheet.image,
             ...frame
