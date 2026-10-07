@@ -118,7 +118,7 @@ export function updateRelationshipsScreen(game) {
         card.className = 'npc-card';
         card.dataset.npc = npc.id;
 
-        const textIcon = getTextIcon(npc.icon);
+        const textIcon = getTextIcon(npc.icon || getNPCFallback(npc));
         // Ensure NPC has image
         const npcImage = getNPCImage(npc);
         const fallbackIcon = getNPCFallback(npc);

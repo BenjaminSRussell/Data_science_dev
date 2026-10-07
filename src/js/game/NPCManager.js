@@ -743,6 +743,22 @@ export const NPCs = [
     }
 ];
 
+// Restore text icons after emoji literals were stripped from the corpus (#1).
+const NPC_TYPE_ICON = {
+    mentor: 'Prof',
+    rival: 'Rival',
+    client: 'Biz',
+    colleague: 'Dev',
+    investor: 'Invest',
+    authority: 'Judge',
+    criminal: 'Shark',
+    social: 'Social',
+};
+for (const npc of NPCs) {
+    if (!npc.icon) npc.icon = NPC_TYPE_ICON[npc.type] || 'NPC';
+}
+
+
 // Initialize all NPC images on module load
 initializeNPCImages();
 

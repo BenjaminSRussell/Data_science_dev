@@ -112,8 +112,20 @@ function simpleHash(str) {
 /**
  * Get fallback emoji/icon if image fails to load
  */
+const TYPE_TEXT = {
+    mentor: 'Prof',
+    rival: 'Rival',
+    client: 'Biz',
+    colleague: 'Dev',
+    investor: 'Invest',
+    authority: 'Judge',
+    criminal: 'Shark',
+    social: 'Social',
+};
+
 export function getNPCFallback(npc) {
-    return npc.icon || '';
+    if (npc?.icon) return npc.icon;
+    return TYPE_TEXT[npc?.type] || 'NPC';
 }
 
 /**
