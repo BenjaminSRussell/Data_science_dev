@@ -2840,6 +2840,14 @@ export class MainGame {
                 if (this.gameState.money < 0) {
                     this.showToast('Warning: You are in debt!', 'warning');
                 }
+
+                // Heat cools off; open investigations escalate or get dropped
+                const crimeOutcome = this.gameState.crimeSystem?.processDay?.() || {};
+                if (crimeOutcome.arrested) {
+                    this.handleArrest(crimeOutcome.reason);
+                } else if (crimeOutcome.cleared) {
+                    this.showToast('The investigation into you was dropped for lack of evidence.', 'success');
+                }
             } else if (event.type === 'new_week') {
                 const rent = this.gameState.rent || 500;
                 this.gameState.money -= rent;

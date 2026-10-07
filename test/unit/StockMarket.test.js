@@ -138,3 +138,37 @@ describe('StockMarket', () => {
         });
     });
 });
+
+describe('StockMarket manipulation unwinding', () => {
+    it('a pump deflates back to the pre-manipulation price within 3 updates', () => {
+        const market = new StockMarket({ money: 0, legalSystem: { hasLicense: () => true } });
+        const stock = market.stocks[0];
+        stock.update = () => {}; // isolate from the random walk
+        market.stocks.forEach(s => { s.update = () => {}; });
+        const base = stock.price;
+        const baseVol = stock.volatility;
+
+        market.manipulateStock(stock.id, 'pump', 1.5);
+        expect(stock.price).toBeCloseTo(base * 1.5);
+        // pumping again keeps the original base price
+        market.manipulateStock(stock.id, 'pump', 1.5);
+        expect(stock.manipulation.basePrice).toBe(base);
+
+        market.update();
+        market.update();
+        market.update();
+        expect(stock.price).toBeCloseTo(base);
+        expect(stock.volatility).toBeCloseTo(baseVol);
+        expect(stock.manipulation).toBeUndefined();
+    });
+
+    it('persists an in-progress manipulation through save/load', () => {
+        const gs = { money: 0, legalSystem: { hasLicense: () => true } };
+        const market = new StockMarket(gs);
+        const id = market.stocks[0].id;
+        market.manipulateStock(id, 'pump', 1.5);
+        const restored = new StockMarket(gs);
+        restored.fromJSON(JSON.parse(JSON.stringify(market.toJSON())));
+        expect(restored.stocks[0].manipulation).toMatchObject({ daysLeft: 3 });
+    });
+});
