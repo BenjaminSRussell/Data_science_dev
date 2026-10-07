@@ -42,7 +42,6 @@ export class MapRoadRenderer {
         
         // Convert grid coordinates to pixel positions
         const startPixel = this.gridSystem.gridToPixel(road.start, road.position);
-        const endPixel = this.gridSystem.gridToPixel(road.end, road.position);
         
         const roadEl = document.createElement('div');
         roadEl.className = `map-road-tile ${road.type.toLowerCase()} ${road.direction}`;

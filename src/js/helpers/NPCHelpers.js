@@ -45,8 +45,14 @@ export async function handleNPCTalk(game, npcId) {
         dialogArea.innerHTML = `"${convo.greeting}"`;
     }
 
-    // Update actions to choices
-    const actionsDiv = document.querySelector('#npc-modal .npc-actions');
+    // Update actions to choices (markup may use npc-modal-actions)
+    const actionsDiv = document.querySelector(
+        '#npc-modal .npc-modal-actions, #npc-modal .npc-actions, .dialogue-container .dialogue-choices'
+    );
+    if (!actionsDiv) {
+        logger.warn('NPC actions container not found');
+        return;
+    }
     actionsDiv.textContent = '';
 
     convo.choices.forEach((choice, index) => {
@@ -84,6 +90,10 @@ export function handleNPCResponse(game, result) {
  */
 export function handleNPCGift(game, npcId) {
     const result = game.gameState.npcManager?.giveGift(npcId, 'coffee');
+    if (!result) {
+        game.showToast?.('Unable to give gift right now.', 'error');
+        return;
+    }
     DOMUtils.updateElement('#npc-dialogue-area', {
         innerHTML: result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess."
     });
