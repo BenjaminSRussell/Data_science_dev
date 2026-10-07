@@ -102,13 +102,22 @@ export class DetailedMapSystem {
             });
         }
         
-        // Side streets (smaller)
+        // Side streets (smaller) — both axes (#2635)
         for (let y = 0; y < 20; y++) {
             this.roads.push({
                 id: `side_h_${y}`,
                 type: 'side',
                 direction: 'horizontal',
                 y: y * 5,
+                width: 1
+            });
+        }
+        for (let x = 0; x < 20; x++) {
+            this.roads.push({
+                id: `side_v_${x}`,
+                type: 'side',
+                direction: 'vertical',
+                x: x * 5,
                 width: 1
             });
         }
@@ -121,7 +130,7 @@ export class DetailedMapSystem {
         this.landmarks = [
             { id: 'city_hall', name: 'City Hall', type: 'government', x: 50, y: 50 },
             { id: 'central_park', name: 'Central Park', type: 'park', x: 30, y: 30 },
-            { id: 'main_plaza', name: 'Main Plaza', type: 'public', x: 50, y: 50 },
+            { id: 'main_plaza', name: 'Main Plaza', type: 'public', x: 70, y: 45 },
             { id: 'river', name: 'City River', type: 'natural', x: 20, y: 0, width: 5, height: 100 }
         ];
     }
@@ -145,7 +154,9 @@ export class DetailedMapSystem {
         const district = this.districts.get(districtId);
         if (!district) return false;
         
-        building.id = building.id || `building_${Date.now()}`;
+        if (!this._buildingIdSeq) this._buildingIdSeq = 0;
+        this._buildingIdSeq += 1;
+        building.id = building.id || `building_${Date.now()}_${this._buildingIdSeq}`;
         building.district = districtId;
         this.buildings.set(building.id, building);
         district.buildings.push(building.id);

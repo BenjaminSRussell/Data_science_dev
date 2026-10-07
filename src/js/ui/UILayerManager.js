@@ -90,6 +90,12 @@ export class UILayerManager {
      * Move element to a different layer
      */
     moveToLayer(element, newLayer) {
+        // Validate target first so we never strand the element (#2640)
+        if (!Object.prototype.hasOwnProperty.call(this.layers, newLayer)) {
+            console.warn(`Layer ${newLayer} does not exist — move aborted`);
+            return false;
+        }
+
         // Remove from old layer
         for (const [layer, elements] of this.layerElements.entries()) {
             const index = elements.indexOf(element);
@@ -101,6 +107,7 @@ export class UILayerManager {
 
         // Add to new layer
         this.addToLayer(element, newLayer);
+        return true;
     }
 
     /**

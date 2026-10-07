@@ -653,10 +653,17 @@ export class MainGame {
     initMenuParticles() {
         const canvas = DOMUtils.query('#menu-particles-canvas');
         if (!canvas) return;
+        // Reset guard — repeated init must not accumulate particles (#2641)
+        if (this._menuParticlesCleanup) {
+            this._menuParticlesCleanup();
+            this._menuParticlesCleanup = null;
+        }
 
         const ctx = canvas.getContext('2d');
         const particles = [];
         const particleCount = 50;
+        let rafId = 0;
+        let alive = true;
 
         // Set canvas size
         const resizeCanvas = () => {
@@ -666,16 +673,39 @@ export class MainGame {
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        // Get theme color from CSS or use default
+        const parseCssColor = (raw) => {
+            const c = (raw || '').trim();
+            if (!c) return null;
+            const rgb = c.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+            if (rgb) return `rgb(${rgb[1]}, ${rgb[2]}, ${rgb[3]})`;
+            const hex = c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+            if (hex) {
+                let h = hex[1];
+                if (h.length === 3) h = h.split('').map(ch => ch + ch).join('');
+                const n = parseInt(h, 16);
+                return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+            }
+            return null;
+        };
+
+        // Get theme color from CSS vars the app actually sets (#2642)
         const getThemeColor = () => {
             try {
                 const root = document.documentElement;
-                const color = getComputedStyle(root).getPropertyValue('--color-primary') ||
-                    getComputedStyle(root).getPropertyValue('--primary-color') ||
-                    'rgb(139, 92, 246)'; // Default purple
-                return color.trim();
+                const style = getComputedStyle(root);
+                const keys = [
+                    '--color-accent-primary', '--color-primary', '--primary',
+                    '--primary-color', '--accent', '--accent-color',
+                    '--theme-primary', '--brand', '--link-color',
+                    '--color-text-accent'
+                ];
+                for (const k of keys) {
+                    const parsed = parseCssColor(style.getPropertyValue(k));
+                    if (parsed) return parsed;
+                }
+                return 'rgb(139, 92, 246)';
             } catch (e) {
-                return 'rgb(139, 92, 246)'; // Default purple
+                return 'rgb(139, 92, 246)';
             }
         };
 
@@ -696,6 +726,7 @@ export class MainGame {
 
         // Animation loop
         const animate = () => {
+            if (!alive) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             particles.forEach((particle, i) => {
@@ -759,10 +790,18 @@ export class MainGame {
                 });
             });
 
-            requestAnimationFrame(animate);
+            rafId = requestAnimationFrame(animate);
         };
 
         animate();
+
+        this._menuParticlesCleanup = () => {
+            alive = false;
+            if (rafId) cancelAnimationFrame(rafId);
+            window.removeEventListener('resize', resizeCanvas);
+            particles.length = 0;
+            try { ctx.clearRect(0, 0, canvas.width, canvas.height); } catch (_) {}
+        };
     }
 
     /**
