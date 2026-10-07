@@ -283,20 +283,6 @@ export class ChartManager {
     }
 
     /**
-     * Get current chart configuration for scoring
-     */
-    getCurrentConfig() {
-        if (!this.previewChart) return null;
-
-        return {
-            type: this.previewChart.config.type,
-            hasLegend: this.previewChart.options.plugins?.legend?.display,
-            hasTitle: !!this.previewChart.options.plugins?.title?.text,
-            hasGrid: this.previewChart.options.scales?.x?.grid?.display
-        };
-    }
-
-    /**
      * Destroy all charts (cleanup)
      */
     destroy() {

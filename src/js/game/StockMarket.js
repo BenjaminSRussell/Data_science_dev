@@ -474,6 +474,35 @@ export class StockMarket {
     }
 
     /**
+     * Trigger a market crash
+     * Reduces all market trends dramatically
+     */
+    triggerCrash() {
+        Object.keys(this.marketTrends).forEach(market => {
+            this.marketTrends[market] -= 0.05; // -5% daily during crash
+        });
+        this.updateIndices();
+    }
+
+    /**
+     * Trigger a tech boom
+     * Increases tech-heavy markets and tech sector
+     */
+    triggerBoom() {
+        this.marketTrends['US'] += 0.02;
+        this.marketTrends['ASIA'] += 0.015;
+
+        // Apply tech sector boost through individual stock manipulation
+        const techStocks = this.stocks?.filter(s => s.sector === 'Tech') || [];
+        techStocks.forEach(stock => {
+            stock.price = stock.price * 1.03; // 3% boost to tech stocks
+            stock.history.push(stock.price);
+        });
+
+        this.updateIndices();
+    }
+
+    /**
      * Serialize state for saving
      */
     toJSON() {

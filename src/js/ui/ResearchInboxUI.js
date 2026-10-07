@@ -174,12 +174,12 @@ export class ResearchInboxUI {
     showPaperDetails(notificationId) {
         const notification = this.researchPaperSystem.inbox.find(item => item.id === notificationId);
         if (!notification) return;
-        
+
         const paper = notification.paper;
-        
+
         // Mark as read
         this.researchPaperSystem.markAsRead(notificationId);
-        
+
         // Create detail modal
         const modal = document.createElement('div');
         modal.className = 'paper-detail-modal';
@@ -218,7 +218,7 @@ export class ResearchInboxUI {
                     </div>
                     ${paper.url ? `
                         <div class="paper-detail-link">
-                            <a href="${paper.url}" target="_blank" class="paper-link-btn">
+                            <a href="${paper.url}" target="_blank" rel="noopener noreferrer" class="paper-link-btn">
                                  Read Paper
                             </a>
                         </div>
@@ -226,21 +226,89 @@ export class ResearchInboxUI {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(modal);
-        
+
+        // Store the element that was focused before opening the modal
+        const previouslyFocused = document.activeElement;
+
+        // Get focusable elements within the modal content
+        const contentDiv = modal.querySelector('.paper-detail-content');
+        const getFocusableElements = () => {
+            return Array.from(contentDiv.querySelectorAll(
+                'a, button, [tabindex]:not([tabindex="-1"])'
+            ));
+        };
+
+        // Handler to close the modal
+        const closeModal = () => {
+            // Remove event listeners
+            document.removeEventListener('keydown', handleKeydown);
+            contentDiv.removeEventListener('keydown', handleTabTrap);
+
+            // Remove modal
+            modal.remove();
+
+            // Restore focus to the previously focused element
+            if (previouslyFocused && previouslyFocused !== document.body) {
+                previouslyFocused.focus();
+            }
+        };
+
+        // Handle Escape key
+        const handleKeydown = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        };
+
+        // Handle Tab key to trap focus within modal
+        const handleTabTrap = (e) => {
+            if (e.key === 'Tab') {
+                const focusableElements = getFocusableElements();
+                if (focusableElements.length === 0) return;
+
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+
+                if (e.shiftKey) {
+                    // Shift+Tab (reverse direction)
+                    if (document.activeElement === firstElement) {
+                        e.preventDefault();
+                        lastElement.focus();
+                    }
+                } else {
+                    // Tab (forward direction)
+                    if (document.activeElement === lastElement) {
+                        e.preventDefault();
+                        firstElement.focus();
+                    }
+                }
+            }
+        };
+
         // Close button
         modal.querySelector('.paper-detail-close').addEventListener('click', () => {
-            modal.remove();
+            closeModal();
         });
-        
+
         // Close on outside click
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.remove();
+                closeModal();
             }
         });
-        
+
+        // Add keyboard event listeners
+        document.addEventListener('keydown', handleKeydown);
+        contentDiv.addEventListener('keydown', handleTabTrap);
+
+        // Focus on the first focusable element
+        const focusableElements = getFocusableElements();
+        if (focusableElements.length > 0) {
+            focusableElements[0].focus();
+        }
+
         // Update inbox display
         if (this.litComponent) {
             this.litComponent.updatePapers(

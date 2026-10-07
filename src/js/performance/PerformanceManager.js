@@ -136,13 +136,6 @@ export class PerformanceManager {
      * Apply quality preset
      */
     applyPreset(preset) {
-        // Set CSS variables for quality
-        const root = document.documentElement;
-        root.style.setProperty('--quality-animations', preset.animations ? '1' : '0');
-        root.style.setProperty('--quality-particles', preset.particles || 'none');
-        root.style.setProperty('--quality-shadows', preset.shadows || 'none');
-        root.style.setProperty('--quality-resolution', preset.resolution);
-
         // Update frame rate limit
         this.targetFPS = preset.frameRateLimit;
     }

@@ -128,10 +128,42 @@ export class EducationSystem {
     completeCourse(courseId) {
         if (!this.completedCourses.includes(courseId)) {
             this.completedCourses.push(courseId);
+
+            // Award direct rewards based on course
+            const course = this.courses[courseId];
+            if (course) {
+                const reward = this.calculateCourseReward(course);
+
+                // Award XP to relevant stats
+                if (this.gameState.characterStats) {
+                    for (const [stat, xp] of Object.entries(reward.stats)) {
+                        this.gameState.characterStats.addExperience(stat, xp);
+                    }
+                }
+
+                // Award money
+                this.gameState.money += reward.money;
+
+                // Award reputation
+                this.gameState.reputation += reward.reputation;
+            }
+
             this.checkDegrees();
             return true;
         }
         return false;
+    }
+
+    calculateCourseReward(course) {
+        // Map course ID to reward based on course subject and cost
+        const rewardMap = {
+            'python_101': { stats: { intelligence: 50, analytics: 30 }, money: 100, reputation: 10 },
+            'sql_101': { stats: { intelligence: 50, analytics: 30 }, money: 100, reputation: 10 },
+            'stats_201': { stats: { analytics: 80, intelligence: 40 }, money: 200, reputation: 20 },
+            'ml_intro': { stats: { intelligence: 80, analytics: 60 }, money: 250, reputation: 25 }
+        };
+
+        return rewardMap[course.id] || { stats: { intelligence: 30, analytics: 20 }, money: 50, reputation: 5 };
     }
 
     checkDegrees() {

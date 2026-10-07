@@ -385,6 +385,10 @@ export class GameState {
         if (this.gameEndingSystem && data.gameEndingSystem) this.gameEndingSystem.fromJSON(data.gameEndingSystem);
         if (this.newsManager && data.newsManager) this.newsManager.fromJSON(data.newsManager);
         if (this.emotionalBreakdownSystem && data.emotionalBreakdownSystem) {
+            // Restore active breakdowns (Map reconstruction from saved array)
+            this.emotionalBreakdownSystem.activeBreakdowns = new Map(
+                (data.emotionalBreakdownSystem.activeBreakdowns || []).map(breakdown => [breakdown.id, breakdown])
+            );
             // Restore breakdown history
             this.emotionalBreakdownSystem.breakdownHistory = data.emotionalBreakdownSystem.breakdownHistory || [];
         }
