@@ -42,15 +42,15 @@ double Economy::getSalaryMultiplier(int rankIndex) {
   return 1.0;
 }
 
-bool Economy::canPromote(int reputation, int currentRank) {
-  if (currentRank >= 6)
+bool Economy::canPromote(int reputation, int currentRank) const {
+  if (currentRank >= MAX_RANK)
     return false; // Max rank
 
   int requiredRep = getRequiredReputation(currentRank + 1);
   return reputation >= requiredRep;
 }
 
-int Economy::getRequiredReputation(int rankIndex) {
+int Economy::getRequiredReputation(int rankIndex) const {
   if (rankIndex >= 0 && rankIndex <= 6) {
     return RANK_THRESHOLDS[rankIndex];
   }
