@@ -698,7 +698,7 @@ export class MainGame {
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            particles.forEach(particle => {
+            particles.forEach((particle, i) => {
                 // Update position
                 particle.x += particle.speedX;
                 particle.y += particle.speedY;
@@ -728,8 +728,9 @@ export class MainGame {
                 }
                 ctx.fill();
 
-                // Draw connections
-                particles.forEach(otherParticle => {
+                // Draw connections once per pair (i < j) — avoid double brightness (#2643)
+                particles.forEach((otherParticle, j) => {
+                    if (j <= i) return;
                     const dx = particle.x - otherParticle.x;
                     const dy = particle.y - otherParticle.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);

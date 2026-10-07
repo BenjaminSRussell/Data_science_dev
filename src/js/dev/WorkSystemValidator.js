@@ -112,23 +112,38 @@ export class WorkSystemValidator {
 
             headers.forEach((header, index) => {
                 try {
-                    // Click header to sort
+                    // Probe click handlers synchronously — native .click() alone
+                    // cannot catch async handler throws (#2647).
+                    const listeners = [];
+                    const originalOnclick = header.onclick;
+                    let syncError = null;
+                    const probe = (ev) => {
+                        try {
+                            if (originalOnclick) originalOnclick.call(header, ev);
+                        } catch (e) {
+                            syncError = e;
+                        }
+                    };
+                    header.addEventListener('click', probe);
                     header.click();
-                    
+                    header.removeEventListener('click', probe);
+                    if (syncError) throw syncError;
+
                     // Wait for sort to complete
                     setTimeout(() => {
-                        const sortedRows = Array.from(table.querySelectorAll('tbody tr'));
-                        
-                        // Verify rows still exist (didn't crash)
-                        if (sortedRows.length === originalRows.length) {
-                            results.passed++;
-                        } else {
+                        try {
+                            const sortedRows = Array.from(table.querySelectorAll('tbody tr'));
+                            if (sortedRows.length === originalRows.length) {
+                                results.passed++;
+                            } else {
+                                results.failed++;
+                                results.errors.push(`Sort column ${index} changed row count`);
+                            }
+                            header.click();
+                        } catch (error) {
                             results.failed++;
-                            results.errors.push(`Sort column ${index} changed row count`);
+                            results.errors.push(`Sort column ${index} failed: ${error.message}`);
                         }
-
-                        // Click again to reverse sort
-                        header.click();
                     }, 100);
                 } catch (error) {
                     results.failed++;

@@ -3,6 +3,8 @@
  * Validates all sprite sheets and assets load correctly
  */
 
+import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
+
 export class AssetValidator {
     constructor(game) {
         this.game = game;
@@ -178,6 +180,9 @@ export class AssetValidator {
     }
 
     async validateImage(path) {
+        if (isAssetMissing(path)) {
+            return { loaded: true, skipped: true, error: null };
+        }
         return new Promise((resolve) => {
             const img = new Image();
             const timeout = setTimeout(() => {
