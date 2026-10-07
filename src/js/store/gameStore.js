@@ -71,7 +71,7 @@ try {
 
                 // Current state
                 currentTask: null,
-                currentLocation: 'apartment',
+                currentLocation: 'home',
                 bank: null,
 
                 // Unlocked content
@@ -259,7 +259,7 @@ try {
                     totalRatings: 0,
                     ratingSum: 0,
                     currentTask: null,
-                    currentLocation: 'apartment',
+                    currentLocation: 'home',
                     bank: null,
                     unlockedChartTypes: ['bar', 'line', 'pie'],
                     purchasedItems: [],
@@ -358,7 +358,7 @@ try {
         totalRatings: 0,
         ratingSum: 0,
         currentTask: null,
-        currentLocation: 'apartment',
+        currentLocation: 'home',
         bank: null,
         unlockedChartTypes: ['bar', 'line', 'pie'],
         purchasedItems: [],
@@ -464,7 +464,7 @@ try {
             totalRatings: 0,
             ratingSum: 0,
             currentTask: null,
-            currentLocation: 'apartment',
+            currentLocation: 'home',
             bank: null,
             unlockedChartTypes: ['bar', 'line', 'pie'],
             purchasedItems: [],
