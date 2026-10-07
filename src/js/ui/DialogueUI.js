@@ -118,9 +118,10 @@ export class DialogueUI {
         // Build dialogue tree for this NPC
         const relLevel = relationshipLevel || this.game?.gameState?.npcManager?.getRelationship?.(npc.id) || 0;
         const treeSystem = this.game?.gameState?.dialogueTreeSystem || this.game?.dialogueTreeSystem || dialogueTreeSystem;
-        if (treeSystem) {
-            this.currentTree = treeSystem.getTree(npc.id, relLevel);
-        } else {
+        // getTree() returns null for NPCs without dialogue data; fall back to
+        // a simple greeting tree in that case too.
+        this.currentTree = treeSystem?.getTree?.(npc.id, relLevel) || null;
+        if (!this.currentTree) {
             // Fallback: create simple tree
             this.currentTree = {
                 getRootNode: () => ({

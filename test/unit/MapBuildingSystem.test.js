@@ -151,7 +151,7 @@ describe('placeBuilding', () => {
         blockSystem.zoneSystem = zoneSystem;
         blockSystem.findAvailableBlock = (zoneType, width) => {
             expect(zoneType).toBe('residential');
-            expect(width).toBe(1);
+            expect(width).toEqual({ width: 1, height: 1 });
             return availableBlock;
         };
 
