@@ -165,8 +165,19 @@ export class TooltipManager {
 
         const show = (e) => {
             tooltip.style.display = 'block';
-            tooltip.style.left = `${e.pageX + 10}px`;
-            tooltip.style.top = `${e.pageY + 10}px`;
+            // Measure after show for correct box; clamp to viewport (#2644)
+            let left = e.clientX + 10;
+            let top = e.clientY + 10;
+            const pad = 8;
+            const tw = tooltip.offsetWidth || 160;
+            const th = tooltip.offsetHeight || 40;
+            const maxL = window.innerWidth - tw - pad;
+            const maxT = window.innerHeight - th - pad;
+            left = Math.max(pad, Math.min(left, maxL));
+            top = Math.max(pad, Math.min(top, maxT));
+            tooltip.style.position = 'fixed';
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
         };
 
         const hide = () => {
