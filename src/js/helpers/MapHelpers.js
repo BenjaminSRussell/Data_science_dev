@@ -5,11 +5,11 @@
  */
 
 import { CameraSystem } from '../camera/CameraSystem.js';
-import { NPCs } from '../game/NPCManager.js';
 import { updateMapLocationIcons, updateLockBadges } from './MapIconRenderer.js';
 import { initializeMapRenderer } from '../game/MapSystemInitializer.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { logger } from '../utils/Logger.js';
+import { VEHICLES, VEHICLES_MAP } from '../game/WorldMap.js';
 // WorldMapRenderer imported lazily to avoid circular dependencies
 
 // Cache DOM elements to avoid repeated queries (using DOMUtils cache)
@@ -163,6 +163,14 @@ function updateNewsTicker(game) {
     if (latestNews.length > 0) {
         const newsText = latestNews.map(n => `[${n.category}] ${n.text}`).join('    •    ');
         domCache.newsEl.textContent = newsText + '    •    ' + newsText;
+
+        // Mark news as read when displayed in ticker
+        latestNews.forEach(n => game.newsManager.markAsRead(n.id));
+
+        // Update the news badge
+        if (game.updateNewsBadge) {
+            game.updateNewsBadge();
+        }
     }
 }
 
@@ -468,6 +476,23 @@ export function updateEnvironmentForLocation(game, locationId) {
  * Handle location-based shop actions - O(1)
  */
 export function handleLocationAction(game, action) {
+    // Handle car-related activities
+    if (action === 'browse_cars') {
+        handleBrowseCars(game);
+        return;
+    }
+
+    if (action === 'buy_car') {
+        handleBuyCar(game);
+        return;
+    }
+
+    if (action === 'sell_car') {
+        handleSellCar(game);
+        return;
+    }
+
+    // Handle simple shop actions
     const actions = {
         'buy_donut': { cost: 5, energyGain: 10, message: "Yummy donut! +10 Energy" },
         'eat_donut': { cost: 5, energyGain: 10, message: "Yum!" },
@@ -503,4 +528,181 @@ export function handleLocationAction(game, action) {
     updateMapScreen(game);
     game.showToast(actionData.message, 'success');
     game.audioManager.play('kaching');
+}
+
+/**
+ * Handle browse cars action - O(n) where n is number of vehicles
+ * Shows available vehicles without purchase prompt
+ */
+function handleBrowseCars(game) {
+    if (!game.worldMap) {
+        game.showError("Vehicle shop temporarily unavailable");
+        return;
+    }
+
+    const ownedVehicles = game.worldMap.ownedVehicles || new Set();
+
+    // Build vehicle list from VEHICLES constant (skip walking)
+    const vehicleList = VEHICLES
+        .filter(v => v.id !== 'walking')
+        .map(v => ({
+            id: v.id,
+            name: v.name,
+            price: v.price,
+            owned: ownedVehicles.has(v.id)
+        }));
+
+    if (vehicleList.length === 0) {
+        game.showError("Vehicle shop temporarily unavailable");
+        return;
+    }
+
+    // Create a browse display without purchase prompt
+    const message = vehicleList
+        .map(v => {
+            const status = v.owned ? '(Owned)' : `$${v.price.toLocaleString()}`;
+            return `${v.name}: ${status}`;
+        })
+        .join('\n');
+
+    game.showToast(`Available Vehicles:\n\n${message}`, 'info');
+}
+
+/**
+ * Handle buy car action - O(n) where n is number of vehicles
+ * Prompts player to select and purchase a vehicle
+ */
+function handleBuyCar(game) {
+    if (!game.worldMap) {
+        game.showError("Vehicle shop temporarily unavailable");
+        return;
+    }
+
+    const ownedVehicles = game.worldMap.ownedVehicles || new Set();
+
+    // Build vehicle list from VEHICLES constant (skip walking)
+    const vehicleList = VEHICLES
+        .filter(v => v.id !== 'walking')
+        .map(v => ({
+            id: v.id,
+            name: v.name,
+            price: v.price,
+            owned: ownedVehicles.has(v.id)
+        }));
+
+    if (vehicleList.length === 0) {
+        game.showError("Vehicle shop temporarily unavailable");
+        return;
+    }
+
+    // Create a simple dialog to purchase vehicles
+    const message = vehicleList
+        .map(v => {
+            const status = v.owned ? '(Owned)' : `$${v.price.toLocaleString()}`;
+            return `${v.name}: ${status}`;
+        })
+        .join('\n');
+
+    // Use vehicle ID (e.g., 'used_car') as default - more robust than name matching
+    const selected = prompt(
+        `Available Vehicles:\n\n${message}\n\nEnter vehicle ID to purchase (or cancel):`,
+        'used_car'
+    );
+
+    if (!selected) return;
+
+    // Match by vehicle ID first, then by name as fallback for user convenience
+    let selectedVehicle = vehicleList.find(v => v.id === selected);
+    if (!selectedVehicle) {
+        selectedVehicle = vehicleList.find(v => v.name.toLowerCase() === selected.toLowerCase());
+    }
+
+    if (!selectedVehicle) {
+        game.showError(`Vehicle "${selected}" not found`);
+        return;
+    }
+
+    if (selectedVehicle.owned) {
+        game.showError(`You already own the ${selectedVehicle.name}`);
+        return;
+    }
+
+    if (game.gameState.money < selectedVehicle.price) {
+        game.showError(`Not enough money! Need $${selectedVehicle.price.toLocaleString()}`);
+        return;
+    }
+
+    if (confirm(`Buy ${selectedVehicle.name} for $${selectedVehicle.price.toLocaleString()}?`)) {
+        const result = game.worldMap.buyVehicle(selectedVehicle.id);
+        if (result.success) {
+            game.showToast(`Bought ${selectedVehicle.name}!`, 'success');
+            if (game.audioManager?.play) game.audioManager.play('kaching');
+            updateMapScreen(game);
+            if (game.uiUpdater?.updateAllUI) game.uiUpdater.updateAllUI();
+        } else {
+            game.showError(result.reason);
+        }
+    }
+}
+
+/**
+ * Handle sell car action - O(n) where n is number of owned vehicles
+ */
+function handleSellCar(game) {
+    if (!game.worldMap) {
+        game.showError("Vehicle shop temporarily unavailable");
+        return;
+    }
+
+    const ownedVehicles = game.worldMap.ownedVehicles || new Set();
+
+    // Build list of owned vehicles (skip walking)
+    const vehicleList = VEHICLES
+        .filter(v => ownedVehicles.has(v.id) && v.id !== 'walking')
+        .map(v => ({
+            id: v.id,
+            name: v.name,
+            price: v.price,
+            salePrice: Math.floor(v.price * 0.5)
+        }));
+
+    if (vehicleList.length === 0) {
+        game.showError("You don't own any vehicles to sell!");
+        return;
+    }
+
+    const message = vehicleList
+        .map(v => `${v.name}: $${v.salePrice.toLocaleString()}`)
+        .join('\n');
+
+    // Use vehicle ID as default for more reliable matching
+    const selected = prompt(
+        `Vehicles for Sale:\n\n${message}\n\nEnter vehicle ID to sell (or cancel):`,
+        vehicleList.length > 0 ? vehicleList[0].id : ''
+    );
+
+    if (!selected) return;
+
+    // Match by vehicle ID first, then by name as fallback
+    let selectedVehicle = vehicleList.find(v => v.id === selected);
+    if (!selectedVehicle) {
+        selectedVehicle = vehicleList.find(v => v.name.toLowerCase() === selected.toLowerCase());
+    }
+
+    if (!selectedVehicle) {
+        game.showError(`Vehicle "${selected}" not found`);
+        return;
+    }
+
+    if (confirm(`Sell ${selectedVehicle.name} for $${selectedVehicle.salePrice.toLocaleString()}?`)) {
+        const result = game.worldMap.sellVehicle(selectedVehicle.id);
+        if (result.success) {
+            game.showToast(`Sold ${selectedVehicle.name} for $${result.salePrice}!`, 'success');
+            if (game.audioManager?.play) game.audioManager.play('kaching');
+            updateMapScreen(game);
+            if (game.uiUpdater?.updateAllUI) game.uiUpdater.updateAllUI();
+        } else {
+            game.showError(result.reason);
+        }
+    }
 }

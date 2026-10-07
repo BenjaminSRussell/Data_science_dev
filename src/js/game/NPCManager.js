@@ -220,7 +220,6 @@ export const NPCs = [
         unlockRequirement: { reputation: 5000, relationship: { david_chen: 50 } },
         gifts: ['fine_wine', 'luxury_watch'],
         dialogueTopics: ['global_markets', 'acquisitions', 'leverage'],
-        benefits: { seriesAFunding: true, boardSeat: true },
         backstory: 'A tough-as-nails VC who demands excellence. Her endorsement guarantees success.'
     },
 
@@ -237,7 +236,6 @@ export const NPCs = [
         unlockRequirement: null,
         gifts: ['tips', 'compliments'],
         dialogueTopics: ['baking', 'sugar', 'mornings'],
-        benefits: { free_donuts: true },
         backstory: 'Bakes the best donuts in the city. Always has a smile ready.',
         description: 'The cheerful owner of Donut Delights. Her donuts are legendary, and her positive energy is infectious. Knows all the regulars by name.',
         age: 42,
@@ -256,7 +254,6 @@ export const NPCs = [
         unlockRequirement: null,
         gifts: ['tips', 'coffee'],
         dialogueTopics: ['yeast', 'nyc', 'cream_cheese'],
-        benefits: { extra_cream_cheese: true },
         backstory: 'Takes bagels very seriously. Claims to import water from NYC.',
         description: 'A passionate bagel maker who moved from Brooklyn to start his own shop. Extremely knowledgeable about traditional bagel-making techniques.',
         age: 48,
@@ -316,7 +313,6 @@ export const NPCs = [
         unlockRequirement: { stat: 'stamina', value: 15 },
         gifts: ['protein', 'sports_gear'],
         dialogueTopics: ['fitness', 'motivation', 'life'],
-        benefits: { staminaBoost: true, workoutPartner: true },
         backstory: 'Personal trainer who believes in work-life balance.',
         description: 'An enthusiastic personal trainer who combines fitness expertise with motivational support. Believes that physical health enhances mental performance.',
         age: 29,
@@ -369,7 +365,6 @@ export const NPCs = [
         unlockRequirement: { ethics: -20, netWorth: 100000 },
         gifts: ['cocaine', 'insider_info'], // cocaine might be too much, let's say "expensive_champagne"
         dialogueTopics: ['penny_stocks', 'ratholes', 'sec_evasion'],
-        benefits: { pumpDump: true, ratholes: true },
         backstory: 'Former wall street legend, now operating in the shadows.'
     },
     {
@@ -452,7 +447,6 @@ export const NPCs = [
         unlockRequirement: { reputation: 300 },
         gifts: ['tech_gadgets', 'books'],
         dialogueTopics: ['data_pipelines', 'infrastructure', 'scalability'],
-        benefits: { statBoost: 'analytics', systemDesign: true },
         backstory: 'Built data infrastructure for major tech companies. Knows everything about scale.'
     },
 
@@ -1608,6 +1602,11 @@ export class NPCManager {
         // Money change
         if (effects.money) {
             this.gameState.money += effects.money;
+        }
+
+        // Reputation change
+        if (effects.reputation) {
+            this.gameState.reputation += effects.reputation;
         }
 
         // Flags (Quest tracking)

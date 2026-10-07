@@ -3,66 +3,14 @@
  * Manages different color themes for each screen/section
  */
 
-export const SCREEN_THEMES = {
-    'screen-menu': {
-        primary: '#0f172a',
-        secondary: '#1e293b',
-        accent: '#8b5cf6',
-        gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
-    },
-    'screen-game': {
-        primary: '#0f172a',
-        secondary: '#1e293b',
-        accent: '#34d399',
-        gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
-    },
-    'screen-chart-studio': {
-        primary: '#1e1b4b',
-        secondary: '#312e81',
-        accent: '#a78bfa',
-        gradient: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%)'
-    },
-    'screen-shop': {
-        primary: '#1c1917',
-        secondary: '#292524',
-        accent: '#fbbf24',
-        gradient: 'linear-gradient(135deg, #1c1917 0%, #292524 50%, #1c1917 100%)'
-    },
-    'screen-map': {
-        primary: '#0f172a',
-        secondary: '#1e293b',
-        accent: '#8b5cf6',
-        gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
-    },
-    'screen-relationships': {
-        primary: '#1e1b4b',
-        secondary: '#312e81',
-        accent: '#f472b6',
-        gradient: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%)'
-    },
-    'screen-stats': {
-        primary: '#0f172a',
-        secondary: '#1e293b',
-        accent: '#34d399',
-        gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
-    },
-    'screen-bank': {
-        primary: '#1c1917',
-        secondary: '#292524',
-        accent: '#fbbf24',
-        gradient: 'linear-gradient(135deg, #1c1917 0%, #292524 50%, #1c1917 100%)'
-    },
-    'screen-news': {
-        primary: '#1e293b',
-        secondary: '#334155',
-        accent: '#f472b6',
-        gradient: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%)'
-    }
-};
+import { SCREEN_THEMES } from '../data/themes.js';
+
+export { SCREEN_THEMES };
 
 export class ScreenThemeManager {
     constructor() {
         this.currentScreen = null;
+        this.currentTheme = null;
         this.applyTheme('screen-menu');
     }
 
@@ -72,6 +20,7 @@ export class ScreenThemeManager {
     applyTheme(screenId) {
         const theme = SCREEN_THEMES[screenId] || SCREEN_THEMES['screen-game'];
         this.currentScreen = screenId;
+        this.currentTheme = theme;
 
         // Apply CSS variables
         const root = document.documentElement;

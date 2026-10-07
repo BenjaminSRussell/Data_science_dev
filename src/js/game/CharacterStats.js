@@ -245,19 +245,39 @@ export class CharacterStats {
 
     /**
      * Check for character evolution based on stats
-     * @param {number} netWorth - Current player money/net worth
+     * Now reads from VisualProgressionSystem to maintain synchronization
+     * @param {number} netWorth - Current player money/net worth (deprecated, kept for backward compatibility)
+     * @param {VisualProgressionSystem} visualProgressionSystem - The canonical visual tier system
      */
-    checkEvolution(netWorth) {
+    checkEvolution(netWorth, visualProgressionSystem) {
         let newStage = this.visualStage;
 
-        // Level 2 Threshold: $5,000
-        if (netWorth >= 5000 && this.visualStage === 'level_1') {
-            newStage = this.ethics >= 50 ? 'level_2_good' : 'level_2_evil';
-        }
+        // If visualProgressionSystem is provided, map its tier to our stage
+        // This ensures both systems stay synchronized instead of maintaining parallel thresholds
+        if (visualProgressionSystem) {
+            const currentTier = visualProgressionSystem.currentTier;
 
-        // Level 3 Threshold: $50,000
-        else if (netWorth >= 50000 && this.visualStage.startsWith('level_2')) {
-            newStage = this.ethics >= 50 ? 'level_3_good' : 'level_3_evil';
+            // Map tier to appropriate stage based on ethics alignment
+            if (currentTier === 'basic') {
+                newStage = 'level_1';
+            } else if (currentTier === 'mid') {
+                newStage = this.ethics >= 50 ? 'level_2_good' : 'level_2_evil';
+            } else if (currentTier === 'premium') {
+                newStage = this.ethics >= 50 ? 'level_3_good' : 'level_3_evil';
+            }
+        } else {
+            // Fallback to old threshold logic if visualProgressionSystem not provided
+            // This maintains backward compatibility for tests or other code paths
+
+            // Level 2 Threshold: $5,000
+            if (netWorth >= 5000 && this.visualStage === 'level_1') {
+                newStage = this.ethics >= 50 ? 'level_2_good' : 'level_2_evil';
+            }
+
+            // Level 3 Threshold: $50,000
+            else if (netWorth >= 50000 && this.visualStage.startsWith('level_2')) {
+                newStage = this.ethics >= 50 ? 'level_3_good' : 'level_3_evil';
+            }
         }
 
         if (newStage !== this.visualStage) {

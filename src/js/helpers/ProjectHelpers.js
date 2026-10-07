@@ -324,7 +324,12 @@ export function updateStatsScreen(game) {
 export function checkForCharacterEvolution(game) {
     if (!game.gameState.characterStats) return;
 
-    const evolution = game.gameState.characterStats.checkEvolution(game.gameState.money);
+    // Pass visualProgressionSystem to maintain synchronized state
+    // This ensures CharacterStats.visualStage matches VisualProgressionSystem.currentTier
+    const evolution = game.gameState.characterStats.checkEvolution(
+        game.gameState.money,
+        game.gameState.visualProgressionSystem
+    );
     if (evolution.evolved) {
         game.showToast(`Character Evolved: ${evolution.stage.replace(/_/g, ' ').toUpperCase()}!`, 'success');
         game.audioManager.play('kaching');

@@ -357,7 +357,7 @@ export class StorylineManager {
             phase: this.storylinePhase,
             progress: this.storylineProgress,
             arc: this.currentArc,
-            decisions: this.majorDecisions.length
+            decisions: this.majorDecisions
         };
     }
 

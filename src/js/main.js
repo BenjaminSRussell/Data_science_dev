@@ -27,6 +27,7 @@ import { TaskSystem } from './game/TaskSystem.js';
 import { EconomySystem } from './game/EconomySystem.js';
 import { BankSystem } from './game/BankSystem.js';
 import { UIUpdater } from './ui/UIUpdater.js';
+import { createGameEndingModal } from './ui/GameEndingModal.js';
 import { EnvironmentManager } from './game/EnvironmentManager.js';
 import { CharacterStats, STATS, TRAINING_ACTIVITIES } from './game/CharacterStats.js';
 import { TimeManager } from './game/TimeManager.js';
@@ -37,11 +38,11 @@ import { MapProgressionSystem } from './game/MapProgressionSystem.js';
 import { dialogueTreeSystem } from './game/dialogue/DialogueTreeSystem.js';
 import { ConversationScreen } from './game/dialogue/ConversationScreen.js';
 import { IntroSystem } from './game/IntroSystem.js';
-import { DayNightCycle, TIME_OF_DAY } from './game/DayNightCycle.js';
+import { DayNightCycle } from './game/DayNightCycle.js';
 import { NotificationSystem } from './game/NotificationSystem.js';
 import { LocationDetailSystem } from './game/locations/LocationDetailSystem.js';
+import { OfficeManager } from './game/OfficeManager.js';
 import { CompanyManagementSystem } from './game/company/CompanyManagementSystem.js';
-import { RomanceProgressionSystem } from './game/romance/RomanceProgressionSystem.js';
 import { JealousySystem } from './game/social/JealousySystem.js';
 import { DemandingBossSystem } from './game/work/DemandingBossSystem.js';
 import { GameplaySettings } from './game/settings/GameplaySettings.js';
@@ -196,6 +197,7 @@ export class MainGame {
 
         this.gameLoopId = null;
         this.bankSystem = null; // Will be initialized when needed
+        this.taskTimerIntervalId = null; // Track the task timer interval
 
         // Bind methods
         this.gameLoop = this.gameLoop.bind(this);
@@ -203,6 +205,9 @@ export class MainGame {
         // this.init = this.init.bind(this); // specific bind not needed and causing issues
         this.startNewGame = this.startNewGame.bind(this);
         this.continueGame = this.continueGame.bind(this);
+        this.updateTaskTimer = this.updateTaskTimer.bind(this);
+        this.startTaskTimer = this.startTaskTimer.bind(this);
+        this.stopTaskTimer = this.stopTaskTimer.bind(this);
 
         logger.debug('MainGame constructor exit - all initialization complete', { hasSaveManager: !!this.saveManager, hasTaskSystem: !!this.taskSystem, hasScreenManager: !!this.screenManager });
 
@@ -1654,6 +1659,7 @@ export class MainGame {
                 logger.warn('NewsManager not initialized, skipping news generation');
             } else {
                 this.newsManager.generateDailyNews();
+                this.updateNewsBadge();
                 logger.debug('[finishGameStart]: news generated');
             }
 
@@ -1664,6 +1670,9 @@ export class MainGame {
                 this.uiUpdater.updateAllUI();
                 logger.debug('[finishGameStart]: UI updated');
             }
+
+            // Start task timer if task has a time limit
+            this.startTaskTimer();
 
             if (this.worldMap) {
                 this.updateMapScreen();
@@ -1845,6 +1854,9 @@ export class MainGame {
         if (!this.gameState.currentTask) {
             this.taskSystem.generateNewTask();
         }
+
+        // Start task timer if task has a time limit
+        this.startTaskTimer();
 
         // Update UI with loaded state
         this.uiUpdater.updateAllUI();
@@ -2029,6 +2041,9 @@ export class MainGame {
             return;
         }
 
+        // Stop the task timer when submitting
+        this.stopTaskTimer();
+
         // Calculate score
         const score = this.economySystem.evaluateChart(
             this.gameState.currentTask,
@@ -2190,8 +2205,83 @@ export class MainGame {
         this.uiUpdater.updateTaskDisplay();
         this.uiUpdater.updateAllUI();
 
+        // Start task timer if task has a time limit
+        this.startTaskTimer();
+
         // Show game screen
         this.screenManager.showScreen('screen-game');
+    }
+
+    /**
+     * Start the task timer countdown
+     */
+    startTaskTimer() {
+        // Stop any existing timer
+        this.stopTaskTimer();
+
+        const task = this.gameState.currentTask;
+        if (!task || !task.timeLimit) {
+            return; // No timer needed if task has no time limit
+        }
+
+        // Get the timer element
+        const timerElement = document.getElementById('task-timer');
+        if (!timerElement) {
+            return; // No timer element in DOM
+        }
+
+        // Unhide the timer
+        timerElement.classList.remove('hidden');
+
+        // Update timer immediately
+        this.updateTaskTimer();
+
+        // Start interval to update timer every second
+        this.taskTimerIntervalId = setInterval(() => {
+            this.updateTaskTimer();
+        }, 1000);
+    }
+
+    /**
+     * Update the task timer display
+     */
+    updateTaskTimer() {
+        const task = this.gameState.currentTask;
+        const timerElement = document.getElementById('task-timer');
+
+        if (!task || !task.timeLimit || !timerElement) {
+            return;
+        }
+
+        // Calculate remaining time
+        const elapsed = (Date.now() - task.startTime) / 1000;
+        const remaining = Math.max(0, task.timeLimit - elapsed);
+
+        // Format as MM:SS
+        const minutes = Math.floor(remaining / 60);
+        const seconds = Math.floor(remaining % 60);
+        timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        // Stop timer if time is up
+        if (remaining <= 0) {
+            this.stopTaskTimer();
+            timerElement.classList.add('time-expired');
+        }
+    }
+
+    /**
+     * Stop the task timer
+     */
+    stopTaskTimer() {
+        if (this.taskTimerIntervalId) {
+            clearInterval(this.taskTimerIntervalId);
+            this.taskTimerIntervalId = null;
+        }
+
+        const timerElement = document.getElementById('task-timer');
+        if (timerElement) {
+            timerElement.classList.add('hidden');
+        }
     }
 
     /**
@@ -2714,8 +2804,21 @@ export class MainGame {
             if (event.type === 'new_day') {
                 if (this.newsManager) {
                     this.newsManager.generateDailyNews();
+                    this.updateNewsBadge();
                 }
                 this.showToast('A new day has begun!', 'info');
+
+                // Update stock market with today's news events
+                if (this.gameState.stockMarket) {
+                    // Gather news events from the daily paper
+                    const dailyPaper = this.newsManager?.getDailyPaper();
+                    const newsEvents = [];
+                    if (dailyPaper?.headline) newsEvents.push(dailyPaper.headline);
+                    if (dailyPaper?.articles) newsEvents.push(...dailyPaper.articles);
+
+                    // Update stock market prices based on news events
+                    this.gameState.stockMarket.update(newsEvents, []);
+                }
 
                 // Expenses
                 if (this.gameState.economySystem) {
@@ -2802,96 +2905,7 @@ export class MainGame {
      * Show game ending screen
      */
     showGameEnding(endingData) {
-        if (!endingData) return;
-
-        // Create ending modal
-        const modal = document.createElement('div');
-        modal.id = 'game-ending-modal';
-        modal.className = 'modal active';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-family: 'Arial', sans-serif;
-        `;
-
-        const stats = this.gameState.gameEndingSystem?.getEndingStats() || {};
-
-        modal.innerHTML = `
-            <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 40px; border-radius: 20px; max-width: 600px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-                <h1 style="font-size: 48px; margin: 0 0 20px 0; color: #fbbf24; text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);">
-                    ${endingData.title || 'Victory!'}
-                </h1>
-                <p style="font-size: 20px; margin: 0 0 30px 0; color: #e2e8f0;">
-                    ${endingData.message || 'Congratulations on completing your journey!'}
-                </p>
-                <div style="background: rgba(15, 23, 42, 0.8); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
-                    <h3 style="margin-top: 0; color: #fbbf24;">Career Statistics</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
-                        <div><strong>Final Rank:</strong> ${stats.rankTitle || 'Unknown'}</div>
-                        <div><strong>Days Played:</strong> ${stats.days || 0}</div>
-                        <div><strong>Total Money:</strong> $${(stats.money || 0).toLocaleString()}</div>
-                        <div><strong>Reputation:</strong> ${stats.reputation || 0}</div>
-                        <div><strong>Tasks Completed:</strong> ${stats.tasksCompleted || 0}</div>
-                        <div><strong>Perfect Scores:</strong> ${stats.perfectScores || 0}</div>
-                        <div><strong>Contracts:</strong> ${stats.contractsCompleted || 0}</div>
-                        <div><strong>Projects:</strong> ${stats.projectsCompleted || 0}</div>
-                    </div>
-                </div>
-                <div style="margin-top: 30px;">
-                    <button id="btn-ending-new-game" style="
-                        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                        color: white;
-                        border: none;
-                        padding: 15px 30px;
-                        font-size: 18px;
-                        border-radius: 10px;
-                        cursor: pointer;
-                        margin: 0 10px;
-                        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-                    ">New Game</button>
-                    <button id="btn-ending-continue" style="
-                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                        color: white;
-                        border: none;
-                        padding: 15px 30px;
-                        font-size: 18px;
-                        border-radius: 10px;
-                        cursor: pointer;
-                        margin: 0 10px;
-                        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-                    ">Continue Playing</button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Button handlers
-        document.getElementById('btn-ending-new-game').onclick = () => {
-            if (confirm('Start a new game? Your current progress will be lost.')) {
-                this.startNewGame();
-                modal.remove();
-            }
-        };
-
-        document.getElementById('btn-ending-continue').onclick = () => {
-            modal.remove();
-            // Allow player to continue playing even after ending
-        };
-
-        // Play victory sound
-        if (this.audioManager?.play) {
-            this.audioManager.play('kaching');
-        }
+        createGameEndingModal(endingData, this);
     }
 
     handleTraining(activityId) {
@@ -3116,6 +3130,28 @@ export class MainGame {
         }
     }
 
+    updateNewsBadge() {
+        try {
+            if (!this.newsManager) return;
+
+            const unreadCount = this.newsManager.getUnreadCount();
+            const badge = document.getElementById('news-unread-badge');
+            const button = document.getElementById('btn-nav-newspaper');
+
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.classList.remove('hidden');
+                    if (button) button.classList.add('has-unread');
+                } else {
+                    badge.classList.add('hidden');
+                    if (button) button.classList.remove('has-unread');
+                }
+            }
+        } catch (error) {
+            logger.error('Error updating news badge:', error);
+        }
+    }
 
     finishWorkingSession(ticks, totalTicks) {
         ProjectHelpers.finishWorkingSession(this, ticks, totalTicks);
@@ -3162,16 +3198,16 @@ export class MainGame {
                 this.locationDetailSystem = this.gameState.locationDetailSystem;
             }
 
+            // Office manager (documented tycoon system)
+            if (!this.gameState.officeManager) {
+                this.gameState.officeManager = new OfficeManager(this.gameState);
+                this.officeManager = this.gameState.officeManager;
+            }
+
             // Company management
             if (!this.gameState.companyManagement) {
                 this.gameState.companyManagement = new CompanyManagementSystem(this.gameState);
                 this.companyManagement = this.gameState.companyManagement;
-            }
-
-            // Romance progression
-            if (!this.gameState.romanceProgression) {
-                this.gameState.romanceProgression = new RomanceProgressionSystem(this.gameState);
-                this.romanceProgression = this.gameState.romanceProgression;
             }
 
             // Jealousy system

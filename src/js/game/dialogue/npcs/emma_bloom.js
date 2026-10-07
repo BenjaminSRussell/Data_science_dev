@@ -111,7 +111,6 @@ export default {
     
     breakdowns: {
         low_relationship: {
-            trigger: { relationship: '<20' },
             emotion: 'hurt',
             dialogue: [
                 "I thought...",
@@ -121,7 +120,6 @@ export default {
             quickTime: 'comfort'
         },
         rejection: {
-            trigger: { rejection: true },
             emotion: 'crying',
             dialogue: [
                 "I... I thought you understood.",

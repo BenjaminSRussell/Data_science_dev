@@ -46,24 +46,29 @@ describe('StatisticsAggregator', () => {
     });
 
     describe('formatMoney', () => {
-        it('should format 999 as "$999"', () => {
+        it('should format 999 as "$999" with comma-grouped format (Issue #141)', () => {
             expect(statsAggregator.formatMoney(999)).toBe('$999');
         });
 
-        it('should format 1000 as "$1.0K"', () => {
-            expect(statsAggregator.formatMoney(1000)).toBe('$1.0K');
+        it('should format 1000 as "$1,000" with comma-grouped format (Issue #141)', () => {
+            expect(statsAggregator.formatMoney(1000)).toBe('$1,000');
         });
 
-        it('should format 999999 as "$1000.0K" (not "$1.0M")', () => {
-            expect(statsAggregator.formatMoney(999999)).toBe('$1000.0K');
+        it('should format 999999 as "$999,999" with comma-grouped format (Issue #141)', () => {
+            expect(statsAggregator.formatMoney(999999)).toBe('$999,999');
         });
 
-        it('should format 1000000 as "$1.00M"', () => {
-            expect(statsAggregator.formatMoney(1000000)).toBe('$1.00M');
+        it('should format 1000000 as "$1,000,000" with comma-grouped format (Issue #141)', () => {
+            expect(statsAggregator.formatMoney(1000000)).toBe('$1,000,000');
         });
 
         it('should format 0 as "$0"', () => {
             expect(statsAggregator.formatMoney(0)).toBe('$0');
+        });
+
+        it('should format negative values with sign preserved (Issue #141)', () => {
+            expect(statsAggregator.formatMoney(-1000)).toBe('$-1,000');
+            expect(statsAggregator.formatMoney(-1000000)).toBe('$-1,000,000');
         });
     });
 });

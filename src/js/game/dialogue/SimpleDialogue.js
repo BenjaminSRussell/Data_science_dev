@@ -260,9 +260,6 @@ export class SimpleDialogueManager {
     }
     
     handleSmallTalk(personality) {
-        const topics = ['weather', 'work', 'news', 'hobbies'];
-        const topic = topics[Math.floor(Math.random() * topics.length)];
-        
         const responses = {
             friendly: { text: "So anyway, I was just thinking about how crazy things have been lately!", mood: MOOD.HAPPY, effect: { relationship: 1 } },
             professional: { text: "The market has been interesting lately. Have you been following the trends?", mood: MOOD.NEUTRAL, effect: { relationship: 1 } },

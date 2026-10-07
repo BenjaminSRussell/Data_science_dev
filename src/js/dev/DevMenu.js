@@ -513,6 +513,10 @@ export class DevMenu {
             this.testSpreadsheets();
         }));
 
+        container.appendChild(this.createButton('Test Ending Screen', () => {
+            this.testEndingScreen();
+        }));
+
         container.appendChild(this.createButton('Validate Assets', () => {
             this.validateAssets();
         }));
@@ -679,6 +683,25 @@ export class DevMenu {
         }
 
         this.game.showToast(`Spreadsheet tests: ${results.passed} passed, ${results.failed} failed`, 'info');
+    }
+
+    testEndingScreen() {
+        try {
+            if (this.game.gameState?.gameEndingSystem) {
+                this.game.gameState.gameEndingSystem.triggerEnding({
+                    type: 'debug_preview',
+                    title: 'Debug: Ending Preview',
+                    message: 'This is a dev-menu preview.',
+                    showEnding: true
+                });
+                this.game.showToast('Ending screen triggered', 'success');
+            } else {
+                this.game.showError('GameEndingSystem not available');
+            }
+        } catch (error) {
+            console.error('Error triggering ending screen:', error);
+            this.game.showError(`Error: ${error.message}`);
+        }
     }
 
     validateAssets() {

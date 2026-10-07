@@ -9,21 +9,35 @@ describe('ScreenThemeManager', () => {
     let mockScreenElement;
 
     beforeEach(() => {
-        mockDocumentElement = { style: {} };
-        mockBody = { style: {} };
-        mockScreenElement = { style: {} };
+        mockDocumentElement = {
+            style: {
+                setProperty: vi.fn()
+            }
+        };
+        mockBody = {
+            style: {
+                background: undefined
+            }
+        };
+        mockScreenElement = {
+            style: {
+                background: undefined
+            }
+        };
 
-        vi.spyOn(document, 'querySelector').mockImplementation(selector => {
-            if (selector === '#game-container') return mockScreenElement;
+        vi.spyOn(document, 'getElementById').mockImplementation(id => {
+            if (id === 'screen-menu' || id === 'screen-shop') return mockScreenElement;
             return null;
         });
 
         Object.defineProperty(document, 'documentElement', {
-            get: () => mockDocumentElement
+            value: mockDocumentElement,
+            writable: true
         });
 
         Object.defineProperty(document, 'body', {
-            get: () => mockBody
+            value: mockBody,
+            writable: true
         });
 
         screenThemeManager = new ScreenThemeManager();
@@ -44,6 +58,7 @@ describe('ScreenThemeManager', () => {
 
     describe('applyTheme', () => {
         it('should apply the correct theme for a known screen', () => {
+            mockDocumentElement.style.setProperty.mockClear();
             const theme = SCREEN_THEMES['screen-shop'];
             screenThemeManager.applyTheme('screen-shop');
             expect(screenThemeManager.currentTheme).toBe(theme);
@@ -57,6 +72,8 @@ describe('ScreenThemeManager', () => {
         });
 
         it('should fall back to the default theme for an unknown screen', () => {
+            mockDocumentElement.style.setProperty.mockClear();
+            mockScreenElement.style.background = undefined;
             const defaultTheme = SCREEN_THEMES['screen-game'];
             screenThemeManager.applyTheme('unknown-screen');
             expect(screenThemeManager.currentTheme).toBe(defaultTheme);
@@ -83,6 +100,26 @@ describe('ScreenThemeManager', () => {
             screenThemeManager.currentTheme = SCREEN_THEMES['screen-shop'];
             screenThemeManager.currentScreen = 'unknown-screen';
             expect(screenThemeManager.getCurrentTheme()).toBe(defaultTheme);
+        });
+    });
+
+    describe('theme coverage', () => {
+        it('should have theme entries for all 18 game screens', () => {
+            const allScreens = [
+                'screen-bank', 'screen-career', 'screen-chart-studio', 'screen-clients',
+                'screen-game', 'screen-intro-video', 'screen-jail', 'screen-library',
+                'screen-map', 'screen-menu', 'screen-newspaper', 'screen-office',
+                'screen-relationships', 'screen-review', 'screen-shop', 'screen-staff',
+                'screen-stats', 'screen-stock-market'
+            ];
+
+            for (const screenId of allScreens) {
+                expect(SCREEN_THEMES[screenId]).toBeDefined();
+                expect(SCREEN_THEMES[screenId]).toHaveProperty('primary');
+                expect(SCREEN_THEMES[screenId]).toHaveProperty('secondary');
+                expect(SCREEN_THEMES[screenId]).toHaveProperty('accent');
+                expect(SCREEN_THEMES[screenId]).toHaveProperty('gradient');
+            }
         });
     });
 });

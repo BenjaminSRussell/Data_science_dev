@@ -234,7 +234,7 @@ export class UIUpdater {
         // Update task reward
         if (task.potentialReward) {
             DOMUtils.updateElement('#task-reward', {
-                textContent: CommonUtils.formatCurrency(task.potentialReward)
+                textContent: `$${task.potentialReward.toLocaleString()}`
             });
         }
 
@@ -395,7 +395,7 @@ export class UIUpdater {
                         <h4 class="contract-title">${c.title}</h4>
                         <p class="contract-desc">${c.description}</p>
                         <div class="contract-rewards">
-                            <span class="reward-money">$${c.reward}</span>
+                            <span class="reward-money">$${c.reward.toLocaleString()}</span>
                             <span class="reward-xp">${Object.keys(c.xpReward || {}).join(', ')} XP</span>
                         </div>
                         <button class="btn btn-sm btn-primary btn-accept-contract" 
@@ -537,7 +537,7 @@ export class UIUpdater {
                         <strong>Effect:</strong> ${lib.gameEffect}
                     </div>
                     <div class="lib-footer">
-                        <div class="lib-cost">$${lib.cost}</div>
+                        <div class="lib-cost">$${lib.cost.toLocaleString()}</div>
                         ${owned
                     ? '<button class="btn btn-sm btn-ghost disabled">Learned</button>'
                     : `<button class="btn btn-sm btn-primary" 
@@ -586,6 +586,19 @@ export class UIUpdater {
             if (titleEl) titleEl.textContent = article.title;
             if (textEl) textEl.textContent = article.description;
         });
+
+        // Mark headline and articles as read when newspaper is displayed
+        if (paper.headline) {
+            this.game?.newsManager?.markAsRead(paper.headline.id);
+        }
+        paper?.articles?.forEach(article => {
+            this.game?.newsManager?.markAsRead(article.id);
+        });
+
+        // Update the news badge
+        if (this.game?.updateNewsBadge) {
+            this.game.updateNewsBadge();
+        }
 
         // Close button
         const closeBtn = document.getElementById('btn-close-paper');
@@ -844,7 +857,10 @@ export class UIUpdater {
             'eat_bagel': 'Eat Bagel',
             'coffee_network': 'Network over Coffee',
             'buy_flowers': 'Buy Flowers ($15)',
-            'buy_plant': 'Buy Office Plant ($25)'
+            'buy_plant': 'Buy Office Plant ($25)',
+            'browse_cars': 'Browse Vehicles',
+            'buy_car': 'Buy Vehicle',
+            'sell_car': 'Sell Vehicle'
         };
         return names[activity] || activity;
     }

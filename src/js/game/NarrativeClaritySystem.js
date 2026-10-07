@@ -125,11 +125,95 @@ export class NarrativeClaritySystem {
         };
 
         const npcMotivation = motivations[npcId];
-        if (!npcMotivation) return null;
+
+        // If no hardcoded motivation exists, generate a generic fallback based on NPC type and personality
+        if (!npcMotivation) {
+            return this.generateFallbackMotivation(npc, relationship);
+        }
 
         if (relationship < 30) return npcMotivation.low;
         if (relationship < 70) return npcMotivation.medium;
         return npcMotivation.high;
+    }
+
+    /**
+     * Generate a fallback motivation for NPCs without hardcoded entries
+     * Uses NPC type and personality to create contextual motivation text
+     */
+    generateFallbackMotivation(npc, relationship) {
+        const name = npc.name;
+        const type = npc.type || 'acquaintance';
+        const personality = npc.personality || 'neutral';
+        const title = npc.title || 'someone';
+
+        // Generate motivation based on NPC type and relationship level
+        if (relationship < 30) {
+            // Low relationship - they're just an acquaintance
+            return this.generateLowMotivation(name, type, personality, title);
+        } else if (relationship < 70) {
+            // Medium relationship - they're warming up to you
+            return this.generateMediumMotivation(name, type, personality, title);
+        } else {
+            // High relationship - they consider you important
+            return this.generateHighMotivation(name, type, personality, title);
+        }
+    }
+
+    /**
+     * Generate low relationship motivation
+     */
+    generateLowMotivation(name, type, personality, title) {
+        const typeTexts = {
+            mentor: `${name} is your mentor. They're dedicated to helping people grow and believe in sharing knowledge with those who seek it.`,
+            business: `${name} is a business professional. They're focused on career success and value reliable partners in their work.`,
+            investor: `${name} is an investor. They're always looking for promising opportunities and talented individuals to work with.`,
+            shopkeeper: `${name} runs their shop with dedication. They value friendly customers and enjoy the day-to-day interactions with people in the community.`,
+            friend: `${name} is someone you've met. They seem approachable and friendly, always open to new connections and conversations.`,
+            rival: `${name} is a competitor in your field. They're driven by ambition and the challenge of being the best.`,
+            criminal: `${name} operates in the shadows. They're mysterious and careful about who they trust with their business.`,
+            romance: `${name} is someone who caught your attention. They're living their own life and pursuing their own interests.`,
+            authority: `${name} works in an official capacity. They're dedicated to their responsibilities and maintaining order.`
+        };
+
+        return typeTexts[type] || `${name} is a ${title}. You've just met them and don't know much about what drives them yet.`;
+    }
+
+    /**
+     * Generate medium relationship motivation
+     */
+    generateMediumMotivation(name, type, personality, title) {
+        const typeTexts = {
+            mentor: `${name} has taken an interest in your development. They see potential in you and want to guide you toward success. They appreciate your willingness to learn.`,
+            business: `${name} sees you as a reliable professional. You've demonstrated competence, and they're interested in finding ways to work together.`,
+            investor: `${name} is watching your progress with interest. They're starting to see the potential in what you're building.`,
+            shopkeeper: `${name} has become more than just a shopkeeper to you. They enjoy your visits and conversations, and appreciate your patronage.`,
+            friend: `${name} has warmed up to you. You've shared some good times together, and they're starting to trust you more.`,
+            rival: `${name} respects your skills and dedication. The competition brings out the best in both of you, and they see you as a worthy challenger.`,
+            criminal: `${name} is becoming more comfortable with you. They're starting to trust you with information and opportunities.`,
+            romance: `${name} has shown genuine interest in you. You've had some meaningful moments together, and there's a growing connection between you.`,
+            authority: `${name} has come to know you through your interactions. They respect your attempts to follow proper procedures and conduct.`
+        };
+
+        return typeTexts[type] || `${name} is warming up to you. They're starting to see you as more than just a casual acquaintance.`;
+    }
+
+    /**
+     * Generate high relationship motivation
+     */
+    generateHighMotivation(name, type, personality, title) {
+        const typeTexts = {
+            mentor: `${name} considers you a standout student. They're proud of your progress and deeply invested in your continued growth and success.`,
+            business: `${name} values you highly as a partner. They trust your judgment and are excited about the opportunities you'll create together.`,
+            investor: `${name} believes in you and what you're building. They're ready to back you financially and open doors for you in the industry.`,
+            shopkeeper: `${name} considers you a true friend. You've become one of their favorite people to see, and they go out of their way to help you.`,
+            friend: `${name} sees you as a close friend. They trust you completely and want to support you in all your endeavors.`,
+            rival: `${name} respects you deeply as an equal. You bring out the best in each other, and there's a strong mutual appreciation beneath the competition.`,
+            criminal: `${name} trusts you completely. You've proven yourself reliable, and they're willing to share their most valuable opportunities with you.`,
+            romance: `${name} has grown deeply attached to you. You mean a lot to them, and they see a real future with you.`,
+            authority: `${name} has come to respect and appreciate you. They see you as a responsible and trustworthy person in your dealings with them.`
+        };
+
+        return typeTexts[type] || `${name} considers you important in their life. You have a strong connection, and they value your presence and friendship.`;
     }
 
     /**

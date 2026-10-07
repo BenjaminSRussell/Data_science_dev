@@ -26,6 +26,7 @@ export class RomanceSystem {
         if (!npc || !npc.romanceOptions) return { success: false, message: "They aren't interested." };
 
         if (this.partnerId && this.partnerId !== npcId) {
+            this.modifyHappiness(-25); // Partner is upset about cheating attempt
             return { success: false, message: "You are already seeing someone! Cheater!" };
         }
 
@@ -63,11 +64,11 @@ export class RomanceSystem {
             case 'coffee':
                 cost = 20; happinessGain = 5; break;
             case 'dinner':
-                cost = 100; happinessGain = 10; break;
+                cost = 100; happinessGain = 25; break;
             case 'fancy_dinner':
-                cost = 500; happinessGain = 20; break;
+                cost = 500; happinessGain = 125; break;
             case 'vacation':
-                cost = 2000; happinessGain = 50; break;
+                cost = 2000; happinessGain = 500; break;
         }
 
         if (this.gameState.money < cost) return { success: false, message: "You can't afford that." };
@@ -79,7 +80,7 @@ export class RomanceSystem {
     }
 
     modifyHappiness(amount) {
-        this.relationshipScore = Math.max(0, Math.min(100, this.relationshipScore + amount));
+        this.relationshipScore = Math.max(0, Math.min(500, this.relationshipScore + amount));
     }
 
     propose() {
