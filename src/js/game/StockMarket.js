@@ -245,19 +245,27 @@ export class StockMarket {
         this.activeWorldEvents = worldEvents.filter(e => e.active);
 
         // Update market trends for each region (random walk with mean reversion)
+        // Snapshot pre-update values so cross-market influence is symmetric:
+        // every market reads the same previous-tick values, independent of key order.
+        const prevTrends = { ...this.marketTrends };
+        const newTrends = {};
         Object.keys(this.marketTrends).forEach(market => {
             // Random walk
-            this.marketTrends[market] += (Math.random() - 0.5) * 0.002;
+            let trend = prevTrends[market] + (Math.random() - 0.5) * 0.002;
             // Mean reversion
-            this.marketTrends[market] *= 0.95;
+            trend *= 0.95;
 
             // Cross-market influence (markets affect each other)
-            Object.keys(this.marketTrends).forEach(otherMarket => {
+            Object.keys(prevTrends).forEach(otherMarket => {
                 if (otherMarket !== market) {
                     const influence = 0.1; // 10% influence from other markets
-                    this.marketTrends[market] += this.marketTrends[otherMarket] * influence * 0.1;
+                    trend += prevTrends[otherMarket] * influence * 0.1;
                 }
             });
+            newTrends[market] = trend;
+        });
+        Object.keys(newTrends).forEach(market => {
+            this.marketTrends[market] = newTrends[market];
         });
 
         // Process news effects on sectors
