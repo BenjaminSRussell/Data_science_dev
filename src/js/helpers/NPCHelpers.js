@@ -23,6 +23,13 @@ export function handleVisitNPC(game, npcId) {
     }
 
     const relationshipLevel = game.gameState.npcManager.getRelationship?.(npcId) || 0;
+    // Refresh the relationships screen when the conversation closes so the
+    // bars/tiers reflect what just happened (#1122)
+    game.dialogueUI.setOnClose?.(() => {
+        if (game.screenManager?.isScreenActive?.('screen-relationships')) {
+            updateRelationshipsScreen(game);
+        }
+    });
     game.dialogueUI.open(npc, relationshipLevel);
 }
 
@@ -208,8 +215,18 @@ export function updateRelationshipsScreen(game) {
         card.appendChild(relationshipBar);
         card.appendChild(tier);
 
+        // Keyboard accessible like a button (#1123)
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', `Visit ${npc.name}`);
         card.addEventListener('click', () => {
             handleVisitNPC(game, npc.id);
+        });
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                handleVisitNPC(game, npc.id);
+            }
         });
 
         return card;

@@ -34,6 +34,8 @@ export class GameState {
         // Current state
         this.currentTask = null;
         this.jailSentence = 0;
+        this.staff = [];
+        this.dailyMarketingCost = 0;
         this.npcMemories = null;
         this.completedStoryBeats = null;
         this.currentLocation = 'home'; // Start at home
@@ -381,6 +383,8 @@ export class GameState {
             housingLevel: this.housingLevel,
             officeLevel: this.officeLevel,
             officeIndex: this.officeIndex ?? 0,
+            staff: Array.isArray(this.staff) ? this.staff : [],
+            dailyMarketingCost: this.dailyMarketingCost || 0,
             lastEventCheck: this.lastEventCheck ?? 0,
             npcMemories: this.npcMemories || null,
             completedStoryBeats: this.completedStoryBeats || null
@@ -462,6 +466,8 @@ export class GameState {
         if (data.housingLevel) this.housingLevel = data.housingLevel;
         if (data.officeLevel) this.officeLevel = data.officeLevel;
         this.officeIndex = Number.isInteger(data.officeIndex) ? data.officeIndex : 0;
+        this.staff = Array.isArray(data.staff) ? data.staff : [];
+        this.dailyMarketingCost = typeof data.dailyMarketingCost === 'number' ? data.dailyMarketingCost : 0;
         this.lastEventCheck = typeof data.lastEventCheck === 'number' ? data.lastEventCheck : 0;
         if (data.npcMemories) this.npcMemories = data.npcMemories;
         if (data.completedStoryBeats) this.completedStoryBeats = data.completedStoryBeats;

@@ -368,11 +368,28 @@ export class TaskSystem {
             filterInput.addEventListener('input', (e) => this.handleTableFilter(e.target.value));
         }
 
-        // Update header
+        // Update header. Sorting is delegated from the table itself; the old
+        // inline onclick pointed at game.gameState.taskSystem, which is never
+        // set, so every header click threw (#959)
         const thead = table.querySelector('thead tr');
-        thead.innerHTML = data.columns.map((c, i) =>
-            `<th class="sortable-header" onclick="game.gameState.taskSystem.handleTableSort(${i})">${c} ↕</th>`
-        ).join('');
+        thead.innerHTML = data.columns.map((c, i) => {
+            const arrow = this.lastSortCol === i ? (this.lastSortAsc ? ' ▲' : ' ▼') : ' ↕';
+            return `<th class="sortable-header" data-col="${i}" tabindex="0" role="button">${c}${arrow}</th>`;
+        }).join('');
+        if (!table.dataset.sortListening) {
+            table.dataset.sortListening = 'true';
+            const sortFromEvent = (e) => {
+                const th = e.target.closest?.('th[data-col]');
+                if (th) this.handleTableSort(Number(th.dataset.col));
+            };
+            table.addEventListener('click', sortFromEvent);
+            table.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    if (e.target.closest?.('th[data-col]')) e.preventDefault();
+                    sortFromEvent(e);
+                }
+            });
+        }
 
         // Update body
         const tbody = table.querySelector('tbody');

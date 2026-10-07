@@ -600,13 +600,8 @@ export class UIUpdater {
             this.game.updateNewsBadge();
         }
 
-        // Close button
-        const closeBtn = document.getElementById('btn-close-paper');
-        if (closeBtn) {
-            closeBtn.onclick = () => {
-                this.game.screenManager.showScreen('screen-office'); // Or previous screen
-            };
-        }
+        // Close button is wired once in MainGame.setupEventListeners(); assigning
+        // onclick here raced that listener and sent the player to two screens (#2392)
     }
 
     /**

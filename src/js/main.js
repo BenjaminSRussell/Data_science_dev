@@ -145,6 +145,18 @@ if (typeof document !== 'undefined' && process.env.NODE_ENV !== 'production') {
 */
 // #endregion
 
+
+// Hireable staff, keyed by the data-type on the Staff screen's hire cards (#2485)
+export const STAFF_ROLES = {
+    intern: { name: 'Intern', hireCost: 100, salary: 50, efficiency: 0.5, minOffice: 0 },
+    junior_analyst: { name: 'Junior Analyst', hireCost: 300, salary: 150, efficiency: 0.8, minOffice: 0 },
+    analyst: { name: 'Data Analyst', hireCost: 600, salary: 300, efficiency: 1.0, minOffice: 0 },
+    data_scientist: { name: 'Data Scientist', hireCost: 1500, salary: 800, efficiency: 2.0, minOffice: 3 }
+};
+
+// Staff capacity per office tier (index = gameState.officeIndex)
+export const OFFICE_STAFF_CAPACITY = [1, 1, 2, 4, 10, 25];
+
 export class MainGame {
     constructor() {
         logger.debug('MainGame constructor entry');
@@ -212,6 +224,7 @@ export class MainGame {
         // Bind methods
         this.gameLoop = this.gameLoop.bind(this);
         this.handleTimeAdvance = this.handleTimeAdvance.bind(this);
+        this.processTimeEvents = this.processTimeEvents.bind(this);
         // this.init = this.init.bind(this); // specific bind not needed and causing issues
         this.startNewGame = this.startNewGame.bind(this);
         this.continueGame = this.continueGame.bind(this);
@@ -1000,8 +1013,10 @@ export class MainGame {
                 this.showError("You can only sleep at home! Travel home first.");
                 return;
             }
+            // sleep() already advances to the next morning; only apply the
+            // resulting new-day/new-week effects (#917, #1249, #2396)
             const result = this.timeManager.sleep();
-            this.handleTimeAdvance(result.slotsSkipped); // triggers new day
+            this.processTimeEvents(result.events);
             this.updateMapScreen();
             this.showToast('You slept well and feel refreshed!', 'success');
         });
@@ -1077,6 +1092,38 @@ export class MainGame {
             });
         }
 
+        // Dataset panel Sort/Filter buttons (#2334)
+        document.getElementById('btn-sort')?.addEventListener('click', () => {
+            const ts = this.taskSystem;
+            const cols = ts?.currentTableData?.columns?.length || 0;
+            if (!cols) return;
+            // Re-sort the last sorted column in the other direction, or start with
+            // the first numeric column
+            let col = ts.lastSortCol;
+            if (col === undefined || col === null) {
+                const row = ts.currentTableData.rows?.[0] || [];
+                col = Math.max(0, row.findIndex(v => typeof v === 'number'));
+            }
+            ts.handleTableSort(col);
+        });
+        document.getElementById('btn-filter')?.addEventListener('click', () => {
+            const input = document.getElementById('table-filter');
+            if (!input) return;
+            input.focus();
+            input.select?.();
+        });
+
+        // Staff hiring / firing (#2485)
+        document.getElementById('hire-staff-grid')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            const card = e.target.closest('.hire-card');
+            if (btn && card && !btn.disabled) this.handleHireStaff(card.dataset.type);
+        });
+        document.getElementById('current-staff-grid')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-fire-staff]');
+            if (btn) this.handleFireStaff(btn.dataset.fireStaff);
+        });
+
         // Chart type selection
         document.getElementById('chart-type-grid')?.addEventListener('click', (e) => {
             const btn = e.target.closest('.chart-type-btn');
@@ -1118,6 +1165,7 @@ export class MainGame {
         document.getElementById('btn-sound')?.addEventListener('click', () => {
             this.toggleSound();
         });
+        this.updateSoundButton();
 
         // Music Radio
         this.initMusicRadio();
@@ -1130,16 +1178,12 @@ export class MainGame {
                 this.showToast('Research system not initialized yet', 'warning');
             }
         };
-        // Try to attach immediately, and also on DOMContentLoaded if needed
-        const researchInboxBtn = document.getElementById('btn-research-inbox');
-        if (researchInboxBtn) {
-            researchInboxBtn.addEventListener('click', researchInboxHandler);
-        } else {
-            // Button might not exist yet, try again when DOM is ready
-            document.addEventListener('DOMContentLoaded', () => {
-                document.getElementById('btn-research-inbox')?.addEventListener('click', researchInboxHandler);
-            });
-        }
+        // Delegate from document so the handler works even if the button is
+        // rendered later; the old DOMContentLoaded fallback could never fire
+        // because setupEventListeners() runs after that event (#1652, #1097)
+        document.addEventListener('click', (e) => {
+            if (e.target?.closest?.('#btn-research-inbox')) researchInboxHandler();
+        });
 
         // Shop category buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
@@ -1177,10 +1221,11 @@ export class MainGame {
             else if (action === 'loan') result = this.bankSystem.takeLoan(amount);
             else if (action === 'repay') result = this.bankSystem.repayLoan(amount);
 
+            if (!result) return;
             if (result.success) {
                 this.showToast(result.message, 'success');
                 this.audioManager.play('kaching');
-                input.value = ''; // Clear input
+                if (input) input.value = ''; // Clear input
                 this.uiUpdater.updateAllUI(); // Updates top bar and bank screen
             } else {
                 this.showToast(result.message, 'error');
@@ -1192,6 +1237,17 @@ export class MainGame {
         document.getElementById('btn-bank-withdraw')?.addEventListener('click', () => handleBankAction('withdraw', 'bank-withdraw-input'));
         document.getElementById('btn-bank-take-loan')?.addEventListener('click', () => handleBankAction('loan', 'bank-loan-input'));
         document.getElementById('btn-bank-repay')?.addEventListener('click', () => handleBankAction('repay', 'bank-repay-input'));
+
+        // Enter in a bank amount field submits that action (#1098)
+        [['bank-deposit-input', 'deposit'], ['bank-withdraw-input', 'withdraw'],
+            ['bank-loan-input', 'loan'], ['bank-repay-input', 'repay']].forEach(([inputId, action]) => {
+            document.getElementById(inputId)?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleBankAction(action, inputId);
+                }
+            });
+        });
 
         // Auto-save on visibility change
         document.addEventListener('visibilitychange', () => {
@@ -2550,8 +2606,18 @@ export class MainGame {
      */
     toggleSound() {
         this.audioManager.toggleSound();
+        this.updateSoundButton();
+    }
+
+    /**
+     * Reflect the sound-effects state on the toolbar button (#1092)
+     */
+    updateSoundButton() {
         const btn = document.getElementById('btn-sound');
-        btn.textContent = this.audioManager.soundEnabled ? '' : '';
+        if (!btn) return;
+        const on = !!this.audioManager?.soundEnabled;
+        btn.textContent = on ? 'SFX: ON' : 'SFX: OFF';
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
 
     /**
@@ -2656,33 +2722,64 @@ export class MainGame {
      * Handle hiring staff
      */
     handleHireStaff(role) {
-        // Legal Check: Need LLC to hire staff
-        if (this.legalSystem && !this.legalSystem.hasLicense('llc_registration')) {
-            this.showToast("You need an LLC Registration to hire employees!", 'error');
-            return;
-        }
-
-        const staffCosts = {
-            'junior': 2000,
-            'senior': 5000,
-            'expert': 15000
-        };
-
-        const cost = staffCosts[role];
-        if (!cost) {
+        const spec = STAFF_ROLES[role];
+        if (!spec) {
             this.showError('Invalid staff role');
-            return;
+            return false;
         }
 
-        if (this.gameState.money < cost) {
-            this.showError(`Not enough money! Need $${cost.toLocaleString()}`);
-            return;
+        // Legal Check: Need LLC to hire staff
+        const legal = this.legalSystem || this.gameState.legalSystem;
+        if (legal && !legal.hasLicense('llc_registration')) {
+            this.showToast("You need an LLC Registration to hire employees!", 'error');
+            return false;
         }
 
-        // Deduct cost and show success
-        this.gameState.money -= cost;
-        this.uiUpdater.updateAllUI();
-        this.showToast(`Hired ${role} staff member!`, 'success');
+        const officeIndex = this.gameState.officeIndex || 0;
+        if (officeIndex < (spec.minOffice || 0)) {
+            this.showError(`${spec.name}s require a bigger office.`);
+            return false;
+        }
+
+        if (!Array.isArray(this.gameState.staff)) this.gameState.staff = [];
+        const capacity = OFFICE_STAFF_CAPACITY[officeIndex] ?? 1;
+        if (this.gameState.staff.length >= capacity) {
+            this.showError('Your office is full. Upgrade your office to hire more staff.');
+            return false;
+        }
+
+        if (this.gameState.money < spec.hireCost) {
+            this.showError(`Not enough money! Need $${spec.hireCost.toLocaleString()}`);
+            return false;
+        }
+
+        this.gameState.money -= spec.hireCost;
+        this.gameState.totalSpent = (this.gameState.totalSpent || 0) + spec.hireCost;
+        this.gameState.staff.push({
+            id: `staff_${Date.now()}_${this.gameState.staff.length}`,
+            role,
+            name: spec.name,
+            salary: spec.salary,
+            efficiency: spec.efficiency,
+            hiredDay: this.gameState.timeManager?.totalDays || 0
+        });
+        this.uiUpdater?.updateAllUI?.();
+        this.updateStaffScreen();
+        this.showToast(`Hired a ${spec.name}! Salary: $${spec.salary}/day`, 'success');
+        return true;
+    }
+
+    /**
+     * Let a staff member go
+     */
+    handleFireStaff(staffId) {
+        const staff = this.gameState.staff || [];
+        const idx = staff.findIndex(s => s.id === staffId);
+        if (idx === -1) return false;
+        const [removed] = staff.splice(idx, 1);
+        this.updateStaffScreen();
+        this.showToast(`${removed.name} has left the team.`, 'info');
+        return true;
     }
 
     /**
@@ -2857,20 +2954,64 @@ export class MainGame {
      */
     updateStaffScreen() {
         const staff = this.gameState.staff || [];
-        const officeCapacity = [1, 1, 2, 4, 10, 25][this.gameState.officeIndex || 0];
+        const officeIndex = this.gameState.officeIndex || 0;
+        const officeCapacity = OFFICE_STAFF_CAPACITY[officeIndex] ?? 1;
 
         // Update capacity
-        document.getElementById('staff-capacity').textContent = `${staff.length} / ${officeCapacity}`;
-        const capacityPct = officeCapacity > 0 ? (staff.length / officeCapacity) * 100 : 0;
-        document.getElementById('capacity-progress').style.width = `${capacityPct}%`;
+        const capacityEl = document.getElementById('staff-capacity');
+        if (capacityEl) capacityEl.textContent = `${staff.length} / ${officeCapacity}`;
+        const capacityPct = officeCapacity > 0 ? Math.min(100, (staff.length / officeCapacity) * 100) : 0;
+        const progressEl = document.getElementById('capacity-progress');
+        if (progressEl) progressEl.style.width = `${capacityPct}%`;
 
         // Update expenses
         const staffCost = staff.reduce((sum, s) => sum + (s.salary || 0), 0);
         const marketingCost = this.gameState.dailyMarketingCost || 0;
+        const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+        setText('daily-salaries', `$${staffCost}`);
+        setText('daily-marketing', `$${marketingCost}`);
+        setText('daily-total', `$${staffCost + marketingCost}`);
 
-        document.getElementById('daily-salaries').textContent = `$${staffCost}`;
-        document.getElementById('daily-marketing').textContent = `$${marketingCost}`;
-        document.getElementById('daily-total').textContent = `$${staffCost + marketingCost}`;
+        // Current team
+        const teamGrid = document.getElementById('current-staff-grid');
+        if (teamGrid) {
+            teamGrid.innerHTML = '';
+            if (staff.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'empty-state';
+                empty.innerHTML = '<p>No employees yet!</p><p class="empty-hint">Hire staff below (requires an LLC registration).</p>';
+                teamGrid.appendChild(empty);
+            } else {
+                staff.forEach(member => {
+                    const card = document.createElement('div');
+                    card.className = 'staff-card';
+                    const name = document.createElement('div');
+                    name.className = 'staff-name';
+                    name.textContent = member.name;
+                    const salary = document.createElement('div');
+                    salary.className = 'staff-salary';
+                    salary.textContent = `$${member.salary}/day`;
+                    const fire = document.createElement('button');
+                    fire.className = 'btn-cartoon';
+                    fire.dataset.fireStaff = member.id;
+                    fire.textContent = 'Let go';
+                    card.append(name, salary, fire);
+                    teamGrid.appendChild(card);
+                });
+            }
+        }
+
+        // Hire cards: lock state and capacity
+        document.querySelectorAll('#hire-staff-grid .hire-card').forEach(card => {
+            const spec = STAFF_ROLES[card.dataset.type];
+            const btn = card.querySelector('button');
+            if (!spec || !btn) return;
+            const locked = officeIndex < (spec.minOffice || 0);
+            card.classList.toggle('locked', locked);
+            btn.disabled = locked || staff.length >= officeCapacity;
+            btn.textContent = locked ? 'Requires Bigger Office' : `Hire - $${spec.hireCost.toLocaleString()}`;
+            if (!locked) btn.classList.add('btn-cartoon-success');
+        });
     }
 
     /* =====================================================
@@ -2934,9 +3075,18 @@ export class MainGame {
         if (slots <= 0) return;
 
         const events = this.timeManager.advanceTime(slots);
+        this.processTimeEvents(events);
+    }
 
+    /**
+     * Apply the side effects of time events (new day/week) that TimeManager
+     * already produced. Used by sleep(), which advances the clock itself, so
+     * the day isn't advanced a second time (#917, #1249, #2396).
+     * @param {Array} events
+     */
+    processTimeEvents(events = []) {
         // Handle events (new day, etc)
-        events.forEach(event => {
+        (events || []).forEach(event => {
             if (event.type === 'new_day') {
                 if (this.newsManager) {
                     this.newsManager.generateDailyNews();
