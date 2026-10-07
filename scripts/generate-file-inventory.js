@@ -8,6 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { groupFilesByExtension } from './lib/groupFilesByExtension.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -108,14 +109,7 @@ markdown += `- [Folders](#folders)\n\n`;
 markdown += `---\n\n`;
 
 // Group files by extension
-const filesByExt = {};
-files.forEach(file => {
-    const ext = file.extension || '(no extension)';
-    if (!filesByExt[ext]) {
-        filesByExt[ext] = [];
-    }
-    filesByExt[ext].push(file);
-});
+const filesByExt = groupFilesByExtension(files);
 
 // Files by extension
 markdown += `## Files by Extension\n\n`;
