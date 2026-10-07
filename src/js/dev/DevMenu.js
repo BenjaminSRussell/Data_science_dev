@@ -1,4 +1,16 @@
 import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
+import { isDevModeEnabled } from './devMode.js';
+import { STATS } from '../game/CharacterStats.js';
+
+// One in-game day is 6 time slots (TimeManager.advanceTime), not 24 hours (#1247)
+export const SLOTS_PER_DAY = 6;
+
+// Real sprite files shipped under assets/characters/sprites (#1342)
+export const ASSET_SAMPLES = [
+    '/assets/characters/sprites/lpc_sprite_0.png',
+    '/assets/characters/sprites/lpc_sprite_19.png',
+    '/assets/characters/sprites/stick_figure.svg'
+];
 /**
  * Developer Menu System
  * Provides quick access to all screens, locations, and testing tools
@@ -22,9 +34,8 @@ export class DevMenu {
     }
 
     isDevMode() {
-        return window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1' ||
-            localStorage.getItem('dev_mode') === 'true';
+        // Same gate as DevTools/main.js, including ?dev (#1744)
+        return isDevModeEnabled();
     }
 
     createToggleButton() {
@@ -203,6 +214,16 @@ export class DevMenu {
         if (this.menuContainer) {
             this.menuContainer.classList.toggle('hidden', !this.isVisible);
         }
+        // Panels that depend on game systems (created by startNewGame/continueGame)
+        // are rebuilt every time the menu opens, so they never stay stuck on
+        // "not initialized" (#1745, #129).
+        if (this.isVisible) this.refreshDynamicPanels();
+    }
+
+    refreshDynamicPanels() {
+        this.populateStoryline();
+        this.populateLocations();
+        this.populateDialogue();
     }
 
     setupKeyboardShortcut() {
@@ -249,7 +270,27 @@ export class DevMenu {
         }
     }
 
+    wireStorylinePhase() {
+        const btn = document.getElementById('dev-set-phase');
+        const select = document.getElementById('dev-storyline-phase');
+        if (!btn || !select) return;
+        btn.onclick = () => {
+            const nav = window.devTools?.storylineNavigator;
+            if (!nav?.setStorylinePhase) {
+                this.game.showToast('Storyline navigator not available', 'error');
+                return;
+            }
+            const result = nav.setStorylinePhase(select.value);
+            this.game.showToast(result.message || result.error, result.success ? 'success' : 'error');
+            this.populateStoryline();
+        };
+        // Reflect the current phase in the dropdown
+        const phase = this.game?.gameState?.storylineManager?.storylinePhase;
+        if (phase && [...select.options].some(o => o.value === phase)) select.value = phase;
+    }
+
     populateStoryline() {
+        this.wireStorylinePhase();
         const container = document.getElementById('dev-storyline-beats');
         if (!container) {
             console.warn('Storyline beats container not found');
@@ -296,7 +337,14 @@ export class DevMenu {
                     beatBtn.style.cssText = 'width: 100%; padding: 4px 8px; margin: 2px 0; background: #444; color: white; border: 1px solid #555; border-radius: 3px; cursor: pointer; font-size: 10px; text-align: left;';
                     beatBtn.innerHTML = `${state.completedBeats.includes(beat.id) ? '✓ ' : ''}${beat.title}`;
                     beatBtn.title = beat.description;
+                    const alreadyDone = state.completedBeats.includes(beat.id);
+                    if (alreadyDone) beatBtn.dataset.completed = 'true';
                     beatBtn.onclick = () => {
+                        if (alreadyDone) {
+                            // Re-triggering a completed beat is a no-op (#1972)
+                            this.game.showToast(`Already completed: ${beat.title}`, 'info');
+                            return;
+                        }
                         const result = window.devTools.storylineNavigator.triggerStoryBeat(beat.id);
                         this.game.showToast(result.message || result.error, result.success ? 'success' : 'error');
                         this.populateStoryline(); // Refresh
@@ -385,7 +433,9 @@ export class DevMenu {
 
     populateDialogue() {
         const container = document.getElementById('dev-dialogue');
+        if (!container) return;
         const npcManager = this.game.gameState?.npcManager;
+        container.innerHTML = '';
 
         if (!npcManager) {
             container.innerHTML = '<p style="color: #888;">NPC Manager not initialized</p>';
@@ -408,7 +458,8 @@ export class DevMenu {
         container.appendChild(testAllBtn);
 
         // Setup test dialogue button
-        document.getElementById('dev-test-dialogue').onclick = () => {
+        const testBtn = document.getElementById('dev-test-dialogue');
+        if (testBtn) testBtn.onclick = () => {
             const npcId = document.getElementById('dev-npc-input').value;
             if (npcId && npcManager.startConversation) {
                 npcManager.startConversation(npcId);
@@ -431,32 +482,57 @@ export class DevMenu {
             }
         }));
 
-        container.appendChild(this.createButton('Max Stats', () => {
-            if (this.game.gameState?.characterStats) {
-                const stats = this.game.gameState.characterStats.getStats();
-                Object.keys(stats).forEach(stat => {
-                    this.game.gameState.characterStats.trainStat?.(stat, 100);
-                });
-                this.game.showToast('Maxed all stats', 'success');
-            }
-        }));
+        container.appendChild(this.createButton('Max Stats', () => this.maxStats()));
 
-        container.appendChild(this.createButton('Complete Task', () => {
-            if (this.game.taskSystem?.getCurrentTask) {
-                const task = this.game.taskSystem.getCurrentTask();
-                if (task) {
-                    this.game.taskSystem.completeTask?.(task.id);
-                    this.game.showToast('Task completed', 'success');
-                }
-            }
-        }));
+        container.appendChild(this.createButton('Complete Task', () => this.completeCurrentTask()));
 
         container.appendChild(this.createButton('Skip Time', () => {
             if (this.game.handleTimeAdvance) {
-                this.game.handleTimeAdvance(24); // Skip 1 day
-                this.game.showToast('Time advanced 24 hours', 'info');
+                this.game.handleTimeAdvance(SLOTS_PER_DAY); // Skip 1 day (#1247)
+                this.game.showToast('Time advanced 1 day', 'info');
             }
         }));
+    }
+
+    /**
+     * Set every character stat (and skill) to its cap (#1027, #2264).
+     * CharacterStats has no getStats()/trainStat(); stats live on .stats and are
+     * capped by STATS[id].maxLevel.
+     */
+    maxStats() {
+        const cs = this.game.gameState?.characterStats;
+        if (!cs?.stats) {
+            this.game.showToast('Character stats not initialized', 'error');
+            return false;
+        }
+        Object.keys(cs.stats).forEach(id => {
+            cs.stats[id] = STATS[id]?.maxLevel ?? 100;
+            if (cs.xp && id in cs.xp) cs.xp[id] = 0;
+        });
+        Object.values(cs.skills || {}).forEach(skill => {
+            skill.value = skill.maxLevel ?? 100;
+        });
+        this.game.uiUpdater?.updateAllUI?.();
+        this.game.showToast('Maxed all stats', 'success');
+        return true;
+    }
+
+    /**
+     * Finish the active task through the real submit pipeline (scoring, rewards,
+     * review screen) (#1856, #2352). TaskSystem has no completeTask().
+     */
+    completeCurrentTask() {
+        const task = this.game.taskSystem?.getCurrentTask?.() ?? this.game.gameState?.currentTask;
+        if (!task) {
+            this.game.showToast('No active task', 'warning');
+            return false;
+        }
+        if (typeof this.game.submitChart !== 'function') {
+            this.game.showError?.('submitChart() not available');
+            return false;
+        }
+        this.game.submitChart();
+        return true;
     }
 
     populateGameState() {
@@ -470,6 +546,7 @@ export class DevMenu {
         container.appendChild(this.createButton('Reset State', () => {
             if (confirm('Reset game state?')) {
                 this.game.gameState?.reset();
+                this.game.uiUpdater?.updateAllUI?.(); // refresh HUD (#1345)
                 this.game.showToast('State reset', 'warning');
             }
         }, 'danger'));
@@ -631,14 +708,14 @@ export class DevMenu {
                 canvas.id = `test-chart-${type}`;
                 document.body.appendChild(canvas);
 
-                if (chartManager.createChart) {
-                    const chart = chartManager.createChart(canvas.id, type, testData);
-                    if (chart) {
-                        results.passed++;
-                        // Clean up
-                        setTimeout(() => canvas.remove(), 100);
-                    }
+                const chart = chartManager.createChart(canvas.id, type, testData);
+                if (chart) {
+                    results.passed++;
+                } else {
+                    results.failed++;
                 }
+                // Clean up
+                setTimeout(() => { chart?.destroy?.(); canvas.remove(); }, 100);
             } catch (error) {
                 results.failed++;
                 console.error(`Chart type ${type} failed:`, error);
@@ -708,11 +785,8 @@ export class DevMenu {
     validateAssets() {
         const results = { loaded: 0, missing: 0, errors: [] };
 
-        // Check sprite assets
-        const spriteSheets = [
-            '/assets/characters/sprites/character_sheet.png',
-            '/assets/characters/sprites/emotion_sheet.png'
-        ];
+        // Check sprite assets that actually ship with the game (#1342)
+        const spriteSheets = ASSET_SAMPLES;
 
         spriteSheets.forEach(url => {
             if (isAssetMissing(url)) {
@@ -766,43 +840,33 @@ export class DevMenu {
         this.game.showToast(`Graph validation: ${results.passed} passed, ${results.failed} failed`, 'info');
     }
 
-    validateWorkSystem() {
-        // Test work/task system
-        const taskSystem = this.game.taskSystem;
-        if (!taskSystem) {
+    async validateWorkSystem() {
+        // Delegate to the full WorkSystemValidator suite (#2443)
+        const validator = window.devTools?.workValidator || this.game?.devTools?.workValidator;
+        if (!this.game.taskSystem) {
             this.game.showError('Task system not found');
-            return;
+            return null;
         }
-
-        const results = { passed: 0, failed: 0 };
-
-        // Test getting current task
-        try {
-            const task = taskSystem.getCurrentTask?.();
-            if (task !== undefined) {
-                results.passed++;
-            }
-        } catch (error) {
-            results.failed++;
+        if (!validator?.validateAll) {
+            this.game.showError('WorkSystemValidator not available');
+            return null;
         }
-
-        // Test task completion
-        try {
-            const task = taskSystem.getCurrentTask?.();
-            if (task && taskSystem.completeTask) {
-                // Don't actually complete, just check method exists
-                results.passed++;
-            }
-        } catch (error) {
-            results.failed++;
-        }
-
-        this.game.showToast(`Work system validation: ${results.passed} passed, ${results.failed} failed`, 'info');
+        const results = await validator.validateAll();
+        const ts = results?.taskSystem || {};
+        console.log('Work system validation:', results);
+        this.game.showToast(`Work system validation: ${ts.passed ?? 0} passed, ${ts.failed ?? 0} failed`, 'info');
+        return results;
     }
 
     async testAllOptions() {
         // Test all clickable options/buttons
-        const buttons = document.querySelectorAll('button:not([disabled]), .clickable, [role="button"]');
+        // Never click the dev menu's own controls (Reset State uses a blocking
+        // confirm(), and "Test All Options" would recurse) or any destructive /
+        // confirm-guarded button (#1030).
+        const buttons = Array.from(document.querySelectorAll('button:not([disabled]), .clickable, [role="button"]'))
+            .filter(btn => !btn.closest('#dev-menu') && !(btn.id || '').startsWith('dev-')
+                && !btn.classList.contains('danger') && !btn.classList.contains('btn-delete')
+                && !btn.hasAttribute('data-confirm'));
         const results = { tested: 0, errors: [] };
 
         for (const btn of Array.from(buttons).slice(0, 50)) { // Limit to 50

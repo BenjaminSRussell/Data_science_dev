@@ -400,12 +400,9 @@ export class MainGame {
 
             // Initialize developer tools (ONLY in dev mode - completely separate from main game)
             // Dev tools never interfere with normal gameplay - they're isolated
-            const isDevMode = window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1' ||
-                localStorage.getItem('dev_mode') === 'true' ||
-                new URLSearchParams(window.location.search).has('dev');
+            const { isDevModeEnabled } = await import('./dev/devMode.js');
 
-            if (isDevMode) {
+            if (isDevModeEnabled()) {
                 try {
                     const { DevTools } = await import('./dev/index.js');
                     this.devTools = new DevTools(this);

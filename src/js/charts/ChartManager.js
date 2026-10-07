@@ -283,6 +283,46 @@ export class ChartManager {
     }
 
     /**
+     * Render a chart into an arbitrary canvas (used by the dev menu's chart tests
+     * and GraphValidator, #1025 / #2350).
+     * Accepts either Chart.js-style data ({ labels, datasets: [{ label, data }] })
+     * or the game's task-data shape ({ labels, datasets: { name: [..] } } / rows).
+     * @returns {Chart|null} the Chart instance, or null if the canvas is missing.
+     */
+    createChart(canvasOrId, type = 'bar', data = {}, config = {}) {
+        const canvas = typeof canvasOrId === 'string'
+            ? document.getElementById(canvasOrId)
+            : canvasOrId;
+        if (!canvas) return null;
+
+        const existing = typeof Chart.getChart === 'function' ? Chart.getChart(canvas) : null;
+        if (existing) existing.destroy();
+
+        let chartConfig;
+        if (Array.isArray(data?.datasets)) {
+            const chartType = this.mapChartType(type);
+            const palette = PALETTES[config.palette] || PALETTES.corporate;
+            chartConfig = {
+                type: chartType,
+                data: {
+                    labels: data.labels || [],
+                    datasets: data.datasets.map((ds, i) => ({
+                        backgroundColor: chartType === 'line' ? palette[i % palette.length] : palette,
+                        borderColor: chartType === 'line' ? palette[i % palette.length] : palette.map(c => c.replace('0.8', '1')),
+                        borderWidth: 1,
+                        fill: type === 'area' ? true : undefined,
+                        ...ds
+                    }))
+                },
+                options: this.buildChartOptions({ ...config, type }, chartType, data.datasets[0]?.label || 'Value')
+            };
+        } else {
+            chartConfig = this.buildChartConfig(data || {}, { ...config, type });
+        }
+        return new Chart(canvas, chartConfig);
+    }
+
+    /**
      * Destroy all charts (cleanup)
      */
     destroy() {

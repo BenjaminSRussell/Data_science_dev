@@ -93,6 +93,14 @@ export class TaskSystem {
     }
 
     /**
+     * The task the player is currently working on (or null).
+     * Used by the dev menu / WorkSystemValidator (#1856, #2352).
+     */
+    getCurrentTask() {
+        return this.gameState?.currentTask || null;
+    }
+
+    /**
      * Get difficulty level based on rank
      */
     getDifficultyForRank(rankIndex) {
