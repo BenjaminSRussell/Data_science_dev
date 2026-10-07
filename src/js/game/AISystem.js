@@ -92,17 +92,27 @@ export class AISystem {
         return {
             level: this.level,
             xp: this.xp,
+            xpToNextLevel: this.xpToNextLevel,
             intelligence: this.intelligence,
             speed: this.speed,
             creativity: this.creativity,
             hardware: this.hardware,
             slots: this.slots,
-            name: this.name
+            name: this.name,
+            isTraining: this.isTraining
         };
     }
 
     fromJSON(data) {
         if (!data) return;
-        Object.assign(this, data);
+        const { gameState, ...rest } = data;
+        Object.assign(this, rest);
+        // Older saves didn't store xpToNextLevel; derive it from level instead of
+        // keeping the level-1 default (#1804)
+        if (data.xpToNextLevel === undefined) {
+            let threshold = 100;
+            for (let lvl = 1; lvl < (this.level || 1); lvl++) threshold = Math.floor(threshold * 1.5);
+            this.xpToNextLevel = threshold;
+        }
     }
 }

@@ -2,15 +2,54 @@
  * SaveSlotManager - Manages save slot display and interactions in the main menu
  */
 
-import { SaveManager } from '../save/SaveManager.js';
+import { SaveManager, MAX_SAVE_SLOTS, SAVE_KEY_PREFIX } from '../save/SaveManager.js';
 import { RANKS } from '../data/ranks.js';
 
+const UNDO_DELETE_WINDOW_MS = 10000;
+
+function escapeHTML(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/**
+ * Human-readable "last played" label. Future timestamps (clock skew, imported
+ * saves) are treated as "Today" rather than negative day counts (#2109).
+ */
+export function formatLastPlayed(lastPlayed, now = Date.now()) {
+    if (!lastPlayed) return 'Unknown';
+    const lastPlayedDate = new Date(lastPlayed);
+    const diffMs = Math.max(0, now - lastPlayedDate.getTime());
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return lastPlayedDate.toLocaleDateString();
+}
+
 export class SaveSlotManager {
-    constructor(saveManager, onSlotSelected) {
+    constructor(saveManager, onSlotSelected, game = null) {
         this.saveManager = saveManager;
         this.onSlotSelected = onSlotSelected; // Callback when slot is selected
+        this.game = game || saveManager?.game || null; // For toasts/errors
         this.currentSlot = null;
         this.slotMenuListeners = {}; // Track document click listeners by slot index
+        this.recentlyDeleted = null; // { slotIndex, raw, name, expiresAt } - in-memory only, cleared on reload
+        this.undoTimer = null;
+    }
+
+    notify(message, type = 'info') {
+        if (type === 'error' && this.game?.showError) {
+            this.game.showError(message);
+        } else if (this.game?.showToast) {
+            this.game.showToast(message, type);
+        } else if (type === 'error') {
+            console.warn(message);
+        }
     }
 
     /**
@@ -50,49 +89,61 @@ export class SaveSlotManager {
      */
     migrateOldSave() {
         const oldSaveKey = 'data_science_tycoon_save';
-        const oldSave = localStorage.getItem(oldSaveKey);
+        let oldSave = null;
+        try {
+            oldSave = localStorage.getItem(oldSaveKey);
+        } catch (_) {
+            return false;
+        }
+        if (!oldSave) return false;
 
-        if (oldSave) {
-            try {
-                const parsed = JSON.parse(oldSave);
-                // Check if slot 0 already exists
-                if (!this.saveManager.hasSave(0)) {
-                    // Move old save to slot 0
-                    const newSaveData = {
-                        ...parsed,
-                        slotIndex: 0,
-                        metadata: {
-                            name: 'Migrated Save',
-                            createdAt: parsed.timestamp || Date.now(),
-                            lastPlayed: parsed.timestamp || Date.now()
-                        }
-                    };
-                    localStorage.setItem('data_science_tycoon_save_0', JSON.stringify(newSaveData));
-
-                }
-                // Remove old save key
-                localStorage.removeItem(oldSaveKey);
-            } catch (error) {
-                console.error('Failed to migrate old save:', error);
+        try {
+            const parsed = JSON.parse(oldSave);
+            // Check if slot 0 already exists
+            if (!this.saveManager.hasSave(0)) {
+                // Legacy saves were either a full record ({ state, timestamp }) or
+                // the bare GameState blob; always produce a record with a `state` key (#2107)
+                const hasState = parsed && typeof parsed.state === 'object' && parsed.state !== null;
+                const newSaveData = {
+                    version: parsed?.version ?? 1,
+                    timestamp: parsed?.timestamp || Date.now(),
+                    slotIndex: 0,
+                    metadata: {
+                        name: 'Migrated Save',
+                        createdAt: parsed?.timestamp || Date.now(),
+                        lastPlayed: parsed?.timestamp || Date.now()
+                    },
+                    state: hasState ? parsed.state : parsed
+                };
+                localStorage.setItem(`${SAVE_KEY_PREFIX}0`, JSON.stringify(newSaveData));
             }
+            // Only remove the legacy key once the new record is safely written (#1663)
+            localStorage.removeItem(oldSaveKey);
+            return true;
+        } catch (error) {
+            console.error('Failed to migrate old save:', error);
+            this.notify('Could not migrate your old save (storage may be full). It has been kept and will be retried next time.', 'error');
+            return false;
         }
     }
 
     /**
      * Create save slots container as dropdown button
      */
-    createSlotsContainer() {
+    createSlotsContainer(attempt = 0) {
         const menuNav = document.querySelector('.menu-navigation');
         if (!menuNav) {
-            console.warn('SaveSlotManager: .menu-navigation not found, retrying...');
-            // Retry after a short delay
+            if (attempt >= 20) {
+                console.warn('SaveSlotManager: .menu-navigation never appeared; save slots unavailable');
+                return false;
+            }
+            // Retry after a short delay, then render once the container exists (#2108)
             setTimeout(() => {
-                const retryNav = document.querySelector('.menu-navigation');
-                if (retryNav) {
-                    this.createSlotsContainer();
+                if (this.createSlotsContainer(attempt + 1)) {
+                    this.renderSlots();
                 }
             }, 100);
-            return;
+            return false;
         }
 
         // Remove old continue button if it exists
@@ -113,6 +164,9 @@ export class SaveSlotManager {
             dropdownBtn = document.createElement('button');
             dropdownBtn.id = 'btn-continue-dropdown';
             dropdownBtn.className = 'btn-grey btn-grey-secondary';
+            dropdownBtn.setAttribute('aria-haspopup', 'true');
+            dropdownBtn.setAttribute('aria-expanded', 'false');
+            dropdownBtn.setAttribute('aria-controls', 'save-slots-dropdown');
             dropdownBtn.innerHTML = `
                 <div class="btn-content">
                     <span class="btn-icon"></span>
@@ -141,6 +195,7 @@ export class SaveSlotManager {
             const dropdown = document.createElement('div');
             dropdown.id = 'save-slots-dropdown';
             dropdown.className = 'save-slots-dropdown hidden';
+            dropdown.setAttribute('role', 'menu');
             document.body.appendChild(dropdown);
 
             // Toggle dropdown on button click
@@ -152,10 +207,21 @@ export class SaveSlotManager {
             // Close dropdown when clicking outside
             document.addEventListener('click', (e) => {
                 if (!dropdown.contains(e.target) && !dropdownBtn.contains(e.target)) {
-                    dropdown.classList.add('hidden');
+                    this.setDropdownOpen(false);
                 }
             });
         }
+        return true;
+    }
+
+    /**
+     * Open/close the dropdown and keep aria-expanded in sync (#182)
+     */
+    setDropdownOpen(open) {
+        const dropdown = document.getElementById('save-slots-dropdown');
+        const dropdownBtn = document.getElementById('btn-continue-dropdown');
+        if (dropdown) dropdown.classList.toggle('hidden', !open);
+        if (dropdownBtn) dropdownBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
 
     /**
@@ -206,6 +272,19 @@ export class SaveSlotManager {
         header.innerHTML = '<h3>Saved Games</h3>';
         dropdown.appendChild(header);
 
+        // Undo affordance for a just-deleted slot (#245)
+        if (this.recentlyDeleted && this.recentlyDeleted.expiresAt > Date.now()) {
+            const undoBtn = document.createElement('button');
+            undoBtn.className = 'save-slot-undo';
+            undoBtn.dataset.action = 'undo-delete';
+            undoBtn.textContent = `Undo delete of "${this.recentlyDeleted.name}"`;
+            undoBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.undoDelete();
+            });
+            dropdown.appendChild(undoBtn);
+        }
+
         // Create slots list
         const slotsList = document.createElement('div');
         slotsList.className = 'save-slots-list';
@@ -233,6 +312,26 @@ export class SaveSlotManager {
             this.handleNewGame();
         });
         dropdown.appendChild(newGameOption);
+
+        // Import a previously exported save file (#1024)
+        const importOption = document.createElement('button');
+        importOption.className = 'save-slot-item import-save-option';
+        importOption.dataset.action = 'import';
+        importOption.innerHTML = `
+            <div class="slot-item-content">
+                <div class="slot-item-info">
+                    <div class="slot-item-title">Import Save</div>
+                    <div class="slot-item-subtitle">Load an exported save file into an empty slot</div>
+                </div>
+            </div>
+        `;
+        importOption.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.promptImport();
+        });
+        dropdown.appendChild(importOption);
+
+        if (this.currentSlot !== null) this.setCurrentSlot(this.currentSlot);
     }
 
     /**
@@ -242,10 +341,11 @@ export class SaveSlotManager {
         const dropdown = document.getElementById('save-slots-dropdown');
         if (!dropdown) return;
 
-        dropdown.classList.toggle('hidden');
+        const open = dropdown.classList.contains('hidden');
+        this.setDropdownOpen(open);
 
         // Re-render to get latest save data
-        if (!dropdown.classList.contains('hidden')) {
+        if (open) {
             this.renderSlots();
         }
     }
@@ -254,22 +354,41 @@ export class SaveSlotManager {
      * Handle new game from dropdown
      */
     handleNewGame() {
-        const dropdown = document.getElementById('save-slots-dropdown');
-        if (dropdown) dropdown.classList.add('hidden');
+        this.setDropdownOpen(false);
 
-        // Find first empty slot or use slot 0
-        const slots = this.saveManager.getAllSlotsInfo();
-        let emptySlot = 0;
-        for (let i = 0; i < slots.length; i++) {
-            if (slots[i].isEmpty) {
-                emptySlot = i;
-                break;
-            }
-        }
+        const slot = this.pickNewGameSlot();
+        if (slot === null) return;
 
+        this.setCurrentSlot(slot);
         if (this.onSlotSelected) {
-            this.onSlotSelected(emptySlot, true);
+            this.onSlotSelected(slot, true);
         }
+    }
+
+    /**
+     * Choose the slot for a new game: the first empty slot, or - when every
+     * slot is full - the least recently played one, but only after the player
+     * confirms overwriting it. Returns null if the player declines (#143).
+     */
+    pickNewGameSlot() {
+        const slots = this.saveManager.getAllSlotsInfo();
+        const empty = slots.findIndex(s => s.isEmpty);
+        if (empty !== -1) return empty;
+
+        let oldest = 0;
+        let oldestTime = Infinity;
+        slots.forEach((slot, i) => {
+            const t = slot.metadata?.lastPlayed || slot.timestamp || 0;
+            if (t < oldestTime) {
+                oldestTime = t;
+                oldest = i;
+            }
+        });
+        const name = slots[oldest]?.metadata?.name || `Save Slot ${oldest + 1}`;
+        const ok = typeof confirm === 'function'
+            ? confirm(`All save slots are full. Overwrite "${name}" (least recently played)?`)
+            : false;
+        return ok ? oldest : null;
     }
 
     /**
@@ -279,6 +398,12 @@ export class SaveSlotManager {
         const item = document.createElement('div');
         item.className = `save-slot-item ${slotInfo.isEmpty ? 'empty' : 'filled'}`;
         item.dataset.slotIndex = slotIndex;
+        // Keyboard accessible like the "Start New Game" button (#130, #1878)
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('aria-label', slotInfo.isEmpty
+            ? `Empty slot ${slotIndex + 1}, start new game`
+            : `Load ${slotInfo.metadata?.name || `Save Slot ${slotIndex + 1}`}`);
 
         if (slotInfo.isEmpty) {
             item.innerHTML = this.createEmptySlotHTML(slotIndex);
@@ -290,6 +415,13 @@ export class SaveSlotManager {
         item.addEventListener('click', (e) => {
             if (e.target.closest('.slot-btn-grey') || e.target.closest('.slot-menu')) return;
             this.handleSlotClick(slotIndex, slotInfo.isEmpty);
+        });
+        item.addEventListener('keydown', (e) => {
+            if (e.target !== item) return; // let inner buttons handle their own keys
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                this.handleSlotClick(slotIndex, slotInfo.isEmpty);
+            }
         });
 
         // Add context menu for filled slots
@@ -326,32 +458,19 @@ export class SaveSlotManager {
         const lastPlayed = slotInfo.metadata?.lastPlayed || slotInfo.timestamp;
         const slotName = slotInfo.metadata?.name || `Save Slot ${slotInfo.slotIndex + 1}`;
 
-        // Calculate completion percentage (assuming 6 ranks total)
-        const completion = Math.min(100, Math.round((slotInfo.rank / 6) * 100));
+        // Completion = progress through the rank ladder (#52)
+        const maxRankIndex = Math.max(1, RANKS.length - 1);
+        const completion = Math.max(0, Math.min(100, Math.round(((slotInfo.rank || 0) / maxRankIndex) * 100)));
 
-        // Format last played date
-        const lastPlayedDate = new Date(lastPlayed);
-        const now = new Date();
-        const diffMs = now - lastPlayedDate;
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        let lastPlayedText = 'Just now';
-        if (diffDays === 0) {
-            lastPlayedText = 'Today';
-        } else if (diffDays === 1) {
-            lastPlayedText = 'Yesterday';
-        } else if (diffDays < 7) {
-            lastPlayedText = `${diffDays} days ago`;
-        } else {
-            lastPlayedText = lastPlayedDate.toLocaleDateString();
-        }
+        const lastPlayedText = formatLastPlayed(lastPlayed);
 
         return `
             <div class="slot-item-content">
                 <div class="slot-item-header">
-                    <div class="slot-item-rank">${rank.title}</div>
+                    <div class="slot-item-rank">${escapeHTML(rank.title)}</div>
                     <button class="slot-btn-grey" aria-label="Slot options">⋯</button>
                 </div>
-                <div class="slot-item-title">${slotName}</div>
+                <div class="slot-item-title">${escapeHTML(slotName)}</div>
                 <div class="slot-item-stats">
                     <span>$${money.toLocaleString()}</span>
                     <span>•</span>
@@ -360,7 +479,8 @@ export class SaveSlotManager {
                     <span>Day ${daysPlayed}</span>
                 </div>
                 <div class="slot-item-footer">
-                    <span class="slot-item-last-played">${lastPlayedText}</span>
+                    <span class="slot-item-last-played">${escapeHTML(lastPlayedText)}</span>
+                    <span class="slot-item-completion" title="Career completion">${completion}% complete</span>
                 </div>
             </div>
         `;
@@ -436,6 +556,7 @@ export class SaveSlotManager {
      * Handle slot click
      */
     handleSlotClick(slotIndex, isEmpty) {
+        this.setCurrentSlot(slotIndex);
         if (isEmpty) {
             // Start new game in this slot
             if (this.onSlotSelected) {
@@ -458,6 +579,7 @@ export class SaveSlotManager {
 
         switch (action) {
             case 'load':
+                this.setCurrentSlot(slotIndex);
                 if (this.onSlotSelected) {
                     this.onSlotSelected(slotIndex, false);
                 }
@@ -501,7 +623,7 @@ export class SaveSlotManager {
     duplicateSlot(slotIndex) {
         // Find next empty slot
         let targetSlot = null;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
             if (i !== slotIndex && this.saveManager.hasSave(i) === false) {
                 targetSlot = i;
                 break;
@@ -509,11 +631,7 @@ export class SaveSlotManager {
         }
 
         if (targetSlot === null) {
-            if (this.saveManager.game && this.saveManager.game.showError) {
-                this.saveManager.game.showError('No empty slots available. Please delete a save first.');
-            } else {
-                console.warn('No empty slots available');
-            }
+            this.notify('No empty slots available. Please delete a save first.', 'error');
             return;
         }
 
@@ -528,9 +646,7 @@ export class SaveSlotManager {
     exportSlot(slotIndex) {
         const encoded = this.saveManager.exportSave(slotIndex);
         if (!encoded) {
-            if (this.saveManager.game && this.saveManager.game.showError) {
-                this.saveManager.game.showError('Failed to export save.');
-            }
+            this.notify('Failed to export save.', 'error');
             return;
         }
 
@@ -545,9 +661,7 @@ export class SaveSlotManager {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        if (this.saveManager.game && this.saveManager.game.showToast) {
-            this.saveManager.game.showToast('Save exported successfully!', 'success');
-        }
+        this.notify('Save exported successfully!', 'success');
     }
 
     /**
@@ -557,11 +671,93 @@ export class SaveSlotManager {
         const slotInfo = this.saveManager.getSaveInfo(slotIndex);
         const slotName = slotInfo?.metadata?.name || `Save Slot ${slotIndex + 1}`;
 
-        if (confirm(`Are you sure you want to delete "${slotName}"?\n\nThis action cannot be undone.`)) {
+        if (confirm(`Are you sure you want to delete "${slotName}"?\n\nYou can undo this for ${UNDO_DELETE_WINDOW_MS / 1000} seconds.`)) {
+            let raw = null;
+            try {
+                raw = localStorage.getItem(SAVE_KEY_PREFIX + slotIndex);
+            } catch (_) { /* storage unavailable */ }
             if (this.saveManager.clearSave(slotIndex)) {
+                if (raw) {
+                    this.recentlyDeleted = { slotIndex, raw, name: slotName, expiresAt: Date.now() + UNDO_DELETE_WINDOW_MS };
+                    clearTimeout(this.undoTimer);
+                    this.undoTimer = setTimeout(() => {
+                        this.recentlyDeleted = null;
+                        this.renderSlots();
+                    }, UNDO_DELETE_WINDOW_MS);
+                }
+                if (this.currentSlot === slotIndex) this.currentSlot = null;
+                this.notify(`Deleted "${slotName}". Use "Undo delete" in the save list to restore it.`, 'info');
                 this.renderSlots();
             }
         }
+    }
+
+    /**
+     * Restore the most recently deleted slot if still within the undo window (#245)
+     * @returns {boolean}
+     */
+    undoDelete() {
+        const deleted = this.recentlyDeleted;
+        if (!deleted || deleted.expiresAt <= Date.now()) {
+            this.recentlyDeleted = null;
+            return false;
+        }
+        if (this.saveManager.hasSave(deleted.slotIndex)) {
+            this.notify('That slot has been reused; the deleted save can no longer be restored.', 'error');
+            this.recentlyDeleted = null;
+            this.renderSlots();
+            return false;
+        }
+        try {
+            localStorage.setItem(SAVE_KEY_PREFIX + deleted.slotIndex, deleted.raw);
+        } catch (error) {
+            this.notify('Could not restore the save (storage may be full).', 'error');
+            return false;
+        }
+        this.recentlyDeleted = null;
+        clearTimeout(this.undoTimer);
+        this.notify(`Restored "${deleted.name}".`, 'success');
+        this.renderSlots();
+        return true;
+    }
+
+    /**
+     * Open a file picker and import an exported save into the first empty slot (#1024)
+     */
+    promptImport() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.txt,text/plain';
+        input.addEventListener('change', () => {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            file.text().then(text => this.importFromText(text)).catch(() => {
+                this.notify('Could not read that file.', 'error');
+            });
+        });
+        input.click();
+    }
+
+    /**
+     * Import exported save text into the first empty slot without starting it
+     * @param {string} text - Base64 text produced by exportSave()
+     * @returns {number|null} slot index used, or null on failure
+     */
+    importFromText(text) {
+        const slot = this.saveManager.findEmptySlot
+            ? this.saveManager.findEmptySlot()
+            : [...Array(MAX_SAVE_SLOTS).keys()].find(i => !this.saveManager.hasSave(i)) ?? null;
+        if (slot === null || slot === undefined) {
+            this.notify('No empty slots available. Please delete a save first.', 'error');
+            return null;
+        }
+        if (!this.saveManager.importSave(String(text || '').trim(), null, slot)) {
+            this.notify('That file is not a valid save export.', 'error');
+            return null;
+        }
+        this.notify(`Save imported into slot ${slot + 1}.`, 'success');
+        this.renderSlots();
+        return slot;
     }
 
     /**

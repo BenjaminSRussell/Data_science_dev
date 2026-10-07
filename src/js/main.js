@@ -18,7 +18,7 @@ import { GameState } from './game/GameState.js';
 import { ScreenManager } from './ui/ScreenManager.js';
 import { ChartManager } from './charts/ChartManager.js';
 import { AudioManager } from './audio/AudioManager.js';
-import { SaveManager } from './save/SaveManager.js';
+import { SaveManager, MAX_SAVE_SLOTS } from './save/SaveManager.js';
 import { SaveSlotManager } from './ui/SaveSlotManager.js';
 import { MenuThemeSystem } from './game/MenuThemeSystem.js';
 import { MenuLogoDisplay } from './ui/MenuLogoDisplay.js';
@@ -178,6 +178,16 @@ export class MainGame {
         }
 
         this.saveManager = new SaveManager();
+        this.saveManager.onSaveError = (error) => {
+            // Throttle so a full storage quota doesn't spam toasts every autosave
+            const now = Date.now();
+            if (now - (this._lastSaveErrorToast || 0) < 30000) return;
+            this._lastSaveErrorToast = now;
+            const quota = error && (error.name === 'QuotaExceededError' || /quota/i.test(error.message || ''));
+            this.showToast?.(quota
+                ? 'Save failed: browser storage is full. Export or delete a save slot.'
+                : 'Save failed. Your latest progress was not stored.', 'error');
+        };
         this.saveSlotManager = null; // Will be initialized in initMenu
         this.currentSaveSlot = 0; // Default to slot 0
         this.menuThemeSystem = new MenuThemeSystem();
@@ -448,14 +458,17 @@ export class MainGame {
             // this.initMenuParticles();
 
             // Initialize save slot manager
+            let saveSlotManagerReady = false;
             try {
                 this.saveSlotManager = new SaveSlotManager(
                     this.saveManager,
                     (slotIndex, isNewGame) => {
                         this.handleSlotSelection(slotIndex, isNewGame);
-                    }
+                    },
+                    this
                 );
                 this.saveSlotManager.init();
+                saveSlotManagerReady = true;
             } catch (e) {
                 logger.error('Failed to initialize save slot manager:', e);
                 // Fallback: show old continue button
@@ -488,10 +501,13 @@ export class MainGame {
                 logger.warn('Failed to initialize menu enhancements:', e);
             }
 
-            // Keep old continue button hidden/disabled for backward compatibility
-            const continueBtn = document.getElementById('btn-continue');
-            if (continueBtn) {
-                continueBtn.style.display = 'none';
+            // Keep old continue button hidden only when the slot dropdown replaced it;
+            // otherwise the catch-block fallback above must stay visible (#1470)
+            if (saveSlotManagerReady) {
+                const continueBtn = document.getElementById('btn-continue');
+                if (continueBtn) {
+                    continueBtn.style.display = 'none';
+                }
             }
         } catch (error) {
             logger.error('Error in initMenu:', error);
@@ -646,7 +662,8 @@ export class MainGame {
         this.currentSaveSlot = slotIndex;
 
         if (isNewGame) {
-            this.startNewGame();
+            // Start in the slot the player actually picked (#1661)
+            this.startNewGame(slotIndex);
         } else {
             this.continueGame(slotIndex);
         }
@@ -824,17 +841,11 @@ export class MainGame {
         document.getElementById('btn-new-game')?.addEventListener('click', () => {
             // Show save slots for new game selection
             if (this.saveSlotManager) {
-                // Find first empty slot or use slot 0
-                let emptySlot = null;
-                for (let i = 0; i < 5; i++) {
-                    if (!this.saveManager.hasSave(i)) {
-                        emptySlot = i;
-                        break;
-                    }
+                // First empty slot, or confirm overwriting the least recently played one
+                const slotToUse = this.saveSlotManager.pickNewGameSlot();
+                if (slotToUse !== null) {
+                    this.handleSlotSelection(slotToUse, true);
                 }
-                // If no empty slot, use slot 0 (will overwrite)
-                const slotToUse = emptySlot !== null ? emptySlot : 0;
-                this.handleSlotSelection(slotToUse, true);
             } else {
                 // Fallback: start game directly if SaveSlotManager not initialized
                 this.startNewGame();
@@ -1250,7 +1261,7 @@ export class MainGame {
         // Use provided slot or find first empty slot, default to 0
         if (slotIndex === null) {
             // Find first empty slot
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
                 if (!this.saveManager.hasSave(i)) {
                     slotIndex = i;
                     break;
@@ -1296,6 +1307,9 @@ export class MainGame {
                     this.gameState.educationSystem = new EducationSystem(this.gameState);
                     this.gameState.worldEventManager = new WorldEventManager(this.gameState);
                     this.gameState.projectSystem = new ProjectSystem(this.gameState);
+                    // Re-link now that the systems exist; the synchronous link below
+                    // ran before this callback and copied undefined (#1660)
+                    this.linkSessionSystems();
                 } catch (error) {
                     logger.warn('Error loading medium priority systems:', error);
                 }
@@ -1309,6 +1323,7 @@ export class MainGame {
                     this.gameState.contractSystem = new ContractSystem(this.gameState);
                     // NOTE: mapProgressionSystem is initialized later in startNewGame, don't duplicate here
                     // this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
+                    this.linkSessionSystems(); // (#1660)
                 } catch (error) {
                     logger.warn('Error loading low priority systems:', error);
                 }
@@ -1551,6 +1566,9 @@ export class MainGame {
             this.investmentEcommerceSystem = this.gameState.investmentEcommerceSystem;
             this.storylineManager = this.gameState.storylineManager;
             this.storyBeatsSystem = this.gameState.storyBeatsSystem;
+            this.characterArcSystem = this.gameState.characterArcSystem;
+            this.npcMemorySystem = this.gameState.npcMemorySystem;
+            this.gameEndingSystem = this.gameState.gameEndingSystem;
             // NOTE: mapProgressionSystem already linked above, don't duplicate
             this.ideSystem = this.gameState.ideSystem;
             this.locationBackgroundSystem = this.gameState.locationBackgroundSystem;
@@ -1724,6 +1742,9 @@ export class MainGame {
                 logger.debug('[finishGameStart]: Game loop started');
             }
 
+            // Periodic autosave into the slot being played (#872)
+            this.saveManager.startAutoSave(this.gameState, 60000, this.currentSaveSlot ?? 0);
+
             logger.debug('[finishGameStart]: COMPLETE');
         } catch (error) {
             logger.error('finishGameStart ERROR:', error);
@@ -1732,10 +1753,111 @@ export class MainGame {
     }
 
     /**
+     * Create any session subsystem that doesn't exist yet. Mirrors the set
+     * startNewGame() builds so a continued save has the same features.
+     */
+    ensureSessionSystems() {
+        const gs = this.gameState;
+        const factories = {
+            economySystem: () => new EconomySystem(gs),
+            projectSystem: () => new ProjectSystem(gs),
+            aiSystem: () => new AISystem(gs),
+            hardwareManager: () => new HardwareManager(gs),
+            contractSystem: () => new ContractSystem(gs),
+            jobSystem: () => new JobSystem(gs),
+            workInteractionSystem: () => new WorkInteractionSystem(gs),
+            realisticDialogueSystem: () => new RealisticDialogueSystem(),
+            relationshipEmotionSystem: () => new RelationshipEmotionSystem(gs),
+            worldEvolutionSystem: () => new WorldEvolutionSystem(gs),
+            investmentEcommerceSystem: () => new InvestmentEcommerceSystem(gs),
+            storylineManager: () => new StorylineManager(gs),
+            storyBeatsSystem: () => new StoryBeatsSystem(gs),
+            characterArcSystem: () => new CharacterArcSystem(gs),
+            npcMemorySystem: () => new NPCMemorySystem(gs),
+            mapProgressionSystem: () => new MapProgressionSystem(gs),
+            ideSystem: () => new IDESystem(gs),
+            locationBackgroundSystem: () => new LocationBackgroundSystem(gs),
+            weeklyNewsSystem: () => new WeeklyNewsSystem(gs),
+            screenThemeManager: () => new ScreenThemeManager(),
+            mapCoordinateSystem: () => new MapCoordinateSystem(),
+            gameEndingSystem: () => new GameEndingSystem(gs),
+            dayNightCycle: () => new DayNightCycle(gs),
+            // Created before the reload so the saved quality setting is applied (#1256)
+            performanceManager: () => {
+                const pm = new PerformanceManager();
+                try { pm.detectHardware?.(); } catch (_) { /* keep defaults */ }
+                return pm;
+            },
+            notificationSystem: () => {
+                const ns = new NotificationSystem(gs);
+                ns.scheduleDefaultNotifications?.();
+                return ns;
+            }
+        };
+        for (const [key, create] of Object.entries(factories)) {
+            if (gs[key]) continue;
+            try {
+                gs[key] = create();
+            } catch (error) {
+                logger.warn(`[ensureSessionSystems] Failed to create ${key}:`, error);
+            }
+        }
+        // StorylineManager's constructor clears mainGame; restore the link
+        gs.mainGame = this;
+    }
+
+    /**
+     * Mirror gameState subsystems onto MainGame for convenient access
+     */
+    linkSessionSystems() {
+        const keys = [
+            'characterStats', 'timeManager', 'economySystem', 'worldMap', 'npcManager', 'newsManager',
+            'stockMarket', 'crimeSystem', 'romanceSystem', 'legalSystem', 'educationSystem',
+            'worldEventManager', 'projectSystem', 'aiSystem', 'hardwareManager', 'contractSystem',
+            'mapProgressionSystem', 'jobSystem', 'workInteractionSystem', 'realisticDialogueSystem',
+            'relationshipEmotionSystem', 'worldEvolutionSystem', 'investmentEcommerceSystem',
+            'storylineManager', 'storyBeatsSystem', 'characterArcSystem', 'npcMemorySystem',
+            'ideSystem', 'locationBackgroundSystem', 'weeklyNewsSystem', 'screenThemeManager',
+            'mapCoordinateSystem', 'gameEndingSystem', 'dayNightCycle', 'notificationSystem',
+            'narrativeClaritySystem', 'companyManagement', 'demandingBoss', 'performanceManager'
+        ];
+        for (const key of keys) {
+            if (this.gameState[key]) this[key] = this.gameState[key];
+        }
+    }
+
+    /**
+     * Run the story systems' initialize() hooks (safe to call after a load)
+     */
+    initializeStorySystems() {
+        for (const key of ['storylineManager', 'storyBeatsSystem', 'characterArcSystem', 'npcMemorySystem']) {
+            const system = this[key];
+            if (system && typeof system.initialize === 'function') {
+                try {
+                    system.initialize();
+                } catch (error) {
+                    logger.warn(`[initializeStorySystems] ${key}.initialize failed:`, error);
+                }
+            }
+        }
+        if (this.worldMap && this.mapCoordinateSystem?.initializeWithLocations) {
+            try {
+                this.mapCoordinateSystem.initializeWithLocations(this.worldMap.getAccessibleLocations());
+            } catch (error) {
+                logger.warn('[initializeStorySystems] map coordinates failed:', error);
+            }
+        }
+    }
+
+    /**
      * Continue saved game
      */
-    continueGame() {
+    continueGame(slotIndex = null) {
         logger.debug('Continuing saved game...');
+        // Honour the slot callers pass in (#95, #1662)
+        if (slotIndex !== null && slotIndex !== undefined) {
+            this.currentSaveSlot = slotIndex;
+        }
 
         // Initialize RPG systems if they don't exist (migration)
         if (!this.gameState.characterStats) this.gameState.characterStats = new CharacterStats();
@@ -1826,29 +1948,34 @@ export class MainGame {
             this.gameState.educationSystem = edu;
         }
 
-        // Link managers
-        this.characterStats = this.gameState.characterStats;
-        this.timeManager = this.gameState.timeManager;
-        this.worldMap = this.gameState.worldMap;
-        this.npcManager = this.gameState.npcManager;
-        this.newsManager = this.gameState.newsManager;
-        this.stockMarket = this.gameState.stockMarket;
-        this.crimeSystem = this.gameState.crimeSystem;
-        this.romanceSystem = this.gameState.romanceSystem;
-        this.legalSystem = this.gameState.legalSystem;
-        this.educationSystem = this.gameState.educationSystem;
-        this.worldEventManager = this.gameState.worldEventManager;
-        this.projectSystem = this.gameState.projectSystem;
-        this.projectSystem = this.gameState.projectSystem;
-        this.aiSystem = this.gameState.aiSystem;
-
-        // Initialize BankSystem
-        this.bankSystem = new BankSystem(this.gameState);
-        // Link specific bank state if needed, but BankSystem constructor uses gameState directly
+        // Construct every subsystem a new game gets, so features don't silently
+        // die after Continue (#94, #1258, #1985, #2049, #2050, #2037, #2372, ...)
+        this.ensureSessionSystems();
+        try {
+            this.loadDeferredSystems();
+        } catch (error) {
+            logger.warn('[continueGame] loadDeferredSystems failed:', error);
+        }
 
         // Reload save data now that subsystems are initialized
         logger.debug("Reloading save data for subsystems...");
-        this.saveManager.loadGame(this.gameState, this.currentSaveSlot);
+        const loaded = this.saveManager.loadGame(this.gameState, this.currentSaveSlot);
+        if (!loaded && this.saveManager.hasSave(this.currentSaveSlot ?? 0)) {
+            // Corrupt/unsupported save: don't start the session (autosave would
+            // overwrite the original bytes with a fresh game)
+            this.saveManager.stopAutoSave();
+            this.showError('This save could not be loaded. It has been left untouched.');
+            this.screenManager.showScreen('screen-menu');
+            return;
+        }
+
+        // Initialize BankSystem AFTER the reload: it fills in default bank state
+        // when the save has none, which the reload would otherwise null out (#937)
+        this.bankSystem = new BankSystem(this.gameState);
+
+        // Link managers
+        this.linkSessionSystems();
+        this.initializeStorySystems();
 
         // Generate a new task if none exists
         if (!this.gameState.currentTask) {
@@ -1873,6 +2000,12 @@ export class MainGame {
             this.gameLoopId = requestAnimationFrame(this.gameLoop);
             logger.debug('[continueGame]: Game loop started');
         }
+
+        // Periodic autosave into the slot being played (#872)
+        this.saveManager.startAutoSave(this.gameState, 60000, this.currentSaveSlot ?? 0);
+
+        // FPS monitoring/auto-adjust for continued sessions too (#1256)
+        try { this.performanceManager?.startMonitoring?.(); } catch (_) { /* optional */ }
 
         // Show toast
         this.showToast('Welcome back!', 'success');
@@ -2188,8 +2321,8 @@ export class MainGame {
                 this.audioManager.play('complete');
             }
 
-            // Auto-save
-            this.saveManager.saveGame(this.gameState);
+            // Auto-save into the slot being played, not always slot 0 (#871)
+            this.saveManager.saveGame(this.gameState, this.currentSaveSlot ?? 0);
 
         }, 2000);
     }
@@ -2485,11 +2618,14 @@ export class MainGame {
      */
     resetProgress() {
         if (confirm('Are you sure? This will delete all your progress!')) {
+            this.saveManager.stopAutoSave();
             this.saveManager.clearSave(this.currentSaveSlot);
             this.gameState.reset();
             this.closeModal();
             this.screenManager.showScreen('screen-menu');
-            document.getElementById('btn-continue').disabled = true;
+            const continueBtn = document.getElementById('btn-continue');
+            if (continueBtn) continueBtn.disabled = true;
+            this.saveSlotManager?.renderSlots?.();
             this.showToast('Progress reset.', 'warning');
         }
     }
@@ -2986,9 +3122,23 @@ export class MainGame {
         ProjectHelpers.startWorkingSession(this, hours);
     }
     /**
-     * Main Game Loop
+     * Main Game Loop. requestAnimationFrame passes a high-resolution timestamp;
+     * the tick is wrapped so one throwing subsystem can't freeze the loop (#1656).
      */
-    gameLoop() {
+    gameLoop(timestamp = (typeof performance !== 'undefined' ? performance.now() : Date.now())) {
+        try {
+            this.gameLoopTick(timestamp);
+        } catch (error) {
+            logger.error('Error in game loop tick:', error);
+        }
+        this.gameLoopId = requestAnimationFrame(this.gameLoop);
+    }
+
+    /**
+     * One frame of game-loop work
+     * @param {number} timestamp - rAF timestamp in ms
+     */
+    gameLoopTick(timestamp) {
         // Update day/night cycle
         if (this.dayNightCycle) {
             this.dayNightCycle.update();
@@ -3031,8 +3181,9 @@ export class MainGame {
             }
         }
 
-        // Check visual progression milestones
-        if (this.visualProgressionSystem) {
+        // Check visual progression milestones (throttled to once per second, #1574)
+        if (this.visualProgressionSystem && seconds !== this.lastMilestoneCheckSecond) {
+            this.lastMilestoneCheckSecond = seconds;
             this.visualProgressionSystem.checkMilestones();
         }
 
@@ -3068,8 +3219,6 @@ export class MainGame {
             logger.error('Error updating visual systems:', error);
         }
         */
-
-        this.gameLoopId = requestAnimationFrame(this.gameLoop);
     }
 
     /**

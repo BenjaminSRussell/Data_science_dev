@@ -136,5 +136,28 @@ export class JealousySystem {
     getJealousyLevel(npcId) {
         return this.jealousyLevels.get(npcId) || 0;
     }
-}
 
+    /**
+     * Serialize jealousy state (Maps become entry arrays) (#1406)
+     */
+    toJSON() {
+        return {
+            jealousyLevels: Array.from(this.jealousyLevels.entries()),
+            relationshipChanges: Array.from(this.relationshipChanges.entries())
+        };
+    }
+
+    /**
+     * Restore jealousy state from a save
+     */
+    fromJSON(data) {
+        if (!data) return;
+        const toMap = (v) => {
+            if (Array.isArray(v)) return new Map(v.filter(e => Array.isArray(e) && e.length === 2));
+            if (v && typeof v === 'object') return new Map(Object.entries(v));
+            return new Map();
+        };
+        if (data.jealousyLevels) this.jealousyLevels = toMap(data.jealousyLevels);
+        if (data.relationshipChanges) this.relationshipChanges = toMap(data.relationshipChanges);
+    }
+}

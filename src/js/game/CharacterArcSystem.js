@@ -4,6 +4,8 @@
  * Priority 2 & 3: Narrative Structure & Choice Consequences
  */
 
+import { pickState, applyState } from '../utils/StateSerializer.js';
+
 export class CharacterArcSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -292,4 +294,19 @@ export class CharacterArcSystem {
         return `You continue to navigate the complexities of life, finding your own way${detail}.`;
     }
 
+
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['arcHistory', 'startingState', 'currentState', 'lastLoggedState']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['arcHistory', 'startingState', 'currentState', 'lastLoggedState']);
+    }
 }

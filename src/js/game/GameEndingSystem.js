@@ -283,7 +283,14 @@ export class GameEndingSystem {
      */
     getEndingStats() {
         const days = this.gameState.timeManager?.totalDays || 0;
-        const hours = Math.floor((Date.now() - this.gameState.startTime) / (1000 * 60 * 60));
+        // Wall-clock time since the save was created includes every hour the tab
+        // was closed; cap it with the same activity estimate StatisticsAggregator
+        // uses (~12 minutes per task) (#1141)
+        const elapsedHours = this.gameState.startTime
+            ? Math.max(0, (Date.now() - this.gameState.startTime) / (1000 * 60 * 60))
+            : 0;
+        const estimatedHours = (this.gameState.tasksCompleted || 0) * 0.2;
+        const hours = Math.floor(estimatedHours > 0 ? Math.min(elapsedHours, estimatedHours) : elapsedHours);
         
         return {
             days: days,

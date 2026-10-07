@@ -3,6 +3,7 @@
  */
 
 import { RANKS } from '../data/ranks.js';
+import { MAX_SAVE_SLOTS } from '../save/SaveManager.js';
 
 export class StatisticsAggregator {
     constructor(saveManager) {
@@ -24,7 +25,7 @@ export class StatisticsAggregator {
         let averageSessionLength = 0;
 
         // Scan all save slots
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
             const saveData = this.saveManager.getSaveData(i);
             if (saveData && saveData.state) {
                 const state = saveData.state;

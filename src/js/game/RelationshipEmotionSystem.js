@@ -3,6 +3,8 @@
  * Deep emotional relationship system that reacts to all player actions
  */
 
+import { pickState, applyState } from '../utils/StateSerializer.js';
+
 export class RelationshipEmotionSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -280,5 +282,19 @@ export class RelationshipEmotionSystem {
             }
         });
     }
-}
 
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['relationshipHistory', 'emotionalStates']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['relationshipHistory', 'emotionalStates']);
+    }
+}

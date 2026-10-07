@@ -33,6 +33,9 @@ export class GameState {
 
         // Current state
         this.currentTask = null;
+        this.jailSentence = 0;
+        this.npcMemories = null;
+        this.completedStoryBeats = null;
         this.currentLocation = 'home'; // Start at home
         this.bank = null; // Bank state (savings/loan)
 
@@ -84,6 +87,9 @@ export class GameState {
         this.hardwareManager = null;
         this.timeManager = null;
         this.characterStats = null;
+        this.romanceProgressionSystem = null;
+        this.companyManagement = null;
+        this.demandingBoss = null;
         
         // New integrated systems
         this.jobSystem = null;
@@ -104,7 +110,6 @@ export class GameState {
         this.screenThemeManager = null;
         this.mapCoordinateSystem = null;
         this.contractSystem = null; // New contract system
-        this.bankSystem = null; // Bank system
         this.gameEndingSystem = null; // Game ending system
         this.gameEnding = null; // Current ending state
         
@@ -231,6 +236,7 @@ export class GameState {
         if (this.purchasedItems.includes(item.id)) return false;
 
         this.money -= item.price;
+        this.totalSpent = (this.totalSpent || 0) + item.price;
         this.purchasedItems.push(item.id);
 
         // Apply item effect
@@ -253,74 +259,166 @@ export class GameState {
     }
 
     /**
+     * Subsystems that expose their own toJSON()/fromJSON() pair.
+     * Order matters on restore: characterStats and timeManager come first so
+     * systems that read stats/time while restoring (e.g. ProjectSystem's
+     * contract refresh) see the loaded values rather than defaults.
+     */
+    static get SERIALIZABLE_SUBSYSTEMS() {
+        return [
+            'characterStats',
+            'timeManager',
+            'worldMap',
+            'npcManager',
+            'stockMarket',
+            'projectSystem',
+            'worldEventManager',
+            'crimeSystem',
+            'educationSystem',
+            'aiSystem',
+            'hardwareManager',
+            'jobSystem',
+            'contractSystem',
+            'mapProgressionSystem',
+            'romanceSystem',
+            'romanceProgressionSystem',
+            'legalSystem',
+            'visualProgressionSystem',
+            'aiTrainingStoryline',
+            'researchPaperSystem',
+            'weeklyNewsSystem',
+            'gameEndingSystem',
+            'newsManager',
+            'ideSystem',
+            'investmentEcommerceSystem',
+            'companyManagement',
+            'relationshipEmotionSystem',
+            'storylineManager',
+            'storyBeatsSystem',
+            'characterArcSystem',
+            'npcMemorySystem',
+            'workInteractionSystem',
+            'demandingBoss',
+            'roommateSystem',
+            'jealousySystem',
+            'eventSystem',
+            'dirtyDataSystem'
+        ];
+    }
+
+    /**
+     * Run one subsystem's save/load step without letting a single failure
+     * abort the rest of the save or load (#1222).
+     */
+    _safeSubsystemStep(name, fn) {
+        try {
+            return fn();
+        } catch (error) {
+            console.error(`[GameState] Failed to ${name}:`, error);
+            return null;
+        }
+    }
+
+    /**
+     * Serialize the in-progress task. The wall-clock startTime is converted to
+     * elapsed time so a timed task doesn't instantly expire after a reload.
+     */
+    _serializeCurrentTask() {
+        if (!this.currentTask) return null;
+        const task = { ...this.currentTask };
+        if (typeof task.startTime === 'number') {
+            task.elapsedMs = Math.max(0, Date.now() - task.startTime);
+            delete task.startTime;
+        }
+        return task;
+    }
+
+    _restoreCurrentTask(task) {
+        if (!task || typeof task !== 'object') return null;
+        const restored = { ...task };
+        if (typeof restored.elapsedMs === 'number') {
+            restored.startTime = Date.now() - restored.elapsedMs;
+            delete restored.elapsedMs;
+        } else if (typeof restored.startTime !== 'number') {
+            restored.startTime = Date.now();
+        }
+        return restored;
+    }
+
+    /**
      * Serialize state for saving
      */
     toJSON() {
-        return {
+        const data = {
             money: this.money,
             reputation: this.reputation,
             rankIndex: this.rankIndex,
             rent: this.rent, // Persist rent
-            bank: this.bank, // Persist bank state
+            bank: this.bank, // Persist bank state (BankSystem keeps all of its state here)
             tasksCompleted: this.tasksCompleted,
             perfectScores: this.perfectScores,
             totalEarned: this.totalEarned,
+            totalSpent: this.totalSpent,
             weeklyIncome: this.weeklyIncome,
+            startTime: this.startTime,
             totalRatings: this.totalRatings,
             ratingSum: this.ratingSum,
+            currentTask: this._serializeCurrentTask(),
+            currentLocation: this.currentLocation,
+            jailSentence: this.jailSentence ?? 0,
             unlockedChartTypes: this.unlockedChartTypes,
+            unlockedThemes: this.unlockedThemes,
             unlockedTools: this.unlockedTools,
             unlockedPerks: this.unlockedPerks || [],
             purchasedItems: this.purchasedItems,
+            chartConfig: this.chartConfig,
             isGameStarted: this.isGameStarted,
             tutorialCompleted: this.tutorialCompleted,
             soundEnabled: this.soundEnabled,
             musicEnabled: this.musicEnabled,
+            settings: this.settings,
             unlockedLibraries: this.unlockedLibraries || [],
-
-            // Sub-systems
-            worldMap: this.worldMap?.toJSON(),
-            npcManager: this.npcManager?.toJSON(),
-            stockMarket: this.stockMarket?.toJSON(),
-            projectSystem: this.projectSystem?.toJSON(),
-            worldEventManager: this.worldEventManager?.toJSON(),
-            crimeSystem: this.crimeSystem?.toJSON(),
-            educationSystem: this.educationSystem?.toJSON(),
-            timeManager: this.timeManager?.toJSON(),
-            aiSystem: this.aiSystem?.toJSON(),
-            hardwareManager: this.hardwareManager?.toJSON(),
-            characterStats: this.characterStats?.toJSON(),
-            jobSystem: this.jobSystem?.toJSON(),
-            contractSystem: this.contractSystem?.toJSON(),
-            mapProgressionSystem: this.mapProgressionSystem?.toJSON(),
-            romanceSystem: this.romanceSystem?.toJSON(),
-            legalSystem: this.legalSystem?.toJSON(),
-            bankSystem: this.bankSystem?.toJSON(),
-            visualProgressionSystem: this.visualProgressionSystem?.toJSON(),
-            realWorldTaskSystem: this.realWorldTaskSystem ? {
-                currentTask: this.realWorldTaskSystem.currentTask,
-                taskHistory: this.realWorldTaskSystem.taskHistory
-            } : null,
-            aiTrainingStoryline: this.aiTrainingStoryline?.toJSON(),
-            githubIssuesSystem: this.githubIssuesSystem ? {
-                openIssues: this.githubIssuesSystem.openIssues,
-                closedIssues: this.githubIssuesSystem.closedIssues,
-                pullRequests: this.githubIssuesSystem.pullRequests
-            } : null,
-            researchPaperSystem: this.researchPaperSystem?.toJSON(),
-            weeklyNewsSystem: this.weeklyNewsSystem?.toJSON(),
-            gameEndingSystem: this.gameEndingSystem?.toJSON(),
-            newsManager: this.newsManager?.toJSON(),
-            emotionalBreakdownSystem: this.emotionalBreakdownSystem ? {
-                activeBreakdowns: Array.from(this.emotionalBreakdownSystem.activeBreakdowns.values()),
-                breakdownHistory: this.emotionalBreakdownSystem.breakdownHistory
-            } : null,
-            
-            // Phase 1 Visual Systems (save quality settings)
-            performanceManager: this.performanceManager ? {
-                quality: this.performanceManager.quality
-            } : null
+            housingLevel: this.housingLevel,
+            officeLevel: this.officeLevel,
+            officeIndex: this.officeIndex ?? 0,
+            lastEventCheck: this.lastEventCheck ?? 0,
+            npcMemories: this.npcMemories || null,
+            completedStoryBeats: this.completedStoryBeats || null
         };
+
+        // Sub-systems with their own toJSON()
+        for (const key of GameState.SERIALIZABLE_SUBSYSTEMS) {
+            const system = this[key];
+            data[key] = (system && typeof system.toJSON === 'function')
+                ? this._safeSubsystemStep(`save ${key}`, () => system.toJSON())
+                : undefined;
+        }
+
+        data.realWorldTaskSystem = this.realWorldTaskSystem ? this._safeSubsystemStep('save realWorldTaskSystem', () => ({
+            currentTask: this.realWorldTaskSystem.currentTask,
+            // Bounded so saves don't grow forever (#2096)
+            taskHistory: (this.realWorldTaskSystem.taskHistory || []).slice(-GameState.MAX_TASK_HISTORY)
+        })) : null;
+        data.githubIssuesSystem = this.githubIssuesSystem ? this._safeSubsystemStep('save githubIssuesSystem', () => ({
+            openIssues: this.githubIssuesSystem.openIssues,
+            closedIssues: this.githubIssuesSystem.closedIssues,
+            pullRequests: this.githubIssuesSystem.pullRequests
+        })) : null;
+        data.emotionalBreakdownSystem = this.emotionalBreakdownSystem ? this._safeSubsystemStep('save emotionalBreakdownSystem', () => ({
+            activeBreakdowns: Array.from(this.emotionalBreakdownSystem.activeBreakdowns.values()),
+            breakdownHistory: this.emotionalBreakdownSystem.breakdownHistory
+        })) : null;
+
+        // Phase 1 Visual Systems (save quality settings)
+        data.performanceManager = this.performanceManager ? {
+            quality: this.performanceManager.quality
+        } : null;
+
+        return data;
+    }
+
+    static get MAX_TASK_HISTORY() {
+        return 100;
     }
 
     /**
@@ -333,69 +431,78 @@ export class GameState {
         this.reputation = data.reputation ?? 0;
         this.rankIndex = data.rankIndex ?? 0;
         this.rent = data.rent ?? 500; // Load rent
-        this.bank = data.bank || null; // Load bank state
+        this.bank = data.bank || null; // Load bank state (BankSystem re-applies defaults when null)
         this.tasksCompleted = data.tasksCompleted ?? 0;
         this.perfectScores = data.perfectScores ?? 0;
         this.totalEarned = data.totalEarned ?? 0;
+        this.totalSpent = data.totalSpent ?? 0;
         this.weeklyIncome = data.weeklyIncome ?? 0;
+        if (typeof data.startTime === 'number') this.startTime = data.startTime;
         this.totalRatings = data.totalRatings ?? 0;
         this.ratingSum = data.ratingSum ?? 0;
+        if (data.currentTask !== undefined) this.currentTask = this._restoreCurrentTask(data.currentTask);
+        if (data.currentLocation) this.currentLocation = data.currentLocation;
+        this.jailSentence = data.jailSentence ?? 0;
         this.unlockedChartTypes = data.unlockedChartTypes ?? ['bar', 'line', 'pie'];
+        if (Array.isArray(data.unlockedThemes)) this.unlockedThemes = data.unlockedThemes;
         this.unlockedTools = data.unlockedTools ?? [];
+        this.unlockedPerks = data.unlockedPerks ?? this.unlockedPerks ?? [];
         this.purchasedItems = data.purchasedItems ?? [];
+        if (data.chartConfig && typeof data.chartConfig === 'object') {
+            this.chartConfig = { ...this.chartConfig, ...data.chartConfig };
+        }
         this.isGameStarted = data.isGameStarted ?? false;
         this.tutorialCompleted = data.tutorialCompleted ?? false;
         this.soundEnabled = data.soundEnabled ?? true;
         this.musicEnabled = data.musicEnabled ?? true;
+        if (data.settings && typeof data.settings === 'object') {
+            this.settings = { ...this.settings, ...data.settings };
+        }
         this.unlockedLibraries = data.unlockedLibraries || [];
+        if (data.housingLevel) this.housingLevel = data.housingLevel;
+        if (data.officeLevel) this.officeLevel = data.officeLevel;
+        this.officeIndex = Number.isInteger(data.officeIndex) ? data.officeIndex : 0;
+        this.lastEventCheck = typeof data.lastEventCheck === 'number' ? data.lastEventCheck : 0;
+        if (data.npcMemories) this.npcMemories = data.npcMemories;
+        if (data.completedStoryBeats) this.completedStoryBeats = data.completedStoryBeats;
 
-        // Restore sub-systems
-        if (this.worldMap && data.worldMap) this.worldMap.fromJSON(data.worldMap);
-        if (this.npcManager && data.npcManager) this.npcManager.fromJSON(data.npcManager);
-        if (this.stockMarket && data.stockMarket) this.stockMarket.fromJSON(data.stockMarket);
-        if (this.projectSystem && data.projectSystem) this.projectSystem.fromJSON(data.projectSystem);
-        if (this.worldEventManager && data.worldEventManager) this.worldEventManager.fromJSON(data.worldEventManager);
-        if (this.crimeSystem && data.crimeSystem) this.crimeSystem.fromJSON(data.crimeSystem);
-        if (this.educationSystem && data.educationSystem) this.educationSystem.fromJSON(data.educationSystem);
-        if (this.timeManager && data.timeManager) this.timeManager.fromJSON(data.timeManager);
-        if (this.aiSystem && data.aiSystem) this.aiSystem.fromJSON(data.aiSystem);
-        if (this.hardwareManager && data.hardwareManager) this.hardwareManager.fromJSON(data.hardwareManager);
-        if (this.characterStats && data.characterStats) this.characterStats.fromJSON(data.characterStats);
-        if (this.jobSystem && data.jobSystem) this.jobSystem.fromJSON(data.jobSystem);
-        if (this.contractSystem && data.contractSystem) this.contractSystem.fromJSON(data.contractSystem);
-        if (this.mapProgressionSystem && data.mapProgressionSystem) this.mapProgressionSystem.fromJSON(data.mapProgressionSystem);
-        if (this.romanceSystem && data.romanceSystem) this.romanceSystem.fromJSON(data.romanceSystem);
-        if (this.legalSystem && data.legalSystem) this.legalSystem.fromJSON(data.legalSystem);
-        if (this.bankSystem && data.bankSystem) this.bankSystem.fromJSON(data.bankSystem);
-        if (this.visualProgressionSystem && data.visualProgressionSystem) this.visualProgressionSystem.fromJSON(data.visualProgressionSystem);
+        // Restore sub-systems; each is isolated so one bad blob can't
+        // truncate the rest of the load (#1222)
+        for (const key of GameState.SERIALIZABLE_SUBSYSTEMS) {
+            const system = this[key];
+            if (system && typeof system.fromJSON === 'function' && data[key]) {
+                this._safeSubsystemStep(`restore ${key}`, () => system.fromJSON(data[key]));
+            }
+        }
+
         if (this.realWorldTaskSystem && data.realWorldTaskSystem) {
-            this.realWorldTaskSystem.currentTask = data.realWorldTaskSystem.currentTask;
-            this.realWorldTaskSystem.taskHistory = data.realWorldTaskSystem.taskHistory || [];
+            this._safeSubsystemStep('restore realWorldTaskSystem', () => {
+                this.realWorldTaskSystem.currentTask = data.realWorldTaskSystem.currentTask;
+                this.realWorldTaskSystem.taskHistory = (data.realWorldTaskSystem.taskHistory || []).slice(-GameState.MAX_TASK_HISTORY);
+            });
         }
-        if (this.aiTrainingStoryline && data.aiTrainingStoryline) this.aiTrainingStoryline.fromJSON(data.aiTrainingStoryline);
         if (this.githubIssuesSystem && data.githubIssuesSystem) {
-            this.githubIssuesSystem.openIssues = data.githubIssuesSystem.openIssues || [];
-            this.githubIssuesSystem.closedIssues = data.githubIssuesSystem.closedIssues || [];
-            this.githubIssuesSystem.pullRequests = data.githubIssuesSystem.pullRequests || [];
+            this._safeSubsystemStep('restore githubIssuesSystem', () => {
+                this.githubIssuesSystem.openIssues = data.githubIssuesSystem.openIssues || [];
+                this.githubIssuesSystem.closedIssues = data.githubIssuesSystem.closedIssues || [];
+                this.githubIssuesSystem.pullRequests = data.githubIssuesSystem.pullRequests || [];
+            });
         }
-        if (this.researchPaperSystem && data.researchPaperSystem) {
-            this.researchPaperSystem.fromJSON(data.researchPaperSystem);
-        }
-        if (this.weeklyNewsSystem && data.weeklyNewsSystem) this.weeklyNewsSystem.fromJSON(data.weeklyNewsSystem);
-        if (this.gameEndingSystem && data.gameEndingSystem) this.gameEndingSystem.fromJSON(data.gameEndingSystem);
-        if (this.newsManager && data.newsManager) this.newsManager.fromJSON(data.newsManager);
         if (this.emotionalBreakdownSystem && data.emotionalBreakdownSystem) {
-            // Restore active breakdowns (Map reconstruction from saved array)
-            this.emotionalBreakdownSystem.activeBreakdowns = new Map(
-                (data.emotionalBreakdownSystem.activeBreakdowns || []).map(breakdown => [breakdown.id, breakdown])
-            );
-            // Restore breakdown history
-            this.emotionalBreakdownSystem.breakdownHistory = data.emotionalBreakdownSystem.breakdownHistory || [];
+            this._safeSubsystemStep('restore emotionalBreakdownSystem', () => {
+                // Restore active breakdowns (Map reconstruction from saved array)
+                this.emotionalBreakdownSystem.activeBreakdowns = new Map(
+                    (data.emotionalBreakdownSystem.activeBreakdowns || []).map(breakdown => [breakdown.id, breakdown])
+                );
+                this.emotionalBreakdownSystem.breakdownHistory = data.emotionalBreakdownSystem.breakdownHistory || [];
+            });
         }
-        
+
         // Restore Phase 1 Visual Systems settings
         if (this.performanceManager && data.performanceManager) {
-            this.performanceManager.setQuality(data.performanceManager.quality || 'auto');
+            this._safeSubsystemStep('restore performanceManager', () => {
+                this.performanceManager.setQuality(data.performanceManager.quality || 'auto');
+            });
         }
     }
 }

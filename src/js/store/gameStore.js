@@ -306,6 +306,7 @@ try {
                     tasksCompleted: state.tasksCompleted,
                     perfectScores: state.perfectScores,
                     totalEarned: state.totalEarned,
+                    totalSpent: state.totalSpent,
                     weeklyIncome: state.weeklyIncome,
                     totalRatings: state.totalRatings,
                     ratingSum: state.ratingSum,

@@ -999,6 +999,7 @@
     letter-spacing: 0.05em;
 }
 
+.slot-btn-grey,
 .slot-menu-btn {
     background: none;
     border: none;
@@ -1011,6 +1012,8 @@
     line-height: 1;
 }
 
+.slot-btn-grey:hover,
+.slot-btn-grey:focus-visible,
 .slot-menu-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     color: var(--color-text-primary);
@@ -1121,4 +1124,29 @@
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-bg-elevated) var(--color-bg-secondary);
+}
+/* Save slot extras: completion badge, undo-delete and import rows */
+.slot-item-completion {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.save-slot-undo {
+    display: block;
+    width: 100%;
+    margin: 0 0 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 200, 0, 0.12);
+    border: 1px solid rgba(255, 200, 0, 0.35);
+    border-radius: 6px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    text-align: left;
+}
+
+.save-slot-item:focus-visible,
+.save-slot-undo:focus-visible {
+    outline: 2px solid var(--color-accent, #4f9cff);
+    outline-offset: 2px;
 }

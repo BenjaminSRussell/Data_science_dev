@@ -3,6 +3,8 @@
  * IDE for coding yourself to earn money
  */
 
+import { pickState, applyState } from '../utils/StateSerializer.js';
+
 export class IDESystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -257,9 +259,19 @@ function createDashboard(data) {
         this.currentProject = null;
         return { success: true, message: 'Project cancelled.' };
     }
+
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['currentProject', 'completedProjects']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['currentProject', 'completedProjects']);
+    }
 }
-
-
-
-
-

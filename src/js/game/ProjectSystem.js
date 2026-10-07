@@ -137,6 +137,7 @@ export class ProjectSystem {
         // Rewards
         if (project.reward) {
             this.gameState.money = (this.gameState.money || 0) + project.reward;
+            this.gameState.totalEarned = (this.gameState.totalEarned || 0) + project.reward;
         }
         
         if (project.xpReward && this.gameState?.characterStats) {

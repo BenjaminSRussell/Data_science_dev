@@ -519,6 +519,10 @@ export class RealWorldTaskSystem {
             completedAt: Date.now(),
             duration: Date.now() - task.startedAt
         });
+        // Keep history bounded; it is re-serialized into every save (#2096)
+        if (this.taskHistory.length > 100) {
+            this.taskHistory.splice(0, this.taskHistory.length - 100);
+        }
         
         // Apply rewards
         if (task.reward) {
