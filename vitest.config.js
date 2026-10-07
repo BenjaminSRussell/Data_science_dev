@@ -16,8 +16,8 @@ export default defineConfig({
         'src/js/main.js' // Main entry point, tested via integration tests
       ]
     },
-    include: ['**/*.test.js', '**/*.spec.js'],
-    exclude: ['node_modules', 'dist', 'test/']
+    include: ['test/**/*.test.js', 'test/**/*.spec.js'],
+    exclude: ['node_modules', 'dist']
   },
   resolve: {
     alias: {
