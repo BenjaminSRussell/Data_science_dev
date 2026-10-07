@@ -133,12 +133,18 @@ export class CrimeSystem {
         // Maybe "Launder Money" -> Converts "Dirty Money" (if we track it) to Clean
         // For now: Just gives a small profit (tax evasion)
 
+        if (amount <= 0) return { success: false, message: 'Invalid amount.' };
+        if (this.gameState.money < amount) return { success: false, message: 'Insufficient funds to hide.' };
+
+        // Deduct the hidden amount up front so we never manufacture money
+        this.gameState.money -= amount;
+
         const roll = Math.random() * 100;
         const effectiveRisk = Math.max(5, risk - (luck * 0.2));
 
         if (roll < effectiveRisk) {
             this.triggerInvestigation();
-            return { success: false, message: 'The IRS flagged your transaction.' };
+            return { success: false, message: `The IRS flagged your transaction. $${amount} seized.` };
         }
 
         const profit = amount * 0.2; // Saved 20% taxes basically
