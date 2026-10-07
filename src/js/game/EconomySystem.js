@@ -2,7 +2,6 @@
  * EconomySystem - Handles scoring, rewards, and progression
  */
 
-import { RANKS } from '../data/ranks.js';
 import { VEHICLES } from './WorldMap.js';
 
 export class EconomySystem {
@@ -155,16 +154,24 @@ export class EconomySystem {
      * Score data accuracy (mostly simulated)
      */
     scoreDataAccuracy(task, chartConfig) {
-        // In a full implementation, this would check:
-        // - Correct data columns mapped
-        // - No data missing/truncated
-        // - Proper axis scales
-
-        // For now, we'll give a good base score with variance
-        const baseScore = 80;
-        const variance = Math.random() * 20 - 5;
-
-        return Math.min(100, Math.max(60, baseScore + variance));
+        // Reward real chart wiring when present; small jitter only as tie-break (#25).
+        let score = 70;
+        const cfg = chartConfig || {};
+        const req = task?.requirements || task?.requiredFields || {};
+        if (cfg.type || cfg.chartType) score += 8;
+        if (cfg.xField || cfg.xAxis || cfg.x) score += 6;
+        if (cfg.yField || cfg.yAxis || cfg.y) score += 6;
+        if (Array.isArray(cfg.datasets) && cfg.datasets.length) score += 5;
+        if (Array.isArray(cfg.data) && cfg.data.length) score += 5;
+        // Soft match against task hints when provided
+        const wantType = req.chartType || req.type;
+        if (wantType && (cfg.type === wantType || cfg.chartType === wantType)) score += 10;
+        const wantX = req.xField || req.x;
+        if (wantX && (cfg.xField === wantX || cfg.x === wantX)) score += 5;
+        const wantY = req.yField || req.y;
+        if (wantY && (cfg.yField === wantY || cfg.y === wantY)) score += 5;
+        score += Math.random() * 4 - 2;
+        return Math.min(100, Math.max(40, Math.round(score)));
     }
 
     /**

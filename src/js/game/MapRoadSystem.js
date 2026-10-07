@@ -160,8 +160,20 @@ export class MapRoadSystem {
      * Get intersection type (4-way, T-junction, etc.)
      */
     getIntersectionType(hRoad, vRoad) {
-        // For now, all intersections are 4-way
-        // Can be enhanced to detect T-junctions, dead ends, etc.
+        // Horizontal road runs along Y=hy spanning [hx0,hx1]; vertical along X=vx spanning [vy0,vy1].
+        const hx0 = Math.min(hRoad.start.x, hRoad.end.x);
+        const hx1 = Math.max(hRoad.start.x, hRoad.end.x);
+        const hy = hRoad.start.y;
+        const vx = vRoad.start.x;
+        const vy0 = Math.min(vRoad.start.y, vRoad.end.y);
+        const vy1 = Math.max(vRoad.start.y, vRoad.end.y);
+        let arms = 0;
+        if (hx0 < vx) arms++;
+        if (hx1 > vx) arms++;
+        if (vy0 < hy) arms++;
+        if (vy1 > hy) arms++;
+        if (arms <= 1) return 'dead-end';
+        if (arms === 3) return 'T-junction';
         return '4-way';
     }
 

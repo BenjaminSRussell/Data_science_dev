@@ -40,7 +40,7 @@ export class MapEnvironmentSystem {
      */
     addParkElements(zone) {
         const bounds = zone.bounds;
-        const treeCount = Math.floor((bounds.maxX - bounds.minX) * (bounds.maxY - bounds.minY) / 4);
+        const treeCount = Math.floor((bounds.maxX - bounds.minX + 1) * (bounds.maxY - bounds.minY + 1) / 4);
         
         for (let i = 0; i < treeCount; i++) {
             const x = bounds.minX + Math.floor(Math.random() * (bounds.maxX - bounds.minX + 1));
@@ -106,7 +106,7 @@ export class MapEnvironmentSystem {
      */
     addCommercialDecorations(zone) {
         const bounds = zone.bounds;
-        const decorationCount = Math.floor((bounds.maxX - bounds.minX) * (bounds.maxY - bounds.minY) / 8);
+        const decorationCount = Math.floor((bounds.maxX - bounds.minX + 1) * (bounds.maxY - bounds.minY + 1) / 8);
         
         for (let i = 0; i < decorationCount; i++) {
             const x = bounds.minX + Math.floor(Math.random() * (bounds.maxX - bounds.minX + 1));

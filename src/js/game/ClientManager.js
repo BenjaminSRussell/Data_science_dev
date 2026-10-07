@@ -113,7 +113,8 @@ export class ClientManager {
             data: null, // Data is assigned when job is accepted
             status: 'pending',
             createdAt: Date.now(),
-            expiresAt: Date.now() + (1000 * 60 * 5), // 5 minute window to accept
+            // Accept window scales with urgency (#19); baseTime is seconds.
+            expiresAt: Date.now() + (baseTime[urgency] * 1000),
             progress: 0
         };
     }
