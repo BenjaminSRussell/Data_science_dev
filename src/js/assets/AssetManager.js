@@ -325,20 +325,6 @@ export class AssetManager {
         return this.assets.get(key) || null;
     }
 
-    /**
-     * Get character emotion asset
-     */
-    getCharacterEmotion(emotion) {
-        return this.getAsset(`characters.emotions.${emotion}`) || null;
-    }
-
-    /**
-     * Get character body language asset
-     */
-    getCharacterBodyLanguage(pose) {
-        return this.getAsset(`characters.bodyLanguage.${pose}`) ||
-            this.getAsset('characters.base');
-    }
 
     /**
      * Get location background
@@ -361,73 +347,4 @@ export class AssetManager {
         return null;
     }
 
-    /**
-     * Get location icon
-     */
-    getLocationIcon(locationId) {
-        return this.getAsset(`icons.locations.${locationId}`) || `/assets/icons/locations/${locationId}.png`;
-    }
-
-    /**
-     * Get NPC icon asset path (organized)
-     */
-    getNPCIcon(npcType) {
-        return this.getAsset(`icons.npcs.${npcType}`) || `/assets/icons/npcs/${npcType}.png`;
-    }
-
-    /**
-     * Get UI icon asset path (organized)
-     */
-    getUIIcon(iconName) {
-        return this.getAsset(`icons.ui.${iconName}`) || `/assets/icons/ui/${iconName}.png`;
-    }
-
-    /**
-     * Get vehicle icon asset path (organized)
-     */
-    getVehicleIcon(vehicleId) {
-        return this.getAsset(`icons.vehicles.${vehicleId}`) || `/assets/icons/vehicles/${vehicleId}.png`;
-    }
-
-    /**
-     * Get item icon asset path (organized)
-     */
-    getItemIcon(itemName) {
-        return this.getAsset(`icons.items.${itemName}`) || `/assets/icons/items/${itemName}.png`;
-    }
-
-    /**
-     * Get feature icon asset path (organized)
-     */
-    getFeatureIcon(featureId) {
-        return this.getAsset(`icons.features.${featureId}`) || `/assets/icons/features/${featureId}.png`;
-    }
-
-    /**
-     * Get chart icon asset path (organized)
-     */
-    getChartIcon(chartType) {
-        return this.getAsset(`icons.charts.${chartType}`) || `/assets/icons/charts/${chartType}.png`;
-    }
-
-    /**
-     * Get map icon
-     */
-    getMapIcon(type) {
-        return this.getAsset(`icons.map.${type}`) || null;
-    }
-
-    /**
-     * Check if assets are loaded
-     */
-    isLoaded() {
-        return this.loaded;
-    }
-
-    /**
-     * Get load progress (0-100)
-     */
-    getLoadProgress() {
-        return this.loadProgress;
-    }
 }
