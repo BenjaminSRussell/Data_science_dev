@@ -4,6 +4,8 @@
  * High expectations, frequent tasks, pressure
  */
 
+import { pickState, applyState } from '../../utils/StateSerializer.js';
+
 export class DemandingBossSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -159,5 +161,19 @@ export class DemandingBossSystem {
             return 'Good work. Continue at this level and we will discuss your future here.';
         }
     }
-}
 
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['boss', 'demandLevel', 'taskFrequency', 'satisfaction']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['boss', 'demandLevel', 'taskFrequency', 'satisfaction']);
+    }
+}

@@ -3,13 +3,79 @@
  * Supports multiple save slots (0-4) for multiple playthroughs
  */
 
-const SAVE_KEY_PREFIX = 'data_science_tycoon_save_';
-const SAVE_VERSION = 1;
-const MAX_SAVE_SLOTS = 5;
+export const SAVE_KEY_PREFIX = 'data_science_tycoon_save_';
+export const SAVE_VERSION = 1;
+export const MAX_SAVE_SLOTS = 5;
+
+/**
+ * Save migrations, keyed by the version they upgrade FROM. Each step receives
+ * the parsed save record and must return a record for version + 1. Add a new
+ * entry here whenever SAVE_VERSION is bumped (#845).
+ */
+export const SAVE_MIGRATIONS = {
+    // Version 0 = legacy/unversioned records that stored the state at the top level
+    0: (record) => {
+        if (record.state && typeof record.state === 'object') return { ...record, version: 1 };
+        const { slotIndex, metadata, timestamp, version, ...state } = record;
+        return { slotIndex, metadata, timestamp, version: 1, state };
+    }
+};
+
+/**
+ * Bring a parsed save record up to SAVE_VERSION. Returns null if the record
+ * is unusable or comes from a newer, unknown version.
+ */
+export function migrateSaveRecord(record) {
+    if (!record || typeof record !== 'object' || Array.isArray(record)) return null;
+    let current = record;
+    let version = Number.isInteger(current.version) ? current.version : 0;
+    if (version > SAVE_VERSION) {
+        console.warn(`Save version ${version} is newer than supported version ${SAVE_VERSION}`);
+        return null;
+    }
+    while (version < SAVE_VERSION) {
+        const step = SAVE_MIGRATIONS[version];
+        if (!step) {
+            console.warn(`No save migration registered for version ${version}`);
+            return null;
+        }
+        current = step(current);
+        version += 1;
+        current.version = version;
+    }
+    return current;
+}
+
+/** UTF-8 safe base64 helpers (plain btoa throws on emoji/CJK names, #2106) */
+export function encodeSaveString(text) {
+    const bytes = new TextEncoder().encode(text);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+}
+
+export function decodeSaveString(encoded) {
+    const binary = atob(String(encoded).trim());
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+}
+
+function isValidSlot(slotIndex) {
+    return Number.isInteger(slotIndex) && slotIndex >= 0 && slotIndex < MAX_SAVE_SLOTS;
+}
+
+/** null/undefined slot means "default slot 0" (callers pass currentSaveSlot, which may be unset) */
+function normalizeSlot(slotIndex) {
+    return (slotIndex === null || slotIndex === undefined) ? 0 : slotIndex;
+}
 
 export class SaveManager {
     constructor() {
         this.autoSaveInterval = null;
+        // Optional (error, slotIndex) => void so the UI can tell the player a save
+        // failed (quota exceeded, storage disabled) instead of failing silently (#1221)
+        this.onSaveError = null;
     }
 
     /**
@@ -20,7 +86,8 @@ export class SaveManager {
      */
     saveGame(gameState, slotIndex = 0) {
         try {
-            if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
+            slotIndex = normalizeSlot(slotIndex);
+            if (!isValidSlot(slotIndex)) {
                 console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
                 return false;
             }
@@ -43,6 +110,9 @@ export class SaveManager {
             return true;
         } catch (error) {
             console.error('Failed to save game:', error);
+            if (typeof this.onSaveError === 'function') {
+                try { this.onSaveError(error, slotIndex); } catch (_) { /* never let the handler break saving */ }
+            }
             return false;
         }
     }
@@ -55,7 +125,8 @@ export class SaveManager {
      */
     loadGame(gameState, slotIndex = 0) {
         try {
-            if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
+            slotIndex = normalizeSlot(slotIndex);
+            if (!isValidSlot(slotIndex)) {
                 console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
                 return false;
             }
@@ -68,12 +139,10 @@ export class SaveManager {
                 return false;
             }
 
-            const parsed = JSON.parse(saveData);
-
-            // Check version compatibility
-            if (parsed.version !== SAVE_VERSION) {
-                console.warn('Save version mismatch, may need migration');
-                // Add migration logic here for future versions
+            const parsed = migrateSaveRecord(JSON.parse(saveData));
+            if (!parsed || !parsed.state) {
+                console.error(`Save in slot ${slotIndex} is unreadable or from an unsupported version`);
+                return false;
             }
 
             gameState.fromJSON(parsed.state);
@@ -98,18 +167,35 @@ export class SaveManager {
      * @returns {boolean} True if save exists
      */
     hasSave(slotIndex = null) {
-        if (slotIndex !== null) {
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            return localStorage.getItem(saveKey) !== null;
-        }
-
-        // Check all slots
-        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
-            if (localStorage.getItem(SAVE_KEY_PREFIX + i) !== null) {
-                return true;
+        try {
+            if (slotIndex !== null) {
+                const saveKey = SAVE_KEY_PREFIX + slotIndex;
+                return localStorage.getItem(saveKey) !== null;
             }
+
+            // Check all slots
+            for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
+                if (localStorage.getItem(SAVE_KEY_PREFIX + i) !== null) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (error) {
+            // localStorage can throw (privacy mode / disabled storage) (#1224)
+            console.error('Failed to check for saves:', error);
+            return false;
         }
-        return false;
+    }
+
+    /**
+     * First empty slot index, or null when every slot is used
+     * @returns {number|null}
+     */
+    findEmptySlot() {
+        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
+            if (!this.hasSave(i)) return i;
+        }
+        return null;
     }
 
     /**
@@ -141,7 +227,7 @@ export class SaveManager {
      */
     clearSave(slotIndex = 0) {
         try {
-            if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
+            if (!isValidSlot(slotIndex)) {
                 console.error(`Invalid slot index: ${slotIndex}`);
                 return false;
             }
@@ -162,16 +248,21 @@ export class SaveManager {
      * @returns {string|null} Base64 encoded save data
      */
     exportSave(slotIndex = 0) {
-        if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
+        if (!isValidSlot(slotIndex)) {
             console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
             return null;
         }
 
-        const saveKey = SAVE_KEY_PREFIX + slotIndex;
-        const saveData = localStorage.getItem(saveKey);
-        if (!saveData) return null;
+        try {
+            const saveKey = SAVE_KEY_PREFIX + slotIndex;
+            const saveData = localStorage.getItem(saveKey);
+            if (!saveData) return null;
 
-        return btoa(saveData); // Base64 encode for easy sharing
+            return encodeSaveString(saveData); // UTF-8 safe base64 for easy sharing
+        } catch (error) {
+            console.error('Failed to export save:', error);
+            return null;
+        }
     }
 
     /**
@@ -183,13 +274,22 @@ export class SaveManager {
      */
     importSave(encodedData, gameState, slotIndex = 0) {
         try {
-            if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
+            if (!isValidSlot(slotIndex)) {
                 console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
                 return false;
             }
 
-            const saveData = atob(encodedData);
-            const parsed = JSON.parse(saveData);
+            let saveData;
+            try {
+                saveData = decodeSaveString(encodedData);
+            } catch (_) {
+                saveData = atob(encodedData); // Legacy Latin-1 exports
+            }
+            const parsed = migrateSaveRecord(JSON.parse(saveData));
+            if (!parsed || !parsed.state || typeof parsed.state !== 'object') {
+                console.error('Import failed: not a valid save file');
+                return false;
+            }
 
             // Update slot index and metadata
             parsed.slotIndex = slotIndex;
@@ -201,10 +301,12 @@ export class SaveManager {
                 parsed.metadata.createdAt = Date.now();
             }
 
+            // Store the updated record object, not the raw decoded string (#56)
             const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.setItem(saveKey, JSON.stringify(saveData));
-            gameState.fromJSON(parsed.state);
-
+            localStorage.setItem(saveKey, JSON.stringify(parsed));
+            if (gameState && typeof gameState.fromJSON === 'function') {
+                gameState.fromJSON(parsed.state);
+            }
 
             return true;
         } catch (error) {
@@ -223,7 +325,8 @@ export class SaveManager {
         this.stopAutoSave();
 
         this.autoSaveInterval = setInterval(() => {
-            if (gameState.isGameStarted) {
+            // Respect the player's autosave setting (#1252)
+            if (gameState.isGameStarted && gameState.settings?.autoSave !== false) {
                 this.saveGame(gameState, slotIndex);
             }
         }, intervalMs);
@@ -351,6 +454,10 @@ export class SaveManager {
      */
     duplicateSave(sourceSlot, targetSlot) {
         try {
+            if (!isValidSlot(targetSlot) || targetSlot === sourceSlot) {
+                console.error(`Invalid duplicate target slot: ${targetSlot}`);
+                return false;
+            }
             const sourceData = this.getSaveData(sourceSlot);
             if (!sourceData) {
                 console.error(`No save data in slot ${sourceSlot}`);

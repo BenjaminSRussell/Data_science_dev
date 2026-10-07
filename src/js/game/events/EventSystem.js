@@ -3,6 +3,8 @@
  * Manages parties, events, holidays, and stock market crashes
  */
 
+import { pickState, applyState } from '../../utils/StateSerializer.js';
+
 export class EventSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -259,5 +261,20 @@ export class EventSystem {
         const daysPerMonth = 30;
         return (event.month || 0) * daysPerMonth + (event.day || 1);
     }
-}
 
+    /**
+     * Serialize the event calendar so a reload doesn't re-roll or re-apply
+     * the same day's events (#1711)
+     */
+    toJSON() {
+        return pickState(this, ['upcomingEvents', 'activeEvents', 'eventHistory']);
+    }
+
+    /**
+     * Restore the event calendar from a save
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['upcomingEvents', 'activeEvents', 'eventHistory']);
+    }
+}

@@ -3,6 +3,8 @@
  * Stock market investment and e-commerce business systems
  */
 
+import { pickState, applyState } from '../utils/StateSerializer.js';
+
 export class InvestmentEcommerceSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -255,12 +257,19 @@ export class InvestmentEcommerceSystem {
                 : 0
         };
     }
+
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['portfolio', 'ecommerceBusiness']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['portfolio', 'ecommerceBusiness']);
+    }
 }
-
-
-
-
-
-
-
-

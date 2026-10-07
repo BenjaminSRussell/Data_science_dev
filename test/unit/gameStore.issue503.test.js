@@ -564,7 +564,7 @@ describe('gameStore', () => {
             // Fields that should be included in partialize
             const includedFields = [
                 'money', 'reputation', 'rankIndex', 'rent', 'bank',
-                'tasksCompleted', 'perfectScores', 'totalEarned', 'weeklyIncome',
+                'tasksCompleted', 'perfectScores', 'totalEarned', 'totalSpent', 'weeklyIncome',
                 'totalRatings', 'ratingSum', 'unlockedChartTypes', 'unlockedTools',
                 'purchasedItems', 'isGameStarted', 'tutorialCompleted',
                 'soundEnabled', 'musicEnabled', 'unlockedLibraries'
@@ -572,7 +572,8 @@ describe('gameStore', () => {
 
             // Fields that should be excluded from partialize
             const excludedFields = [
-                'totalSpent', 'startTime', 'currentTask', 'currentLocation',
+                // totalSpent is persisted alongside totalEarned (#58)
+                'startTime', 'currentTask', 'currentLocation',
                 'chartConfig', 'lastScore', 'settings', 'unlockedThemes'
             ];
 

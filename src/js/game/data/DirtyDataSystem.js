@@ -4,6 +4,8 @@
  * Manipulation, privacy violations, etc.
  */
 
+import { pickState, applyState } from '../../utils/StateSerializer.js';
+
 export class DirtyDataSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -164,5 +166,19 @@ export class DirtyDataSystem {
         if (this.reputation > -50) return 'bad';
         return 'terrible';
     }
-}
 
+    /**
+     * Serialize dirty-data reputation and violation history (#1180)
+     */
+    toJSON() {
+        return pickState(this, ['unethicalActions', 'reputation']);
+    }
+
+    /**
+     * Restore dirty-data state from a save
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['unethicalActions', 'reputation']);
+    }
+}

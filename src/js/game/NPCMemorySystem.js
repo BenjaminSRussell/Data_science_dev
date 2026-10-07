@@ -4,6 +4,8 @@
  * Priority 3: Make Choices Matter
  */
 
+import { pickState, applyState } from '../utils/StateSerializer.js';
+
 export class NPCMemorySystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -188,5 +190,21 @@ export class NPCMemorySystem {
         const decisionWeek = decision.week || 0;
 
         return currentWeek - decisionWeek <= 4;
+    }
+
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['npcMemories']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['npcMemories']);
+        this.gameState && (this.gameState.npcMemories = this.npcMemories);
     }
 }

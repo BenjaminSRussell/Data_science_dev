@@ -4,6 +4,8 @@
  * 2 incomes, working together, difficult choices, advice
  */
 
+import { pickState, applyState } from '../../utils/StateSerializer.js';
+
 export class RomanceProgressionSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -203,5 +205,19 @@ export class RomanceProgressionSystem {
             // Can propose
         }
     }
-}
 
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['romancePartner', 'relationshipStage', 'relationshipPoints', 'difficultChoices', 'partnerBias']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['romancePartner', 'relationshipStage', 'relationshipPoints', 'difficultChoices', 'partnerBias']);
+    }
+}

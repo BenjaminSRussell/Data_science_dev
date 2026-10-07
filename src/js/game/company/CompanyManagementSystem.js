@@ -3,6 +3,8 @@
  * Manages company creation, hiring, skills, tasks, and workers
  */
 
+import { pickState, applyState } from '../../utils/StateSerializer.js';
+
 export class CompanyManagementSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -264,5 +266,19 @@ export class CompanyManagementSystem {
                 return { message: 'You attended ' + event.name };
         }
     }
-}
 
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['playerCompany', 'employees', 'clients', 'projects']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['playerCompany', 'employees', 'clients', 'projects']);
+    }
+}

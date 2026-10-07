@@ -160,5 +160,25 @@ export class RoommateSystem {
         if (timeSlot <= 4) return schedule.evening === 'home';
         return schedule.night === 'home';
     }
-}
 
+    /**
+     * Serialize roommate state for saving (#1284)
+     */
+    toJSON() {
+        return {
+            roommate: this.roommate ? JSON.parse(JSON.stringify(this.roommate)) : null,
+            relationship: this.relationship,
+            rentSplit: this.rentSplit
+        };
+    }
+
+    /**
+     * Restore roommate state from a save
+     */
+    fromJSON(data) {
+        if (!data) return;
+        if (data.roommate) this.roommate = data.roommate;
+        if (typeof data.relationship === 'number') this.relationship = data.relationship;
+        if (typeof data.rentSplit === 'number') this.rentSplit = data.rentSplit;
+    }
+}

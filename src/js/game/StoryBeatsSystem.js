@@ -4,6 +4,8 @@
  * Priority 2: Narrative Structure
  */
 
+import { pickState, applyState } from '../utils/StateSerializer.js';
+
 export class StoryBeatsSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -277,5 +279,21 @@ export class StoryBeatsSystem {
                 ? (completedRequired.length / requiredBeats.length) * 100 
                 : 0
         };
+    }
+
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['completedBeats']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['completedBeats']);
+        this.gameState && (this.gameState.completedStoryBeats = this.completedBeats);
     }
 }

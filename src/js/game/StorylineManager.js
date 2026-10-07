@@ -3,6 +3,8 @@
  * Main storyline about dealing with world changes and difficulty
  */
 
+import { pickState, applyState } from '../utils/StateSerializer.js';
+
 export class StorylineManager {
     constructor(gameState) {
         this.gameState = gameState;
@@ -400,9 +402,19 @@ export class StorylineManager {
 
         return false;
     }
+
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['storylinePhase', 'majorDecisions', 'storylineProgress', 'currentArc']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['storylinePhase', 'majorDecisions', 'storylineProgress', 'currentArc']);
+    }
 }
-
-
-
-
-

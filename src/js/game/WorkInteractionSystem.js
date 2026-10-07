@@ -3,6 +3,8 @@
  * Work interactions: coworkers, boss, promotions, quitting
  */
 
+import { pickState, applyState } from '../utils/StateSerializer.js';
+
 export class WorkInteractionSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -298,12 +300,19 @@ export class WorkInteractionSystem {
     increasePromotionReadiness(amount = 1) {
         this.boss.promotionReadiness = Math.min(100, this.boss.promotionReadiness + amount);
     }
+
+    /**
+     * Serialize player-visible state for saving
+     */
+    toJSON() {
+        return pickState(this, ['coworkers', 'boss']);
+    }
+
+    /**
+     * Restore state from a save (missing fields keep constructor defaults)
+     */
+    fromJSON(data) {
+        if (!data) return;
+        applyState(this, data, ['coworkers', 'boss']);
+    }
 }
-
-
-
-
-
-
-
-

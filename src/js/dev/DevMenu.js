@@ -476,17 +476,18 @@ export class DevMenu {
 
         container.appendChild(this.createButton('Save Game', () => {
             if (this.game.saveManager) {
-                this.game.saveManager.save(0, this.game.gameState);
-                this.game.showToast('Game saved', 'success');
+                const slot = this.game.currentSaveSlot ?? 0;
+                const ok = this.game.saveManager.saveGame(this.game.gameState, slot);
+                this.game.showToast(ok ? `Game saved to slot ${slot + 1}` : 'Save failed', ok ? 'success' : 'error');
             }
         }));
 
         container.appendChild(this.createButton('Load Game', () => {
             if (this.game.saveManager) {
-                const save = this.game.saveManager.load(0);
-                if (save) {
-                    this.game.showToast('Game loaded', 'success');
-                }
+                const slot = this.game.currentSaveSlot ?? 0;
+                const ok = this.game.saveManager.loadGame(this.game.gameState, slot);
+                this.game.showToast(ok ? `Game loaded from slot ${slot + 1}` : 'No loadable save in this slot', ok ? 'success' : 'error');
+                if (ok) this.game.uiUpdater?.updateAllUI?.();
             }
         }));
     }
