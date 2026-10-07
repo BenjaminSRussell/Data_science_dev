@@ -20,6 +20,7 @@ export class EducationSystem {
                 id: 'python_101',
                 name: "Python 101",
                 cost: 500,
+                prereqs: [],
                 description: "Learn the basics of Python programming.",
                 questions: [
                     { q: "What is the correct file extension for Python files?", options: [".pt", ".py", ".pyt", ".python"], correct: 1 },
@@ -31,6 +32,7 @@ export class EducationSystem {
                 id: 'sql_101',
                 name: "SQL Fundamentals",
                 cost: 500,
+                prereqs: [],
                 description: "Master database querying.",
                 questions: [
                     { q: "Which statement is used to extract data from a database?", options: ["GET", "OPEN", "SELECT", "EXTRACT"], correct: 2 },
@@ -42,6 +44,7 @@ export class EducationSystem {
                 id: 'stats_201',
                 name: "Statistics for DS",
                 cost: 1000,
+                prereqs: ['python_101'],
                 description: "Probability distributions and hypothesis testing.",
                 questions: [
                     { q: "What is the median of [1, 3, 3, 6, 7, 8, 9]?", options: ["3", "6", "7", "5.2"], correct: 1 },
@@ -52,6 +55,7 @@ export class EducationSystem {
                 id: 'ml_intro',
                 name: "Intro to Machine Learning",
                 cost: 1500,
+                prereqs: ['python_101', 'sql_101'],
                 description: "Supervised vs Unsupervised learning.",
                 questions: [
                     { q: "Which of these is a Supervised Learning algorithm?", options: ["K-Means", "Linear Regression", "PCA", "Apriori"], correct: 1 },
@@ -65,6 +69,11 @@ export class EducationSystem {
         if (this.completedCourses.includes(courseId)) return { success: false, message: "Course already completed." };
 
         const course = this.courses[courseId];
+        const missingPrereqs = (course.prereqs || []).filter(p => !this.completedCourses.includes(p));
+        if (missingPrereqs.length > 0) {
+            const names = missingPrereqs.map(p => this.courses[p]?.name || p).join(', ');
+            return { success: false, message: `Prerequisites not met: ${names}.` };
+        }
         if (this.gameState.money < course.cost) return { success: false, message: "Cannot afford tuition." };
 
         this.gameState.money -= course.cost;
