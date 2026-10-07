@@ -420,8 +420,10 @@ export class RealWorldTaskSystem {
             currentStep: 0,
             visual: taskTemplate.visual,
             description: taskTemplate.description,
-            skills: taskTemplate.skills,
-            reward: taskTemplate.reward,
+            skills: Array.isArray(taskTemplate.skills)
+                ? [...taskTemplate.skills]
+                : { ...(taskTemplate.skills || {}) },
+            reward: { ...(taskTemplate.reward || {}) },
             requiresLab: taskTemplate.requiresLab || false,
             canTakeModel: taskTemplate.canTakeModel !== false,
             startedAt: Date.now(),

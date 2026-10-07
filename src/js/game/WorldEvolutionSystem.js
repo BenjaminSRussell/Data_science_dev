@@ -123,7 +123,11 @@ export class WorldEvolutionSystem {
 
         // Check for layoffs
         if (business.health < 30 && business.health > 0 && Math.random() > 0.7) {
-            const layoffs = Math.floor(business.employees * 0.1);
+            // At least 1 when any staff exist — floor(0.1*N) was 0 for N<10 (#2632)
+            const layoffs = business.employees > 0
+                ? Math.max(1, Math.floor(business.employees * 0.1))
+                : 0;
+            if (layoffs === 0) return null;
             business.employees -= layoffs;
             return {
                 type: 'layoffs',

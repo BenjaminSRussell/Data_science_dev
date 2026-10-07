@@ -323,7 +323,9 @@ export class GitHubIssuesSystem {
         ];
         
         const template = issueTemplates[Math.floor(Math.random() * issueTemplates.length)];
-        const issueNumber = this.openIssues.length + this.closedIssues.length + 1;
+        const allNums = [...(this.openIssues || []), ...(this.closedIssues || [])]
+            .map(i => Number(i.number) || 0);
+        const issueNumber = (allNums.length ? Math.max(...allNums) : 0) + 1;
         
         const issue = {
             id: `issue_${Date.now()}`,

@@ -207,7 +207,7 @@ export class CharacterStats {
         // -100: Pure Evil (Wolf of Wall Street)
         // 0: Neutral
         // +100: Saint
-        this.ethics = 50; // 0 (Evil) to 100 (Saint)
+        this.ethics = 0; // Neutral start (-100 Evil … +100 Saint); was 50 which forced ethical news (#2639)
         this.level = 1;
         this.visualStage = 'level_1'; // level_1, level_2_good, level_2_evil, etc.
 
