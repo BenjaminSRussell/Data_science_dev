@@ -2135,7 +2135,19 @@ export class MainGame {
      * Open the chart studio
      */
     openChartStudio() {
+        // A submitted task can't be reopened for a second payout (#1226)
+        if (!this.gameState.currentTask || this.gameState.currentTask.submitted) {
+            this.taskSystem?.generateNewTask();
+            this.uiUpdater?.updateTaskDisplay?.();
+            this.startTaskTimer?.();
+        }
+        if (!this.gameState.currentTask) {
+            this.showError('No task available.');
+            return;
+        }
+
         this.screenManager.showScreen('screen-chart-studio');
+        this.syncChartStudioUI();
 
         // Initialize chart preview with current data
         this.chartManager.createPreviewChart(
@@ -2191,19 +2203,50 @@ export class MainGame {
     }
 
     /**
+     * Copy the Chart Studio form controls into gameState.chartConfig.
+     * Called before previewing AND before scoring, so what the player sees is
+     * exactly what gets scored (#1681).
+     */
+    readChartStudioForm() {
+        const cfg = this.gameState.chartConfig || (this.gameState.chartConfig = GameState.defaultChartConfig());
+        const legend = document.getElementById('show-legend');
+        const grid = document.getElementById('show-grid');
+        const labels = document.getElementById('show-data-labels');
+        const title = document.getElementById('chart-title');
+        this.gameState.chartConfig = {
+            ...cfg,
+            showLegend: legend ? legend.checked : (cfg.showLegend ?? true),
+            showGrid: grid ? grid.checked : (cfg.showGrid ?? true),
+            showDataLabels: labels ? labels.checked : (cfg.showDataLabels ?? false),
+            title: title ? title.value : (cfg.title ?? '')
+        };
+        return this.gameState.chartConfig;
+    }
+
+    /**
+     * Make the Chart Studio controls reflect gameState.chartConfig (after a
+     * load or a per-task reset) (#1495, #1682).
+     */
+    syncChartStudioUI() {
+        const cfg = this.gameState.chartConfig || GameState.defaultChartConfig();
+        document.querySelectorAll('.chart-type-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.type === cfg.type);
+        });
+        document.querySelectorAll('.palette-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.palette === cfg.palette);
+        });
+        const set = (id, prop, value) => { const el = document.getElementById(id); if (el) el[prop] = value; };
+        set('show-legend', 'checked', !!cfg.showLegend);
+        set('show-grid', 'checked', !!cfg.showGrid);
+        set('show-data-labels', 'checked', !!cfg.showDataLabels);
+        set('chart-title', 'value', cfg.title || '');
+    }
+
+    /**
      * Update the chart preview
      */
     updateChartPreview() {
-        const config = {
-            type: this.gameState.chartConfig.type,
-            palette: this.gameState.chartConfig.palette,
-            showLegend: document.getElementById('show-legend')?.checked ?? true,
-            showGrid: document.getElementById('show-grid')?.checked ?? true,
-            showDataLabels: document.getElementById('show-data-labels')?.checked ?? false,
-            title: document.getElementById('chart-title')?.value ?? ''
-        };
-
-        this.gameState.chartConfig = { ...this.gameState.chartConfig, ...config };
+        this.readChartStudioForm();
 
         this.chartManager.updatePreviewChart(
             this.gameState.currentTask.data,
@@ -2222,22 +2265,37 @@ export class MainGame {
             return;
         }
 
-        if (!this.gameState.currentTask) {
+        const task = this.gameState.currentTask;
+        if (!task) {
             this.showError('No task available. Please start a new game.');
+            return;
+        }
+
+        // A task can only be paid out once (#1226)
+        if (task.submitted) {
+            this.showToast('This task was already submitted. Grab the next task.', 'warning');
             return;
         }
 
         // Stop the task timer when submitting
         this.stopTaskTimer();
 
+        // Score exactly what the form shows (#1681)
+        this.readChartStudioForm();
+
         // Calculate score
         const score = this.economySystem.evaluateChart(
-            this.gameState.currentTask,
+            task,
             this.gameState.chartConfig
         );
+        task.submitted = true;
 
         // Store score for display
         this.gameState.lastScore = score;
+
+        // Apply rewards now, in the same tick as the rating stats that
+        // evaluateChart() just recorded, so the outcome is atomic (#1311).
+        this.applyTaskRewards(score);
 
         // Show review screen
         this.screenManager.showScreen('screen-review');
@@ -2245,12 +2303,110 @@ export class MainGame {
         // Copy chart to review screen
         this.chartManager.copyToReviewChart();
 
-        // Animate the review
+        // Animate the review (presentation only)
         this.animateReview(score);
     }
 
     /**
-     * Animate the boss review
+     * Apply money/reputation/progress for a scored task, check promotion and
+     * story beats, and autosave. Runs synchronously from submitChart().
+     */
+    applyTaskRewards(score) {
+        // Apply rewards to game state
+        this.gameState.money += score.moneyEarned;
+        this.gameState.reputation += score.repEarned;
+
+        // Show money particle effect if significant amount
+        if (score.moneyEarned > 100 && this.unifiedMapSystem?.particleManager) {
+            // Get screen center or task completion location
+            const screenCenterX = window.innerWidth / 2;
+            const screenCenterY = window.innerHeight / 2;
+            this.unifiedMapSystem.particleManager.createMoneyEffect(
+                screenCenterX,
+                screenCenterY,
+                score.moneyEarned
+            );
+        }
+        const oldTaskCount = this.gameState.tasksCompleted || 0;
+        this.gameState.tasksCompleted++;
+        this.gameState.totalEarned += score.moneyEarned;
+        this.gameState.weeklyIncome += score.moneyEarned; // Track for taxes
+
+        // Check for story beats (task completion)
+        if (this.storyBeatsSystem && oldTaskCount === 0) {
+            const beat = this.storyBeatsSystem.getBeat('first_task_complete');
+            if (beat) {
+                this.handleStoryBeat(beat);
+            }
+        }
+
+        // Check for promotion
+        if (this.economySystem) {
+            const oldRank = this.gameState.rankIndex;
+            const promoted = this.economySystem.checkPromotion();
+            if (promoted) {
+                const newRank = this.gameState.currentRank;
+                this.showToast(`PROMOTED to ${newRank.title}!`, 'success');
+                this.audioManager.play('success');
+                this.uiUpdater.updateAllUI();
+                // Announce the promotion milestone to assistive technology
+                this.uiUpdater.announceRankPromotion(newRank);
+
+                // Check for story beats (promotion)
+                if (this.storyBeatsSystem) {
+                    if (oldRank === 0) {
+                        const beat = this.storyBeatsSystem.getBeat('first_promotion');
+                        if (beat) this.handleStoryBeat(beat);
+                    }
+                    // Check for other promotion beats
+                    const newRankIndex = this.gameState.rankIndex;
+                    if (newRankIndex >= 2 && newRankIndex < 3) {
+                        const beat = this.storyBeatsSystem.getBeat('mid_career');
+                        if (beat) this.handleStoryBeat(beat);
+                    }
+                    if (newRankIndex >= 4 && newRankIndex < 5) {
+                        const beat = this.storyBeatsSystem.getBeat('senior_position');
+                        if (beat) this.handleStoryBeat(beat);
+                    }
+                    if (newRankIndex >= 6) {
+                        const beat = this.storyBeatsSystem.getBeat('final_rank');
+                        if (beat) this.handleStoryBeat(beat);
+                    }
+                }
+            }
+        }
+
+        // Update top bar
+        this.uiUpdater.updateTopBar();
+
+        // Play sound
+        if (score.stars >= 4) {
+            this.audioManager.play('success');
+        } else if (score.stars <= 2) {
+            this.audioManager.play('fail');
+        } else {
+            this.audioManager.play('complete');
+        }
+
+        // Auto-save into the slot being played, not always slot 0 (#871)
+        this.saveManager.saveGame(this.gameState, this.currentSaveSlot ?? 0);
+    }
+
+    /**
+     * Human-readable summary of what purchased software added to a score.
+     */
+    formatSoftwareBonus(mult) {
+        if (!mult) return '';
+        const parts = [];
+        const pct = v => Math.round((v - 1) * 100);
+        if (mult.chartAppropriateness > 1) parts.push(`+${pct(mult.chartAppropriateness)}% appropriateness`);
+        if (mult.visualClarity > 1) parts.push(`+${pct(mult.visualClarity)}% clarity`);
+        if (mult.dataAccuracy > 1) parts.push(`+${pct(mult.dataAccuracy)}% accuracy`);
+        return parts.length ? `Software bonus: ${parts.join(', ')}` : 'Software bonus: none (buy software in the shop)';
+    }
+
+    /**
+     * Animate the boss review (visual only — rewards are already applied)
      */
     animateReview(score) {
         const bossReactions = {
@@ -2262,121 +2418,55 @@ export class MainGame {
         };
 
         const reaction = bossReactions[score.stars] || bossReactions[3];
+        const stars = Math.max(0, Math.min(5, Math.round(score.stars || 0)));
+
+        // Reset presentation from any previous review
+        const starsContainer = document.getElementById('stars-container');
+        if (starsContainer) {
+            starsContainer.textContent = '☆☆☆☆☆';
+            starsContainer.setAttribute('aria-label', `${stars} out of 5 stars`);
+        }
+        const scoreFills = document.querySelectorAll('#review-score .text-progress-filled, #review-score .score-fill');
+        scoreFills.forEach(fill => { fill.style.width = '0%'; });
+        const moneyEl = document.getElementById('reward-money');
+        const repEl = document.getElementById('reward-rep');
+        if (moneyEl) moneyEl.textContent = '+$0';
+        if (repEl) repEl.textContent = '+0 Rep';
 
         // Animate feedback
         setTimeout(() => {
             const emojiEl = document.getElementById('reaction-emoji');
             if (emojiEl) emojiEl.textContent = '';
-            document.getElementById('boss-feedback').querySelector('.feedback-text').textContent = reaction.text;
+            const feedbackText = document.getElementById('boss-feedback')?.querySelector('.feedback-text');
+            if (feedbackText) feedbackText.textContent = reaction.text;
         }, 500);
 
-        // Animate stars
-        const starsContainer = document.getElementById('stars-container');
-        const stars = starsContainer.querySelectorAll('.star');
-        stars.forEach((star, i) => {
-            setTimeout(() => {
-                if (i < score.stars) {
-                    star.textContent = '';
-                    star.classList.add('filled');
-                } else {
-                    star.textContent = '';
-                    star.classList.remove('filled');
-                }
-            }, 800 + (i * 200));
-        });
+        // Animate stars: #stars-container is a text node, fill one star at a time (#1684)
+        if (starsContainer) {
+            for (let i = 1; i <= stars; i++) {
+                setTimeout(() => {
+                    starsContainer.textContent = '★'.repeat(i) + '☆'.repeat(5 - i);
+                }, 800 + ((i - 1) * 200));
+            }
+        }
 
-        // Animate score breakdown
+        // Animate score breakdown bars (#2209, #1683: the bars are .text-progress-filled)
         setTimeout(() => {
-            const scoreFills = document.querySelectorAll('.score-fill');
-            scoreFills[0].style.width = `${score.chartAppropriateness}%`;
-            scoreFills[1].style.width = `${score.visualClarity}%`;
-            scoreFills[2].style.width = `${score.dataAccuracy}%`;
+            const values = [score.chartAppropriateness, score.visualClarity, score.dataAccuracy];
+            scoreFills.forEach((fill, i) => {
+                const v = Math.max(0, Math.min(100, Number(values[i]) || 0));
+                fill.style.width = `${v}%`;
+            });
         }, 1500);
 
-        // Animate rewards
+        // Software contribution (#1315)
+        const bonusEl = document.getElementById('review-software-bonus');
+        if (bonusEl) bonusEl.textContent = this.formatSoftwareBonus(score.softwareMultipliers);
+
+        // Reveal rewards
         setTimeout(() => {
-            document.getElementById('reward-money').textContent = `+$${score.moneyEarned.toLocaleString()}`;
-            document.getElementById('reward-rep').textContent = `+${score.repEarned} Rep`;
-
-            // Apply rewards to game state
-            this.gameState.money += score.moneyEarned;
-            this.gameState.reputation += score.repEarned;
-
-            // Show money particle effect if significant amount
-            if (score.moneyEarned > 100 && this.unifiedMapSystem?.particleManager) {
-                // Get screen center or task completion location
-                const screenCenterX = window.innerWidth / 2;
-                const screenCenterY = window.innerHeight / 2;
-                this.unifiedMapSystem.particleManager.createMoneyEffect(
-                    screenCenterX,
-                    screenCenterY,
-                    score.moneyEarned
-                );
-            }
-            const oldTaskCount = this.gameState.tasksCompleted || 0;
-            this.gameState.tasksCompleted++;
-            this.gameState.totalEarned += score.moneyEarned;
-            this.gameState.weeklyIncome += score.moneyEarned; // Track for taxes
-
-            // Check for story beats (task completion)
-            if (this.storyBeatsSystem && oldTaskCount === 0) {
-                const beat = this.storyBeatsSystem.getBeat('first_task_complete');
-                if (beat) {
-                    this.handleStoryBeat(beat);
-                }
-            }
-
-            // Check for promotion
-            if (this.economySystem) {
-                const oldRank = this.gameState.rankIndex;
-                const promoted = this.economySystem.checkPromotion();
-                if (promoted) {
-                    const newRank = this.gameState.currentRank;
-                    this.showToast(`PROMOTED to ${newRank.title}!`, 'success');
-                    this.audioManager.play('success');
-                    this.uiUpdater.updateAllUI();
-                    // Announce the promotion milestone to assistive technology
-                    this.uiUpdater.announceRankPromotion(newRank);
-
-                    // Check for story beats (promotion)
-                    if (this.storyBeatsSystem) {
-                        if (oldRank === 0) {
-                            const beat = this.storyBeatsSystem.getBeat('first_promotion');
-                            if (beat) this.handleStoryBeat(beat);
-                        }
-                        // Check for other promotion beats
-                        const newRankIndex = this.gameState.rankIndex;
-                        if (newRankIndex >= 2 && newRankIndex < 3) {
-                            const beat = this.storyBeatsSystem.getBeat('mid_career');
-                            if (beat) this.handleStoryBeat(beat);
-                        }
-                        if (newRankIndex >= 4 && newRankIndex < 5) {
-                            const beat = this.storyBeatsSystem.getBeat('senior_position');
-                            if (beat) this.handleStoryBeat(beat);
-                        }
-                        if (newRankIndex >= 6) {
-                            const beat = this.storyBeatsSystem.getBeat('final_rank');
-                            if (beat) this.handleStoryBeat(beat);
-                        }
-                    }
-                }
-            }
-
-            // Update top bar
-            this.uiUpdater.updateTopBar();
-
-            // Play sound
-            if (score.stars >= 4) {
-                this.audioManager.play('success');
-            } else if (score.stars <= 2) {
-                this.audioManager.play('fail');
-            } else {
-                this.audioManager.play('complete');
-            }
-
-            // Auto-save into the slot being played, not always slot 0 (#871)
-            this.saveManager.saveGame(this.gameState, this.currentSaveSlot ?? 0);
-
+            if (moneyEl) moneyEl.textContent = `+$${(score.moneyEarned || 0).toLocaleString()}`;
+            if (repEl) repEl.textContent = `+${score.repEarned || 0} Rep`;
         }, 2000);
     }
 
@@ -2386,6 +2476,10 @@ export class MainGame {
     nextTask() {
         // Generate new task
         this.taskSystem.generateNewTask();
+
+        // Each task starts from a clean Chart Studio (#1682)
+        this.gameState.chartConfig = GameState.defaultChartConfig();
+        this.syncChartStudioUI();
 
         // Update UI
         this.uiUpdater.updateTaskDisplay();

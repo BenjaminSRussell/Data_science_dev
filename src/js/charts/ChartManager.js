@@ -71,6 +71,7 @@ export class ChartManager {
             this.previewChart.destroy();
         }
 
+        this.lastPreview = { data, config: { ...config } };
         const chartConfig = this.buildChartConfig(data, config);
         this.previewChart = new Chart(canvas, chartConfig);
     }
@@ -84,6 +85,7 @@ export class ChartManager {
             return;
         }
 
+        this.lastPreview = { data, config: { ...config } };
         const chartConfig = this.buildChartConfig(data, config);
 
         // Update chart type
@@ -105,47 +107,78 @@ export class ChartManager {
     buildChartConfig(data, config) {
         const palette = PALETTES[config.palette] || PALETTES.corporate;
         const type = this.mapChartType(config.type);
+        const labels = data.labels || data.rows?.map(r => r[0]) || [];
 
-        // Get the first dataset key with non-empty data
-        const datasetKeys = Object.keys(data.datasets || {});
-        let primaryKey = 'Value';
-        let values = [];
-
-        // Find first dataset with data
-        for (const key of datasetKeys) {
-            const datasetValues = data.datasets?.[key];
-            if (Array.isArray(datasetValues) && datasetValues.length > 0) {
-                primaryKey = key;
-                values = datasetValues;
-                break;
-            }
+        // Collect every non-empty numeric series (#1491). Previously only the
+        // first one was plotted and the rest silently dropped.
+        const series = [];
+        for (const key of Object.keys(data.datasets || {})) {
+            const values = data.datasets?.[key];
+            if (Array.isArray(values) && values.length > 0) series.push({ key, values });
         }
 
         // Fallback to rows if no dataset found
-        if (values.length === 0 && data.rows && data.rows.length > 0) {
-            values = data.rows.map(r => r[1] || 0);
-            primaryKey = data.columns?.[1] || 'Value';
+        if (series.length === 0 && data.rows && data.rows.length > 0) {
+            series.push({ key: data.columns?.[1] || 'Value', values: data.rows.map(r => r[1] || 0) });
+        }
+        if (series.length === 0) series.push({ key: 'Value', values: [] });
+
+        const primaryKey = series[0].key;
+        // Single-ring chart types only make sense with one series
+        const isSingleSeriesType = ['pie', 'doughnut', 'polarArea'].includes(type);
+        const plotted = isSingleSeriesType ? series.slice(0, 1) : series;
+        const multi = plotted.length > 1;
+        const isPointType = type === 'scatter' || type === 'bubble';
+
+        const datasets = plotted.map((s, i) => {
+            const color = palette[i % palette.length];
+            let points = s.values;
+            if (isPointType) {
+                // Scatter/bubble need {x, y(, r)} points on a linear x axis; map
+                // each category to its index so nothing parses as NaN (#2254).
+                const max = Math.max(1, ...s.values.map(v => Math.abs(Number(v) || 0)));
+                points = s.values.map((v, idx) => {
+                    const y = Number(v) || 0;
+                    return type === 'bubble'
+                        ? { x: idx, y, r: 4 + Math.round((Math.abs(y) / max) * 12) }
+                        : { x: idx, y };
+                });
+            }
+            const lineLike = type === 'line' || isPointType || multi;
+            return {
+                label: s.key,
+                data: points,
+                backgroundColor: type === 'line' ? color.replace('0.8', '0.2') : (lineLike ? color : palette),
+                borderColor: lineLike ? color.replace('0.8', '1') : palette.map(c => c.replace('0.8', '1')),
+                borderWidth: type === 'line' ? 3 : 1,
+                tension: 0.3,
+                fill: type === 'line' ? (config.type === 'area' || !multi) : undefined,
+                pointBackgroundColor: color,
+                pointBorderColor: '#fff',
+                pointRadius: type === 'line' ? 5 : (type === 'scatter' ? 6 : undefined),
+                pointHoverRadius: type === 'line' ? 7 : undefined
+            };
+        });
+
+        const options = this.buildChartOptions(config, type, primaryKey);
+        if (isPointType && options.scales?.x) {
+            options.scales.x = {
+                ...options.scales.x,
+                type: 'linear',
+                min: -0.5,
+                max: Math.max(0, labels.length - 0.5),
+                ticks: {
+                    ...options.scales.x.ticks,
+                    stepSize: 1,
+                    callback: (value) => (Number.isInteger(value) && labels[value] !== undefined ? labels[value] : '')
+                }
+            };
         }
 
         return {
             type: type,
-            data: {
-                labels: data.labels || data.rows?.map(r => r[0]) || [],
-                datasets: [{
-                    label: primaryKey,
-                    data: values,
-                    backgroundColor: type === 'line' ? palette[0].replace('0.8', '0.2') : palette,
-                    borderColor: type === 'line' ? palette[0] : palette.map(c => c.replace('0.8', '1')),
-                    borderWidth: type === 'line' ? 3 : 1,
-                    tension: 0.3,
-                    fill: type === 'line' ? true : undefined,
-                    pointBackgroundColor: palette[0],
-                    pointBorderColor: '#fff',
-                    pointRadius: type === 'line' ? 5 : undefined,
-                    pointHoverRadius: type === 'line' ? 7 : undefined
-                }]
-            },
-            options: this.buildChartOptions(config, type, primaryKey)
+            data: { labels, datasets },
+            options
         };
     }
 
@@ -269,15 +302,21 @@ export class ChartManager {
             this.reviewChart.destroy();
         }
 
-        // Clone configuration
-        const config = {
-            type: this.previewChart.config.type,
-            data: JSON.parse(JSON.stringify(this.previewChart.data)),
-            options: {
-                ...this.previewChart.options,
-                animation: false // No animation for review
-            }
-        };
+        // Rebuild a fresh config from the source data instead of spreading the
+        // preview chart's resolved options: Chart.js exposes those as a Proxy with
+        // Symbol keys, and spreading it made `new Chart()` throw
+        // "startsWith is not a function", which aborted submitChart().
+        let config;
+        if (this.lastPreview) {
+            config = this.buildChartConfig(this.lastPreview.data, this.lastPreview.config);
+        } else {
+            config = {
+                type: this.previewChart.config.type,
+                data: JSON.parse(JSON.stringify(this.previewChart.data)),
+                options: {}
+            };
+        }
+        config.options = { ...config.options, animation: false }; // No animation for review
 
         this.reviewChart = new Chart(reviewCanvas, config);
     }
