@@ -104,7 +104,7 @@ import { RANKS } from './data/ranks.js';
 import { SHOP_ITEMS } from './data/shopItems.js';
 // import { SpriteSheetManager } from './assets/SpriteSheetManager.js';
 // import { AnimatedCharacterRenderer } from './characters/AnimatedCharacterRenderer.js';
-// import { ThreeCharacterRenderer } from './characters/ThreeCharacterRenderer.js';
+import { ThreeCharacterRenderer } from './characters/ThreeCharacterRenderer.js';
 // import { VisualEffectsManager } from './effects/VisualEffectsManager.js';
 // import { CharacterAnimationSystem } from './characters/CharacterAnimationSystem.js';
 import { LocationView } from './ui/LocationView.js';
