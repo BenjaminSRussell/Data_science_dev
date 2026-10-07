@@ -41,6 +41,7 @@ export class GameState {
         this.purchasedItems = []; // Shop items
         this.unlockedThemes = ['default'];
         this.unlockedTools = []; // Software tools
+        this.unlockedPerks = []; // Shop perks
         this.unlockedLibraries = [];
 
         // Game configuration
@@ -240,6 +241,12 @@ export class GameState {
         } else if (item.type === 'software') {
             // Software items are tracked in purchasedItems, no additional action needed
             // Software quality effects are calculated dynamically
+        } else if (item.type === 'perk') {
+            if (!this.unlockedPerks) this.unlockedPerks = [];
+            const perkId = item.perkId || item.id;
+            if (!this.unlockedPerks.includes(perkId)) {
+                this.unlockedPerks.push(perkId);
+            }
         }
 
         return true;
@@ -263,6 +270,7 @@ export class GameState {
             ratingSum: this.ratingSum,
             unlockedChartTypes: this.unlockedChartTypes,
             unlockedTools: this.unlockedTools,
+            unlockedPerks: this.unlockedPerks || [],
             purchasedItems: this.purchasedItems,
             isGameStarted: this.isGameStarted,
             tutorialCompleted: this.tutorialCompleted,

@@ -23,10 +23,26 @@ function copyAudioAssets() {
   };
 }
 
+// OFFICE_LOCATIONS CSS urls hit /assets/backgrounds/locations/*.png which live
+// under top-level assets/, not publicDir. Mirror them into public at buildStart.
+function copyLocationBackgrounds() {
+  return {
+    name: 'copy-location-backgrounds',
+    buildStart() {
+      const src = join(__dirname, 'assets', 'backgrounds', 'locations');
+      const dest = join(__dirname, 'public', 'assets', 'backgrounds', 'locations');
+      if (existsSync(src)) {
+        mkdirSync(dirname(dest), { recursive: true });
+        cpSync(src, dest, { recursive: true });
+      }
+    }
+  };
+}
+
 export default defineConfig({
   root: './',
   publicDir: 'public',
-  plugins: [copyAudioAssets()],
+  plugins: [copyAudioAssets(), copyLocationBackgrounds()],
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

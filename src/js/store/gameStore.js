@@ -79,6 +79,7 @@ try {
                 purchasedItems: [],
                 unlockedThemes: ['default'],
                 unlockedTools: [],
+                unlockedPerks: [],
                 unlockedLibraries: [],
 
                 // Game configuration
@@ -178,6 +179,13 @@ try {
                         set((s) => ({
                             unlockedTools: [...s.unlockedTools, item.toolId]
                         }));
+                    } else if (item.type === 'perk') {
+                        const perkId = item.perkId || item.id;
+                        set((s) => {
+                            const perks = s.unlockedPerks || [];
+                            if (perks.includes(perkId)) return {};
+                            return { unlockedPerks: [...perks, perkId] };
+                        });
                     }
 
                     return true;
@@ -419,10 +427,18 @@ try {
             const state = get();
             if (!state.canAfford(item.price)) return false;
             if (state.purchasedItems.includes(item.id)) return false;
-            set({
+            const patch = {
                 money: state.money - item.price,
                 purchasedItems: [...state.purchasedItems, item.id]
-            });
+            };
+            if (item.type === 'perk') {
+                const perkId = item.perkId || item.id;
+                const perks = state.unlockedPerks || [];
+                if (!perks.includes(perkId)) {
+                    patch.unlockedPerks = [...perks, perkId];
+                }
+            }
+            set(patch);
             return true;
         },
         incrementTasksCompleted: () => set((state) => ({ tasksCompleted: state.tasksCompleted + 1 })),
