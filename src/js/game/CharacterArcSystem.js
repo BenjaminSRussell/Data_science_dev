@@ -104,20 +104,18 @@ export class CharacterArcSystem {
      * Get career description
      */
     getCareerDescription(rank, reputation) {
+        const rep = Number(reputation) || 0;
+        const tone = rep >= 70 ? 'widely respected' : rep >= 40 ? 'building a solid name' : rep >= 15 ? 'still proving yourself' : 'mostly unknown';
         if (rank >= 6) {
-            return 'You\'ve reached the pinnacle of your career, a respected leader in the industry.';
+            return `You've reached the pinnacle of your career — ${tone}, with doors opening wherever you go.`;
         } else if (rank >= 4) {
-            return 'You\'ve established yourself as a senior professional, known for your expertise.';
+            return `You're a senior presence in the field, ${tone}. Clients seek you out for hard problems.`;
         } else if (rank >= 2) {
-            return 'You\'re building your reputation and making a name for yourself.';
-        } else {
-            return 'You\'re still finding your footing, learning the ropes of the industry.';
+            return `You're mid-career and ${tone}. Each project stretches your reputation further.`;
         }
+        return `You're early in the climb and ${tone}. Every chart you ship shapes how people see you.`;
     }
 
-    /**
-     * Get time description
-     */
     getTimeDescription(days) {
         if (days >= 180) {
             return 'Months have passed, and you\'ve seen the city change around you.';
@@ -267,20 +265,31 @@ export class CharacterArcSystem {
      * Get milestone description
      */
     getMilestoneDescription(entry) {
-        const { changes, direction } = entry;
+        const { changes = {}, direction } = entry;
+        const bits = [];
+        if (typeof changes.money === 'number' && changes.money) {
+            bits.push(changes.money > 0 ? `$${changes.money.toLocaleString()} richer` : `$${Math.abs(changes.money).toLocaleString()} poorer`);
+        }
+        if (typeof changes.ethics === 'number' && changes.ethics) {
+            bits.push(changes.ethics > 0 ? 'ethics up' : 'ethics down');
+        }
+        if (typeof changes.reputation === 'number' && changes.reputation) {
+            bits.push(changes.reputation > 0 ? 'reputation rising' : 'reputation slipping');
+        }
+        const detail = bits.length ? ` (${bits.join(', ')})` : '';
 
         if (direction === 'corruption') {
-            return 'You crossed a line. The money was good, but something changed inside you.';
+            return `You crossed a line. The money was good, but something changed inside you${detail}.`;
         } else if (direction === 'redemption') {
-            return 'You made a stand for what\'s right. It wasn\'t easy, but you have no regrets.';
+            return `You made a stand for what's right. It wasn't easy, but you have no regrets${detail}.`;
         } else if (direction === 'success') {
-            return 'You reached a major milestone in your career. Your hard work is paying off.';
+            return `You reached a major milestone in your career. Your hard work is paying off${detail}.`;
         } else if (direction === 'decline') {
-            return 'You made choices that compromised your values. The path ahead looks darker.';
+            return `You made choices that compromised your values. The path ahead looks darker${detail}.`;
         } else if (direction === 'growth') {
-            return 'You stayed true to yourself. Your integrity is your greatest strength.';
-        } else {
-            return 'You continue to navigate the complexities of life, finding your own way.';
+            return `You stayed true to yourself. Your integrity is your greatest strength${detail}.`;
         }
+        return `You continue to navigate the complexities of life, finding your own way${detail}.`;
     }
+
 }

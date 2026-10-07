@@ -139,6 +139,7 @@ export class HardwareManager {
                 if (part.stats.style) stats.aesthetics += part.stats.style;
                 if (part.stats.compute) stats.compute += part.stats.compute;
                 if (part.stats.productivity) stats.productivity = Math.max(stats.productivity, part.stats.productivity); // Max, not add
+                if (part.stats.reliability) stats.reliability *= part.stats.reliability;
             }
         }
         return stats;
