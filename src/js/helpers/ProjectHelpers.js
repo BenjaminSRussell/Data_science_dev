@@ -230,24 +230,22 @@ export function updateOfficeScreen(game) {
         game.uiUpdater.updateLocationLayout(locId);
     }
 
-    // Update upgrade button
-    const nextBtn = document.getElementById('upgrade-office');
+    // Update upgrade button (the DOM id is btn-upgrade-office, #1329)
+    const nextBtn = document.getElementById('btn-upgrade-office') || document.getElementById('upgrade-office');
     const officePrices = [0, 5000, 15000, 50000, 200000, 1000000];
 
     if (nextBtn) {
-        const nextOfficePrice = officePrices[currentOffice + 1];
-        nextBtn.textContent = `$${nextOfficePrice.toLocaleString()}`;
         nextBtn.onclick = () => game.handleUpgradeOffice();
+        const nextOfficePrice = officePrices[currentOffice + 1];
 
-        if (currentOffice >= officeNames.length - 1) {
+        if (currentOffice >= officeNames.length - 1 || nextOfficePrice === undefined) {
             nextBtn.textContent = 'MAXED';
             nextBtn.disabled = true;
             const nextOfficeInfo = document.getElementById('next-office-info');
             if (nextOfficeInfo) nextOfficeInfo.classList.add('hidden');
-        } else if (game.gameState.money < nextOfficePrice) {
-            nextBtn.disabled = true;
         } else {
-            nextBtn.disabled = false;
+            nextBtn.textContent = `[ RENT: $${nextOfficePrice.toLocaleString()} ]`;
+            nextBtn.disabled = game.gameState.money < nextOfficePrice;
         }
     }
 

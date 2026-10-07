@@ -2,6 +2,11 @@
  * ScreenManager - Handles screen transitions and navigation
  */
 
+const MAX_HISTORY = 20;
+
+// Screens a jailed player may still reach (the jail itself and the main menu)
+const JAIL_ALLOWED_SCREENS = new Set(['screen-jail', 'screen-menu']);
+
 export class ScreenManager {
     constructor(mainGame) {
         this.mainGame = mainGame;
@@ -26,6 +31,14 @@ export class ScreenManager {
      * Show a specific screen
      */
     showScreen(screenId, addToHistory = true) {
+        // While serving a sentence the top-bar nav must not let the player walk
+        // out of jail (#2145)
+        const jailSentence = this.mainGame?.gameState?.jailSentence || 0;
+        if (jailSentence > 0 && this.currentScreen === 'screen-jail' && !JAIL_ALLOWED_SCREENS.has(screenId)) {
+            this.mainGame?.showToast?.(`You're in jail for ${jailSentence} more day${jailSentence === 1 ? '' : 's'}. Serve your time or bribe the guard.`, 'error');
+            return false;
+        }
+
         let targetScreen = this.screens[screenId];
 
         if (!targetScreen) {
@@ -46,6 +59,11 @@ export class ScreenManager {
                 this.mainGame.showToast('Screen could not be loaded. Please try again or refresh the page.', 'error');
             }
             return;
+        }
+
+        // Already showing this screen: don't replay the exit/entrance animation (#1361)
+        if (this.currentScreen === screenId && targetScreen.classList.contains('active')) {
+            return true;
         }
 
         // Apply screen theme if theme manager exists
@@ -111,9 +129,14 @@ export class ScreenManager {
             }
         }
 
-        // Track history
-        if (addToHistory && this.currentScreen !== screenId) {
+        // Track history (bounded, and cleared when returning to the menu) (#1088)
+        if (screenId === 'screen-menu') {
+            this.history = [];
+        } else if (addToHistory && this.currentScreen !== screenId) {
             this.history.push(this.currentScreen);
+            if (this.history.length > MAX_HISTORY) {
+                this.history.splice(0, this.history.length - MAX_HISTORY);
+            }
         }
 
         this.currentScreen = screenId;
