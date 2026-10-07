@@ -246,7 +246,10 @@ export class MainGame {
             this.gameState.reputation = state.reputation;
             this.gameState.rankIndex = state.rankIndex;
             this.gameState.rent = state.rent;
-            this.gameState.bank = state.bank;
+            // NOTE: bank is intentionally NOT synced from the store here. The store
+            // never legitimately owns bank state (nothing calls setBank()), so
+            // copying it back would let the async persist rehydration clobber the
+            // bank object that BankSystem constructs during startNewGame().
             this.gameState.tasksCompleted = state.tasksCompleted;
             this.gameState.perfectScores = state.perfectScores;
             this.gameState.totalEarned = state.totalEarned;
