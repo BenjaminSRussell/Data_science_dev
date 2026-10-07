@@ -4,7 +4,7 @@
  * Handles zone queries, location-to-zone mapping, and zone visualization
  */
 
-import { getAllZones, getZoneAt, getZoneById, getZonesByType } from '../data/mapZones.js';
+import { getAllZones, getZoneById, getZonesByType } from '../data/mapZones.js';
 
 export class MapZoneSystem {
     constructor(gridSystem) {
