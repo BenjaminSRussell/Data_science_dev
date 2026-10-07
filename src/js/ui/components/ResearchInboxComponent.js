@@ -21,8 +21,11 @@ export class ResearchInboxComponent extends BaseComponent {
             position: fixed;
             inset: 0;
             z-index: 1000;
-            background: rgba(0, 0, 0, 0.8);
             pointer-events: none;
+        }
+
+        :host([isOpen]) {
+            background: rgba(0, 0, 0, 0.8);
         }
 
         :host([hidden]) {
@@ -273,6 +276,7 @@ export class ResearchInboxComponent extends BaseComponent {
         this.unreadCount = unreadCount || 0;
         this.isOpen = true;
         this.activeTab = 'all';
+        this.setAttribute('isOpen', '');
     }
 
     /**
@@ -280,6 +284,7 @@ export class ResearchInboxComponent extends BaseComponent {
      */
     close() {
         this.isOpen = false;
+        this.removeAttribute('isOpen');
     }
 
     /**
