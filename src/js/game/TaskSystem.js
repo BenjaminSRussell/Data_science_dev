@@ -232,8 +232,9 @@ export class TaskSystem {
 
         let value = this.randomRange(1000, 5000);
         const trend = weeks.map(() => {
-            value = value + this.randomRange(-200, 500);
-            return Math.max(500, value);
+            // Clamp the running walk state (not only the displayed sample)
+            value = Math.max(500, value + this.randomRange(-200, 500));
+            return value;
         });
 
         return {

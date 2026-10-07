@@ -347,7 +347,7 @@ export class UIUpdater {
 
         if (ps.activeProject) {
             activeContainer.classList.remove('hidden');
-            contractsGrid.parentElement.querySelector('h3').classList.add('hidden'); // Hide "Available Contracts" header
+            document.querySelector('#contracts-grid')?.previousElementSibling?.classList.add('hidden'); // Hide AVAILABLE CONTRACTS only
             contractsGrid.classList.add('hidden');
 
             // Update Active Project UI
@@ -370,7 +370,7 @@ export class UIUpdater {
 
         } else {
             activeContainer.classList.add('hidden');
-            contractsGrid.parentElement.querySelector('h3').classList.remove('hidden');
+            document.querySelector('#contracts-grid')?.previousElementSibling?.classList.remove('hidden');
             contractsGrid.classList.remove('hidden');
 
             // --- Available Contracts View ---
@@ -804,14 +804,26 @@ export class UIUpdater {
     }
 
     renderPartStats(part) {
-        let text = [];
-        if (part.stats.cooling) text.push(`Cooling: +${part.stats.cooling}`);
-        if (part.stats.noise) text.push(`Noise: ${part.stats.noise}dB`);
-        if (part.stats.compute) text.push(`Compute: ${part.stats.compute} TFLOPS`);
-        if (part.stats.vram) text.push(`VRAM: ${part.stats.vram}GB`);
-        if (part.stats.resolution) text.push(`Res: Level ${part.stats.resolution}`);
+        if (!part?.stats) return '';
+        const s = part.stats;
+        const text = [];
+        const has = (k) => Object.prototype.hasOwnProperty.call(s, k) && s[k] != null;
+        if (has('cooling')) text.push(`Cooling: +${s.cooling}`);
+        if (has('noise')) text.push(`Noise: ${s.noise}dB`);
+        if (has('compute')) text.push(`Compute: ${s.compute} TFLOPS`);
+        if (has('vram')) text.push(`VRAM: ${s.vram}GB`); // include vram: 0
+        if (has('resolution')) text.push(`Res: Level ${s.resolution}`);
+        if (has('refresh_rate')) text.push(`${s.refresh_rate}Hz`);
+        if (has('productivity')) text.push(`Prod: x${s.productivity}`);
+        if (has('reliability')) text.push(`Rel: x${s.reliability}`);
+        if (has('power_draw')) text.push(`${s.power_draw}W`);
+        // Case hardware
+        if (has('aesthetics')) text.push(`Aesthetics: ${s.aesthetics}`);
+        if (has('airflow')) text.push(`Airflow: ${s.airflow}`);
+        if (has('noise_dampening')) text.push(`Dampening: ${s.noise_dampening}`);
+        if (has('style')) text.push(`Style: +${s.style}`);
 
-        return `<div class="equipment-bonus">${text.join(', ')}</div>`;
+        return text.length ? `<div class="equipment-bonus">${text.join(', ')}</div>` : '';
     }
 
     getActivityName(activity) {

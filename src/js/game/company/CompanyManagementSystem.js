@@ -18,7 +18,7 @@ export class CompanyManagementSystem {
      */
     startCompany(name, type = 'consulting') {
         this.playerCompany = {
-            id: 'player_company_' + Date.now(),
+            id: this._nextId('player_company'),
             name: name,
             type: type,
             founded: this.gameState.timeManager?.totalDays || 1,
@@ -63,6 +63,13 @@ export class CompanyManagementSystem {
     /**
      * Hire an employee
      */
+
+    _nextId(prefix) {
+        if (this._idSeq == null) this._idSeq = 0;
+        this._idSeq += 1;
+        return `${prefix}_${Date.now()}_${this._idSeq}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
     hireEmployee(candidate) {
         if (!this.playerCompany) {
             return { success: false, message: 'You need a company first' };
@@ -74,7 +81,7 @@ export class CompanyManagementSystem {
         }
         
         const employee = {
-            id: 'emp_' + Date.now(),
+            id: this._nextId('emp'),
             name: candidate.name,
             skills: candidate.skills || {},
             experience: candidate.experience || 0,
@@ -200,7 +207,7 @@ export class CompanyManagementSystem {
         if (!client) return { success: false };
         
         this.clients.push({
-            id: 'client_' + Date.now(),
+            id: this._nextId('client'),
             name: client.name,
             needs: client.needs,
             budget: client.budget,
@@ -216,7 +223,7 @@ export class CompanyManagementSystem {
      */
     scheduleMeeting(clientId, location, time) {
         return {
-            id: 'meeting_' + Date.now(),
+            id: this._nextId('meeting'),
             clientId: clientId,
             location: location,
             time: time,

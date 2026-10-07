@@ -50,11 +50,13 @@ export function updateStockMarketScreen(game) {
         const marketHeader = document.createElement('div');
         marketHeader.className = 'market-section-header';
         const summary = game.stockMarket?.getMarketSummary(market);
-        const marketTrend = summary ? (summary.avgChange * 100).toFixed(2) : '0.00';
-        const trendClass = summary && summary.avgChange >= 0 ? 'positive' : 'negative';
+        const avgPct = summary ? summary.avgChange * 100 : 0;
+        const marketTrend = avgPct.toFixed(2);
+        const trendClass = avgPct >= 0 ? 'positive' : 'negative';
+        const trendSign = avgPct > 0 ? '+' : ''; // negatives already include '-'
         marketHeader.innerHTML = `
             <h3 class="market-name">${getMarketDisplayName(market)}</h3>
-            <span class="market-trend ${trendClass}">${marketTrend >= 0 ? '+' : ''}${marketTrend}%</span>
+            <span class="market-trend ${trendClass}">${trendSign}${marketTrend}%</span>
             <span class="market-stats">${summary ? `${summary.gainers}↑ ${summary.losers}↓` : ''}</span>
         `;
         grid.appendChild(marketHeader);
