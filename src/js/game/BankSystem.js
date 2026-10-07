@@ -129,11 +129,14 @@ export class BankSystem {
             this.gameState.bank.transactionHistory = [];
         }
         
+        const isLoanTransaction = type === 'Loan Taken' || type === 'Loan Repayment';
         this.gameState.bank.transactionHistory.unshift({
             date: new Date().toISOString(), // In-game date would be better if passed, using real time for now unique ID
             type,
             amount,
-            balance: this.gameState.bank.savings
+            balance: isLoanTransaction ? this.gameState.bank.loan : this.gameState.bank.savings,
+            savingsBalance: this.gameState.bank.savings,
+            loanBalance: this.gameState.bank.loan
         });
 
         // Keep history short
