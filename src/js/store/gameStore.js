@@ -101,7 +101,6 @@ try {
                 soundEnabled: true,
                 musicEnabled: true,
                 settings: {
-                    soundEnabled: true,
                     autoSave: true,
                     theme: 'dark'
                 },
@@ -380,7 +379,6 @@ try {
         soundEnabled: true,
         musicEnabled: true,
         settings: {
-            soundEnabled: true,
             autoSave: true,
             theme: 'dark'
         },
@@ -487,7 +485,6 @@ try {
             soundEnabled: true,
             musicEnabled: true,
             settings: {
-                soundEnabled: true,
                 autoSave: true,
                 theme: 'dark'
             }
