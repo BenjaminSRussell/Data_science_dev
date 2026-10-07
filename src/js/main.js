@@ -2662,8 +2662,7 @@ export class MainGame {
         // Handle events (new day, etc)
         events.forEach(event => {
             if (event.type === 'new_day') {
-                if (!this.newsManager) {
-                } else {
+                if (this.newsManager) {
                     this.newsManager.generateDailyNews();
                 }
                 this.showToast('A new day has begun!', 'info');
