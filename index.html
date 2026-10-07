@@ -1523,8 +1523,16 @@
             // #endregion
             window.dispatchEvent(new CustomEvent('module-loaded', { detail: { module: 'main.js' } }));
 
-            // Auto-start continuous tests in development mode (can be disabled via localStorage)
-            if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+            // Continuous tests are opt-in (localStorage continuousTestsEnabled=true or ?autotest),
+            // so a normal dev session is never hijacked (#2327)
+            const __autotest = (() => {
+                try {
+                    if (localStorage.getItem('continuousTestsDisabled')) return false;
+                    if (localStorage.getItem('continuousTestsEnabled') === 'true') return true;
+                } catch (e) { }
+                return new URLSearchParams(window.location.search).has('autotest');
+            })();
+            if (__autotest && (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')) {
                 try {
                     import('/test/integration/auto-start-continuous-tests.js').catch(e => {
                         // Silently fail if test runner not available

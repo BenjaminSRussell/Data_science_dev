@@ -13,7 +13,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest --watch",
-    "test:continuous": "node test/integration/continuous-test-runner.js",
+    "test:continuous": "vitest --watch",
     "inventory": "node scripts/generate-file-inventory.js",
     "inventory:full": "node scripts/generate-file-inventory.js src/js FILE_INVENTORY.md --size --date --lines --ext",
     "compress-assets": "node scripts/compress-assets-for-git.js",
