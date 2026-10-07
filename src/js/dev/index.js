@@ -11,6 +11,7 @@ import { GraphValidator } from './GraphValidator.js';
 import { WorkSystemValidator } from './WorkSystemValidator.js';
 import { StorylineNavigator } from './StorylineNavigator.js';
 import { LocationTester } from './LocationTester.js';
+import { isDevModeEnabled } from './devMode.js';
 
 export class DevTools {
     constructor(game) {
@@ -30,8 +31,12 @@ export class DevTools {
     init() {
         if (this.isDevMode()) {
             console.log('Developer Tools Enabled');
-            
-            this.devMenu = new DevMenu(this.game);
+
+            // Persist the flag and construct every helper tool BEFORE the menu,
+            // so DevMenu's populate* methods can see window.devTools.storylineNavigator /
+            // locationTester on first render (#129, #1744).
+            try { localStorage.setItem('dev_mode', 'true'); } catch (_) { /* storage disabled */ }
+
             this.dialogueTester = new DialogueTester(this.game);
             this.optionTester = new OptionTester(this.game);
             this.assetValidator = new AssetValidator(this.game);
@@ -42,17 +47,13 @@ export class DevTools {
 
             // Make tools globally available
             window.devTools = this;
-            
-            // Enable dev mode in localStorage
-            localStorage.setItem('dev_mode', 'true');
+
+            this.devMenu = new DevMenu(this.game);
         }
     }
 
     isDevMode() {
-        return window.location.hostname === 'localhost' || 
-               window.location.hostname === '127.0.0.1' ||
-               localStorage.getItem('dev_mode') === 'true' ||
-               new URLSearchParams(window.location.search).has('dev');
+        return isDevModeEnabled();
     }
 
     runAllTests() {

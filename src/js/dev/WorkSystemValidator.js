@@ -49,7 +49,7 @@ export class WorkSystemValidator {
             // Test task structure
             const task = taskSystem.getCurrentTask?.();
             if (task) {
-                const requiredFields = ['id', 'description', 'requirements'];
+                const requiredFields = ['id', 'data', 'requirements'];
                 requiredFields.forEach(field => {
                     if (task[field] === undefined) {
                         results.failed++;
@@ -60,19 +60,13 @@ export class WorkSystemValidator {
                 });
             }
 
-            // Test task completion
-            if (taskSystem.completeTask && task) {
-                try {
-                    // Don't actually complete, just check method exists and is callable
-                    if (typeof taskSystem.completeTask === 'function') {
-                        results.passed++;
-                    } else {
-                        results.failed++;
-                        results.errors.push('completeTask is not a function');
-                    }
-                } catch (error) {
+            // Task completion runs through MainGame.submitChart() (TaskSystem has no completeTask)
+            if (task) {
+                if (typeof this.game.submitChart === 'function') {
+                    results.passed++;
+                } else {
                     results.failed++;
-                    results.errors.push(`completeTask error: ${error.message}`);
+                    results.errors.push('submitChart is not a function');
                 }
             }
         } catch (error) {
