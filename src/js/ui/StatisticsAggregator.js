@@ -64,12 +64,22 @@ export class StatisticsAggregator {
                 // Sum reputation
                 totalReputation += state.reputation || 0;
                 
-                // Track session info
+                // Track session info — days played from start→save timestamps when available
                 if (saveData.timestamp) {
+                    let days = 0;
+                    if (state.startTime) {
+                        const elapsedMs = saveData.timestamp - state.startTime;
+                        days = Math.max(0, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)));
+                    } else if (typeof state.day === 'number') {
+                        days = Math.max(0, state.day);
+                    } else if (tasksCompleted > 0) {
+                        // ~0.2h per task → convert estimated hours to whole days
+                        days = Math.max(0, Math.floor(estimatedHours / 24));
+                    }
                     sessions.push({
                         slotIndex: i,
                         lastPlayed: saveData.timestamp,
-                        days: days,
+                        days,
                         rank: state.rankIndex
                     });
                 }
