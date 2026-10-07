@@ -3,6 +3,7 @@
  */
 
 import { RANKS } from '../data/ranks.js';
+import { VEHICLES } from './WorldMap.js';
 
 export class EconomySystem {
     constructor(gameState) {
