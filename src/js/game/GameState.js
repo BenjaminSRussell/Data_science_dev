@@ -7,6 +7,18 @@ import { RANKS } from '../data/ranks.js';
 
 
 export class GameState {
+    /** Fresh Chart Studio settings (used on reset and for every new task, #1682). */
+    static defaultChartConfig() {
+        return {
+            type: 'bar',
+            palette: 'corporate',
+            showLegend: true,
+            showGrid: true,
+            showDataLabels: false,
+            title: ''
+        };
+    }
+
     constructor() {
         this.reset();
     }
@@ -50,14 +62,7 @@ export class GameState {
         this.unlockedLibraries = [];
 
         // Game configuration
-        this.chartConfig = {
-            type: 'bar',
-            palette: 'corporate',
-            showLegend: true,
-            showGrid: true,
-            showDataLabels: false,
-            title: ''
-        };
+        this.chartConfig = GameState.defaultChartConfig();
 
         this.lastScore = null;
 

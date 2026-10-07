@@ -24,8 +24,11 @@ export class EconomySystem {
         visualClarity = Math.min(100, visualClarity * softwareMultipliers.visualClarity);
         dataAccuracy = Math.min(100, dataAccuracy * softwareMultipliers.dataAccuracy);
 
-        // Boss modifier (some bosses are stricter)
-        const bossModifier = task.boss.strictness || 1.0;
+        // Boss modifier: higher strictness means a HARSHER grade (#1990). bosses.js
+        // gives the perfectionist 1.3 and the easygoing boss 0.8, so invert it
+        // gently around 1.0: 1.3 -> 0.85, 0.8 -> 1.10.
+        const strictness = Number(task?.boss?.strictness) > 0 ? Number(task.boss.strictness) : 1.0;
+        const bossModifier = 1 - (strictness - 1) * 0.5;
 
         // Calculate weighted average
         const rawScore = (
@@ -122,26 +125,28 @@ export class EconomySystem {
      * Score visual clarity of the chart
      */
     scoreVisualClarity(chartConfig) {
-        let score = 70; // Base score
+        // Base 55 so a bare chart (no legend/grid/labels/title) scores
+        // meaningfully lower; a fully dressed chart still reaches ~95 (#957).
+        let score = 55; // Base score
 
         // Legend helps readability
         if (chartConfig.showLegend) {
-            score += 10;
+            score += 12;
         }
 
         // Grid helps precision reading
         if (chartConfig.showGrid) {
-            score += 5;
+            score += 8;
         }
 
         // Data labels can help (but can also clutter)
         if (chartConfig.showDataLabels) {
-            score += 3;
+            score += 5;
         }
 
         // Having a title is important
         if (chartConfig.title && chartConfig.title.trim().length > 0) {
-            score += 10;
+            score += 15;
         }
 
         // Add some randomness
@@ -181,7 +186,7 @@ export class EconomySystem {
         if (rawScore >= 90) return 5;
         if (rawScore >= 75) return 4;
         if (rawScore >= 55) return 3;
-        if (rawScore >= 35) return 2;
+        if (rawScore >= 40) return 2;
         return 1;
     }
 
