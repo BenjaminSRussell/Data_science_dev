@@ -48,7 +48,11 @@ export function getNPCImage(npc) {
  * Generate a clean SVG placeholder for missing assets
  */
 function generateSVGPlaceholder(npc) {
-    const initials = npc.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    // Array.from splits by code point so non-Latin / astral characters stay intact
+    const initials = Array.from(
+        (npc.name || '?').split(/\s+/).filter(Boolean).map(n => Array.from(n)[0]).join('')
+    ).slice(0, 2).join('').toUpperCase()
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     // Deterministic color
     const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1'];
     const hash = simpleHash(npc.name);
@@ -61,7 +65,8 @@ function generateSVGPlaceholder(npc) {
         <text x="50" y="50" dy=".35em" text-anchor="middle" fill="white" font-family="sans-serif" font-size="40" font-weight="bold">${initials}</text>
     </svg>`;
 
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
+    // URI-encode instead of btoa(): btoa throws on any character outside Latin-1
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
 /**

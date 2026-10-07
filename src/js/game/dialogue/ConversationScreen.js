@@ -3,7 +3,7 @@
  * Manages the conversation screen UI and dialogue flow
  */
 
-import { dialogueTreeSystem } from './DialogueTreeSystem.js';
+import { STATS } from '../CharacterStats.js';
 import { getNPCImage, getNPCFallback } from '../../utils/NPCImageMapper.js';
 import { ThreeCharacterRenderer } from '../../characters/ThreeCharacterRenderer.js';
 
@@ -176,47 +176,48 @@ export class ConversationScreen {
      * Handle player choice
      */
     handleChoice(choiceIndex) {
-        const result = this.game.npcManager?.makeChoice(choiceIndex);
-        if (!result) return;
+        // Ignore repeat clicks while a choice is being resolved
+        if (this.choiceLocked) return;
+        this.choiceLocked = true;
+        try {
+            this.screenElement?.querySelectorAll('.conversation-choice').forEach(btn => { btn.disabled = true; });
 
-        // Update dialogue text
-        const dialogueText = this.screenElement.querySelector('#conversation-dialogue-text');
-        if (dialogueText && result.text) {
-            dialogueText.textContent = result.text;
-        }
+            const result = this.game.npcManager?.makeChoice(choiceIndex);
+            if (!result) return;
 
-        // Get next node if using dialogue tree
-        if (result.isTreeAction && this.currentNPC) {
-            const relationship = this.game.npcManager?.relationships?.[this.currentNPC.id] || 0;
-            const dialogueTree = dialogueTreeSystem.getTree(this.currentNPC.id, relationship);
-            if (dialogueTree) {
-                const currentNode = this.game.npcManager?.currentConversation?.currentNode || 'root';
-                const node = dialogueTree.getNode(currentNode);
-                if (node && node.choices) {
-                    // Update choices
-                    const choicesArea = this.screenElement.querySelector('#conversation-choices');
-                    if (choicesArea) {
-                        choicesArea.innerHTML = this.renderChoices(node.choices);
-                        this.attachChoiceHandlers();
-                    }
-                }
+            // Show the NPC's reply (not the player's own line)
+            const dialogueText = this.screenElement.querySelector('#conversation-dialogue-text');
+            if (dialogueText && result.text) {
+                dialogueText.textContent = result.text;
             }
-        }
 
-        // Update relationship display
-        const relationship = this.game.npcManager?.getRelationship(this.currentNPC.id) || 0;
-        const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || 0;
-        const relationshipEl = this.screenElement.querySelector('.conversation-relationship');
-        if (relationshipEl) {
-            relationshipEl.innerHTML = `
-                <span style="color: ${tier.color}">${tier.label}</span>
-                <span>(${relationship})</span>
-            `;
-        }
+            // Re-render choices for the new conversation position. The old
+            // buttons are replaced, so a choice can't be applied twice.
+            const choicesArea = this.screenElement.querySelector('#conversation-choices');
+            if (choicesArea && Array.isArray(result.choices)) {
+                choicesArea.innerHTML = result.ended
+                    ? '<div class="conversation-choice disabled">The conversation is over.</div>'
+                    : this.renderChoices(result.choices);
+                this.attachChoiceHandlers();
+            }
 
-        // Show effects
-        if (result.effects) {
-            this.showEffects(result.effects);
+            // Update relationship display
+            const relationship = this.game.npcManager?.getRelationship(this.currentNPC.id) || 0;
+            const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || 0;
+            const relationshipEl = this.screenElement.querySelector('.conversation-relationship');
+            if (relationshipEl) {
+                relationshipEl.innerHTML = `
+                    <span style="color: ${tier.color}">${tier.label}</span>
+                    <span>(${relationship})</span>
+                `;
+            }
+
+            // Show effects
+            if (result.effects) {
+                this.showEffects(result.effects);
+            }
+        } finally {
+            this.choiceLocked = false;
         }
     }
 
@@ -230,8 +231,14 @@ export class ConversationScreen {
         }
         if (effects.xp) {
             const amount = effects.xpAmount || 20;
-            const skillName = this.game.gameState?.characterStats?.skills?.[effects.xp]?.name;
-            this.game.showToast(`Gained ${amount} XP${skillName ? ` in ${skillName}` : ''}`, 'success');
+            const statName = STATS[effects.xp]?.name || effects.xp;
+            this.game.showToast?.(`Gained ${amount} ${statName} XP`, 'success');
+        }
+        if (effects.energy) {
+            this.game.showToast?.(`Energy ${effects.energy > 0 ? '+' : ''}${effects.energy}`, 'info');
+        }
+        if (effects.money) {
+            this.game.showToast?.(`${effects.money > 0 ? '+' : '-'}$${Math.abs(effects.money)}`, effects.money > 0 ? 'success' : 'warning');
         }
     }
 

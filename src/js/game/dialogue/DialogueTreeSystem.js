@@ -124,8 +124,15 @@ export class DialogueTreeBuilder {
         }
         
         // Fallback to personality-based trees
-        const personality = npc.personality || 'friendly';
-        const type = npc.type || 'friend';
+        // Personalities without a dedicated tree reuse the closest one
+        const PERSONALITY_TREE_ALIASES = {
+            aggressive: 'grumpy',
+            hostile: 'grumpy',
+            greedy: 'professional',
+            high_maintenance: 'competitive'
+        };
+        const rawPersonality = npc.personality || 'friendly';
+        const personality = PERSONALITY_TREE_ALIASES[rawPersonality] || rawPersonality;
         
         if (personality === 'friendly') {
             return this.buildFriendlyTree(npc);

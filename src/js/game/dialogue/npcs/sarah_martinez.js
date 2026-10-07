@@ -155,7 +155,7 @@ export default {
     
     actions: {
         gift_coffee: "Thanks. I need this.",
-        gift_tech: "Oh, this is nice. Thank you.",
+        gift_tech_gadgets: "Oh, this is nice. Thank you.",
         compliment: "That means a lot.",
         ask_help: "I'll help if I can.",
         rejection: "I see. Okay.",
