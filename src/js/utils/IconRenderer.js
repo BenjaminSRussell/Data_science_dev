@@ -4,6 +4,19 @@
  * Handles fallback to emoji if image fails to load
  */
 
+
+/** True when value looks like an asset URL/path rather than an emoji/label (#2557). */
+export function isIconPath(value) {
+    if (!value || typeof value !== 'string') return false;
+    const v = value.trim();
+    if (!v) return false;
+    if (v.startsWith('/') || v.startsWith('http://') || v.startsWith('https://') || v.startsWith('data:')) return true;
+    if (/\.(png|jpe?g|gif|webp|svg|ico)(\?|$)/i.test(v)) return true;
+    // Absolute-ish without leading slash: assets/...
+    if (/^(assets|downloaded_assets|public)\//i.test(v)) return true;
+    return false;
+}
+
 /**
  * Create an icon image element
  * @param {string} iconPath - Path to icon image
@@ -20,7 +33,7 @@ export function createIconElement(iconPath, fallbackEmoji = '', options = {}) {
     } = options;
 
     // If iconPath is an emoji (starts with emoji), return span
-    if (iconPath && !iconPath.startsWith('/') && !iconPath.startsWith('http')) {
+    if (iconPath && !isIconPath(iconPath)) {
         const span = document.createElement('span');
         span.textContent = iconPath;
         span.className = className;
@@ -72,7 +85,7 @@ export function updateIconElement(element, iconPath, fallbackEmoji = '') {
     element.innerHTML = '';
 
     // If iconPath is emoji, just set text
-    if (iconPath && !iconPath.startsWith('/') && !iconPath.startsWith('http')) {
+    if (iconPath && !isIconPath(iconPath)) {
         element.textContent = iconPath;
         return;
     }
@@ -102,7 +115,7 @@ export function getLocationIconPath(location) {
     if (!location) return '';
     
     // If icon is already a path, return it
-    if (location.icon && (location.icon.startsWith('/') || location.icon.startsWith('http'))) {
+    if (location.icon && isIconPath(location.icon)) {
         return location.icon;
     }
     

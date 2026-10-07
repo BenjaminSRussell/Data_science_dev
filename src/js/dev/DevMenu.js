@@ -530,7 +530,46 @@ export class DevMenu {
         }));
 
         container.appendChild(this.createButton('Test All Options', () => {
-            this.testAllOptions();
+            const tools = this.game?.devTools || this.game?.dev;
+            if (tools?.optionTester?.testAll) {
+                tools.optionTester.testAll().then(r => {
+                    this.game.showToast(`OptionTester: done`, 'info');
+                    console.log('OptionTester', r);
+                });
+            } else {
+                this.testAllOptions();
+            }
+        }));
+        container.appendChild(this.createButton('Test All Dialogues', () => {
+            const tools = this.game?.devTools || this.game?.dev;
+            if (tools?.dialogueTester?.testAll) {
+                tools.dialogueTester.testAll().then(r => {
+                    this.game.showToast(`DialogueTester: done`, 'info');
+                    console.log('DialogueTester', r);
+                });
+            } else {
+                this.testAllDialogues();
+            }
+        }));
+        container.appendChild(this.createButton('Test Locations', () => {
+            const tools = this.game?.devTools || this.game?.dev;
+            if (tools?.locationTester?.testAll) {
+                tools.locationTester.testAll().then(r => {
+                    this.game.showToast(`LocationTester: done`, 'info');
+                    console.log('LocationTester', r);
+                });
+            } else {
+                this.game.showToast('LocationTester unavailable', 'warn');
+            }
+        }));
+        container.appendChild(this.createButton('Run All DevTools Tests', () => {
+            const tools = this.game?.devTools || this.game?.dev;
+            if (tools?.runAllTests) {
+                tools.runAllTests().then(r => {
+                    this.game.showToast('DevTools runAllTests finished', 'info');
+                    console.log('runAllTests', r);
+                });
+            }
         }));
 
         container.appendChild(this.createButton('Check Crashes', () => {
