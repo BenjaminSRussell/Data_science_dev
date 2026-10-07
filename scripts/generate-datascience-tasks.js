@@ -1,128 +1,210 @@
-#!/usr/bin/env node
-/**
- * Generate 1000+ Data Science Tasks
- * Creates comprehensive task database with real-world scenarios
- */
+const fs = require('fs');
+const path = require('path');
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.dirname(__dirname);
-
-// Task templates by domain and difficulty
 const TASK_TEMPLATES = {
     finance: {
-        domains: ['banking', 'investment', 'insurance', 'fintech', 'trading'],
         difficulty1: [
-            'Daily transaction report', 'Monthly revenue summary', 'Customer account balance analysis',
-            'Loan application review', 'Payment processing report', 'Budget variance analysis'
+            {
+                title: 'Analyze Stock Market Trends',
+                description: 'Identify patterns in stock market data over the past year.',
+                datasets: ['historical stock prices'],
+                tools: ['Excel', 'Python'],
+                deliverable: 'A report with visualizations.',
+                duration: '1 week'
+            }
         ],
         difficulty2: [
-            'Credit risk scoring model', 'Fraud detection analysis', 'Portfolio performance evaluation',
-            'Customer segmentation by risk', 'Loan default prediction', 'Transaction anomaly detection'
+            {
+                title: 'Credit Risk Assessment',
+                description: 'Develop a model to predict credit risk based on customer data.',
+                datasets: ['customer financial data', 'loan records'],
+                tools: ['R', 'SQL'],
+                deliverable: 'A predictive model and a presentation.',
+                duration: '2 weeks'
+            }
         ],
         difficulty3: [
-            'Real-time fraud detection system', 'Market risk modeling', 'Credit score optimization',
-            'High-frequency trading algorithm', 'AML compliance monitoring', 'Derivatives pricing model'
+            {
+                title: 'Algorithmic Trading',
+                description: 'Create an algorithm to trade stocks based on real-time market data.',
+                datasets: ['real-time stock quotes'],
+                tools: ['Python', 'APIs'],
+                deliverable: 'A trading strategy and a backtest report.',
+                duration: '3 weeks'
+            }
         ],
         difficulty4: [
-            'Deep learning fraud detection', 'Reinforcement learning trading bot', 'NLP for financial document analysis',
-            'Graph neural networks for fraud networks', 'Time series forecasting for markets', 'Explainable AI for credit decisions'
+            {
+                title: 'High-Frequency Trading System',
+                description: 'Design a system for high-frequency trading in the stock market.',
+                datasets: ['market depth data', 'trade history'],
+                tools: ['C++', 'QuantLib'],
+                deliverable: 'A trading system and a performance analysis.',
+                duration: '4 weeks'
+            }
         ]
     },
     healthcare: {
-        domains: ['hospitals', 'pharmaceuticals', 'medical devices', 'telemedicine', 'clinical trials'],
         difficulty1: [
-            'Patient appointment scheduling analysis', 'Medication adherence tracking', 'Hospital bed utilization report',
-            'Patient satisfaction survey analysis', 'Clinical trial enrollment metrics', 'Insurance claim processing'
+            {
+                title: 'Disease Outbreak Detection',
+                description: 'Detect outbreaks of infectious diseases from patient records.',
+                datasets: ['hospital admission records'],
+                tools: ['Excel', 'Python'],
+                deliverable: 'A report with visualizations.',
+                duration: '1 week'
+            }
         ],
         difficulty2: [
-            'Patient readmission prediction', 'Disease outbreak detection', 'Treatment outcome analysis',
-            'Drug interaction risk assessment', 'Medical image classification', 'Patient risk stratification'
+            {
+                title: 'Patient Readmission Prediction',
+                description: 'Develop a model to predict patient readmissions based on medical records.',
+                datasets: ['patient records', 'readmission data'],
+                tools: ['R', 'SQL'],
+                deliverable: 'A predictive model and a presentation.',
+                duration: '2 weeks'
+            }
         ],
         difficulty3: [
-            'Predictive analytics for ICU patients', 'Genomic data analysis for personalized medicine',
-            'Medical image segmentation using CNNs', 'Clinical decision support system', 'Epidemic forecasting model'
+            {
+                title: 'Genetic Disease Analysis',
+                description: 'Analyze genetic data to identify disease markers.',
+                datasets: ['genetic sequences'],
+                tools: ['Python', 'Bioinformatics tools'],
+                deliverable: 'A research paper and a presentation.',
+                duration: '3 weeks'
+            }
         ],
         difficulty4: [
-            'Transformer models for medical records', 'Federated learning for multi-hospital data',
-            'Reinforcement learning for treatment optimization', 'Computer vision for radiology', 'NLP for clinical notes'
+            {
+                title: 'Personalized Medicine',
+                description: 'Develop a system for personalized treatment plans based on genetic data.',
+                datasets: ['genetic data', 'treatment outcomes'],
+                tools: ['C++', 'Machine Learning libraries'],
+                deliverable: 'A treatment recommendation system and a performance analysis.',
+                duration: '4 weeks'
+            }
         ]
     },
     ecommerce: {
-        domains: ['retail', 'marketplace', 'subscription', 'dropshipping', 'social commerce'],
         difficulty1: [
-            'Product sales dashboard', 'Shopping cart abandonment analysis', 'Customer order processing',
-            'Inventory level monitoring', 'Product category performance', 'Customer review sentiment'
+            {
+                title: 'Customer Segmentation',
+                description: 'Segment customers based on their purchase history.',
+                datasets: ['purchase records'],
+                tools: ['Excel', 'Python'],
+                deliverable: 'A report with visualizations.',
+                duration: '1 week'
+            }
         ],
         difficulty2: [
-            'Recommendation system', 'Demand forecasting', 'Price optimization', 'Customer lifetime value',
-            'Market basket analysis', 'A/B test analysis for checkout'
+            {
+                title: 'Recommendation System',
+                description: 'Develop a recommendation system to suggest products to customers.',
+                datasets: ['product data', 'customer interactions'],
+                tools: ['R', 'SQL'],
+                deliverable: 'A recommendation system and a presentation.',
+                duration: '2 weeks'
+            }
         ],
         difficulty3: [
-            'Deep learning recommendation engine', 'Dynamic pricing algorithm', 'Supply chain optimization',
-            'Multi-touchpoint attribution', 'Customer journey mapping', 'Product similarity matching'
+            {
+                title: 'Price Optimization',
+                description: 'Optimize product prices based on demand and competition.',
+                datasets: ['sales data', 'competitor pricing'],
+                tools: ['Python', 'APIs'],
+                deliverable: 'A pricing strategy and a performance analysis.',
+                duration: '3 weeks'
+            }
         ],
         difficulty4: [
-            'Graph neural networks for recommendations', 'Reinforcement learning for pricing',
-            'Computer vision for product matching', 'NLP for review analysis', 'Real-time personalization engine'
+            {
+                title: 'Inventory Management System',
+                description: 'Design a system for automated inventory management in warehouses.',
+                datasets: ['inventory data', 'sales forecasts'],
+                tools: ['C++', 'Inventory Management tools'],
+                deliverable: 'An inventory management system and a performance analysis.',
+                duration: '4 weeks'
+            }
+        ]
+    },
+    energy: {
+        difficulty1: [
+            {
+                title: 'Grid Load Forecasting',
+                description: 'Forecast electricity demand for the next day.',
+                datasets: ['historical load data'],
+                tools: ['Excel', 'Python'],
+                deliverable: 'A report with visualizations.',
+                duration: '1 week'
+            }
+        ],
+        difficulty2: [
+            {
+                title: 'Renewable Output Analysis',
+                description: 'Analyze the output of renewable energy sources like solar and wind.',
+                datasets: ['solar/wind data', 'weather data'],
+                tools: ['R', 'SQL'],
+                deliverable: 'A report with visualizations.',
+                duration: '2 weeks'
+            }
+        ],
+        difficulty3: [
+            {
+                title: 'Energy Consumption Anomaly Detection',
+                description: 'Detect anomalies in energy consumption patterns.',
+                datasets: ['energy consumption data'],
+                tools: ['Python', 'Anomaly Detection libraries'],
+                deliverable: 'A detection system and a presentation.',
+                duration: '3 weeks'
+            }
+        ],
+        difficulty4: [
+            {
+                title: 'Equipment Failure Prediction',
+                description: 'Develop a model to predict equipment failures based on sensor data.',
+                datasets: ['sensor data', 'failure records'],
+                tools: ['C++', 'Machine Learning libraries'],
+                deliverable: 'A predictive model and a performance analysis.',
+                duration: '4 weeks'
+            }
         ]
     }
-    // ... more domains would be added
 };
 
-/**
- * Generate tasks programmatically
- */
+const DATA_DIRECTORY = path.join(__dirname, '../src/js/data');
+
 function generateTasks() {
-    const tasks = [];
-    let taskId = 1;
-    
-    // Generate tasks for each domain and difficulty
-    Object.keys(TASK_TEMPLATES).forEach(domain => {
-        const template = TASK_TEMPLATES[domain];
-        
-        // Difficulty 1 tasks
-        template.difficulty1.forEach((taskName, index) => {
-            tasks.push(generateTask(taskId++, domain, taskName, 1.0 + (index * 0.1), template.domains[0]));
-        });
-        
-        // Difficulty 2 tasks
-        template.difficulty2.forEach((taskName, index) => {
-            tasks.push(generateTask(taskId++, domain, taskName, 2.0 + (index * 0.15), template.domains[index % template.domains.length]));
-        });
-        
-        // Continue for other difficulties...
-    });
-    
+    let tasks = [];
+
+    for (const domain of Object.keys(TASK_TEMPLATES)) {
+        for (const difficulty of Object.keys(TASK_TEMPLATES[domain])) {
+            for (const template of TASK_TEMPLATES[domain][difficulty]) {
+                const task = {
+                    domain: domain,
+                    difficulty: difficulty,
+                    title: template.title,
+                    description: template.description,
+                    datasets: template.datasets,
+                    tools: template.tools,
+                    deliverable: template.deliverable,
+                    duration: template.duration
+                };
+                tasks.push(task);
+            }
+        }
+    }
+
     return tasks;
 }
 
-function generateTask(id, domain, name, difficulty, subdomain) {
-    // Generate specific task details based on name and difficulty
-    return {
-        id: `${domain}_${id.toString().padStart(3, '0')}`,
-        name: name,
-        description: generateDescription(name, difficulty, subdomain),
-        domain: domain,
-        difficulty: Math.round(difficulty * 10) / 10,
-        // ... other properties
-    };
+function writeTasksToFile(tasks) {
+    const outputFilePath = path.join(DATA_DIRECTORY, 'comprehensive_datascience_tasks.js');
+    const outputContent = `const comprehensiveDataScienceTasks = ${JSON.stringify(tasks, null, 2)};`;
+
+    fs.writeFileSync(outputFilePath, outputContent);
+    console.log(`Tasks generated successfully and written to ${outputFilePath}`);
 }
 
-function generateDescription(taskName, difficulty, subdomain) {
-    // Generate realistic descriptions based on task name and difficulty
-    // This would be expanded with more specific details
-    return `Real-world ${taskName.toLowerCase()} task in ${subdomain} domain. Difficulty: ${difficulty}.`;
-}
-
-// Output the tasks
 const tasks = generateTasks();
-const outputPath = path.join(rootDir, 'src/js/data/generated_datascience_tasks.js');
-fs.writeFileSync(outputPath, `export const GENERATED_DATA_SCIENCE_TASKS = ${JSON.stringify(tasks, null, 2)};`);
-
-console.log(`Generated ${tasks.length} tasks`);
-
+writeTasksToFile(tasks);
