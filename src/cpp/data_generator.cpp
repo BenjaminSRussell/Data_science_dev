@@ -1,11 +1,13 @@
 #include "data_generator.h"
 #include <cmath>
-#include <ctime>
+#include <random>
 #include <sstream>
 
 DataGenerator::DataGenerator() {
-  // Seed random number generator
-  rng.seed(static_cast<unsigned int>(time(nullptr)));
+  // Seed random number generator with a high-entropy source so that
+  // instances constructed in the same second are not correlated.
+  std::random_device rd;
+  rng.seed(rd());
 }
 
 DataGenerator::~DataGenerator() {}
