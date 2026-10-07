@@ -84,7 +84,7 @@ export class StoryUI {
                             <div class="story-arc-description" id="story-arc-description">You navigate the complexities of life, trying to find balance.</div>
                             <div class="story-arc-progress">
                                 <div class="progress-label">Story Progress</div>
-                                <div class="progress-bar">
+                                <div class="progress-bar" id="story-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="story-progress-text">
                                     <div class="progress-fill" id="story-progress-fill" style="width: 0%"></div>
                                 </div>
                                 <div class="progress-text" id="story-progress-text">0%</div>
@@ -113,21 +113,21 @@ export class StoryUI {
                             <div class="phase-name" id="phase-name">Early Game</div>
                             <div class="phase-description" id="phase-description">You're just starting out. Every choice matters.</div>
                             <div class="phase-timeline">
-                                <div class="timeline-item ${this.getPhaseClass('early')}" data-phase="early">
-                                    <div class="timeline-marker"></div>
-                                    <div class="timeline-label">Act 1: Beginning</div>
+                                <div class="timeline-item ${this.getPhaseClass('early')}" data-phase="early" ${this.getPhaseClass('early').includes('active') ? 'aria-current="step"' : ''}>
+                                    <div class="timeline-marker" aria-hidden="true"></div>
+                                    <div class="timeline-label">Act 1: Beginning<span class="visually-hidden"> ${this.getPhaseClass('early').includes('completed') ? '(completed)' : this.getPhaseClass('early').includes('active') ? '(current phase)' : ''}</span></div>
                                 </div>
-                                <div class="timeline-item ${this.getPhaseClass('mid')}" data-phase="mid">
-                                    <div class="timeline-marker"></div>
-                                    <div class="timeline-label">Act 2: Rising Action</div>
+                                <div class="timeline-item ${this.getPhaseClass('mid')}" data-phase="mid" ${this.getPhaseClass('mid').includes('active') ? 'aria-current="step"' : ''}>
+                                    <div class="timeline-marker" aria-hidden="true"></div>
+                                    <div class="timeline-label">Act 2: Rising Action<span class="visually-hidden"> ${this.getPhaseClass('mid').includes('completed') ? '(completed)' : this.getPhaseClass('mid').includes('active') ? '(current phase)' : ''}</span></div>
                                 </div>
-                                <div class="timeline-item ${this.getPhaseClass('late')}" data-phase="late">
-                                    <div class="timeline-marker"></div>
-                                    <div class="timeline-label">Act 3: Climax</div>
+                                <div class="timeline-item ${this.getPhaseClass('late')}" data-phase="late" ${this.getPhaseClass('late').includes('active') ? 'aria-current="step"' : ''}>
+                                    <div class="timeline-marker" aria-hidden="true"></div>
+                                    <div class="timeline-label">Act 3: Climax<span class="visually-hidden"> ${this.getPhaseClass('late').includes('completed') ? '(completed)' : this.getPhaseClass('late').includes('active') ? '(current phase)' : ''}</span></div>
                                 </div>
-                                <div class="timeline-item ${this.getPhaseClass('endgame')}" data-phase="endgame">
-                                    <div class="timeline-marker"></div>
-                                    <div class="timeline-label">Epilogue</div>
+                                <div class="timeline-item ${this.getPhaseClass('endgame')}" data-phase="endgame" ${this.getPhaseClass('endgame').includes('active') ? 'aria-current="step"' : ''}>
+                                    <div class="timeline-marker" aria-hidden="true"></div>
+                                    <div class="timeline-label">Epilogue<span class="visually-hidden"> ${this.getPhaseClass('endgame').includes('completed') ? '(completed)' : this.getPhaseClass('endgame').includes('active') ? '(current phase)' : ''}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -267,7 +267,18 @@ export class StoryUI {
         const progressFill = document.getElementById('story-progress-fill');
         const progressText = document.getElementById('story-progress-text');
         const progress = status.progress || 0;
-        if (progressFill) progressFill.style.width = `${progress}%`;
+        if (progressFill) const _pb = document.getElementById("story-progress-bar"); if (_pb) _pb.setAttribute("aria-valuenow", String(Math.round(pct)));
+        const _bar = document.getElementById('story-progress-bar');
+            if (_bar) {
+                const _v = parseInt(String(progressFill.style.width || '0'), 10) || 0;
+            const _bar = document.getElementById('story-progress-bar');
+            if (_bar) {
+                const _m = /(\d+)/.exec(progressFill.style.width || '');
+                if (_m) _bar.setAttribute('aria-valuenow', _m[1]);
+            }
+                // value set after assignment below
+            }
+            progressFill.style.width = `${progress}%`;
         if (progressText) progressText.textContent = `${Math.round(progress)}%`;
 
         // Update phase

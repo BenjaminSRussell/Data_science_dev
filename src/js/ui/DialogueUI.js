@@ -204,6 +204,16 @@ export class DialogueUI {
      */
     typeText(text, speed = 30) {
         const textEl = this.container.querySelector('#dialogue-text');
+        if (this._typeTimer) {
+            clearTimeout(this._typeTimer);
+            this._typeTimer = null;
+        }
+        const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) {
+            textEl.textContent = text;
+            textEl.classList.remove('typing');
+            return;
+        }
         textEl.textContent = '';
         textEl.classList.add('typing');
 
@@ -212,9 +222,10 @@ export class DialogueUI {
             if (i < text.length) {
                 textEl.textContent += text[i];
                 i++;
-                setTimeout(type, speed);
+                this._typeTimer = setTimeout(type, speed);
             } else {
                 textEl.classList.remove('typing');
+                this._typeTimer = null;
             }
         };
         type();
@@ -227,12 +238,14 @@ export class DialogueUI {
         const choicesEl = this.container.querySelector('#dialogue-choices');
         choicesEl.innerHTML = '';
 
-        choices?.forEach(choice => {
+        choices?.forEach((choice, idx) => {
             const btn = document.createElement('button');
             btn.className = 'dialogue-choice';
+            btn.type = 'button';
             btn.textContent = choice.text;
             btn.addEventListener('click', () => this.handleChoice(choice.id));
             choicesEl.appendChild(btn);
+            if (idx === 0) btn.focus();
         });
     }
 
@@ -313,6 +326,7 @@ export class DialogueUI {
      * Phase 2: Uses Lit component if available
      */
     close() {
+        if (this._typeTimer) { clearTimeout(this._typeTimer); this._typeTimer = null; }
         // Use Lit component if available
         if (this.litComponent) {
             this.litComponent.close();
