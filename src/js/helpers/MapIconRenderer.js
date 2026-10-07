@@ -55,42 +55,29 @@ export function updateLockBadges() {
     const lockBadges = document.querySelectorAll('.lock-badge');
 
     lockBadges.forEach(badge => {
+        if (badge.querySelector('img')) return; // already converted
+        const kind = (badge.dataset.icon || badge.dataset.type || badge.getAttribute('aria-label') || '').toLowerCase();
         const text = badge.textContent.trim();
-
-        // Replace emoji lock with icon
-        if (text === '') {
-            badge.textContent = '';
-            const img = document.createElement('img');
-            img.src = '/assets/icons/ui/lock.png';
-            img.style.width = '16px';
-            img.style.height = '16px';
-            img.onerror = () => badge.textContent = '';
-            badge.appendChild(img);
+        let src = null;
+        if (kind.includes('lock') || text === String.fromCodePoint(0x1F512)) {
+            src = '/assets/icons/ui/lock.png';
+        } else if (kind.includes('bus') || text === String.fromCodePoint(0x1F68C)) {
+            src = '/assets/icons/vehicles/bus_pass.png';
+        } else if (kind.includes('car') || kind.includes('vehicle') || text === String.fromCodePoint(0x1F697)) {
+            src = '/assets/icons/vehicles/used_car.png';
+        } else if (badge.classList.contains('locked') || kind === 'locked') {
+            src = '/assets/icons/ui/lock.png';
+        } else {
+            return; // unknown empty badge — do not stack all three icons (#35)
         }
-
-        // Replace vehicle emojis with icons
-        if (text === '') {
-            badge.textContent = '';
-            const img = document.createElement('img');
-            img.src = '/assets/icons/vehicles/bus_pass.png';
-            img.style.width = '16px';
-            img.style.height = '16px';
-            img.onerror = () => {
-                badge.textContent = '';
-                badge.style.background = '#666';
-            };
-            badge.appendChild(img);
-        }
-
-        if (text === '') {
-            badge.textContent = '';
-            const img = document.createElement('img');
-            img.src = '/assets/icons/vehicles/used_car.png';
-            img.style.width = '16px';
-            img.style.height = '16px';
-            img.onerror = () => badge.textContent = '';
-            badge.appendChild(img);
-        }
+        badge.textContent = '';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = kind || 'badge';
+        img.style.width = '16px';
+        img.style.height = '16px';
+        img.onerror = () => { badge.textContent = ''; };
+        badge.appendChild(img);
     });
 }
 

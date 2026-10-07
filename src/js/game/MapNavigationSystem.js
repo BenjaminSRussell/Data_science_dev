@@ -30,14 +30,15 @@ export class MapNavigationSystem {
      * A* pathfinding algorithm
      */
     aStarPathfinding(startX, startY, endX, endY) {
-        const openSet = [{ x: startX, y: startY, g: 0, h: this.heuristic(startX, startY, endX, endY), parent: null }];
+        const startH = this.heuristic(startX, startY, endX, endY);
+        const openSet = [{ x: startX, y: startY, g: 0, h: startH, f: startH, parent: null }];
         const closedSet = new Set();
         const openMap = new Map();
         openMap.set(`${startX},${startY}`, openSet[0]);
         
         while (openSet.length > 0) {
             // Get node with lowest f score
-            openSet.sort((a, b) => (a.g + a.h) - (b.g + b.h));
+            openSet.sort((a, b) => (a.f ?? (a.g + a.h)) - (b.f ?? (b.g + b.h)));
             const current = openSet.shift();
             openMap.delete(`${current.x},${current.y}`);
             
@@ -70,10 +71,12 @@ export class MapNavigationSystem {
                 if (existing) {
                     if (g < existing.g) {
                         existing.g = g;
+                        existing.h = h;
+                        existing.f = f;
                         existing.parent = current;
                     }
                 } else {
-                    const newNode = { x: neighbor.x, y: neighbor.y, g, h, parent: current };
+                    const newNode = { x: neighbor.x, y: neighbor.y, g, h, f, parent: current };
                     openSet.push(newNode);
                     openMap.set(key, newNode);
                 }

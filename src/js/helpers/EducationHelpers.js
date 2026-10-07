@@ -8,6 +8,10 @@
  */
 export function handleStartExam(game, courseId) {
     const course = game.gameState.educationSystem.courses[courseId];
+    if (!course) {
+        game.showToast?.('Unknown course.', 'error');
+        return;
+    }
     if (game.gameState.educationSystem.completedCourses.includes(courseId)) return;
     if (game.gameState.money < course.cost) {
         game.showToast('Tuition too high!', 'error');
