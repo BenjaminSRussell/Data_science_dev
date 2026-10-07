@@ -267,18 +267,9 @@ export class StoryUI {
         const progressFill = document.getElementById('story-progress-fill');
         const progressText = document.getElementById('story-progress-text');
         const progress = status.progress || 0;
-        if (progressFill) const _pb = document.getElementById("story-progress-bar"); if (_pb) _pb.setAttribute("aria-valuenow", String(Math.round(pct)));
-        const _bar = document.getElementById('story-progress-bar');
-            if (_bar) {
-                const _v = parseInt(String(progressFill.style.width || '0'), 10) || 0;
-            const _bar = document.getElementById('story-progress-bar');
-            if (_bar) {
-                const _m = /(\d+)/.exec(progressFill.style.width || '');
-                if (_m) _bar.setAttribute('aria-valuenow', _m[1]);
-            }
-                // value set after assignment below
-            }
-            progressFill.style.width = `${progress}%`;
+        if (progressFill) progressFill.style.width = `${progress}%`;
+        const progressBar = document.getElementById('story-progress-bar');
+        if (progressBar) progressBar.setAttribute('aria-valuenow', String(Math.round(progress)));
         if (progressText) progressText.textContent = `${Math.round(progress)}%`;
 
         // Update phase
