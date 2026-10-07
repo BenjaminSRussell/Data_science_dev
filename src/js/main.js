@@ -1799,6 +1799,17 @@ export class MainGame {
             this.gameState.worldEventManager = worldEvents;
         }
 
+        // Story panel depends on this — must reconstruct after load (#2627)
+        if (!this.gameState.narrativeClaritySystem) {
+            this.gameState.narrativeClaritySystem = new NarrativeClaritySystem(this.gameState);
+        } else if (!(this.gameState.narrativeClaritySystem instanceof NarrativeClaritySystem)) {
+            const ncs = new NarrativeClaritySystem(this.gameState);
+            if (typeof ncs.fromJSON === 'function' && this.gameState.narrativeClaritySystem) {
+                try { ncs.fromJSON(this.gameState.narrativeClaritySystem); } catch (_) {}
+            }
+            this.gameState.narrativeClaritySystem = ncs;
+        }
+
         if (!this.gameState.educationSystem) this.gameState.educationSystem = new EducationSystem(this.gameState);
         else {
             const edu = new EducationSystem(this.gameState);

@@ -61,15 +61,17 @@ export class DevTools {
             options: null,
             assets: null,
             graphs: null,
-            work: null
+            work: null,
+            locations: null
         };
 
         return Promise.all([
-            this.dialogueTester?.testAll().then(r => results.dialogues = r),
-            this.optionTester?.testAll().then(r => results.options = r),
-            this.assetValidator?.validateAll().then(r => results.assets = r),
-            this.graphValidator?.validateAll().then(r => results.graphs = r),
-            this.workValidator?.validateAll().then(r => results.work = r)
+            this.dialogueTester?.testAll?.().then(r => results.dialogues = r),
+            this.optionTester?.testAll?.().then(r => results.options = r),
+            this.assetValidator?.validateAll?.().then(r => results.assets = r),
+            this.graphValidator?.validateAll?.().then(r => results.graphs = r),
+            this.workValidator?.validateAll?.().then(r => results.work = r),
+            this.locationTester?.testAll?.().then(r => results.locations = r)
         ]).then(() => {
             console.log('All tests completed:', results);
             return results;

@@ -118,7 +118,14 @@ export class UIUpdater {
             if (this.gameState.isChartTypeUnlocked(type)) {
                 DOMUtils.toggleClass(btn, 'locked', false);
                 if (iconEl) {
-                    iconEl.textContent = this.getChartIcon(type);
+                    const src = this.getChartIcon(type);
+                    iconEl.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.alt = type;
+                    img.width = 24; img.height = 24;
+                    img.onerror = () => { iconEl.textContent = type[0]?.toUpperCase() || '?'; };
+                    iconEl.appendChild(img);
                 }
             } else {
                 DOMUtils.toggleClass(btn, 'locked', true);
@@ -239,11 +246,13 @@ export class UIUpdater {
             DOMUtils.updateElement('#boss-title', {
                 textContent: task.boss.title || 'Department Head'
             });
-            if (task.boss.greeting) {
+            // bosses.js defines taskIntro (not greeting) — #2615
+            const greeting = task.boss.greeting || task.boss.taskIntro || task.boss.intro;
+            if (greeting) {
                 const bossDialogue = DOMUtils.query('#boss-dialogue');
                 if (bossDialogue) {
                     const p = bossDialogue.querySelector('p');
-                    if (p) p.textContent = task.boss.greeting;
+                    if (p) p.textContent = greeting;
                 }
             }
         }

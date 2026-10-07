@@ -36,6 +36,10 @@ export class GameplaySettings {
      * Toggle relationship aspects
      */
     toggleRelationships(enabled) {
+        // True toggle: omitted/undefined flips current value (#2630)
+        if (typeof enabled !== 'boolean') {
+            enabled = !this.settings.relationships.enabled;
+        }
         this.settings.relationships.enabled = enabled;
         return this.settings.relationships.enabled;
     }
@@ -44,6 +48,10 @@ export class GameplaySettings {
      * Toggle romance
      */
     toggleRomance(enabled) {
+        // True toggle: omitted/undefined flips current value (#2630)
+        if (typeof enabled !== 'boolean') {
+            enabled = !this.settings.relationships.romance;
+        }
         this.settings.relationships.romance = enabled;
         return this.settings.relationships.romance;
     }
@@ -52,6 +60,10 @@ export class GameplaySettings {
      * Toggle jealousy
      */
     toggleJealousy(enabled) {
+        // True toggle: omitted/undefined flips current value (#2630)
+        if (typeof enabled !== 'boolean') {
+            enabled = !this.settings.relationships.jealousy;
+        }
         this.settings.relationships.jealousy = enabled;
         return this.settings.relationships.jealousy;
     }
