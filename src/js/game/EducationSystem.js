@@ -113,6 +113,7 @@ export class EducationSystem {
         if (this.completedCourses.includes(courseId)) return { success: false, message: "Course already completed." };
 
         const course = this.courses[courseId];
+        if (!course) return { success: false, message: "Unknown course." };
         const missingPrereqs = (course.prereqs || []).filter(p => !this.completedCourses.includes(p));
         if (missingPrereqs.length > 0) {
             const names = missingPrereqs.map(p => this.courses[p]?.name || p).join(', ');
