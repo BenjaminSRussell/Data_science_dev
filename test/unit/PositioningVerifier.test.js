@@ -5,13 +5,8 @@
  *   - verifyElementPositioning
  *   - verifyImagePositioning
  *
- * NOTE: generateReport / isPositioningCorrect are intentionally NOT tested.
- * generateReport pulls in game.worldMap and live DOM traversal, and has a
- * latent bug: its summary reads report.locations?.percentageCoordinates.length,
- * but verifyLocations never returns a percentageCoordinates field (only
- * total/gridCoordinates/invalidCoordinates/conflicts). The optional chaining
- * only guards report.locations itself being nullish, so when it is a real
- * object the unguarded .length on undefined throws. Flagged, not fixed.
+ * generateReport / isPositioningCorrect are covered in
+ * PositioningFixes.cluster.test.js.
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
