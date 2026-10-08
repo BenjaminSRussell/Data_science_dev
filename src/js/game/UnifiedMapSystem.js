@@ -37,32 +37,44 @@ export class UnifiedMapSystem {
      */
     async initialize() {
         if (this.rendered) return;
+        // update() can call this again before the first init finishes; share
+        // the in-flight init instead of creating a second PIXI app
+        if (this.initializing) return this.initializing;
         
         // Check if container exists
         if (!this.container) {
             console.error('UnifiedMapSystem: Container not found');
             return;
         }
+
+        this.initializing = this._initialize().finally(() => {
+            this.initializing = null;
+        });
+        return this.initializing;
+    }
+
+    /**
+     * Container size, falling back to the parent and then 800x600 when the
+     * container is hidden (clientWidth/Height = 0)
+     */
+    getDimensions() {
+        let width = this.container?.clientWidth || 0;
+        let height = this.container?.clientHeight || 0;
+        if (width === 0 || height === 0) {
+            const parent = this.container?.parentElement;
+            width = parent?.clientWidth || 800;
+            height = parent?.clientHeight || 600;
+        }
+        return { width, height };
+    }
+
+    async _initialize() {
         
         // Clear container
         this.container.innerHTML = '';
         this.container.classList.add('unified-map-container');
         
-        // Get container dimensions - if hidden, use parent or default
-        let width = this.container.clientWidth;
-        let height = this.container.clientHeight;
-        
-        // If container is hidden (clientWidth/Height = 0), try to get from parent or use defaults
-        if (width === 0 || height === 0) {
-            const parent = this.container.parentElement;
-            if (parent) {
-                width = parent.clientWidth || 800;
-                height = parent.clientHeight || 600;
-            } else {
-                width = 800;
-                height = 600;
-            }
-        }
+        const { width, height } = this.getDimensions();
         
         // Create PixiJS Application (PixiJS v8+ pattern)
         this.app = new PIXI.Application();
@@ -86,8 +98,11 @@ export class UnifiedMapSystem {
         // Render local map
         await this.renderLocalMap();
         
-        // Handle resize
-        window.addEventListener('resize', () => this.handleResize());
+        // Handle resize (kept so destroy() can remove it)
+        if (!this.onResize) {
+            this.onResize = () => this.handleResize();
+            window.addEventListener('resize', this.onResize);
+        }
         
         // Initialize particle effects (optional - lazy load)
         if (this.game?.gameState?.particleEffectManager) {
@@ -581,21 +596,7 @@ export class UnifiedMapSystem {
     handleResize() {
         if (!this.app || !this.container) return;
         
-        // Get container dimensions - if hidden, try parent or use defaults
-        let width = this.container.clientWidth;
-        let height = this.container.clientHeight;
-        
-        // If container is hidden (clientWidth/Height = 0), try to get from parent or use defaults
-        if (width === 0 || height === 0) {
-            const parent = this.container.parentElement;
-            if (parent) {
-                width = parent.clientWidth || 800;
-                height = parent.clientHeight || 600;
-            } else {
-                width = 800;
-                height = 600;
-            }
-        }
+        const { width, height } = this.getDimensions();
         
         // Only resize if we have valid dimensions
         if (width > 0 && height > 0) {
@@ -628,10 +629,17 @@ export class UnifiedMapSystem {
      * Cleanup
      */
     destroy() {
+        if (this.onResize) {
+            window.removeEventListener('resize', this.onResize);
+            this.onResize = null;
+        }
         if (this.app) {
             this.app.destroy(true);
             this.app = null;
         }
-        this.container.innerHTML = '';
+        // Allow a later initialize() to rebuild the map
+        this.rendered = false;
+        Object.keys(this.layers).forEach(k => { this.layers[k] = null; });
+        if (this.container) this.container.innerHTML = '';
     }
 }

@@ -2582,11 +2582,11 @@ export class MainGame {
                     </div>
                     <div class="option-group">
                         <label>Music Volume</label>
-                        <input type="range" id="settings-music-volume" min="0" max="100" value="${Math.round(this.audioManager.musicVolume * 100)}" oninput="game.audioManager.setMusicVolume(this.value / 100)">
+                        <input type="range" id="settings-music-volume" min="0" max="100" value="${Math.round(this.audioManager.musicVolume * 100)}">
                     </div>
                     <div class="option-group">
                         <label>Sound Effects Volume</label>
-                        <input type="range" id="settings-sound-volume" min="0" max="100" value="${Math.round(this.audioManager.soundVolume * 100)}" oninput="game.audioManager.setSoundVolume(this.value / 100)">
+                        <input type="range" id="settings-sound-volume" min="0" max="100" value="${Math.round(this.audioManager.soundVolume * 100)}">
                     </div>
                 </div>
                 <div class="settings-danger">
@@ -2598,13 +2598,22 @@ export class MainGame {
 
         this.showModal(modalContent);
 
-        // Wire up the Music toggle to AudioManager.toggleMusic()
-        const musicToggle = document.getElementById('settings-music');
-        if (musicToggle) {
-            musicToggle.addEventListener('change', () => {
-                this.audioManager.toggleMusic();
-            });
-        }
+        // Wire the controls to AudioManager (#869). The checkboxes set the
+        // state they show instead of blindly toggling, so they can't drift
+        // out of sync; the sound checkbox had no listener at all before.
+        const am = this.audioManager;
+        document.getElementById('settings-sound')?.addEventListener('change', (e) => {
+            if (e.target.checked !== !!am.soundEnabled) this.toggleSound();
+        });
+        document.getElementById('settings-music')?.addEventListener('change', (e) => {
+            if (e.target.checked !== !!am.musicEnabled) am.toggleMusic();
+        });
+        document.getElementById('settings-music-volume')?.addEventListener('input', (e) => {
+            am.setMusicVolume(Number(e.target.value) / 100);
+        });
+        document.getElementById('settings-sound-volume')?.addEventListener('input', (e) => {
+            am.setSoundVolume(Number(e.target.value) / 100);
+        });
     }
 
     /**
@@ -2635,6 +2644,13 @@ export class MainGame {
         const radioStations = radioMenu?.querySelectorAll('.radio-station');
 
         if (!radioBtn || !radioMenu) return;
+        // Bind once; a second call would stack another set of listeners and
+        // make the button toggle the menu open and shut in one click
+        if (radioBtn.dataset.radioBound) {
+            this.updateRadioUI();
+            return;
+        }
+        radioBtn.dataset.radioBound = 'true';
 
         // Toggle menu visibility
         radioBtn.addEventListener('click', (e) => {
