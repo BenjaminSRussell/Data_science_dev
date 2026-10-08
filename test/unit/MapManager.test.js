@@ -385,11 +385,11 @@ describe('MapManager', () => {
     });
 
     describe('gridToPercent()', () => {
-        it('should convert grid coordinates to percentage using container dimensions', () => {
-            const result = mapManager.gridToPercent(10, 15);
+        it('should convert grid coordinates to a percent of the grid, not the container (#1933)', () => {
+            mapManager.gridToPercent(10, 15);
 
-            // Should call gridSystem.gridToPercent with container dimensions
-            expect(mapManager.gridSystem.gridToPercent).toHaveBeenCalledWith(10, 15, 800, 600);
+            // gridToPercent's contract needs containerWidth === totalWidth
+            expect(mapManager.gridSystem.gridToPercent).toHaveBeenCalledWith(10, 15, 600, 600);
         });
 
         it('should fallback to gridSystem dimensions when container.offsetWidth is falsy', () => {
@@ -412,8 +412,8 @@ describe('MapManager', () => {
 
             mapManager.gridToPercent(10, 15);
 
-            // Should use gridSystem.totalHeight instead
-            expect(mapManager.gridSystem.gridToPercent).toHaveBeenCalledWith(10, 15, 800, 600);
+            // Always the grid's own size (#1933)
+            expect(mapManager.gridSystem.gridToPercent).toHaveBeenCalledWith(10, 15, 600, 600);
         });
 
         it('should fallback to gridSystem dimensions when both container dimensions are falsy', () => {
