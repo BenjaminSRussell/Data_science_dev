@@ -146,6 +146,8 @@
 
 .job-card-detail { display: flex; flex-direction: column; }
 .job-card-label { font-size: 0.75rem; text-transform: uppercase; color: rgba(248, 250, 252, 0.55); }
+/* Skills / perks rows (#1070) */
+.job-card-tags { display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.75rem; font-size: 0.85rem; }
 .job-card-value { font-weight: 600; }
 .job-card-value.money { color: #34d399; }
 

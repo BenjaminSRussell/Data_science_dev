@@ -3496,6 +3496,14 @@ export class MainGame {
                 // magnitude 0.1-0.3 maps to a 1-3% move
                 const move = (change.magnitude || 0) / 10;
                 this.gameState.stockMarket.applyMarketShock(change.effect === 'bust' ? -move : move);
+            } else if (change.type === 'new_location' && change.location?.name) {
+                // Announce a real office the player can work toward (#1192)
+                this.newsManager?.addNews?.({
+                    text: `${change.location.name} has space available`,
+                    title: `${change.location.name} has space available`,
+                    description: 'A new office option is on the market. Check Office Upgrades to see what it takes to move in.',
+                    category: 'business'
+                });
             }
         });
         this.updateNewsBadge?.();

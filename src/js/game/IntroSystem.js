@@ -315,11 +315,24 @@ export class IntroSystem {
                         <span class="job-card-value">${job.difficulty}</span>
                     </div>
                 </div>
+                ${this.renderJobTags('Skills', job.skills)}
+                ${this.renderJobTags('Perks', job.perks)}
                 <button class="job-card-apply" data-job-id="${job.id}">
                     Apply for This Job
                 </button>
             </div>
         `;
+    }
+
+    /** Skills / perks row on a job card (#1070) */
+    renderJobTags(label, items) {
+        if (!Array.isArray(items) || items.length === 0) return '';
+        const escape = (t) => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+        return `
+                <div class="job-card-tags">
+                    <span class="job-card-label">${label}</span>
+                    <span class="job-card-value">${items.map(escape).join(', ')}</span>
+                </div>`;
     }
 
     /**
