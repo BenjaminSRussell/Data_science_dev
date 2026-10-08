@@ -144,29 +144,51 @@ export class PositioningHelper {
     }
 
     /**
-     * Detect coordinate system from position object
+     * Detect coordinate system from position object.
+     * Magnitude alone can't tell a 0-30 percent value from a grid value, so
+     * anything inside the grid range (fractional sub-cell positions included)
+     * is treated as grid. Callers that know their system should say so via
+     * normalizeToPercent(position, gridSize, coordinateSystem).
      * @param {Object} position - Position object {x, y}
      * @param {number} gridSize - Grid size (default: 30)
      * @returns {string} 'grid' | 'pixel'
-     * @deprecated All locations now use grid coordinates (0-30)
      */
     static detectCoordinateSystem(position, gridSize = WORLD_GRID_SIZE) {
-        if (position.x <= gridSize && position.y <= gridSize && 
-            Number.isInteger(position.x) && Number.isInteger(position.y)) {
+        const { x, y } = position || {};
+        if (Number.isFinite(x) && Number.isFinite(y) && x <= gridSize && y <= gridSize) {
             return 'grid';
         }
         return 'pixel';
     }
 
     /**
-     * Normalize position to percentage
-     * @param {Object} position - Position object {x, y} (grid coordinates)
+     * Normalize a position to percentages.
+     * @param {Object} position - Position object {x, y}
      * @param {number} gridSize - Grid size (default: 30)
+     * @param {string} coordinateSystem - 'grid' (default) | 'percentage' | 'pixel' | 'auto'
+     * @param {{width:number,height:number}|null} container - required for pixel positions
      * @returns {Object} {x: percentage, y: percentage}
      */
-    static normalizeToPercent(position, gridSize = WORLD_GRID_SIZE) {
-        // All positions are grid coordinates - convert to percentage
-        return this.gridToPercent(position.x, position.y, gridSize);
+    static normalizeToPercent(position, gridSize = WORLD_GRID_SIZE, coordinateSystem = 'grid', container = null) {
+        const system = coordinateSystem === 'auto'
+            ? this.detectCoordinateSystem(position, gridSize)
+            : coordinateSystem;
+        switch (system) {
+            case 'grid':
+                return this.gridToPercent(position.x, position.y, gridSize);
+            case 'percentage':
+                return { x: position.x, y: position.y };
+            case 'pixel':
+                if (!container || !(container.width > 0) || !(container.height > 0)) {
+                    throw new RangeError('normalizeToPercent: pixel positions need a container {width, height}');
+                }
+                return {
+                    x: (position.x / container.width) * 100,
+                    y: (position.y / container.height) * 100
+                };
+            default:
+                throw new RangeError(`normalizeToPercent: unknown coordinate system "${coordinateSystem}"`);
+        }
     }
 
     /**
@@ -221,10 +243,9 @@ export class PositioningHelper {
         } else {
             this.positionAtPixels(element, position.x, position.y);
         }
-        // center: false keeps the top-left corner on the coordinate
-        if (!center) {
-            element.style.transform = '';
-        }
+        // center: true centres the element on the coordinate in every system;
+        // center: false keeps the top-left corner on it
+        element.style.transform = center ? 'translate(-50%, -50%)' : '';
 
         // Set size
         if (size.width !== 'auto') {

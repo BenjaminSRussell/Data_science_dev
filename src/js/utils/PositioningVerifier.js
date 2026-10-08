@@ -39,7 +39,7 @@ export class PositioningVerifier {
             
             if (system === 'grid') {
                 // Verify grid bounds
-                if (pos.x < 0 || pos.x > 29 || pos.y < 0 || pos.y > 29) {
+                if (pos.x < 0 || pos.x >= 30 || pos.y < 0 || pos.y >= 30) {
                     results.invalidCoordinates.push({
                         id: location.id,
                         position: pos,
@@ -63,7 +63,8 @@ export class PositioningVerifier {
         // Check for conflicts (same grid cell)
         const gridPositions = new Map();
         results.gridCoordinates.forEach(loc => {
-            const key = `${loc.position.x},${loc.position.y}`;
+            // Same grid cell, including sub-cell positions within it
+            const key = `${Math.floor(loc.position.x)},${Math.floor(loc.position.y)}`;
             if (gridPositions.has(key)) {
                 results.conflicts.push({
                     location1: gridPositions.get(key),
@@ -201,10 +202,9 @@ export class PositioningVerifier {
         report.summary = {
             locations: {
                 total: report.locations?.total || 0,
-                gridCoordinates: report.locations?.gridCoordinates.length || 0,
-                percentageCoordinates: report.locations?.percentageCoordinates.length || 0,
-                invalid: report.locations?.invalidCoordinates.length || 0,
-                conflicts: report.locations?.conflicts.length || 0
+                gridCoordinates: report.locations?.gridCoordinates?.length || 0,
+                                invalid: report.locations?.invalidCoordinates?.length || 0,
+                conflicts: report.locations?.conflicts?.length || 0
             },
             elements: {
                 total: report.elements.length,
