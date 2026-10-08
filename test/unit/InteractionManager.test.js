@@ -493,8 +493,8 @@ describe('InteractionManager', () => {
             const dropzoneConfig = capturedListeners.dropzone;
             expect(dropzoneConfig).toBeDefined();
             expect(dropzoneConfig.ondrop).toBe(mockDrop);
-            expect(dropzoneConfig.ondropenter).toBe(mockDropEnter);
-            expect(dropzoneConfig.ondropleave).toBe(mockDropLeave);
+            expect(dropzoneConfig.ondragenter).toBe(mockDropEnter);
+            expect(dropzoneConfig.ondragleave).toBe(mockDropLeave);
         });
     });
 });

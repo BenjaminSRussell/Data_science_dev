@@ -358,6 +358,7 @@ export class ResearchInboxUI {
             const unreadCount = this.researchPaperSystem.getUnreadCount();
             this.litComponent.open(papers, unreadCount);
             this.isOpen = true;
+            this._renderedPaperCount = Array.isArray(papers) ? papers.length : 0;
             return;
         }
         
@@ -370,6 +371,8 @@ export class ResearchInboxUI {
         this.container.style.display = 'flex';
         this.isOpen = true;
         this.renderPapers('all');
+        const inbox = this.researchPaperSystem.getInbox();
+        this._renderedPaperCount = Array.isArray(inbox) ? inbox.length : 0;
         
         // Update unread count
         this.updateUnreadCount();
@@ -405,6 +408,31 @@ export class ResearchInboxUI {
         }
     }
     
+    /**
+     * Push the current inbox into an already-open view so papers that arrive
+     * while it is open appear without closing and reopening it (#189).
+     * Only re-renders when the number of papers changed, so a periodic call
+     * doesn't disturb the list the player is reading.
+     * @returns {boolean} true if the list was re-rendered
+     */
+    refresh() {
+        if (!this.isOpen || !this.researchPaperSystem) return false;
+        const papers = this.researchPaperSystem.getInbox();
+        const count = Array.isArray(papers) ? papers.length : 0;
+        if (count === this._renderedPaperCount) {
+            this.updateUnreadCount();
+            return false;
+        }
+        this._renderedPaperCount = count;
+        if (this.litComponent) {
+            this.litComponent.updatePapers(papers, this.researchPaperSystem.getUnreadCount());
+        } else {
+            this.renderPapers(this.getActiveTab());
+            this.updateUnreadCount();
+        }
+        return true;
+    }
+
     /**
      * Update unread count
      */
