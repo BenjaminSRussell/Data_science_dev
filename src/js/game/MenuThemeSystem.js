@@ -4,73 +4,42 @@
  * Version: 2.0 - Fixed initialization issues
  */
 
+const FALLBACK_STARTER = {
+    id: 'starter',
+    name: 'Starter',
+    unlocked: true,
+    particleColors: ['rgba(139, 92, 246, 0.6)', 'rgba(167, 139, 250, 0.4)'],
+    gradient: 'radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
+    pattern: 'linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
+    background: 'linear-gradient(180deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%)'
+};
+
 export class MenuThemeSystem {
     constructor() {
-        // Initialize themes FIRST, before any other operations
         this.themes = null;
         this.currentTheme = 'starter';
-        
-        try {
-            // Force initialization of themes
-            this.themes = this.initializeThemes();
-            
-            // Verify themes were initialized correctly
-            if (!this.themes || typeof this.themes !== 'object') {
-                this.themes = this.initializeThemes();
-            }
-            
-            // Verify starter theme exists
-            if (!this.themes || typeof this.themes !== 'object' || !this.themes.starter) {
-                // Create fallback themes object
-                this.themes = {
-                    starter: {
-                        id: 'starter',
-                        name: 'Starter',
-                        unlocked: true,
-                        particleColors: ['rgba(139, 92, 246, 0.6)', 'rgba(167, 139, 250, 0.4)'],
-                        gradient: 'radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-                        pattern: 'linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
-                        background: 'linear-gradient(180deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%)'
-                    }
-                };
-            }
-            
-            // Now that themes are guaranteed to exist, load theme preference
-            this.currentTheme = this.loadTheme();
-        } catch (error) {
-            // Fallback initialization on error
-            // Fallback initialization - ensure themes always exist
-            if (!this.themes || typeof this.themes !== 'object' || !this.themes.starter) {
-                this.themes = {
-                    starter: {
-                        id: 'starter',
-                        name: 'Starter',
-                        unlocked: true,
-                        particleColors: ['rgba(139, 92, 246, 0.6)', 'rgba(167, 139, 250, 0.4)'],
-                        gradient: 'radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-                        pattern: 'linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
-                        background: 'linear-gradient(180deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%)'
-                    }
-                };
-            }
-            this.currentTheme = 'starter';
-        }
-        
-        // Final safety check - themes MUST exist at this point
+        this.ensureThemes();
+        this.currentTheme = this.loadTheme();
+    }
+
+    /**
+     * Guarantee this.themes is an object with an unlocked starter theme.
+     * Every method goes through this instead of repeating its own guards.
+     */
+    ensureThemes() {
         if (!this.themes || typeof this.themes !== 'object' || !this.themes.starter) {
-            this.themes = {
-                starter: {
-                    id: 'starter',
-                    name: 'Starter',
-                    unlocked: true,
-                    particleColors: ['rgba(139, 92, 246, 0.6)', 'rgba(167, 139, 250, 0.4)'],
-                    gradient: 'radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-                    pattern: 'linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
-                    background: 'linear-gradient(180deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%)'
-                }
-            };
-            this.currentTheme = 'starter';
+            try {
+                this.themes = this.initializeThemes();
+            } catch {
+                this.themes = null;
+            }
+            if (!this.themes || typeof this.themes !== 'object' || !this.themes.starter) {
+                this.themes = { starter: { ...FALLBACK_STARTER } };
+            }
         }
+        // The starter theme can never be locked (e.g. by corrupt saved unlocks)
+        this.themes.starter.unlocked = true;
+        return this.themes;
     }
 
     /**
@@ -150,9 +119,7 @@ export class MenuThemeSystem {
      */
     checkThemeUnlocks(gameState) {
         if (!gameState) return;
-        if (!this.themes || typeof this.themes !== 'object') {
-            this.themes = this.initializeThemes();
-        }
+        this.ensureThemes();
 
         Object.values(this.themes).forEach(theme => {
             if (theme.unlocked || !theme.unlockRequirement) return;
@@ -184,9 +151,7 @@ export class MenuThemeSystem {
      * Get theme based on current game state
      */
     getThemeForGameState(gameState) {
-        if (!this.themes || typeof this.themes !== 'object' || !this.themes.starter) {
-            this.themes = this.initializeThemes();
-        }
+        this.ensureThemes();
         if (!gameState) return this.themes.starter;
 
         // Check for highest unlocked theme based on rank
@@ -196,7 +161,7 @@ export class MenuThemeSystem {
         for (let i = rankThemes.length - 1; i >= 0; i--) {
             const themeId = rankThemes[i];
             const theme = this.themes[themeId];
-            if (theme.unlocked) {
+            if (theme?.unlocked) {
                 const req = theme.unlockRequirement;
                 if (!req || (req.rankIndex !== undefined && gameState.rankIndex >= req.rankIndex)) {
                     selectedTheme = theme;
@@ -212,9 +177,7 @@ export class MenuThemeSystem {
      * Apply theme to menu
      */
     applyTheme(themeId = null) {
-        if (!this.themes || typeof this.themes !== 'object' || !this.themes.starter) {
-            this.themes = this.initializeThemes();
-        }
+        this.ensureThemes();
         let theme = themeId ? this.themes[themeId] : this.themes[this.currentTheme];
         if (!theme || !theme.unlocked) {
             theme = this.themes.starter; // Fallback to starter
@@ -253,9 +216,7 @@ export class MenuThemeSystem {
      * Get current theme
      */
     getCurrentTheme() {
-        if (!this.themes || typeof this.themes !== 'object' || !this.themes.starter) {
-            this.themes = this.initializeThemes();
-        }
+        this.ensureThemes();
         return this.themes[this.currentTheme] || this.themes.starter;
     }
 
@@ -263,9 +224,7 @@ export class MenuThemeSystem {
      * Get all unlocked themes
      */
     getUnlockedThemes() {
-        if (!this.themes || typeof this.themes !== 'object') {
-            this.themes = this.initializeThemes();
-        }
+        this.ensureThemes();
         return Object.values(this.themes).filter(theme => theme.unlocked);
     }
 
@@ -273,68 +232,15 @@ export class MenuThemeSystem {
      * Load theme from localStorage
      */
     loadTheme() {
+        this.ensureThemes();
         try {
-            // Ensure themes are initialized - be very defensive
-            if (!this.themes || typeof this.themes !== 'object') {
-                this.themes = this.initializeThemes();
-            }
-            
-            // Double-check themes exist and have starter theme - use separate checks to avoid errors
-            if (!this.themes || typeof this.themes !== 'object') {
-                this.themes = this.initializeThemes();
-            }
-            if (this.themes && typeof this.themes === 'object' && !this.themes.starter) {
-                this.themes = this.initializeThemes();
-            }
-            
-            // Final safety check - if themes still don't exist, something is very wrong
-            if (!this.themes || (typeof this.themes === 'object' && !this.themes.starter)) {
-                // Failed to initialize themes, using fallback
-                // Create a minimal fallback theme
-                this.themes = {
-                    starter: {
-                        id: 'starter',
-                        name: 'Starter',
-                        unlocked: true,
-                        particleColors: ['rgba(139, 92, 246, 0.6)', 'rgba(167, 139, 250, 0.4)'],
-                        gradient: 'radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-                        pattern: 'linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
-                        background: 'linear-gradient(180deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%)'
-                    }
-                };
-            }
-            
             const saved = localStorage.getItem('menuTheme');
-            if (saved && this.themes && this.themes[saved] && this.themes[saved].unlocked) {
+            if (saved && this.themes[saved] && this.themes[saved].unlocked) {
                 return saved;
             }
-        } catch (error) {
-            // Failed to load theme, using default
-            // Ensure themes exist even on error
-            try {
-                if (!this.themes || typeof this.themes !== 'object') {
-                    this.themes = this.initializeThemes();
-                }
-                if (this.themes && typeof this.themes === 'object' && !this.themes.starter) {
-                    this.themes = this.initializeThemes();
-                }
-            } catch (initError) {
-                // Failed to initialize themes in error handler
-                // Last resort fallback
-                this.themes = {
-                    starter: {
-                        id: 'starter',
-                        name: 'Starter',
-                        unlocked: true,
-                        particleColors: ['rgba(139, 92, 246, 0.6)', 'rgba(167, 139, 250, 0.4)'],
-                        gradient: 'radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-                        pattern: 'linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
-                        background: 'linear-gradient(180deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%)'
-                    }
-                };
-            }
+        } catch {
+            // localStorage unavailable
         }
-        // Always return a valid theme ID
         return 'starter';
     }
 
@@ -354,15 +260,13 @@ export class MenuThemeSystem {
      */
     loadUnlockedThemes() {
         try {
-            if (!this.themes || typeof this.themes !== 'object') {
-                this.themes = this.initializeThemes();
-            }
+            this.ensureThemes();
             const saved = localStorage.getItem('unlockedMenuThemes');
             if (saved) {
                 const unlocked = JSON.parse(saved);
                 Object.keys(unlocked).forEach(themeId => {
                     if (this.themes && this.themes[themeId]) {
-                        this.themes[themeId].unlocked = unlocked[themeId];
+                        this.themes[themeId].unlocked = unlocked[themeId] === true;
                     }
                 });
             }
@@ -376,9 +280,7 @@ export class MenuThemeSystem {
      */
     saveUnlockedThemes() {
         try {
-            if (!this.themes || typeof this.themes !== 'object') {
-                this.themes = this.initializeThemes();
-            }
+            this.ensureThemes();
             const unlocked = {};
             Object.values(this.themes).forEach(theme => {
                 unlocked[theme.id] = theme.unlocked;
@@ -394,6 +296,10 @@ export class MenuThemeSystem {
      */
     init() {
         this.loadUnlockedThemes();
+        this.ensureThemes();
+        // The constructor ran before saved unlocks were loaded, so a saved
+        // unlocked theme was rejected there; re-read the preference now
+        this.currentTheme = this.loadTheme();
         this.applyTheme();
     }
 
