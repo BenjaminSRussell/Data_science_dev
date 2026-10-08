@@ -517,6 +517,10 @@ export function handleTravel(game, locationId) {
     }
 
     if (result.success) {
+        // gameState.currentLocation reads through to the world map; keep the
+        // persisted store copy in step too (#982)
+        game.gameStore?.getState?.()?.setCurrentLocation?.(locationId);
+
         // Advance time immediately
         game.handleTimeAdvance(result.timeCost);
 

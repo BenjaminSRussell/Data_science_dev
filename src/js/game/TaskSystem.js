@@ -4,6 +4,7 @@
 
 import { BOSSES } from '../data/bosses.js';
 import { COMPREHENSIVE_DATA_SCIENCE_TASKS } from '../data/comprehensive_datascience_tasks.js';
+import { insightHint } from './EconomySystem.js';
 
 export class TaskSystem {
     static MAX_RANK_INDEX = 6;
@@ -364,9 +365,10 @@ export class TaskSystem {
         // Update requirements
         const reqContainer = document.querySelector('.task-requirements');
         if (reqContainer) {
+            const hint = insightHint(this.gameState, task); // "Data Insight" perk
             reqContainer.innerHTML = task.requirements
                 .map(r => `<span class="requirement-tag">${r}</span>`)
-                .join('');
+                .join('') + (hint ? `<span class="requirement-tag insight-hint">${hint}</span>` : '');
         }
 
         // Update data table

@@ -109,6 +109,16 @@ export const SHOP_ITEMS = [
         price: 1500
     },
     {
+        id: "perk_bargain_hunter",
+        name: "Coupon Clipper",
+        description: "10% off everything else in the shop",
+        category: "perks",
+        type: "perk",
+        perkId: "bargain_hunter",
+        icon: "",
+        price: 450
+    },
+    {
         id: "perk_insight",
         name: "Data Insight",
         description: "See hints for optimal chart type",

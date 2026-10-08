@@ -4,9 +4,45 @@
 
 import { VEHICLES } from './WorldMap.js';
 
+/**
+ * Shop-perk "Data Insight": the hint shown next to the task requirements.
+ * Returns null when the perk isn't owned or the task has no optimal type.
+ */
+export function insightHint(gameState, task) {
+    if (!(gameState?.unlockedPerks || []).includes('insight')) return null;
+    const best = task?.optimalChartTypes?.[0];
+    return best ? `Hint: try a ${best} chart` : null;
+}
+
 export class EconomySystem {
+    // Shop perk tuning (src/js/data/shopItems.js descriptions)
+    static PERK_TIME_BONUS_SECONDS = 30;   // perk_time_bonus
+    static PERK_BOSS_FAVOR = 0.9;          // perk_boss_favor: strictness x0.9
+    static PERK_MONEY_MULTIPLIER = 1.15;   // perk_bonus_multiplier
+    static PERK_REP_MULTIPLIER = 1.2;      // perk_rep_boost
+    static PERK_DISCOUNT = 0.9;            // perk_bargain_hunter
+
     constructor(gameState) {
         this.gameState = gameState;
+    }
+
+    /** True when a shop perk has been bought (#244, #2010) */
+    hasPerk(perkId) {
+        return (this.gameState?.unlockedPerks || []).includes(perkId);
+    }
+
+    /**
+     * Seconds the player has for a task: base time limit, +30s with the Time
+     * Extension perk, stretched by software speed bonuses (AutoML, Cloud)
+     * (#1310, #2011). 0 means the task is untimed.
+     */
+    getEffectiveTimeLimit(task) {
+        const base = Number(task?.timeLimit) || 0;
+        if (base <= 0) return 0;
+        let limit = base;
+        if (this.hasPerk('time_bonus')) limit += EconomySystem.PERK_TIME_BONUS_SECONDS;
+        const speed = Number(this.gameState?.getSoftwareQualityMultiplier?.()?.speedBonus) || 0;
+        return Math.round(limit * (1 + Math.max(0, speed)));
     }
 
     /**
@@ -27,7 +63,9 @@ export class EconomySystem {
         // Boss modifier: higher strictness means a HARSHER grade (#1990). bosses.js
         // gives the perfectionist 1.3 and the easygoing boss 0.8, so invert it
         // gently around 1.0: 1.3 -> 0.85, 0.8 -> 1.10.
-        const strictness = Number(task?.boss?.strictness) > 0 ? Number(task.boss.strictness) : 1.0;
+        let strictness = Number(task?.boss?.strictness) > 0 ? Number(task.boss.strictness) : 1.0;
+        // "Office Coffee": bosses are 10% more lenient (#244)
+        if (this.hasPerk('boss_favor')) strictness *= EconomySystem.PERK_BOSS_FAVOR;
         const bossModifier = 1 - (strictness - 1) * 0.5;
 
         // Calculate weighted average
@@ -209,13 +247,17 @@ export class EconomySystem {
 
         // Time bonus (if completed quickly)
         let timeBonus = 1.0;
-        if (task.timeLimit && task.startTime) {
+        const timeLimit = this.getEffectiveTimeLimit(task);
+        if (timeLimit && task.startTime) {
             const elapsed = (Date.now() - task.startTime) / 1000;
             // 1.2x multiplier if completed in half the time limit or less
-            timeBonus = elapsed < task.timeLimit / 2 ? 1.2 : 1.0;
+            timeBonus = elapsed < timeLimit / 2 ? 1.2 : 1.0;
         }
 
-        return Math.round(baseReward * multiplier * timeBonus);
+        // "Negotiation Skills": +15% money from tasks
+        const perkBonus = this.hasPerk('bonus_multiplier') ? EconomySystem.PERK_MONEY_MULTIPLIER : 1.0;
+
+        return Math.round((Number(baseReward) || 0) * multiplier * timeBonus * perkBonus);
     }
 
     /**
@@ -230,27 +272,28 @@ export class EconomySystem {
             5: 30
         };
 
-        return repRewards[stars] || 10;
+        const base = repRewards[stars] || 10;
+        // "Networking": +20% reputation from tasks
+        return this.hasPerk('rep_boost') ? Math.round(base * EconomySystem.PERK_REP_MULTIPLIER) : base;
     }
 
     /**
      * Check if player should be promoted
      */
     checkPromotion() {
-        const nextRank = this.gameState.nextRank;
-
-        if (!nextRank) return false; // Already max rank
-
-        if (this.gameState.reputation >= nextRank.repRequired) {
+        // Climb every rank the reputation already covers, not just one per
+        // call (#1312). Called after tasks and once a day, so reputation from
+        // contracts, events, etc. promotes too (#856).
+        let promoted = false;
+        let nextRank = this.gameState.nextRank;
+        while (nextRank && this.gameState.reputation >= nextRank.repRequired) {
             this.gameState.rankIndex++;
-
-            // Notify player
-            this.showPromotionNotification(this.gameState.currentRank);
-
-            return true;
+            promoted = true;
+            nextRank = this.gameState.nextRank;
         }
 
-        return false;
+        if (promoted) this.showPromotionNotification(this.gameState.currentRank);
+        return promoted;
     }
 
     /**
@@ -272,9 +315,9 @@ export class EconomySystem {
     getItemPrice(item) {
         let price = item.price;
 
-        // Check for discount perks
-        if (this.gameState.unlockedTools?.includes('bargain_hunter')) {
-            price = Math.round(price * 0.9); // 10% discount
+        // "Coupon Clipper" perk: 10% off everything else in the shop (#1988, #1309)
+        if (item.id !== 'perk_bargain_hunter' && this.hasPerk('bargain_hunter')) {
+            price = Math.round(price * EconomySystem.PERK_DISCOUNT);
         }
 
         return price;

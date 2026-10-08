@@ -544,8 +544,10 @@ export class ContractSystem {
             bonuses
         });
         
-        // Award pay
+        // Award pay; contract pay is income like task pay, so it's taxed weekly (#1989)
         this.gameState.money += pay;
+        this.gameState.weeklyIncome = (this.gameState.weeklyIncome || 0) + pay;
+        this.gameState.totalEarned = (this.gameState.totalEarned || 0) + pay;
         this.gameState.reputation += Math.floor(contract.difficulty * 10);
         
         return {

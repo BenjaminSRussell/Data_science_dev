@@ -37,7 +37,8 @@ describe('UIUpdater - Issue #194 Price Formatting (Source Code Verification)', (
         it('shop price (line 425) should use toLocaleString', () => {
             // Verify shop price formatting
             const shopMatch = uiUpdaterSource.match(
-                /\$\{item\.price\.toLocaleString\(\)\}/
+                // price is the perk-discounted item price (#1309)
+                /\$\{(item\.)?price\.toLocaleString\(\)\}/
             );
             expect(shopMatch).toBeTruthy();
         });
