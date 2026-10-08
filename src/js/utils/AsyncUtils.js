@@ -36,13 +36,16 @@ export class AsyncUtils {
 
         let lastError;
         let currentDelay = delay;
+        // `retries` is the total number of attempts; 0 (or less) still makes
+        // one attempt rather than throwing undefined without calling fn (#2410)
+        const attempts = Math.max(1, Math.floor(Number(retries)) || 0);
 
-        for (let i = 0; i < retries; i++) {
+        for (let i = 0; i < attempts; i++) {
             try {
                 return await fn();
             } catch (error) {
                 lastError = error;
-                if (i < retries - 1) {
+                if (i < attempts - 1) {
                     if (onRetry) onRetry(i + 1, error);
                     await this.delay(currentDelay);
                     currentDelay *= backoff;
@@ -60,20 +63,25 @@ export class AsyncUtils {
         const results = [];
         const executing = [];
 
+        const max = Math.max(1, Math.floor(Number(limit)) || 1);
+
         for (const task of tasks) {
-            const promise = Promise.resolve(task()).then(result => {
-                executing.splice(executing.indexOf(promise), 1);
-                return result;
+            const promise = Promise.resolve().then(() => task());
+            // Free the slot whether the task resolves or rejects, so one failure
+            // can't stop the remaining tasks from starting (#2409)
+            const slot = promise.then(() => {}, () => {}).then(() => {
+                executing.splice(executing.indexOf(slot), 1);
             });
 
             results.push(promise);
-            executing.push(promise);
+            executing.push(slot);
 
-            if (executing.length >= limit) {
+            if (executing.length >= max) {
                 await Promise.race(executing);
             }
         }
 
+        // Every task has been started; reject with the first failure (if any)
         return Promise.all(results);
     }
 
