@@ -559,22 +559,11 @@ export class UnifiedMapSystem {
         pulse.beginFill(0x3b82f6, 0.3);
         pulse.drawCircle(x, y, 15);
         
-        // Phase 3: Use GSAP for smooth pulsing animation
-        // Phase 4: Can also use particle effects for enhanced visuals
-        if (this.game?.gsapAnimator) {
-            this.game.gsapAnimator.pulse(pulse, {
-                scale: 1.2,
-                duration: 1,
-                repeat: -1,
-                yoyo: true
-            });
-        } else {
-            // Fallback to ticker animation
-            this.app.ticker.add(() => {
-                pulse.scale.x = 1 + Math.sin(this.app.ticker.lastTime / 200) * 0.2;
-                pulse.scale.y = 1 + Math.sin(this.app.ticker.lastTime / 200) * 0.2;
-            });
-        }
+        // Pulse on the Pixi ticker (no GSAP animator exists, #2295)
+        this.app.ticker.add(() => {
+            pulse.scale.x = 1 + Math.sin(this.app.ticker.lastTime / 200) * 0.2;
+            pulse.scale.y = 1 + Math.sin(this.app.ticker.lastTime / 200) * 0.2;
+        });
         
         // Phase 4: Add particle effect around player marker (optional)
         if (this.particleManager) {

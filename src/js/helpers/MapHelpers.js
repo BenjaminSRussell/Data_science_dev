@@ -88,7 +88,11 @@ export function updateMapScreen(game) {
                 game.unifiedMapSystem = new UnifiedMapSystem(domCache.mapContainer, game);
                 // Initialize map system
                 game.unifiedMapSystem.initialize().then(() => {
-
+                    // First visit: the map finished loading after ScreenManager's
+                    // resize call, so size it now if the map is still showing (#2147)
+                    if (game.screenManager?.isScreenActive?.('screen-map')) {
+                        game.unifiedMapSystem?.handleResize?.();
+                    }
                 }).catch(err => {
                     console.error('UnifiedMapSystem initialization failed:', err);
                     // Fallback disabled - WorldMapRenderer causes import errors

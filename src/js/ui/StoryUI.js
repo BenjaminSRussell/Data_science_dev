@@ -251,7 +251,8 @@ export class StoryUI {
     isStoryScreenVisible() {
         const storyScreen = document.getElementById('screen-story');
         if (!storyScreen) return false;
-        const current = this.game?.screenManager?.currentScreen;
+        const sm = this.game?.screenManager;
+        const current = sm?.getCurrentScreen?.() ?? sm?.currentScreen;
         if (current) return current === 'screen-story';
         return !storyScreen.classList.contains('hidden');
     }
