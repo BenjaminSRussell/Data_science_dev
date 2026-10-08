@@ -179,13 +179,19 @@ export class AssetValidator {
         const audioManager = this.game?.audioManager;
         const paths = [];
 
+        // Music tracks are the only audio files the game loads; sound effects
+        // are synthesized tones (#2310)
+        if (typeof audioManager?.getTrackUrls === 'function') {
+            paths.push(...audioManager.getTrackUrls());
+        }
+
         if (audioManager?.sounds) {
             Object.values(audioManager.sounds).forEach(sound => {
                 if (sound.url) paths.push(sound.url);
             });
         }
 
-        return paths;
+        return [...new Set(paths)];
     }
 
     async validateImage(path) {

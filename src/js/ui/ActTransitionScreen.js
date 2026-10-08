@@ -24,20 +24,23 @@ export class ActTransitionScreen {
             overlay.classList.add('active');
         }, 100);
 
-        // Auto-advance after delay or on click
+        // Close on Continue or Escape; whichever fires first tears down both
+        // listeners so no stale keydown handler is left on document.
         const continueBtn = overlay.querySelector('.act-continue-btn');
-        continueBtn.addEventListener('click', () => {
+        let closed = false;
+        const close = () => {
+            if (closed) return;
+            closed = true;
+            document.removeEventListener('keydown', keyHandler);
             this.closeTransition(overlay);
-        });
-
-        // Also close on escape
-        const closeHandler = (e) => {
-            if (e.key === 'Escape') {
-                this.closeTransition(overlay);
-                document.removeEventListener('keydown', closeHandler);
-            }
         };
-        document.addEventListener('keydown', closeHandler);
+        const keyHandler = (e) => {
+            if (e.key === 'Escape') close();
+        };
+        continueBtn?.addEventListener('click', close);
+        document.addEventListener('keydown', keyHandler);
+        overlay._closeTransition = close;
+        return overlay;
     }
 
     /**
@@ -117,7 +120,9 @@ export class ActTransitionScreen {
 
         const items = [];
         
-        if (summary.decisions) {
+        // Counts of 0 are meaningful ("no major decisions yet"), so only
+        // skip them when they are missing entirely.
+        if (Number.isFinite(summary.decisions)) {
             items.push(`<div class="summary-item"><strong>Major Decisions:</strong> ${summary.decisions}</div>`);
         }
         
@@ -125,7 +130,7 @@ export class ActTransitionScreen {
             items.push(`<div class="summary-item"><strong>Career Progress:</strong> ${summary.progress}</div>`);
         }
         
-        if (summary.relationships) {
+        if (Number.isFinite(summary.relationships)) {
             items.push(`<div class="summary-item"><strong>Relationships:</strong> ${summary.relationships}</div>`);
         }
         
@@ -204,7 +209,6 @@ export class ActTransitionScreen {
         if (!gameState) return null;
 
         const storylineManager = gameState.storylineManager;
-        const timeManager = gameState.timeManager;
         const npcManager = gameState.npcManager;
 
         const summary = {

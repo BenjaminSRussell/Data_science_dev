@@ -46,12 +46,17 @@ export class ScreenThemeManager {
         // background for the current location, instead of one fixed theme
         // that overwrote it on every visit (#2008, #1065)
         const locationBackground = screenId === 'screen-office' ? this.getLocationBackground() : null;
+        // The menu keeps the player's unlocked menu theme instead of being
+        // reset to the fixed screen gradient each time it is shown
+        const menuBackground = screenId === 'screen-menu' ? this.getMenuBackground() : null;
 
         // Apply background to screen container
         const screen = document.getElementById(screenId);
         if (screen) {
             if (locationBackground) {
                 paintLayered(screen, locationBackground);
+            } else if (menuBackground) {
+                screen.style.backgroundImage = menuBackground;
             } else {
                 screen.style.background = theme.gradient;
             }
@@ -68,6 +73,15 @@ export class ScreenThemeManager {
         } else {
             document.body.style.background = theme.gradient;
         }
+    }
+
+    /**
+     * Background layers for the active menu theme, if the menu theme system exists
+     */
+    getMenuBackground() {
+        const game = typeof window !== 'undefined' ? window.game : null;
+        const system = game?.menuThemeSystem;
+        return system?.getMenuBackground ? system.getMenuBackground() : null;
     }
 
     /**
