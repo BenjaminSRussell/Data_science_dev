@@ -10,6 +10,7 @@ import { DialogueUI } from '../ui/DialogueUI.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { logger } from '../utils/Logger.js';
 import { GIFT_COSTS } from '../game/NPCManager.js';
+import { npcDialogueLoader } from '../game/dialogue/NPCDialogueLoader.js';
 
 /**
  * Handle visiting an NPC (opens clean dialogue interface)
@@ -137,6 +138,27 @@ export function handleNPCResponse(game, result) {
     renderNPCChoices(game, result.choices);
 }
 
+// Shop gift id -> the action keys NPC dialogue files use for it (#1307)
+const GIFT_ACTION_ALIASES = {
+    wine: ['fine_wine'],
+    books: ['legal_books', 'research_papers', 'notebooks'],
+    tech_gadgets: ['tech', 'keyboard']
+};
+
+/**
+ * The NPC's own hand-written reaction to this gift from its dialogue file
+ * (`actions.gift_<id>`), or null when it has none (#1307).
+ */
+export function giftReactionLine(dialogue, giftId) {
+    const actions = dialogue?.actions;
+    if (!actions || !giftId) return null;
+    for (const key of [giftId, ...(GIFT_ACTION_ALIASES[giftId] || [])]) {
+        const line = actions[`gift_${key}`];
+        if (typeof line === 'string' && line.trim()) return line;
+    }
+    return null;
+}
+
 /**
  * Handle giving a gift to an NPC
  */
@@ -151,9 +173,20 @@ export function handleNPCGift(game, npcId, giftId = 'coffee') {
         game.showToast?.(result.message || 'Unable to give gift right now.', 'warning');
         return;
     }
-    DOMUtils.updateElement('#npc-dialogue-area', {
+    // Fresh lookups: the dialogue area can be re-rendered, so DOMUtils'
+    // selector cache could hand back a detached node
+    const dialogueArea = () => (typeof document !== 'undefined' ? document.getElementById('npc-dialogue-area') : null);
+    DOMUtils.updateElement(dialogueArea(), {
         textContent: result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess."
     });
+    // Swap in the NPC's own line for this gift once its dialogue file loads (#1307)
+    const reactionReady = Promise.resolve(npcDialogueLoader.loadNPCDialogue(npcId))
+        .then(dialogue => {
+            const line = giftReactionLine(dialogue, giftId);
+            if (line) DOMUtils.updateElement(dialogueArea(), { textContent: line });
+            return line;
+        })
+        .catch(() => null);
     const gain = Math.round((result.relationshipGain || 0) * 10) / 10;
     const reaction = result.liked ? 'loved it' : 'accepted it';
     game.showToast?.(`Gift given (-$${result.cost}): they ${reaction}. Relationship ${gain >= 0 ? '+' : ''}${gain}`, result.liked ? 'success' : 'info');
@@ -161,6 +194,7 @@ export function handleNPCGift(game, npcId, giftId = 'coffee') {
     if (game.screenManager?.isScreenActive?.('screen-relationships')) {
         updateRelationshipsScreen(game);
     }
+    return reactionReady;
 }
 
 /**
