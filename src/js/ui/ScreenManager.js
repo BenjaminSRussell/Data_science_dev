@@ -61,6 +61,14 @@ export class ScreenManager {
             return;
         }
 
+        // A modal belongs to the screen it was opened on; leaving the screen
+        // closes it instead of leaving it floating over the next one (#2146)
+        const modal = typeof document !== 'undefined' ? document.getElementById('modal-container') : null;
+        if (modal && !modal.classList.contains('hidden') && screenId !== this.currentScreen) {
+            if (typeof this.mainGame?.closeModal === 'function') this.mainGame.closeModal();
+            else modal.classList.add('hidden');
+        }
+
         // Already showing this screen: don't replay the exit/entrance animation (#1361)
         if (this.currentScreen === screenId && targetScreen.classList.contains('active')) {
             return true;
@@ -133,6 +141,19 @@ export class ScreenManager {
     /**
      * Go back to previous screen
      */
+    /**
+     * Hide whatever screen is showing without opening another, e.g. when a
+     * full-screen flow like the intro takes over (#1360)
+     */
+    hideCurrentScreen() {
+        const el = this.currentScreen && this.screens[this.currentScreen];
+        if (el) {
+            el.classList.remove('active');
+            el.classList.add('hidden');
+        }
+        this.currentScreen = null;
+    }
+
     goBack() {
         if (this.history.length > 0) {
             const previousScreen = this.history.pop();
