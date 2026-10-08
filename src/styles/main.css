@@ -104,7 +104,15 @@
     --z-base: 1;
     --z-overlay: 100;
     --z-modal: 200;
-    --z-toast: 300;
+    /* Above the full-screen story/research/breakdown overlays (z 10000-10002)
+       so feedback is never hidden behind them (#1245) */
+    --z-toast: 10050;
+
+    /* Aliases referenced by components but never defined (#1057, #2339, #1056, #2338) */
+    --color-primary: var(--color-accent-primary);
+    --gradient-grey-dark: linear-gradient(180deg, #27272a 0%, #18181b 100%);
+    --gradient-grey-mid: linear-gradient(180deg, #3f3f46 0%, #27272a 100%);
+    --gradient-grey-light: linear-gradient(180deg, #52525b 0%, #3f3f46 100%);
 }
 
 /* =====================================================
@@ -112,6 +120,9 @@
    Apple-inspired Light Mode (Zinc/Slate)
    ===================================================== */
 [data-theme="light"] {
+    --gradient-grey-dark: linear-gradient(180deg, #e4e4e7 0%, #d4d4d8 100%);
+    --gradient-grey-mid: linear-gradient(180deg, #f4f4f5 0%, #e4e4e7 100%);
+    --gradient-grey-light: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
     /* Backgrounds - Clean White & Soft Grays */
     --color-bg-primary: #ffffff;
     --color-bg-secondary: #f4f4f5;
@@ -424,6 +435,8 @@ a:hover {
 }
 
 .music-radio-menu {
+    display: grid;
+    gap: var(--space-1, 0.25rem);
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
@@ -1793,6 +1806,10 @@ a:hover {
     border-left: 4px solid var(--color-accent-danger);
 }
 
+.toast.info {
+    border-left: 4px solid var(--color-accent-secondary);
+}
+
 .toast-icon {
     font-size: 1.25rem;
 }
@@ -2134,4 +2151,102 @@ a:hover {
 
 @media (prefers-reduced-motion: reduce) {
     .env-floating-element { animation: none !important; }
+}
+
+/* =====================================================
+   SETTINGS AND CREDITS MODALS (#2511, #2512)
+   ===================================================== */
+.settings-modal,
+.credits-modal {
+    padding: var(--space-6);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.settings-modal h2,
+.credits-modal h2 {
+    margin: 0 0 var(--space-4);
+}
+
+.settings-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.settings-row .settings-label {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.settings-row input[type="range"] {
+    flex: 0 1 50%;
+}
+
+.settings-danger {
+    padding-top: var(--space-3);
+    margin-bottom: var(--space-3);
+    border-top: 1px solid var(--glass-border);
+}
+
+.credits-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.credits-section h3 {
+    margin: 0 0 var(--space-1);
+    font-size: var(--font-size-base, 1rem);
+}
+
+.credits-section p {
+    margin: 0;
+    color: var(--color-text-secondary);
+}
+
+/* =====================================================
+   KEYFRAMES REFERENCED ELSEWHERE BUT NEVER DEFINED (#1058)
+   ===================================================== */
+@keyframes loadingProgress {
+    from { width: 0%; }
+    to { width: 100%; }
+}
+
+@keyframes menuFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+}
+
+@keyframes skeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6); }
+    50% { box-shadow: 0 0 0 6px rgba(234, 179, 8, 0); }
 }
