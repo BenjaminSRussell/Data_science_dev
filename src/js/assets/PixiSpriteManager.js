@@ -67,6 +67,8 @@ export class PixiSpriteManager {
         if (!animationFrames) return null;
 
         const animatedSprite = new AnimatedSprite(animationFrames);
+        // playAnimation() looks the sheet up by this id (#70, #1840, #2300)
+        animatedSprite.sheetId = sheetId;
         return animatedSprite;
     }
 
@@ -77,7 +79,7 @@ export class PixiSpriteManager {
         if (!sprite || !(sprite instanceof AnimatedSprite)) return;
 
         // Get animation frames from current sheet
-        const sheetId = sprite.sheetId; // Store sheetId when creating
+        const sheetId = sprite.sheetId; // set by createAnimatedSprite()
         const animationFrames = this.animations.get(sheetId)?.[animationName];
         
         if (animationFrames) {
@@ -85,6 +87,24 @@ export class PixiSpriteManager {
             sprite.loop = loop;
             sprite.play();
         }
+    }
+
+    /**
+     * Free a sprite sheet that's no longer needed (#1053). Destroys its
+     * textures (and the base texture unless keepBaseTexture) and forgets it.
+     * @returns {boolean} true if a sheet was unloaded
+     */
+    unloadSpriteSheet(id, { keepBaseTexture = false } = {}) {
+        const sheet = this.spriteSheets.get(id);
+        if (!sheet) return false;
+        try {
+            sheet.destroy?.(!keepBaseTexture);
+        } catch (error) {
+            console.warn(`Failed to destroy sprite sheet: ${id}`, error);
+        }
+        this.spriteSheets.delete(id);
+        this.animations.delete(id);
+        return true;
     }
 
     /**
