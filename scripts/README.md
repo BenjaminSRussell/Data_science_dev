@@ -13,16 +13,10 @@ Compresses PNG/JPEG assets to reduce size for GitHub upload.
 ### check-file-sizes.js
 Scans repository for files exceeding 50MB.
 - Checks all files (respects .gitignore)
-- Reports files that need attention
+- Reports files that need attention; exits 1 if any file is over the limit
+- `npm run check-sizes -- --limit-mb 25` changes the limit
 
 **Usage**: `npm run check-sizes`
-
-### decompress-assets.js
-Helper script providing information on restoring original files.
-- Shows compression report if available
-- Provides restore instructions
-
-**Usage**: `node scripts/decompress-assets.js`
 
 ## Other Scripts
 
@@ -32,5 +26,5 @@ Static code analysis to find common bugs.
 - Pattern matching for bugs
 - Warnings for code quality
 
-**Usage**: `node scripts/static-bug-check.js`
+**Usage**: `npm run check:static` (or `node scripts/static-bug-check.js`)
 
