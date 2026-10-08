@@ -3291,6 +3291,11 @@ export class MainGame {
                         this.gameState.gameEndingSystem.triggerEnding(ending);
                     }
                 }
+            } else if (event.type === 'new_month') {
+                // Month/year events used to be dropped on the floor (#1462)
+                this.showToast(`A new month begins: ${event.data?.month || ''}`.trim(), 'info');
+            } else if (event.type === 'new_year') {
+                this.showToast(`Happy New Year! Welcome to Year ${event.data?.year ?? ''}`.trim(), 'success');
             }
         });
 
@@ -3316,19 +3321,21 @@ export class MainGame {
             return;
         }
 
-        // Pay cost
-        if (this.gameState.money < activity.cost) {
-            this.showError("Not enough money!");
-            return;
-        }
-        this.gameState.money -= activity.cost;
-
-        // Do training
-        this.timeManager.useEnergy(activity.energyCost);
+        // Validate everything before mutating any state (#93)
         if (!this.characterStats) {
             this.showError('Character stats not initialized');
             return;
         }
+        if (this.gameState.money < activity.cost) {
+            this.showError("Not enough money!");
+            return;
+        }
+
+        // Pay cost
+        this.gameState.money -= activity.cost;
+
+        // Do training (negative energyCost, e.g. Meditation, restores energy)
+        this.timeManager.useEnergy(activity.energyCost);
         const results = this.characterStats.train(activityId);
 
         this.handleTimeAdvance(activity.timeSlots);

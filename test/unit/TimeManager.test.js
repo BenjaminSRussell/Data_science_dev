@@ -376,11 +376,19 @@ describe('TimeManager', () => {
         });
 
         it('should reject action requiring more than remaining time slots', () => {
-            timeManager.timeSlot = 0; // 6 slots remaining
+            timeManager.timeSlot = 3; // 3 slots remaining
+            timeManager.energy = 100;
+
+            const result = timeManager.canPerformAction(4, 20);
+            expect(result.can).toBe(false);
+        });
+
+        it('should allow multi-day actions longer than a full day (#2174)', () => {
+            timeManager.timeSlot = 0;
             timeManager.energy = 100;
 
             const result = timeManager.canPerformAction(7, 20);
-            expect(result.can).toBe(false);
+            expect(result.can).toBe(true);
         });
 
         it('should allow action with zero energy cost', () => {

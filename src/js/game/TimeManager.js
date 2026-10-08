@@ -13,6 +13,12 @@ export const TIME_SLOTS = [
     { id: 'night', name: 'Night', icon: '', hours: '21:00 - 00:00', index: 5 }
 ];
 
+// Number of time slots in a day — derived from TIME_SLOTS so it is defined once (#2174)
+export const SLOTS_PER_DAY = TIME_SLOTS.length;
+
+// The game calendar uses 30-day months (see advanceDay)
+export const DAYS_PER_MONTH = 30;
+
 // Days of the week
 export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -87,7 +93,7 @@ export class TimeManager {
      * Get remaining time slots today
      */
     getRemainingSlots() {
-        return 6 - this.timeSlot;
+        return Math.max(0, SLOTS_PER_DAY - this.timeSlot);
     }
 
     /**
@@ -100,7 +106,7 @@ export class TimeManager {
             this.timeSlot++;
 
             // Check for day change
-            if (this.timeSlot >= 6) {
+            if (this.timeSlot >= SLOTS_PER_DAY) {
                 this.timeSlot = 0;
                 events.push(...this.advanceDay());
             }
@@ -127,7 +133,7 @@ export class TimeManager {
         this.energy = Math.min(this.maxEnergy, this.energy + 50);
 
         // Check for month change (30 days per month)
-        if (this.day > 30) {
+        if (this.day > DAYS_PER_MONTH) {
             this.day = 1;
             events.push(...this.advanceMonth());
         }
@@ -144,7 +150,8 @@ export class TimeManager {
 
         // Check for new week (Monday)
         if (this.dayOfWeek === 0) {
-            events.push({ type: 'new_week', data: { week: Math.floor(this.totalDays / 7) + 1 } });
+            // Same week numbering as every other system: Math.floor(totalDays / 7) (#1463)
+            events.push({ type: 'new_week', data: { week: Math.floor(this.totalDays / 7) } });
         }
 
         return events;
@@ -191,7 +198,7 @@ export class TimeManager {
      */
     sleep() {
         const slotsToAdvance = this.getRemainingSlots();
-        this.timeSlot = 5; // Set to night
+        this.timeSlot = SLOTS_PER_DAY - 1; // Set to night
         const events = this.advanceTime(1); // Advance to next day
 
         // Full energy restore from sleeping
@@ -204,19 +211,50 @@ export class TimeManager {
      * Use energy
      */
     useEnergy(amount) {
-        if (this.energy < amount) {
+        const cost = Number(amount);
+        if (!Number.isFinite(cost)) {
+            return { success: false, reason: 'Invalid energy amount' };
+        }
+        // Negative costs (e.g. Meditation's energyCost: -10) restore energy,
+        // but never past maxEnergy (#1460)
+        if (cost < 0) {
+            this.restoreEnergy(-cost);
+            return { success: true, remaining: this.energy };
+        }
+        if (this.energy < cost) {
             return { success: false, reason: 'Not enough energy' };
         }
 
-        this.energy -= amount;
+        this.energy -= cost;
         return { success: true, remaining: this.energy };
+    }
+
+    /**
+     * Whether the player has at least `amount` energy (#1458)
+     */
+    hasEnergy(amount = 0) {
+        const cost = Number(amount) || 0;
+        return this.energy >= cost;
+    }
+
+    /**
+     * Forced energy loss (sickness, events). Unlike useEnergy it always applies,
+     * but energy is floored at 0 so it can never go negative (#160, #1727).
+     * @returns {number} energy actually lost
+     */
+    drainEnergy(amount) {
+        const loss = Math.max(0, Number(amount) || 0);
+        const before = this.energy;
+        this.energy = Math.max(0, this.energy - loss);
+        return before - this.energy;
     }
 
     /**
      * Restore energy (eating, coffee, etc.)
      */
     restoreEnergy(amount) {
-        this.energy = Math.min(this.maxEnergy, this.energy + amount);
+        const gain = Math.max(0, Number(amount) || 0);
+        this.energy = Math.max(0, Math.min(this.maxEnergy, this.energy + gain));
         return this.energy;
     }
 
@@ -239,7 +277,10 @@ export class TimeManager {
      * Check if can perform action requiring time/energy
      */
     canPerformAction(timeSlots, energyCost) {
-        if (this.getRemainingSlots() < timeSlots) {
+        // Activities longer than a full day are multi-day commitments that roll
+        // over into following days; only same-day activities must fit in
+        // the remaining slots (#2174)
+        if (timeSlots <= SLOTS_PER_DAY && this.getRemainingSlots() < timeSlots) {
             return { can: false, reason: 'Not enough time today' };
         }
         if (energyCost > 0 && this.energy < energyCost) {
@@ -268,7 +309,24 @@ export class TimeManager {
      * Load from saved data
      */
     fromJSON(data) {
-        if (!data) return;
-        Object.assign(this, data);
+        if (!data || typeof data !== 'object') return;
+        // Validate every field before trusting it — a corrupted save must not
+        // soft-lock the player with an out-of-range slot or day (#1461)
+        const int = (v, min, max, fallback) => {
+            const n = Number(v);
+            if (!Number.isFinite(n)) return fallback;
+            return Math.min(max, Math.max(min, Math.floor(n)));
+        };
+        this.timeSlot = int(data.timeSlot, 0, SLOTS_PER_DAY - 1, 0);
+        this.day = int(data.day, 1, DAYS_PER_MONTH, 1);
+        this.dayOfWeek = int(data.dayOfWeek, 0, DAYS.length - 1, 0);
+        this.month = int(data.month, 0, MONTHS.length - 1, 0);
+        this.year = int(data.year, 1, Number.MAX_SAFE_INTEGER, 1);
+        this.totalDays = int(data.totalDays, 1, Number.MAX_SAFE_INTEGER, 1);
+        this.maxEnergy = int(data.maxEnergy, 1, Number.MAX_SAFE_INTEGER, 100);
+        const energy = Number(data.energy);
+        this.energy = Number.isFinite(energy)
+            ? Math.min(this.maxEnergy, Math.max(0, energy))
+            : this.maxEnergy;
     }
 }

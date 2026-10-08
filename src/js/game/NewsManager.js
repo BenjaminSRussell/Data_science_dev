@@ -434,10 +434,15 @@ export class NewsManager {
         }
 
         if (effects.energyPenalty && this.gameState.timeManager) {
-            if (this.gameState?.timeManager) {
-                this.gameState.timeManager.energy = (this.gameState.timeManager.energy || 0) - (effects.energyPenalty || 0);
+            // Use the clamped TimeManager API so energy never goes negative (#160, #1727)
+            const tm = this.gameState.timeManager;
+            if (typeof tm.drainEnergy === 'function') {
+                results.energyLost = tm.drainEnergy(effects.energyPenalty);
+            } else {
+                const before = tm.energy || 0;
+                tm.energy = Math.max(0, before - (effects.energyPenalty || 0));
+                results.energyLost = before - tm.energy;
             }
-            results.energyLost = effects.energyPenalty;
         }
 
         return results;

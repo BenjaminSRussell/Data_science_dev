@@ -134,11 +134,13 @@ export class LocationBackgroundSystem {
      * Get time of day
      */
     getTimeOfDay() {
-        const hour = this.gameState.timeManager?.currentHour || 12;
-        if (hour >= 6 && hour < 12) return 'morning';
-        if (hour >= 12 && hour < 17) return 'afternoon';
-        if (hour >= 17 && hour < 21) return 'evening';
-        return 'night';
+        // TimeManager tracks 3-hour slots (0-5 = 6:00 ... 21:00), not hours (#215, #1285)
+        const slot = Number(this.gameState.timeManager?.timeSlot);
+        if (!Number.isFinite(slot)) return 'afternoon';
+        if (slot <= 1) return 'morning';     // 6:00 - 12:00
+        if (slot <= 3) return 'afternoon';   // 12:00 - 18:00
+        if (slot === 4) return 'evening';    // 18:00 - 21:00
+        return 'night';                      // 21:00 - 00:00
     }
 
     /**

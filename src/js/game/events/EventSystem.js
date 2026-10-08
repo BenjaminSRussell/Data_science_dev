@@ -37,7 +37,8 @@ export class EventSystem {
             { id: 'valentines', name: "Valentine's Day", month: 1, day: 14, type: 'holiday' },
             { id: 'easter', name: 'Easter', month: 3, day: 15, type: 'holiday', variable: true },
             { id: 'independence', name: 'Independence Day', month: 6, day: 4, type: 'holiday' },
-            { id: 'halloween', name: 'Halloween', month: 9, day: 31, type: 'holiday' },
+            // The game calendar has 30-day months, so Oct 31 is celebrated on the last day of October (#1459, #1707)
+            { id: 'halloween', name: 'Halloween', month: 9, day: 30, type: 'holiday' },
             { id: 'thanksgiving', name: 'Thanksgiving', month: 10, day: 23, type: 'holiday', variable: true },
             { id: 'christmas', name: 'Christmas', month: 11, day: 25, type: 'holiday' }
         ];
@@ -73,7 +74,7 @@ export class EventSystem {
             this.upcomingEvents.push({
                 id: `networking_${week}`,
                 name: 'Networking Event',
-                day: week * 7,
+                ...EventSystem.dayOfYearToDate(week * 7),
                 type: 'party',
                 location: 'coffee_shop',
                 description: 'Professional networking opportunity'
@@ -91,7 +92,7 @@ export class EventSystem {
             this.upcomingEvents.push({
                 id: `crash_${i}`,
                 name: 'Stock Market Crash',
-                day: randomDay,
+                ...EventSystem.dayOfYearToDate(randomDay),
                 type: 'crash',
                 severity: Math.random() * 50 + 20, // 20-70% drop
                 description: 'Major market downturn'
@@ -104,7 +105,7 @@ export class EventSystem {
             this.upcomingEvents.push({
                 id: `bull_${i}`,
                 name: 'Bull Market',
-                day: randomDay,
+                ...EventSystem.dayOfYearToDate(randomDay),
                 type: 'bull',
                 boost: Math.random() * 30 + 10, // 10-40% gain
                 description: 'Strong market performance'
@@ -112,6 +113,19 @@ export class EventSystem {
         }
     }
     
+    /**
+     * Convert a 0-based day-of-year offset into the game's { month, day }
+     * calendar (12 months x 30 days). Events must carry both, because
+     * checkTodayEvents() compares against TimeManager's day-of-month (#2413).
+     * @param {number} dayOfYear
+     * @returns {{month: number, day: number}}
+     */
+    static dayOfYearToDate(dayOfYear) {
+        const DAYS_PER_MONTH = 30;
+        const d = Math.max(0, Math.floor(Number(dayOfYear) || 0)) % (DAYS_PER_MONTH * 12);
+        return { month: Math.floor(d / DAYS_PER_MONTH), day: (d % DAYS_PER_MONTH) + 1 };
+    }
+
     /**
      * Check for events today
      */
