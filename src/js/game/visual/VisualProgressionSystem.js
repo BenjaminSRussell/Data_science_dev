@@ -36,9 +36,10 @@ export class VisualProgressionSystem {
             
             // Job level milestones
             job_level_5: { tier: 'mid', threshold: 5, type: 'jobLevel', unlocked: false },
-            job_level_10: { tier: 'premium', threshold: 10, type: 'jobLevel', unlocked: false },
+            // Job tiers run 0-6 (JOB_CATEGORIES), so the top milestone is the CDO tier (#2082)
+            job_level_10: { tier: 'premium', threshold: 6, type: 'jobLevel', unlocked: false },
             
-            // Skills milestones
+            // Skills milestones: stat points gained above the starting 10 per stat
             skills_50: { tier: 'mid', threshold: 50, type: 'totalSkills', unlocked: false },
             skills_100: { tier: 'premium', threshold: 100, type: 'totalSkills', unlocked: false }
         };
@@ -95,14 +96,16 @@ export class VisualProgressionSystem {
             stats.days = this.gameState.timeManager?.totalDays || 0;
         }
         
-        // Get job level
-        if (this.gameState.jobSystem && this.gameState.jobSystem.currentJob) {
-            stats.jobLevel = this.gameState.jobSystem?.currentJob?.level || 0;
+        // Job tier from reputation (JobSystem.updateCurrentJob sets level) (#2082)
+        const job = this.gameState.jobSystem?.updateCurrentJob?.() || this.gameState.jobSystem?.currentJob;
+        if (job) {
+            stats.jobLevel = job.level || 0;
         }
-        
-        // Calculate total skills
-        if (this.gameState.stats) {
-            stats.totalSkills = Object.values(this.gameState.stats).reduce((sum, val) => sum + (val || 0), 0);
+
+        // Total skills from the real CharacterStats (gameState.stats never existed) (#2082)
+        const allStats = this.gameState.characterStats?.getAllStats?.();
+        if (Array.isArray(allStats)) {
+            stats.totalSkills = allStats.reduce((sum, s) => sum + Math.max(0, (Number(s.value) || 0) - 10), 0);
         }
         
         return stats;
