@@ -61,13 +61,10 @@ export function updateStockMarketScreen(game) {
         const marketHeader = document.createElement('div');
         marketHeader.className = 'market-section-header';
         const summary = game.stockMarket?.getMarketSummary(market);
-        const avgPct = summary ? summary.avgChange * 100 : 0;
-        const marketTrend = avgPct.toFixed(2);
-        const trendClass = avgPct >= 0 ? 'positive' : 'negative';
-        const trendSign = avgPct > 0 ? '+' : ''; // negatives already include '-'
+        const trend = formatPercentChange(summary ? summary.avgChange * 100 : 0);
         marketHeader.innerHTML = `
             <h3 class="market-name">${getMarketDisplayName(market)}</h3>
-            <span class="market-trend ${trendClass}">${trendSign}${marketTrend}%</span>
+            <span class="market-trend ${trend.className}">${trend.text}</span>
             <span class="market-stats">${summary ? `${summary.gainers}↑ ${summary.losers}↓` : ''}</span>
         `;
         grid.appendChild(marketHeader);
@@ -180,11 +177,11 @@ function updateMarketSummaries(game) {
 
         const summaryElement = document.createElement('div');
         summaryElement.className = 'market-summary';
-        const trendClass = summary.avgChange >= 0 ? 'positive' : 'negative';
+        const trend = formatPercentChange(summary.avgChange * 100);
         summaryElement.innerHTML = `
             <div class="summary-market">${getMarketDisplayName(summary.market)}</div>
-            <div class="summary-trend ${trendClass}">
-                ${(summary.avgChange * 100).toFixed(2)}%
+            <div class="summary-trend ${trend.className}">
+                ${trend.text}
             </div>
             <div class="summary-stats">
                 ${summary.gainers}↑ ${summary.losers}↓
@@ -231,20 +228,33 @@ function updateWorldEventsDisplay(game) {
 /**
  * Get display name for market
  */
-function getMarketDisplayName(market) {
+export function getMarketDisplayName(market) {
     const names = {
-        'US': ' United States',
-        'EU': ' Europe',
-        'ASIA': ' Asia',
-        'EMERGING': ' Emerging Markets'
+        'US': 'United States',
+        'EU': 'Europe',
+        'ASIA': 'Asia',
+        'EMERGING': 'Emerging Markets'
     };
     return names[market] || market;
 }
 
 /**
+ * Shared % change formatting for market headers and summaries (#1527):
+ * fixed 2 decimals, explicit + for gains, and a positive/negative class
+ */
+export function formatPercentChange(pct) {
+    const value = Number.isFinite(pct) ? pct : 0;
+    return {
+        text: `${value > 0 ? '+' : ''}${value.toFixed(2)}%`,
+        className: value >= 0 ? 'positive' : 'negative'
+    };
+}
+
+/**
  * Format volume for display
  */
-function formatVolume(volume) {
+export function formatVolume(volume) {
+    volume = Number(volume) || 0;
     if (volume >= 1000000) {
         return (volume / 1000000).toFixed(1) + 'M';
     } else if (volume >= 1000) {
