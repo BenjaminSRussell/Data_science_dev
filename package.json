@@ -18,7 +18,8 @@
     "inventory": "node scripts/generate-file-inventory.js",
     "inventory:full": "node scripts/generate-file-inventory.js src/js FILE_INVENTORY.md --size --date --lines --ext",
     "compress-assets": "node scripts/compress-assets-for-git.js",
-    "check-sizes": "node scripts/check-file-sizes.js"
+    "check-sizes": "node scripts/check-file-sizes.js",
+    "check:static": "node scripts/static-bug-check.js"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
