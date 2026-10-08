@@ -125,6 +125,8 @@ class GameAssetManifestCreator:
             assets = list(items_dir.glob("*.png")) + list(items_dir.glob("*.svg"))
             for i, asset in enumerate(assets[:250]):
                 info = self.get_asset_info(asset) if asset.suffix == '.png' else {'width': 64, 'height': 64}
+                if not info:  # unreadable PNG: skip it like the other scan_* methods (#1912)
+                    continue
                 self.manifest['icons']['items'][f'item_{i:04d}'] = {
                     'path': f'/downloaded_assets/icons/items/{asset.name}',
                     'width': info.get('width', 64),
@@ -137,6 +139,8 @@ class GameAssetManifestCreator:
             assets = list(features_dir.glob("*.png")) + list(features_dir.glob("*.svg"))
             for i, asset in enumerate(assets[:250]):
                 info = self.get_asset_info(asset) if asset.suffix == '.png' else {'width': 64, 'height': 64}
+                if not info:  # unreadable PNG: skip it like the other scan_* methods (#1912)
+                    continue
                 self.manifest['icons']['features'][f'feature_{i:04d}'] = {
                     'path': f'/downloaded_assets/icons/features/{asset.name}',
                     'width': info.get('width', 64),

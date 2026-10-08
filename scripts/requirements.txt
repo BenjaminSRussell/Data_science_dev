@@ -1,9 +1,6 @@
-# Web Scraping Requirements
+# Python asset tooling (scripts/generators, scripts/scrapers)
+# Only what those scripts import: the scrapers use requests + BeautifulSoup
+# (plain HTML parsing, no browser automation) and everything uses Pillow (#1914)
 beautifulsoup4>=4.12.0
 requests>=2.31.0
-selenium>=4.15.0
 Pillow>=10.0.0
-lxml>=4.9.0
-webdriver-manager>=4.0.0
-cairosvg>=2.7.0
-
