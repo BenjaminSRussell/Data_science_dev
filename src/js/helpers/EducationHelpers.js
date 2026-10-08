@@ -72,23 +72,22 @@ export function handleStartExam(game, courseId) {
         return;
     }
 
-    // Pay tuition through EducationSystem.enroll, the one place that guards
-    // completed courses, prerequisites and affordability (#1426, #1640)
-    const enrolled = typeof edu.enroll === 'function'
-        ? edu.enroll(courseId)
-        : (game.gameState.money -= course.cost, { success: true });
-    if (!enrolled?.success) {
-        game.showToast?.(enrolled?.message || 'Cannot enroll.', 'error');
+    // Check enrollment (completed, prerequisites, affordability) up front,
+    // but only charge tuition when the player actually starts the exam, so
+    // closing the intro costs nothing (#1270, #1426, #1640)
+    const check = typeof edu.canEnroll === 'function' ? edu.canEnroll(courseId) : { success: true };
+    if (!check?.success) {
+        game.showToast?.(check?.message || 'Cannot enroll.', 'error');
         game.audioManager?.play?.('error');
         return;
     }
-    game.uiUpdater?.updateAllUI?.();
 
     game.currentExam = {
         courseId: courseId,
         questions: course.questions,
         currentQuestionIndex: 0,
-        score: 0
+        score: 0,
+        paid: false
     };
 
     // Show Modal
@@ -120,9 +119,40 @@ export function handleStartExam(game, courseId) {
  * Start the exam questions phase
  */
 export function startExamQuestions(game) {
+    const exam = game?.currentExam;
+    if (exam && exam.paid === false && !payTuition(game, exam)) return;
     document.getElementById('exam-intro')?.classList.add('hidden');
     document.getElementById('exam-questions')?.classList.remove('hidden');
     showExamQuestion(game);
+}
+
+/**
+ * Charge tuition through EducationSystem.enroll, the one place that guards
+ * completed courses, prerequisites and affordability (#1426, #1640). Called
+ * when the exam starts, not when the intro opens (#1270)
+ */
+function payTuition(game, exam) {
+    const edu = game.gameState?.educationSystem;
+    const cost = edu?.courses?.[exam.courseId]?.cost || 0;
+    let enrolled;
+    if (typeof edu?.enroll === 'function') {
+        enrolled = edu.enroll(exam.courseId);
+    } else if (game.gameState.money >= cost) {
+        game.gameState.money -= cost;
+        enrolled = { success: true };
+    } else {
+        enrolled = { success: false, message: 'Cannot afford tuition.' };
+    }
+    if (!enrolled?.success) {
+        game.showToast?.(enrolled?.message || 'Cannot enroll.', 'error');
+        game.audioManager?.play?.('error');
+        closeExamModal(document.getElementById('modal-exam'));
+        game.currentExam = null;
+        return false;
+    }
+    exam.paid = true;
+    game.uiUpdater?.updateAllUI?.();
+    return true;
 }
 
 /**
@@ -157,6 +187,9 @@ export function handleAnswerQuestion(game, answerIndex) {
     const q = exam?.questions?.[exam.currentQuestionIndex];
     // Ignore stray clicks after the exam ended (double-click on the last answer)
     if (!q) return;
+
+    // Neutral click for each answer, so the final result isn't given away (#1237)
+    game.audioManager?.play?.('click');
 
     if (answerIndex === q.correct) {
         exam.score++;
