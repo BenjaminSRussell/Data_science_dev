@@ -15,7 +15,33 @@ export class StorylineManager {
         this.currentArc = null;
         this.lastDecisionCheck = 0; // Timestamp of last decision check
         this.decisionCooldown = 30000; // 30 seconds between decision checks
+        // When each act began, for the journal (#2151, #1772)
+        this.phaseHistory = [];
+        // Injectable for tests; used by gamble outcomes (#1762)
+        this.random = Math.random;
     }
+
+    // Per-act flavour for each arc (#1421)
+    static ARC_PHASE_TEXT = {
+        corruption: {
+            early: 'Small compromises add up. Nobody is watching yet.',
+            mid: 'Your shortcuts are paying off, and people are starting to ask how.',
+            late: 'You have power and enemies in equal measure. One slip could end it all.',
+            endgame: 'Everything you built sits on the choices you made in the dark.'
+        },
+        integrity: {
+            early: 'Doing it right costs more when you have nothing.',
+            mid: 'Your name means something now, and the temptations get bigger.',
+            late: 'People bring you the hard cases because they trust you.',
+            endgame: 'Your legacy is the line you never crossed.'
+        },
+        survival: {
+            early: 'Rent, clients and long nights. You take what comes.',
+            mid: 'You are finding your footing, one trade-off at a time.',
+            late: 'The stakes are higher and the grey areas wider.',
+            endgame: 'Balance got you here. Now decide what it was all for.'
+        }
+    };
 
     /**
      * Initialize storyline
@@ -45,30 +71,34 @@ export class StorylineManager {
      */
     getCurrentArc() {
         const ethics = this.gameState.characterStats?.ethics || 0;
-        const phase = this.storylinePhase;
+        const phase = this.storylinePhase || 'early';
 
+        let arc;
         if (ethics < -30) {
-            return {
+            arc = {
                 name: 'The Dark Path',
                 description: 'Your choices have consequences. The world reacts to your actions.',
                 theme: 'corruption',
                 challenges: ['legal_trouble', 'relationship_loss', 'isolation']
             };
         } else if (ethics > 30) {
-            return {
+            arc = {
                 name: 'The Righteous Path',
                 description: 'You stand for what\'s right, but the world tests your resolve.',
                 theme: 'integrity',
                 challenges: ['financial_struggle', 'temptation', 'sacrifice']
             };
         } else {
-            return {
+            arc = {
                 name: 'The Balanced Path',
                 description: 'You navigate the complexities of life, trying to find balance.',
                 theme: 'survival',
                 challenges: ['uncertainty', 'competition', 'change']
             };
         }
+        // The act changes the telling, not just ethics (#1421)
+        const flavour = StorylineManager.ARC_PHASE_TEXT[arc.theme]?.[phase];
+        return { ...arc, phase, description: flavour ? `${arc.description} ${flavour}` : arc.description };
     }
 
     /**
@@ -80,8 +110,10 @@ export class StorylineManager {
         // getDecision sees the full catalog, so stop a decision being made twice
         if (this.majorDecisions.some(d => d.decisionId === decisionId)) return null;
 
-        const result = decision.choices[choice];
-        if (!result) return null;
+        const chosen = decision.choices[choice];
+        if (!chosen) return null;
+        // A gamble resolves to one of its outcomes (#1762)
+        const result = this.resolveOutcome(chosen);
 
         // Apply consequences
         if (result.consequences) {
@@ -95,7 +127,9 @@ export class StorylineManager {
             // The act it was made in; the catalog's phase can be dynamic (#2266)
             phase: decision.phase || this.storylinePhase,
             timestamp: Date.now(),
-            week: Math.floor((this.gameState.timeManager?.totalDays || 0) / 7)
+            day: this.gameState.timeManager?.totalDays || 0,
+            week: Math.floor((this.gameState.timeManager?.totalDays || 0) / 7),
+            ...(result.outcome ? { outcome: result.outcome } : {})
         });
 
         // Update storyline progress
@@ -107,9 +141,25 @@ export class StorylineManager {
         return {
             success: true,
             message: result.message,
+            // Shown to the player too, not only stored (#1107, #1505)
+            storyImpact: result.storyImpact,
             consequences: result.consequences,
+            outcome: result.outcome,
             progress: this.storylineProgress
         };
+    }
+
+    /**
+     * Pick a gamble's outcome. A choice with `outcomes: { chance, win, lose }`
+     * becomes the win or lose branch (message/consequences/storyImpact);
+     * other choices are returned as-is.
+     */
+    resolveOutcome(choice) {
+        const o = choice?.outcomes;
+        if (!o || !o.win || !o.lose) return choice;
+        const won = this.random() < (Number(o.chance) || 0);
+        const branch = won ? o.win : o.lose;
+        return { ...choice, ...branch, outcome: won ? 'win' : 'lose' };
     }
 
     /**
@@ -205,7 +255,8 @@ export class StorylineManager {
                     choices: {
                         expose: {
                             message: 'You go public with the evidence. The story breaks, the company faces consequences, and you lose your job. But you did the right thing. Some people call you a hero, others a traitor. Your career path changes forever.',
-                            consequences: { ethics: 20, reputation: -50, money: -10000 },
+                            // Losing the job is real: you drop a rank (#1504)
+                            consequences: { ethics: 20, reputation: -50, money: -10000, fired: true },
                             progress: 15,
                             storyImpact: 'You\'ve chosen truth over security. The city respects your courage, but your path forward will be different. New opportunities emerge from those who value integrity.'
                         },
@@ -235,14 +286,30 @@ export class StorylineManager {
                     phase: 'mid',
                     choices: {
                         invest: {
-                            message: 'You write the check. Six months later, the tech fails, but the IP is bought out. You break even, but learn a lot.',
-                            consequences: { money: 0, reputation: 50 },
+                            // A real gamble: $10,000 in, 35% chance it pays 4x (#1762)
+                            message: 'You write a $10,000 check and wait.',
+                            consequences: { money: -10000 },
+                            stakes: 'Costs $10,000. 35% chance it returns $40,000.',
+                            outcomes: {
+                                chance: 0.35,
+                                win: {
+                                    message: 'You write the check. Against the odds the tech works, and a buyout turns your $10,000 into $40,000.',
+                                    consequences: { money: 30000, reputation: 80 },
+                                    storyImpact: 'You took a shot at the moon and hit. People call it vision; you know it was luck.'
+                                },
+                                lose: {
+                                    message: 'You write the check. Six months later the tech fails and your $10,000 is gone, but you learned a lot.',
+                                    consequences: { money: -10000, reputation: 30 },
+                                    storyImpact: 'You took a shot at the moon. You missed, but people respect the ambition.'
+                                }
+                            },
                             progress: 12,
-                            storyImpact: 'You took a shot at the moon. You missed, but people respect the ambition.'
+                            storyImpact: 'You took a shot at the moon.'
                         },
                         decline: {
-                            message: 'You pass. The startup folds a month later. You saved your money, but feel a bit boring.',
-                            consequences: { money: 5000 }, // Saved money logic effectively
+                            message: 'You pass. The startup folds a month later. You kept your money, but feel a bit boring.',
+                            // Declining keeps your cash; it doesn't create any (#1762)
+                            consequences: { reputation: 0 },
                             progress: 5,
                             storyImpact: 'You played it safe. Your empire is built on solid ground, not dreams.'
                         }
@@ -265,6 +332,8 @@ export class StorylineManager {
                         accept: {
                             message: 'You take the deal. The money is incredible - $50,000 in your account. You\'ve crossed a line you can\'t uncross. You\'re now a criminal. The money feels good, but you\'re always looking over your shoulder.',
                             consequences: { ethics: -30, money: 50000, risk: 'arrest' },
+                            // Say so before the click (#1503)
+                            stakes: 'You WILL be arrested and jailed.',
                             progress: 20,
                             storyImpact: 'You\'ve chosen the dark path. The money is real, but so are the risks. Your relationships with ethical people suffer. New, shadier opportunities open up. The city\'s underworld knows your name.'
                         },
@@ -358,6 +427,11 @@ export class StorylineManager {
         if (consequences.reputation !== undefined) {
             this.gameState.reputation = (this.gameState.reputation || 0) + consequences.reputation;
         }
+        if (consequences.fired) {
+            // Fired: back down one rank (#1504)
+            const rank = Number(this.gameState.rankIndex) || 0;
+            this.gameState.rankIndex = Math.max(0, rank - 1);
+        }
         if (consequences.risk === 'arrest') {
             // Trigger arrest event
             if (this.gameState.mainGame) {
@@ -375,6 +449,7 @@ export class StorylineManager {
             const oldPhase = this.storylinePhase;
             this.storylinePhase = newPhase;
             this.currentArc = this.getCurrentArc();
+            this.recordPhase(newPhase);
 
             // Show act transition screen
             if (this.gameState.mainGame && this.gameState.mainGame.actTransitionScreen) {
@@ -392,6 +467,15 @@ export class StorylineManager {
         }
 
         return { phaseChanged: false };
+    }
+
+    /**
+     * Remember the day an act began (once per act) (#2151, #1772)
+     */
+    recordPhase(phase) {
+        if (!Array.isArray(this.phaseHistory)) this.phaseHistory = [];
+        if (phase === 'early' || this.phaseHistory.some(p => p.phase === phase)) return;
+        this.phaseHistory.push({ phase, day: this.gameState.timeManager?.totalDays || 0 });
     }
 
     /**
@@ -450,7 +534,7 @@ export class StorylineManager {
      * Serialize player-visible state for saving
      */
     toJSON() {
-        return pickState(this, ['storylinePhase', 'majorDecisions', 'storylineProgress', 'currentArc']);
+        return pickState(this, ['storylinePhase', 'majorDecisions', 'storylineProgress', 'currentArc', 'phaseHistory']);
     }
 
     /**
@@ -458,6 +542,7 @@ export class StorylineManager {
      */
     fromJSON(data) {
         if (!data) return;
-        applyState(this, data, ['storylinePhase', 'majorDecisions', 'storylineProgress', 'currentArc']);
+        applyState(this, data, ['storylinePhase', 'majorDecisions', 'storylineProgress', 'currentArc', 'phaseHistory']);
+        if (!Array.isArray(this.phaseHistory)) this.phaseHistory = [];
     }
 }

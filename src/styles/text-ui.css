@@ -22,11 +22,6 @@
     padding-bottom: 0.5rem;
 }
 
-.text-ui-content {
-    font-size: clamp(0.75rem, 1.5vw, 1rem);
-    line-height: 1.6;
-}
-
 /* Modular panel system - adapts to window size */
 .modular-panel {
     display: grid;
@@ -40,16 +35,8 @@
         grid-template-columns: 1fr;
     }
 
-    .hide-on-small {
-        display: none;
-    }
-
     .text-ui-heading {
         font-size: 1rem;
-    }
-
-    .text-ui-content {
-        font-size: 0.75rem;
     }
 }
 
@@ -57,10 +44,6 @@
 @media (min-width: 601px) and (max-width: 1024px) {
     .modular-panel {
         grid-template-columns: 1fr 1fr;
-    }
-
-    .full-width-on-medium {
-        grid-column: 1 / -1;
     }
 }
 
@@ -96,10 +79,6 @@
     transition: width 0.3s ease;
 }
 
-.text-progress-empty {
-    color: #404040;
-}
-
 /* Text-based stats display */
 .text-stat-row {
     display: flex;
@@ -132,31 +111,6 @@
     background: #1a1a1a;
     padding: 0 0.25rem;
     color: #666666;
-}
-
-/* Phase indicator */
-.phase-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #2d2d2d;
-    border: 1px solid #404040;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-}
-
-.phase-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #666666;
-}
-
-.phase-dot.active {
-    background: #999999;
-    box-shadow: 0 0 6px #666666;
 }
 
 /* .phase-name is styled by story-ui.css; a colour override here dimmed the
@@ -196,16 +150,6 @@
     min-height: calc(100vh - 120px);
     display: flex;
     flex-direction: column;
-}
-
-/* Scrollable text content */
-.text-scroll-area {
-    flex: 1;
-    overflow-y: auto;
-    max-height: 60vh;
-    padding: 1rem;
-    background: #1a1a1a;
-    border: 1px solid #333333;
 }
 
 /* Simple grey button variants */
@@ -267,12 +211,3 @@
     }
 }
 
-.btn-grey-primary {
-    background: linear-gradient(135deg, #666666 0%, #555555 100%);
-    color: #ffffff;
-    border: 1px solid #777777;
-}
-
-.btn-grey-primary:hover {
-    background: linear-gradient(135deg, #777777 0%, #666666 100%);
-}
