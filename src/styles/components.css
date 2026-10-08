@@ -955,13 +955,13 @@
 
 .save-slot-item:hover {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
-    border-color: rgba(139, 92, 246, 0.4);
+    border-color: rgba(var(--color-accent-rgb),  0.4);
     transform: translateX(4px);
 }
 
 .save-slot-item.selected {
-    border-color: rgba(139, 92, 246, 0.6);
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 100%);
+    border-color: rgba(var(--color-accent-rgb),  0.6);
+    background: linear-gradient(135deg, rgba(var(--color-accent-rgb),  0.15) 0%, rgba(var(--color-accent-rgb),  0.08) 100%);
 }
 
 .save-slot-item.empty {
@@ -970,13 +970,13 @@
 
 .save-slot-item.new-game-option {
     margin-top: auto;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
-    border-color: rgba(139, 92, 246, 0.4);
+    background: linear-gradient(135deg, rgba(var(--color-accent-rgb),  0.2) 0%, rgba(var(--color-accent-rgb),  0.1) 100%);
+    border-color: rgba(var(--color-accent-rgb),  0.4);
 }
 
 .save-slot-item.new-game-option:hover {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.15) 100%);
-    border-color: rgba(139, 92, 246, 0.5);
+    background: linear-gradient(135deg, rgba(var(--color-accent-rgb),  0.3) 0%, rgba(var(--color-accent-rgb),  0.15) 100%);
+    border-color: rgba(var(--color-accent-rgb),  0.5);
 }
 
 .slot-item-content {

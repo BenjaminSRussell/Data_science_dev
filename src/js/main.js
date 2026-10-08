@@ -322,6 +322,9 @@ export class MainGame {
             localStorage.setItem('dst_theme_preference', 'dark');
         }
 
+        // Chart.js draws text on the canvas, so redraw it in the new colours (#1893)
+        this.chartManager?.refreshTheme?.();
+
         // Update button icon
         const themeBtn = document.getElementById('btn-theme-toggle');
         if (themeBtn) {
@@ -2111,12 +2114,7 @@ export class MainGame {
      */
     selectColorPalette(palette) {
         // Update active state
-        document.querySelectorAll('.palette-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.dataset.palette === palette) {
-                btn.classList.add('active');
-            }
-        });
+        MainGame.syncPaletteButtons(palette);
 
         // Update game state
         this.gameState.chartConfig.palette = palette;
@@ -2155,9 +2153,7 @@ export class MainGame {
         document.querySelectorAll('.chart-type-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.type === cfg.type);
         });
-        document.querySelectorAll('.palette-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.palette === cfg.palette);
-        });
+        MainGame.syncPaletteButtons(cfg.palette);
         const set = (id, prop, value) => { const el = document.getElementById(id); if (el) el[prop] = value; };
         set('show-legend', 'checked', !!cfg.showLegend);
         set('show-grid', 'checked', !!cfg.showGrid);
@@ -3999,6 +3995,20 @@ export class MainGame {
         }
     }
 }
+
+/**
+ * Palette picker buttons: swatch painted from the real chart palette (#1892),
+ * and the selection exposed to screen readers (#1881)
+ */
+MainGame.syncPaletteButtons = function (selected) {
+    document.querySelectorAll('.palette-btn').forEach(btn => {
+        const active = btn.dataset.palette === selected;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        const swatch = ChartManager.paletteSwatch(btn.dataset.palette);
+        if (swatch) btn.style.background = swatch;
+    });
+};
 
 // Initialize on DOM ready
 
