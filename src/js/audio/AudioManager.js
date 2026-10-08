@@ -92,7 +92,8 @@ export class AudioManager {
      * Play a sound effect
      */
     play(soundName) {
-        if (!this.soundEnabled) return;
+        // Returns true when a sound was played, so callers can chain fallbacks (#2250)
+        if (!this.soundEnabled) return false;
 
         // Map sound names to frequencies for simple beeps
         // In production, replace with actual audio files
@@ -111,7 +112,9 @@ export class AudioManager {
         const sound = sounds[soundName];
         if (sound) {
             this.playTone(sound.freq, sound.duration);
+            return true;
         }
+        return false;
     }
 
     /**
