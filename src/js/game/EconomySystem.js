@@ -351,7 +351,18 @@ export class EconomySystem {
      * Calculate salary bonus for current rank
      */
     getSalaryMultiplier() {
-        return this.gameState.currentRank?.salaryMultiplier || 1;
+        return EconomySystem.salaryMultiplierFor(this.gameState.currentRank);
+    }
+
+    /**
+     * The one place a rank's salary multiplier is derived; TaskSystem's task
+     * pay uses this too, so a balance change lands everywhere at once (#1314).
+     * @param {{salaryMultiplier?: number}|null|undefined} rank
+     * @returns {number} a positive finite multiplier, 1 when unknown
+     */
+    static salaryMultiplierFor(rank) {
+        const m = Number(rank?.salaryMultiplier);
+        return Number.isFinite(m) && m > 0 ? m : 1;
     }
 
     /**

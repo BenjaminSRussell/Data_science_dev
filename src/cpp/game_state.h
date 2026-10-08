@@ -56,6 +56,14 @@ private:
 
   // Configuration
   static const int INITIAL_MONEY = 100;
+
+public:
+  // Invariants enforced by every mutator and by fromJSON (#152).
+  // Money may go negative (rent/debt) but never below MIN_MONEY, reputation
+  // never drops below MIN_REPUTATION (rank math assumes >= 0), totalEarned is
+  // lifetime earnings and only grows. Additions saturate instead of overflowing.
+  static const int MIN_MONEY = -1000000000;
+  static const int MIN_REPUTATION = 0;
 };
 
 #endif // GAME_STATE_H

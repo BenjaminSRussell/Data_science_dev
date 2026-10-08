@@ -101,7 +101,7 @@ export class TaskSystem {
 
         // Calculate reward based on rank and difficulty
         const rank = this.gameState.currentRank;
-        const baseReward = 100 * (rank?.salaryMultiplier || 1);
+        const baseReward = 100 * EconomySystem.salaryMultiplierFor(rank);
         const difficultyBonus = difficulty * 20;
         const potentialReward = Math.round(baseReward + difficultyBonus);
 

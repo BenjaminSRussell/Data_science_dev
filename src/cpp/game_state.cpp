@@ -3,6 +3,24 @@
 #include <limits>
 #include <sstream>
 
+namespace {
+
+const int INT_MAX_VALUE = std::numeric_limits<int>::max();
+
+int clampInt(long long value, int lo, int hi) {
+  if (value < lo)
+    return lo;
+  if (value > hi)
+    return hi;
+  return static_cast<int>(value);
+}
+
+} // namespace
+
+// Out-of-line definitions so the constants can be bound by reference
+const int GameState::MIN_MONEY;
+const int GameState::MIN_REPUTATION;
+
 GameState::GameState() { reset(); }
 
 GameState::~GameState() {}
@@ -10,16 +28,25 @@ GameState::~GameState() {}
 // Money management
 int GameState::getMoney() const { return money; }
 
-void GameState::setMoney(int amount) { money = amount; }
+void GameState::setMoney(int amount) {
+  money = clampInt(amount, MIN_MONEY, INT_MAX_VALUE);
+}
 
-void GameState::addMoney(int amount) { money += amount; }
+void GameState::addMoney(int amount) {
+  money = clampInt(static_cast<long long>(money) + amount, MIN_MONEY, INT_MAX_VALUE);
+}
 
 // Reputation management
 int GameState::getReputation() const { return reputation; }
 
-void GameState::setReputation(int amount) { reputation = amount; }
+void GameState::setReputation(int amount) {
+  reputation = clampInt(amount, MIN_REPUTATION, INT_MAX_VALUE);
+}
 
-void GameState::addReputation(int amount) { reputation += amount; }
+void GameState::addReputation(int amount) {
+  reputation = clampInt(static_cast<long long>(reputation) + amount,
+                        MIN_REPUTATION, INT_MAX_VALUE);
+}
 
 // Rank management
 int GameState::getRankIndex() const { return rankIndex; }
@@ -42,7 +69,12 @@ void GameState::incrementPerfectScores() { perfectScores++; }
 
 int GameState::getTotalEarned() const { return totalEarned; }
 
-void GameState::addToTotalEarned(int amount) { totalEarned += amount; }
+void GameState::addToTotalEarned(int amount) {
+  // Lifetime earnings: spending or refunds never reduce it
+  if (amount <= 0)
+    return;
+  totalEarned = clampInt(static_cast<long long>(totalEarned) + amount, 0, INT_MAX_VALUE);
+}
 
 // Reset state
 void GameState::reset() {
@@ -125,15 +157,15 @@ void GameState::fromJSON(const std::string &json) {
 
   int value;
   if (readIntField(json, "money", value))
-    money = value;
+    setMoney(value);
   if (readIntField(json, "reputation", value))
-    reputation = value;
+    setReputation(value);
   if (readIntField(json, "rankIndex", value))
     setRankIndex(value);
   if (readIntField(json, "tasksCompleted", value))
-    tasksCompleted = value;
+    tasksCompleted = value < 0 ? 0 : value;
   if (readIntField(json, "perfectScores", value))
-    perfectScores = value;
+    perfectScores = value < 0 ? 0 : value;
   if (readIntField(json, "totalEarned", value))
-    totalEarned = value;
+    totalEarned = value < 0 ? 0 : value;
 }
