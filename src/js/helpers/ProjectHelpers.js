@@ -249,8 +249,9 @@ export function handleTrainAI(game) {
  */
 export function updateOfficeScreen(game) {
     // Update office badge
-    const officeNames = ['Bedroom Corner', 'Home Office', 'Co-working Space', 'Small Office', 'Office Floor', 'Company HQ'];
-    const officeIcons = ['', '', '', '', '', ''];
+    // Names come from the canonical OFFICES table so they can't drift (#1767)
+    const officeNames = OFFICES.map(o => o.name);
+    const officeIcons = OFFICES.map(o => o.icon || '');
     const currentOffice = game.gameState.officeIndex || 0;
 
     const officeNameEl = document.getElementById('current-office-name');
@@ -267,7 +268,7 @@ export function updateOfficeScreen(game) {
     // Check layout visibility
     if (game.worldMap) {
         const locId = game.worldMap.currentLocation;
-        game.uiUpdater.updateLocationLayout(locId);
+        game.uiUpdater?.updateLocationLayout?.(locId);
     }
 
     // Update upgrade button (the DOM id is btn-upgrade-office, #1329)
@@ -307,8 +308,8 @@ export function updateOfficeScreen(game) {
         if (aiSpdEl) aiSpdEl.textContent = ai.speed;
 
         if (aiXpFillEl) {
-            const xpPct = (ai.xp / ai.xpToNextLevel) * 100;
-            aiXpFillEl.style.width = `${xpPct}%`;
+            const xpPct = ai.xpToNextLevel > 0 ? (ai.xp / ai.xpToNextLevel) * 100 : 0;
+            aiXpFillEl.style.width = `${Math.max(0, Math.min(100, xpPct || 0))}%`;
         }
 
         const trainBtn = document.getElementById('btn-train-ai');
@@ -345,7 +346,7 @@ export function updateStatsScreen(game) {
             const xpEl = el.querySelector('.stat-xp');
 
             if (valueEl) valueEl.textContent = stat.value;
-            if (fillEl) fillEl.style.width = `${(stat.value / stat.maxLevel) * 100}%`;
+            if (fillEl) fillEl.style.width = `${stat.maxLevel > 0 ? Math.min(100, (stat.value / stat.maxLevel) * 100) : 0}%`;
             if (xpEl) xpEl.textContent = `XP: ${Math.floor(stat.xp)}/${stat.xpNeeded}`;
         }
     });
@@ -377,7 +378,7 @@ export function updateStatsScreen(game) {
  * Check for character visual evolution
  */
 export function checkForCharacterEvolution(game) {
-    if (!game.gameState.characterStats) return;
+    if (!game.gameState.characterStats?.checkEvolution) return;
 
     // Pass visualProgressionSystem to maintain synchronized state
     // This ensures CharacterStats.visualStage matches VisualProgressionSystem.currentTier
@@ -385,9 +386,9 @@ export function checkForCharacterEvolution(game) {
         game.gameState.money,
         game.gameState.visualProgressionSystem
     );
-    if (evolution.evolved) {
-        game.showToast(`Character Evolved: ${evolution.stage.replace(/_/g, ' ').toUpperCase()}!`, 'success');
-        game.audioManager.play('kaching');
+    if (evolution?.evolved) {
+        game.showToast?.(`Character Evolved: ${String(evolution.stage).replace(/_/g, ' ').toUpperCase()}!`, 'success');
+        game.audioManager?.play?.('kaching');
         updatePlayerAvatar(game);
     }
 }
@@ -406,8 +407,13 @@ export function updatePlayerAvatar(game) {
     if (stage === 'level_3_good') icon = '';
     if (stage === 'level_3_evil') icon = '';
 
+    // Tag every marker with the stage for styling; only replace the text
+    // when there is an icon, instead of blanking the marker
     const markers = document.querySelectorAll('.player-icon');
-    markers.forEach(el => el.textContent = icon);
+    markers.forEach(el => {
+        if (stage) el.dataset.stage = stage;
+        if (icon) el.textContent = icon;
+    });
 }
 
 

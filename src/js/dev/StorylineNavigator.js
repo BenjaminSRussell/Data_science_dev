@@ -67,10 +67,14 @@ export class StorylineNavigator {
                 this.game.handleStoryBeat(foundBeat);
                 return { success: true, message: `Triggered story beat: ${foundBeat.title}` };
             } else {
-                // Manual trigger
-                storyBeatsSystem.completedBeats = storyBeatsSystem.completedBeats || [];
-                if (!storyBeatsSystem.completedBeats.includes(beatId)) {
-                    storyBeatsSystem.completedBeats.push(beatId);
+                // Manual trigger: completeBeat also drops it from pendingBeats
+                if (typeof storyBeatsSystem.completeBeat === 'function') {
+                    storyBeatsSystem.completeBeat(beatId);
+                } else {
+                    storyBeatsSystem.completedBeats = storyBeatsSystem.completedBeats || [];
+                    if (!storyBeatsSystem.completedBeats.includes(beatId)) {
+                        storyBeatsSystem.completedBeats.push(beatId);
+                    }
                 }
                 return { success: true, message: `Marked story beat as completed: ${foundBeat.title}` };
             }
@@ -95,6 +99,10 @@ export class StorylineNavigator {
             }
 
             storylineManager.storylinePhase = phase;
+            // Keep the arc in step with the phase, as checkPhaseTransition does
+            if (typeof storylineManager.getCurrentArc === 'function') {
+                storylineManager.currentArc = storylineManager.getCurrentArc();
+            }
             return { success: true, message: `Storyline phase set to: ${phase}` };
         } catch (error) {
             return { success: false, error: error.message };

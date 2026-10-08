@@ -7,6 +7,7 @@ export class DialogueTester {
     constructor(game) {
         this.game = game;
         this.results = [];
+        this.stepDelay = 100; // ms between choices; tests set 0
     }
 
     async testAll() {
@@ -71,17 +72,18 @@ export class DialogueTester {
 
             result.dialogueCount = 1;
 
-            // Test dialogue choices
+            // Test every opening choice. Picking a choice advances the
+            // conversation, so restart it before each one; otherwise choice N
+            // would be made against whatever turn choice N-1 led to
             if (dialogue.choices && Array.isArray(dialogue.choices)) {
                 for (let choiceIndex = 0; choiceIndex < dialogue.choices.length; choiceIndex++) {
-                    const choice = dialogue.choices[choiceIndex];
                     result.optionCount++;
 
-                    // Test choice selection by index
                     if (npcManager.makeChoice) {
                         try {
-                            npcManager.makeChoice(choiceIndex);
-                            await this.wait(100);
+                            if (choiceIndex > 0) await npcManager.startConversation(npcId);
+                            await npcManager.makeChoice(choiceIndex);
+                            await this.wait(this.stepDelay);
                         } catch (optError) {
                             result.error = `Choice ${choiceIndex} failed: ${optError.message}`;
                             return result;
@@ -106,12 +108,12 @@ export class DialogueTester {
         try {
             // Start conversation (async; returns the dialogue payload)
             await npcManager.startConversation(npcId);
-            await this.wait(200);
+            await this.wait(this.stepDelay * 2);
 
             // Drive each turn by choice index into the current choices array
             for (const choiceIndex of optionPath) {
-                npcManager.makeChoice?.(choiceIndex);
-                await this.wait(200);
+                await npcManager.makeChoice?.(choiceIndex);
+                await this.wait(this.stepDelay * 2);
             }
 
             return { success: true };
@@ -122,6 +124,9 @@ export class DialogueTester {
 
     validateDialogueLogic(dialogue) {
         const issues = [];
+        if (!dialogue || typeof dialogue !== 'object') {
+            return { valid: false, issues: ['Dialogue is null/undefined'] };
+        }
 
         // Check dialogue structure
         if (!dialogue.text && !dialogue.message) {
@@ -129,7 +134,9 @@ export class DialogueTester {
         }
 
         // Check choices (real payloads use `choices` with `text`/`action`)
-        if (dialogue.choices) {
+        if (dialogue.choices !== undefined && !Array.isArray(dialogue.choices)) {
+            issues.push('Choices is not an array');
+        } else if (dialogue.choices) {
             dialogue.choices.forEach((choice, index) => {
                 if (!choice.text) {
                     issues.push(`Choice ${index} missing text`);
