@@ -777,3 +777,31 @@
 .office-scene .office-bonus strong {
     margin-left: 4px;
 }
+
+/* TaskVisualRenderer element stages and chart (#2103, #2104) */
+.task-visual .element-stages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+.task-visual .element-stage {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    text-transform: capitalize;
+}
+.task-visual .element-stage.done {
+    color: var(--color-text-primary);
+}
+.task-visual .element-stage.active {
+    color: var(--color-text-primary);
+    background: var(--color-accent-primary);
+}
+.task-visual .chart-bg {
+    fill: var(--color-bg-tertiary);
+}
+.task-visual .chart-point {
+    fill: var(--color-accent-primary);
+}
