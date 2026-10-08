@@ -11,7 +11,6 @@ import { OFFICE_LOCATIONS } from '../data/locations.js';
 import { LOCATIONS } from '../game/WorldMap.js';
 import { HARDWARE_PARTS, HARDWARE_TYPES } from '../game/HardwareSystems.js';
 import { LitUIManager } from './LitUIManager.js';
-import { useGameStore } from '../store/gameStore.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommonUtils } from '../utils/CommonUtils.js';
 import { insightHint } from '../game/EconomySystem.js';
@@ -43,70 +42,21 @@ export class UIUpdater {
     }
 
     /**
-     * Update top bar stats
-     * Phase 2: Uses LitUIManager (with fallback to DOM)
-     * Phase 4: Uses Zustand store
+     * Update top bar stats (money / reputation / rank).
+     * LitUIManager renders them from the live GameState: into the Lit
+     * <top-bar> when it is mounted, otherwise straight into the existing
+     * #money-value / #reputation-value / #rank-value markup. The store-backed
+     * branches that used to live here could never run (#55, #1638).
      */
     updateTopBar() {
-        // Phase 4: Get state from Zustand store
-        const gameStore = this.game?.gameStore || useGameStore;
-        const state = gameStore.getState();
-        
-        // Try Lit component first
-        if (this.litUIManager) {
-            this.litUIManager.updateTopBar();
-        } else {
-            // Fallback to DOM manipulation (using DOMUtils)
-            DOMUtils.updateElement('#money-value', {
-                textContent: CommonUtils.formatCurrency(state.money ?? 0)
-            });
-            DOMUtils.updateElement('#reputation-value', {
-                textContent: CommonUtils.formatNumber(state.reputation ?? 0)
-            });
-            if (state.currentRank) {
-                DOMUtils.updateElement('#rank-value', {
-                    textContent: state.currentRank.title
-                });
-            }
-        }
+        this.litUIManager?.updateTopBar();
     }
 
-
     /**
-     * Update rank progress display
-     * Phase 2: Uses LitUIManager (with fallback to DOM)
-     * Phase 4: Uses Zustand store
+     * Update rank progress display, same GameState-backed path (#55, #1638)
      */
     updateRankProgress() {
-        // Phase 4: Get state from Zustand store
-        const gameStore = this.game?.gameStore || useGameStore;
-        const state = gameStore.getState();
-        
-        // Try Lit component first
-        if (this.litUIManager) {
-            this.litUIManager.updateRankProgress();
-        } else {
-            // Fallback to DOM manipulation
-            const currentRankEl = document.getElementById('current-rank');
-            const progressEl = document.getElementById('rank-progress');
-            const nextRankEl = document.querySelector('.next-rank');
-
-            if (currentRankEl && state.currentRank) {
-                currentRankEl.textContent = state.currentRank.title || 'None';
-            }
-
-            if (progressEl) {
-                progressEl.style.width = `${state.progressToNextRank || 0}%`;
-            }
-
-            if (nextRankEl) {
-                if (state.nextRank) {
-                    nextRankEl.textContent = `Next: ${state.nextRank.title}`;
-                } else {
-                    nextRankEl.textContent = 'Max Rank Achieved!';
-                }
-            }
-        }
+        this.litUIManager?.updateRankProgress();
     }
 
     /**
