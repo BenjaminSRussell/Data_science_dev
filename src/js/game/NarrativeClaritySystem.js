@@ -347,7 +347,7 @@ export class NarrativeClaritySystem {
 
         return {
             time: `Day ${days} of your journey in Data City`,
-            news: news.length > 0 ? `Recent news: ${news[0]?.headline || 'All quiet'}` : 'No major news',
+            news: news.length > 0 ? `Recent news: ${news[0]?.title || news[0]?.text || 'All quiet'}` : 'No major news',
             events: events.length > 0 ? `${events.length} active world events` : 'No active events',
             economy: this.getEconomyState(),
             social: this.getSocialState()

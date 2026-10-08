@@ -154,8 +154,14 @@ export class EventSystem {
     triggerEvent(eventId) {
         const event = this.upcomingEvents.find(e => e.id === eventId);
         if (!event) return null;
-        
-        this.activeEvents.push(event);
+
+        // Don't trigger the same event twice on one day, and let old ones
+        // age out so activeEvents can't grow forever (#159)
+        const today = this.gameState?.timeManager?.totalDays ?? 0;
+        if (this.activeEvents.some(e => e.id === eventId && e.triggeredDay === today)) return null;
+        this.activeEvents = this.activeEvents.filter(e =>
+            typeof e.triggeredDay === 'number' && today - e.triggeredDay < 7);
+        this.activeEvents.push({ ...event, triggeredDay: today });
         
         // Handle event based on type
         switch (event.type) {

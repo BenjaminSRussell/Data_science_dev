@@ -248,7 +248,29 @@ export const RANDOM_EVENTS = [
 /**
  * NewsManager class - handles news ticker and random events
  */
+// One-line blurbs for the newspaper body, per category (#2238, #1365)
+const CATEGORY_BLURBS = {
+    market: 'Traders are watching closely as the numbers move.',
+    tech: 'Analysts say the change could reshape how data teams work.',
+    business: 'Recruiters and hiring managers are already reacting.',
+    economy: 'Economists are split on what it means for the months ahead.',
+    local: 'Residents and local professionals are expected to turn out.',
+    personal: 'It is the talk of the town today.'
+};
+
+// How template effects move the stock market. StockMarket.update() reads
+// effects.SECTOR / effects.MARKET with MAGNITUDE (#1366)
+const DIRECTION_SIGN = {
+    surges: 1, rises: 1, rallies: 1, grows: 1, increases: 1,
+    drops: -1, plummets: -1, tumbles: -1, 'dries up': -1
+};
+
 export class NewsManager {
+    /** True when the vehicle id is an actual car, not walking or a bus pass */
+    static isCar(vehicleId) {
+        return typeof vehicleId === 'string' && /car|sedan/.test(vehicleId);
+    }
+
     constructor(gameState) {
         this.gameState = gameState;
 
@@ -265,6 +287,8 @@ export class NewsManager {
         // News update frequency
         this.newsPerDay = 3;
     }
+
+    static SIDE_STORIES = 2;
 
     /**
      * Generate news for the day
@@ -286,15 +310,59 @@ export class NewsManager {
         this.dailyPaper.headline = headline;
         this.newsHistory.unshift(headline); //Keep history for now/legacy support
 
-        // Generate 2-3 smaller articles
-        const count = 2 + Math.floor(Math.random() * 2);
-        for (let i = 0; i < count; i++) {
+        // Two smaller articles: the newspaper has two side-story slots (#1127)
+        for (let i = 0; i < NewsManager.SIDE_STORIES; i++) {
             const article = this.generateNewsItem();
             this.dailyPaper.articles.push(article);
             this.newsHistory.unshift(article);
         }
+        this.trimHistory();
 
         return this.dailyPaper;
+    }
+
+    /** Enforce maxHistory (#216) */
+    trimHistory() {
+        if (this.newsHistory.length > this.maxHistory) {
+            this.newsHistory.length = this.maxHistory;
+        }
+    }
+
+    /**
+     * Add a breaking news item (used by WorldEventManager and the weekly
+     * edition). It becomes today's headline; the old headline moves into the
+     * side stories (#2111).
+     * @param {{text: string, title?: string, description?: string, category?: string, sentiment?: string}} item
+     */
+    addNews(item = {}) {
+        const text = item.text || item.title || '';
+        if (!text) return null;
+        const category = item.category || 'local';
+        const newsItem = {
+            id: `news_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            category,
+            text,
+            title: item.title || text,
+            description: item.description || CATEGORY_BLURBS[category] || '',
+            sentiment: item.sentiment || 'neutral',
+            timestamp: this.gameState.timeManager?.getDateString?.() || 'Today',
+            effects: item.effects || {},
+            breaking: true,
+            read: false
+        };
+        this.newsHistory.unshift(newsItem);
+        this.trimHistory();
+        if (this.dailyPaper) {
+            if (this.dailyPaper.headline) this.dailyPaper.articles.unshift(this.dailyPaper.headline);
+            this.dailyPaper.articles = this.dailyPaper.articles.slice(0, NewsManager.SIDE_STORIES);
+            this.dailyPaper.headline = newsItem;
+        }
+        return newsItem;
+    }
+
+    /** Most recent news first (used by NarrativeClaritySystem, #1105) */
+    getCurrentNews(count = 5) {
+        return this.getRecentNews(count);
     }
 
     /**
@@ -312,8 +380,10 @@ export class NewsManager {
 
         // Fill in the template
         let text = template.template;
+        const picked = {};
         for (const [key, options] of Object.entries(template.variables)) {
             const value = options[Math.floor(Math.random() * options.length)];
+            picked[key] = value;
             text = text.replace(`{${key}}`, value);
         }
 
@@ -321,8 +391,11 @@ export class NewsManager {
             id: `news_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             category: template.category,
             text,
+            // The newspaper screen reads title/description (#2238, #1365)
+            title: text,
+            description: CATEGORY_BLURBS[template.category] || '',
             timestamp: this.gameState.timeManager?.getDateString() || 'Today',
-            effects: template.effects,
+            effects: { ...template.effects, ...NewsManager.marketEffectFor(template, picked) },
             read: false
         };
 
@@ -335,6 +408,29 @@ export class NewsManager {
     /**
      * Apply effects from news
      */
+    /**
+     * Turn a template's wording into an effect the stock market reads
+     * (SECTOR/MARKET + MAGNITUDE) (#1366)
+     */
+    static marketEffectFor(template, picked = {}) {
+        const word = picked.direction || picked.sentiment || picked.trend || '';
+        const sign = DIRECTION_SIGN[word] || 0;
+        const fx = template.effects || {};
+        if (template.category === 'market' && sign) {
+            const pct = Number(picked.percent) || 5;
+            return { MARKET: 'US', MAGNITUDE: sign * Math.min(0.01, pct / 2000) };
+        }
+        if (fx.trendingSkill || fx.marketOpportunity) return { SECTOR: 'Tech', MAGNITUDE: 0.01 };
+        if (fx.jobMarket === 'boom') return { SECTOR: 'Tech', MAGNITUDE: 0.005 };
+        if (fx.jobMarket === 'bust') return { SECTOR: 'Tech', MAGNITUDE: -0.01 };
+        if (fx.vcFunding && sign) return { SECTOR: 'Tech', MAGNITUDE: sign * 0.01 };
+        if (fx.loanRates && picked.direction) {
+            // Rate rises hurt banks' borrowers but help bank margins
+            return { SECTOR: 'Finance', MAGNITUDE: picked.direction === 'rise' ? 0.01 : picked.direction === 'drop' ? -0.005 : 0 };
+        }
+        return {};
+    }
+
     applyNewsEffects(newsItem) {
         if (newsItem.effects.stockVolatility) {
             this.activeEffects.stockVolatility = (this.activeEffects.stockVolatility || 0) +
@@ -388,11 +484,15 @@ export class NewsManager {
             return false;
         }
 
-        if (req.hasCar && this.gameState.worldMap?.currentVehicle === 'walking') {
+        // A bus pass isn't a car (#1701)
+        if (req.hasCar && !NewsManager.isCar(this.gameState.worldMap?.currentVehicle)) {
             return false;
         }
 
-        if (req.hasInvestments && !this.gameState.hasInvestments) {
+        // Owning any shares counts as having investments
+        const holdings = this.gameState.stockMarket?.portfolio?.holdings || {};
+        const ownsShares = Object.values(holdings).some(q => q > 0);
+        if (req.hasInvestments && !this.gameState.hasInvestments && !ownsShares) {
             return false;
         }
 
@@ -400,9 +500,9 @@ export class NewsManager {
             return false;
         }
 
-        if (req.hasMetMentor && !this.gameState.npcManager?.metNPCs.some(id =>
-            ['professor_higgins', 'sarah_martinez'] // real mentor id (#107, #2067).includes(id)
-        )) {
+        // real mentor ids (#107, #2067)
+        const MENTORS = ['professor_higgins', 'sarah_martinez'];
+        if (req.hasMetMentor && !(this.gameState.npcManager?.metNPCs || []).some(id => MENTORS.includes(id))) {
             return false;
         }
 
@@ -431,6 +531,15 @@ export class NewsManager {
                 this.gameState.characterStats?.addExperience(stat, amount);
             }
             results.xp = effects.xp;
+        }
+
+        if ((effects.portfolioLoss || effects.portfolioBoost) && this.gameState.stockMarket) {
+            const sm = this.gameState.stockMarket;
+            // Lucky Break / Market Dip move prices once, without the multi-day
+            // trend hit a full crash() carries
+            const fraction = (effects.portfolioBoost || 0) - (effects.portfolioLoss || 0);
+            sm.applyMarketShock?.(fraction);
+            results.marketMove = Math.round(fraction * 100);
         }
 
         if (effects.energyPenalty && this.gameState.timeManager) {
@@ -476,8 +585,10 @@ export class NewsManager {
     toJSON() {
         return {
             newsHistory: this.newsHistory,
-            eventHistory: this.eventHistory,
-            activeEffects: this.activeEffects
+            eventHistory: this.eventHistory.slice(-50),
+            activeEffects: this.activeEffects,
+            // The newspaper renders dailyPaper, so keep it across saves (#1370)
+            dailyPaper: this.dailyPaper || null
         };
     }
 
@@ -489,5 +600,7 @@ export class NewsManager {
         this.newsHistory = data.newsHistory || [];
         this.eventHistory = data.eventHistory || [];
         this.activeEffects = data.activeEffects || {};
+        if (data.dailyPaper) this.dailyPaper = data.dailyPaper;
+        this.trimHistory();
     }
 }
