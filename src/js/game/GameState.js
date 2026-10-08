@@ -551,6 +551,9 @@ export class GameState {
                 this.githubIssuesSystem.openIssues = data.githubIssuesSystem.openIssues || [];
                 this.githubIssuesSystem.closedIssues = data.githubIssuesSystem.closedIssues || [];
                 this.githubIssuesSystem.pullRequests = data.githubIssuesSystem.pullRequests || [];
+                // Repository counts are derived from the lists; recount after
+                // restoring them instead of keeping the fresh-game numbers (#528)
+                this.githubIssuesSystem.refreshRepositoryCounts?.();
             });
         }
         if (this.emotionalBreakdownSystem && data.emotionalBreakdownSystem) {
