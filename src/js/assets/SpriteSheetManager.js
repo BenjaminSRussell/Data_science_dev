@@ -5,6 +5,20 @@
  */
 
 export class SpriteSheetManager {
+    /**
+     * Fallback layout (Universal LPC style) used when a sheet is registered
+     * without its own `animations`. Frame indices run left to right, top to
+     * bottom across `columns`.
+     */
+    static DEFAULT_ANIMATIONS = {
+        idle: { startFrame: 0, frameCount: 4 },
+        walk_down: { startFrame: 4, frameCount: 4 },
+        walk_up: { startFrame: 8, frameCount: 4 },
+        walk_left: { startFrame: 12, frameCount: 4 },
+        walk_right: { startFrame: 16, frameCount: 4 },
+        talk: { startFrame: 20, frameCount: 4 }
+    };
+
     constructor() {
         this.spriteSheets = new Map();
         this.animations = new Map();
@@ -21,7 +35,10 @@ export class SpriteSheetManager {
             frameHeight: config.frameHeight || 64,
             columns: config.columns || 8,
             rows: config.rows || 8,
-            animations: config.animations || {},
+            // Caller-supplied frame layout; parseAnimations() turns it into
+            // frame rects instead of discarding it (#2294, #1050)
+            animationDefs: config.animations || null,
+            animations: {},
             url: config.url
         });
     }
@@ -70,22 +87,16 @@ export class SpriteSheetManager {
      */
     calculateFramePositions(sheet) {
         const animations = {};
-        
-        // Example: Universal LPC format
-        // Each animation has a start frame index
-        const animationDefs = {
-            idle: { startFrame: 0, frameCount: 4, row: 0 },
-            walk_down: { startFrame: 4, frameCount: 4, row: 0 },
-            walk_up: { startFrame: 8, frameCount: 4, row: 1 },
-            walk_left: { startFrame: 12, frameCount: 4, row: 1 },
-            walk_right: { startFrame: 16, frameCount: 4, row: 1 },
-            talk: { startFrame: 20, frameCount: 4, row: 2 }
-        };
+        const animationDefs = (sheet.animationDefs && Object.keys(sheet.animationDefs).length > 0)
+            ? sheet.animationDefs
+            : SpriteSheetManager.DEFAULT_ANIMATIONS;
         
         for (const [animName, animDef] of Object.entries(animationDefs)) {
             const frames = [];
+            // Optional `row`: startFrame then counts from the start of that row
+            const base = (Number.isInteger(animDef.row) ? animDef.row * sheet.columns : 0) + (animDef.startFrame || 0);
             for (let i = 0; i < animDef.frameCount; i++) {
-                const frameIndex = animDef.startFrame + i;
+                const frameIndex = base + i;
                 const col = frameIndex % sheet.columns;
                 const row = Math.floor(frameIndex / sheet.columns);
                 

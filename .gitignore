@@ -62,10 +62,12 @@ assets/map/**/*.jpg
 # Public assets (generated/cached)
 public/assets/**/*.png
 public/assets/**/*.jpg
+# WASM build output (npm run build:wasm). It's generated in CI (cpp.yml)
+# and not committed; the old `!public/**/*.wasm` negation could never apply
+# under an ignored directory anyway (#2535)
 public/wasm/
 # Keep manifests
 !public/assets/**/*.json
-!public/**/*.wasm
 
 # Test coverage
 coverage/
