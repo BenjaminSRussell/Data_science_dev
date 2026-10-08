@@ -4,6 +4,8 @@
  * Handles contract generation, acceptance, completion, and rewards
  */
 
+import { grantWorkReward } from '../work/workRewards.js';
+
 /**
  * Contract Categories - Different types of work contracts
  */
@@ -581,17 +583,15 @@ export class ContractSystem {
             bonuses
         });
         
-        // Award pay; contract pay is income like task pay, so it's taxed weekly (#1989)
-        this.gameState.money += pay;
-        this.gameState.weeklyIncome = (this.gameState.weeklyIncome || 0) + pay;
-        this.gameState.totalEarned = (this.gameState.totalEarned || 0) + pay;
-        this.gameState.reputation += Math.floor(contract.difficulty * 10);
+        // Award pay; contract pay is income like task pay, so it's taxed weekly (#1989).
+        // Shared with the other work systems (#267)
+        grantWorkReward(this.gameState, { money: pay, reputation: Math.floor((Number(contract.difficulty) || 0) * 10) });
         
         return {
             success: true,
             pay,
             bonuses,
-            reputation: Math.floor(contract.difficulty * 10)
+            reputation: Math.floor((Number(contract.difficulty) || 0) * 10)
         };
     }
     

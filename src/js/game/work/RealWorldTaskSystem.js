@@ -5,6 +5,7 @@
  */
 
 import { SKILL_TO_STAT } from '../ProjectSystem.js';
+import { grantWorkReward } from './workRewards.js';
 
 // Task skill ids that aren't in ProjectSystem's map
 const EXTRA_SKILL_TO_STAT = {
@@ -582,12 +583,9 @@ export class RealWorldTaskSystem {
         // Apply rewards
         if (task.reward) {
             // canTakeModel is about keeping the trained model, not pay (#1821)
-            if (task.reward.money) {
-                this.gameState.money += task.reward.money;
-            }
-            if (task.reward.reputation) {
-                this.gameState.reputation += task.reward.reputation;
-            }
+            // Same money/reputation bookkeeping as contracts and projects:
+            // pay is weekly (taxed) income, reputation never below 0 (#267)
+            grantWorkReward(this.gameState, { money: task.reward.money, reputation: task.reward.reputation });
             if (task.reward.experience) {
                 // XP goes into the canonical CharacterStats store through its
                 // API, the same way ProjectSystem.completeProject grants it (#165)

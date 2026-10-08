@@ -3,6 +3,7 @@
  * Manages active projects, progress, and stage transitions.
  */
 import { CONTRACTS } from './ProjectDatabase.js';
+import { grantWorkReward } from './work/workRewards.js';
 
 /**
  * Contract xpReward keys are data-science skills; CharacterStats only levels
@@ -203,11 +204,9 @@ export class ProjectSystem {
         const project = this.activeProject;
 
         // Rewards
-        if (project.reward) {
-            this.gameState.money = (this.gameState.money || 0) + project.reward;
-            this.gameState.totalEarned = (this.gameState.totalEarned || 0) + project.reward;
-            this.gameState.weeklyIncome = (this.gameState.weeklyIncome || 0) + project.reward; // taxed weekly (#1989)
-        }
+        // Pay counts as weekly (taxed) income (#1989); shared with the other
+        // work systems (#267). Reputation is granted below.
+        if (project.reward) grantWorkReward(this.gameState, { money: project.reward });
         
         const xpGained = {};
         if (project.xpReward && this.gameState?.characterStats) {
@@ -242,9 +241,7 @@ export class ProjectSystem {
         if (typeof project.ethics === 'number' && project.ethics < 0) {
             reputationChange += project.ethics * 2;
         }
-        if (reputationChange !== 0) {
-            this.gameState.reputation = Math.max(0, (this.gameState.reputation || 0) + reputationChange);
-        }
+        if (reputationChange !== 0) grantWorkReward(this.gameState, { reputation: reputationChange });
 
         // Completed projects yield Data Points for training the AI (#1807)
         const dataPoints = Math.max(1, (project.difficulty || 1) * 5 + (project.stages?.length || 0) * 2);
