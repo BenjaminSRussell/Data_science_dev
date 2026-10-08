@@ -7,7 +7,8 @@
 export class DayNightCycle {
     constructor(gameState) {
         this.gameState = gameState;
-        this.currentTimeOfDay = 'morning';
+        // null so the first update() applies the classes even in the morning
+        this.currentTimeOfDay = null;
     }
 
     /**
@@ -47,9 +48,7 @@ export class DayNightCycle {
             this.updateMapAppearance();
 
             // Update body class for CSS
-            document.body.className = document.body.className
-                .replace(/time-morning|time-noon|time-night/g, '')
-                .trim();
+            document.body.classList.remove('time-morning', 'time-noon', 'time-night');
             document.body.classList.add(`time-${newTimeOfDay}`);
         }
     }

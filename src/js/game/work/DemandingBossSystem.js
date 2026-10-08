@@ -18,14 +18,16 @@ export class DemandingBossSystem {
     /**
      * Initialize boss
      */
-    initializeBoss(bossData) {
+    initializeBoss(bossData = {}) {
+        bossData = bossData || {};
         this.boss = {
             id: bossData.id || 'boss_default',
             name: bossData.name || 'Mr. Anderson',
             title: bossData.title || 'Department Head',
             personality: 'demanding',
-            demandLevel: bossData.demandLevel || 70,
-            satisfaction: 50
+            // ?? so an explicit demandLevel of 0 is kept
+            demandLevel: bossData.demandLevel ?? 70,
+            satisfaction: this.satisfaction
         };
         
         this.demandLevel = this.boss.demandLevel;
@@ -40,7 +42,7 @@ export class DemandingBossSystem {
         const reward = this.calculateReward(difficulty);
         
         return {
-            id: 'task_' + Date.now(),
+            id: `task_${Date.now()}_${(this.taskSeq = (this.taskSeq || 0) + 1)}`,
             name: this.generateTaskName(),
             description: this.generateTaskDescription(),
             difficulty: difficulty,
@@ -128,6 +130,8 @@ export class DemandingBossSystem {
         }
         
         this.satisfaction = Math.max(0, Math.min(100, this.satisfaction + satisfactionChange));
+        // Keep the boss record's copy in sync with the system value
+        if (this.boss) this.boss.satisfaction = this.satisfaction;
         
         return {
             satisfaction: this.satisfaction,

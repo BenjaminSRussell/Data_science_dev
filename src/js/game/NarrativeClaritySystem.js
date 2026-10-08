@@ -23,7 +23,9 @@ export class NarrativeClaritySystem {
         const rank = this.gameState.rankIndex || 0;
         const money = this.gameState.money || 0;
         const reputation = this.gameState.reputation || 0;
-        const ethics = this.gameState.characterStats?.getStat?.('ethics') || 0;
+        // Ethics lives on characterStats.ethics, not in the stats table
+        const cs = this.gameState.characterStats;
+        const ethics = typeof cs?.ethics === 'number' ? cs.ethics : (cs?.getStat?.('ethics') || 0);
 
         // Determine chapter
         let chapter = 'Prologue';
@@ -287,7 +289,8 @@ export class NarrativeClaritySystem {
                 explanation += `Ethics ${cons.ethics > 0 ? '+' : ''}${cons.ethics}. `;
             }
             if (cons.money !== undefined) {
-                explanation += `Money ${cons.money > 0 ? '+' : ''}$${Math.abs(cons.money)}. `;
+                // Keep the sign for losses: "Money -$500", not "Money $500"
+                explanation += `Money ${cons.money > 0 ? '+' : cons.money < 0 ? '-' : ''}$${Math.abs(cons.money)}. `;
             }
             if (cons.reputation !== undefined) {
                 explanation += `Reputation ${cons.reputation > 0 ? '+' : ''}${cons.reputation}. `;

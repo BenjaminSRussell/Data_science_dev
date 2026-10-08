@@ -33,7 +33,8 @@ export class CharacterArcSystem {
             ethics: this.gameState.characterStats?.ethics || 0,
             reputation: this.gameState.reputation || 0,
             rank: this.gameState.rankIndex || 0,
-            money: this.gameState.money || 100,
+            // ?? so a real starting balance of $0 isn't recorded as $100
+            money: this.gameState.money ?? 100,
             relationships: this.getRelationshipCount(),
             days: this.gameState.timeManager?.totalDays || 0,
             description: 'A newcomer to Data City, full of potential but uncertain of the path ahead.'
@@ -107,7 +108,8 @@ export class CharacterArcSystem {
      */
     getCareerDescription(rank, reputation) {
         const rep = Number(reputation) || 0;
-        const tone = rep >= 70 ? 'widely respected' : rep >= 40 ? 'building a solid name' : rep >= 15 ? 'still proving yourself' : 'mostly unknown';
+        // Reputation runs into the thousands (RANKS.repRequired: 100 / 600 / 2500)
+        const tone = rep >= 2500 ? 'widely respected' : rep >= 600 ? 'building a solid name' : rep >= 100 ? 'still proving yourself' : 'mostly unknown';
         if (rank >= 6) {
             return `You've reached the pinnacle of your career — ${tone}, with doors opening wherever you go.`;
         } else if (rank >= 4) {
