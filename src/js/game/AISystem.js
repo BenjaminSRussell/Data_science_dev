@@ -23,6 +23,8 @@ export class AISystem {
         // State
         this.name = "Project Prometheus";
         this.isTraining = false;
+        // Data Points earned from completed projects, spent on training (#1807)
+        this.dataPoints = 0;
     }
 
     /**
@@ -47,9 +49,11 @@ export class AISystem {
      */
     train(dataPoints) {
         // For now, simple XP gain
-        this.xp += dataPoints * 10;
-        this.checkLevelUp();
-        return { success: true, xpGained: dataPoints * 10 };
+        const points = Math.max(0, Number(dataPoints) || 0);
+        this.xp += points * 10;
+        let levelsGained = 0;
+        while (this.checkLevelUp()) levelsGained++;
+        return { success: true, xpGained: points * 10, leveledUp: levelsGained > 0, levelsGained };
     }
 
     checkLevelUp() {
@@ -99,7 +103,8 @@ export class AISystem {
             hardware: this.hardware,
             slots: this.slots,
             name: this.name,
-            isTraining: this.isTraining
+            isTraining: this.isTraining,
+            dataPoints: this.dataPoints
         };
     }
 

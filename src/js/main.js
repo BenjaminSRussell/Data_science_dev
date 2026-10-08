@@ -2957,7 +2957,7 @@ export class MainGame {
      * Handle office upgrade
      */
     handleUpgradeOffice() {
-        const officePrices = [0, 5000, 15000, 50000, 200000, 1000000];
+        const officePrices = ProjectHelpers.getOfficePrices(); // canonical OFFICES pricing (#1767)
         const currentOffice = this.gameState.officeIndex || 0;
         const nextOfficePrice = officePrices[currentOffice + 1];
 
@@ -3372,6 +3372,10 @@ export class MainGame {
 
     handleStartProject(contractId) {
         ProjectHelpers.handleStartProject(this, contractId);
+    }
+
+    handleCancelProject() {
+        ProjectHelpers.handleCancelProject(this);
     }
 
     handleWorkOnProject() {

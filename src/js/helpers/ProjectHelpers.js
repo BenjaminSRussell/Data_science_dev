@@ -2,6 +2,33 @@
  * ProjectHelpers.js
  * Helper functions for project work, work sessions, and AI training
  */
+import { OFFICES } from '../data/tycoonData.js';
+
+/**
+ * Price to move into each office tier, from the canonical OFFICES table (#1767)
+ * @returns {number[]}
+ */
+export function getOfficePrices() {
+    return OFFICES.map(o => o.price || 0);
+}
+
+/**
+ * Handle abandoning the active project (#1113)
+ */
+export function handleCancelProject(game) {
+    const ps = game.projectSystem;
+    if (!ps?.activeProject) return;
+    const title = ps.activeProject.title;
+    const ok = typeof window === 'undefined' || typeof window.confirm !== 'function'
+        ? true
+        : window.confirm(`Abandon "${title}"? All progress on it will be lost.`);
+    if (!ok) return;
+    const result = ps.cancelProject();
+    if (result?.success) {
+        game.showToast(`Abandoned contract: ${title}`, 'warning');
+        game.uiUpdater?.updateCareerScreen();
+    }
+}
 
 /**
  * Handle starting a new project
@@ -68,8 +95,11 @@ export function startWorkingSession(game, hours) {
         game.workSession.currentTick++;
         currentTick = game.workSession.currentTick;
 
-        // Advance time
-        game.handleTimeAdvance(0.1);
+        // Advance time: one time slot (3 in-game hours) per 3 hours of work.
+        // handleTimeAdvance(0.1) used to advance a whole slot on every click.
+        if (currentTick % (ticksPerHour * 3) === 0) {
+            game.handleTimeAdvance(1);
+        }
 
         // Add progress
         simulateWorkTick(game);
@@ -88,14 +118,16 @@ export function startWorkingSession(game, hours) {
             game.showToast("Bug found! Fixing...", "warning");
         }
 
-        if (currentTick >= totalTicks) {
+        // A stage (or the whole project) finished on this tick: end the session.
+        // The two checks are exclusive and null-safe once the project completes
+        // and activeProject becomes null (#1768, #2040).
+        if (game.workSession.active && game.projectSystem.lastResult) {
             game.workSession.active = false;
             finishWorkingSession(game, currentTick, totalTicks);
+            return;
         }
 
-        // Check if stage completed early
-        if (game.projectSystem.activeProject.stageProgress >=
-            game.projectSystem.activeProject.stages[game.projectSystem.activeProject.currentStageIndex].maxProgress) {
+        if (currentTick >= totalTicks && game.workSession.active) {
             game.workSession.active = false;
             finishWorkingSession(game, currentTick, totalTicks);
         }
@@ -140,14 +172,14 @@ export function finishWorkingSession(game, ticks, totalTicks) {
     game.uiUpdater.updateCareerScreen();
     game.uiUpdater.updateAllUI();
 
-    const result = game.projectSystem.checkProgress();
+    const result = game.projectSystem.checkProgress?.();
 
     if (result && result.status === 'project_complete') {
         game.showToast(`PROJECT COMPLETE! Earned $${result.reward}`, 'success');
         game.audioManager.play('kaching');
         game.uiUpdater.updateCareerScreen();
     } else if (result && result.status === 'stage_complete') {
-        game.showToast(`Stage Complete! Next: ${result.nextStage.name}`, 'info');
+        game.showToast(`Stage Complete! Next: ${result.nextStage?.name || 'next stage'}`, 'info');
         game.uiUpdater.updateCareerScreen();
     }
 }
@@ -190,12 +222,20 @@ export function handleTrainAI(game) {
     game.gameState.money -= moneyCost;
     game.handleTimeAdvance(2);
 
-    const result = game.aiSystem.train(10);
+    // Training consumes Data Points earned from completed projects (#1807);
+    // with none banked, the cloud compute still runs on a small synthetic set.
+    const banked = Math.max(0, game.aiSystem.dataPoints || 0);
+    const used = Math.min(10, banked);
+    game.aiSystem.dataPoints = banked - used;
+    const result = game.aiSystem.train(used > 0 ? used : 2);
 
-    game.showToast(`Trained AI! Gained ${result.xpGained} XP.`, 'success');
+    const source = used > 0 ? `${used} Data Points` : 'synthetic data (complete projects to earn Data Points)';
+    game.showToast(`Trained AI on ${source}! Gained ${result.xpGained} XP.`, 'success');
+    // play() returns whether a sound was found, so the fallback works (#1234, #2250)
     game.audioManager.play('keyboard_typing') || game.audioManager.play('click');
 
-    if (game.aiSystem.checkLevelUp()) {
+    // train() already levels up; read its result instead of re-checking (#1765)
+    if (result.leveledUp) {
         game.showToast(`AI LEVEL UP! Now Level ${game.aiSystem.level}`, 'success');
         game.audioManager.play('kaching');
     }
@@ -232,7 +272,7 @@ export function updateOfficeScreen(game) {
 
     // Update upgrade button (the DOM id is btn-upgrade-office, #1329)
     const nextBtn = document.getElementById('btn-upgrade-office') || document.getElementById('upgrade-office');
-    const officePrices = [0, 5000, 15000, 50000, 200000, 1000000];
+    const officePrices = getOfficePrices();
 
     if (nextBtn) {
         nextBtn.onclick = () => game.handleUpgradeOffice();

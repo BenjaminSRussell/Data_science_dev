@@ -350,40 +350,49 @@ export class UIUpdater {
         const ps = this.gameState.projectSystem;
         if (!ps) return;
 
-        // --- Active Project View ---
+        // --- Active Project View --- (every DOM lookup is null-guarded, #1132)
         const activeContainer = document.getElementById('active-project-container');
         const contractsGrid = document.getElementById('contracts-grid');
+        if (!activeContainer || !contractsGrid) return;
+        const setText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
 
-        if (ps.activeProject) {
+        const currentStage = ps.activeProject?.stages?.[ps.activeProject.currentStageIndex];
+        if (ps.activeProject && currentStage) {
             activeContainer.classList.remove('hidden');
-            document.querySelector('#contracts-grid')?.previousElementSibling?.classList.add('hidden'); // Hide AVAILABLE CONTRACTS only
+            contractsGrid.previousElementSibling?.classList.add('hidden'); // Hide AVAILABLE CONTRACTS only
             contractsGrid.classList.add('hidden');
 
             // Update Active Project UI
-            document.getElementById('active-project-title').textContent = ps.activeProject.title;
-            const currentStage = ps.activeProject.stages[ps.activeProject.currentStageIndex];
+            setText('active-project-title', ps.activeProject.title);
+            setText('active-project-stage', `Stage ${ps.activeProject.currentStageIndex + 1}/${ps.activeProject.stages.length}`);
+            setText('current-stage-name', currentStage.name);
+            setText('current-stage-desc', currentStage.description);
 
-            document.getElementById('active-project-stage').textContent = `Stage ${ps.activeProject.currentStageIndex + 1}/${ps.activeProject.stages.length}`;
-            document.getElementById('current-stage-name').textContent = currentStage.name;
-            document.getElementById('current-stage-desc').textContent = currentStage.description;
+            const pct = currentStage.maxProgress > 0
+                ? Math.min(100, (ps.activeProject.stageProgress / currentStage.maxProgress) * 100)
+                : 0;
+            const fill = document.getElementById('project-progress-fill');
+            if (fill) fill.style.width = `${pct}%`;
 
-            const pct = (ps.activeProject.stageProgress / currentStage.maxProgress) * 100;
-            document.getElementById('project-progress-fill').style.width = `${pct}%`;
-
-            // Work Button State
+            // Work / abandon buttons
             const workBtn = document.getElementById('btn-work-project');
-            workBtn.onclick = () => {
-                // Call main game work handler
-                this.game.handleWorkOnProject();
-            };
+            if (workBtn) workBtn.onclick = () => this.game.handleWorkOnProject();
+            const cancelBtn = document.getElementById('btn-cancel-project');
+            if (cancelBtn) cancelBtn.onclick = () => this.game.handleCancelProject?.();
 
         } else {
             activeContainer.classList.add('hidden');
-            document.querySelector('#contracts-grid')?.previousElementSibling?.classList.remove('hidden');
+            contractsGrid.previousElementSibling?.classList.remove('hidden');
             contractsGrid.classList.remove('hidden');
 
+            // Re-evaluate eligibility against current stats/reputation (#1116, #1515)
+            ps.refreshContracts?.();
+
             // --- Available Contracts View ---
-            if (ps.availableContracts.length === 0) {
+            if (!ps.availableContracts || ps.availableContracts.length === 0) {
                 contractsGrid.innerHTML = '<div class="no-contracts">No contracts available right now. Improve your skills!</div>';
             } else {
                 contractsGrid.innerHTML = ps.availableContracts.map(c => `
