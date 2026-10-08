@@ -51,7 +51,7 @@ export class RelationshipEmotionSystem {
         const ethics = this.gameState.characterStats?.ethics || 0;
 
         // Track emotional state
-        this.updateEmotionalState(npcId, action, context);
+        this.updateEmotionalState(npcId, action, { ...context, npcType: npc?.type });
 
         // Calculate relationship change, coloured by how the NPC feels (#111, #1551, #1549)
         const base = this.calculateRelationshipChange(action, npc, ethics, currentRel, context);
@@ -165,13 +165,26 @@ export class RelationshipEmotionSystem {
             state.trust -= 5;
             state.fear += 3;
         }
-        if (action === 'gift' && context.liked) {
-            state.affection += 5;
+        // Every action calculateRelationshipChange() scores also moves at
+        // least one emotional stat, in the same direction (#1850)
+        if (action === 'gift') {
+            state.affection += context.liked ? 5 : 1;
         }
         if (action === 'help' || action === 'support') {
             state.trust += 3;
             state.anger -= 5;
             state.fear -= 3;
+        }
+        if (action === 'help') {
+            state.respect += 2;
+        }
+        if (action === 'support') {
+            state.affection += 3;
+        }
+        const npcType = context.npcType ?? this.gameState?.npcManager?.getNPC?.(npcId)?.type;
+        if (action === 'financial_stress' && npcType === 'romance' && (Number(context.debt) || 0) > 5000) {
+            state.affection -= 2;
+            state.anger += 2;
         }
         if (action === 'neglect') {
             // Longer absences sting more, so affection can reach the

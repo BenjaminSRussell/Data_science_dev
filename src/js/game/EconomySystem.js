@@ -71,6 +71,37 @@ export class EconomySystem {
         return Math.round(limit * (1 + Math.max(0, speed)));
     }
 
+    static BOSS_LIKED_CHART_BONUS = 8;
+    static BOSS_DISLIKED_CHART_PENALTY = 12;
+    static BOSS_CREATIVE_STYLE_BONUS = 5;
+
+    /**
+     * How a boss's preferences (bosses.js) colour the grade (#1854, #2226):
+     * a liked chart type scores higher and a disliked one lower; bosses who
+     * value clarity weight visual clarity more; bosses who value creativity
+     * reward styling beyond the default (custom palette or data labels).
+     */
+    static bossTaste(boss, chartConfig = {}) {
+        const prefs = boss?.preferences || {};
+        const type = chartConfig?.type;
+        const liked = !!type && (prefs.likesChartTypes || []).includes(type);
+        const disliked = !!type && (prefs.dislikesChartTypes || []).includes(type);
+        let appropriatenessDelta = 0;
+        if (liked) appropriatenessDelta += EconomySystem.BOSS_LIKED_CHART_BONUS;
+        if (disliked) appropriatenessDelta -= EconomySystem.BOSS_DISLIKED_CHART_PENALTY;
+        const styled = (chartConfig?.palette && chartConfig.palette !== 'corporate') || !!chartConfig?.showDataLabels;
+        const clarityDelta = prefs.valuesCreativity && styled ? EconomySystem.BOSS_CREATIVE_STYLE_BONUS : 0;
+        const weights = prefs.valuesClarity
+            ? { chartAppropriateness: 0.35, visualClarity: 0.4, dataAccuracy: 0.25 }
+            : { chartAppropriateness: 0.4, visualClarity: 0.3, dataAccuracy: 0.3 };
+        return {
+            appropriatenessDelta,
+            clarityDelta,
+            weights,
+            preference: liked ? 'liked' : disliked ? 'disliked' : null
+        };
+    }
+
     /**
      * Evaluate a submitted chart and calculate score
      */
@@ -86,6 +117,11 @@ export class EconomySystem {
         visualClarity = Math.min(100, visualClarity * softwareMultipliers.visualClarity);
         dataAccuracy = Math.min(100, dataAccuracy * softwareMultipliers.dataAccuracy);
 
+        // The boss's own tastes from bosses.js (#1854, #2226)
+        const taste = EconomySystem.bossTaste(task?.boss, chartConfig);
+        chartAppropriateness = Math.max(0, Math.min(100, chartAppropriateness + taste.appropriatenessDelta));
+        visualClarity = Math.max(0, Math.min(100, visualClarity + taste.clarityDelta));
+
         // Boss modifier: higher strictness means a HARSHER grade (#1990). bosses.js
         // gives the perfectionist 1.3 and the easygoing boss 0.8, so invert it
         // gently around 1.0: 1.3 -> 0.85, 0.8 -> 1.10.
@@ -96,10 +132,11 @@ export class EconomySystem {
         const bossModifier = 1 - (strictness - 1) * 0.5;
 
         // Calculate weighted average
+        const w = taste.weights;
         const rawScore = (
-            chartAppropriateness * 0.4 +
-            visualClarity * 0.3 +
-            dataAccuracy * 0.3
+            chartAppropriateness * w.chartAppropriateness +
+            visualClarity * w.visualClarity +
+            dataAccuracy * w.dataAccuracy
         ) * bossModifier;
 
         // Convert to stars (1-5)
@@ -124,6 +161,8 @@ export class EconomySystem {
             stars,
             moneyEarned,
             repEarned,
+            bossPreference: taste.preference,
+            chartType: chartConfig?.type,
             softwareMultipliers // Include for display
         };
     }
