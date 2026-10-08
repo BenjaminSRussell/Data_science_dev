@@ -39,11 +39,11 @@ describe('MenuLogoDisplay', () => {
         });
 
         it('uses days+hours shape at the 24h boundary (24 is not < 24)', () => {
-            expect(display.formatPlaytime(24)).toBe('1d 0h');
+            expect(display.formatPlaytime(24)).toBe('1d'); // shared dashboard formatter (#1629)
         });
 
         it('uses weeks+days shape at the 168h boundary (168 is not < 168)', () => {
-            expect(display.formatPlaytime(168)).toBe('1w 0d');
+            expect(display.formatPlaytime(168)).toBe('1w');
         });
     });
 
@@ -77,7 +77,8 @@ describe('MenuLogoDisplay', () => {
             display = new MenuLogoDisplay(saveManager);
             display.calculateStats();
             expect(display.stats).toHaveLength(6);
-            expect(display.stats[0].value).toBe('2d 0h');
+            // 1 task ~ 12 minutes via StatisticsAggregator (#1629)
+            expect(display.stats[0].value).toBe('< 30m');
             expect(display.stats[1].value).toBe('Data Analyst');
             expect(display.stats[5].value).toBe('2');
         });

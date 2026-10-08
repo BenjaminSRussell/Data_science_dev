@@ -75,7 +75,8 @@ describe('menu statistics dashboard icons (#1471)', () => {
         document.body.innerHTML = '<div id="menu-stats-dashboard"></div>';
         MainGame.prototype.renderStatisticsDashboard.call({
             statisticsAggregator: {
-                calculate: () => ({ totalPlaytime: 60, gamesCompleted: 1, highestRankName: 'Intern', totalMoney: 5 }),
+                // The dashboard reads through the cache (#140)
+                getStats: () => ({ totalPlaytime: 60, gamesCompleted: 1, highestRankName: 'Intern', totalMoney: 5 }),
                 formatPlaytime: () => '1m',
                 formatMoney: () => '$5'
             }

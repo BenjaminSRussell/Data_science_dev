@@ -76,6 +76,9 @@ export class SaveManager {
         // Optional (error, slotIndex) => void so the UI can tell the player a save
         // failed (quota exceeded, storage disabled) instead of failing silently (#1221)
         this.onSaveError = null;
+        // Bumped whenever slot contents may change, so readers such as
+        // StatisticsAggregator can reuse cached results (#140)
+        this.revision = 0;
     }
 
     /**
@@ -85,6 +88,7 @@ export class SaveManager {
      * @returns {boolean} Success status
      */
     saveGame(gameState, slotIndex = 0) {
+        this.revision++;
         try {
             slotIndex = normalizeSlot(slotIndex);
             if (!isValidSlot(slotIndex)) {
@@ -226,6 +230,7 @@ export class SaveManager {
      * @returns {boolean} Success status
      */
     clearSave(slotIndex = 0) {
+        this.revision++;
         try {
             if (!isValidSlot(slotIndex)) {
                 console.error(`Invalid slot index: ${slotIndex}`);
@@ -273,6 +278,7 @@ export class SaveManager {
      * @returns {boolean} Success status
      */
     importSave(encodedData, gameState, slotIndex = 0) {
+        this.revision++;
         try {
             if (!isValidSlot(slotIndex)) {
                 console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
@@ -453,6 +459,7 @@ export class SaveManager {
      * @returns {boolean} Success status
      */
     duplicateSave(sourceSlot, targetSlot) {
+        this.revision++;
         try {
             if (!isValidSlot(targetSlot) || targetSlot === sourceSlot) {
                 console.error(`Invalid duplicate target slot: ${targetSlot}`);

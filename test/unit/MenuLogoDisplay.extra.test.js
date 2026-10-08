@@ -22,7 +22,8 @@ describe('MenuLogoDisplay extras', () => {
         ]));
         display.calculateStats();
         const v = Object.fromEntries(display.stats.map(s => [s.label, s.value]));
-        expect(v['Total Playtime']).toBe('4d 0h');
+        // Playtime comes from StatisticsAggregator (task-based estimate), not days * 24h (#1629)
+        expect(v['Total Playtime']).toBe('1h');
         expect(v['Highest Rank']).toBe(RANKS[7]?.title || 'Data Entry Clerk');
         expect(v['Games Completed']).toBe('2');
         expect(v['Total Money Earned']).toBe('$150');
@@ -38,10 +39,11 @@ describe('MenuLogoDisplay extras', () => {
 
     it('formatPlaytime boundaries at 23/24/167/168', () => {
         display = new MenuLogoDisplay(sm([]));
+        // Same formatter as the stats dashboard (#1629)
         expect(display.formatPlaytime(23)).toBe('23h');
-        expect(display.formatPlaytime(24)).toBe('1d 0h');
+        expect(display.formatPlaytime(24)).toBe('1d');
         expect(display.formatPlaytime(167)).toBe('6d 23h');
-        expect(display.formatPlaytime(168)).toBe('1w 0d');
+        expect(display.formatPlaytime(168)).toBe('1w');
     });
 
     it('render retries until the element appears, then stops retrying', () => {
@@ -84,7 +86,11 @@ describe('MenuLogoDisplay extras', () => {
         expect(logo.textContent).toBe(display.stats[1].icon);
         for (let i = 0; i < display.stats.length - 1; i++) logo.click();
         expect(display.currentStatIndex).toBe(0);
-        expect(vi.getTimerCount()).toBe(1);
+        // Only one rotation interval is running: one tick advances one stat.
+        // (Counted by behaviour: the shared StatisticsAggregator's localStorage
+        // write queues a jsdom storage-event timer of its own.)
+        vi.advanceTimersByTime(display.updateInterval);
+        expect(display.currentStatIndex).toBe(1);
     });
 
     it('update() after stats shrink keeps the index in range', () => {

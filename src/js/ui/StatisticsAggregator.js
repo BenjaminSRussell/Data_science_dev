@@ -24,10 +24,9 @@ export class StatisticsAggregator {
         let sessions = [];
         let averageSessionLength = 0;
 
-        // Scan all save slots
-        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
-            const saveData = this.saveManager.getSaveData(i);
-            if (saveData && saveData.state) {
+        // Scan all save slots; a duplicated slot counts once (#1630)
+        for (const { slotIndex: i, saveData } of this.getDistinctSaves()) {
+            {
                 const state = saveData.state;
                 
                 // Calculate playtime more accurately
@@ -93,6 +92,7 @@ export class StatisticsAggregator {
             averageSessionLength = totalDays / sessions.length;
         }
 
+        this.statsRevision = this.saveManager?.revision ?? null;
         this.stats = {
             totalPlaytime,
             gamesCompleted,
@@ -113,12 +113,50 @@ export class StatisticsAggregator {
     }
 
     /**
-     * Get cached statistics
+     * One entry per playthrough. Copies made with SaveManager.duplicateSave
+     * keep the original's startTime, so slots that share a startTime are the
+     * same career; the most recently saved one wins (#1630).
+     */
+    getDistinctSaves() {
+        const byRun = new Map();
+        const singles = [];
+        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
+            const saveData = this.saveManager?.getSaveData?.(i);
+            if (!saveData?.state) continue;
+            const entry = { slotIndex: i, saveData };
+            const runId = saveData.state.startTime;
+            if (typeof runId !== 'number') {
+                singles.push(entry);
+                continue;
+            }
+            const prev = byRun.get(runId);
+            if (!prev || (saveData.timestamp || 0) > (prev.saveData.timestamp || 0)) byRun.set(runId, entry);
+        }
+        return [...byRun.values(), ...singles].sort((a, b) => a.slotIndex - b.slotIndex);
+    }
+
+    /**
+     * Cached statistics. Recalculates only when the save slots changed since
+     * the last calculation (SaveManager.revision); calculate() forces it (#140)
      */
     getStats() {
-        if (!this.stats) {
-            this.calculate();
+        const revision = this.saveManager?.revision;
+        if (this.stats && revision != null && this.statsRevision === revision) {
+            return this.stats;
         }
+        if (!this.saveManager) {
+            return this.stats || this.loadFromLocalStorage() || this.calculateEmpty();
+        }
+        return this.calculate();
+    }
+
+    calculateEmpty() {
+        this.stats = {
+            totalPlaytime: 0, gamesCompleted: 0, highestRank: 0,
+            highestRankName: RANKS[0]?.title || 'Data Entry Clerk',
+            totalMoney: 0, totalTasks: 0, totalReputation: 0,
+            sessions: 0, averageSessionLength: 0, lastUpdated: Date.now()
+        };
         return this.stats;
     }
 
@@ -130,16 +168,22 @@ export class StatisticsAggregator {
             return '< 30m';
         } else if (hours < 1) {
             return `${Math.round(hours * 60)}m`;
-        } else if (hours < 24) {
-            const wholeHours = Math.floor(hours);
-            const minutes = Math.round((hours - wholeHours) * 60);
+        } else if (hours < 24 && Math.round(hours * 60) < 24 * 60) {
+            // Whole minutes first, so 1h 59.7m reads "2h" rather than "1h 60m"
+            const totalMinutes = Math.round(hours * 60);
+            const wholeHours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
             if (minutes > 0) {
                 return `${wholeHours}h ${minutes}m`;
             }
             return `${wholeHours}h`;
         } else if (hours < 168) {
-            const days = Math.floor(hours / 24);
-            const remainingHours = Math.round(hours % 24);
+            // Round to whole hours first so 23.6h rolls into the next day
+            // instead of showing "1d 24h" (#1631)
+            const totalHours = Math.round(hours);
+            if (totalHours >= 168) return '1w';
+            const days = Math.floor(totalHours / 24);
+            const remainingHours = totalHours % 24;
             if (remainingHours > 0) {
                 return `${days}d ${remainingHours}h`;
             }
