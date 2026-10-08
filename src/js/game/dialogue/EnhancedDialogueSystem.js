@@ -15,7 +15,7 @@ export class EnhancedDialogueSystem {
     /**
      * Build enhanced dialogue tree for NPC with deep stories
      */
-    buildEnhancedTree(npc, relationshipLevel) {
+    buildEnhancedTree(npc, relationshipLevel, flags = {}) {
         const story = CHARACTER_STORIES[npc.id];
         if (!story) {
             // Fallback to basic dialogue if no story exists
@@ -25,7 +25,7 @@ export class EnhancedDialogueSystem {
         const nodes = [];
 
         // Root node with relationship-based greeting
-        nodes.push(this.createRootNode(npc, relationshipLevel, story));
+        nodes.push(this.createRootNode(npc, relationshipLevel, story, flags));
 
         // Add story reveal nodes based on relationship
         story.storyReveals.forEach(reveal => {
@@ -51,7 +51,7 @@ export class EnhancedDialogueSystem {
     /**
      * Create root node with dynamic greeting
      */
-    createRootNode(npc, relationshipLevel, story) {
+    createRootNode(npc, relationshipLevel, story, flags = {}) {
         let greeting = this.getGreetingForLevel(npc, relationshipLevel);
 
         const choices = [
@@ -62,8 +62,7 @@ export class EnhancedDialogueSystem {
 
         // Add story phase option if available
         if (story.phases) {
-            const activePhase = this.getActivePhase(npc, story, relationshipLevel);
-            // In a real implementation we would check if the specific phase is completed via flags
+            const activePhase = this.getActivePhase(npc, story, relationshipLevel, flags);
             if (activePhase) {
                 choices.unshift({ id: `phase_${activePhase.id}`, text: "Talk about something important" });
             }
@@ -326,19 +325,39 @@ export class EnhancedDialogueSystem {
     /**
      * Get active phase for NPC
      */
-    getActivePhase(npc, story, relationshipLevel) {
-        // Need to check specific flags in real implementation, 
-        // passing mock flags for now or checking implementation in NPCManager
-        for (const phase of story.phases) {
-            // Check relationship trigger
-            if (relationshipLevel >= phase.trigger.relationship) {
-                // Check if already completed (this logic would typically access game state flags)
-                // For now, we assume if it's available and not 'done', it's active
-                // The actual check logic should ideally rely on a flags system passed in or accessible globally
-                return phase;
-            }
+    getActivePhase(npc, story, relationshipLevel, flags = {}) {
+        // The first phase that is unlocked by relationship, whose prerequisite
+        // is met, and that hasn't been answered yet. Choosing any option of a
+        // phase sets that option's flag (NPCManager stores it per NPC), which
+        // completes the phase. Previously this always returned phase 1, so
+        // later phases could never come up.
+        for (const phase of story.phases || []) {
+            if (this.isPhaseComplete(phase, flags)) continue;
+            if (relationshipLevel < (phase.trigger?.relationship || 0)) return null;
+            const prerequisite = phase.trigger?.flag;
+            if (prerequisite && !this.isFlagSatisfied(prerequisite, story, flags)) return null;
+            return phase;
         }
         return null;
+    }
+
+    /**
+     * A phase is complete once any of its options has been chosen
+     */
+    isPhaseComplete(phase, flags = {}) {
+        if (flags[`${phase.id}_complete`]) return true;
+        return (phase.options || []).some(opt => opt.flag && flags[opt.flag]);
+    }
+
+    /**
+     * 'phase_N_complete' prerequisites are derived from the phase's option
+     * flags; any other flag must be set directly
+     */
+    isFlagSatisfied(flag, story, flags = {}) {
+        if (flags[flag]) return true;
+        const match = /^(.*)_complete$/.exec(flag);
+        const phase = match && (story.phases || []).find(p => p.id === match[1]);
+        return phase ? this.isPhaseComplete(phase, flags) : false;
     }
 
     /**

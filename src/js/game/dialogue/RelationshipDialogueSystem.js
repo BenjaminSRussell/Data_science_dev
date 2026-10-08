@@ -22,7 +22,8 @@ export class RelationshipDialogueSystem {
         
         // Get relationship stage
         const stage = this.getRelationshipStage(relationshipLevel);
-        const stageDialogue = dialogue.stages[stage];
+        // A dialogue file without stages has nothing for this level (#311)
+        const stageDialogue = dialogue.stages?.[stage];
         
         if (!stageDialogue) return null;
         
@@ -36,17 +37,22 @@ export class RelationshipDialogueSystem {
         
         // Get topic-specific dialogue or greeting
         if (topic && stageDialogue.topics?.[topic]) {
-            const topicDialogue = stageDialogue.topics[topic];
-            return Array.isArray(topicDialogue) 
-                ? topicDialogue[Math.floor(Math.random() * topicDialogue.length)]
-                : topicDialogue;
+            const picked = this.pick(stageDialogue.topics[topic]);
+            if (picked) return picked;
         }
         
         // Return greeting
-        const greetings = ageAppropriate?.greeting || stageDialogue.greeting || ["Hello."];
-        return Array.isArray(greetings)
-            ? greetings[Math.floor(Math.random() * greetings.length)]
-            : greetings;
+        return this.pick(ageAppropriate?.greeting) || this.pick(stageDialogue.greeting) || 'Hello.';
+    }
+
+    /**
+     * Random element of an array, or the value itself; null for empty
+     */
+    pick(value) {
+        if (Array.isArray(value)) {
+            return value.length ? value[Math.floor(Math.random() * value.length)] : null;
+        }
+        return value || null;
     }
     
     /**
@@ -115,6 +121,7 @@ export class RelationshipDialogueSystem {
     checkTriggerCondition(condition, trigger) {
         // Simple condition checking
         // Can be expanded for complex conditions
+        if (!condition || !trigger) return false;
         if (condition.playerSuccess && trigger.playerSuccess) return true;
         if (condition.betrayal && trigger.betrayal) return true;
         if (condition.rejection && trigger.rejection) return true;
@@ -129,7 +136,7 @@ export class RelationshipDialogueSystem {
         if (!dialogue) return [];
         
         const stage = this.getRelationshipStage(relationshipLevel);
-        const stageDialogue = dialogue.stages[stage];
+        const stageDialogue = dialogue.stages?.[stage];
         
         if (!stageDialogue || !stageDialogue.topics) return [];
         

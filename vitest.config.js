@@ -17,8 +17,12 @@ export default defineConfig({
         'test/',
         'dist/',
         '**/*.config.js',
-        '**/*.d.ts',
-        'src/js/main.js' // Main entry point, tested via integration tests
+        '**/*.d.ts'
+        // src/js/main.js used to be excluded as "tested via integration
+        // tests", but no automated integration suite exercises it (#627).
+        // It is now unit-testable (MainGame.worldInputs.test.js imports it
+        // with __DSD_NO_AUTOBOOT__), so it stays in the report and shows its
+        // real coverage.
       ]
     },
     include: ['test/**/*.test.js', 'test/**/*.spec.js'],

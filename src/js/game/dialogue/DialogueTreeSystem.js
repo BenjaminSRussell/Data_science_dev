@@ -157,12 +157,17 @@ export class DialogueTreeSystem {
      * @param {number} relationshipLevel - Current relationship level (for enhanced dialogue)
      * @returns {DialogueTree} Dialogue tree
      */
-    getTree(npcId, relationshipLevel = 0) {
+    getTree(npcId, relationshipLevel = 0, flags = null) {
         // Only story-driven (enhanced) trees depend on the relationship level;
         // personality trees are cached once per NPC (#2122). The cache is also
         // bounded so fractional/ever-changing levels can't grow it forever (#913).
         const level = Math.round(Number(relationshipLevel) || 0);
-        const cacheKey = CHARACTER_STORIES[npcId] ? `${npcId}_${level}` : `${npcId}`;
+        // Story phases depend on the NPC's flags, so they're part of the key
+        const story = CHARACTER_STORIES[npcId];
+        const flagKey = story?.phases && flags
+            ? Object.keys(flags).filter(k => flags[k]).sort().join(',')
+            : '';
+        const cacheKey = story ? `${npcId}_${level}${flagKey ? `_${flagKey}` : ''}` : `${npcId}`;
         if (this.treeCache.has(cacheKey)) {
             const cached = this.treeCache.get(cacheKey);
             // refresh LRU position
@@ -179,7 +184,7 @@ export class DialogueTreeSystem {
         }
         
         // Build tree (enhanced system will be used if character has deep story)
-        const tree = this.builder.buildTreeForNPC(npc, level);
+        const tree = this.builder.buildTreeForNPC(npc, level, flags || {});
         
         // Cache it (LRU, bounded)
         this.treeCache.set(cacheKey, tree);
@@ -228,10 +233,10 @@ export class DialogueTreeBuilder {
      * Build tree for a specific NPC
      * Uses enhanced dialogue system if character has deep story
      */
-    buildTreeForNPC(npc, relationshipLevel = 0) {
+    buildTreeForNPC(npc, relationshipLevel = 0, flags = {}) {
         // Try enhanced dialogue system first (if character has deep story)
         try {
-            const enhancedTree = enhancedDialogueSystem.buildEnhancedTree(npc, relationshipLevel);
+            const enhancedTree = enhancedDialogueSystem.buildEnhancedTree(npc, relationshipLevel, flags);
             if (enhancedTree && enhancedTree.nodes.size > 1) {
                 return enhancedTree;
             }
