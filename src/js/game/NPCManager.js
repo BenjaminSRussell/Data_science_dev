@@ -1188,7 +1188,10 @@ export class NPCManager {
      * Get available NPCs at a location
      */
     getNPCsAtLocation(locationId) {
-        return NPCs.filter(npc => npc.location === locationId && this.isNPCUnlocked(npc));
+        // Holidays keep some people home (EventSystem npcAvailability, #1704)
+        const events = this.gameState?.eventSystem;
+        return NPCs.filter(npc => npc.location === locationId && this.isNPCUnlocked(npc) &&
+            events?.isNPCAvailable?.(npc.id) !== false);
     }
 
     /**

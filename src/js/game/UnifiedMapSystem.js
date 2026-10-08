@@ -548,16 +548,19 @@ export class UnifiedMapSystem {
             label.anchor.set(0.5);
             label.x = x;
             label.y = y + 20;
-            label.alpha = isCurrent ? 1 : 0; // Show only if current
+            // Touch screens never hover, so names are always shown there (#2532)
+            const alwaysShow = isCurrent || UnifiedMapSystem.isCoarsePointer();
+            label.alpha = alwaysShow ? 1 : 0;
             
-            // Phase 4: Use tooltip manager for better tooltips (for DOM elements)
-            // Note: PixiJS elements need DOM wrapper for Floating UI
-            // For now, use label visibility on hover
+            // Hover reveals the name on mouse; a press reveals it on touch/pen
             icon.on('pointerover', () => {
                 label.alpha = 1;
             });
+            icon.on('pointerdown', () => {
+                label.alpha = 1;
+            });
             icon.on('pointerout', () => {
-                if (!isCurrent) label.alpha = 0;
+                if (!alwaysShow) label.alpha = 0;
             });
             
             // Future: Can create DOM overlay for PixiJS elements to use Floating UI
@@ -568,6 +571,15 @@ export class UnifiedMapSystem {
             
             this.layers.ui.addChild(label);
         });
+    }
+
+    /** True on touch-first devices, where hover labels can't be reached (#2532) */
+    static isCoarsePointer() {
+        try {
+            return typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)')?.matches;
+        } catch {
+            return false;
+        }
     }
 
     /**
