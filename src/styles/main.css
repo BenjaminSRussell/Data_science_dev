@@ -2154,6 +2154,32 @@ a:hover {
     .env-floating-element { animation: none !important; }
 }
 
+/* Top bar stats: layout lives in CSS (not inline) so the mobile rule
+   below can hide it (#877) */
+.top-bar-center {
+    display: flex;
+    gap: 1rem;
+}
+
+#top-bar {
+    flex-wrap: wrap;
+}
+
+/* Visible keyboard focus everywhere, from the theme instead of per-element
+   JS listeners with a hardcoded purple (#1320, #2212) */
+:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+}
+
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
 /* =====================================================
    SETTINGS AND CREDITS MODALS (#2511, #2512)
    ===================================================== */
