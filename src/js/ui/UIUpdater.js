@@ -14,11 +14,31 @@ import { LitUIManager } from './LitUIManager.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommonUtils } from '../utils/CommonUtils.js';
 import { EconomySystem } from '../game/EconomySystem.js';
+import { GameState } from '../game/GameState.js';
 import { insightHint } from '../game/EconomySystem.js';
 import { logger } from '../utils/Logger.js';
 import { NEWS_CATEGORIES } from '../game/NewsManager.js';
 
 export class UIUpdater {
+    /**
+     * Icon markup: image paths become <img>, anything else is text. Shop
+     * cards printed image paths as text (#1482, #1129)
+     */
+    static iconHTML(icon, alt = '') {
+        if (!icon) return '';
+        const safeAlt = String(alt).replace(/"/g, '&quot;');
+        return String(icon).startsWith('/')
+            ? `<img src="${icon}" alt="${safeAlt}" style="width: 24px; height: 24px; object-fit: contain; object-position: center center;">`
+            : icon;
+    }
+
+    /**
+     * Whether the player's rank meets a library's reqLevel (1-based)
+     */
+    static libraryRankMet(lib, rankIndex) {
+        return (Number(rankIndex) || 0) >= ((Number(lib?.reqLevel) || 1) - 1);
+    }
+
     constructor(game) {
         this.game = game;
         // Phase 2: Use LitUIManager for component-based UI
@@ -123,25 +143,11 @@ export class UIUpdater {
             return;
         }
 
-        const multipliers = this.gameState.getSoftwareQualityMultiplier?.() || {};
-        
         const softwareHTML = purchasedSoftware.map(item => {
-            const bonuses = [];
-            if (item.id === 'soft_ide_pro') {
-                bonuses.push('+5% Visual Clarity', '+3% Data Accuracy');
-            } else if (item.id === 'soft_automl') {
-                bonuses.push('+10% Speed', '+3% Chart Appropriateness');
-            } else if (item.id === 'soft_cloud_basic') {
-                bonuses.push('+5% Data Accuracy', '+5% Speed');
-            } else if (item.id === 'soft_enterprise_db') {
-                bonuses.push('+8% Data Accuracy', '+2% Chart Appropriateness');
-            } else if (item.id === 'soft_neural_arch') {
-                bonuses.push('+10% Visual Clarity', '+8% Chart Appropriateness', '+5% Data Accuracy');
-            }
+            // Same table the scoring uses (#1484)
+            const bonuses = GameState.describeSoftwareEffects(item.id);
 
-            const iconHTML = item.icon && item.icon.startsWith('/') 
-                ? `<img src="${item.icon}" alt="${item.name}" style="width: 24px; height: 24px; object-fit: contain; object-position: center center;">` 
-                : item.icon;
+            const iconHTML = UIUpdater.iconHTML(item.icon, item.name);
 
             return `
                 <div class="software-item">
@@ -387,7 +393,7 @@ export class UIUpdater {
 
             return `
                 <div class="shop-item-card ${owned ? 'owned' : ''}" data-id="${item.id}">
-                    <div class="shop-item-icon">${item.icon}</div>
+                    <div class="shop-item-icon">${UIUpdater.iconHTML(item.icon, item.name)}</div>
                     <div class="shop-item-name">${item.name}</div>
                     <div class="shop-item-desc">${item.description}</div>
                     ${owned
@@ -402,20 +408,6 @@ export class UIUpdater {
             `;
         }).join('');
         grid.innerHTML = shopHTML;
-    }
-
-    /**
-     * Animate money change
-     */
-    animateMoneyChange(amount) {
-        const moneyEl = document.getElementById('money-value');
-        if (!moneyEl) return;
-
-        moneyEl.classList.add('counter-animate', 'counting');
-
-        setTimeout(() => {
-            moneyEl.classList.remove('counting');
-        }, 300);
     }
 
     /**
@@ -469,9 +461,13 @@ export class UIUpdater {
 
         document.body.appendChild(overlay);
     }
-    updateLibraryScreen(category = 'all') {
+    updateLibraryScreen(category) {
         const grid = document.getElementById('library-grid');
         if (!grid) return;
+        // Called with no argument (e.g. after learning a library) keeps the
+        // tab the player was on instead of snapping back to "all" (#1995)
+        category = category || this.currentLibraryCategory || 'all';
+        this.currentLibraryCategory = category;
 
         let items = LIBRARY_CONTENT;
         if (category !== 'all') {
@@ -488,7 +484,12 @@ export class UIUpdater {
             const owned = (this.gameState.unlockedLibraries || []).includes(lib.id);
             const canAfford = this.gameState.money >= lib.cost;
             const currentRank = this.gameState.rankIndex || 0;
-            const reqMet = currentRank >= (lib.reqLevel - 1);
+            const reqMet = UIUpdater.libraryRankMet(lib, currentRank);
+            // Say why Learn is disabled (#1271)
+            const reqRank = RANKS[Math.max(0, (lib.reqLevel || 1) - 1)];
+            const reqText = !owned && !reqMet
+                ? `<div class="lib-req">Requires ${reqRank?.title || `rank ${lib.reqLevel}`}</div>`
+                : '';
 
             return `
                 <div class="library-card ascii-box ${owned ? 'owned' : ''}">
@@ -500,6 +501,7 @@ export class UIUpdater {
                     <div class="lib-effect">
                         <strong>Effect:</strong> ${lib.gameEffect}
                     </div>
+                    ${reqText}
                     <div class="lib-footer">
                         <div class="lib-cost">$${lib.cost.toLocaleString()}</div>
                         ${owned
@@ -622,7 +624,10 @@ export class UIUpdater {
         // Logic: Is this a functional office or a visitable shop?
         // 'home_office', 'startup_office', etc. are offices.
         // 'donut_shop', 'bagel_shop' are shops.
-        const isShop = locationData && locationData.type === 'shop';
+        // Hidden OFFICE_LOCATIONS entries are visitable shops too, whatever
+        // their map type (coffee_shop is typed 'social') (#2432)
+        const isShop = (locationData && locationData.type === 'shop') ||
+            (theme.id === locationId && theme.hidden === true);
 
         if (isShop) {
             // SHOP MODE: Hide office furniture, show shop interaction
@@ -797,20 +802,24 @@ export class UIUpdater {
     }
 
     getHardwareIcon(type) {
+        // Text glyphs; the old table had an empty string for every type (#1333)
         const icons = {
-            [HARDWARE_TYPES.COOLING]: '',
-            [HARDWARE_TYPES.CASE]: '',
-            [HARDWARE_TYPES.MONITOR]: '',
-            [HARDWARE_TYPES.GPU]: '',
-            [HARDWARE_TYPES.CPU]: '',
-            [HARDWARE_TYPES.RAM]: '',
-            [HARDWARE_TYPES.STORAGE]: ''
+            [HARDWARE_TYPES.COOLING]: '≋',
+            [HARDWARE_TYPES.CASE]: '▣',
+            [HARDWARE_TYPES.MONITOR]: '▭',
+            [HARDWARE_TYPES.GPU]: '▦',
+            [HARDWARE_TYPES.CPU]: '▤',
+            [HARDWARE_TYPES.RAM]: '≡',
+            [HARDWARE_TYPES.STORAGE]: '◫'
         };
         return icons[type] || '';
     }
 
     getHardwareName(type) {
-        return type.charAt(0).toUpperCase() + type.slice(1);
+        // Acronyms stay upper case: "GPU", not "Gpu" (#1485)
+        const acronyms = { gpu: 'GPU', cpu: 'CPU', ram: 'RAM' };
+        const t = String(type || '');
+        return acronyms[t.toLowerCase()] || (t.charAt(0).toUpperCase() + t.slice(1));
     }
 
     renderPartStats(part) {

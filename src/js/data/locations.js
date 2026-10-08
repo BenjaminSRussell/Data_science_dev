@@ -54,6 +54,19 @@ export const OFFICE_LOCATIONS = [
         unlockMessage: "You've reached the top! The C-Suite is yours."
     },
     {
+        // Visitable shop, not an office: renders in shop mode with its own
+        // theme instead of falling back to Home Office (#2432)
+        id: "coffee_shop",
+        name: "Coffee Shop",
+        description: "Grab coffee, meet people, boost focus.",
+        rankRequired: 0,
+        background: "linear-gradient(180deg, #d7b899 0%, #6f4e37 100%)",
+        ambiance: "",
+        elements: [],
+        unlockMessage: "",
+        hidden: true // Not selectable in Office Upgrade menu
+    },
+    {
         id: "donut_shop",
         name: "Donut Delights",
         description: "Fresh donuts and coffee available 24/7",

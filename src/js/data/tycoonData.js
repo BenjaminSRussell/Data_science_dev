@@ -72,7 +72,7 @@ export const OFFICES = [
     {
         id: "bedroom",
         name: "Bedroom Corner",
-        icon: "",
+        icon: "▫",
         price: 0,
         capacity: 1,
         clientBonus: 0,
@@ -82,7 +82,7 @@ export const OFFICES = [
     {
         id: "home_office",
         name: "Home Office",
-        icon: "",
+        icon: "⌂",
         price: 2000,
         capacity: 1,
         clientBonus: 0.1,
@@ -92,7 +92,7 @@ export const OFFICES = [
     {
         id: "coworking",
         name: "Co-working Space",
-        icon: "",
+        icon: "▤",
         price: 5000,
         capacity: 2,
         clientBonus: 0.2,
@@ -102,7 +102,7 @@ export const OFFICES = [
     {
         id: "small_office",
         name: "Small Office",
-        icon: "",
+        icon: "▥",
         price: 15000,
         capacity: 4,
         clientBonus: 0.35,
@@ -112,7 +112,7 @@ export const OFFICES = [
     {
         id: "office_floor",
         name: "Office Floor",
-        icon: "",
+        icon: "▦",
         price: 50000,
         capacity: 10,
         clientBonus: 0.5,
@@ -122,7 +122,7 @@ export const OFFICES = [
     {
         id: "headquarters",
         name: "Company HQ",
-        icon: "",
+        icon: "◆",
         price: 200000,
         capacity: 25,
         clientBonus: 0.75,
