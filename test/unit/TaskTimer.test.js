@@ -155,7 +155,10 @@ describe('Task Timer Feature (Issue #963)', () => {
         });
 
         it('should handle edge case just under half the time limit', () => {
+            // Freeze the clock: with a 1 ms margin, real time could tick past
+            // the boundary between building the task and scoring it
             const now = Date.now();
+            vi.spyOn(Date, 'now').mockReturnValue(now);
             const task = {
                 potentialReward: 100,
                 timeLimit: 300, // 5 minutes = 300 seconds
@@ -167,6 +170,7 @@ describe('Task Timer Feature (Issue #963)', () => {
             // Just under half the time limit, should get the bonus
             // Expected: 100 * 1.0 * 1.2 = 120
             expect(moneyReward).toBe(120);
+            vi.restoreAllMocks();
         });
     });
 
