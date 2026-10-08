@@ -2341,6 +2341,9 @@ export class MainGame {
             }
         }
 
+        // Money just changed: the look evolves at the next wealth tier (#1230)
+        this.checkForCharacterEvolution?.();
+
         // Check for promotion
         if (this.economySystem) {
             const oldRank = this.gameState.rankIndex;
@@ -3996,6 +3999,8 @@ export class MainGame {
         if (this.visualProgressionSystem && seconds !== this.lastMilestoneCheckSecond) {
             this.lastMilestoneCheckSecond = seconds;
             this.visualProgressionSystem.checkMilestones();
+            // Wealth from any source (stocks, projects, ...) can evolve the look (#1230)
+            this.checkForCharacterEvolution?.();
         }
 
         // Check for new research papers (only if game is started), throttled

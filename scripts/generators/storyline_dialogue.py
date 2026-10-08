@@ -30,7 +30,7 @@ TARGETS = [
     'luna_bookstore', 'marcus_thompson', 'maya_engineer', 'noah_artist',
     'priya_sharma', 'rachel_green', 'robert_kim', 'sam_taylor', 'shadow_broker',
     'sophia_zhang', 'taylor_morgan', 'the_broker', 'tyler_brooks',
-    'victoria_sterling', 'zero_cool',
+    'victoria_sterling', 'vinnie_shark', 'zero_cool',
 ]
 
 STAGES = ['stranger', 'friendly', 'acquaintance', 'friend', 'close_friend']
