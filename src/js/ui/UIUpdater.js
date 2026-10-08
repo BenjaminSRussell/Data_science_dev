@@ -771,7 +771,8 @@ export class UIUpdater {
         const equipped = hm.equippedParts;
 
         // Map through hardware types to show current status and upgrade options
-        const types = [HARDWARE_TYPES.COOLING, HARDWARE_TYPES.CASE, HARDWARE_TYPES.MONITOR, HARDWARE_TYPES.GPU];
+        // Every category is buyable, including CPU, RAM and storage (#995)
+        const types = Object.values(HARDWARE_TYPES);
 
         const equipmentHTML = types.map(type => {
             const currentPartId = equipped[type];
@@ -818,7 +819,14 @@ export class UIUpdater {
                 </div>
             `;
         }).join('');
-        grid.innerHTML = equipmentHTML;
+        // Warn when the CPU draws more power than the cooling can handle (#1896)
+        const totals = hm.getTotalStats?.();
+        const thermal = totals
+            ? `<div class="equipment-thermal${totals.overheating ? ' overheating' : ''}" role="status">
+                 Power: ${totals.powerDraw}W / ${totals.thermalBudget}W cooling${totals.overheating ? ' (overheating: work is slower, upgrade cooling)' : ''}
+               </div>`
+            : '';
+        grid.innerHTML = thermal + equipmentHTML;
     }
 
     getHardwareIcon(type) {
