@@ -354,6 +354,23 @@ export function updateStatsScreen(game) {
     const totalLevel = game.characterStats?.getAllStats()?.reduce((sum, s) => sum + s.value, 0) || 0;
     const totalLevelEl = document.getElementById('total-level');
     if (totalLevelEl) totalLevelEl.textContent = totalLevel;
+
+    // Endings earned this playthrough stay visible after the ending screen (#1139)
+    const endingsEl = document.getElementById('stats-endings-list');
+    if (endingsEl) {
+        const earned = game.gameState.gameEndingSystem?.getEarnedEndings?.() || [];
+        endingsEl.replaceChildren();
+        if (!earned.length) {
+            endingsEl.textContent = 'No endings earned yet.';
+        } else {
+            earned.forEach(e => {
+                const item = document.createElement('div');
+                item.className = 'ending-earned-item';
+                item.textContent = e.day ? `${e.title} (day ${e.day})` : e.title;
+                endingsEl.appendChild(item);
+            });
+        }
+    }
 }
 
 /**

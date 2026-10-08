@@ -658,6 +658,9 @@ export class StoryUI {
                 document.removeEventListener('keydown', onKeydown, true);
                 return;
             }
+            // Another dialog opened on top (e.g. the ending screen) owns the keyboard
+            const topDialog = [...document.querySelectorAll('[aria-modal="true"]')].pop();
+            if (topDialog && topDialog !== modal) return;
             if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopPropagation();

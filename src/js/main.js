@@ -3216,11 +3216,17 @@ export class MainGame {
         // Office lighting follows the in-game clock (#921)
         this.environmentManager?.updateTimeOfDay?.();
 
+        let checkEndings = false;
+
         // Handle events (new day, etc)
         (events || []).forEach(event => {
             if (event.type === 'new_day') {
                 // New weather every morning (#1184)
                 this.environmentManager?.updateWeather?.();
+                // Districts unlock as days/reputation/money grow, so the
+                // Elite District ending is reachable (#1986)
+                const mapUnlock = this.gameState.mapProgressionSystem?.checkMapUnlocks?.();
+                if (mapUnlock?.unlocked) this.showToast(mapUnlock.message, 'success');
                 // Jealousy cools off a little every day (#915)
                 this.gameState.jealousySystem?.decayAll?.(2);
                 if (this.newsManager) {
@@ -3344,13 +3350,8 @@ export class MainGame {
                     this.showToast('CRITICAL: Eviction imminent! Earn money fast!', 'error');
                 }
 
-                // Check for game ending conditions
-                if (this.gameState.gameEndingSystem) {
-                    const ending = this.gameState.gameEndingSystem.checkVictoryConditions();
-                    if (ending) {
-                        this.gameState.gameEndingSystem.triggerEnding(ending);
-                    }
-                }
+                // Ending checks run after every event is processed (#1514)
+                checkEndings = true;
             } else if (event.type === 'new_month') {
                 // Month/year events used to be dropped on the floor (#1462)
                 this.showToast(`A new month begins: ${event.data?.month || ''}`.trim(), 'info');
@@ -3361,6 +3362,13 @@ export class MainGame {
 
         this.updateMapScreen(); // Update visuals
         this.uiUpdater.updateAllUI(); // Money updated
+
+        // Endings are checked once, after the week's events and UI have
+        // settled, so the ending screen shows the final state (#1514)
+        if (checkEndings && this.gameState.gameEndingSystem) {
+            const ending = this.gameState.gameEndingSystem.checkVictoryConditions();
+            if (ending) this.gameState.gameEndingSystem.triggerEnding(ending);
+        }
     }
 
     /**

@@ -8,11 +8,36 @@ import { STATS } from './CharacterStats.js';
 import { RANKS } from '../data/ranks.js';
 
 export class GameEndingSystem {
+    // Order matters: specific endings before the generic ones they imply
+    static COMPANY_STAFF_TARGET = 5;
+
+    static ENDING_GROUPS = {
+        speedrun: 'top_rank',
+        early_retirement: 'top_rank',
+        ethical_leader: 'top_rank',
+        ruthless_climber: 'top_rank',
+        final_rank: 'top_rank'
+    };
+
+    static CHECK_ORDER = [
+        'checkSpeedrun',
+        'checkEarlyRetirement',
+        'checkEthicsEnding',
+        'checkFinalRank',
+        'checkMillionaire',
+        'checkEndGameMap',
+        'checkPerfectScores',
+        'checkCompanyOwnership',
+        'checkResearchBreakthrough',
+        'checkEducationCompletion'
+    ];
+
     constructor(gameState) {
         this.gameState = gameState;
         this.endingTriggered = false;
         this.endingType = null;
         this.endingData = null;
+        this.earnedEndings = []; // [{ type, title, day }]
     }
 
     /**
@@ -20,49 +45,37 @@ export class GameEndingSystem {
      * Called periodically during gameplay
      */
     checkVictoryConditions() {
-        if (this.endingTriggered) return null;
-
-        // Check final rank achievement
-        const finalRankCheck = this.checkFinalRank();
-        if (finalRankCheck) return finalRankCheck;
-
-        // Check millionaire achievement
-        const millionaireCheck = this.checkMillionaire();
-        if (millionaireCheck) return millionaireCheck;
-
-        // Check end-game map unlock (victory condition)
-        const endGameCheck = this.checkEndGameMap();
-        if (endGameCheck) return endGameCheck;
-
-        // Check perfect score achievement
-        const perfectCheck = this.checkPerfectScores();
-        if (perfectCheck) return perfectCheck;
-
-        // Check early retirement
-        const earlyRetirementCheck = this.checkEarlyRetirement();
-        if (earlyRetirementCheck) return earlyRetirementCheck;
-
-        // Check speedrun ending
-        const speedrunCheck = this.checkSpeedrun();
-        if (speedrunCheck) return speedrunCheck;
-
-        // Check ethics-based endings
-        const ethicsCheck = this.checkEthicsEnding();
-        if (ethicsCheck) return ethicsCheck;
-
-        // Check company ownership
-        const companyCheck = this.checkCompanyOwnership();
-        if (companyCheck) return companyCheck;
-
-        // Check research breakthrough
-        const researchCheck = this.checkResearchBreakthrough();
-        if (researchCheck) return researchCheck;
-
-        // Check education completion
-        const educationCheck = this.checkEducationCompletion();
-        if (educationCheck) return educationCheck;
-
+        // Most specific endings first, so the generic "Chief Data Officer"
+        // can't mask speedrun / early retirement / ethics endings (#1984,
+        // #1259). Endings already earned are skipped, so "Continue Playing"
+        // can still earn the others (#1136).
+        for (const check of GameEndingSystem.CHECK_ORDER) {
+            const ending = this[check]?.();
+            if (ending && !this.hasEarned(ending.type)) return ending;
+        }
         return null;
+    }
+
+    /** Endings earned so far, oldest first (#1139) */
+    getEarnedEndings() {
+        return [...this.earnedEndings];
+    }
+
+    /**
+     * True when this ending, or another ending from the same family, was
+     * already earned. Reaching the top rank earns exactly one of the
+     * top-rank endings (the most specific), not all of them week by week.
+     */
+    hasEarned(type) {
+        const group = GameEndingSystem.ENDING_GROUPS[type];
+        return this.earnedEndings.some(e =>
+            e.type === type || (group && GameEndingSystem.ENDING_GROUPS[e.type] === group));
+    }
+
+    /** Ethics lives on CharacterStats.ethics, not in stats (#1260) */
+    getEthics() {
+        const cs = this.gameState.characterStats;
+        return typeof cs?.ethics === 'number' ? cs.ethics : 0;
     }
 
     /**
@@ -170,7 +183,7 @@ export class GameEndingSystem {
      * Check ethics-based endings
      */
     checkEthicsEnding() {
-        const ethics = this.gameState.characterStats?.getStat?.('ethics') || 0;
+        const ethics = this.getEthics();
         const maxRankIndex = RANKS.length - 1;
         
         if (this.gameState.rankIndex >= maxRankIndex) {
@@ -197,16 +210,17 @@ export class GameEndingSystem {
      * Check for company ownership
      */
     checkCompanyOwnership() {
-        if (this.gameState.investmentEcommerceSystem) {
-            const company = this.gameState.investmentEcommerceSystem?.getCompany?.();
-            if (company && company.ownership >= 100) {
-                return {
-                    type: 'company_owner',
-                    title: 'Company Owner',
-                    message: 'You\'ve built and own your own company! Entrepreneurship achieved!',
-                    showEnding: true
-                };
-            }
+        // A registered LLC with a real team, from the live hiring flow
+        // (InvestmentEcommerceSystem has no company API) (#1986, #854, #2357)
+        const legal = this.gameState.legalSystem || this.gameState.mainGame?.legalSystem;
+        const staff = Array.isArray(this.gameState.staff) ? this.gameState.staff.length : 0;
+        if (legal?.hasLicense?.('llc_registration') && staff >= GameEndingSystem.COMPANY_STAFF_TARGET) {
+            return {
+                type: 'company_owner',
+                title: 'Company Owner',
+                message: 'You\'ve built and own your own company! Entrepreneurship achieved!',
+                showEnding: true
+            };
         }
         return null;
     }
@@ -216,8 +230,8 @@ export class GameEndingSystem {
      */
     checkResearchBreakthrough() {
         if (this.gameState.researchPaperSystem) {
-            const papers = this.gameState.researchPaperSystem?.getPublishedPapers?.() || [];
-            const breakthroughPapers = papers.filter(p => p.impact && p.impact.includes('breakthrough'));
+            // Unlocked papers flagged isBreakthrough (#1986, #2026, #1322)
+            const breakthroughPapers = this.gameState.researchPaperSystem?.getBreakthroughPapers?.() || [];
             if (breakthroughPapers.length >= 3) {
                 return {
                     type: 'research_master',
@@ -253,16 +267,22 @@ export class GameEndingSystem {
     }
 
     /**
-     * Trigger an ending
+     * Trigger an ending. Each ending type can be earned once per playthrough.
      */
     triggerEnding(endingData) {
-        if (this.endingTriggered) return;
-        
+        if (!endingData || this.hasEarned(endingData.type)) return;
+
         this.endingTriggered = true;
         this.endingType = endingData.type;
         this.endingData = endingData;
-        
-        // Store ending in game state
+        this.earnedEndings.push({
+            type: endingData.type,
+            title: endingData.title,
+            day: this.gameState.timeManager?.totalDays || 0
+        });
+
+        // Store ending in game state; stats are computed once and reused by
+        // the ending screen (#1138)
         this.gameState.gameEnding = {
             type: endingData.type,
             title: endingData.title,
@@ -271,8 +291,8 @@ export class GameEndingSystem {
             stats: this.getEndingStats()
         };
 
-        // Notify main game
-        if (this.gameState.mainGame) {
+        // showEnding: false records the ending without opening the screen (#1137)
+        if (endingData.showEnding !== false && this.gameState.mainGame) {
             this.gameState.mainGame.showGameEnding(endingData);
         }
 
@@ -309,7 +329,7 @@ export class GameEndingSystem {
             projectsCompleted: this.gameState.projectSystem?.completedProjects?.length || 0,
             coursesCompleted: this.gameState.educationSystem?.completedCourses?.length || 0,
             relationships: this.getRelationshipStats(),
-            ethics: this.gameState.characterStats?.getStat?.('ethics') || 0,
+            ethics: this.getEthics(),
             skills: this.getSkillStats()
         };
     }
@@ -355,6 +375,7 @@ export class GameEndingSystem {
         this.endingTriggered = false;
         this.endingType = null;
         this.endingData = null;
+        this.earnedEndings = [];
         if (this.gameState) {
             this.gameState.gameEnding = null;
         }
@@ -367,7 +388,8 @@ export class GameEndingSystem {
         return {
             endingTriggered: this.endingTriggered,
             endingType: this.endingType,
-            endingData: this.endingData
+            endingData: this.endingData,
+            earnedEndings: this.earnedEndings
         };
     }
 
@@ -379,6 +401,10 @@ export class GameEndingSystem {
         this.endingTriggered = data.endingTriggered || false;
         this.endingType = data.endingType || null;
         this.endingData = data.endingData || null;
+        this.earnedEndings = Array.isArray(data.earnedEndings)
+            ? data.earnedEndings.filter(e => e && e.type)
+            // Old saves only stored the single ending
+            : (data.endingType ? [{ type: data.endingType, title: data.endingData?.title || data.endingType, day: 0 }] : []);
     }
 }
 
