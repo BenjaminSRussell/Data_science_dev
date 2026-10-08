@@ -22,7 +22,7 @@ class TestRunScraper:
         mock_result.stdout = "Success output"
         mock_result.stderr = ""
 
-        with patch('run_all_scrapers.subprocess.run', return_value=mock_result):
+        with patch('run_all_scrapers.run_process_group', return_value=mock_result):
             result = run_scraper(scraper_info)
 
         assert result is True, "run_scraper should return True for returncode=0"
@@ -36,7 +36,7 @@ class TestRunScraper:
         mock_result.stdout = ""
         mock_result.stderr = "Error output"
 
-        with patch('run_all_scrapers.subprocess.run', return_value=mock_result):
+        with patch('run_all_scrapers.run_process_group', return_value=mock_result):
             result = run_scraper(scraper_info)
 
         assert result is False, "run_scraper should return False for returncode=1"
@@ -45,7 +45,7 @@ class TestRunScraper:
         """Issue #3: run_scraper catches TimeoutExpired exception and returns False"""
         scraper_info = SCRAPERS[0]
 
-        with patch('run_all_scrapers.subprocess.run',
+        with patch('run_all_scrapers.run_process_group',
                   side_effect=subprocess.TimeoutExpired(cmd='test', timeout=3600)):
             result = run_scraper(scraper_info)
 
@@ -55,7 +55,7 @@ class TestRunScraper:
         """Issue #4: run_scraper catches generic Exception and returns False"""
         scraper_info = SCRAPERS[0]
 
-        with patch('run_all_scrapers.subprocess.run',
+        with patch('run_all_scrapers.run_process_group',
                   side_effect=Exception("Some generic error")):
             result = run_scraper(scraper_info)
 
@@ -90,7 +90,7 @@ class TestMainResultsMapping:
             return mock_result
 
         # Verify main() runs without errors with alternating results
-        with patch('run_all_scrapers.subprocess.run', side_effect=mock_run_side_effect):
+        with patch('run_all_scrapers.run_process_group', side_effect=mock_run_side_effect):
             with patch('run_all_scrapers.time.sleep'):
                 main()
 
@@ -143,7 +143,7 @@ class TestMainResultsMapping:
             call_count[0] += 1
             return mock_result
 
-        with patch('run_all_scrapers.subprocess.run', side_effect=mock_run_side_effect):
+        with patch('run_all_scrapers.run_process_group', side_effect=mock_run_side_effect):
             with patch('run_all_scrapers.time.sleep'):
                 main()
 
@@ -182,7 +182,7 @@ class TestMainResultsMapping:
             call_count[0] += 1
             return mock_result
 
-        with patch('run_all_scrapers.subprocess.run', side_effect=mock_run_side_effect):
+        with patch('run_all_scrapers.run_process_group', side_effect=mock_run_side_effect):
             with patch('run_all_scrapers.time.sleep'):
                 main()
 
@@ -215,7 +215,7 @@ class TestMainSleepBehavior:
         mock_result.stdout = "output"
         mock_result.stderr = ""
 
-        with patch('run_all_scrapers.subprocess.run', return_value=mock_result):
+        with patch('run_all_scrapers.run_process_group', return_value=mock_result):
             with patch('run_all_scrapers.time.sleep') as mock_sleep:
                 main()
 
@@ -244,7 +244,7 @@ class TestMainSleepBehavior:
             mock_result.returncode = result_code
             return mock_result
 
-        with patch('run_all_scrapers.subprocess.run', side_effect=mock_run_side_effect):
+        with patch('run_all_scrapers.run_process_group', side_effect=mock_run_side_effect):
             with patch('run_all_scrapers.time.sleep') as mock_sleep:
                 main()
 
@@ -265,7 +265,7 @@ class TestMainSleepBehavior:
             Mock(returncode=0, stdout="output", stderr=""),
         ]
 
-        with patch('run_all_scrapers.subprocess.run', side_effect=effects):
+        with patch('run_all_scrapers.run_process_group', side_effect=effects):
             with patch('run_all_scrapers.time.sleep') as mock_sleep:
                 main()
 

@@ -5,6 +5,7 @@ Creates Low-poly style assets when scrapers don't find enough
 """
 
 import json
+import re
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter
 import random
@@ -373,6 +374,18 @@ class LowPolyGenerator:
         img.save(output_path, 'PNG', optimize=True)
         return True
     
+    GENERATED_INDEX_RE = re.compile(r'^generated_low_poly_.*_(\d+)\.png$')
+
+    @classmethod
+    def next_generated_index(cls, category_path):
+        """One past the highest generated_low_poly_*_NNNN.png index in category_path."""
+        highest = -1
+        for path in Path(category_path).glob('generated_low_poly_*.png'):
+            match = cls.GENERATED_INDEX_RE.match(path.name)
+            if match:
+                highest = max(highest, int(match.group(1)))
+        return highest + 1
+
     def fill_category(self, category, target_count, current_count):
         """Fill a category with generated Low-poly assets"""
         needed = max(0, target_count - current_count)
@@ -384,9 +397,12 @@ class LowPolyGenerator:
         generated = 0
         category_path = self.output_dir / category
         category_path.mkdir(parents=True, exist_ok=True)
+        # Continue numbering after any earlier run so re-runs extend the set
+        # instead of overwriting _0000.. (#602)
+        start = self.next_generated_index(category_path)
         
         if 'character' in category:
-            for i in range(needed):
+            for i in range(start, start + needed):
                 output_path = category_path / f"generated_low_poly_character_{i:04d}.png"
                 if self.generate_low_poly_character(output_path, variant=i):
                     generated += 1
@@ -394,7 +410,7 @@ class LowPolyGenerator:
         
         elif 'icon' in category:
             icon_types = ['bed', 'desk', 'chair', 'table', 'lamp', 'computer', 'phone']
-            for i in range(needed):
+            for i in range(start, start + needed):
                 icon_type = icon_types[i % len(icon_types)]
                 output_path = category_path / f"generated_low_poly_{icon_type}_{i:04d}.png"
                 if self.generate_low_poly_icon(output_path, icon_type):
@@ -403,7 +419,7 @@ class LowPolyGenerator:
         
         elif 'ui' in category or 'element' in category:
             element_types = ['button', 'panel', 'frame', 'arrow', 'star']
-            for i in range(needed):
+            for i in range(start, start + needed):
                 element_type = element_types[i % len(element_types)]
                 output_path = category_path / f"generated_low_poly_{element_type}_{i:04d}.png"
                 if self.generate_low_poly_ui_element(output_path, element_type):
@@ -412,7 +428,7 @@ class LowPolyGenerator:
         
         elif 'particle' in category or 'effect' in category:
             particle_types = ['sparkle', 'star', 'glow', 'magic', 'energy']
-            for i in range(needed):
+            for i in range(start, start + needed):
                 particle_type = particle_types[i % len(particle_types)]
                 output_path = category_path / f"generated_low_poly_{particle_type}_{i:04d}.png"
                 if self.generate_low_poly_particle(output_path, particle_type):
@@ -421,7 +437,7 @@ class LowPolyGenerator:
 
         elif 'vehicle' in category:
             vehicle_types = ['car', 'truck', 'bike', 'bus', 'jeep', 'van']
-            for i in range(needed):
+            for i in range(start, start + needed):
                 vehicle_type = vehicle_types[i % len(vehicle_types)]
                 output_path = category_path / f"generated_low_poly_{vehicle_type}_{i:04d}.png"
                 if self.generate_low_poly_vehicle(output_path, vehicle_type):
@@ -430,7 +446,7 @@ class LowPolyGenerator:
 
         elif 'map' in category:
             map_asset_types = ['tree', 'rock', 'water', 'bush', 'cliff', 'bridge']
-            for i in range(needed):
+            for i in range(start, start + needed):
                 asset_type = map_asset_types[i % len(map_asset_types)]
                 output_path = category_path / f"generated_low_poly_{asset_type}_{i:04d}.png"
                 if self.generate_low_poly_map_asset(output_path, asset_type):

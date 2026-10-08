@@ -15,6 +15,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 class MasterManifestGenerator:
+    ASSET_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.svg'}
+
     def __init__(self, assets_dir="downloaded_assets", generated_dir="assets"):
         self.assets_dir = Path(assets_dir)
         self.generated_dir = Path(generated_dir)
@@ -103,7 +105,12 @@ class MasterManifestGenerator:
         if not directory.exists():
             return
         
-        assets = list(directory.rglob("*.png")) + list(directory.rglob("*.jpg")) + list(directory.rglob("*.svg"))
+        # Match extensions case-insensitively: rglob's case sensitivity depends
+        # on the filesystem, and .jpeg/.JPG were silently skipped (#606)
+        assets = sorted(
+            p for p in directory.rglob("*")
+            if p.is_file() and p.suffix.lower() in self.ASSET_EXTENSIONS
+        )
         
         logger.info(f"Scanning {directory}: {len(assets)} assets found")
         

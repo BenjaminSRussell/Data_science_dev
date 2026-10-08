@@ -3,15 +3,24 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
 
-# Mock external dependencies before importing MassThemeScraper
-sys.modules['requests'] = MagicMock()
-sys.modules['PIL'] = MagicMock()
-sys.modules['PIL.Image'] = MagicMock()
+# Stub external dependencies only while importing MassThemeScraper, then
+# restore the real modules so later test files aren't handed a MagicMock
+_STUBBED = ('requests', 'PIL', 'PIL.Image')
+_saved_modules = {name: sys.modules.get(name) for name in _STUBBED}
+for _name in _STUBBED:
+    sys.modules[_name] = MagicMock()
 
 # Add the scripts directory to the path so we can import the scraper
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 
-from scrapers.mass_theme_scraper import MassThemeScraper
+try:
+    from scrapers.mass_theme_scraper import MassThemeScraper
+finally:
+    for _name, _module in _saved_modules.items():
+        if _module is None:
+            sys.modules.pop(_name, None)
+        else:
+            sys.modules[_name] = _module
 
 
 class TestGenerateMassAssetList:

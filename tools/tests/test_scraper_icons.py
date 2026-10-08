@@ -5,17 +5,25 @@ import os
 from pathlib import Path
 import tempfile
 
-# Mock external dependencies before importing scraper_icons
-sys.modules['requests'] = MagicMock()
-sys.modules['PIL'] = MagicMock()
-sys.modules['PIL.Image'] = MagicMock()
-sys.modules['bs4'] = MagicMock()
-sys.modules['bs4.BeautifulSoup'] = MagicMock()
+# Stub external dependencies only while importing scraper_icons, then put
+# the real modules back so later test files (which use real PIL) aren't
+# handed a MagicMock
+_STUBBED = ('requests', 'PIL', 'PIL.Image', 'bs4', 'bs4.BeautifulSoup')
+_saved_modules = {name: sys.modules.get(name) for name in _STUBBED}
+for _name in _STUBBED:
+    sys.modules[_name] = MagicMock()
 
 # Add scripts/scrapers to path for importing
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'scripts', 'scrapers')))
 
-from scraper_icons import IconScraper
+try:
+    from scraper_icons import IconScraper
+finally:
+    for _name, _module in _saved_modules.items():
+        if _module is None:
+            sys.modules.pop(_name, None)
+        else:
+            sys.modules[_name] = _module
 
 
 class TestIconSlugTransformation:
