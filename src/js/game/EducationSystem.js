@@ -7,6 +7,13 @@ export class EducationSystem {
     // this is reachable without a perfect score (#1265)
     static PASS_RATIO = 0.6;
 
+    // What a degree is worth once earned (#949)
+    static DEGREE_REWARDS = {
+        bootcamp: { reputation: 25, stats: { intelligence: 40 } },
+        bachelors: { reputation: 60, stats: { intelligence: 80, analytics: 40 } },
+        masters: { reputation: 120, stats: { intelligence: 120, analytics: 80 } }
+    };
+
     /**
      * Correct answers needed to pass an exam of `total` questions
      */
@@ -140,6 +147,8 @@ export class EducationSystem {
     }
 
     completeCourse(courseId) {
+        // Only real catalog courses count (#1424)
+        if (!this.courses[courseId]) return false;
         if (!this.completedCourses.includes(courseId)) {
             this.completedCourses.push(courseId);
 
@@ -180,14 +189,35 @@ export class EducationSystem {
         return rewardMap[course.id] || { stats: { intelligence: 30, analytics: 20 }, money: 50, reputation: 5 };
     }
 
-    checkDegrees() {
+    checkDegrees({ silent = false } = {}) {
+        const earned = [];
         for (const [key, degree] of Object.entries(this.degrees)) {
             if (!degree.acquired && degree.reqs.every(r => this.completedCourses.includes(r))) {
                 degree.acquired = true;
+                earned.push(key);
+                if (silent) continue; // re-deriving on load: no news, no double rewards
                 this.gameState.newsManager?.addNews({ text: `Player earned a ${degree.name}!`, category: 'career', sentiment: 'positive' });
-                // Add credential to character?
+                this.applyDegreeReward(key);
             }
         }
+        return earned;
+    }
+
+    /** A degree now pays off: reputation plus stat XP (#949) */
+    applyDegreeReward(key) {
+        const reward = EducationSystem.DEGREE_REWARDS[key];
+        if (!reward || !this.gameState) return null;
+        this.gameState.reputation = (Number(this.gameState.reputation) || 0) + reward.reputation;
+        const stats = this.gameState.characterStats;
+        if (typeof stats?.addExperience === 'function') {
+            for (const [stat, xp] of Object.entries(reward.stats)) stats.addExperience(stat, xp);
+        }
+        this.gameState.showToast?.(`${this.degrees[key]?.name}: +${reward.reputation} reputation`, 'success');
+        return reward;
+    }
+
+    hasDegree(key) {
+        return !!this.degrees[key]?.acquired;
     }
 
     // Serialization
@@ -199,13 +229,20 @@ export class EducationSystem {
     }
 
     fromJSON(data) {
-        if (!data) return;
-        this.completedCourses = data.completedCourses || [];
-        // Merge degree progress
-        if (data.degrees) {
+        if (!data || typeof data !== 'object') return;
+        // Tolerate a corrupt list: keep unique catalog course ids only (#1425)
+        const list = Array.isArray(data.completedCourses) ? data.completedCourses : [];
+        this.completedCourses = [...new Set(list.filter(id => typeof id === 'string' && this.courses[id]))];
+        // Merge degree progress; a bad entry must not abort the load (#2164)
+        if (data.degrees && typeof data.degrees === 'object') {
             for (const key in data.degrees) {
-                if (this.degrees[key]) this.degrees[key].acquired = data.degrees[key].acquired;
+                const saved = data.degrees[key];
+                if (this.degrees[key] && saved && typeof saved === 'object') {
+                    this.degrees[key].acquired = saved.acquired === true;
+                }
             }
         }
+        // Re-derive from completed courses rather than trusting a frozen flag (#2163)
+        this.checkDegrees({ silent: true });
     }
 }

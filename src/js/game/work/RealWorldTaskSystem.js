@@ -13,6 +13,15 @@ const EXTRA_SKILL_TO_STAT = {
     optimization: 'focus', performance: 'focus', database: 'analytics'
 };
 
+// JobSystem's JOB_CATEGORIES ids -> the task roles below (#1819)
+export const JOB_CATEGORY_ROLES = {
+    entry_level: 'data_analyst',
+    junior_analyst: 'data_analyst',
+    data_analyst: 'data_analyst',
+    senior_analyst: 'ml_engineer',
+    lead_scientist: 'research_scientist'
+};
+
 export class RealWorldTaskSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -439,7 +448,8 @@ export class RealWorldTaskSystem {
         const taskTemplate = this.taskTypes[taskType];
         
         return {
-            id: `${taskType}_${Date.now()}`,
+            // Sequence suffix so rapid calls never collide (#2097)
+            id: `${taskType}_${Date.now()}_${(this.taskSeq = (this.taskSeq || 0) + 1)}`,
             type: taskType,
             name: taskTemplate.name,
             category: taskTemplate.category,
@@ -462,7 +472,6 @@ export class RealWorldTaskSystem {
      * Get available tasks for a job
      */
     getAvailableTasks(jobId, context = {}) {
-        const allTasks = Object.keys(this.taskTypes);
         
         // Filter based on job requirements - expanded with new tasks
         const jobTasks = {
@@ -489,8 +498,11 @@ export class RealWorldTaskSystem {
             ]
         };
         
+        // Accept real JobSystem category ids too; an unknown job gets the
+        // entry-level list rather than every task in the game (#1819)
+        const role = jobTasks[jobId] ? jobId : (JOB_CATEGORY_ROLES[jobId] || 'data_analyst');
         // Only task types that are actually defined (#249)
-        let available = (jobTasks[jobId] || allTasks).filter(t => this.taskTypes[t]);
+        let available = jobTasks[role].filter(t => this.taskTypes[t]);
         
         // Check if in university lab for AI training
         if (context.inUniversityLab && available.includes('ai_model_training')) {
@@ -508,10 +520,12 @@ export class RealWorldTaskSystem {
     /**
      * Start a task
      */
-    startTask(task) {
+    startTask(task, context = {}) {
         if (!task) return null;
         // One task at a time, like ProjectSystem.startProject (#164)
         if (this.currentTask && this.currentTask !== task) return null;
+        // Lab-only work needs the university lab (#2094)
+        if (task.requiresLab && !(context.inUniversityLab || task.context?.inUniversityLab)) return null;
         this.currentTask = task;
         this.currentTask.currentStep = 0;
         this.currentTask.startedAt = Date.now();
@@ -524,15 +538,23 @@ export class RealWorldTaskSystem {
     completeStep() {
         if (!this.currentTask) return null;
         
-        const step = this.currentTask.steps[this.currentTask.currentStep];
-        if (step) {
-            step.completed = true;
-            this.currentTask.currentStep++;
-            
-            // Check if task is complete
-            if (this.currentTask.currentStep >= this.currentTask.steps.length) {
-                return this.completeTask();
-            }
+        const steps = this.currentTask.steps || [];
+        // A corrupt/out-of-range index must not stall the task forever (#2095):
+        // past the end means done, anything else snaps to the first open step
+        if (!(this.currentTask.currentStep >= 0 && this.currentTask.currentStep < steps.length)) {
+            if (this.currentTask.currentStep >= steps.length) return this.completeTask();
+            const open = steps.findIndex(s => !s.completed);
+            if (open === -1) return this.completeTask();
+            this.currentTask.currentStep = open;
+        }
+
+        const step = steps[this.currentTask.currentStep];
+        step.completed = true;
+        this.currentTask.currentStep++;
+
+        // Check if task is complete
+        if (this.currentTask.currentStep >= steps.length) {
+            return this.completeTask();
         }
         
         return this.currentTask;
@@ -557,7 +579,8 @@ export class RealWorldTaskSystem {
         
         // Apply rewards
         if (task.reward) {
-            if (task.reward.money && task.canTakeModel !== false) {
+            // canTakeModel is about keeping the trained model, not pay (#1821)
+            if (task.reward.money) {
                 this.gameState.money += task.reward.money;
             }
             if (task.reward.reputation) {
@@ -569,10 +592,15 @@ export class RealWorldTaskSystem {
                 const skills = Array.isArray(task.skills) ? task.skills : Object.keys(task.skills || {});
                 const stats = this.gameState.characterStats;
                 if (skills.length && typeof stats?.addExperience === 'function') {
-                    const perSkill = Math.floor(task.reward.experience / skills.length);
+                    const total = Math.round(Number(task.reward.experience) || 0);
+                    const perSkill = Math.floor(total / skills.length);
+                    // Hand out the remainder too, so the full XP lands (#1820)
+                    let remainder = total - perSkill * skills.length;
                     skills.forEach(skill => {
                         const statId = SKILL_TO_STAT[skill] || EXTRA_SKILL_TO_STAT[skill] || 'analytics';
-                        stats.addExperience(statId, perSkill);
+                        const amount = perSkill + (remainder > 0 ? 1 : 0);
+                        if (remainder > 0) remainder--;
+                        if (amount > 0) stats.addExperience(statId, amount);
                     });
                 }
             }
