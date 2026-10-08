@@ -45,5 +45,17 @@ export default [
       'no-useless-assignment': 'warn',
       'preserve-caught-error': 'warn'
     }
+  },
+  {
+    // Game code (not tests under src/): an undeclared name or a case-clause
+    // binding is a lint error, and CI runs `npm run lint`. A misplaced block
+    // in StorylineManager.checkPhaseTransition read undeclared `phase` and
+    // threw ReferenceError on every call (#4, #515).
+    files: ['src/**/*.js'],
+    ignores: ['src/**/*.test.js'],
+    rules: {
+      'no-undef': 'error',
+      'no-case-declarations': 'error'
+    }
   }
 ];

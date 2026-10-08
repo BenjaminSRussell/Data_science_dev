@@ -153,11 +153,12 @@ export class EmotionalBreakdownSystem {
                 shouldTrigger = relationship < condition.threshold &&
                     (this.peakRelationship.get(npc.id) || 0) >= condition.threshold;
                 break;
-            case 'relationship_drop':
+            case 'relationship_drop': {
                 // Check if relationship dropped recently
                 const recentDrop = this.checkRecentRelationshipDrop(npc.id);
                 shouldTrigger = recentDrop >= Math.abs(condition.threshold);
                 break;
+            }
             case 'rejection':
                 shouldTrigger = this.checkRejection(npc.id);
                 break;

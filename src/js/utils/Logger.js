@@ -5,6 +5,9 @@
  * Allows for log levels and production mode
  */
 
+// Vite replaces process.env.NODE_ENV at build time
+/* global process */
+
 const LOG_LEVELS = {
     DEBUG: 0,
     INFO: 1,

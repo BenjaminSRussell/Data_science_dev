@@ -6,6 +6,27 @@
 import { pickState, applyState } from '../utils/StateSerializer.js';
 import { ethicsBand } from '../data/ethics.js';
 
+/**
+ * Whether any decision in `manager.majorDecisions` was made in `phase`.
+ * The single answer to "was a major decision made in this act?", shared by
+ * StorylineManager and StoryBeatsSystem so callers don't re-derive it (#515).
+ * Records carry the act they were made in (#2266); older saves without it
+ * fall back to the catalog's fixed phase.
+ * @param {{majorDecisions?: Array, getDecision?: Function}} manager
+ * @param {string} phase
+ * @returns {boolean}
+ */
+export function decisionMadeInPhase(manager, phase) {
+    if (!manager || !phase) return false;
+    const decisions = Array.isArray(manager.majorDecisions) ? manager.majorDecisions : [];
+    return decisions.some(d => {
+        if (!d) return false;
+        if (d.phase) return d.phase === phase;
+        const catalogEntry = manager.getDecision?.(d.decisionId);
+        return Boolean(catalogEntry) && catalogEntry.phase === phase;
+    });
+}
+
 export class StorylineManager {
     constructor(gameState) {
         this.gameState = gameState;
@@ -162,6 +183,14 @@ export class StorylineManager {
         const won = this.random() < (Number(o.chance) || 0);
         const branch = won ? o.win : o.lose;
         return { ...choice, ...branch, outcome: won ? 'win' : 'lose' };
+    }
+
+    /**
+     * Was a major decision made in this act? (#515)
+     * @param {string} phase
+     */
+    hasDecisionInPhase(phase) {
+        return decisionMadeInPhase(this, phase);
     }
 
     /**
@@ -329,7 +358,10 @@ export class StorylineManager {
                     title: 'A Lucrative But Illegal Offer',
                     description: 'A contact offers you $50,000 to manipulate stock market data to benefit their trading scheme. It\'s clearly illegal - market manipulation. But the money would change your life. No one would know. Probably.',
                     context: 'You\'ve been struggling, or maybe you\'re just greedy. This is a lot of money. But it\'s fraud. If you get caught, you could face serious legal consequences. But if you don\'t get caught...',
-                    phase: phase,
+                    // Offered in whatever act the player is in, so the catalog
+                    // has no fixed act for it; the full-catalog view must not
+                    // report the current act as the one it was made in (#515)
+                    phase: includeAll ? undefined : phase,
                     choices: {
                         accept: {
                             message: 'You take the deal. The money is incredible - $50,000 in your account. You\'ve crossed a line you can\'t uncross. You\'re now a criminal. The money feels good, but you\'re always looking over your shoulder.',
