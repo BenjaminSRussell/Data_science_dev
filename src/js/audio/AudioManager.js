@@ -3,6 +3,10 @@
  */
 
 export class AudioManager {
+    /** Station crossfade length and step (#1291) */
+    static FADE_MS = 400;
+    static FADE_STEP_MS = 40;
+
     constructor() {
         this.soundEnabled = true;
         this.musicEnabled = true;
@@ -213,7 +217,8 @@ export class AudioManager {
             return;
         }
 
-        this.stopCurrentMusic();
+        // Fade the old track out while the new one fades in (#1291)
+        this.stopCurrentMusic({ fade: true });
 
         if (stationId === 'off') {
             this.currentStation = 'off';
@@ -237,10 +242,41 @@ export class AudioManager {
      * Stop the playing track and release its media resources, so switching
      * stations doesn't keep old elements buffering in the background (#1290)
      */
-    stopCurrentMusic() {
+    stopCurrentMusic({ fade = false } = {}) {
         const audio = this.currentMusic;
         this.currentMusic = null;
         if (!audio) return;
+        if (fade && !audio.paused && AudioManager.FADE_MS > 0) {
+            this.fadeVolume(audio, 0, AudioManager.FADE_MS, () => AudioManager.releaseAudio(audio));
+            return;
+        }
+        AudioManager.releaseAudio(audio);
+    }
+
+    /**
+     * Ramp an element's volume to `target` over `ms`, then call `done` (#1291)
+     */
+    fadeVolume(audio, target, ms, done) {
+        const steps = Math.max(1, Math.round(ms / AudioManager.FADE_STEP_MS));
+        const start = Number(audio.volume) || 0;
+        let step = 0;
+        const timer = setInterval(() => {
+            step++;
+            try {
+                audio.volume = Math.max(0, Math.min(1, start + (target - start) * (step / steps)));
+            } catch {
+                // Element released mid-fade
+            }
+            if (step >= steps) {
+                clearInterval(timer);
+                done?.();
+            }
+        }, AudioManager.FADE_STEP_MS);
+        return timer;
+    }
+
+    /** Pause and release an element's media resources (#1290) */
+    static releaseAudio(audio) {
         try {
             audio.pause();
             audio.removeAttribute?.('src');
@@ -270,8 +306,14 @@ export class AudioManager {
         const url = `/assets/audio/music/${track}`;
 
         const audio = new Audio(url);
-        audio.volume = this.musicVolume;
+        // Start silent and fade in, so a station switch blends (#1291)
+        audio.volume = AudioManager.FADE_MS > 0 ? 0 : this.musicVolume;
         this.currentMusic = audio;
+        if (AudioManager.FADE_MS > 0) {
+            audio.addEventListener('playing', () => {
+                if (this.currentMusic === audio) this.fadeVolume(audio, this.musicVolume, AudioManager.FADE_MS);
+            }, { once: true });
+        }
         const isCurrent = () => this.currentMusic === audio && this.musicEnabled && this.currentStation === stationId;
 
         audio.addEventListener('playing', () => {

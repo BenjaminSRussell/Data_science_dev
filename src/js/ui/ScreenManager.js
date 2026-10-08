@@ -128,6 +128,8 @@ export class ScreenManager {
         if (screenId === 'screen-map' && this.mainGame) {
             // Small delay to ensure DOM is ready and screen is visible
             setTimeout(() => {
+                // The player may have left the map within the delay (#1089)
+                if (this.currentScreen !== 'screen-map') return;
                 if (this.mainGame.updateMapScreen) {
                     this.mainGame.updateMapScreen();
                 }
