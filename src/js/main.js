@@ -28,6 +28,7 @@ import { EconomySystem } from './game/EconomySystem.js';
 import { BankSystem } from './game/BankSystem.js';
 import { UIUpdater } from './ui/UIUpdater.js';
 import { createGameEndingModal } from './ui/GameEndingModal.js';
+import { AchievementSystem } from './game/AchievementSystem.js';
 import { EnvironmentManager } from './game/EnvironmentManager.js';
 import { CharacterStats, STATS, TRAINING_ACTIVITIES } from './game/CharacterStats.js';
 import { TimeManager } from './game/TimeManager.js';
@@ -2365,6 +2366,9 @@ export class MainGame {
             }
         }
 
+        // Milestones reached by this task (#258)
+        this.checkAchievements();
+
         // Update top bar
         this.uiUpdater.updateTopBar();
 
@@ -2379,6 +2383,18 @@ export class MainGame {
 
         // Auto-save into the slot being played, not always slot 0 (#871)
         this.saveManager.saveGame(this.gameState, this.currentSaveSlot ?? 0);
+    }
+
+    /**
+     * Award newly reached achievements and toast each one (#258)
+     * @returns {Array} the newly earned achievements
+     */
+    checkAchievements() {
+        const earned = AchievementSystem.check(this.gameState);
+        for (const a of earned) {
+            this.showToast?.(`Achievement unlocked: ${a.name} (${a.description})`, 'success');
+        }
+        return earned;
     }
 
     /**
@@ -3634,6 +3650,8 @@ export class MainGame {
                 // Nudge about a freelance project left idle (#263)
                 const idleWork = this.gameState.projectSystem?.checkIdleWork?.();
                 if (idleWork) this.showToast(idleWork.message, 'info');
+                // Milestones reached overnight: days survived, contracts, ... (#258)
+                this.checkAchievements();
                 // Jealousy cools off a little every day (#915)
                 this.gameState.jealousySystem?.decayAll?.(2);
                 // Neglected relationships cool off and can end (#1076)

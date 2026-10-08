@@ -3,6 +3,7 @@
  * Holds all player data, current task, and game configuration
  */
 
+import { AchievementSystem } from './AchievementSystem.js';
 import { RANKS } from '../data/ranks.js';
 
 
@@ -54,6 +55,8 @@ export class GameState {
         // Progress tracking
         this.tasksCompleted = 0;
         this.perfectScores = 0;
+        // Earned achievements, { id, day, earnedAt } (#258)
+        this.completedAchievements = [];
         this.totalEarned = 0;
         this.totalSpent = 0;
         this.weeklyIncome = 0; // Track income for tax calculation
@@ -408,6 +411,7 @@ export class GameState {
             bank: this.bank, // Persist bank state (BankSystem keeps all of its state here)
             tasksCompleted: this.tasksCompleted,
             perfectScores: this.perfectScores,
+            completedAchievements: this.completedAchievements || [],
             totalEarned: this.totalEarned,
             totalSpent: this.totalSpent,
             weeklyIncome: this.weeklyIncome,
@@ -495,6 +499,7 @@ export class GameState {
         this.bank = data.bank || null; // Load bank state (BankSystem re-applies defaults when null)
         this.tasksCompleted = data.tasksCompleted ?? 0;
         this.perfectScores = data.perfectScores ?? 0;
+        this.completedAchievements = AchievementSystem.normalize(data.completedAchievements);
         this.totalEarned = data.totalEarned ?? 0;
         this.totalSpent = data.totalSpent ?? 0;
         this.weeklyIncome = data.weeklyIncome ?? 0;
