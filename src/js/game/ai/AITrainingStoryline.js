@@ -129,8 +129,8 @@ export class AITrainingStoryline {
         }
         
         // Find available GPU cluster
-        const availableCluster = Object.values(this.universityLab.computers)
-            .find(cluster => cluster.available && !cluster.inUse);
+        const [clusterId, availableCluster] = Object.entries(this.universityLab.computers)
+            .find(([, cluster]) => cluster.available && !cluster.inUse) || [];
         
         if (!availableCluster) {
             return {
@@ -141,9 +141,11 @@ export class AITrainingStoryline {
         
         // Create training project
         const project = {
-            id: `ai_training_${Date.now()}`,
+            id: `ai_training_${Date.now()}_${this.universityLab.currentProjects.length + this.modelsTrained.length + 1}`,
             type: projectType,
             phase: this.currentPhase,
+            // Keep the key so the cluster can be freed; name is for display (#103, #2032)
+            clusterId,
             cluster: availableCluster.name,
             startedAt: Date.now(),
             status: 'training',
@@ -198,14 +200,19 @@ export class AITrainingStoryline {
      * Complete training project
      */
     completeTrainingProject(projectId) {
-        const project = this.universityLab.currentProjects.find(p => p.id === projectId);
+        const project = this.universityLab?.currentProjects.find(p => p.id === projectId);
         if (!project) return;
+        // Completing twice must not pay out twice
+        if (project.status === 'completed') {
+            return { success: false, message: 'That training run is already complete.' };
+        }
         
         project.status = 'completed';
         project.completedAt = Date.now();
         
-        // Free up cluster
-        const cluster = this.universityLab.computers[project.cluster];
+        // Free up cluster. Look up by key; older saves stored only the display
+        // name, which never matched a key, so the cluster stayed locked (#103, #2032)
+        const cluster = this.findCluster(project.clusterId ?? project.cluster);
         if (cluster) {
             cluster.inUse = false;
         }
@@ -234,10 +241,21 @@ export class AITrainingStoryline {
     /**
      * Check if phase should transition
      */
+    /** A university cluster by key or (for older saves) by display name */
+    findCluster(idOrName) {
+        const computers = this.universityLab?.computers || {};
+        if (idOrName == null) return null;
+        return computers[idOrName] || Object.values(computers).find(c => c.name === idOrName) || null;
+    }
+
     checkPhaseTransition() {
-        // Transition to attention era after certain progress
-        if (this.currentPhase === 'pre_attention' && this.researchProgress >= 50) {
-            this.transitionToPhase('attention_era');
+        // Both eras gate on their own milestones; pre-attention also needs the
+        // research progress. Training runs alone can't skip the era (#2034)
+        if (this.currentPhase === 'pre_attention') {
+            const preMilestones = this.timeline.pre_attention?.milestones || [];
+            if (this.researchProgress >= 50 && preMilestones.every(m => m.completed)) {
+                this.transitionToPhase('attention_era');
+            }
         }
         
         // Transition to post-attention after attention era milestones
@@ -319,11 +337,25 @@ export class AITrainingStoryline {
             return { success: false, message: 'Cluster is currently in use' };
         }
         
+        // Reserve it, so the inUse guard means something (#2035); free it
+        // with releaseUniversityComputer()
+        cluster.inUse = true;
         return {
             success: true,
             cluster: cluster,
             message: `Using ${cluster.name} (${cluster.gpus} GPUs, ${cluster.memory} memory)`
         };
+    }
+
+    /** Free a cluster reserved by useUniversityComputer() */
+    releaseUniversityComputer(clusterName) {
+        const cluster = this.findCluster(clusterName);
+        if (!cluster || !cluster.inUse) return false;
+        // A cluster running a training project is freed by completing it
+        const busy = this.universityLab.currentProjects.some(p => p.status === 'training' && this.findCluster(p.clusterId ?? p.cluster) === cluster);
+        if (busy) return false;
+        cluster.inUse = false;
+        return true;
     }
     
     /**
