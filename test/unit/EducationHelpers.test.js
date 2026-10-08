@@ -88,9 +88,11 @@ describe('finishExam (#200)', () => {
 });
 
 describe('EducationHelpers exam flow and purchases (#1269)', () => {
-    it('handleStartExam charges tuition and sets up the exam', () => {
+    it('handleStartExam sets up the exam; tuition is charged on Start (#1270)', () => {
         const g = makeGame();
         Edu.handleStartExam(g, 'stats101');
+        expect(g.gameState.money).toBe(1000);
+        document.getElementById('btn-start-exam').click();
         expect(g.gameState.money).toBe(700);
         expect(g.currentExam).toMatchObject({ courseId: 'stats101', currentQuestionIndex: 0, score: 0 });
         expect(g.currentExam.questions).toHaveLength(3);

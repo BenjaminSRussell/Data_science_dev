@@ -176,12 +176,14 @@ describe('EducationSystem (#949, #1424, #1425, #1427, #2163, #2164)', () => {
         const state = gs();
         state.educationSystem = new EducationSystem(state);
         const game = { gameState: state, showToast: vi.fn(), uiUpdater: { updateAllUI: vi.fn() } };
-        const spy = vi.spyOn(state.educationSystem, 'enroll');
+        const spy = vi.spyOn(state.educationSystem, 'canEnroll');
         handleStartExam(game, 'stats_201'); // needs python_101
         expect(spy).toHaveBeenCalledWith('stats_201');
         expect(state.money).toBe(10000);
         expect(game.showToast).toHaveBeenCalledWith(expect.stringMatching(/Prerequisites/), 'error');
         handleStartExam(game, 'python_101');
+        expect(state.money).toBe(10000); // charged on Start, not on open (#1270)
+        document.getElementById('btn-start-exam').click();
         expect(state.money).toBe(9500);
         state.educationSystem.completedCourses.push('sql_101');
         handleStartExam(game, 'sql_101');

@@ -352,6 +352,8 @@ export function handleCrime(game, type, params) {
         if (typeof result.profit === 'number' && result.profit !== 0) {
             game.showToast(`Profit: $${Math.round(result.profit).toLocaleString()}`, result.profit > 0 ? 'success' : 'warning');
         }
+        // Same sound as every other money gain (#1238)
+        game.audioManager?.play?.(result.profit > 0 ? 'kaching' : 'click');
         updateStockMarketScreen(game);
         game.uiUpdater.updateAllUI();
     } else {
