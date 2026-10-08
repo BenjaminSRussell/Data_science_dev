@@ -15,6 +15,18 @@ export const LICENSES = [
     { id: 'series_63', name: 'Series 63 License', cost: 1000 }
 ];
 
+/** Lawyer retainers, cheapest first; the index is the tier's rank */
+export const LAWYER_TIERS = [
+    { id: 'cheap', name: 'Budget Lawyer', cost: 500, reduction: 0.2 },
+    { id: 'average', name: 'Solid Lawyer', cost: 2500, reduction: 0.4 },
+    { id: 'expensive', name: 'Top-Tier Lawyer', cost: 10000, reduction: 0.6 }
+];
+
+/** How much a retained lawyer cuts fines and sentences (0 without one) */
+export function getLawyerReduction(tier) {
+    return LAWYER_TIERS.find(t => t.id === tier)?.reduction || 0;
+}
+
 export class LegalSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -70,17 +82,47 @@ export class LegalSystem {
      * Invalid tiers must not touch money (#12).
      */
     hireLawyer(tier) {
-        const costs = { cheap: 500, average: 2500, expensive: 10000 };
-        if (!Object.prototype.hasOwnProperty.call(costs, tier)) {
+        const rank = LAWYER_TIERS.findIndex(t => t.id === tier);
+        if (rank === -1) {
             return { success: false, message: "Unknown lawyer tier." };
         }
-        const cost = costs[tier];
+        // Re-buying the same (or a worse) retainer would just burn money
+        const currentRank = LAWYER_TIERS.findIndex(t => t.id === this.lawyer);
+        if (currentRank >= rank) {
+            return { success: false, message: "You already retain an equal or better lawyer." };
+        }
+        const cost = LAWYER_TIERS[rank].cost;
         if (this.gameState.money < cost) {
             return { success: false, message: "Cannot afford retainer." };
         }
         this.gameState.money -= cost;
         this.lawyer = tier;
         return { success: true, message: `Hired ${tier} lawyer for $${cost}.` };
+    }
+
+    /**
+     * Weekly legal tick: accumulated legal trouble can trigger an audit fine
+     * (a lawyer softens it); otherwise it slowly cools off (#1538)
+     * @param {() => number} rng
+     * @returns {{audited: boolean, fine: number, legalTrouble: number}}
+     */
+    processWeek(rng = Math.random) {
+        const trouble = Number(this.legalTrouble) || 0;
+        if (trouble <= 0) return { audited: false, fine: 0, legalTrouble: 0 };
+
+        const reduction = getLawyerReduction(this.lawyer);
+        // Up to a 50% weekly audit chance at maximum trouble
+        if (rng() < trouble / 200) {
+            const fullFine = Math.round(trouble * 100 * (1 - reduction));
+            const fine = Math.max(0, Math.min(fullFine, Math.floor(Number(this.gameState?.money) || 0)));
+            this.gameState.money = (Number(this.gameState.money) || 0) - fine;
+            this.legalTrouble = Math.floor(trouble / 2);
+            return { audited: true, fine, legalTrouble: this.legalTrouble };
+        }
+
+        // A lawyer makes trouble go away faster
+        this.legalTrouble = Math.max(0, trouble - (5 + Math.round(reduction * 10)));
+        return { audited: false, fine: 0, legalTrouble: this.legalTrouble };
     }
 
     getLicenseById(licenseId) {

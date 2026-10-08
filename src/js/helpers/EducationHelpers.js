@@ -204,6 +204,24 @@ export function handleBuyLicense(game, licenseId) {
 }
 
 /**
+ * Handle retaining a lawyer at City Hall (#1535)
+ */
+export function handleHireLawyer(game, tier) {
+    const legal = game.gameState.legalSystem;
+    if (!legal) return;
+    const result = legal.hireLawyer(tier);
+    if (result.success) {
+        game.showToast(`${result.message} Arrest fines, sentences and audit fines are now reduced.`, 'success');
+        game.audioManager?.play?.('kaching');
+        MapHelpers.refreshLocationActions?.(game);
+        game.uiUpdater?.updateAllUI?.();
+    } else {
+        game.showToast(result.message, 'error');
+        game.audioManager?.play?.('error');
+    }
+}
+
+/**
  * Handle learning a library skill
  */
 export function handleLearnLibrary(game, libId, LIBRARY_CONTENT) {

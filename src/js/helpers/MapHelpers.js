@@ -4,6 +4,7 @@
  * Cleanup: Uses centralized utilities
  */
 
+import { LAWYER_TIERS } from '../game/LegalSystem.js';
 import { CameraSystem } from '../camera/CameraSystem.js';
 import { updateMapLocationIcons, updateLockBadges } from './MapIconRenderer.js';
 import { initializeMapRenderer } from '../game/MapSystemInitializer.js';
@@ -296,6 +297,37 @@ function createCityHallActions(game, actionsEl) {
     s63Btn.innerHTML = series63Owned ? 'Series 63 Active' : 'Take Series 63 Exam ($1,000)';
     if (!series63Owned) s63Btn.onclick = () => game.handleBuyLicense('series_63');
     actionsEl.appendChild(s63Btn);
+
+    // Driver's License gates cars, Business License gates senior hires (#1536)
+    const extraLicenses = [
+        { id: 'drivers_license', buy: "Get Driver's License ($200)", owned: "Driver's License" },
+        { id: 'business_license', buy: 'Get Business License ($2,000)', owned: 'Business Licensed' }
+    ];
+    for (const lic of extraLicenses) {
+        const owned = game.gameState.legalSystem?.hasLicense(lic.id) || false;
+        const btn = document.createElement('button');
+        btn.className = `btn-cartoon ${owned ? 'disabled' : ''}`;
+        btn.textContent = owned ? lic.owned : lic.buy;
+        if (!owned) btn.onclick = () => game.handleBuyLicense(lic.id);
+        actionsEl.appendChild(btn);
+    }
+
+    // Lawyer retainers: only offer upgrades over the current one (#1535)
+    const currentLawyer = game.gameState.legalSystem?.lawyer || null;
+    const currentRank = LAWYER_TIERS.findIndex(t => t.id === currentLawyer);
+    if (currentRank >= 0) {
+        const status = document.createElement('button');
+        status.className = 'btn-cartoon disabled';
+        status.textContent = `${LAWYER_TIERS[currentRank].name} on retainer`;
+        actionsEl.appendChild(status);
+    }
+    LAWYER_TIERS.slice(currentRank + 1).forEach(tier => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-cartoon';
+        btn.textContent = `Retain ${tier.name} ($${tier.cost.toLocaleString()}, -${Math.round(tier.reduction * 100)}% penalties)`;
+        btn.onclick = () => game.handleHireLawyer(tier.id);
+        actionsEl.appendChild(btn);
+    });
 }
 
 /**

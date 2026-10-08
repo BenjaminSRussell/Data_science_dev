@@ -559,6 +559,12 @@ export class WorldMap {
             return { success: false, reason: 'Already own this vehicle' };
         }
 
+        // Cars need a Driver's License from City Hall (#1536)
+        const legal = this.gameState.legalSystem;
+        if (vehicle.id !== 'walking' && vehicle.id !== 'bus_pass' && legal?.hasLicense && !legal.hasLicense('drivers_license')) {
+            return { success: false, reason: "You need a Driver's License (City Hall) to buy a car" };
+        }
+
         if (this.gameState.money < vehicle.price) {
             return { success: false, reason: 'Not enough money' };
         }
