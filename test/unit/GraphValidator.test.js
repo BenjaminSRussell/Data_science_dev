@@ -7,8 +7,9 @@ import { GraphValidator } from '../../src/js/dev/GraphValidator.js';
 describe('GraphValidator', () => {
     const v = new GraphValidator({});
 
-    it('validateDataAccuracy passes all 4 built-in cases', async () => {
-        expect(await v.validateDataAccuracy()).toMatchObject({ total: 4, passed: 4, failed: 0, errors: [] });
+    it('validateDataAccuracy passes all built-in cases', async () => {
+        const n = GraphValidator.DATA_ACCURACY_CASES.length;
+        expect(await v.validateDataAccuracy()).toMatchObject({ total: n, passed: n, failed: 0, errors: [] });
     });
 
     it('null/undefined chart data', () => {
@@ -33,6 +34,7 @@ describe('GraphValidator', () => {
             'Dataset 0, value 1 is invalid: NaN',
             'Dataset 0, value 2 is invalid: Infinity',
             'Dataset 1 missing data array',
+            'Dataset 2 has 2 values for 3 labels',
             'Dataset 2, value 1 is invalid: 3'
         ]);
     });
