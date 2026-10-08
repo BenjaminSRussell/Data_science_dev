@@ -158,6 +158,9 @@ export const STAFF_ROLES = {
 export const OFFICE_STAFF_CAPACITY = [1, 1, 2, 4, 10, 25];
 
 export class MainGame {
+    // Longest the loading screen waits for images before starting anyway (#1675)
+    static ASSET_WAIT_MS = 4000;
+
     constructor() {
         logger.debug('MainGame constructor entry');
 
@@ -1169,6 +1172,25 @@ export class MainGame {
     }
 
     /**
+     * Resolve once assets finish loading or after `maxWaitMs`, whichever is
+     * first, updating the loading bar from 70% toward 99% meanwhile (#1675)
+     */
+    waitForAssets(maxWaitMs = MainGame.ASSET_WAIT_MS) {
+        const load = Promise.resolve(this.loadAssetsInBackground?.()).catch(() => false);
+        let timer = null;
+        let poll = null;
+        const timeout = new Promise(resolve => { timer = setTimeout(() => resolve('timeout'), maxWaitMs); });
+        poll = setInterval(() => {
+            const p = Number(this.assetManager?.loadProgress) || 0;
+            this.showLoadingProgress?.(`Loading assets... ${Math.round(p)}%`, 70 + Math.min(29, Math.round(p * 0.29)));
+        }, 150);
+        return Promise.race([load, timeout]).finally(() => {
+            clearTimeout(timer);
+            clearInterval(poll);
+        });
+    }
+
+    /**
      * Load game assets once per session. Waits for the PixiJS managers to
      * finish importing so a slow import can't force the legacy pipeline
      * (#1049), and does nothing if a previous game already loaded them (#1679).
@@ -1607,6 +1629,11 @@ export class MainGame {
             }
 
             logger.debug('[startNewGame]: managers linked');
+
+            // Don't claim "Ready! 100%" before any image has loaded (#1675):
+            // wait for the asset load (capped, so a slow network never blocks
+            // the game) while the bar tracks real progress
+            this.waitForAssets().then(() => {
             this.showLoadingProgress('Ready!', 100);
             logger.debug('[startNewGame]: core systems initialized, showing intro');
 
@@ -1623,6 +1650,7 @@ export class MainGame {
                     this.screenManager.showScreen('screen-game');
                 }
             }, 100);
+            });
         } catch (error) {
             logger.error(' startNewGame ERROR:', error);
             logger.error('Stack:', error.stack);

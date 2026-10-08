@@ -7,6 +7,39 @@
 import { isAssetMissing } from './MissingAssetBlocklist.js';
 
 export class AssetManager {
+    // Images requested at once while preloading (#1676)
+    static LOAD_CONCURRENCY = 8;
+
+    /** { name_00: `${prefix}_00.png`, ... } for generator-numbered files */
+    static numbered(prefix, count) {
+        const out = {};
+        for (let i = 0; i < count; i++) {
+            const n = String(i).padStart(2, '0');
+            out[`${prefix.split('/').pop()}_${n}`] = `${prefix}_${n}.png`;
+        }
+        return out;
+    }
+
+    /**
+     * Flatten a manifest into [{ key, src }]. Descriptor objects with a `url`
+     * (sprite sheets) are ONE asset; their other fields (type, frameWidth...)
+     * are metadata, not URLs (#1043).
+     */
+    static collectEntries(manifest, path = '', out = []) {
+        if (!manifest || typeof manifest !== 'object') return out;
+        for (const key of Object.keys(manifest)) {
+            const value = manifest[key];
+            const currentPath = path ? `${path}.${key}` : key;
+            if (typeof value === 'string') {
+                out.push({ key: currentPath, src: value });
+            } else if (value && typeof value === 'object') {
+                if (typeof value.url === 'string') out.push({ key: currentPath, src: value.url, meta: value });
+                else AssetManager.collectEntries(value, currentPath, out);
+            }
+        }
+        return out;
+    }
+
     constructor() {
         this.assets = new Map();
         this.loaded = false;
@@ -169,30 +202,13 @@ export class AssetManager {
                 }
             },
             map: {
-                // Simple 2D map tiles
-                grass: '/assets/map/grass.png',
-                roads: {
-                    main_h: '/assets/map/roads/main_horizontal.png',
-                    main_v: '/assets/map/roads/main_vertical.png',
-                    secondary_h: '/assets/map/roads/secondary_horizontal.png',
-                    secondary_v: '/assets/map/roads/secondary_vertical.png'
-                },
-                buildings: {
-                    residence: '/assets/map/buildings/residence.png',
-                    work: '/assets/map/buildings/work.png',
-                    education: '/assets/map/buildings/education.png',
-                    finance: '/assets/map/buildings/finance.png',
-                    government: '/assets/map/buildings/government.png',
-                    shop: '/assets/map/buildings/shop.png',
-                    social: '/assets/map/buildings/social.png',
-                    training: '/assets/map/buildings/training.png',
-                    business: '/assets/map/buildings/business.png',
-                    elite: '/assets/map/buildings/elite.png'
-                },
-                parks: {
-                    tree: '/assets/map/parks/tree.png',
-                    grass_park: '/assets/map/parks/grass_park.png'
-                }
+                // Real files from the town-map generator: building_NN, house_NN,
+                // road_NN, tree_NN plus the composed base map (#1040)
+                base: '/assets/map/town_map_base.png',
+                roads: AssetManager.numbered('/assets/map/roads/road', 10),
+                buildings: AssetManager.numbered('/assets/map/buildings/building', 10),
+                houses: AssetManager.numbered('/assets/map/houses/house', 10),
+                trees: AssetManager.numbered('/assets/map/trees/tree', 10)
             },
             icons: {
                 // Simple 2D location icons (when available)
@@ -245,39 +261,28 @@ export class AssetManager {
      * Count total assets
      */
     countAssets(obj, count = 0) {
-        for (const key in obj) {
-            if (typeof obj[key] === 'string') {
-                count++;
-            } else if (typeof obj[key] === 'object') {
-                count = this.countAssets(obj[key], count);
-            }
-        }
-        return count;
+        return count + AssetManager.collectEntries(obj).length;
     }
 
     /**
      * Load assets recursively (fails gracefully for missing assets)
      */
     async loadAssets(manifest, path = '') {
-        for (const key in manifest) {
-            const currentPath = path ? `${path}.${key}` : key;
-
-            if (typeof manifest[key] === 'string') {
-                // It's an asset path - load it (will resolve null if missing)
+        // Parallel with a small pool instead of one image at a time (#1676)
+        const entries = AssetManager.collectEntries(manifest, path);
+        let next = 0;
+        const worker = async () => {
+            while (next < entries.length) {
+                const { key, src } = entries[next++];
                 try {
-                    await this.loadImage(manifest[key], currentPath);
-                } catch (error) {
-                    // Continue loading other assets even if one fails
-                }
-            } else if (typeof manifest[key] === 'object') {
-                // It's a nested object
-                try {
-                    await this.loadAssets(manifest[key], currentPath);
-                } catch (error) {
+                    await this.loadImage(src, key);
+                } catch {
                     // Continue loading other assets even if one fails
                 }
             }
-        }
+        };
+        const pool = Math.max(1, Math.min(AssetManager.LOAD_CONCURRENCY, entries.length));
+        await Promise.all(Array.from({ length: pool }, worker));
     }
 
     /**
@@ -294,7 +299,7 @@ export class AssetManager {
                 img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23cccccc'/%3E%3Ctext x='32' y='32' font-family='sans-serif' font-size='10' text-anchor='middle' dy='0.3em' fill='%23666666'%3EMISSING%3C/text%3E%3C/svg%3E";
                 this.assets.set(key, img);
                 this.loadedAssets++;
-                this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
+                this.loadProgress = this.totalAssets ? Math.min(100, (this.loadedAssets / this.totalAssets) * 100) : 100;
                 resolve(img);
                 return;
             }
@@ -304,13 +309,13 @@ export class AssetManager {
             img.onload = () => {
                 this.assets.set(key, img);
                 this.loadedAssets++;
-                this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
+                this.loadProgress = this.totalAssets ? Math.min(100, (this.loadedAssets / this.totalAssets) * 100) : 100;
                 resolve(img);
             };
 
             img.onerror = () => {
                 this.loadedAssets++;
-                this.loadProgress = (this.loadedAssets / this.totalAssets) * 100;
+                this.loadProgress = this.totalAssets ? Math.min(100, (this.loadedAssets / this.totalAssets) * 100) : 100;
                 resolve(null);
             };
 

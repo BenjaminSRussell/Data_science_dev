@@ -159,15 +159,17 @@ export class AssetValidator {
         if (assetManager?.getAssetManifest) {
             const manifest = assetManager.getAssetManifest();
             
-            // Background images
+            // Background images, at any nesting depth (backgrounds.locations.*) (#2309)
             if (manifest.backgrounds) {
-                Object.values(manifest.backgrounds).forEach(bg => {
-                    if (typeof bg === 'string') {
-                        paths.push(bg);
-                    } else if (bg.url) {
-                        paths.push(bg.url);
+                const walk = (node) => {
+                    if (!node) return;
+                    if (typeof node === 'string') { paths.push(node); return; }
+                    if (typeof node === 'object') {
+                        if (typeof node.url === 'string') { paths.push(node.url); return; }
+                        Object.values(node).forEach(walk);
                     }
-                });
+                };
+                walk(manifest.backgrounds);
             }
         }
 
