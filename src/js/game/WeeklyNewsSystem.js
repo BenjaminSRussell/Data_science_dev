@@ -5,6 +5,7 @@
  */
 
 import { ethicsBand } from '../data/ethics.js';
+import { OFFICE_LOCATIONS } from '../data/locations.js';
 
 const DEFAULT_STORYLINES = {
     techRevolution: 0,
@@ -281,24 +282,38 @@ export class WeeklyNewsSystem {
     }
 
     generateNewLocation(week) {
-        const locations = [
-            { id: 'innovation_hub', name: 'Innovation Hub', type: 'work' },
-            { id: 'data_lounge', name: 'Data Lounge', type: 'social' },
-            { id: 'tech_park', name: 'Tech Park', type: 'work' },
-            { id: 'startup_incubator', name: 'Startup Incubator', type: 'work' }
-        ];
-        return locations[(week / 4 - 1) % locations.length];
+        // Real office locations the player can move into (rank-gated by
+        // OfficeManager), not invented ids nothing recognises (#1192)
+        const locations = OFFICE_LOCATIONS.filter(l => !l.hidden);
+        if (locations.length === 0) return null;
+        const index = Math.max(0, Math.floor(week / 4) - 1) % locations.length;
+        const loc = locations[index];
+        return { id: loc.id, name: loc.name, type: 'office', rankRequired: loc.rankRequired ?? 0 };
     }
 
     /**
      * Generate market update
      */
     generateMarketUpdate() {
+        // Report what the real stock market did over the past week (#1194)
+        const stocks = (this.gameState?.stockMarket?.stocks || []).filter(s => Number(s?.price) > 0);
+        if (stocks.length === 0) {
+            return { trend: 'flat', volatility: 0, topPerformer: null, worstPerformer: null };
+        }
+        const weekChange = (s) => {
+            const history = Array.isArray(s.history) && s.history.length ? s.history : [s.price];
+            const base = Number(history[Math.max(0, history.length - 8)]) || s.price;
+            return base > 0 ? (s.price - base) / base : 0;
+        };
+        const ranked = stocks.map(s => ({ s, change: weekChange(s) })).sort((a, b) => b.change - a.change);
+        const avg = ranked.reduce((sum, r) => sum + r.change, 0) / ranked.length;
+        const label = (r) => r.s.name || r.s.ticker || r.s.id;
         return {
-            trend: Math.random() > 0.5 ? 'up' : 'down',
-            volatility: 0.1 + Math.random() * 0.3,
-            topPerformer: 'TechCorp',
-            worstPerformer: 'DataDynamics'
+            trend: avg > 0 ? 'up' : avg < 0 ? 'down' : 'flat',
+            weeklyChange: avg,
+            volatility: stocks.reduce((sum, s) => sum + (Number(s.volatility) || 0), 0) / stocks.length,
+            topPerformer: label(ranked[0]),
+            worstPerformer: label(ranked[ranked.length - 1])
         };
     }
 
