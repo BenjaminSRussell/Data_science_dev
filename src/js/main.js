@@ -1614,15 +1614,11 @@ export class MainGame {
             // Hide loading and show intro flow
             setTimeout(() => {
                 this.hideLoadingProgress();
-                if (this.introSystem) {
-                    // The menu closes when the intro takes over (#1360)
-                    this.screenManager?.hideCurrentScreen?.();
-                    this.introSystem.showIntro();
-                } else {
-                    // Fallback if intro system not available
-                    this.gameState.isGameStarted = true;
-                    this.screenManager.showScreen('screen-game');
-                }
+                // introSystem is always constructed above (a throwing constructor
+                // lands in the catch below), so there is no fallback branch (#1659)
+                // The menu closes when the intro takes over (#1360)
+                this.screenManager?.hideCurrentScreen?.();
+                this.introSystem.showIntro();
             }, 100);
             });
         } catch (error) {
