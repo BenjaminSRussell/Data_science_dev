@@ -1,0 +1,211 @@
+/*
+ * Base styles for live game panels that had no CSS at all:
+ * Character Stats cards (#1750), Training Activities (#2515),
+ * Marketing Channels (#2498), Chart Studio software list (#2495)
+ * and the How to Play modal (#1319).
+ * Colours come from the theme tokens in main.css, so light mode works too.
+ */
+
+/* ---- Shared card look ---- */
+.stat-card,
+.training-card,
+.marketing-card {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border, var(--color-bg-elevated));
+    border-radius: var(--radius-md, 6px);
+    padding: var(--space-3, 0.75rem);
+    color: var(--color-text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 0.5rem);
+    min-width: 0;
+}
+
+/* ---- Character Stats (#1750) ---- */
+.stat-card .stat-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2, 0.5rem);
+}
+
+.stat-card .stat-name {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.stat-card .stat-value {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.stat-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--color-bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    background: var(--color-accent-primary, var(--color-text-primary));
+    border-radius: inherit;
+    transition: width 0.3s ease;
+}
+
+.stat-xp {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary);
+}
+
+/* ---- Training Activities (#2515) ---- */
+.training-grid,
+.marketing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--space-3, 0.75rem);
+    margin-top: var(--space-3, 0.75rem);
+}
+
+.training-icon:empty,
+.marketing-icon:empty {
+    display: none;
+}
+
+.training-name,
+.marketing-name {
+    font-weight: 700;
+}
+
+.training-effects,
+.marketing-leads {
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-accent-success);
+}
+
+.training-cost,
+.marketing-cost {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary);
+}
+
+.training-card button {
+    margin-top: auto;
+    align-self: stretch;
+}
+
+/* ---- Marketing Channels (#2498) ---- */
+.marketing-card {
+    cursor: pointer;
+    transition: border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.marketing-card:hover {
+    border-color: var(--color-text-secondary);
+}
+
+.marketing-card.active {
+    border-color: var(--color-accent-success);
+    box-shadow: inset 0 0 0 1px var(--color-accent-success);
+}
+
+.marketing-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.marketing-card.locked .marketing-name::after {
+    content: ' (locked)';
+    font-weight: 400;
+    color: var(--color-text-secondary);
+}
+
+/* ---- Chart Studio software list (#2495) ---- */
+.software-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2, 0.5rem);
+    padding: var(--space-1, 0.25rem) 0;
+    border-bottom: 1px solid var(--color-bg-tertiary);
+}
+
+.software-item:last-child {
+    border-bottom: none;
+}
+
+.software-icon {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.software-icon img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.software-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.software-name {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.software-bonuses,
+.software-none {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary);
+}
+
+/* ---- How to Play modal (#1319) ---- */
+.howto-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4, 1rem);
+}
+
+.howto-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3, 0.75rem);
+}
+
+.howto-step {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3, 0.75rem);
+    padding: var(--space-3, 0.75rem);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-bg-tertiary);
+    border-radius: var(--radius-md, 6px);
+}
+
+.howto-step-number {
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    background: var(--color-text-primary);
+    color: var(--color-bg-primary);
+}
+
+.howto-step-content h4 {
+    margin: 0 0 var(--space-1, 0.25rem);
+}
+
+.howto-step-content p {
+    margin: 0;
+    color: var(--color-text-secondary);
+}

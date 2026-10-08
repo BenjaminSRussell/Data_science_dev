@@ -849,8 +849,8 @@
 
 .equipment-bonus {
     font-size: var(--font-size-xs);
-    color: var(#888888);
-    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-text-secondary);
+    background: rgba(var(--color-accent-success-rgb), 0.1);
     padding: var(--space-1) var(--space-2);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-4);
