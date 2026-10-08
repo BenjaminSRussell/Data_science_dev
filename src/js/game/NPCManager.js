@@ -1432,7 +1432,9 @@ export class NPCManager {
         let dialogueText = null;
         if (this.gameState.relationshipDialogueSystem) {
             try {
-                dialogueText = await this.gameState.relationshipDialogueSystem?.getDialogue(npcId, relationship);
+                // Returning visits rotate through the NPC's authored topics (#2080)
+                dialogueText = await this.gameState.relationshipDialogueSystem?.getDialogue(
+                    npcId, relationship, isFirstMeeting || preview ? null : 'next');
             } catch (error) {
                 console.warn(`Could not load dialogue for ${npcId}:`, error);
             }

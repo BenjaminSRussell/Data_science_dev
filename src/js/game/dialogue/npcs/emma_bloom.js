@@ -52,11 +52,12 @@ export default {
                 "Hey there."
             ],
             topics: {
+                // Keep the papers for her close_friend secret (#2159)
                 work: [
-                    "I've published research papers.",
-                    "Three of them.",
-                    "Under a pseudonym.",
-                    "I'm too shy to claim them publicly."
+                    "I help people find the sources they need.",
+                    "Archives, journals, old datasets.",
+                    "I do a bit of my own research too.",
+                    "Nothing worth talking about. Yet."
                 ],
                 dream: [
                     "I want to digitize historical documents.",
@@ -95,10 +96,10 @@ export default {
             ],
             topics: {
                 secret: [
-                    "I've published papers.",
-                    "I'm proud of the work.",
-                    "It matters to me.",
-                    "Even if no one knows it's me."
+                    "Can I tell you something? I've published research papers.",
+                    "Three of them. Under a pseudonym.",
+                    "I'm too shy to claim them publicly.",
+                    "But I'm proud of the work, even if no one knows it's me."
                 ],
                 turning_point: [
                     "A student thanked me.",

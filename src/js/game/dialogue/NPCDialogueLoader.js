@@ -139,7 +139,8 @@ export class NPCDialogueLoader {
         
         if (!stageDialogue) return null;
         
-        // Filter by age appropriateness
+        // Filter by age appropriateness. Callers pass the age of the player
+        // being spoken to (#2081)
         const ageGroup = this.getAgeGroup(npcAge);
         return stageDialogue.ageGroups?.[ageGroup] || stageDialogue;
     }
@@ -164,6 +165,7 @@ export class NPCDialogueLoader {
         if (age < 60) return 'middle_aged';
         return 'elderly';
     }
+
 }
 
 export const npcDialogueLoader = new NPCDialogueLoader();

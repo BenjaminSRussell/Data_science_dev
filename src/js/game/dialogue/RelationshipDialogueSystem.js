@@ -7,9 +7,25 @@
 
 import { npcDialogueLoader } from './NPCDialogueLoader.js';
 
+export const PLAYER_START_AGE = 22;
+
 export class RelationshipDialogueSystem {
     constructor(gameState) {
         this.gameState = gameState;
+        // Per-NPC position in the greeting → topics rotation (#2080)
+        this.topicCursor = new Map();
+    }
+
+    /**
+     * The player's age. The player starts as a 22-year-old new graduate and
+     * ages with the in-game calendar. NPC dialogue ageGroups describe who
+     * the NPC is talking to, so they key off this, not the NPC's own age (#2081, #2185)
+     */
+    getPlayerAge() {
+        const explicit = Number(this.gameState?.playerAge);
+        if (Number.isFinite(explicit) && explicit > 0) return explicit;
+        const days = Number(this.gameState?.timeManager?.totalDays) || 1;
+        return PLAYER_START_AGE + Math.floor(Math.max(0, days - 1) / 365);
     }
     
     /**
@@ -27,13 +43,26 @@ export class RelationshipDialogueSystem {
         
         if (!stageDialogue) return null;
         
-        // Get age-appropriate dialogue
-        const npc = this.gameState.npcManager?.getNPC(npcId);
+        // Age-appropriate dialogue for the player the NPC is talking to (#2081)
         const ageAppropriate = npcDialogueLoader.getAgeAppropriateDialogue(
             npcId,
-            npc?.age || 30,
+            this.getPlayerAge(),
             relationshipLevel
         );
+
+        // 'next' rotates through the greeting and then each authored topic,
+        // so topic dialogue is actually heard in conversation (#2080)
+        if (topic === 'next') {
+            const topics = Object.keys(stageDialogue.topics || {});
+            const n = this.topicCursor.get(npcId) || 0;
+            this.topicCursor.set(npcId, n + 1);
+            const slot = n % (topics.length + 1);
+            if (slot > 0) {
+                const lines = stageDialogue.topics[topics[slot - 1]];
+                const text = Array.isArray(lines) ? lines.filter(Boolean).join(' ') : lines;
+                if (text) return text;
+            }
+        }
         
         // Get topic-specific dialogue or greeting
         if (topic && stageDialogue.topics?.[topic]) {
