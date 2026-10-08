@@ -25,6 +25,12 @@ export class RomanceSystem {
 
         if (!npc || !npc.romanceOptions) return { success: false, message: "They aren't interested." };
 
+        // Asking your own partner out again must not reset an engagement or
+        // marriage back to 'dating' (#1075)
+        if (this.partnerId === npcId && this.relationshipStatus !== 'single') {
+            return { success: false, message: `You're already ${this.relationshipStatus === 'dating' ? 'dating' : this.relationshipStatus}!` };
+        }
+
         if (this.partnerId && this.partnerId !== npcId) {
             this.modifyHappiness(-25); // Partner is upset about cheating attempt
             return { success: false, message: "You are already seeing someone! Cheater!" };
@@ -35,10 +41,12 @@ export class RomanceSystem {
         if (rel < 30) return { success: false, message: "We don't know each other well enough." };
 
         // Check Compatibility/Ethics
-        if (npc.romanceOptions.minEthics && this.gameState.characterStats?.ethics < npc.romanceOptions.minEthics) {
+        // Explicit number checks so a gate of 0 still applies (#1081)
+        const ethics = this.gameState.characterStats?.ethics ?? 0;
+        if (typeof npc.romanceOptions.minEthics === 'number' && ethics < npc.romanceOptions.minEthics) {
             return { success: false, message: "I don't date criminals." };
         }
-        if (npc.romanceOptions.maxEthics && this.gameState.characterStats?.ethics > npc.romanceOptions.maxEthics) {
+        if (typeof npc.romanceOptions.maxEthics === 'number' && ethics > npc.romanceOptions.maxEthics) {
             return { success: false, message: "You're too much of a 'goody two-shoes' for me." };
         }
         const stats = this.gameState.characterStats;
@@ -64,11 +72,13 @@ export class RomanceSystem {
         if (!this.partnerId) return { success: false, message: "You are single." };
 
         // Cost, energy, time (in 2-hour slots) and effect per date type
+        // `relationship` is the bump to the NPC relationship that the rest of
+        // the game (tiers, breakup checks) reads (#1929, #1931)
         const DATE_TYPES = {
-            coffee: { cost: 20, energy: 10, slots: 1, happiness: 5 },
-            dinner: { cost: 100, energy: 15, slots: 1, happiness: 25 },
-            fancy_dinner: { cost: 500, energy: 20, slots: 2, happiness: 125 },
-            vacation: { cost: 2000, energy: 40, slots: 4, happiness: 500 }
+            coffee: { cost: 20, energy: 10, slots: 1, happiness: 5, relationship: 1 },
+            dinner: { cost: 100, energy: 15, slots: 1, happiness: 25, relationship: 2 },
+            fancy_dinner: { cost: 500, energy: 20, slots: 2, happiness: 125, relationship: 4 },
+            vacation: { cost: 2000, energy: 40, slots: 4, happiness: 500, relationship: 8 }
         };
         const date = DATE_TYPES[type];
         if (!date) return { success: false, message: "That's not a kind of date." };
@@ -83,6 +93,15 @@ export class RomanceSystem {
         this.gameState.money -= date.cost;
         timeManager?.useEnergy?.(date.energy);
         this.modifyHappiness(date.happiness);
+        // Keep the NPC relationship moving with the romance, so dates still
+        // matter once engaged/married (#1929, #1931)
+        const npcManager = this.gameState.npcManager;
+        let relationshipGain = 0;
+        if (npcManager?.modifyRelationship) {
+            const before = npcManager.getRelationship?.(this.partnerId) ?? 0;
+            npcManager.modifyRelationship(this.partnerId, date.relationship);
+            relationshipGain = (npcManager.getRelationship?.(this.partnerId) ?? before) - before;
+        }
 
         // Dates take time like any other activity
         if (this.gameState.mainGame?.handleTimeAdvance) {
@@ -91,7 +110,7 @@ export class RomanceSystem {
             timeManager?.advanceTime?.(date.slots);
         }
 
-        return { success: true, message: "Date went great!", cost: date.cost, energy: date.energy };
+        return { success: true, message: "Date went great!", cost: date.cost, energy: date.energy, relationshipGain };
     }
 
     modifyHappiness(amount) {
@@ -123,6 +142,8 @@ export class RomanceSystem {
 
         this.gameState.money -= 20000;
         this.relationshipStatus = 'married';
+        // Remember the wedding day (#1079, #2189)
+        this.anniversary = this.gameState.timeManager?.totalDays ?? null;
         this.modifyHappiness(100); // Max happy
 
         return { success: true, message: "Just married! " };
@@ -133,6 +154,7 @@ export class RomanceSystem {
             partnerId: this.partnerId,
             relationshipStatus: this.relationshipStatus,
             relationshipScore: this.relationshipScore,
+            anniversary: this.anniversary,
             children: this.children,
             houseLevel: this.houseLevel
         };
@@ -140,9 +162,10 @@ export class RomanceSystem {
 
     fromJSON(data) {
         if (!data) return;
-        this.partnerId = data.partnerId;
-        this.relationshipStatus = data.relationshipStatus;
-        this.relationshipScore = data.relationshipScore;
+        this.partnerId = data.partnerId ?? null;
+        this.relationshipStatus = data.relationshipStatus || (this.partnerId ? 'dating' : 'single');
+        this.relationshipScore = Number(data.relationshipScore) || 0;
+        this.anniversary = data.anniversary ?? null;
         this.children = data.children || [];
         this.houseLevel = data.houseLevel || 0;
     }
