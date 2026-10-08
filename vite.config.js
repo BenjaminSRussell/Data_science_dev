@@ -63,7 +63,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: true,
+    // Production builds ship without source maps; set SOURCEMAP=true to
+    // emit them for debugging a build (#2343, #1875)
+    sourcemap: process.env.SOURCEMAP === 'true',
     target: 'esnext'
   },
   server: {
