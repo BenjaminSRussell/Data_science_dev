@@ -215,6 +215,9 @@ export class MainGame {
         this.taskSystem = new TaskSystem(this.gameState);
         this.uiUpdater = new UIUpdater(this);
         this.storyUI = new StoryUI(this);
+        // StorylineManager.checkPhaseTransition() shows the act recap through
+        // this; it was imported but never constructed, so no recap ever showed (#256)
+        this.actTransitionScreen = new ActTransitionScreen(this);
         this.screenManager = new ScreenManager(this);
         this.chartManager = new ChartManager(this);
         this.environmentManager = new EnvironmentManager(this.gameState);
