@@ -7,6 +7,15 @@ import { SCREEN_THEMES } from '../data/themes.js';
 
 export { SCREEN_THEMES };
 
+/** Layered background-image value (url, gradient) onto an element */
+function paintLayered(element, value) {
+    element.style.background = '';
+    element.style.backgroundImage = value;
+    element.style.backgroundSize = 'cover';
+    element.style.backgroundPosition = 'center';
+    element.style.backgroundRepeat = 'no-repeat';
+}
+
 export class ScreenThemeManager {
     /**
      * @param {Object} [environmentManager] - owner of the office background (#1731)
@@ -33,10 +42,19 @@ export class ScreenThemeManager {
         root.style.setProperty('--screen-accent', theme.accent);
         root.style.setProperty('--screen-gradient', theme.gradient);
 
+        // The location screen shows where you are: LocationBackgroundSystem's
+        // background for the current location, instead of one fixed theme
+        // that overwrote it on every visit (#2008, #1065)
+        const locationBackground = screenId === 'screen-office' ? this.getLocationBackground() : null;
+
         // Apply background to screen container
         const screen = document.getElementById(screenId);
         if (screen) {
-            screen.style.background = theme.gradient;
+            if (locationBackground) {
+                paintLayered(screen, locationBackground);
+            } else {
+                screen.style.background = theme.gradient;
+            }
         }
 
         // Update body background. On the main game screen the office
@@ -45,8 +63,25 @@ export class ScreenThemeManager {
         const env = this.environmentManager || (typeof window !== 'undefined' ? window.game?.environmentManager : null);
         if (screenId === 'screen-game' && env?.getBackground) {
             document.body.style.background = env.getBackground(theme.gradient);
+        } else if (locationBackground) {
+            paintLayered(document.body, locationBackground);
         } else {
             document.body.style.background = theme.gradient;
+        }
+    }
+
+    /**
+     * Background for the player's current location, if the systems exist
+     */
+    getLocationBackground() {
+        const game = typeof window !== 'undefined' ? window.game : null;
+        const system = game?.locationBackgroundSystem || game?.gameState?.locationBackgroundSystem;
+        const locationId = game?.worldMap?.currentLocation || game?.gameState?.worldMap?.currentLocation;
+        if (!system?.getLayeredBackground || !locationId) return null;
+        try {
+            return system.getLayeredBackground(locationId) || null;
+        } catch {
+            return null;
         }
     }
 

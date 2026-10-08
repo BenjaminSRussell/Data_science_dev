@@ -560,10 +560,11 @@ export function handleTravel(game, locationId) {
         // Advance time immediately
         game.handleTimeAdvance(result.timeCost);
 
-        // Update immediately (no setTimeout)
+        // Update immediately (no setTimeout). The location background goes on
+        // after the layout so nothing overwrites it (#2008, #1065)
         updateMapScreen(game);
-        updateEnvironmentForLocation(game, locationId);
         game.uiUpdater.updateLocationLayout(locationId);
+        updateEnvironmentForLocation(game, locationId);
         game.showToast(`Traveled to ${result.location.name}`, 'success');
 
         // Switch screen immediately
@@ -577,10 +578,14 @@ export function handleTravel(game, locationId) {
  * Update environment for a specific location - O(1)
  */
 export function updateEnvironmentForLocation(game, locationId) {
-    if (game.locationBackgroundSystem) {
-        const screen = document.getElementById('screen-map');
-        if (screen) {
-            game.locationBackgroundSystem.applyBackground(locationId, screen);
+    // Paint the location screen the player is about to see, not #screen-map,
+    // which is hidden right after travel and re-themed by ScreenThemeManager
+    // whenever it is shown (#2008, #1065)
+    const system = game.locationBackgroundSystem || game.gameState?.locationBackgroundSystem;
+    if (system) {
+        const target = document.getElementById('screen-office');
+        if (target) {
+            system.applyBackground(locationId, target);
         }
     }
 }
