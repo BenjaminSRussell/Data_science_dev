@@ -154,10 +154,9 @@ describe('MapBlockSystem', () => {
             // Try to find block for 2x4 building
             const block = blockSystem.findAvailableBlock('residential', { width: 2, height: 4 });
 
-            // The only block available doesn't meet height requirement
-            // so it falls back to any block in the zone
-            expect(block).toBeDefined();
-            expect(block.id).toBe('block-insufficient-height');
+            // The only block doesn't meet the height requirement; the fallback
+            // no longer hands back an undersized block (#1944)
+            expect(block).toBeNull();
         });
 
         it('should maintain backward compatibility with numeric minSize parameter', () => {

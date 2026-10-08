@@ -118,9 +118,11 @@ export class MapGridSystem {
      * @returns {boolean} True if valid
      */
     isValidGridCoord(gridX, gridY) {
-        return gridX >= this.bounds.minX && 
+        // Grid cells are integers; occupancy keys depend on it (#1935)
+        return Number.isInteger(gridX) && Number.isInteger(gridY) &&
+               gridX >= this.bounds.minX &&
                gridX <= this.bounds.maxX &&
-               gridY >= this.bounds.minY && 
+               gridY >= this.bounds.minY &&
                gridY <= this.bounds.maxY;
     }
 
@@ -131,9 +133,11 @@ export class MapGridSystem {
      * @returns {Object} Clamped coordinates {x, y}
      */
     clampGridCoord(gridX, gridY) {
+        // Snap to the containing cell first, so the result is always a valid
+        // integer cell (#1935)
         return {
-            x: Math.max(this.bounds.minX, Math.min(this.bounds.maxX, gridX)),
-            y: Math.max(this.bounds.minY, Math.min(this.bounds.maxY, gridY))
+            x: Math.max(this.bounds.minX, Math.min(this.bounds.maxX, Math.floor(gridX))),
+            y: Math.max(this.bounds.minY, Math.min(this.bounds.maxY, Math.floor(gridY)))
         };
     }
 
@@ -144,7 +148,9 @@ export class MapGridSystem {
      * @returns {string} Grid key "x,y"
      */
     getGridKey(gridX, gridY) {
-        return `${gridX},${gridY}`;
+        // A fractional coordinate names the cell that contains it, so 12.5
+        // and 12 can't become two different occupancy keys (#1935)
+        return `${Math.floor(gridX)},${Math.floor(gridY)}`;
     }
 
     /**

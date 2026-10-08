@@ -207,7 +207,7 @@ describe('MapZoneSystem (#421)', () => {
             expect(zs.isInZone(zone.bounds.minX, zone.bounds.minY, z.id)).toBe(true);
         }
         expect(zs.getZoneAt(-1, -1)).toBeNull();
-        expect(zs.getZoneAt(29, 0)).toBeNull();
+        expect(zs.getZoneAt(30, 0)).toBeNull(); // zones partition 0..29 (#1927)
     });
 
     it('location assignments round-trip', () => {
@@ -226,7 +226,7 @@ describe('MapZoneSystem (#421)', () => {
 
     it('isInZone checks bounds and rejects unknown zones', () => {
         expect(zs.isInZone(10, 10, 'nope')).toBe(false);
-        expect(zs.isInZone(18, 12, 'finance_district')).toBe(true);
+        expect(zs.isInZone(15, 8, 'finance_district')).toBe(true);
         expect(zs.isInZone(26, 12, 'finance_district')).toBe(false);
     });
 

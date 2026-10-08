@@ -89,6 +89,19 @@ export class MapBuildingSystem {
     }
 
     /**
+     * Store a placed building and link it to its block, so block.buildings
+     * answers "what's built here" (#1946)
+     */
+    recordBuilding(building, block) {
+        this.buildings.push(building);
+        this.markBuildingCells(building);
+        if (block) {
+            if (!Array.isArray(block.buildings)) block.buildings = [];
+            if (!block.buildings.includes(building.id)) block.buildings.push(building.id);
+        }
+    }
+
+    /**
      * Place building in a specific block
      */
     placeBuildingInBlock(location, block, size) {
@@ -117,8 +130,7 @@ export class MapBuildingSystem {
                 zone: block.zone
             };
             
-            this.buildings.push(building);
-            this.markBuildingCells(building);
+            this.recordBuilding(building, block);
             
             return building;
         }
@@ -145,8 +157,7 @@ export class MapBuildingSystem {
                         zone: block.zone
                     };
                     
-                    this.buildings.push(building);
-                    this.markBuildingCells(building);
+                    this.recordBuilding(building, block);
                     
                     return building;
                 }

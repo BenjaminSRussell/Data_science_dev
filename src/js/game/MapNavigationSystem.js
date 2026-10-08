@@ -5,6 +5,8 @@
  */
 
 export class MapNavigationSystem {
+    static OFF_ROAD_COST = 2;
+
     constructor(gridSystem, roadSystem) {
         this.gridSystem = gridSystem;
         this.roadSystem = roadSystem;
@@ -64,7 +66,9 @@ export class MapNavigationSystem {
                 
                 if (closedSet.has(key)) continue;
                 
-                const g = current.g + 1;
+                // Roads are cheaper than the road-side tiles the walker may
+                // also use, so equal-length routes prefer staying on road (#1943)
+                const g = current.g + this.stepCost(neighbor.x, neighbor.y);
                 const h = this.heuristic(neighbor.x, neighbor.y, endX, endY);
                 const f = g + h;
                 
@@ -105,16 +109,24 @@ export class MapNavigationSystem {
             const ny = y + dir.dy;
             
             if (this.gridSystem.isValidGridCoord(nx, ny)) {
-                // Allow movement on roads or adjacent to roads
-                if (this.roadSystem.isRoad(nx, ny) || 
-                    this.roadSystem.isRoad(x, y) ||
-                    this.isAdjacentToRoad(nx, ny)) {
+                // Allow movement onto roads or road-side tiles. (A separate
+                // isRoad(x, y) check was redundant: if the current tile is a
+                // road, every neighbour is already adjacent to it, #1942.)
+                if (this.roadSystem.isRoad(nx, ny) || this.isAdjacentToRoad(nx, ny)) {
                     neighbors.push({ x: nx, y: ny });
                 }
             }
         }
         
         return neighbors;
+    }
+
+    /**
+     * Cost of stepping onto a tile: 1 on road, OFF_ROAD_COST beside it.
+     * The Manhattan heuristic stays admissible because every step costs >= 1.
+     */
+    stepCost(x, y) {
+        return this.roadSystem.isRoad(x, y) ? 1 : MapNavigationSystem.OFF_ROAD_COST;
     }
 
     /**

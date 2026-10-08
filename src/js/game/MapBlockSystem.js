@@ -62,18 +62,30 @@ export class MapBlockSystem {
     }
 
     /**
+     * Zone id at a cell, or null outside every zone / without a zone system
+     */
+    zoneIdAt(x, y) {
+        return this.zoneSystem?.getZoneAt?.(x, y)?.id ?? null;
+    }
+
+    /**
      * Find block boundaries starting from a seed coordinate
      */
     findBlockBoundaries(startX, startY, visited) {
         // Find the top-left corner of the block
         let minX = startX;
         let minY = startY;
-        
+
+        // A block never straddles two zones: growth stops where the zone
+        // changes, so the zone assigned from its centre covers every cell (#1945)
+        const startZone = this.zoneIdAt(startX, startY);
+        const blocked = (x, y) => this.roadSystem.isRoad(x, y) ||
+            visited.has(this.gridSystem.getGridKey(x, y)) ||
+            this.zoneIdAt(x, y) !== startZone;
+
         // Expand right to find width
         let maxX = startX;
-        while (maxX < this.gridSystem.gridWidth - 1 && 
-               !this.roadSystem.isRoad(maxX + 1, startY) &&
-               !visited.has(this.gridSystem.getGridKey(maxX + 1, startY))) {
+        while (maxX < this.gridSystem.gridWidth - 1 && !blocked(maxX + 1, startY)) {
             maxX++;
         }
         
@@ -83,8 +95,7 @@ export class MapBlockSystem {
         while (isValid && maxY < this.gridSystem.gridHeight - 1) {
             // Check if entire row is valid
             for (let x = minX; x <= maxX; x++) {
-                if (this.roadSystem.isRoad(x, maxY + 1) ||
-                    visited.has(this.gridSystem.getGridKey(x, maxY + 1))) {
+                if (blocked(x, maxY + 1)) {
                     isValid = false;
                     break;
                 }
@@ -204,11 +215,18 @@ export class MapBlockSystem {
             })[0];
         }
         
-        // Fallback: return any block in zone
-        if (blocks.length > 0) {
-            return blocks[0];
+        // No empty block fits: share the least-crowded block that is big
+        // enough instead of always piling onto blocks[0] (#1944). Blocks that
+        // are too small are never returned.
+        const bigEnough = blocks.filter(block =>
+            block.bounds.width >= minWidth && block.bounds.height >= minHeight
+        );
+        if (bigEnough.length > 0) {
+            return bigEnough.reduce((best, block) =>
+                block.locations.length < best.locations.length ? block : best
+            );
         }
-        
+
         return null;
     }
 
