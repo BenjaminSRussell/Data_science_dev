@@ -38,6 +38,25 @@ export class GameEndingSystem {
         this.endingType = null;
         this.endingData = null;
         this.earnedEndings = []; // [{ type, title, day }]
+        // High/low-water marks for values that go up and down, so a milestone
+        // reached between ending checks still counts (#1134)
+        this.marks = { peakMoney: 0, topRankMaxEthics: null, topRankMinEthics: null };
+    }
+
+    /**
+     * Record the current money/ethics into the high/low-water marks. Called
+     * every in-game day and before each ending check (#1134)
+     */
+    trackMarks() {
+        const money = Number(this.gameState?.money) || 0;
+        this.marks.peakMoney = Math.max(Number(this.marks.peakMoney) || 0, money);
+        if ((this.gameState?.rankIndex ?? 0) >= RANKS.length - 1) {
+            const ethics = this.getEthics();
+            if (Number.isFinite(ethics)) {
+                this.marks.topRankMaxEthics = this.marks.topRankMaxEthics == null ? ethics : Math.max(this.marks.topRankMaxEthics, ethics);
+                this.marks.topRankMinEthics = this.marks.topRankMinEthics == null ? ethics : Math.min(this.marks.topRankMinEthics, ethics);
+            }
+        }
     }
 
     /**
@@ -49,6 +68,7 @@ export class GameEndingSystem {
         // can't mask speedrun / early retirement / ethics endings (#1984,
         // #1259). Endings already earned are skipped, so "Continue Playing"
         // can still earn the others (#1136).
+        this.trackMarks();
         for (const check of GameEndingSystem.CHECK_ORDER) {
             const ending = this[check]?.();
             if (ending && !this.hasEarned(ending.type)) return ending;
@@ -98,7 +118,8 @@ export class GameEndingSystem {
      * Check if player reached $1 million
      */
     checkMillionaire() {
-        if (this.gameState.money >= 1000000) {
+        // Peak money counts: crossing $1M mid-week and spending it still earns it (#1134)
+        if (Math.max(Number(this.gameState.money) || 0, Number(this.marks?.peakMoney) || 0) >= 1000000) {
             return {
                 type: 'millionaire',
                 title: 'Millionaire',
@@ -187,14 +208,17 @@ export class GameEndingSystem {
         const maxRankIndex = RANKS.length - 1;
         
         if (this.gameState.rankIndex >= maxRankIndex) {
-            if (ethics >= 80) {
+            // Current value first; otherwise the extremes seen while at the top (#1134)
+            const high = Math.max(ethics, this.marks?.topRankMaxEthics ?? -Infinity);
+            const low = Math.min(ethics, this.marks?.topRankMinEthics ?? Infinity);
+            if (ethics >= 80 || (ethics > -50 && high >= 80)) {
                 return {
                     type: 'ethical_leader',
                     title: 'Ethical Leader',
                     message: 'You\'ve reached the top while maintaining high ethical standards. A true leader!',
                     showEnding: true
                 };
-            } else if (ethics <= -50) {
+            } else if (low <= -50) {
                 return {
                     type: 'ruthless_climber',
                     title: 'Ruthless Climber',
@@ -389,7 +413,8 @@ export class GameEndingSystem {
             endingTriggered: this.endingTriggered,
             endingType: this.endingType,
             endingData: this.endingData,
-            earnedEndings: this.earnedEndings
+            earnedEndings: this.earnedEndings,
+            marks: this.marks
         };
     }
 
@@ -405,6 +430,13 @@ export class GameEndingSystem {
             ? data.earnedEndings.filter(e => e && e.type)
             // Old saves only stored the single ending
             : (data.endingType ? [{ type: data.endingType, title: data.endingData?.title || data.endingType, day: 0 }] : []);
+        const marks = data.marks || {};
+        const num = (v) => (v == null || !Number.isFinite(Number(v)) ? null : Number(v));
+        this.marks = {
+            peakMoney: num(marks.peakMoney) ?? 0,
+            topRankMaxEthics: num(marks.topRankMaxEthics),
+            topRankMinEthics: num(marks.topRankMinEthics)
+        };
     }
 }
 

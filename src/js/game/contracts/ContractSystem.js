@@ -433,6 +433,13 @@ export class ContractGenerator {
 export class ContractSystem {
     static DAY_MS = 24 * 60 * 60 * 1000;
 
+    /** Current in-game day (TimeManager.totalDays), 1 when there's no clock */
+    getCurrentDay() {
+        const tm = this.gameState?.timeManager;
+        const day = Number(tm?.totalDays ?? tm?.day);
+        return Number.isFinite(day) && day > 0 ? day : 1;
+    }
+
     constructor(gameState) {
         this.gameState = gameState;
         this.generator = new ContractGenerator();
@@ -482,13 +489,16 @@ export class ContractSystem {
             }
         }
         
-        // Move to active
+        // Move to active. Deadlines run on the in-game calendar, not the real
+        // clock, so the early bonus depends on game days played (#2113)
         const acceptedAt = Date.now();
+        const acceptedDay = this.getCurrentDay();
         this.availableContracts = this.availableContracts.filter(c => c.id !== contractId);
         this.activeContracts.push({
             ...contract,
             acceptedAt,
-            deadline: acceptedAt + (Number(contract.timeRequired) || 0) * ContractSystem.DAY_MS,
+            acceptedDay,
+            deadlineDay: acceptedDay + (Number(contract.timeRequired) || 0),
             progress: 0,
             status: 'active'
         });
@@ -552,9 +562,10 @@ export class ContractSystem {
             }
         });
         
-        // Early completion bonus
-        const deadline = Number(contract.deadline);
-        const daysEarly = Number.isFinite(deadline) ? Math.max(0, (deadline - Date.now()) / ContractSystem.DAY_MS) : 0;
+        // Early completion bonus, in in-game days (#2113). Old saves with only a
+        // wall-clock deadline get no early bonus rather than a real-time one.
+        const deadlineDay = Number(contract.deadlineDay);
+        const daysEarly = Number.isFinite(deadlineDay) ? Math.max(0, deadlineDay - this.getCurrentDay()) : 0;
         if (daysEarly > 0 && required > 0) {
             const earlyBonus = basePay * 0.1 * Math.min(daysEarly / required, 1);
             pay += earlyBonus;
