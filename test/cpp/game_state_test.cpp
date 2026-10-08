@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "game_state.h"
+#include <limits>
 
 namespace {
 void expectDefaults(const GameState &g) {
@@ -25,19 +26,50 @@ TEST_CASE("GameState defaults and reset") {
   expectDefaults(g);
 }
 
-TEST_CASE("GameState money/reputation mutators accumulate, negatives allowed") {
+TEST_CASE("GameState money may go into debt; reputation floors at 0; totalEarned only grows") {
   GameState g;
   g.addMoney(50);
   g.addMoney(-200);
-  CHECK(g.getMoney() == -50);
+  CHECK(g.getMoney() == -50); // debt is allowed
   g.setMoney(1000);
   CHECK(g.getMoney() == 1000);
   g.addReputation(30);
   g.addReputation(-40);
-  CHECK(g.getReputation() == -10);
+  CHECK(g.getReputation() == 0);
+  g.setReputation(-5);
+  CHECK(g.getReputation() == GameState::MIN_REPUTATION);
   g.addToTotalEarned(70);
   g.addToTotalEarned(-20);
-  CHECK(g.getTotalEarned() == 50);
+  CHECK(g.getTotalEarned() == 70);
+}
+
+TEST_CASE("GameState mutators saturate instead of overflowing (#152)") {
+  const int maxInt = std::numeric_limits<int>::max();
+  GameState g;
+  g.setMoney(maxInt);
+  g.addMoney(1000);
+  CHECK(g.getMoney() == maxInt);
+  g.setMoney(std::numeric_limits<int>::min());
+  CHECK(g.getMoney() == GameState::MIN_MONEY);
+  g.addMoney(std::numeric_limits<int>::min());
+  CHECK(g.getMoney() == GameState::MIN_MONEY);
+  g.setReputation(maxInt);
+  g.addReputation(maxInt);
+  CHECK(g.getReputation() == maxInt);
+  g.addToTotalEarned(maxInt);
+  g.addToTotalEarned(maxInt);
+  CHECK(g.getTotalEarned() == maxInt);
+}
+
+TEST_CASE("GameState fromJSON applies the same invariants (#152)") {
+  GameState g;
+  g.fromJSON("{\"money\":-2000000000,\"reputation\":-7,\"tasksCompleted\":-3,"
+             "\"perfectScores\":-1,\"totalEarned\":-9}");
+  CHECK(g.getMoney() == GameState::MIN_MONEY);
+  CHECK(g.getReputation() == 0);
+  CHECK(g.getTasksCompleted() == 0);
+  CHECK(g.getPerfectScores() == 0);
+  CHECK(g.getTotalEarned() == 0);
 }
 
 TEST_CASE("GameState::setRankIndex only accepts 0..6") {
@@ -126,10 +158,12 @@ TEST_CASE("GameState::fromJSON is bounded per field and never throws (#83)") {
   CHECK(g.getReputation() == 0);
   CHECK(g.getTotalEarned() == 0);
 
-  // int limits are accepted
+  // int limits parse, then go through the setters' invariants (#152)
   g.fromJSON("{\"money\":2147483647,\"reputation\":-2147483648}");
   CHECK(g.getMoney() == 2147483647);
-  CHECK(g.getReputation() == -2147483647 - 1);
+  CHECK(g.getReputation() == GameState::MIN_REPUTATION);
+  g.fromJSON("{\"reputation\":2147483647}");
+  CHECK(g.getReputation() == 2147483647);
 
   // out-of-range rank still goes through setRankIndex's guard
   g.fromJSON("{\"rankIndex\":9}");
