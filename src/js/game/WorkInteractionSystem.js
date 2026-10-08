@@ -22,22 +22,19 @@ export class WorkInteractionSystem {
                 id: 'coworker_sarah',
                 name: 'Sarah',
                 personality: 'friendly',
-                relationship: 0,
-                dialogue: this.getCoworkerDialogue.bind(this, 'friendly')
+                relationship: 0
             },
             {
                 id: 'coworker_mike',
                 name: 'Mike',
                 personality: 'competitive',
-                relationship: 0,
-                dialogue: this.getCoworkerDialogue.bind(this, 'competitive')
+                relationship: 0
             },
             {
                 id: 'coworker_jessica',
                 name: 'Jessica',
                 personality: 'gossipy',
-                relationship: 0,
-                dialogue: this.getCoworkerDialogue.bind(this, 'gossipy')
+                relationship: 0
             }
         ];
     }
@@ -54,8 +51,7 @@ export class WorkInteractionSystem {
             title: template.title,
             personality: template.personality || 'professional',
             relationship: 0,
-            promotionReadiness: 0, // 0-100
-            dialogue: this.getBossDialogue.bind(this)
+            promotionReadiness: 0 // 0-100
         };
     }
 
@@ -72,8 +68,11 @@ export class WorkInteractionSystem {
         if (!coworker) return null;
 
         const relationship = coworker.relationship;
-        // One line to show, like DemandingBossSystem.getBossDialogue (#1544)
-        const lines = coworker.dialogue(relationship);
+        // One line to show, like DemandingBossSystem.getBossDialogue (#1544).
+        // Dialogue comes from the personality, not a bound function stored on
+        // the coworker: functions don't survive a save, and the boss's copy was
+        // never read (#1545)
+        const lines = this.getCoworkerDialogue(coworker.personality, relationship);
         const dialogue = WorkInteractionSystem.pickLine(lines);
 
         // Small relationship gain from talking
@@ -364,6 +363,21 @@ export class WorkInteractionSystem {
      */
     fromJSON(data) {
         if (!data) return;
-        applyState(this, data, ['coworkers', 'boss']);
+        const saved = {};
+        applyState(saved, data, ['coworkers', 'boss']);
+        // Merge onto the generated roster so old saves (with dropped function
+        // fields) and new coworkers both keep working
+        if (Array.isArray(saved.coworkers)) {
+            const byId = new Map(saved.coworkers.filter(c => c && c.id).map(c => [c.id, c]));
+            this.coworkers = this.coworkers.map(c => {
+                const { dialogue, ...rest } = byId.get(c.id) || {};
+                return { ...c, ...rest };
+            });
+        }
+        if (saved.boss && typeof saved.boss === 'object') {
+            const { dialogue, ...rest } = saved.boss;
+            this.boss = { ...this.boss, ...rest };
+            this.clampBoss();
+        }
     }
 }
