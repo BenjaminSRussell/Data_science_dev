@@ -45,7 +45,8 @@ describe('AssetManager cluster (#1040, #1043, #1675, #1676, #2309)', () => {
         v.game = { assetManager: new AssetManager() };
         const paths = v.getImagePaths();
         expect(paths.length).toBeGreaterThan(0);
-        expect(paths.every(p => p.includes('/backgrounds/'))).toBe(true);
+        // Nested backgrounds are found; other manifest images are included too (#1045)
+        expect(paths.filter(p => p.includes('/backgrounds/')).length).toBeGreaterThan(0);
     });
 
     it('startNewGame waits for assets (capped) before "Ready!" (#1675)', async () => {
