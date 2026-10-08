@@ -32,6 +32,8 @@
     --color-accent-success-rgb: 34, 197, 94;
     --color-accent-warning: #eab308;
     --color-accent-danger: #ef4444;
+    /* Text on a warning/status fill; dark in both themes so it stays readable on yellow */
+    --color-on-status: #09090b;
     /* Apple System Red (Dark) */
 
     /* Gradients - Subtle & Professional */

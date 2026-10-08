@@ -5,8 +5,8 @@
 
 /* Story Screen */
 .screen-story {
-    background: #111;
-    color: #ddd;
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
     padding: 2rem;
     overflow-y: auto;
     font-family: monospace;
@@ -15,9 +15,9 @@
 .story-screen-container {
     max-width: 1000px;
     margin: 0 auto;
-    border: 1px solid #333;
+    border: 1px solid var(--color-bg-tertiary);
     padding: 1rem;
-    background: #000;
+    background: var(--color-bg-primary);
 }
 
 .story-header {
@@ -26,22 +26,22 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--color-bg-elevated);
 }
 
 .story-header .screen-title {
     font-size: 2rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-text-primary);
     margin: 0;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
 
 .close-btn {
-    background: #222;
-    border: 1px solid #444;
-    color: #ddd;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-bg-elevated);
+    color: var(--color-text-primary);
     width: 44px;
     height: 44px;
     cursor: pointer;
@@ -53,12 +53,12 @@
 }
 
 .close-btn:focus-visible {
-    outline: 2px solid #fff;
+    outline: 2px solid var(--color-text-primary);
     outline-offset: 2px;
 }
 .close-btn:hover {
-    background: #333;
-    border-color: #666;
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-bg-elevated);
 }
 
 /* Story Content */
@@ -69,8 +69,8 @@
 }
 
 .story-section {
-    background: #111;
-    border: 1px dashed #444;
+    background: var(--color-bg-primary);
+    border: 1px dashed var(--color-bg-elevated);
     padding: 1.5rem;
 }
 
@@ -78,16 +78,16 @@
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0 0 1rem 0;
-    color: #fff;
-    border-bottom: 1px solid #333;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-bg-tertiary);
     padding-bottom: 0.5rem;
     display: inline-block;
 }
 
 /* Arc Card */
 .story-arc-card {
-    background: #181818;
-    border: 1px solid #444;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-bg-elevated);
     padding: 1.5rem;
 }
 
@@ -95,11 +95,11 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .story-arc-description {
-    color: #888;
+    color: var(--color-text-muted);
     margin-bottom: 1rem;
     line-height: 1.6;
 }
@@ -110,7 +110,7 @@
 
 .progress-label {
     font-size: 0.875rem;
-    color: #aaa;
+    color: var(--color-text-secondary);
     margin-bottom: 0.5rem;
 }
 
@@ -119,36 +119,36 @@
 .screen-story .progress-bar {
     width: 100%;
     height: 10px;
-    background: #222;
-    border: 1px solid #444;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-bg-elevated);
     margin-bottom: 0.5rem;
 }
 
 .screen-story .progress-fill {
     height: 100%;
-    background: #666;
+    background: var(--color-bg-elevated);
 }
 
 .progress-text {
     font-size: 0.875rem;
-    color: #aaa;
+    color: var(--color-text-secondary);
     text-align: right;
 }
 
 /* Phase Info */
 .story-phase-info {
-    color: #ccc;
+    color: var(--color-text-secondary);
 }
 
 .phase-name {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .phase-description {
-    color: #888;
+    color: var(--color-text-muted);
     margin-bottom: 1.5rem;
     line-height: 1.6;
 }
@@ -158,7 +158,7 @@
     justify-content: space-between;
     position: relative;
     padding: 1rem 0;
-    border-top: 1px solid #333;
+    border-top: 1px solid var(--color-bg-tertiary);
 }
 
 .timeline-item {
@@ -169,28 +169,28 @@
 .timeline-marker {
     width: 12px;
     height: 12px;
-    background: #222;
-    border: 1px solid #555;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-bg-elevated);
     margin: 0 auto 0.5rem;
 }
 
 .timeline-item.active .timeline-marker {
-    background: #888;
-    border-color: #fff;
+    background: var(--color-text-muted);
+    border-color: var(--color-text-primary);
 }
 
 .timeline-item.completed .timeline-marker {
-    background: #444;
-    border-color: #666;
+    background: var(--color-bg-elevated);
+    border-color: var(--color-bg-elevated);
 }
 
 .timeline-label {
     font-size: 0.75rem;
-    color: #666;
+    color: var(--color-bg-elevated);
 }
 
 .timeline-item.active .timeline-label {
-    color: #fff;
+    color: var(--color-text-primary);
     font-weight: 600;
 }
 
@@ -204,20 +204,20 @@
 }
 
 .no-decisions {
-    color: #666;
+    color: var(--color-bg-elevated);
     text-align: center;
     padding: 2rem;
     font-style: italic;
 }
 
 .decision-card {
-    background: #181818;
-    border: 1px solid #333;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-bg-tertiary);
     padding: 1rem;
 }
 
 .decision-card:hover {
-    border-color: #666;
+    border-color: var(--color-bg-elevated);
 }
 
 .decision-header {
@@ -228,37 +228,37 @@
 
 .decision-number {
     font-size: 0.75rem;
-    color: #888;
+    color: var(--color-text-muted);
     font-weight: 600;
 }
 
 .decision-week {
     font-size: 0.75rem;
-    color: #555;
+    color: var(--color-bg-elevated);
 }
 
 .decision-title {
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 0.75rem;
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .decision-choice {
     margin-bottom: 0.75rem;
     padding-left: 0.5rem;
-    border-left: 2px solid #444;
+    border-left: 2px solid var(--color-bg-elevated);
 }
 
 .choice-label {
     font-size: 0.875rem;
-    color: #888;
+    color: var(--color-text-muted);
     margin-right: 0.5rem;
 }
 
 /* Scoped: the decisions list and the decision modal both use .choice-text (#1793) */
 .decision-choice .choice-text {
-    color: #ddd;
+    color: var(--color-text-primary);
     font-style: italic;
 }
 
@@ -271,18 +271,18 @@
 
 .consequence {
     padding: 0.25rem 0.5rem;
-    border: 1px solid #444;
+    border: 1px solid var(--color-bg-elevated);
     font-size: 0.75rem;
     font-weight: 600;
-    color: #aaa;
+    color: var(--color-text-secondary);
 }
 
 .consequence.ethics,
 .consequence.money,
 .consequence.reputation {
     /* Keeping text neutral but distinct by brightness/style if needed, but keeping monochrome per request */
-    background: #222;
-    color: #ccc;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
 }
 
 /* Story Journal */
@@ -295,32 +295,32 @@
 }
 
 .journal-entry {
-    background: #111;
-    border-left: 3px solid #444;
+    background: var(--color-bg-primary);
+    border-left: 3px solid var(--color-bg-elevated);
     padding: 1rem;
 }
 
 .journal-date {
     font-size: 0.75rem;
-    color: #888;
+    color: var(--color-text-muted);
     font-weight: 600;
     margin-bottom: 0.25rem;
 }
 
 .journal-text {
-    color: #ccc;
+    color: var(--color-text-secondary);
     line-height: 1.6;
 }
 
 /* Next Beat Card */
 .next-beat-card {
-    background: #1a1a1a;
-    border: 1px solid #333;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-bg-tertiary);
     padding: 1.5rem;
 }
 
 .next-beat-text {
-    color: #ddd;
+    color: var(--color-text-primary);
     line-height: 1.6;
     font-size: 1rem;
 }
@@ -339,8 +339,8 @@
 }
 
 .decision-modal-content {
-    background: #050505;
-    border: 2px solid #555;
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-bg-elevated);
     padding: 2rem;
     max-width: 600px;
     width: 100%;
@@ -351,29 +351,29 @@
 
 .decision-modal-header {
     margin-bottom: 1.5rem;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--color-bg-tertiary);
     padding-bottom: 1rem;
 }
 
 .decision-modal-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-text-primary);
     margin: 0 0 0.5rem 0;
 }
 
 .decision-modal-importance {
     display: inline-block;
     padding: 0.25rem 0.75rem;
-    background: #222;
-    color: #aaa;
-    border: 1px solid #444;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-bg-elevated);
     font-size: 0.75rem;
     font-weight: 600;
 }
 
 .decision-modal-description {
-    color: #ddd;
+    color: var(--color-text-primary);
     line-height: 1.6;
     margin-bottom: 1.5rem;
 }
@@ -386,24 +386,24 @@
 }
 
 .decision-choice-btn {
-    background: #111;
-    border: 1px solid #444;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-bg-elevated);
     padding: 1rem;
-    color: #fff;
+    color: var(--color-text-primary);
     cursor: pointer;
     text-align: left;
     font-family: monospace;
 }
 
 .decision-choice-btn:hover {
-    background: #333;
-    border-color: #888;
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-text-muted);
 }
 
 .decision-choice-btn .choice-text {
     font-size: 1rem;
     margin-bottom: 0.5rem;
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .choice-consequences {
@@ -415,7 +415,7 @@
 
 .decision-modal-footer {
     text-align: center;
-    color: #666;
+    color: var(--color-bg-elevated);
     font-size: 0.875rem;
     margin-top: 1rem;
 }
@@ -423,19 +423,19 @@
 .arc-transformation {
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid #333;
+    border-top: 1px solid var(--color-bg-tertiary);
     text-align: center;
 }
 
 .transformation-label {
     font-size: 0.875rem;
-    color: #888;
+    color: var(--color-text-muted);
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
 
 .transformation-text {
-    color: #bbb;
+    color: var(--color-text-secondary);
     line-height: 1.6;
     font-style: italic;
 }
