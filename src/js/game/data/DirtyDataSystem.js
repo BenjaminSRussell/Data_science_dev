@@ -103,6 +103,11 @@ export class DirtyDataSystem {
         });
         
         this.applyConsequences(action.consequences);
+
+        // Actually pay the reward the result promises
+        if (typeof this.gameState.money === 'number') {
+            this.gameState.money += action.reward;
+        }
         
         return {
             success: true,
@@ -122,8 +127,9 @@ export class DirtyDataSystem {
             caught: true
         });
         
-        // Severe consequences
-        this.reputation -= action.consequences.reputation * 2;
+        // Severe consequences: double the (negative) reputation hit. This used
+        // to subtract a negative number, so getting caught raised reputation (#114, #2073)
+        this.applyConsequences({ reputation: action.consequences.reputation * 2 });
         
         // Legal trouble
         if (this.gameState.legalSystem) {
@@ -149,11 +155,13 @@ export class DirtyDataSystem {
      * Apply consequences
      */
     applyConsequences(consequences) {
-        this.reputation += consequences.reputation;
-        
-        // Update game state
-        if (this.gameState.reputationSystem) {
-            this.gameState.reputationSystem?.updateReputation(consequences.reputation);
+        const delta = Number(consequences?.reputation) || 0;
+        this.reputation += delta;
+
+        // There is no reputationSystem; the player's reputation is the plain
+        // gameState.reputation number shown in the top bar (#2075)
+        if (typeof this.gameState.reputation === 'number') {
+            this.gameState.reputation = Math.max(0, this.gameState.reputation + delta);
         }
     }
     

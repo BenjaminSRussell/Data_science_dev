@@ -188,10 +188,10 @@ describe('CompanyManagementSystem', () => {
             const clients = cms.findClients();
             expect(clients).toHaveLength(4);
             expect(clients).toEqual([
-                { name: 'TechCorp', needs: 'data_analysis', budget: 5000 },
-                { name: 'RetailCo', needs: 'visualization', budget: 3000 },
-                { name: 'FinanceInc', needs: 'machine_learning', budget: 8000 },
-                { name: 'StartupXYZ', needs: 'statistics', budget: 2000 }
+                { id: 'client_techcorp', name: 'TechCorp', needs: 'data_analysis', budget: 5000 },
+                { id: 'client_retailco', name: 'RetailCo', needs: 'visualization', budget: 3000 },
+                { id: 'client_financeinc', name: 'FinanceInc', needs: 'machine_learning', budget: 8000 },
+                { id: 'client_startupxyz', name: 'StartupXYZ', needs: 'statistics', budget: 2000 }
             ]);
         });
 
@@ -204,6 +204,10 @@ describe('CompanyManagementSystem', () => {
     });
 
     describe('acquireClient', () => {
+        beforeEach(() => {
+            cms.startCompany('My Company');
+        });
+
         it('should return success true and push a client when matched by name', () => {
             const result = cms.acquireClient('TechCorp');
             expect(result.success).toBe(true);

@@ -5,6 +5,13 @@
 
 import { pickState, applyState } from '../utils/StateSerializer.js';
 
+/** Intelligence needed per point of project difficulty (#1738) */
+export const INTELLIGENCE_PER_DIFFICULTY = 10;
+/** Days before the same project can be taken again (#1736, #1978) */
+export const PROJECT_COOLDOWN_DAYS = 7;
+/** Quality for submitting the starter template unchanged */
+export const MIN_QUALITY = 0.3;
+
 export class IDESystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -22,7 +29,7 @@ export class IDESystem {
                 id: 'simple_script',
                 name: 'Simple Automation Script',
                 description: 'Write a Python script to automate data entry',
-                difficulty: 2,
+                difficulty: 1, // fresh characters start at intelligence 10 (#1395)
                 basePay: 200,
                 skills: ['intelligence'],
                 language: 'python',
@@ -122,19 +129,47 @@ function createDashboard(data) {
     /**
      * Start a coding project
      */
+    getRequiredIntelligence(project) {
+        return (project?.difficulty || 0) * INTELLIGENCE_PER_DIFFICULTY;
+    }
+
+    getToday() {
+        return this.gameState.timeManager?.totalDays || 1;
+    }
+
+    /**
+     * Days left before a project can be repeated (0 = available)
+     */
+    getCooldownRemaining(projectId) {
+        const last = [...this.completedProjects].reverse().find(c => c.projectId === projectId);
+        if (!last || !Number.isFinite(last.day)) return 0;
+        return Math.max(0, last.day + PROJECT_COOLDOWN_DAYS - this.getToday());
+    }
+
     startProject(projectId) {
         const project = this.availableProjects.find(p => p.id === projectId);
         if (!project) {
             return { success: false, message: 'Project not found.' };
         }
 
+        // One project at a time (#217, #1735)
+        if (this.currentProject) {
+            return { success: false, message: `Finish or cancel ${this.currentProject.name} first.` };
+        }
+
         // Check if player has required skills
         const intelligence = this.gameState.characterStats?.getStat('intelligence') || 0;
-        if (intelligence < project.difficulty * 10) {
+        const required = this.getRequiredIntelligence(project);
+        if (intelligence < required) {
             return { 
                 success: false, 
-                message: `You need more intelligence (${project.difficulty * 10} required).` 
+                message: `You need more intelligence (${required} required).` 
             };
+        }
+
+        const cooldown = this.getCooldownRemaining(projectId);
+        if (cooldown > 0) {
+            return { success: false, message: `The client doesn't need another ${project.name} yet (${cooldown} day${cooldown === 1 ? '' : 's'}).` };
         }
 
         this.currentProject = {
@@ -159,6 +194,11 @@ function createDashboard(data) {
             return { success: false, message: 'No active project.' };
         }
 
+        // Guard against non-string or blank submissions (#1393, #1979, #1977)
+        if (typeof code !== 'string' || code.trim() === '') {
+            return { success: false, message: 'Write some code before submitting.' };
+        }
+
         const project = this.currentProject;
         
         // Simple validation (in real game, would have actual code execution)
@@ -166,13 +206,15 @@ function createDashboard(data) {
         
         // Calculate pay based on quality
         const pay = Math.floor(project.basePay * quality);
-        this.gameState.money += pay;
+        this.gameState.money = (Number(this.gameState.money) || 0) + pay;
 
         // XP rewards
-        if (project.skills) {
-            project.skills?.forEach(skill => {
-                const xp = project.difficulty * 10 * quality;
-                this.gameState.characterStats?.addExperience(skill, Math.floor(xp));
+        // The XP pool is split across the project's skills so multi-skill
+        // projects don't pay double (#1737)
+        if (Array.isArray(project.skills) && project.skills.length > 0) {
+            const xpPerSkill = Math.floor(project.difficulty * 10 * quality / project.skills.length);
+            project.skills.forEach(skill => {
+                this.gameState.characterStats?.addExperience(skill, xpPerSkill);
             });
         }
 
@@ -180,6 +222,7 @@ function createDashboard(data) {
         this.completedProjects.push({
             projectId: project.id,
             completedAt: Date.now(),
+            day: this.getToday(),
             quality,
             pay
         });
@@ -202,16 +245,24 @@ function createDashboard(data) {
      * Evaluate code quality (simplified)
      */
     evaluateCode(code, project) {
+        code = typeof code === 'string' ? code : '';
+        const template = project.codeTemplate || '';
         let quality = 0.5; // Base quality
 
-        // Check if code is not just template
-        if (code !== project.codeTemplate) {
-            quality += 0.2;
+        // Submitting the untouched template earns the minimum: the pattern
+        // bonuses below would otherwise reward def/import lines the template
+        // already contains
+        if (code.trim() === '') {
+            return 0;
         }
+        if (code.trim() === template.trim()) {
+            return MIN_QUALITY;
+        }
+        quality += 0.2;
 
         // Check code length (more code = more effort)
         const codeLength = code.split('\n').length;
-        const templateLength = project.codeTemplate.split('\n').length;
+        const templateLength = template.split('\n').length;
         if (codeLength > templateLength * 1.5) {
             quality += 0.1;
         }
@@ -227,7 +278,9 @@ function createDashboard(data) {
         // Random factor (simulating code quality assessment)
         quality += (Math.random() - 0.5) * 0.2;
 
-        return Math.max(0.3, Math.min(1.0, quality));
+        // Modified code scores 0.6-1.0; MIN_QUALITY is reserved for the
+        // untouched template above, so only the upper bound needs clamping (#1392)
+        return Math.min(1.0, quality);
     }
 
     /**
@@ -237,7 +290,7 @@ function createDashboard(data) {
         const intelligence = this.gameState.characterStats?.getStat('intelligence') || 0;
         
         return this.availableProjects.filter(project => {
-            return intelligence >= project.difficulty * 10;
+            return intelligence >= this.getRequiredIntelligence(project);
         });
     }
 
