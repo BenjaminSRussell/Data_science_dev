@@ -1561,10 +1561,7 @@ export class MainGame {
             setTimeout(() => {
                 try {
                     // this.gameState.visualSystem = new VisualSystem(this.gameState);
-                    // Phase 3: Use GSAP instead of custom AnimationManager
-                    // this.gameState.animationManager = new GSAPAnimationManager();
-                    // Also store as gsapAnimator for easy access
-                    this.gameState.gsapAnimator = this.gameState.animationManager;
+                    // Screen transitions are CSS-only (ScreenManager, #2295)
                     // Phase 4: Initialize particle effects (will be set up when PixiJS app is ready)
                     this.gameState.particleEffectManager = null;
                     this.gameState.performanceManager = new PerformanceManager();
@@ -1640,8 +1637,6 @@ export class MainGame {
             // Link Phase 1 Visual Systems
             this.visualSystem = this.gameState.visualSystem;
             this.animationManager = this.gameState.animationManager;
-            // Phase 3: Also expose as gsapAnimator for easy access
-            this.gsapAnimator = this.gameState.gsapAnimator || this.gameState.animationManager;
             // Phase 4: Use PixiJS AssetManager (with fallback - may be undefined if lazy load failed)
             this.pixiAssetManager = this.gameState.pixiAssetManager || null;
             this.assetManager = this.gameState.assetManager;

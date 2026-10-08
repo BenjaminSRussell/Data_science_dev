@@ -41,7 +41,8 @@ describe('ScreenManager', () => {
     expect(screenA.classList.contains('active')).toBe(true);
     expect(screenA.classList.contains('hidden')).toBe(false);
     expect(screenB.classList.contains('active')).toBe(false);
-    expect(screenB.classList.contains('hidden')).toBe(true);
+    // The screen we left is hidden
+    expect(document.getElementById('screen-menu').classList.contains('hidden')).toBe(true);
   });
 
   it('should toggle top-bar display based on screen id', () => {
@@ -55,9 +56,10 @@ describe('ScreenManager', () => {
   it('should track history and navigate back correctly', () => {
     screenManager.showScreen('screen-a');
     screenManager.showScreen('screen-b');
-    expect(screenManager.history).toEqual(['screen-menu', 'screen-a', 'screen-b']);
-    screenManager.goBack();
+    // history holds the screens we came from; the current one isn't in it
     expect(screenManager.history).toEqual(['screen-menu', 'screen-a']);
+    screenManager.goBack();
+    expect(screenManager.history).toEqual(['screen-menu']);
     expect(screenManager.currentScreen).toBe('screen-a');
   });
 

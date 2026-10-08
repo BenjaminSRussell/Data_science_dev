@@ -71,62 +71,30 @@ export class ScreenManager {
             this.mainGame.gameState.screenThemeManager?.applyTheme(screenId);
         }
 
-        // Phase 3: Use GSAP for smooth screen transitions
-        const gsapAnimator = this.mainGame?.gsapAnimator || this.mainGame?.gameState?.gsapAnimator;
+        // Transitions are CSS-only: `.screen.active` runs the fadeIn keyframe
+        // (main.css). The old GSAP branch called animator methods that never
+        // existed on an animator that was never created (#2295, #1087, #1362).
 
-        // Hide current screen with animation
+        // Hide current screen
         if (this.currentScreen && this.screens[this.currentScreen]) {
             const currentScreenEl = this.screens[this.currentScreen];
-            if (gsapAnimator) {
-                gsapAnimator.animateExit(currentScreenEl, 'fade', {
-                    duration: 0.2,
-                    onComplete: () => {
-                        currentScreenEl.classList.remove('active');
-                        currentScreenEl.classList.add('hidden');
-                    }
-                });
-            } else {
-                currentScreenEl.classList.remove('active');
-                currentScreenEl.classList.add('hidden');
-            }
+            currentScreenEl.classList.remove('active');
+            currentScreenEl.classList.add('hidden');
         }
 
         // Show top bar for game screens, hide for menu
         const topBar = document.getElementById('top-bar');
         if (topBar) {
-            if (screenId === 'screen-menu') {
-                if (gsapAnimator) {
-                    gsapAnimator.fadeOut(topBar, { duration: 0.2 });
-                } else {
-                    topBar.style.display = 'none';
-                }
-            } else {
-                if (gsapAnimator) {
-                    gsapAnimator.fadeIn(topBar, { duration: 0.2 });
-                } else {
-                    topBar.style.display = 'flex';
-                }
-            }
+            topBar.style.display = screenId === 'screen-menu' ? 'none' : 'flex';
         }
 
-        // Show target screen with animation
-        if (gsapAnimator) {
-            targetScreen.classList.remove('hidden');
-            gsapAnimator.animateEntrance(targetScreen, 'fade', {
-                duration: 0.3,
-                onComplete: () => {
-                    targetScreen.classList.add('active');
-                }
-            });
-        } else {
-            targetScreen.classList.remove('hidden');
-            targetScreen.classList.add('active');
+        // Show target screen
+        targetScreen.classList.remove('hidden');
+        targetScreen.classList.add('active');
 
-            // Force display in case CSS is overriding
-            const computedDisplay = window.getComputedStyle(targetScreen).display;
-            if (computedDisplay === 'none') {
-                targetScreen.style.display = 'block';
-            }
+        // Force display in case CSS is overriding
+        if (window.getComputedStyle(targetScreen).display === 'none') {
+            targetScreen.style.display = 'block';
         }
 
         // Track history (bounded, and cleared when returning to the menu) (#1088)
@@ -155,10 +123,9 @@ export class ScreenManager {
                 if (this.mainGame.updateMapScreen) {
                     this.mainGame.updateMapScreen();
                 }
-                // Also trigger resize to ensure map gets correct dimensions
-                if (this.mainGame.unifiedMapSystem && this.mainGame.unifiedMapSystem.handleResize) {
-                    this.mainGame.unifiedMapSystem.handleResize();
-                }
+                // Resize an existing map now; a map created by the call above
+                // is still loading and resizes itself once ready (#2147)
+                this.mainGame.unifiedMapSystem?.handleResize?.();
             }, 100);
         }
     }
