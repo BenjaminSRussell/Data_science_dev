@@ -61,8 +61,51 @@ export const RESPONSE_LIBRARY = {
     dream_ask_how: { text: "One step at a time. Save a little, learn a lot, and stay stubborn.", relationship: 1 },
     personal_support: { text: "I'm glad you're in my corner.", relationship: 2 },
     deep_philosophy: { text: "Sometimes I wonder if any of the numbers really mean anything. Then I remember the people behind them.", relationship: 1 },
-    deep_connect: { text: "I feel like I can be honest with you. That's rare.", relationship: 3 }
+    deep_connect: { text: "I feel like I can be honest with you. That's rare.", relationship: 3 },
+    pitch_idea: { text: "Interesting. Bring me numbers, not adjectives, and we'll talk.", relationship: 1 },
+    ask_about_stock: { text: "Just got a few new things in. Take a look around.", relationship: 1 },
+    ask_about_rumors: { text: "I hear things. Not all of it is safe to repeat.", relationship: 1 },
+    challenge: { text: "You want to compete? Fine. Let's see your numbers next week.", relationship: 1 },
+    ask_about_day: { text: "Better now that you're here, honestly.", relationship: 2 },
+    ask_about_rules: { text: "Keep your nose clean and your paperwork in order. That's all I ask.", relationship: 1 }
 };
+
+// A topic that fits what the NPC does, added to personality trees so npc.type
+// shapes the conversation too (#121, #1916)
+export const TYPE_TOPICS = {
+    mentor: { id: 'ask_for_advice', text: 'Ask for career advice' },
+    investor: { id: 'pitch_idea', text: 'Pitch an idea' },
+    business: { id: 'network', text: 'Talk business' },
+    shopkeeper: { id: 'ask_about_stock', text: "Ask what's new in the shop" },
+    criminal: { id: 'ask_about_rumors', text: 'Ask what they have heard' },
+    rival: { id: 'challenge', text: 'Size up the competition' },
+    romance: { id: 'ask_about_day', text: 'Ask about their day' },
+    friend: { id: 'small_talk', text: 'Catch up' },
+    authority: { id: 'ask_about_rules', text: 'Ask about the rules' },
+    service: { id: 'small_talk', text: 'Chat for a bit' }
+};
+
+// Greetings that warm up as the relationship grows (#1580). Tier 1 is a
+// friend (30+), tier 2 a close friend (60+).
+const RELATIONSHIP_GREETINGS = {
+    friendly: ["Hey, you! I was hoping you'd stop by.", "There you are! Sit down, tell me everything."],
+    professional: ["Good to see you again. What can I do for you?", "Always a pleasure. You know my door is open."],
+    competitive: ["You again. Still trying to keep up?", "Alright, I'll admit it. You're the only one who actually pushes me."],
+    mysterious: ["...You came back. Interesting.", "I don't trust many people. You're one of them."],
+    grumpy: ["Oh. It's you. Fine, I've got a minute.", "Don't tell anyone, but you're the one visitor I don't mind."],
+    generous: ["My friend! What can I do for you today?", "You're always welcome here. You know that, right?"],
+    default: ["Good to see you again.", "Always good to see a friend."]
+};
+
+/**
+ * 0 = acquaintance, 1 = friend (30+), 2 = close friend (60+)
+ */
+export function relationshipTier(level) {
+    const value = Number(level) || 0;
+    if (value >= 60) return 2;
+    if (value >= 30) return 1;
+    return 0;
+}
 
 const DEFAULT_RESPONSE = { text: "Hm. I'll have to think about that.", relationship: 0.5 };
 
@@ -71,7 +114,14 @@ export class DialogueTree {
         this.npcId = npcId;
         this.nodes = new Map();
         this.missingLookups = new Set();
+        this.duplicateIds = [];
         nodes.forEach(node => {
+            // Later nodes still win, but a clash is reported instead of
+            // silently dropping the earlier node (#1583)
+            if (this.nodes.has(node.id)) {
+                this.duplicateIds.push(node.id);
+                console.warn(`[Dialogue] Duplicate node id "${node.id}" in tree for ${npcId}; keeping the last one`);
+            }
             this.nodes.set(node.id, node);
         });
         this.repairGraph();
@@ -138,6 +188,18 @@ export class DialogueTree {
     getRootNode() {
         return this.nodes.get('root');
     }
+
+    /**
+     * A tree is usable when its root offers at least one real conversation
+     * choice (not just goodbye) that leads to a node in the tree (#1584)
+     */
+    isUsable() {
+        const root = this.getRootNode();
+        if (!root) return false;
+        return (root.choices || []).some(choice =>
+            !SPECIAL_CHOICE_IDS.has(choice.id) && this.nodes.has(choice.nextNode || choice.id)
+        );
+    }
 }
 
 /**
@@ -167,7 +229,10 @@ export class DialogueTreeSystem {
         const flagKey = story?.phases && flags
             ? Object.keys(flags).filter(k => flags[k]).sort().join(',')
             : '';
-        const cacheKey = story ? `${npcId}_${level}${flagKey ? `_${flagKey}` : ''}` : `${npcId}`;
+        // Personality trees only change per relationship tier (#1580)
+        const cacheKey = story
+            ? `${npcId}_${level}${flagKey ? `_${flagKey}` : ''}`
+            : `${npcId}_t${relationshipTier(level)}`;
         if (this.treeCache.has(cacheKey)) {
             const cached = this.treeCache.get(cacheKey);
             // refresh LRU position
@@ -225,10 +290,7 @@ export class DialogueTreeSystem {
  * Build dialogue trees for each NPC
  */
 export class DialogueTreeBuilder {
-    constructor() {
-        this.trees = new Map();
-    }
-    
+
     /**
      * Build tree for a specific NPC
      * Uses enhanced dialogue system if character has deep story
@@ -237,14 +299,23 @@ export class DialogueTreeBuilder {
         // Try enhanced dialogue system first (if character has deep story)
         try {
             const enhancedTree = enhancedDialogueSystem.buildEnhancedTree(npc, relationshipLevel, flags);
-            if (enhancedTree && enhancedTree.nodes.size > 1) {
+            if (enhancedTree?.isUsable?.()) {
                 return enhancedTree;
             }
         } catch (error) {
-            // Enhanced dialogue not available
+            // Report the failure instead of silently swapping in the generic
+            // personality tree (#2124)
+            console.warn(`[Dialogue] Enhanced dialogue failed for ${npc?.id}; using personality tree`, error);
         }
-        
-        // Fallback to personality-based trees
+
+        const tree = this.buildPersonalityTree(npc);
+        return this.personalize(tree, npc, relationshipLevel);
+    }
+
+    /**
+     * Fallback personality-based tree
+     */
+    buildPersonalityTree(npc) {
         // Personalities without a dedicated tree reuse the closest one
         const PERSONALITY_TREE_ALIASES = {
             aggressive: 'grumpy',
@@ -252,9 +323,8 @@ export class DialogueTreeBuilder {
             greedy: 'professional',
             high_maintenance: 'competitive'
         };
-        const rawPersonality = npc.personality || 'friendly';
-        const personality = PERSONALITY_TREE_ALIASES[rawPersonality] || rawPersonality;
-        
+        const personality = DialogueTreeBuilder.resolvePersonality(npc, PERSONALITY_TREE_ALIASES);
+
         if (personality === 'friendly') {
             return this.buildFriendlyTree(npc);
         } else if (personality === 'professional') {
@@ -268,8 +338,45 @@ export class DialogueTreeBuilder {
         } else if (personality === 'generous') {
             return this.buildGenerousTree(npc);
         }
-        
+
         return this.buildDefaultTree(npc);
+    }
+
+    static resolvePersonality(npc, aliases = {}) {
+        const raw = npc?.personality || 'friendly';
+        return aliases[raw] || raw;
+    }
+
+    /**
+     * Shape a personality tree by the NPC's type and the relationship:
+     * a type-specific topic, a warmer greeting as you get closer, and a
+     * personal topic for close friends (#121, #1916, #1580)
+     */
+    personalize(tree, npc, relationshipLevel = 0) {
+        const root = tree?.getRootNode?.();
+        if (!root) return tree;
+        root.choices = root.choices || [];
+        const insertBeforeGoodbye = (choice) => {
+            if (root.choices.some(c => c.id === choice.id)) return;
+            const goodbyeIndex = root.choices.findIndex(c => c.id === 'goodbye');
+            root.choices.splice(goodbyeIndex === -1 ? root.choices.length : goodbyeIndex, 0, { ...choice });
+        };
+
+        const typeTopic = TYPE_TOPICS[npc?.type];
+        if (typeTopic) insertBeforeGoodbye(typeTopic);
+
+        const tier = relationshipTier(relationshipLevel);
+        if (tier > 0) {
+            const personality = DialogueTreeBuilder.resolvePersonality(npc, { aggressive: 'grumpy', hostile: 'grumpy', greedy: 'professional', high_maintenance: 'competitive' });
+            const lines = RELATIONSHIP_GREETINGS[personality] || RELATIONSHIP_GREETINGS.default;
+            root.text = lines[tier - 1];
+        }
+        if (tier === 2) {
+            insertBeforeGoodbye({ id: 'deep_connect', text: 'Share something personal', conditions: { relationship: 60 } });
+        }
+
+        tree.repairGraph();
+        return tree;
     }
     
     buildFriendlyTree(npc) {

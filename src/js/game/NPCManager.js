@@ -169,10 +169,10 @@ export const NPCs = [
         gifts: ['coffee', 'tech_gadgets'],
         dialogueTopics: ['industry', 'career', 'visualization'],
         benefits: { statBoost: 'analytics', clientReferrals: true },
-        backstory: 'Works at a top tech company. Loves helping newcomers break into the field.',
-        description: 'Experienced analyst at a Fortune 500 company. Known for her clear communication and ability to translate complex data into actionable insights.',
+        backstory: 'Former barista who taught herself Python at night and worked up from data entry. Single mom of two who loves helping newcomers break into the field.',
+        description: 'Self-taught senior analyst who climbed from data entry to the top of her team. Known for her clear communication and ability to translate complex data into actionable insights.',
         age: 34,
-        interests: ['data visualization', 'career development', 'coffee'],
+        interests: ['data visualization', 'career development', 'her kids'],
         favoriteTopics: ['Tableau', 'Python', 'industry trends']
     },
 
@@ -225,8 +225,8 @@ export const NPCs = [
         unlockRequirement: { reputation: 1000, stat: 'charisma', value: 40 },
         gifts: ['fine_wine', 'art'],
         dialogueTopics: ['investments', 'startups', 'market'],
-        benefits: { seedFunding: true, vcIntros: true },
-        backstory: 'Made millions in tech. Now invests in promising data-driven startups.',
+        benefits: { vcIntros: true },
+        backstory: 'Sold his first tech company for millions. Everyone assumes he still has them.',
         description: 'A wealthy investor who made his fortune in the tech boom. Speaks in riddles but has an eye for promising ventures. Very selective about who he works with.',
         age: 52,
         interests: ['venture capital', 'fine art', 'cryptocurrency'],
@@ -404,7 +404,7 @@ export const NPCs = [
     {
         id: 'emma_bloom',
         name: 'Emma Bloom',
-        title: 'Librarian & Teacher',
+        title: 'Librarian & Information Architect',
         icon: '',
         image: '/assets/characters/bosses/chen.png', // Temporary high-quality replacement
         type: 'romance',
@@ -415,11 +415,11 @@ export const NPCs = [
         gifts: ['books', 'flowers'],
         dialogueTopics: ['books', 'education', 'future'],
         benefits: { studyBoost: true, ethicsBoost: true },
-        backstory: 'Passionate about education. Looking for someone kind and stable.',
+        backstory: 'Quiet librarian with a master\'s in library science. Spends her evenings reading research papers and dreams of digitizing the city\'s rare archives.',
         description: 'A gentle soul who finds joy in books and helping others learn. Values integrity and intellectual curiosity above all else.',
         age: 28,
-        interests: ['literature', 'education', 'gardening'],
-        favoriteTopics: ['classic novels', 'teaching methods', 'personal growth']
+        interests: ['information architecture', 'research papers', 'historical archives'],
+        favoriteTopics: ['open access to knowledge', 'digitization', 'search and cataloguing']
     },
     {
         id: 'bella_lux',
@@ -1736,6 +1736,11 @@ export class NPCManager {
             effects.xp = statId;
             stats?.addExperience?.(statId, effects.xpAmount || 20);
         }
+
+        // Direct stat rewards from story phases, e.g. { intelligence: 5 }
+        ['intelligence', 'charisma', 'focus', 'luck', 'analytics'].forEach(id => {
+            if (typeof effects[id] === 'number' && effects[id] > 0) stats?.addExperience?.(id, effects[id]);
+        });
 
         if (effects.ethics) stats?.modifyEthics?.(effects.ethics);
         if (effects.money) this.gameState.money += effects.money;
