@@ -298,12 +298,14 @@ export class JobSystem {
         const reputation = this.gameState.reputation || 0;
         const available = [];
 
+        // One eligibility model for both methods (#1826): reputation unlocks a
+        // category, the player's stats decide which of its tasks are in reach.
         for (const [categoryId, category] of Object.entries(JOB_CATEGORIES)) {
             if (reputation >= category.minReputation) {
                 available.push({
                     category: categoryId,
                     name: category.name,
-                    tasks: category.tasks
+                    tasks: category.tasks.filter(task => this.isTaskInReach(task))
                 });
             }
         }
@@ -341,15 +343,31 @@ export class JobSystem {
 
         const category = JOB_CATEGORIES[this.currentJob.category];
         if (!category) return [];
+        if ((this.gameState.reputation || 0) < category.minReputation) return [];
 
-        // Filter tasks by difficulty (player should be able to handle them)
-        const playerIntelligence = this.gameState.characterStats?.getStat('intelligence') || 0;
-        const playerAnalytics = this.gameState.characterStats?.getStat('analytics') || 0;
+        return category.tasks.filter(task => this.isTaskInReach(task));
+    }
 
-        return category.tasks.filter(task => {
-            const maxDifficulty = Math.max(playerIntelligence, playerAnalytics) / 10;
-            return task.difficulty <= maxDifficulty + 2; // Allow slightly harder tasks
-        });
+    /**
+     * Can the player handle this task? Difficulty may be up to 2 above their
+     * best of intelligence/analytics (per 10 points).
+     */
+    isTaskInReach(task) {
+        const cs = this.gameState.characterStats;
+        const playerIntelligence = cs?.getStat?.('intelligence') || 0;
+        const playerAnalytics = cs?.getStat?.('analytics') || 0;
+        const maxDifficulty = Math.max(playerIntelligence, playerAnalytics) / 10;
+        return task.difficulty <= maxDifficulty + 2; // Allow slightly harder tasks
+    }
+
+    /**
+     * Reputation earned for a task at full quality: its own reputationReward,
+     * or 5 per difficulty point (#1824).
+     */
+    static reputationFor(task) {
+        const explicit = Number(task?.reputationReward);
+        if (Number.isFinite(explicit) && explicit >= 0) return explicit;
+        return Math.max(1, (Number(task?.difficulty) || 1) * 5);
     }
 
     /**
@@ -413,17 +431,25 @@ export class JobSystem {
             }
         }
 
+        // Reputation is what unlocks the next job category; tasks now earn it (#1824)
+        const reputation = Math.round(JobSystem.reputationFor(task) * q);
+        if (reputation > 0) {
+            this.gameState.reputation = (Number(this.gameState.reputation) || 0) + reputation;
+        }
+
         this.completedTasks.push({
             taskId,
             completedAt: Date.now(),
             durationMs: Date.now() - active.startTime,
             quality: q,
-            pay
+            pay,
+            reputation
         });
 
         return {
             success: true,
             pay,
+            reputation,
             quality: q,
             xpReward: task.xpReward,
             timeRequired: task.timeRequired,

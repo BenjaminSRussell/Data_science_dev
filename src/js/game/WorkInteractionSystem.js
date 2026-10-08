@@ -300,6 +300,20 @@ export class WorkInteractionSystem {
             message = "Your boss seems relieved. 'Okay. HR will handle the paperwork.'";
         }
 
+        // Record the job being quit before clearing it (#1546)
+        const job = this.gameState.currentJob;
+        if (job) {
+            const jobSystem = this.gameState.jobSystem;
+            if (jobSystem && !Array.isArray(jobSystem.jobHistory)) jobSystem.jobHistory = [];
+            jobSystem?.jobHistory.push({
+                ...(typeof job === 'object' ? job : { name: String(job) }),
+                endedAt: Date.now(),
+                endedDay: this.gameState.timeManager?.totalDays ?? null,
+                reason: 'quit',
+                bossRelationship: relationship
+            });
+        }
+
         // Reset work state
         this.gameState.currentJob = null;
         this.boss.relationship = 0;
