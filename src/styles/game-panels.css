@@ -210,6 +210,22 @@
     color: var(--color-text-secondary);
 }
 
+/* Onboarding overview above the steps (#1069) */
+.howto-intro {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+    gap: var(--space-3, 0.75rem);
+}
+
+.howto-intro-section h4 {
+    margin: 0 0 var(--space-1, 0.25rem);
+}
+
+.howto-intro-section p {
+    margin: 0;
+    color: var(--color-text-secondary);
+}
+
 /* =====================================================
    Second batch of live panels that had no CSS
    ===================================================== */
