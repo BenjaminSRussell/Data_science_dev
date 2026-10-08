@@ -154,7 +154,7 @@ describe('InvestmentEcommerceSystem (e-commerce)', () => {
             expect(system.ecommerceBusiness.inventory.p2).toBe(70);
         });
 
-        it('computes expenses exactly as marketingBudget + products.length*50 and adds profit to money', () => {
+        it('charges only operating costs weekly; marketing was paid up front (#1005)', () => {
             const moneyBefore = 9800;
             mockGameState.money = moneyBefore;
             system.startEcommerceBusiness('Shop', 0);
@@ -165,13 +165,13 @@ describe('InvestmentEcommerceSystem (e-commerce)', () => {
 
             const result = system.processWeeklyOperations();
 
-            // expenses = 5000 + 2*50 = 5100
-            expect(result.expenses).toBe(5100);
-            // revenue = 900, profit = 900 - 5100 = -4200
-            expect(result.profit).toBe(-4200);
-            expect(mockGameState.money).toBe(moneyBefore - 4200);
+            // expenses = 2*50 = 100 (marketing is not charged again)
+            expect(result.expenses).toBe(100);
+            // revenue = 30*10 + 30*20 = 900, profit = 800
+            expect(result.profit).toBe(800);
+            expect(mockGameState.money).toBe(moneyBefore + 800);
             expect(system.ecommerceBusiness.revenue).toBe(900);
-            expect(system.ecommerceBusiness.expenses).toBe(5100);
+            expect(system.ecommerceBusiness.expenses).toBe(100);
         });
 
         it('caps reputation at 100 via min(100, reputation + floor(sales/10))', () => {

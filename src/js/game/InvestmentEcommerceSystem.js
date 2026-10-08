@@ -5,6 +5,9 @@
 
 import { pickState, applyState } from '../utils/StateSerializer.js';
 
+const isAmount = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+const DEFAULT_PRODUCT_COST = 100;
+
 export class InvestmentEcommerceSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -105,6 +108,10 @@ export class InvestmentEcommerceSystem {
      * Start e-commerce business
      */
     startEcommerceBusiness(name, initialInvestment) {
+        // A negative/NaN investment used to pay the player (#1003)
+        if (!isAmount(initialInvestment)) {
+            return { success: false, message: "Investment must be a non-negative amount." };
+        }
         if (this.gameState.money < initialInvestment) {
             return { success: false, message: "Not enough money to start business." };
         }
@@ -143,14 +150,28 @@ export class InvestmentEcommerceSystem {
             return { success: false, message: "You don't have an e-commerce business." };
         }
 
-        const cost = product.cost || 100;
+        // Reject products that would poison revenue with NaN (#1004)
+        const id = product?.id;
+        if (id === undefined || id === null || id === '' || !isAmount(product?.price)) {
+            return { success: false, message: "A product needs an id and a non-negative price." };
+        }
+        // Re-adding an id used to reset its stock and double its sales (#1981)
+        if (this.ecommerceBusiness.products.some(p => p.id === id)) {
+            return { success: false, message: `${product.name || id} is already in your store.` };
+        }
+
+        // A free product (cost: 0) is free, not "unset" (#1358)
+        const cost = product.cost === undefined || product.cost === null ? DEFAULT_PRODUCT_COST : product.cost;
+        if (!isAmount(cost)) {
+            return { success: false, message: "Product cost must be a non-negative amount." };
+        }
         if (this.gameState.money < cost) {
             return { success: false, message: "Not enough money to add product." };
         }
 
         this.gameState.money -= cost;
         this.ecommerceBusiness.products.push(product);
-        this.ecommerceBusiness.inventory[product.id] = product.stock || 0;
+        this.ecommerceBusiness.inventory[id] = isAmount(product.stock) ? Math.floor(product.stock) : 0;
 
         return {
             success: true,
@@ -173,22 +194,27 @@ export class InvestmentEcommerceSystem {
         const baseSales = business.products.length * 10;
         const sales = Math.floor(baseSales * marketingEffect * reputationEffect);
         
-        // Calculate revenue
+        // Calculate revenue from units actually shipped
         let revenue = 0;
+        let unitsSold = 0;
+        const demandPerProduct = business.products.length ? Math.floor(sales / business.products.length) : 0;
         business.products.forEach(product => {
-            const sold = Math.min(sales / business.products.length, business.inventory[product.id] || 0);
+            const sold = Math.min(demandPerProduct, business.inventory[product.id] || 0);
             revenue += sold * product.price;
+            unitsSold += sold;
             business.inventory[product.id] = (business.inventory[product.id] || 0) - sold;
         });
 
-        // Calculate expenses
-        const expenses = business.marketingBudget + (business.products.length * 50); // Base operating costs
+        // Marketing was paid up front in investInMarketing(); only operating
+        // costs recur (#1005). The campaign's effect fades 25% a week.
+        const expenses = business.products.length * 50; // Base operating costs
+        business.marketingBudget = Math.floor(business.marketingBudget * 0.75);
 
-        // Update business
+        // Customers and reputation come from orders filled, not demand (#1356)
         business.revenue += revenue;
         business.expenses += expenses;
-        business.customers += sales;
-        business.reputation = Math.min(100, business.reputation + Math.floor(sales / 10));
+        business.customers += unitsSold;
+        business.reputation = Math.min(100, business.reputation + Math.floor(unitsSold / 10));
 
         // Profit
         const profit = revenue - expenses;
@@ -199,6 +225,7 @@ export class InvestmentEcommerceSystem {
             expenses,
             profit,
             sales,
+            unitsSold,
             business: { ...business }
         };
     }
@@ -211,6 +238,10 @@ export class InvestmentEcommerceSystem {
             return { success: false, message: "You don't have an e-commerce business." };
         }
 
+        // Negative spend used to pay the player (#1357)
+        if (!isAmount(amount) || amount === 0) {
+            return { success: false, message: "Marketing spend must be a positive amount." };
+        }
         if (this.gameState.money < amount) {
             return { success: false, message: "Not enough money." };
         }
@@ -238,7 +269,8 @@ export class InvestmentEcommerceSystem {
         return {
             ...this.portfolio,
             profit,
-            profitPercent: profitPercent.toFixed(2)
+            // A number like profitMargin, rounded to 2 places (#1982)
+            profitPercent: Math.round(profitPercent * 100) / 100
         };
     }
 
