@@ -94,23 +94,27 @@ export class ContractGenerator {
      * Generate contracts for a category
      */
     generateContractsForCategory(category, count = 3) {
+        // Pick templates without repeats, so a category with one template
+        // offers one contract instead of two identical ones (#1626)
+        const templates = this.getContractTemplates(category);
+        const pool = templates.map((_, i) => i);
         const contracts = [];
-        
-        for (let i = 0; i < count; i++) {
-            contracts.push(this.generateContract(category));
+        const n = Math.min(count, templates.length);
+        for (let i = 0; i < n; i++) {
+            const pick = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+            contracts.push(this.generateContract(category, templates[pick]));
         }
-        
         return contracts;
     }
     
     /**
      * Generate a single contract
      */
-    generateContract(category) {
+    generateContract(category, chosenTemplate = null) {
         this.contractIdCounter++;
         
         const templates = this.getContractTemplates(category);
-        const template = templates[Math.floor(Math.random() * templates.length)];
+        const template = chosenTemplate || templates[Math.floor(Math.random() * templates.length)];
         
         return {
             id: `contract_${category}_${this.contractIdCounter}`,
@@ -127,7 +131,9 @@ export class ContractGenerator {
             difficulty: template.difficulty,
             deliverables: template.deliverables,
             bonusConditions: template.bonusConditions || [],
-            deadline: Date.now() + (template.timeRequired * 24 * 60 * 60 * 1000), // Days to milliseconds
+            // The deadline clock starts when the contract is accepted, not
+            // when it's offered (#972); acceptContract() stamps it
+            deadline: null,
             createdAt: Date.now()
         };
     }
@@ -425,6 +431,8 @@ export class ContractGenerator {
  * Contract System - Manages all contracts
  */
 export class ContractSystem {
+    static DAY_MS = 24 * 60 * 60 * 1000;
+
     constructor(gameState) {
         this.gameState = gameState;
         this.generator = new ContractGenerator();
@@ -475,10 +483,12 @@ export class ContractSystem {
         }
         
         // Move to active
+        const acceptedAt = Date.now();
         this.availableContracts = this.availableContracts.filter(c => c.id !== contractId);
         this.activeContracts.push({
             ...contract,
-            acceptedAt: Date.now(),
+            acceptedAt,
+            deadline: acceptedAt + (Number(contract.timeRequired) || 0) * ContractSystem.DAY_MS,
             progress: 0,
             status: 'active'
         });
@@ -489,15 +499,15 @@ export class ContractSystem {
     /**
      * Work on active contract
      */
-    workOnContract(contractId, workAmount) {
+    workOnContract(contractId, workAmount, options = {}) {
         const contract = this.activeContracts.find(c => c.id === contractId);
         if (!contract) return null;
         
-        contract.progress += workAmount;
+        contract.progress += Math.max(0, Number(workAmount) || 0);
         
         // Check completion
         if (contract.progress >= contract.timeRequired) {
-            return this.completeContract(contractId);
+            return this.completeContract(contractId, options);
         }
         
         return {
@@ -510,27 +520,43 @@ export class ContractSystem {
     /**
      * Complete a contract
      */
-    completeContract(contractId) {
+    completeContract(contractId, options = {}) {
         const contract = this.activeContracts.find(c => c.id === contractId);
         if (!contract) return { success: false, reason: 'Contract not found' };
-        
-        // Calculate pay with bonuses
-        let pay = contract.basePay;
+
+        // No payout until the work is done (#2112, #968)
+        const required = Number(contract.timeRequired) || 0;
+        if ((Number(contract.progress) || 0) < required) {
+            return {
+                success: false,
+                reason: 'Contract work is not finished',
+                progress: required > 0 ? ((Number(contract.progress) || 0) / required) * 100 : 0
+            };
+        }
+
+        // Every bonus is a share of basePay; they used to compound off pay
+        // that already included earlier bonuses (#1622)
+        const basePay = Number(contract.basePay) || 0;
+        let pay = basePay;
         let bonuses = [];
+        const context = { quality: options.quality };
         
         // Check bonus conditions
         (contract.bonusConditions || []).forEach(condition => {
-            if (this.checkBonusCondition(condition)) {
-                const bonus = pay * condition.multiplier;
+            const multiplier = ContractSystem.validMultiplier(condition?.multiplier);
+            if (multiplier === null) return; // malformed: ignore, never NaN (#1625)
+            if (this.checkBonusCondition(condition, context)) {
+                const bonus = basePay * multiplier;
                 pay += bonus;
                 bonuses.push({ type: condition.type, amount: bonus });
             }
         });
         
         // Early completion bonus
-        const daysEarly = Math.max(0, (contract.deadline - Date.now()) / (24 * 60 * 60 * 1000));
-        if (daysEarly > 0) {
-            const earlyBonus = pay * 0.1 * Math.min(daysEarly / contract.timeRequired, 1);
+        const deadline = Number(contract.deadline);
+        const daysEarly = Number.isFinite(deadline) ? Math.max(0, (deadline - Date.now()) / ContractSystem.DAY_MS) : 0;
+        if (daysEarly > 0 && required > 0) {
+            const earlyBonus = basePay * 0.1 * Math.min(daysEarly / required, 1);
             pay += earlyBonus;
             bonuses.push({ type: 'early_completion', amount: earlyBonus });
         }
@@ -561,7 +587,7 @@ export class ContractSystem {
     /**
      * Check bonus condition
      */
-    checkBonusCondition(condition) {
+    checkBonusCondition(condition, context = {}) {
         if (!condition || !this.gameState) return false;
         
         switch (condition.type) {
@@ -569,8 +595,11 @@ export class ContractSystem {
                 // Already handled in completeContract
                 return false;
             case 'perfect_quality':
-                // Check if contract was completed with perfect quality
-                return condition.achieved || false;
+                // Fires when the work is delivered at (or above) the quality
+                // bar; nothing ever set condition.achieved before (#1624)
+                if (condition.achieved) return true;
+                return Number.isFinite(Number(context.quality))
+                    && Number(context.quality) >= (Number(condition.value) || 100);
             case 'skill_requirement':
                 // Check if player has required skill level
                 if (this.gameState.characterStats) {
@@ -590,14 +619,33 @@ export class ContractSystem {
      * Get available contracts for UI
      */
     getAvailableContracts() {
-        return this.availableContracts;
+        // Copies, so UI code can't mutate the system's state (#1627)
+        return this.availableContracts.map(c => ContractSystem.copyContract(c));
     }
     
     /**
      * Get active contracts
      */
     getActiveContracts() {
-        return this.activeContracts;
+        return this.activeContracts.map(c => ContractSystem.copyContract(c));
+    }
+
+    static copyContract(contract) {
+        if (!contract || typeof contract !== 'object') return contract;
+        return typeof structuredClone === 'function'
+            ? structuredClone(contract)
+            : JSON.parse(JSON.stringify(contract));
+    }
+
+    /**
+     * A bonus multiplier is a finite number between 0 and 5; anything else
+     * returns null and the bonus is skipped (#1625)
+     */
+    static validMultiplier(value) {
+        const n = Number(value);
+        if (value === null || value === undefined || value === '' || !Number.isFinite(n)) return null;
+        if (n < 0 || n > 5) return null;
+        return n;
     }
     
     /**
@@ -607,7 +655,9 @@ export class ContractSystem {
         return {
             activeContracts: this.activeContracts,
             completedContracts: this.completedContracts,
-            availableContracts: this.availableContracts
+            availableContracts: this.availableContracts,
+            // Persist the id counter so new ids never collide after a load (#1623)
+            contractIdCounter: this.generator.contractIdCounter
         };
     }
     
@@ -619,6 +669,13 @@ export class ContractSystem {
         this.activeContracts = (data.activeContracts || []).map(c => this.normalizeContract(c));
         this.completedContracts = (data.completedContracts || []).map(c => this.normalizeContract(c));
         this.availableContracts = (data.availableContracts || []).map(c => this.normalizeContract(c));
+        // Never hand out an id that's already in use, even for saves made
+        // before the counter was stored (#1623)
+        const highest = [...this.activeContracts, ...this.completedContracts, ...this.availableContracts]
+            .map(c => Number(String(c?.id || '').match(/_(\d+)$/)?.[1]))
+            .filter(Number.isFinite)
+            .reduce((a, b) => Math.max(a, b), 0);
+        this.generator.contractIdCounter = Math.max(Number(data.contractIdCounter) || 0, highest, this.generator.contractIdCounter || 0);
     }
     
     /**
