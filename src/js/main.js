@@ -1064,6 +1064,7 @@ export class MainGame {
         document.getElementById('btn-settings')?.addEventListener('click', () => {
             this.showSettings();
         });
+        this.bindPerformanceEvents();
 
         document.getElementById('btn-sound')?.addEventListener('click', () => {
             this.toggleSound();
@@ -2605,6 +2606,37 @@ export class MainGame {
     }
 
     /**
+     * React to PerformanceManager events: keep the settings control in sync
+     * when the level changes (#1446) and surface low-FPS warnings (#1445)
+     */
+    bindPerformanceEvents() {
+        if (this._performanceEventsBound || typeof window === 'undefined') return;
+        this._performanceEventsBound = true;
+        window.addEventListener('qualityChanged', () => this.updateQualitySetting());
+        window.addEventListener('performanceWarning', (e) => {
+            if (e.detail?.message) this.showToast(e.detail.message, 'warning');
+        });
+    }
+
+    /**
+     * Label for the graphics setting, e.g. "Auto (currently high)"
+     */
+    describeQualitySetting(pm = this.gameState?.performanceManager) {
+        if (!pm) return 'Unavailable';
+        const level = pm.getEffectiveLevel?.() || pm.level;
+        if (pm.quality === 'auto') return level ? `Auto (currently ${level})` : 'Auto';
+        return pm.quality.charAt(0).toUpperCase() + pm.quality.slice(1);
+    }
+
+    updateQualitySetting() {
+        const pm = this.gameState?.performanceManager;
+        const select = document.getElementById('settings-quality');
+        if (select && pm) select.value = pm.quality;
+        const label = document.getElementById('settings-quality-current');
+        if (label) label.textContent = this.describeQualitySetting(pm);
+    }
+
+    /**
      * Show settings modal
      */
     showSettings() {
@@ -2634,6 +2666,14 @@ export class MainGame {
                         <label class="settings-label" for="settings-sound-volume">Sound Effects Volume</label>
                         <input type="range" id="settings-sound-volume" min="0" max="100" value="${Math.round(this.audioManager.soundVolume * 100)}">
                     </div>
+                    <div class="settings-row">
+                        <label class="settings-label" for="settings-quality">Graphics Quality</label>
+                        <select id="settings-quality" aria-describedby="settings-quality-current">
+                            ${['auto', 'low', 'medium', 'high', 'ultra'].map(q =>
+                                `<option value="${q}" ${this.gameState?.performanceManager?.quality === q ? 'selected' : ''}>${q.charAt(0).toUpperCase() + q.slice(1)}</option>`).join('')}
+                        </select>
+                        <span id="settings-quality-current" class="settings-hint">${MainGame.prototype.describeQualitySetting.call(this)}</span>
+                    </div>
                 </div>
                 <div class="settings-danger">
                     <button class="btn btn-danger" onclick="game.resetProgress()">Reset Progress</button>
@@ -2660,6 +2700,11 @@ export class MainGame {
         });
         document.getElementById('settings-sound-volume')?.addEventListener('input', (e) => {
             am.setSoundVolume(Number(e.target.value) / 100);
+        });
+        // Let the player pick graphics quality themselves (#1449)
+        document.getElementById('settings-quality')?.addEventListener('change', (e) => {
+            this.gameState?.performanceManager?.setQuality(e.target.value);
+            MainGame.prototype.updateQualitySetting.call(this);
         });
     }
 

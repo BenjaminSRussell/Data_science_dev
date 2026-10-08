@@ -2245,6 +2245,25 @@ a:hover {
     flex: 0 1 50%;
 }
 
+.settings-row select {
+    flex: 0 1 30%;
+}
+
+.settings-row .settings-hint {
+    flex: 0 1 30%;
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary);
+}
+
+/* Low graphics quality turns off CSS motion (#1443) */
+html.quality-no-animations *,
+html.quality-no-animations *::before,
+html.quality-no-animations *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+}
+
 .settings-danger {
     padding-top: var(--space-3);
     margin-bottom: var(--space-3);

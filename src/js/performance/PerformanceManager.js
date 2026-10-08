@@ -5,6 +5,8 @@
  */
 
 export class PerformanceManager {
+    static WARNING_INTERVAL_MS = 60000;
+
     constructor() {
         this.quality = 'auto'; // auto, low, medium, high, ultra
         this.fps = 60;
@@ -15,6 +17,10 @@ export class PerformanceManager {
         this.lastFrameTime = performance.now();
         this.fpsHistory = [];
         this.hardwareTier = 'unknown';
+        this.level = null; // effective level; 'auto' resolves to one of the presets
+        this.lastWarningAt = 0;
+        this._visibilityHandler = null;
+        this._resumeOnVisible = false;
 
         // Quality presets
         this.presets = {
@@ -54,63 +60,65 @@ export class PerformanceManager {
     }
 
     /**
+     * Rate a WebGL renderer string. Apple Silicon is a strong GPU, mobile GPUs
+     * are mid-range, and anything unrecognised is 'low' (#1444)
+     */
+    static classifyRenderer(renderer) {
+        const r = String(renderer || '');
+        if (/Adreno|Mali|PowerVR|Apple A\d/i.test(r)) return 'medium'; // phones/tablets
+        if (/NVIDIA|GeForce|Quadro|AMD|Radeon|Intel.*Iris|Apple/i.test(r)) return 'high'; // incl. Apple M-series / "Apple GPU"
+        if (/Intel/i.test(r)) return 'medium';
+        return 'low';
+    }
+
+    /**
+     * Combine the GPU rating with CPU/RAM. Plenty of cores or memory can lift a
+     * tier by one step at most; it can't turn a weak GPU into 'high' (#1448, #2091)
+     */
+    static combineTier(gpuTier, cores, memory) {
+        const order = ['low', 'medium', 'high'];
+        let idx = Math.max(0, order.indexOf(gpuTier));
+        const strongHost = (cores >= 8) || (memory >= 8);
+        if (strongHost && idx < order.length - 1) idx += 1;
+        // Very little memory holds a machine back
+        if (memory && memory < 4 && idx > 0) idx -= 1;
+        return order[idx];
+    }
+
+    /**
      * Detect hardware capabilities
      */
     detectHardware() {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-        let tier = 'low';
-
-        if (gl) {
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            if (debugInfo) {
-                const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-
-                // Detect GPU tier
-                if (renderer.includes('NVIDIA') || renderer.includes('AMD') || renderer.includes('Intel Iris')) {
-                    tier = 'high';
-                } else if (renderer.includes('Intel')) {
-                    tier = 'medium';
-                } else {
-                    tier = 'low';
-                }
+        let gpuTier = 'low';
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (gl) {
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                // WebGL without the renderer string: assume a mid-range GPU
+                gpuTier = debugInfo
+                    ? PerformanceManager.classifyRenderer(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL))
+                    : 'medium';
             }
+        } catch (_) {
+            gpuTier = 'low';
         }
 
-        // Check CPU cores
-        const cores = navigator.hardwareConcurrency || 2;
-        if (cores >= 8) {
-            tier = tier === 'low' ? 'medium' : 'high';
-        }
-
-        // Check memory (if available)
-        if (navigator.deviceMemory) {
-            if (navigator.deviceMemory >= 8) {
-                tier = 'high';
-            } else if (navigator.deviceMemory >= 4) {
-                tier = tier === 'low' ? 'medium' : tier;
-            }
-        }
-
+        const nav = typeof navigator !== 'undefined' ? navigator : {};
+        const tier = PerformanceManager.combineTier(gpuTier, nav.hardwareConcurrency || 2, nav.deviceMemory || 0);
         this.hardwareTier = tier;
 
-        // Auto-set quality based on hardware
+        // In auto mode pick the starting level but stay in auto mode, so the
+        // FPS monitor can keep adjusting it (#2090)
         if (this.quality === 'auto') {
-            if (tier === 'high') {
-                this.setQuality('high');
-            } else if (tier === 'medium') {
-                this.setQuality('medium');
-            } else {
-                this.setQuality('low');
-            }
+            this.applyLevel(tier);
         }
 
         return tier;
     }
 
     /**
-     * Set quality level
+     * Set the player's quality setting: 'auto' or a fixed level
      */
     setQuality(level) {
         if (!this.presets[level] && level !== 'auto') {
@@ -119,25 +127,48 @@ export class PerformanceManager {
         }
 
         this.quality = level;
-
-        // Apply preset if not auto
-        if (level !== 'auto') {
-            const preset = this.presets[level];
-            this.applyPreset(preset);
-        }
-
-        // Emit quality change event
-        window.dispatchEvent(new CustomEvent('qualityChanged', {
-            detail: { quality: level, preset: this.presets[level] }
-        }));
+        const effective = level === 'auto'
+            ? (this.presets[this.hardwareTier] ? this.hardwareTier : (this.level || 'medium'))
+            : level;
+        this.applyLevel(effective);
     }
 
     /**
-     * Apply quality preset
+     * Switch the effective level without touching the player's setting
      */
-    applyPreset(preset) {
+    applyLevel(level) {
+        const preset = this.presets[level];
+        if (!preset) return;
+        this.level = level;
+        this.applyPreset(preset, level);
+
+        // Emit quality change event (main.js listens and reflects it)
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('qualityChanged', {
+                detail: { quality: level, setting: this.quality, preset }
+            }));
+        }
+    }
+
+    /**
+     * The level actually in use (resolves 'auto')
+     */
+    getEffectiveLevel() {
+        return this.level || (this.quality === 'auto' ? null : this.quality);
+    }
+
+    /**
+     * Apply quality preset. Besides the frame-rate target this tags the
+     * document so CSS can cut animations on low quality (#1443)
+     */
+    applyPreset(preset, level = null) {
         // Update frame rate limit
         this.targetFPS = preset.frameRateLimit;
+        const root = typeof document !== 'undefined' ? document.documentElement : null;
+        if (root) {
+            if (level) root.dataset.quality = level;
+            root.classList.toggle('quality-no-animations', preset.animations === false);
+        }
     }
 
     /**
@@ -150,8 +181,38 @@ export class PerformanceManager {
         this.frameCount = 0;
         this.lastFrameTime = performance.now();
         this.fpsHistory = [];
+        this.attachVisibilityHandling();
 
         this.monitor();
+    }
+
+    /**
+     * Pause the monitor loop while the tab is hidden and resume it when the
+     * player comes back, so it doesn't spin forever in the background (#1447)
+     */
+    attachVisibilityHandling() {
+        if (this._visibilityHandler || typeof document === 'undefined') return;
+        this._visibilityHandler = () => {
+            if (document.hidden) {
+                this._resumeOnVisible = this.monitoring;
+                this.stopMonitoring();
+            } else if (this._resumeOnVisible) {
+                this._resumeOnVisible = false;
+                this.startMonitoring();
+            }
+        };
+        document.addEventListener('visibilitychange', this._visibilityHandler);
+    }
+
+    /**
+     * Stop monitoring for good and drop listeners
+     */
+    destroy() {
+        this.stopMonitoring();
+        if (this._visibilityHandler && typeof document !== 'undefined') {
+            document.removeEventListener('visibilitychange', this._visibilityHandler);
+        }
+        this._visibilityHandler = null;
     }
 
     /**
@@ -167,19 +228,7 @@ export class PerformanceManager {
 
         // Calculate FPS every second
         if (deltaTime >= 1000) {
-            this.fps = Math.round((this.frameCount * 1000) / deltaTime);
-            this.frameTime = deltaTime / this.frameCount;
-
-            this.fpsHistory.push(this.fps);
-            if (this.fpsHistory.length > 60) {
-                this.fpsHistory.shift(); // Keep last 60 seconds
-            }
-
-            // Auto-optimize if FPS is low
-            if (this.quality === 'auto' && this.fps < this.targetFPS - 10) {
-                this.autoOptimize();
-            }
-
+            this.recordSample(Math.round((this.frameCount * 1000) / deltaTime), deltaTime / this.frameCount, Date.now());
             this.frameCount = 0;
             this.lastFrameTime = currentTime;
         }
@@ -189,6 +238,35 @@ export class PerformanceManager {
             requestAnimationFrame(() => this.monitor());
         } else {
             setTimeout(() => this.monitor(), 16);
+        }
+    }
+
+    /**
+     * Record one per-second FPS sample and react to it
+     */
+    recordSample(fps, frameTime = 1000 / Math.max(1, fps), now = Date.now()) {
+        this.fps = fps;
+        this.frameTime = frameTime;
+
+        this.fpsHistory.push(this.fps);
+        if (this.fpsHistory.length > 60) {
+            this.fpsHistory.shift(); // Keep last 60 seconds
+        }
+
+        if (this.quality === 'auto') {
+            // autoOptimize decides both downgrades and upgrades, so it runs
+            // every sample, not only when FPS is below target
+            this.autoOptimize();
+        } else {
+            // A fixed setting that the machine can't handle: tell the player
+            // (at most once a minute) instead of overriding them (#1445)
+            const warning = this.showPerformanceWarning();
+            if (warning && now - (this.lastWarningAt || 0) >= PerformanceManager.WARNING_INTERVAL_MS) {
+                this.lastWarningAt = now;
+                if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('performanceWarning', { detail: warning }));
+                }
+            }
         }
     }
 
@@ -216,20 +294,21 @@ export class PerformanceManager {
     }
 
     /**
-     * Auto-optimize based on performance
+     * Auto-optimize based on performance. Only acts in auto mode, and only
+     * changes the effective level, so it keeps working after the first
+     * adjustment (#60, #2090)
      */
     autoOptimize() {
+        if (this.quality !== 'auto') return;
         const avgFPS = this.getAverageFPS();
+        const level = this.level || 'medium';
 
-        if (avgFPS < 30 && this.quality !== 'low') {
-
-            this.setQuality('low');
-        } else if (avgFPS < 45 && this.quality === 'high') {
-
-            this.setQuality('medium');
-        } else if (avgFPS >= 55 && this.quality === 'low') {
-
-            this.setQuality('medium');
+        if (avgFPS < 30 && level !== 'low') {
+            this.applyLevel('low');
+        } else if (avgFPS < 45 && (level === 'high' || level === 'ultra')) {
+            this.applyLevel('medium');
+        } else if (avgFPS >= 55 && level === 'low') {
+            this.applyLevel('medium');
         }
     }
 
@@ -239,6 +318,7 @@ export class PerformanceManager {
     getStats() {
         return {
             quality: this.quality,
+            level: this.getEffectiveLevel(),
             fps: this.fps,
             averageFPS: this.getAverageFPS(),
             frameTime: this.frameTime.toFixed(2),

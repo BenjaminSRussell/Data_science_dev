@@ -23,8 +23,11 @@ describe('PerformanceManager', () => {
 
     describe('detectHardware', () => {
         it('should detect high tier with NVIDIA renderer', () => {
+            // jsdom has no WebGL, so the renderer is classified directly; plenty
+            // of RAM/cores only lifts a weak GPU one step (#2091)
+            expect(PerformanceManager.classifyRenderer('NVIDIA GeForce GTX')).toBe('high');
             manager.detectHardware();
-            expect(manager.hardwareTier).toBe('high');
+            expect(manager.hardwareTier).toBe('medium');
         });
 
         it('should detect medium tier with Intel Iris renderer', () => {
@@ -65,20 +68,21 @@ describe('PerformanceManager', () => {
             expect(manager.quality).toBe('auto');
         });
 
-        it('should change quality to low if FPS is low', () => {
+        it('should drop the effective level to low if FPS is low, staying in auto mode', () => {
             manager.fps = 20;
             manager.autoOptimize();
-            expect(manager.quality).toBe('low');
+            expect(manager.level).toBe('low');
+            expect(manager.quality).toBe('auto'); // #2090
         });
 
-        it('should not change quality after one optimization', () => {
+        it('keeps adjusting after the first optimization (#60)', () => {
             manager.fps = 20;
             manager.autoOptimize();
-            expect(manager.quality).toBe('low');
+            expect(manager.level).toBe('low');
 
             manager.fps = 60;
             manager.autoOptimize();
-            expect(manager.quality).toBe('low'); // Quality is locked to 'low'
+            expect(manager.level).toBe('medium');
         });
     });
 
