@@ -6,6 +6,12 @@ import { OFFICE_LOCATIONS, TIME_OF_DAY, WEATHER_EFFECTS, OFFICE_EVENTS } from '.
 import { slotStartHour } from './TimeManager.js';
 
 export class EnvironmentManager {
+    static DAILY_EVENT_CHANCE = 0.25;
+    static EVENT_ENERGY = 10;
+    static EVENT_FOCUS_XP = 10;
+    static EVENT_REP = 5;
+    static EVENT_BONUS_MULTIPLIER = 1.25;
+
     constructor(gameState) {
         this.gameState = gameState;
         this.currentLocation = null;
@@ -382,6 +388,53 @@ export class EnvironmentManager {
     }
 
     /**
+     * Apply an office event's `effect` to the game (#2434). Returns a short
+     * description of what changed, or null for an unknown effect.
+     *   mood_boost    +10 energy (capped at max)
+     *   time_pressure +10 focus XP
+     *   rep_boost     +5 reputation (+2 before any chart has been delivered)
+     *   bonus_reward  the next submitted chart pays x1.25
+     */
+    applyEventEffect(event) {
+        const gs = this.gameState;
+        if (!gs || !event) return null;
+        switch (event.effect) {
+            case 'mood_boost': {
+                const tm = gs.timeManager;
+                if (!tm) return null;
+                const max = Number(tm.maxEnergy) || 100;
+                tm.energy = Math.min(max, (Number(tm.energy) || 0) + EnvironmentManager.EVENT_ENERGY);
+                return `+${EnvironmentManager.EVENT_ENERGY} energy`;
+            }
+            case 'time_pressure':
+                gs.characterStats?.addExperience?.('focus', EnvironmentManager.EVENT_FOCUS_XP);
+                return `+${EnvironmentManager.EVENT_FOCUS_XP} focus XP`;
+            case 'rep_boost': {
+                const gain = (gs.tasksCompleted || 0) > 0 ? EnvironmentManager.EVENT_REP : 2;
+                gs.reputation = (Number(gs.reputation) || 0) + gain;
+                return `+${gain} reputation`;
+            }
+            case 'bonus_reward':
+                gs.officeEventBonus = EnvironmentManager.EVENT_BONUS_MULTIPLIER;
+                return `next chart pays x${EnvironmentManager.EVENT_BONUS_MULTIPLIER}`;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Turn-based office event for the start of a day: the real-time event
+     * timer is off (no auto-progression), so new_day rolls instead (#2434).
+     * @returns {{event: object, result: string}|null}
+     */
+    rollDailyEvent(rand = Math.random) {
+        if (rand() >= EnvironmentManager.DAILY_EVENT_CHANCE) return null;
+        const event = OFFICE_EVENTS[Math.floor(rand() * OFFICE_EVENTS.length)] || OFFICE_EVENTS[0];
+        const result = this.applyEventEffect(event);
+        return result ? { event, result } : null;
+    }
+
+    /**
      * Trigger a random office event
      */
     triggerRandomEvent() {
@@ -389,6 +442,7 @@ export class EnvironmentManager {
 
         const event = OFFICE_EVENTS[Math.floor(Math.random() * OFFICE_EVENTS.length)];
         this.activeEvent = event;
+        this.applyEventEffect(event);
 
         // Show event notification
         this.showEventNotification(event);

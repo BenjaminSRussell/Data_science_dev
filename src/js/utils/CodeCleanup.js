@@ -11,22 +11,47 @@ export class CodeCleanup {
      * Remove unused imports from file
      */
     static findUnusedImports(code) {
-        // This would require AST parsing - simplified version
-        const importRegex = /import\s+.*?\s+from\s+['"](.*?)['"]/g;
+        // Regex-level check (no AST): collect the identifiers each import binds
+        // and report the import's path when none of them is used outside the
+        // import statements themselves (#2478). The old check looked for the
+        // file's basename and its second branch could never be true.
+        const src = String(code || '');
+        const importRegex = /import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"];?/g;
         const imports = [];
         let match;
-        
-        while ((match = importRegex.exec(code)) !== null) {
-            imports.push(match[1]);
+        while ((match = importRegex.exec(src)) !== null) {
+            imports.push({ clause: match[1], path: match[2] });
         }
-        
-        // Check if imports are used
-        const unused = imports.filter(imp => {
-            const importName = imp.split('/').pop().replace('.js', '');
-            return !code.includes(importName) || code.indexOf(importName) === code.indexOf(`from '${imp}'`);
-        });
-        
-        return unused;
+        const body = src.replace(importRegex, ' ');
+        const isUsed = (name) => new RegExp(`(^|[^\\w$.])${name.replace(/\$/g, '\\$')}([^\\w$]|$)`).test(body);
+
+        return imports
+            .filter(({ clause }) => {
+                const names = CodeCleanup.importedNames(clause);
+                return names.length > 0 && !names.some(isUsed);
+            })
+            .map(({ path }) => path);
+    }
+
+    /**
+     * Local names bound by an import clause:
+     * `X`, `{ a, b as c }`, `* as ns`, `X, { a }`
+     */
+    static importedNames(clause) {
+        const names = [];
+        const text = String(clause || '').trim();
+        const braces = text.match(/\{([\s\S]*?)\}/);
+        if (braces) {
+            braces[1].split(',').map(s => s.trim()).filter(Boolean).forEach(part => {
+                const alias = part.split(/\s+as\s+/);
+                names.push((alias[1] || alias[0]).trim());
+            });
+        }
+        const ns = text.match(/\*\s+as\s+([\w$]+)/);
+        if (ns) names.push(ns[1]);
+        const outside = text.replace(/\{[\s\S]*?\}/, '').replace(/\*\s+as\s+[\w$]+/, '');
+        outside.split(',').map(s => s.trim()).filter(s => /^[\w$]+$/.test(s)).forEach(n => names.push(n));
+        return names.filter(n => /^[\w$]+$/.test(n));
     }
 
     /**

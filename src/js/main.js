@@ -3654,6 +3654,9 @@ export class MainGame {
                 this.checkAchievements();
                 // Jealousy cools off a little every day (#915)
                 this.gameState.jealousySystem?.decayAll?.(2);
+                // Office event of the day, with a real effect (#2434)
+                const officeEvent = this.environmentManager?.rollDailyEvent?.();
+                if (officeEvent) this.showToast(`${officeEvent.event.name}: ${officeEvent.result}`, 'info');
                 // Neglected relationships cool off and can end (#1076)
                 const breakups = this.gameState.relationshipEmotionSystem?.processDailyUpdates?.() || [];
                 for (const b of breakups) {
