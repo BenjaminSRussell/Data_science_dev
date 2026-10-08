@@ -1,0 +1,84 @@
+/* Visual tiers applied by VisualProgressionSystem (#1352).
+   basic is the default look; mid and premium layer accents on top. */
+
+@keyframes visualUpgradeFlash {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+body.visual-basic {
+    --visual-accent: var(--color-accent-secondary, #a1a1aa);
+}
+
+body.visual-mid {
+    --visual-accent: #38bdf8;
+}
+
+body.visual-premium {
+    --visual-accent: var(--color-accent-warning, #eab308);
+}
+
+/* Panels and cards pick up a tier-coloured edge */
+.panel.visual-mid,
+.card.visual-mid,
+.modal-content.visual-mid {
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 6px 24px rgba(56, 189, 248, 0.08);
+}
+
+.panel.visual-premium,
+.card.visual-premium,
+.modal-content.visual-premium {
+    border-color: rgba(234, 179, 8, 0.45);
+    box-shadow: 0 8px 32px rgba(234, 179, 8, 0.12);
+}
+
+/* Buttons get a tier focus/hover ring */
+button.visual-mid:hover,
+.btn.visual-mid:hover,
+.button.visual-mid:hover {
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+}
+
+button.visual-premium:hover,
+.btn.visual-premium:hover,
+.button.visual-premium:hover {
+    box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.6), 0 0 12px rgba(234, 179, 8, 0.25);
+}
+
+/* World map: brighter buildings and roads as the city "levels up" */
+.map-container.visual-mid,
+.map-detailed.visual-mid {
+    filter: saturate(1.15);
+}
+
+.map-container.visual-premium,
+.map-detailed.visual-premium {
+    filter: saturate(1.3) brightness(1.05);
+}
+
+.map-building.visual-premium,
+.map-npc-house.visual-premium {
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.35);
+}
+
+.map-road.visual-mid {
+    opacity: 0.9;
+}
+
+.map-road.visual-premium {
+    opacity: 1;
+}
+
+.location-view-container.visual-mid {
+    filter: saturate(1.1);
+}
+
+.location-view-container.visual-premium {
+    filter: saturate(1.2) contrast(1.05);
+}
+
+.visual-upgrade-overlay {
+    animation: visualUpgradeFlash 1s ease-out;
+}

@@ -96,7 +96,7 @@ describe('VisualProgressionSystem DOM upgrades (#383)', () => {
     it('upgradeUI tags panels, cards, modals and buttons', () => {
         document.body.innerHTML = '<div class="panel"></div><div class="card"></div><div class="modal-content"></div><button></button><a class="btn"></a><span class="button"></span>';
         new VisualProgressionSystem({}).upgradeUI('basic');
-        expect(document.querySelectorAll('.visual-basic')).toHaveLength(6);
+        expect(document.body.querySelectorAll('.visual-basic')).toHaveLength(6);
     });
 });
 
