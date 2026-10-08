@@ -19,6 +19,19 @@ export class EconomySystem {
     static PERK_TIME_BONUS_SECONDS = 30;   // perk_time_bonus
     static PERK_BOSS_FAVOR = 0.9;          // perk_boss_favor: strictness x0.9
     static PERK_MONEY_MULTIPLIER = 1.15;   // perk_bonus_multiplier
+    // Pay per star rating, applied to task.potentialReward
+    static STAR_MULTIPLIERS = { 1: 0.2, 2: 0.4, 3: 0.7, 4: 1.0, 5: 1.3 };
+
+    /**
+     * What a task pays, shown before starting it. potentialReward is the
+     * 4-star pay; 5 stars pay more, so say so instead of showing one number
+     * that understates the top payout (#965)
+     */
+    static rewardRangeText(potentialReward) {
+        const base = Math.round(Number(potentialReward) || 0);
+        const top = Math.round(base * EconomySystem.STAR_MULTIPLIERS[5]);
+        return `$${base.toLocaleString()} (up to $${top.toLocaleString()} for 5 stars)`;
+    }
     static PERK_REP_MULTIPLIER = 1.2;      // perk_rep_boost
     static PERK_DISCOUNT = 0.9;            // perk_bargain_hunter
 
@@ -107,7 +120,8 @@ export class EconomySystem {
     scoreChartAppropriateness(task, chartConfig) {
         const selected = chartConfig.type;
         const optimal = task.optimalChartTypes || [];
-        const acceptable = task.template?.acceptableChartTypes || [];
+        // The task's own list (which TaskSystem defaults) first, like optimal (#1313)
+        const acceptable = task.acceptableChartTypes || task.template?.acceptableChartTypes || [];
 
         // Perfect match
         if (optimal.includes(selected)) {
@@ -235,15 +249,7 @@ export class EconomySystem {
         const baseReward = task.potentialReward;
 
         // Star multiplier
-        const starMultipliers = {
-            1: 0.2,
-            2: 0.4,
-            3: 0.7,
-            4: 1.0,
-            5: 1.3
-        };
-
-        const multiplier = starMultipliers[stars] || 1.0;
+        const multiplier = EconomySystem.STAR_MULTIPLIERS[stars] || 1.0;
 
         // Time bonus (if completed quickly)
         let timeBonus = 1.0;

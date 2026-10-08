@@ -3,6 +3,7 @@
  */
 
 import Chart from 'chart.js/auto';
+import { isCurrencyColumn } from '../utils/dataFormat.js';
 
 // Color palettes
 const PALETTES = {
@@ -209,14 +210,7 @@ export class ChartManager {
         // Only format y-axis ticks as currency when the plotted series is a
         // currency metric (same heuristic used for the data table)
         const columnName = (datasetName || '').toLowerCase();
-        const isCurrency = columnName.includes('revenue') ||
-                           columnName.includes('expense') ||
-                           columnName.includes('profit') ||
-                           columnName.includes('money') ||
-                           columnName.includes('cost') ||
-                           columnName.includes('price') ||
-                           columnName.includes('salary') ||
-                           columnName.includes('budget');
+        const isCurrency = isCurrencyColumn(columnName);
 
         return {
             responsive: true,

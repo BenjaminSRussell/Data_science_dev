@@ -4,6 +4,7 @@
  * These tests verify the source code contains the expected formatting patterns
  */
 
+import { EconomySystem } from '../../src/js/game/EconomySystem.js';
 import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'fs';
 import path from 'path';
@@ -45,10 +46,10 @@ describe('UIUpdater - Issue #194 Price Formatting (Source Code Verification)', (
 
         it('task reward (line 230) should use toLocaleString', () => {
             // Verify task reward formatting
-            const taskRewardMatch = uiUpdaterSource.match(
-                /\$\{task\.potentialReward\.toLocaleString\(\)\}/
-            );
-            expect(taskRewardMatch).toBeTruthy();
+            // Now formatted by EconomySystem.rewardRangeText, which uses
+            // toLocaleString for both amounts (#965)
+            expect(uiUpdaterSource).toContain('EconomySystem.rewardRangeText(task.potentialReward)');
+            expect(EconomySystem.rewardRangeText(12345)).toBe('$12,345 (up to $16,049 for 5 stars)');
         });
     });
 
