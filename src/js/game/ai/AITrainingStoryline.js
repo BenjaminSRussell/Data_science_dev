@@ -200,15 +200,20 @@ export class AITrainingStoryline {
      * Complete training project
      */
     completeTrainingProject(projectId) {
-        const project = this.universityLab?.currentProjects.find(p => p.id === projectId);
-        if (!project) return;
+        const projects = this.universityLab?.currentProjects ?? [];
+        const index = projects.findIndex(p => p.id === projectId);
         // Completing twice must not pay out twice
-        if (project.status === 'completed') {
+        if (index === -1 ? this.findTrainedModel(projectId) : projects[index].status === 'completed') {
             return { success: false, message: 'That training run is already complete.' };
         }
+        if (index === -1) return;
+        const project = projects[index];
         
         project.status = 'completed';
         project.completedAt = Date.now();
+        // currentProjects holds only runs in progress; finished runs live in
+        // modelsTrained, so saves don't pile up stale entries (#2036)
+        projects.splice(index, 1);
         
         // Free up cluster. Look up by key; older saves stored only the display
         // name, which never matched a key, so the cluster stayed locked (#103, #2032)
@@ -241,6 +246,11 @@ export class AITrainingStoryline {
     /**
      * Check if phase should transition
      */
+    /** A finished training run by project id */
+    findTrainedModel(projectId) {
+        return this.modelsTrained.find(m => m.id === projectId) ?? null;
+    }
+
     /** A university cluster by key or (for older saves) by display name */
     findCluster(idOrName) {
         const computers = this.universityLab?.computers || {};
@@ -362,8 +372,9 @@ export class AITrainingStoryline {
      * Learn from trained model (but can't take it)
      */
     learnFromModel(projectId) {
-        const project = this.universityLab.currentProjects.find(p => p.id === projectId);
-        if (!project || project.status !== 'completed') {
+        // Finished runs are moved to modelsTrained (#2036)
+        const project = this.findTrainedModel(projectId);
+        if (!project) {
             return { success: false, message: 'Project not completed yet' };
         }
         
@@ -408,7 +419,20 @@ export class AITrainingStoryline {
     fromJSON(data) {
         if (data.currentPhase) this.currentPhase = data.currentPhase;
         if (data.timeline) this.timeline = data.timeline;
-        if (data.universityLab) this.universityLab = data.universityLab;
+        if (data.universityLab) {
+            this.universityLab = data.universityLab;
+            // Older saves kept finished runs in currentProjects; move any that
+            // aren't already recorded into modelsTrained, then drop them (#2036)
+            const finished = (this.universityLab.currentProjects ?? []).filter(p => p.status === 'completed');
+            if (finished.length) {
+                const saved = Array.isArray(data.modelsTrained) ? data.modelsTrained : this.modelsTrained;
+                for (const p of finished) {
+                    if (!saved.some(m => m.id === p.id)) saved.push({ ...p, learned: true, canTake: false });
+                }
+                this.modelsTrained = saved;
+                this.universityLab.currentProjects = this.universityLab.currentProjects.filter(p => p.status !== 'completed');
+            }
+        }
         if (data.researchProgress) this.researchProgress = data.researchProgress;
         if (data.modelsTrained) this.modelsTrained = data.modelsTrained;
     }
