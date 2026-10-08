@@ -8,12 +8,12 @@ describe('HardwareManager coverage', () => {
     let gs, hw;
     beforeEach(() => { gs = { money: 100000, rankIndex: 10 }; hw = new HardwareManager(gs); });
 
-    it('productivity takes the best part instead of summing', () => {
-        hw.buyPart(HARDWARE_TYPES.RAM, 'ram_16gb'); // 1.2
-        hw.buyPart(HARDWARE_TYPES.MONITOR, 'dual_24'); // 1.5
-        expect(hw.getTotalStats().productivity).toBe(1.5);
+    it('productivity sums each category\'s gain over its stock part (#1895)', () => {
+        hw.buyPart(HARDWARE_TYPES.RAM, 'ram_16gb'); // 1.2 vs 0.8 stock: +0.4
+        hw.buyPart(HARDWARE_TYPES.MONITOR, 'dual_24'); // 1.5 vs 1.0: +0.5
+        expect(hw.getTotalStats().productivity).toBeCloseTo(1.9);
         hw.equipPart(HARDWARE_TYPES.MONITOR, 'crt_monitor');
-        expect(hw.getTotalStats().productivity).toBe(1.2);
+        expect(hw.getTotalStats().productivity).toBeCloseTo(1.4);
     });
 
     it('compute and power draw add up across part types', () => {
