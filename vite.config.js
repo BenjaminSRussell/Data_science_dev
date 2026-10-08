@@ -58,9 +58,10 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'require-corp'
     }
   },
+  // react/react-dom were leftovers from an abandoned React UI, and 'wasm' is
+  // not a package name, so excluding it did nothing (#1872, #2341)
   optimizeDeps: {
-    exclude: ['wasm'],
-    include: ['zustand', 'react', 'react-dom']
+    include: ['zustand/vanilla', 'zustand/middleware']
   },
   resolve: {
     conditions: ['import', 'module', 'browser', 'default']

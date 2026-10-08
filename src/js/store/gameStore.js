@@ -7,7 +7,9 @@
  * #1035.
  */
 
-import { create } from 'zustand';
+// Vanilla store: the game reads getState()/setState()/subscribe() directly and
+// never renders React, so the React-bound `zustand` entry isn't needed (#1872)
+import { createStore } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
 import { RANKS } from '../data/ranks.js';
 
@@ -266,13 +268,13 @@ const persistOptions = {
 
 let useGameStore;
 try {
-    useGameStore = create(persist(withDerived(storeConfig), persistOptions));
+    useGameStore = createStore(persist(withDerived(storeConfig), persistOptions));
 } catch (error) {
     // No persistence available (e.g. storage blocked): same store, in memory.
     // Debug overlays used to be injected into the page here and on every
     // load (#57); errors now only go to the console.
     console.error('gameStore: persistent store unavailable, using in-memory store:', error);
-    useGameStore = create(withDerived(storeConfig));
+    useGameStore = createStore(withDerived(storeConfig));
 }
 
 export { useGameStore };
