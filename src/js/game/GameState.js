@@ -323,7 +323,8 @@ export class GameState {
             'jealousySystem',
             'eventSystem',
             'dirtyDataSystem',
-            'detailedMapSystem'
+            'detailedMapSystem',
+            'worldEvolutionSystem'
         ];
     }
 

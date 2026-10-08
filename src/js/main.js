@@ -3352,6 +3352,16 @@ export class MainGame {
                     this.showToast(`Audited! Regulators fined you $${legalWeek.fine.toLocaleString()} over your legal trouble.`, 'error');
                 }
 
+                // The world simulation moves on: closures, layoffs, openings (#2258)
+                const world = this.gameState.worldEvolutionSystem?.processWeeklyChanges?.();
+                for (const change of world?.changes || []) {
+                    if (change.type === 'business_closed' || change.type === 'layoffs') {
+                        this.showToast(change.message, 'warning');
+                    } else if (change.type === 'new_business') {
+                        this.showToast(change.message, 'info');
+                    }
+                }
+
                 // Company payroll and client retainers (no-op without a company)
                 if (this.companyManagement?.playerCompany) {
                     const week = this.companyManagement.processWeek();
