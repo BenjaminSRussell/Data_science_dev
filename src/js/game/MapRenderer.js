@@ -315,15 +315,10 @@ export class MapRenderer {
             locEl.className = `map-location ${location.id === this.game.worldMap.currentLocation ? 'current' : ''}`;
             locEl.dataset.location = location.id;
             
-            let percentX, percentY;
-            if (location.position.x > 100 || location.position.y > 100) {
-                const pixel = gridSystem.gridToPixel(location.position.x, location.position.y);
-                percentX = (pixel.x / containerWidth) * 100;
-                percentY = (pixel.y / containerHeight) * 100;
-            } else {
-                percentX = location.position.x;
-                percentY = location.position.y;
-            }
+            // Positions are grid coordinates; bounds-check them instead of
+            // treating anything <= 100 as a percentage (#158)
+            const { x: percentX, y: percentY } = gridSystem.positionToPercent(
+                location.position.x, location.position.y, containerWidth, containerHeight);
             
             locEl.style.cssText = `
                 position: absolute;
@@ -401,15 +396,8 @@ export class MapRenderer {
         const containerWidth = this.container.offsetWidth || this.mapManager.getGridSystem().totalWidth;
         const containerHeight = this.container.offsetHeight || this.mapManager.getGridSystem().totalHeight;
         
-        let percentX, percentY;
-        if (currentLocation.position.x > 100 || currentLocation.position.y > 100) {
-            const pixel = gridSystem.gridToPixel(currentLocation.position.x, currentLocation.position.y);
-            percentX = (pixel.x / containerWidth) * 100;
-            percentY = (pixel.y / containerHeight) * 100;
-        } else {
-            percentX = currentLocation.position.x;
-            percentY = currentLocation.position.y;
-        }
+        const { x: percentX, y: percentY } = gridSystem.positionToPercent(
+            currentLocation.position.x, currentLocation.position.y, containerWidth, containerHeight);
         
         marker.style.cssText = `
             position: absolute;

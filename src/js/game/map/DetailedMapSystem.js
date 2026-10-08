@@ -5,12 +5,16 @@
  */
 
 export class DetailedMapSystem {
+    static STARTING_LOCATIONS = ['home', 'coffee_shop', 'office'];
+
     constructor(gameState) {
         this.gameState = gameState;
         this.districts = new Map();
         this.buildings = new Map();
         this.roads = [];
         this.landmarks = [];
+        // Locations open from the start; unlockLocation() adds to this set
+        this.unlockedLocations = new Set(DetailedMapSystem.STARTING_LOCATIONS);
         this.initializeCity();
     }
     
@@ -157,6 +161,12 @@ export class DetailedMapSystem {
         if (!this._buildingIdSeq) this._buildingIdSeq = 0;
         this._buildingIdSeq += 1;
         building.id = building.id || `building_${Date.now()}_${this._buildingIdSeq}`;
+        // Re-adding an existing id moves it instead of listing it twice
+        const previous = this.buildings.get(building.id);
+        if (previous) {
+            const oldDistrict = this.districts.get(previous.district);
+            if (oldDistrict) oldDistrict.buildings = oldDistrict.buildings.filter(id => id !== building.id);
+        }
         building.district = districtId;
         this.buildings.set(building.id, building);
         district.buildings.push(building.id);
@@ -178,17 +188,28 @@ export class DetailedMapSystem {
      * Check if location is unlocked
      */
     isLocationUnlocked(locationId) {
-        // At start, only basic locations unlocked
-        const unlockedAtStart = ['home', 'coffee_shop', 'office'];
-        return unlockedAtStart.includes(locationId);
+        return this.unlockedLocations.has(locationId);
     }
     
     /**
      * Unlock new location
      */
     unlockLocation(locationId) {
-        // Logic to unlock locations as game progresses
+        if (typeof locationId !== 'string' || !locationId) return false;
+        this.unlockedLocations.add(locationId);
         return true;
+    }
+
+    /**
+     * Save/load the unlocked-location set
+     */
+    toJSON() {
+        return { unlockedLocations: Array.from(this.unlockedLocations) };
+    }
+
+    fromJSON(data) {
+        if (!data || !Array.isArray(data.unlockedLocations)) return;
+        this.unlockedLocations = new Set([...DetailedMapSystem.STARTING_LOCATIONS, ...data.unlockedLocations.filter(id => typeof id === 'string')]);
     }
     
     /**

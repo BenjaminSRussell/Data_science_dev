@@ -67,9 +67,10 @@ export class MapBuildingSystem {
             }
             if (!block) {
                 // Last resort: find any block near the location's grid position
-                if (location.position && location.position.x > 100) {
-                    // Grid coordinates
-                    const nearbyBlock = this.blockSystem.getBlockAt(location.position.x, location.position.y);
+                if (location.position) {
+                    // Normalize to grid coordinates with a real bounds check (#158)
+                    const g = this.gridSystem?.positionToGrid?.(location.position.x, location.position.y) ?? location.position;
+                    const nearbyBlock = this.blockSystem.getBlockAt(g.x, g.y);
                     if (nearbyBlock) {
                         this.blockSystem.assignLocationToBlock(location.id, nearbyBlock.id);
                         block = nearbyBlock;

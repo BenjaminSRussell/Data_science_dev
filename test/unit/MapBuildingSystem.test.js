@@ -180,13 +180,23 @@ describe('placeBuilding', () => {
         expect(blockSystem.assigned).toEqual([{ locationId: 'loc-1', blockId: 'block-nearby' }]);
     });
 
-    it('does not enter the x>100 branch when position.x <= 100', () => {
-        location.position = { x: 50, y: 50 };
-        blockSystem.getBlockAt = () => {
-            throw new Error('getBlockAt should not be called for x <= 100');
-        };
+    it('grid positions (<= 100) also use the getBlockAt fallback (#158)', () => {
+        location.position = { x: 5, y: 6 };
+        const calls = [];
+        blockSystem.getBlockAt = (x, y) => { calls.push([x, y]); return null; };
 
         expect(system.placeBuilding(location)).toBeNull();
+        expect(calls).toEqual([[5, 6]]);
+    });
+
+    it('normalizes positions through gridSystem.positionToGrid when available (#158)', () => {
+        location.position = { x: 50, y: 50 };
+        system.gridSystem.positionToGrid = () => ({ x: 15, y: 15 });
+        const calls = [];
+        blockSystem.getBlockAt = (x, y) => { calls.push([x, y]); return null; };
+
+        system.placeBuilding(location);
+        expect(calls).toEqual([[15, 15]]);
     });
 
     it('returns null when no block can be resolved (terminal null)', () => {
