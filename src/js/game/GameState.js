@@ -5,6 +5,7 @@
 
 import { AchievementSystem } from './AchievementSystem.js';
 import { RANKS } from '../data/ranks.js';
+import { normalizePortfolio } from './Portfolio.js';
 
 
 export class GameState {
@@ -57,6 +58,8 @@ export class GameState {
         this.perfectScores = 0;
         // Earned achievements, { id, day, earnedAt } (#258)
         this.completedAchievements = [];
+        // Scored chart submissions, newest last (#2715, #2717)
+        this.portfolio = [];
         this.totalEarned = 0;
         this.totalSpent = 0;
         this.weeklyIncome = 0; // Track income for tax calculation
@@ -413,6 +416,7 @@ export class GameState {
             tasksCompleted: this.tasksCompleted,
             perfectScores: this.perfectScores,
             completedAchievements: this.completedAchievements || [],
+            portfolio: this.portfolio,
             totalEarned: this.totalEarned,
             totalSpent: this.totalSpent,
             weeklyIncome: this.weeklyIncome,
@@ -502,6 +506,7 @@ export class GameState {
         this.tasksCompleted = data.tasksCompleted ?? 0;
         this.perfectScores = data.perfectScores ?? 0;
         this.completedAchievements = AchievementSystem.normalize(data.completedAchievements);
+        this.portfolio = normalizePortfolio(data.portfolio);
         this.totalEarned = data.totalEarned ?? 0;
         this.totalSpent = data.totalSpent ?? 0;
         this.weeklyIncome = data.weeklyIncome ?? 0;
