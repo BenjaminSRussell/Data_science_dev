@@ -86,41 +86,52 @@ export class GraphValidator {
         return results;
     }
 
-    async validateDataAccuracy() {
-        const testCases = [
-            {
-                name: 'Simple sum',
-                data: [10, 20, 30, 40],
-                expectedSum: 100,
-                expectedAverage: 25,
-                expectedMax: 40,
-                expectedMin: 10
-            },
-            {
-                name: 'Negative values',
-                data: [-10, 0, 10, 20],
-                expectedSum: 20,
-                expectedAverage: 5
-            },
-            {
-                name: 'Decimal values',
-                data: [10.5, 20.3, 30.7, 40.1],
-                expectedSum: 101.6
-            },
-            {
-                name: 'Single value',
-                data: [42],
-                expectedSum: 42,
-                expectedAverage: 42
-            }
-        ];
+    static DATA_ACCURACY_CASES = [
+        {
+            name: 'Simple sum',
+            data: [10, 20, 30, 40],
+            expectedSum: 100,
+            expectedAverage: 25,
+            expectedMax: 40,
+            expectedMin: 10
+        },
+        {
+            name: 'Negative values',
+            data: [-10, 0, 10, 20],
+            expectedSum: 20,
+            expectedAverage: 5,
+            expectedMax: 20,
+            expectedMin: -10
+        },
+        {
+            name: 'Zero-centred values',
+            data: [-5, 0, 5],
+            expectedSum: 0,
+            expectedAverage: 0,
+            expectedMax: 5,
+            expectedMin: -5
+        },
+        {
+            name: 'Decimal values',
+            data: [10.5, 20.3, 30.7, 40.1],
+            expectedSum: 101.6
+        },
+        {
+            name: 'Single value',
+            data: [42],
+            expectedSum: 42,
+            expectedAverage: 42
+        }
+    ];
 
+    async validateDataAccuracy(testCases = GraphValidator.DATA_ACCURACY_CASES) {
         const results = {
             total: testCases.length,
             passed: 0,
             failed: 0,
             errors: []
         };
+        const has = (value) => value !== undefined && value !== null;
 
         for (const testCase of testCases) {
             try {
@@ -132,22 +143,23 @@ export class GraphValidator {
                 let passed = true;
                 const errors = [];
 
-                if (Math.abs(sum - testCase.expectedSum) > 0.01) {
+                if (has(testCase.expectedSum) && Math.abs(sum - testCase.expectedSum) > 0.01) {
                     passed = false;
                     errors.push(`Sum mismatch: expected ${testCase.expectedSum}, got ${sum}`);
                 }
 
-                if (testCase.expectedAverage && Math.abs(average - testCase.expectedAverage) > 0.01) {
+                // Explicit presence checks: an expected value of 0 must still be checked (#2444)
+                if (has(testCase.expectedAverage) && Math.abs(average - testCase.expectedAverage) > 0.01) {
                     passed = false;
                     errors.push(`Average mismatch: expected ${testCase.expectedAverage}, got ${average}`);
                 }
 
-                if (testCase.expectedMax && max !== testCase.expectedMax) {
+                if (has(testCase.expectedMax) && max !== testCase.expectedMax) {
                     passed = false;
                     errors.push(`Max mismatch: expected ${testCase.expectedMax}, got ${max}`);
                 }
 
-                if (testCase.expectedMin && min !== testCase.expectedMin) {
+                if (has(testCase.expectedMin) && min !== testCase.expectedMin) {
                     passed = false;
                     errors.push(`Min mismatch: expected ${testCase.expectedMin}, got ${min}`);
                 }
@@ -293,6 +305,10 @@ export class GraphValidator {
                 if (!dataset.data || !Array.isArray(dataset.data)) {
                     issues.push(`Dataset ${index} missing data array`);
                 } else {
+                    // Every label needs exactly one value (#2445)
+                    if (Array.isArray(chartData.labels) && dataset.data.length !== chartData.labels.length) {
+                        issues.push(`Dataset ${index} has ${dataset.data.length} values for ${chartData.labels.length} labels`);
+                    }
                     // Check for invalid values
                     dataset.data.forEach((value, valueIndex) => {
                         if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
