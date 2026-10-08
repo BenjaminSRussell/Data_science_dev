@@ -2113,3 +2113,25 @@ a:hover {
 @media (prefers-reduced-motion: reduce) {
     .news-content { animation: none; padding-left: 0; white-space: normal; }
 }
+
+/* Toast / floating-element keyframes referenced from JS (#1243, #2435) */
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes envFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(12px, -18px) rotate(4deg); }
+    50% { transform: translate(-8px, -30px) rotate(-3deg); }
+    75% { transform: translate(-14px, -12px) rotate(2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .env-floating-element { animation: none !important; }
+}

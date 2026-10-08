@@ -281,7 +281,9 @@ export class CharacterStats {
     }
 
     modifyEthics(amount) {
-        this.ethics = Math.max(-100, Math.min(100, this.ethics + amount));
+        amount = Number(amount);
+        if (!Number.isFinite(amount)) return;
+        this.ethics = Math.max(-100, Math.min(100, (Number(this.ethics) || 0) + amount));
         // Update visuals based on ethics?
         if (this.ethics < -50) this.visuals.clothes = 'expensive_suit'; // Evil rich
     }
@@ -333,6 +335,11 @@ export class CharacterStats {
      */
     addExperience(statId, amount) {
         if (!STATS[statId]) return { leveled: false };
+        // Negative/NaN XP would drain or poison the pool
+        amount = Number(amount);
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return { leveled: false, levelsGained: 0, newLevel: this.stats[statId] };
+        }
 
         if (!this.xp[statId]) this.xp[statId] = 0;
         this.xp[statId] += amount;

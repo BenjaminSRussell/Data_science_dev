@@ -20,7 +20,10 @@ export class NotificationSystem {
             message: config.message,
             type: config.type || 'info', // info, warning, success, error
             action: config.action || null,
-            id: config.id || Date.now().toString()
+            id: config.id || `${Date.now()}_${this.scheduledNotifications.length}`,
+            // Repeating notifications fire once per in-game day (#2235)
+            repeat: config.repeat === true,
+            lastFiredDay: null
         });
     }
     
@@ -32,12 +35,14 @@ export class NotificationSystem {
         
         const currentTime = this.gameState.dayNightCycle?.getTimeOfDay() || 'morning';
         const currentSlot = this.gameState.timeManager?.timeSlot;
+        const currentDay = this.getCurrentDay();
         
         // Check scheduled notifications (iterate over a copy so splicing
         // in triggerNotification doesn't skip subsequent entries)
         [...this.scheduledNotifications].forEach(notif => {
+            if (notif.repeat && notif.lastFiredDay === currentDay) return;
             if (this.shouldTrigger(notif, currentTime, currentSlot)) {
-                this.triggerNotification(notif);
+                this.triggerNotification(notif, currentDay);
             }
         });
     }
@@ -61,11 +66,21 @@ export class NotificationSystem {
     /**
      * Trigger a notification
      */
-    triggerNotification(notif) {
-        // Remove from scheduled if one-time
-        const index = this.scheduledNotifications.findIndex(n => n.id === notif.id);
-        if (index > -1) {
-            this.scheduledNotifications.splice(index, 1);
+    getCurrentDay() {
+        const tm = this.gameState.timeManager;
+        return tm?.totalDays ?? tm?.day ?? 1;
+    }
+
+    triggerNotification(notif, currentDay = this.getCurrentDay()) {
+        if (notif.repeat) {
+            // Daily reminders stay scheduled; just remember today (#2235)
+            notif.lastFiredDay = currentDay;
+        } else {
+            // Remove from scheduled if one-time
+            const index = this.scheduledNotifications.findIndex(n => n.id === notif.id);
+            if (index > -1) {
+                this.scheduledNotifications.splice(index, 1);
+            }
         }
         
         // Show notification
@@ -76,8 +91,9 @@ export class NotificationSystem {
      * Show notification to user
      */
     showNotification(message, type = 'info', action = null) {
-        // Use game's toast system if available
-        if (window.game && window.game.showToast) {
+        // Use game's toast system if available. Toasts can't carry a button,
+        // so notifications with an action use the element that can (#2423)
+        if (!action && window.game && window.game.showToast) {
             window.game.showToast(message, type);
         } else {
             // Fallback: create notification element
@@ -170,7 +186,8 @@ export class NotificationSystem {
             id: 'morning_reminder',
             time: 'morning',
             message: 'Good morning. Time to start your day.',
-            type: 'info'
+            type: 'info',
+            repeat: true
         });
         
         // Noon notifications
@@ -178,7 +195,8 @@ export class NotificationSystem {
             id: 'noon_reminder',
             time: 'noon',
             message: 'Midday check-in. How are your tasks progressing?',
-            type: 'info'
+            type: 'info',
+            repeat: true
         });
         
         // Night notifications
@@ -186,7 +204,8 @@ export class NotificationSystem {
             id: 'night_reminder',
             time: 'night',
             message: 'Evening. Consider resting to restore energy.',
-            type: 'info'
+            type: 'info',
+            repeat: true
         });
     }
 }
