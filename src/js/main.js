@@ -3335,6 +3335,14 @@ export class MainGame {
                 // Reset weekly income tracker
                 this.gameState.weeklyIncome = 0;
 
+                // Company payroll and client retainers (no-op without a company)
+                if (this.companyManagement?.playerCompany) {
+                    const week = this.companyManagement.processWeek();
+                    if (week.payroll > 0) this.showToast(`Company payroll: -$${week.payroll.toLocaleString()}`, 'warning');
+                    if (week.revenue > 0) this.showToast(`Client retainers: +$${week.revenue.toLocaleString()}`, 'success');
+                    week.lostClients.forEach(name => this.showToast(`${name} dropped your company after being neglected.`, 'error'));
+                }
+
                 // Bank Interest
                 if (this.bankSystem) {
                     const interest = this.bankSystem.processWeeklyInterest();
