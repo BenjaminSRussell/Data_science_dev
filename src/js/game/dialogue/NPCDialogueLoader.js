@@ -5,6 +5,11 @@
  * Each NPC has their own dialogue file
  */
 
+// Bundle every per-NPC dialogue file. A @vite-ignore'd template import is
+// never bundled, so it only worked under the dev server (#817-#842).
+const NPC_DIALOGUE_MODULES = import.meta.glob('./npcs/*.js');
+const STAGE_KEYS = ['stranger', 'friendly', 'acquaintance', 'friend', 'close_friend'];
+
 export class NPCDialogueLoader {
     constructor() {
         this.loadedDialogues = new Map();
@@ -14,45 +19,59 @@ export class NPCDialogueLoader {
     /**
      * Load dialogue for NPC
      */
-    async loadNPCDialogue(npcId) {
+    loadNPCDialogue(npcId) {
         // Check if already loaded
         if (this.loadedDialogues.has(npcId)) {
-            return this.loadedDialogues.get(npcId);
+            return Promise.resolve(this.loadedDialogues.get(npcId));
         }
-        
-        // Check if currently loading
+
+        // Concurrent callers share one in-flight promise. This method is not
+        // async, so it hands back that exact promise instead of a new wrapper.
         if (this.loadingPromises.has(npcId)) {
             return this.loadingPromises.get(npcId);
         }
-        
-        // Try to load dialogue file
-        const loadPromise = this.loadDialogueFile(npcId);
-        this.loadingPromises.set(npcId, loadPromise);
-        
+
+        let raw;
         try {
-            const dialogue = await loadPromise;
-            this.loadedDialogues.set(npcId, dialogue);
-            this.loadingPromises.delete(npcId);
-            return dialogue;
+            raw = Promise.resolve(this.loadDialogueFile(npcId));
         } catch (error) {
-            // Failed to load dialogue
-            this.loadingPromises.delete(npcId);
-            return this.getFallbackDialogue(npcId);
+            raw = Promise.reject(error);
         }
+        const loadPromise = raw
+            .then(dialogue => {
+                this.loadedDialogues.set(npcId, dialogue);
+                this.loadingPromises.delete(npcId);
+                return dialogue;
+            }, () => {
+                // Failed to load dialogue. Cache the fallback too, so the
+                // cache-reading getters (getAgeAppropriateDialogue,
+                // getDialogueForStage) see it instead of null (#2184)
+                const fallback = this.getFallbackDialogue(npcId);
+                this.loadedDialogues.set(npcId, fallback);
+                this.loadingPromises.delete(npcId);
+                return fallback;
+            });
+        this.loadingPromises.set(npcId, loadPromise);
+        return loadPromise;
     }
-    
+
     /**
      * Load dialogue file (try .js first, then .json)
      */
     async loadDialogueFile(npcId) {
         // Try .js file first
-        try {
-            const jsModule = await import(/* @vite-ignore */ `./npcs/${npcId}.js`);
-            if (jsModule && jsModule.default) {
-                return jsModule.default;
+        const loadModule = NPC_DIALOGUE_MODULES[`./npcs/${npcId}.js`];
+        if (loadModule) {
+            try {
+                const jsModule = await loadModule();
+                if (jsModule && jsModule.default) {
+                    return jsModule.default;
+                }
+            } catch (error) {
+                // The file exists, so this is a real bug in it, not a missing
+                // file: say so instead of silently falling back (#2186)
+                console.error(`Dialogue file for ${npcId} failed to load:`, error);
             }
-        } catch (error) {
-            // .js not found, try .json
         }
         
         // Try .json file
@@ -72,23 +91,21 @@ export class NPCDialogueLoader {
      * Get fallback dialogue if file not found
      */
     getFallbackDialogue(npcId) {
+        // Every stage getRelationshipStage() can return, so a friendly or
+        // close-friend NPC isn't answered with null/stranger lines (#2317)
+        const greetings = {
+            stranger: ['Hello.'],
+            friendly: ['Hey, good to see you.'],
+            acquaintance: ['Hey.'],
+            friend: ['Hi there!'],
+            close_friend: ['There you are! I was hoping you would stop by.']
+        };
+        const stages = {};
+        for (const key of STAGE_KEYS) stages[key] = { greeting: greetings[key], topics: {} };
         return {
             npcId: npcId,
-            stages: {
-                stranger: {
-                    greeting: "Hello.",
-                    topics: []
-                },
-                acquaintance: {
-                    greeting: "Hey.",
-                    topics: []
-                },
-                friend: {
-                    greeting: "Hi there!",
-                    topics: []
-                }
-            },
-            breakdowns: [],
+            stages,
+            breakdowns: {},
             emotionalTriggers: []
         };
     }
