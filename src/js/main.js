@@ -3264,6 +3264,11 @@ export class MainGame {
                     if (interest.loanInterest > 0) {
                         this.showToast(`Loan Interest: -$${interest.loanInterest}`, 'warning');
                     }
+                    if (interest.defaulted) {
+                        this.showToast('You defaulted on your loan! Credit score and reputation took a hit.', 'error');
+                    } else if (interest.missedWeeks) {
+                        this.showToast(`Missed a loan payment (${interest.missedWeeks} week${interest.missedWeeks === 1 ? '' : 's'}). Your credit score dropped.`, 'warning');
+                    }
                 }
 
                 this.showToast(`Paid weekly rent: -$${rent}`, 'warning');
