@@ -44,8 +44,10 @@ describe('Game Flow Control', () => {
             const filePath = path.join(__dirname, '../../src/js/helpers/ProjectHelpers.js');
             const content = fs.readFileSync(filePath, 'utf8');
 
-            // Work sessions should not have auto-interval
-            expect(content).not.toMatch(/game\.workInterval\s*=\s*setInterval/);
+            // Work sessions advance by explicit time steps; the old check looked
+            // for a game.workInterval variable that never existed (#1846)
+            expect(content).not.toMatch(/setInterval\s*\(/);
+            expect(content).toMatch(/handleTimeAdvance\(/);
         });
 
         it('should require manual click to advance work', async () => {
