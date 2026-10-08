@@ -4,6 +4,33 @@
  * Can turn relationship aspects on/off
  */
 
+// Allowed ranges for numeric settings (#1073)
+const NUMERIC_RANGES = {
+    difficulty: {
+        bossDemand: [0, 100],
+        taskFrequency: [1, 10],
+        competition: [0, 100]
+    }
+};
+
+/**
+ * Coerce a value to the type of the default it replaces. Returns
+ * { ok, value }: booleans must be booleans, numbers must be finite and are
+ * clamped to their range.
+ */
+function sanitizeSetting(category, key, value, defaultValue) {
+    if (typeof defaultValue === 'boolean') {
+        return typeof value === 'boolean' ? { ok: true, value } : { ok: false };
+    }
+    if (typeof defaultValue === 'number') {
+        const n = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+        if (typeof n !== 'number' || !Number.isFinite(n)) return { ok: false };
+        const [min, max] = NUMERIC_RANGES[category]?.[key] ?? [-Infinity, Infinity];
+        return { ok: true, value: Math.min(max, Math.max(min, n)) };
+    }
+    return { ok: true, value };
+}
+
 export class GameplaySettings {
     constructor() {
         this.settings = {
@@ -80,9 +107,13 @@ export class GameplaySettings {
      * Set setting value
      */
     setSetting(category, key, value) {
-        if (this.settings[category]) {
-            this.settings[category][key] = value;
-        }
+        const group = this.settings[category];
+        // Unknown categories and keys are rejected (#1073)
+        if (!group || !Object.prototype.hasOwnProperty.call(group, key)) return false;
+        const result = sanitizeSetting(category, key, value, group[key]);
+        if (!result.ok) return false;
+        group[key] = result.value;
+        return true;
     }
     
     /**
@@ -116,6 +147,12 @@ export class GameplaySettings {
             const incoming = parsed[key];
             if (base && incoming && typeof incoming === 'object' && !Array.isArray(incoming)) {
                 merged[key] = { ...base, ...incoming };
+                // Saved values get the same type/range checks as setSetting()
+                for (const k of Object.keys(base)) {
+                    if (!(k in incoming)) continue;
+                    const result = sanitizeSetting(key, k, incoming[k], base[k]);
+                    merged[key][k] = result.ok ? result.value : base[k];
+                }
             } else {
                 merged[key] = base ? { ...base } : incoming;
             }

@@ -69,7 +69,7 @@ export const LIBRARY_CONTENT = [
         name: 'PyTorch',
         category: 'ai',
         description: 'An open source machine learning framework based on the Torch library.',
-        realWorldUse: ' favored by researchers for its flexibility and dynamic computation graph.',
+        realWorldUse: 'Favored by researchers for its flexibility and dynamic computation graph.',
         gameEffect: 'AI Creativity +2',
         cost: 1200,
         reqLevel: 5
