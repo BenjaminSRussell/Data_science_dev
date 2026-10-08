@@ -7,13 +7,19 @@
 export class NarrativeClaritySystem {
     constructor(gameState) {
         this.gameState = gameState;
-        this.narrativeContext = {
-            currentChapter: 'Prologue',
-            storyThemes: [],
-            playerMotivation: 'survival',
-            worldState: 'normal'
-        };
+        // Context is derived from live game state on every call
+        // (getNarrativeContext); the old cached this.narrativeContext was
+        // never read or updated (#1528)
     }
+
+    /** Short player-facing descriptions of each motivation (#1533) */
+    static MOTIVATION_TEXT = {
+        survival: 'Survival: keep the lights on.',
+        stability: 'Stability: build a safety net.',
+        growth: 'Growth: turn skills into opportunities.',
+        success: 'Success: make your mark.',
+        legacy: 'Legacy: build something that outlasts you.'
+    };
 
     /**
      * Get narrative context for current game state
@@ -65,7 +71,7 @@ export class NarrativeClaritySystem {
     /**
      * Get situation description for narrative clarity
      */
-    getSituationDescription(days, money, reputation, ethics) {
+    getPhaseSituation(days) {
         if (days < 7) {
             return {
                 title: 'Starting Out',
@@ -97,6 +103,39 @@ export class NarrativeClaritySystem {
                 goals: ['Reflect on your journey', 'Help others', 'Build something lasting', 'Complete your story']
             };
         }
+    }
+
+    /**
+     * The day-based phase, adjusted for where the player actually stands:
+     * debt, reputation and ethics change the description and goals (#1529)
+     */
+    getSituationDescription(days, money = 0, reputation = 0, ethics = 0) {
+        const base = this.getPhaseSituation(days);
+        const notes = [];
+        const goals = [...base.goals];
+        if (money < 0) {
+            notes.push('You\'re in debt, and every choice is shadowed by what you owe.');
+            goals.unshift('Get out of debt');
+        } else if (money >= 100000) {
+            notes.push('Money is no longer the problem. What you do with it is.');
+        }
+        if (reputation > 1000) {
+            notes.push('Your name opens doors across the city.');
+            goals.push('Use your influence wisely');
+        } else if (reputation < 0) {
+            notes.push('People in the industry are wary of you.');
+            goals.unshift('Repair your reputation');
+        }
+        if (ethics < -30) {
+            notes.push('The shortcuts you\'ve taken are starting to follow you.');
+        } else if (ethics > 30) {
+            notes.push('You\'ve earned a reputation for doing things the right way.');
+        }
+        return {
+            ...base,
+            description: notes.length ? `${base.description} ${notes.join(' ')}` : base.description,
+            goals: [...new Set(goals)]
+        };
     }
 
     /**
@@ -314,8 +353,28 @@ export class NarrativeClaritySystem {
      * Get decision recommendation (non-binding)
      */
     getDecisionRecommendation(decision, context) {
-        // Don't force a choice, just provide context
-        return 'Consider how this decision aligns with your goals and values. Every choice shapes your story.';
+        // Non-binding: point out which choice fits the player's current
+        // motivation and themes, using this decision's real consequences (#1531)
+        const fallback = 'Consider how this decision aligns with your goals and values. Every choice shapes your story.';
+        const choices = Object.entries(decision?.choices || {});
+        if (choices.length === 0) return fallback;
+        const ctx = context || this.getNarrativeContext();
+        const themes = ctx.themes || [];
+        const motivation = ctx.motivation || 'survival';
+
+        let focus;
+        let label;
+        if (themes.includes('integrity')) { focus = 'ethics'; label = 'your principles'; }
+        else if (themes.includes('corruption')) { focus = 'money'; label = 'the path you\'re already on'; }
+        else if (motivation === 'survival' || motivation === 'stability') { focus = 'money'; label = 'your finances'; }
+        else { focus = 'reputation'; label = 'your standing'; }
+
+        const value = ([, c]) => Number(c?.consequences?.[focus]) || 0;
+        const [bestId] = choices.reduce((best, cur) => (value(cur) > value(best) ? cur : best));
+        const name = bestId.replace(/_/g, ' ');
+        const riskiest = choices.find(([, c]) => c?.consequences?.risk);
+        const risk = riskiest ? ` "${riskiest[0].replace(/_/g, ' ')}" carries risk: ${riskiest[1].consequences.risk}.` : '';
+        return `Thinking about ${label}, "${name}" fits best.${risk} It's your call. Every choice shapes your story.`;
     }
 
     /**
