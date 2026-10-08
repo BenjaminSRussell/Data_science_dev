@@ -416,25 +416,49 @@ function updatePlayerMarker(game) {
  * Update vehicle display - O(m) where m is vehicle count
  */
 function updateVehicleDisplay(game) {
-    const vehicleElements = DOMUtils.queryAll('.vehicle-option');
-    const ownedSet = game.worldMap.ownedVehicles; // Already a Set
-
-    for (const el of vehicleElements) {
-        const id = el.dataset.vehicle;
-        if (!id) continue;
-
-        // O(1) Set lookup
-        if (ownedSet.has(id)) {
-            DOMUtils.toggleClass(el, 'locked', false);
-            const priceEl = el.querySelector('.vehicle-price');
-            if (priceEl) {
-                DOMUtils.updateElement(priceEl, { textContent: 'Owned' });
-            }
+    // Render every vehicle in the catalog, not just the 3 hard-coded in
+    // index.html (#1164). Clicks are handled by the delegated #vehicle-options
+    // listener in main.js.
+    const container = document.getElementById('vehicle-options');
+    const wm = game.worldMap;
+    if (!container || !wm) return;
+    const ownedSet = wm.ownedVehicles || new Set(['walking']);
+    const atDealer = wm.currentLocation === 'car_dealership';
+    container.innerHTML = '';
+    for (const v of VEHICLES) {
+        const owned = ownedSet.has(v.id);
+        const dealerOnly = vehicleRequiresDealership(v);
+        const el = document.createElement('div');
+        el.className = 'vehicle-option';
+        el.dataset.vehicle = v.id;
+        el.setAttribute('role', 'button');
+        el.tabIndex = 0;
+        if (!owned) el.classList.add('locked');
+        if (wm.currentVehicle === v.id) el.classList.add('active');
+        const icon = document.createElement('span');
+        icon.className = 'vehicle-icon';
+        const name = document.createElement('span');
+        name.className = 'vehicle-name';
+        name.textContent = v.name;
+        el.append(icon, name);
+        if (v.id !== 'walking') {
+            const price = document.createElement('span');
+            price.className = 'vehicle-price';
+            price.textContent = owned
+                ? 'Owned'
+                : (dealerOnly && !atDealer ? `$${v.price.toLocaleString()} @ Auto World` : `$${v.price.toLocaleString()}${v.isMonthly ? '/mo' : ''}`);
+            el.appendChild(price);
         }
-
-        // Highlight active
-        DOMUtils.toggleClass(el, 'active', game.worldMap.currentVehicle === id);
+        el.title = owned ? `Switch to ${v.name}` : (dealerOnly && !atDealer ? 'Buy cars at Auto World (car dealership)' : `Buy ${v.name}`);
+        container.appendChild(el);
     }
+}
+
+/**
+ * Cars can only be bought at the car dealership; the bus pass is sold anywhere (#1703).
+ */
+export function vehicleRequiresDealership(vehicle) {
+    return !!vehicle && vehicle.id !== 'walking' && vehicle.id !== 'bus_pass';
 }
 
 /**
@@ -442,6 +466,13 @@ function updateVehicleDisplay(game) {
  */
 export function handleTravel(game, locationId) {
     const result = game.worldMap.travelTo(locationId);
+
+    if (result.success && result.alreadyHere) {
+        // No time charged for "travelling" to where you already are (#1434, #2168)
+        game.showToast(`You're already at ${result.location?.name || 'this location'}`, 'info');
+        game.screenManager.showScreen('screen-office');
+        return;
+    }
 
     if (result.success) {
         // Advance time immediately
@@ -518,7 +549,8 @@ export function handleLocationAction(game, action) {
     // Apply effects immediately
     game.gameState.money -= actionData.cost;
     if (actionData.energyGain > 0) {
-        game.timeManager.gainEnergy(actionData.energyGain);
+        // TimeManager exposes restoreEnergy(), not gainEnergy() (#2397)
+        game.timeManager.restoreEnergy(actionData.energyGain);
     }
     if (actionData.relationshipGain && game.npcManager?.boostNearbyRelationships) {
         game.npcManager.boostNearbyRelationships(actionData.relationshipGain);

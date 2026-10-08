@@ -1063,10 +1063,18 @@ export class MainGame {
                         this.showError("Vehicle not found.");
                         return;
                     }
+                    // Cars are sold only at Auto World, so the dealership's
+                    // money/bus gate actually matters (#1703)
+                    if (MapHelpers.vehicleRequiresDealership(vehicle) && this.worldMap.currentLocation !== 'car_dealership') {
+                        this.showError('Cars are sold at Auto World. Travel to the car dealership to buy one.');
+                        return;
+                    }
                     if (confirm(`Buy ${vehicle.name} for $${vehicle.price}?`)) {
                         const result = this.worldMap.buyVehicle(vehicleId);
                         if (result.success) {
-                            this.showToast(`Bought ${vehicle.name}!`, 'success');
+                            this.showToast(result.switched === false
+                                ? `Bought ${vehicle.name}! (still driving your faster vehicle — click it to switch)`
+                                : `Bought ${vehicle.name}!`, 'success');
                             this.updateMapScreen();
                         } else {
                             this.showError(result.reason);
