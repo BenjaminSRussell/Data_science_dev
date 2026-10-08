@@ -13,6 +13,20 @@ from PIL import Image
 import random
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
+import re
+
+
+def is_sized_href(href, size=128):
+    """Does this link point at the `size` px variant? Only structural size
+    markers count - a path segment (/128/), a filename suffix (-128.svg,
+    _128x128.svg) or a size query param (?size=128) - not any '128' that
+    happens to appear in an id or slug (#617)."""
+    if not href:
+        return False
+    n = str(int(size))
+    pattern = (rf'(?:^|[/_-]){n}(?:x{n})?(?=[/._-]|$)'
+               rf'|[?&](?:size|s|w|width)={n}(?:&|$)')
+    return re.search(pattern, str(href)) is not None
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -85,7 +99,7 @@ class IconScraper:
             
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
-                svg_link = soup.find('a', href=lambda x: x and '.svg' in x and '128' in x)
+                svg_link = soup.find('a', href=lambda x: x and '.svg' in x and is_sized_href(x, 128))
                 if not svg_link:
                     svg_link = soup.find('a', href=lambda x: x and '.svg' in x)
                 

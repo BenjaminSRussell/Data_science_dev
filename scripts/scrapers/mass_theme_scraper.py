@@ -16,6 +16,7 @@ import io
 import random
 import subprocess
 import shutil
+from urllib.parse import urljoin
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,6 +27,17 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+def fit_exact(img, width, height):
+    """Scale `img` to cover width x height keeping its aspect ratio, then
+    centre-crop to exactly that size."""
+    src_w, src_h = img.size
+    scale = max(width / src_w, height / src_h)
+    new_w, new_h = max(width, round(src_w * scale)), max(height, round(src_h * scale))
+    img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+    left, top = (new_w - width) // 2, (new_h - height) // 2
+    return img.crop((left, top, left + width, top + height))
+
 
 class MassThemeScraper:
     def __init__(self, output_dir="downloaded_assets", theme="low_poly"):
@@ -81,7 +93,9 @@ class MassThemeScraper:
                     img = img.convert('RGBA')
                 
                 if target_size.get('exact', False):
-                    img = img.resize((target_size['width'], target_size['height']), Image.Resampling.LANCZOS)
+                    # Exact size without distortion: scale to cover, then
+                    # centre-crop to the target box (#611)
+                    img = fit_exact(img, target_size['width'], target_size['height'])
                 else:
                     img.thumbnail((target_size['width'], target_size['height']), Image.Resampling.LANCZOS)
                 
