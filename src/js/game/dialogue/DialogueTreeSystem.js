@@ -6,6 +6,7 @@
  */
 
 import { enhancedDialogueSystem } from './EnhancedDialogueSystem.js';
+import { CHARACTER_STORIES } from './DeepCharacterStories.js';
 
 export class DialogueNode {
     constructor(config) {
@@ -15,24 +16,127 @@ export class DialogueNode {
         this.conditions = config.conditions || {}; // When this node is available
         this.effects = config.effects || {}; // What happens when chosen
         this.nextNode = config.nextNode || null; // Next node ID
+        this.synthesized = !!config.synthesized;
     }
 }
+
+// Choice ids handled by DialogueUI itself (never looked up as nodes)
+export const SPECIAL_CHOICE_IDS = new Set(['goodbye', 'close', 'continue']);
+
+// Choices that should simply return to the conversation hub
+const ROUTE_TO_ROOT = new Set(['root', 'change_topic', 'work_change_topic']);
+
+/**
+ * Follow-up lines for choice ids that the tree builders reference but never
+ * built as nodes (#1142, #1143, #1606, #2121, #2348, #2475). Previously every
+ * one of these silently snapped the conversation back to the greeting.
+ */
+export const RESPONSE_LIBRARY = {
+    ask_for_help: { text: "Of course. What do you need? I'll help however I can.", relationship: 1 },
+    small_talk: { text: "Ha, not much going on. Same coffee, different spreadsheet. You?", relationship: 1 },
+    work_ask_details: { text: "Mostly cleaning data nobody else wants to touch. The glamorous side of analytics.", relationship: 1 },
+    work_interesting: { text: "It really is. Every dataset hides a story if you look long enough.", relationship: 1 },
+    work_industry: { text: "The industry moves fast. Everyone's chasing the next big model.", relationship: 1 },
+    compliment: { text: "Oh! Thank you. That genuinely made my day.", relationship: 2 },
+    compliment_elaborate: { text: "You're too kind. I'll remember you said that.", relationship: 2 },
+    ask_for_advice: { text: "My advice? Keep your charts simple and your data honest.", relationship: 1 },
+    network: { text: "Always happy to expand the network. Let's keep in touch.", relationship: 1 },
+    challenge_accept: { text: "Bold. I like that. Let's see what you've got.", relationship: 2 },
+    observe: { text: "You notice things. Most people don't.", relationship: 1 },
+    secrets_yes: { text: "Not here. Some things are better said when fewer people are listening.", relationship: 1 },
+    persist: { text: "Persistent, aren't you? Fine. Ask me again some other time.", relationship: 0.5 },
+    help_resources: { text: "The library has more than you'd think. Start with the statistics section.", relationship: 1 },
+    help_connections: { text: "I know a few people. I'll put in a good word for you.", relationship: 2 },
+    help_advice: { text: "Don't try to do everything at once. Pick one skill and get great at it.", relationship: 1 },
+    gifts_thank: { text: "You're welcome! It's nice to have someone to share with.", relationship: 1 },
+    gifts_why: { text: "Why not? Kindness is cheap and it comes back around.", relationship: 1 },
+    empathize: { text: "Thanks for listening. Not many people actually do.", relationship: 2 },
+    life_empathize: { text: "Thanks. It helps to know someone gets it.", relationship: 2 },
+    past_empathize: { text: "I don't talk about that much. Thanks for understanding.", relationship: 2 },
+    personal_empathize: { text: "That means more than you know.", relationship: 2 },
+    ask_more: { text: "There's more to it... but maybe when we know each other better.", relationship: 1 },
+    life_ask_more: { text: "Honestly? Some days are better than others. Today's a good one.", relationship: 1 },
+    past_ask_more: { text: "It shaped who I am. Maybe I'll tell you the whole story one day.", relationship: 1 },
+    dream_encourage: { text: "You really think I could? Maybe I will.", relationship: 2 },
+    dream_ask_how: { text: "One step at a time. Save a little, learn a lot, and stay stubborn.", relationship: 1 },
+    personal_support: { text: "I'm glad you're in my corner.", relationship: 2 },
+    deep_philosophy: { text: "Sometimes I wonder if any of the numbers really mean anything. Then I remember the people behind them.", relationship: 1 },
+    deep_connect: { text: "I feel like I can be honest with you. That's rare.", relationship: 3 }
+};
+
+const DEFAULT_RESPONSE = { text: "Hm. I'll have to think about that.", relationship: 0.5 };
 
 export class DialogueTree {
     constructor(npcId, nodes) {
         this.npcId = npcId;
         this.nodes = new Map();
+        this.missingLookups = new Set();
         nodes.forEach(node => {
             this.nodes.set(node.id, node);
         });
+        this.repairGraph();
     }
-    
+
+    /**
+     * Make every choice lead somewhere real:
+     *  - choices to "change topic" route back to root;
+     *  - any other dangling choice id gets a follow-up node from RESPONSE_LIBRARY
+     *    that offers a way back to the hub or out of the conversation;
+     *  - mid-conversation nodes with no choices continue back to root (#1918, #2123).
+     */
+    repairGraph() {
+        if (!this.nodes.has('root')) return;
+        const hubChoices = () => [
+            { id: 'root', text: 'Talk about something else' },
+            { id: 'goodbye', text: 'Goodbye' }
+        ];
+        for (const node of Array.from(this.nodes.values())) {
+            for (const choice of node.choices || []) {
+                if (SPECIAL_CHOICE_IDS.has(choice.id)) continue;
+                const target = choice.nextNode || choice.id;
+                if (this.nodes.has(target)) continue;
+                if (ROUTE_TO_ROOT.has(target)) {
+                    choice.nextNode = 'root';
+                    continue;
+                }
+                const response = RESPONSE_LIBRARY[target] || DEFAULT_RESPONSE;
+                this.nodes.set(target, new DialogueNode({
+                    id: target,
+                    text: response.text,
+                    choices: hubChoices(),
+                    effects: { relationship: response.relationship },
+                    synthesized: true
+                }));
+            }
+        }
+        for (const node of this.nodes.values()) {
+            if (node.id === 'goodbye' || node.id === 'root') continue;
+            if ((!node.choices || node.choices.length === 0) && !node.nextNode) {
+                node.nextNode = 'root';
+            }
+        }
+    }
+
+    /**
+     * Strict lookup: undefined for unknown ids.
+     */
+    hasNode(nodeId) {
+        return this.nodes.has(nodeId);
+    }
+
     getNode(nodeId) {
-        return this.nodes.get(nodeId) || this.nodes.get('root');
+        const node = this.nodes.get(nodeId);
+        if (node) return node;
+        // Make bad lookups observable instead of silently rerouting (#1149)
+        if (!this.missingLookups.has(nodeId)) {
+            this.missingLookups.add(nodeId);
+            console.warn(`[Dialogue] Unknown node "${nodeId}" in tree for ${this.npcId}; falling back to root`);
+        }
+        return this.nodes.get('root');
     }
     
     getRootNode() {
-        return this.getNode('root');
+        return this.nodes.get('root');
     }
 }
 
@@ -40,6 +144,8 @@ export class DialogueTree {
  * Main Dialogue Tree System
  */
 export class DialogueTreeSystem {
+    static MAX_CACHE = 100;
+
     constructor() {
         this.builder = new DialogueTreeBuilder();
         this.treeCache = new Map();
@@ -52,10 +158,17 @@ export class DialogueTreeSystem {
      * @returns {DialogueTree} Dialogue tree
      */
     getTree(npcId, relationshipLevel = 0) {
-        // Check cache first (key includes relationship level for enhanced trees)
-        const cacheKey = `${npcId}_${relationshipLevel}`;
+        // Only story-driven (enhanced) trees depend on the relationship level;
+        // personality trees are cached once per NPC (#2122). The cache is also
+        // bounded so fractional/ever-changing levels can't grow it forever (#913).
+        const level = Math.round(Number(relationshipLevel) || 0);
+        const cacheKey = CHARACTER_STORIES[npcId] ? `${npcId}_${level}` : `${npcId}`;
         if (this.treeCache.has(cacheKey)) {
-            return this.treeCache.get(cacheKey);
+            const cached = this.treeCache.get(cacheKey);
+            // refresh LRU position
+            this.treeCache.delete(cacheKey);
+            this.treeCache.set(cacheKey, cached);
+            return cached;
         }
         
         // Get NPC data
@@ -66,10 +179,13 @@ export class DialogueTreeSystem {
         }
         
         // Build tree (enhanced system will be used if character has deep story)
-        const tree = this.builder.buildTreeForNPC(npc, relationshipLevel);
+        const tree = this.builder.buildTreeForNPC(npc, level);
         
-        // Cache it
+        // Cache it (LRU, bounded)
         this.treeCache.set(cacheKey, tree);
+        while (this.treeCache.size > DialogueTreeSystem.MAX_CACHE) {
+            this.treeCache.delete(this.treeCache.keys().next().value);
+        }
         
         return tree;
     }
@@ -389,11 +505,20 @@ export class DialogueTreeBuilder {
             new DialogueNode({
                 id: 'ask_help',
                 text: "I can try to help. What do you need?",
+                choices: [
+                    { id: 'help_advice', text: 'Any advice for getting ahead?' },
+                    { id: 'root', text: 'Never mind' },
+                    { id: 'goodbye', text: 'Goodbye' }
+                ],
                 effects: { relationship: 1 }
             }),
             new DialogueNode({
                 id: 'small_talk',
                 text: "Not much to say, really. How are things with you?",
+                choices: [
+                    { id: 'root', text: 'Pretty good, thanks' },
+                    { id: 'goodbye', text: 'Goodbye' }
+                ],
                 effects: { relationship: 1 }
             }),
             new DialogueNode({

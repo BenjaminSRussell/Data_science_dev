@@ -133,6 +133,9 @@ export class DialogueUI {
             };
         }
         this.currentNode = this.currentTree.getRootNode();
+        // Each node's effects apply once per conversation; the greeting's apply on open
+        this._appliedNodes = new Set(['root']);
+        if (this.currentNode?.effects) this.applyEffects(this.currentNode.effects);
 
         // Use Lit component if available
         if (this.litComponent) {
@@ -274,23 +277,28 @@ export class DialogueUI {
         const choice = this.currentNode.choices?.find(c => c.id === choiceId);
         if (!choice) return;
 
-        // Apply effects
-        if (this.currentNode.effects) {
-            this.applyEffects(this.currentNode.effects);
-        }
-
-        // Find next node
+        // Find next node (strict lookup so a bad id is handled, not masked) (#1157)
         const nextNodeId = choice.nextNode || choiceId;
-        const nextNode = this.currentTree.getNode(nextNodeId);
+        const tree = this.currentTree;
+        const nextNode = typeof tree?.hasNode === 'function'
+            ? (tree.hasNode(nextNodeId) ? tree.nodes.get(nextNodeId) : null)
+            : (tree?.getNode?.(nextNodeId) || null);
 
-        if (nextNode) {
-            this.showNode(nextNode);
-        } else {
-            // No next node - close or return to root
-            setTimeout(() => {
-                this.showNode(this.currentTree.getRootNode());
-            }, 1000);
+        if (!nextNode) {
+            console.warn(`[Dialogue] Choice "${choiceId}" has no node; returning to the start of the conversation`);
+            this.showNode(this.currentTree.getRootNode());
+            return;
         }
+
+        // Apply the effects of the node being ENTERED, once per conversation, so
+        // bouncing between nodes can't farm relationship points (#1156)
+        if (nextNode.effects && !this._appliedNodes?.has(nextNode.id)) {
+            this._appliedNodes = this._appliedNodes || new Set();
+            this._appliedNodes.add(nextNode.id);
+            this.applyEffects(nextNode.effects);
+        }
+
+        this.showNode(nextNode);
     }
 
     /**

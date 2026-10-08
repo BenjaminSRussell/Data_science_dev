@@ -386,19 +386,21 @@ describe('DialogueUI', () => {
             expect(dialogueUI.currentNPC).toBe(previousNPC);
         });
 
-        it('should apply effects and advance to next node for valid choice', () => {
+        it('should apply the ENTERED node\'s effects and advance for a valid choice (#1156)', () => {
             const applySpy = vi.spyOn(dialogueUI, 'applyEffects');
 
             dialogueUI.currentNode = {
                 id: 'node_with_choice',
                 text: 'Choose',
                 choices: [{ id: 'choice_1', text: 'Option', nextNode: 'node_2' }],
-                effects: { relationship: 1 }
+                effects: { relationship: 5 }
             };
+            mockTree.getNode.mockReturnValue({ id: 'node_2', text: 'Next', choices: [], effects: { relationship: 1 } });
 
             dialogueUI.handleChoice('choice_1');
 
             expect(applySpy).toHaveBeenCalledWith({ relationship: 1 });
+            expect(applySpy).not.toHaveBeenCalledWith({ relationship: 5 });
             expect(mockTree.getNode).toHaveBeenCalledWith('node_2');
         });
 
