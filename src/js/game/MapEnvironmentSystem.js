@@ -3,6 +3,8 @@
  * Environmental elements system - trees, parks, green spaces, decorations
  */
 
+import { logger } from '../utils/Logger.js';
+
 const PLACEMENT_RETRY_RADIUS = 3;
 
 export class MapEnvironmentSystem {
@@ -12,12 +14,40 @@ export class MapEnvironmentSystem {
         this.zoneSystem = zoneSystem;
         this.assetPlacer = assetPlacer;
         this.environmentElements = [];
+        // zoneId -> { kind, requested, placed } from the last initialize()
+        this.placementStats = new Map();
+    }
+
+    /**
+     * Remove every element this system placed (also from the asset placer)
+     * so initialize() can safely run again.
+     */
+    clear() {
+        for (const el of this.environmentElements) {
+            this.assetPlacer?.removeAsset?.(el.id);
+        }
+        this.environmentElements = [];
+        this.placementStats.clear();
+    }
+
+    /**
+     * Record how many elements a zone asked for vs. actually got, and warn on
+     * a shortfall so density tuning isn't silent.
+     */
+    recordPlacement(zone, kind, requested, placed) {
+        this.placementStats.set(zone.id, { kind, requested, placed });
+        if (placed < requested) {
+            logger.debug(`MapEnvironmentSystem: ${kind} in zone ${zone.id} placed ${placed}/${requested}`);
+        }
+        return { requested, placed };
     }
 
     /**
      * Initialize environmental elements
      */
     initialize() {
+        this.clear();
+
         // Add trees in park zones
         const parkZones = this.zoneSystem.getZonesByType('park');
         for (const zone of parkZones) {
@@ -68,6 +98,7 @@ export class MapEnvironmentSystem {
     addParkElements(zone) {
         const bounds = zone.bounds;
         const treeCount = Math.floor((bounds.maxX - bounds.minX + 1) * (bounds.maxY - bounds.minY + 1) / 4);
+        let placed = 0;
         
         for (let i = 0; i < treeCount; i++) {
             const x = bounds.minX + Math.floor(Math.random() * (bounds.maxX - bounds.minX + 1));
@@ -76,6 +107,7 @@ export class MapEnvironmentSystem {
             const tree = {
                 id: `tree-${zone.id}-${i}`,
                 type: 'tree',
+                subtype: 'park-tree',
                 x,
                 y,
                 width: 1,
@@ -85,8 +117,10 @@ export class MapEnvironmentSystem {
             
             if (this.placeWithRetry(tree, (cx, cy) => this.isInZone(bounds, cx, cy) && !this.roadSystem.isRoad(cx, cy))) {
                 this.environmentElements.push(tree);
+                placed++;
             }
         }
+        return this.recordPlacement(zone, 'park-tree', treeCount, placed);
     }
 
     /**
@@ -95,6 +129,7 @@ export class MapEnvironmentSystem {
     addStreetTrees(zone) {
         const bounds = zone.bounds;
         const treeCount = Math.floor((bounds.maxX - bounds.minX + bounds.maxY - bounds.minY) / 3);
+        let placed = 0;
         
         for (let i = 0; i < treeCount; i++) {
             // Place trees near roads but not on them
@@ -113,6 +148,7 @@ export class MapEnvironmentSystem {
             const tree = {
                 id: `street-tree-${zone.id}-${i}`,
                 type: 'tree',
+                subtype: 'street-tree',
                 x,
                 y,
                 width: 1,
@@ -122,8 +158,10 @@ export class MapEnvironmentSystem {
             
             if (this.placeWithRetry(tree, isStreetSpot)) {
                 this.environmentElements.push(tree);
+                placed++;
             }
         }
+        return this.recordPlacement(zone, 'street-tree', treeCount, placed);
     }
 
     /**
@@ -132,6 +170,7 @@ export class MapEnvironmentSystem {
     addCommercialDecorations(zone) {
         const bounds = zone.bounds;
         const decorationCount = Math.floor((bounds.maxX - bounds.minX + 1) * (bounds.maxY - bounds.minY + 1) / 8);
+        let placed = 0;
         
         for (let i = 0; i < decorationCount; i++) {
             const x = bounds.minX + Math.floor(Math.random() * (bounds.maxX - bounds.minX + 1));
@@ -149,8 +188,10 @@ export class MapEnvironmentSystem {
             
             if (this.placeWithRetry(decoration, (cx, cy) => this.isInZone(bounds, cx, cy) && !this.roadSystem.isRoad(cx, cy))) {
                 this.environmentElements.push(decoration);
+                placed++;
             }
         }
+        return this.recordPlacement(zone, 'decoration', decorationCount, placed);
     }
 
     /**
@@ -164,7 +205,8 @@ export class MapEnvironmentSystem {
      * Get elements by type
      */
     getElementsByType(type) {
-        return this.environmentElements.filter(el => el.type === type);
+        // Matches the broad type ('tree') or the specific one ('street-tree')
+        return this.environmentElements.filter(el => el.type === type || el.subtype === type);
     }
 
     /**

@@ -277,28 +277,37 @@ export class MapRenderer {
         const containerWidth = this.container.offsetWidth || this.mapManager.getGridSystem().totalWidth;
         const containerHeight = this.container.offsetHeight || this.mapManager.getGridSystem().totalHeight;
         
+        // Trees (park and street) and commercial decorations all get drawn (#1452)
+        const CLASS_BY_KIND = {
+            'park-tree': 'map-tree map-tree--park',
+            'street-tree': 'map-tree map-tree--street',
+            tree: 'map-tree',
+            decoration: 'map-decoration'
+        };
         elements.forEach(element => {
-            if (element.type === 'tree') {
-                const treeEl = document.createElement('div');
-                treeEl.className = 'map-tree';
-                
-                const pixel = gridSystem.gridToPixel(element.x, element.y);
-                const left = (pixel.x / containerWidth) * 100;
-                const top = (pixel.y / containerHeight) * 100;
-                
-                treeEl.style.cssText = `
-                    position: absolute;
-                    left: ${left}%;
-                    top: ${top}%;
-                    transform: translate(-50%, -50%);
-                    width: 20px;
-                    height: 20px;
-                    z-index: 2;
-                    pointer-events: none;
-                `;
-                
-                envContainer.appendChild(treeEl);
-            }
+            const className = CLASS_BY_KIND[element.subtype] || CLASS_BY_KIND[element.type];
+            if (!className) return;
+            const el = document.createElement('div');
+            el.className = className;
+            el.dataset.envType = element.subtype || element.type;
+
+            const pixel = gridSystem.gridToPixel(element.x, element.y);
+            const left = (pixel.x / containerWidth) * 100;
+            const top = (pixel.y / containerHeight) * 100;
+            const size = element.type === 'decoration' ? 12 : 20;
+
+            el.style.cssText = `
+                position: absolute;
+                left: ${left}%;
+                top: ${top}%;
+                transform: translate(-50%, -50%);
+                width: ${size}px;
+                height: ${size}px;
+                z-index: 2;
+                pointer-events: none;
+            `;
+
+            envContainer.appendChild(el);
         });
     }
 
