@@ -53,8 +53,11 @@ export const CONTRACTS = [
         title: 'Fashion Trend Predictor',
         description: 'Tell me what colors will be hot next season based on Instagram data.',
         difficulty: 2,
-        reward: 2500,
-        xpReward: { statistics: 40, python: 30 },
+        // Gated (rep 200 + GPU) and the longest grind, so it has to out-earn
+        // the ungated, ethics-costing loan_risk_model on XP and stay close on
+        // cash; at 2500 / 70 XP it was worse on every axis (#2172)
+        reward: 3800,
+        xpReward: { statistics: 60, python: 55 },
         requirements: { stat: 'reputation', value: 200 },
         stages: [
             {

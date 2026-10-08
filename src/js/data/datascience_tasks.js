@@ -1,7 +1,11 @@
 /**
- * Data Science Tasks - 1000+ Real-World Tasks
- * Organized by domain and difficulty, steadily increasing in intellectual complexity
- * Based on actual industry work across multiple sectors
+ * Data Science Tasks - a 19-task SAMPLE of the domain/difficulty schema.
+ *
+ * DATA_SCIENCE_TASKS holds 19 hand-written tasks at difficulty 1.0-4.3, so
+ * DIFFICULTY_LEVELS tiers 5-10 have no backing tasks here. The game's real
+ * task database is comprehensive_datascience_tasks.js (imported by
+ * TaskSystem); this file is not imported by the game (see #2153 / #78) and
+ * must not be treated as a complete fallback (#2155).
  */
 
 /**
@@ -355,8 +359,7 @@ export const DATA_SCIENCE_TASKS = [
         deliverable: 'Churn prediction model with feature insights'
     },
     
-    // Continue with more tasks... (This is a sample structure)
-    // In production, we'll generate the full 1000 tasks
+    // End of the 19-task sample (#2155)
 ];
 
 /**
