@@ -4,10 +4,10 @@
  * Runs basic static analysis on JS files to find common bugs
  */
 
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +30,17 @@ function findJSFiles(dir, fileList = []) {
     });
     
     return fileList;
+}
+
+/**
+ * A setInterval line is suspicious only when the file never calls
+ * clearInterval. Cleanup can live in stop()/close()/resolve()/etc., so no
+ * particular method name ("destroy") is required (#2320).
+ */
+export function intervalLacksCleanup(line, content) {
+    if (!line.includes('setInterval') || line.includes('clearInterval')) return false;
+    if (line.trim().startsWith('//')) return false;
+    return !content.includes('clearInterval');
 }
 
 function checkFile(filePath) {
@@ -56,11 +67,8 @@ function checkFile(filePath) {
         }
         
         // Check for setInterval without cleanup
-        if (line.includes('setInterval') && !line.includes('clearInterval')) {
-            const funcName = content.match(/function\s+(\w+)/)?.[1] || 'anonymous';
-            if (!content.includes('clearInterval') || !content.includes('destroy')) {
-                warnings.push(`${fileName}:${lineNum} - setInterval may not be cleaned up`);
-            }
+        if (intervalLacksCleanup(line, content)) {
+            warnings.push(`${fileName}:${lineNum} - setInterval may not be cleaned up`);
         }
         
         // Check for Assets.init() calls
@@ -77,56 +85,62 @@ function checkFile(filePath) {
     });
 }
 
-// Main execution
-console.log('🔍 Running Static Bug Check...\n');
-
-const srcDir = path.join(path.dirname(__dirname), 'src', 'js');
-const jsFiles = findJSFiles(srcDir);
-
-console.log(`Found ${jsFiles.length} JavaScript files\n`);
-
-jsFiles.forEach(file => {
-    try {
-        checkFile(file);
-    } catch (error) {
-        console.error(`Error checking ${file}:`, error.message);
-    }
-});
-
-// Run syntax check
-console.log('Running syntax checks...\n');
-jsFiles.forEach(file => {
-    try {
-        execSync(`node --check "${file}"`, { stdio: 'pipe' });
-    } catch (error) {
-        bugs.push(`${path.relative(process.cwd(), file)} - Syntax error: ${error.message.split('\n')[0]}`);
-    }
-});
-
-// Report results
-console.log('='.repeat(60));
-console.log('📊 Static Bug Check Results');
-console.log('='.repeat(60));
-console.log(`\n🐛 Bugs Found: ${bugs.length}`);
-console.log(`⚠️  Warnings: ${warnings.length}\n`);
-
-if (bugs.length > 0) {
-    console.log('🐛 BUGS:');
-    bugs.forEach((bug, i) => console.log(`${i + 1}. ${bug}`));
-    console.log('');
+// Main execution (skipped when imported, e.g. by tests)
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+    main();
 }
 
-if (warnings.length > 0) {
-    console.log('⚠️  WARNINGS:');
-    warnings.slice(0, 20).forEach((warn, i) => console.log(`${i + 1}. ${warn}`));
-    if (warnings.length > 20) {
-        console.log(`... and ${warnings.length - 20} more warnings`);
-    }
-    console.log('');
-}
+function main() {
+    console.log('🔍 Running Static Bug Check...\n');
 
-if (bugs.length === 0 && warnings.length === 0) {
-    console.log('✨ No issues found!\n');
-} else {
-    process.exit(1);
+    const srcDir = path.join(path.dirname(__dirname), 'src', 'js');
+    const jsFiles = findJSFiles(srcDir);
+
+    console.log(`Found ${jsFiles.length} JavaScript files\n`);
+
+    jsFiles.forEach(file => {
+        try {
+            checkFile(file);
+        } catch (error) {
+            console.error(`Error checking ${file}:`, error.message);
+        }
+    });
+
+    // Run syntax check
+    console.log('Running syntax checks...\n');
+    jsFiles.forEach(file => {
+        try {
+            execSync(`node --check "${file}"`, { stdio: 'pipe' });
+        } catch (error) {
+            bugs.push(`${path.relative(process.cwd(), file)} - Syntax error: ${error.message.split('\n')[0]}`);
+        }
+    });
+
+    // Report results
+    console.log('='.repeat(60));
+    console.log('📊 Static Bug Check Results');
+    console.log('='.repeat(60));
+    console.log(`\n🐛 Bugs Found: ${bugs.length}`);
+    console.log(`⚠️  Warnings: ${warnings.length}\n`);
+
+    if (bugs.length > 0) {
+        console.log('🐛 BUGS:');
+        bugs.forEach((bug, i) => console.log(`${i + 1}. ${bug}`));
+        console.log('');
+    }
+
+    if (warnings.length > 0) {
+        console.log('⚠️  WARNINGS:');
+        warnings.slice(0, 20).forEach((warn, i) => console.log(`${i + 1}. ${warn}`));
+        if (warnings.length > 20) {
+            console.log(`... and ${warnings.length - 20} more warnings`);
+        }
+        console.log('');
+    }
+
+    if (bugs.length === 0 && warnings.length === 0) {
+        console.log('✨ No issues found!\n');
+    } else {
+        process.exit(1);
+    }
 }

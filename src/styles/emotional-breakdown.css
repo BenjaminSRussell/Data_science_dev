@@ -40,6 +40,11 @@
     animation: emotionalPulse 2s ease-in-out infinite;
 }
 
+.breakdown-character.sad .character-visual {
+    filter: grayscale(0.5);
+    opacity: 0.85;
+}
+
 .breakdown-character.crying .character-visual {
     animation: crying 1s ease-in-out infinite;
     filter: blur(1px);
@@ -64,6 +69,11 @@
     border-radius: 50%;
     border: 3px solid #fff;
     animation: emotionPulse 1s ease-in-out infinite;
+}
+
+.emotion-indicator.sad {
+    background: rgba(149, 117, 205, 0.8);
+    box-shadow: 0 0 20px rgba(149, 117, 205, 0.6);
 }
 
 .emotion-indicator.crying {

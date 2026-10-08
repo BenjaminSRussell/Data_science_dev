@@ -227,7 +227,9 @@ describe('DemandingBossSystem (#386)', () => {
     it('getBossMessage boundaries', () => {
         const b = new DemandingBossSystem({});
         expect(b.getBossMessage(6)).toBe('Good work. Keep it up.');
-        expect(b.getBossMessage(5)).toBe('Adequate. I expect more next time.');
+        // decent work on time (+5) is good work (#1780)
+        expect(b.getBossMessage(5)).toBe('Good work. Keep it up.');
+        expect(b.getBossMessage(4)).toBe('Adequate. I expect more next time.');
         expect(b.getBossMessage(0)).toBe('Adequate. I expect more next time.');
         expect(b.getBossMessage(-5)).toBe('Adequate. I expect more next time.');
         expect(b.getBossMessage(-6)).toBe('This is unacceptable. Do better.');
