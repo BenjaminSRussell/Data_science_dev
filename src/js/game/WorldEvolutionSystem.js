@@ -3,6 +3,13 @@
  * World changes: businesses closing, new ones opening, economic shifts
  */
 
+/** Cap on the persistent world-event log */
+const MAX_EVENTS = 50;
+
+/** Names for businesses that open during play (#1085) */
+const NEW_BUSINESS_NAMES = ['Quantum Insights', 'ByteBrew Labs', 'Pixel & Pivot', 'Neural Nest', 'Signal Forge', 'Tensor Table'];
+const NEW_BUSINESS_LOCATIONS = ['tech_hub', 'downtown'];
+
 export class WorldEvolutionSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -11,6 +18,7 @@ export class WorldEvolutionSystem {
             businesses: [],
             economicClimate: 'stable', // stable, boom, recession, depression
             unemploymentRate: 5.0,
+            laidOff: 0,
             events: []
         };
         this.businesses = this.initializeBusinesses();
@@ -39,18 +47,34 @@ export class WorldEvolutionSystem {
         // Economic climate changes
         this.updateEconomicClimate();
 
-        // Business health changes
+        // Business health changes (closed businesses stay closed) (#1083)
         this.businesses.forEach(business => {
+            if (business.closed) return;
             const change = this.updateBusinessHealth(business);
             if (change) changes.push(change);
         });
 
         // Random events
         const event = this.generateRandomEvent();
-        if (event) changes.push(event);
+        if (event) {
+            if (event.type === 'new_business') {
+                const business = this.openNewBusiness();
+                changes.push({ ...event, business: business.name, message: `${business.name} opened in ${business.location.replace('_', ' ')}. Job opportunities available!` });
+            } else {
+                changes.push(event);
+            }
+        }
 
         // Update unemployment based on business health
         this.updateUnemploymentRate();
+
+        // Persistent log of what happened (#1085)
+        for (const change of changes) {
+            this.worldState.events.push({ week: this.worldState.week, type: change.type, message: change.message });
+        }
+        if (this.worldState.events.length > MAX_EVENTS) {
+            this.worldState.events.splice(0, this.worldState.events.length - MAX_EVENTS);
+        }
 
         return {
             week: this.worldState.week,
@@ -129,6 +153,7 @@ export class WorldEvolutionSystem {
                 : 0;
             if (layoffs === 0) return null;
             business.employees -= layoffs;
+            this.worldState.laidOff = (this.worldState.laidOff || 0) + layoffs;
             return {
                 type: 'layoffs',
                 business: business.name,
@@ -177,16 +202,38 @@ export class WorldEvolutionSystem {
     }
 
     /**
-     * Update unemployment rate
+     * Open a new business (from a 'new_business' event) so the roster can grow
+     */
+    openNewBusiness() {
+        const opened = this.businesses.filter(b => b.spawned).length;
+        const name = NEW_BUSINESS_NAMES[opened % NEW_BUSINESS_NAMES.length] + (opened >= NEW_BUSINESS_NAMES.length ? ` ${Math.floor(opened / NEW_BUSINESS_NAMES.length) + 1}` : '');
+        const business = {
+            id: `new_business_${this.worldState.week}_${opened + 1}`,
+            name,
+            type: 'startup',
+            health: 50,
+            employees: 10,
+            location: NEW_BUSINESS_LOCATIONS[opened % NEW_BUSINESS_LOCATIONS.length],
+            openedWeek: this.worldState.week,
+            spawned: true
+        };
+        this.businesses.push(business);
+        return business;
+    }
+
+    /**
+     * Update unemployment rate. Counts staff lost to closures and to layoffs
+     * at businesses that stayed open (#1084); new businesses rehire some.
      */
     updateUnemploymentRate() {
-        const totalEmployees = this.businesses.reduce((sum, b) => sum + (b.closed ? 0 : b.employees), 0);
         const closedEmployees = this.businesses.filter(b => b.closed).reduce((sum, b) => sum + b.employees, 0);
-        
+        const newJobs = this.businesses.filter(b => b.spawned && !b.closed).reduce((sum, b) => sum + b.employees, 0);
+        const jobless = Math.max(0, closedEmployees + (this.worldState.laidOff || 0) - newJobs);
+
         // Simplified unemployment calculation
         const baseRate = 5.0;
-        const unemploymentFromClosures = (closedEmployees / 1000) * 10; // Rough estimate
-        this.worldState.unemploymentRate = Math.min(20, baseRate + unemploymentFromClosures);
+        const unemployment = (jobless / 1000) * 10; // Rough estimate
+        this.worldState.unemploymentRate = Math.min(20, baseRate + unemployment);
     }
 
     /**
@@ -200,7 +247,8 @@ export class WorldEvolutionSystem {
             'startup_alpha': 'tech_hub',
             'consulting_firm': 'downtown'
         };
-        return locationMap[businessId] || 'downtown';
+        const spawned = this.businesses.find(b => b.id === businessId)?.location;
+        return locationMap[businessId] || spawned || 'downtown';
     }
 
     /**
@@ -216,6 +264,30 @@ export class WorldEvolutionSystem {
                 closed: b.closed || false
             }))
         };
+    }
+
+    /**
+     * Save the world simulation so it doesn't reset on load
+     */
+    toJSON() {
+        return {
+            worldState: { ...this.worldState, events: [...this.worldState.events] },
+            businesses: this.businesses.map(b => ({ ...b }))
+        };
+    }
+
+    fromJSON(data) {
+        if (!data || typeof data !== 'object') return;
+        if (data.worldState && typeof data.worldState === 'object') {
+            this.worldState = {
+                ...this.worldState,
+                ...data.worldState,
+                events: Array.isArray(data.worldState.events) ? data.worldState.events : []
+            };
+        }
+        if (Array.isArray(data.businesses) && data.businesses.length > 0) {
+            this.businesses = data.businesses;
+        }
     }
 }
 
