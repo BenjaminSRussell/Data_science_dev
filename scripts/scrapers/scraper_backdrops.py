@@ -47,7 +47,10 @@ class BackdropScraper:
         """Resize backdrop to target size"""
         try:
             with Image.open(image_path) as img:
-                if img.mode == 'RGBA':
+                # Saved as JPEG, which has no alpha or palette: anything that
+                # isn't plain RGB (RGBA, LA, P, CMYK...) must be converted
+                # first or save() raises OSError (#620)
+                if img.mode != 'RGB':
                     img = img.convert('RGB')
                 img = img.resize(target_size, Image.Resampling.LANCZOS)
                 img.save(image_path, 'JPEG', quality=85, optimize=True)
