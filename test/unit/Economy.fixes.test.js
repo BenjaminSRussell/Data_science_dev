@@ -112,7 +112,7 @@ describe('contract and project pay are taxable income (#1989)', () => {
     it('completeContract adds to weeklyIncome and totalEarned', () => {
         const gs = { money: 0, reputation: 0, weeklyIncome: 50, totalEarned: 0 };
         const cs = new ContractSystem(gs);
-        cs.activeContracts.push({ id: 'c1', basePay: 1000, difficulty: 2, bonusConditions: [], deadline: 0, timeRequired: 5 });
+        cs.activeContracts.push({ id: 'c1', basePay: 1000, difficulty: 2, bonusConditions: [], deadline: 0, timeRequired: 5, progress: 5 });
         const r = cs.completeContract('c1');
         expect(r.success).toBe(true);
         expect(gs.weeklyIncome).toBe(50 + r.pay);
