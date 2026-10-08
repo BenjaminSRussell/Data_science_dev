@@ -1441,7 +1441,8 @@ export class NPCManager {
         // Check for memory-based dialogue (NPCs remember player choices)
         let memoryDialogue = null;
         if (this.gameState.npcMemorySystem && !isFirstMeeting) {
-            memoryDialogue = this.gameState.npcMemorySystem?.getMemoryDialogue(npcId, relationship);
+            // A preview must not use up the one-time reaction (#2419)
+            memoryDialogue = this.gameState.npcMemorySystem?.getMemoryDialogue(npcId, relationship, { consume: !preview });
             if (memoryDialogue) {
                 // Apply relationship change from memory
                 if (memoryDialogue.relationshipChange && !preview) {
