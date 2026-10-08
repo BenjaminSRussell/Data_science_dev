@@ -556,13 +556,16 @@ export class StoryUI {
         const storylineManager = this.game?.gameState?.storylineManager;
         const storyBeatsSystem = this.game?.gameState?.storyBeatsSystem;
         
-        // Check for pending story beats first
+        // Check for pending story beats first: required beats of this act
+        // lead (#2148), with the act's key-beat progress (#1106)
         if (storyBeatsSystem) {
-            storyBeatsSystem.updatePendingBeats();
-            const pendingBeats = storyBeatsSystem.pendingBeats || [];
-            if (pendingBeats.length > 0) {
-                const nextBeat = pendingBeats[0];
-                nextBeatText.textContent = `Story Beat: ${nextBeat.title}. ${nextBeat.description}`;
+            const nextBeat = storyBeatsSystem.getNextBeat?.();
+            if (nextBeat) {
+                const status = storyBeatsSystem.getCompletionStatus?.(phase);
+                const progress = status && status.required > 0
+                    ? ` (${status.completedRequired}/${status.required} key beats this act)`
+                    : '';
+                nextBeatText.textContent = `Story Beat: ${nextBeat.title}. ${nextBeat.description}${progress}`;
                 return;
             }
         }

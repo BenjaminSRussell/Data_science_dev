@@ -269,6 +269,7 @@ export class NarrativeClaritySystem {
             // The rest of the decisions StorylineManager can surface (#1532)
             'hire_friend': 'Your workload is growing and you need help. An old friend needs a break, but a stranger has the stronger resume. Loyalty and competence pull in different directions.',
             'startup_investment': 'You finally have some cash in reserve, and a founder with a big pitch wants a piece of it. It could be visionary or it could be vaporware.',
+            'model_audit': 'The model that made your name has been quietly discriminating, and an audit proves it. You are the one who decides whether the world finds out.',
             'sell_company': 'Everything you built has caught the eye of a tech giant. Their offer would set you up for life, but your company as you know it would disappear.'
         };
 

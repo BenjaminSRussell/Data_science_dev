@@ -2366,23 +2366,10 @@ export class MainGame {
 
                 // Check for story beats (promotion)
                 if (this.storyBeatsSystem) {
-                    if (oldRank === 0) {
-                        const beat = this.storyBeatsSystem.getBeat('first_promotion');
-                        if (beat) this.handleStoryBeat(beat);
-                    }
-                    // Check for other promotion beats
-                    const newRankIndex = this.gameState.rankIndex;
-                    if (newRankIndex >= 2 && newRankIndex < 3) {
-                        const beat = this.storyBeatsSystem.getBeat('mid_career');
-                        if (beat) this.handleStoryBeat(beat);
-                    }
-                    if (newRankIndex >= 4 && newRankIndex < 5) {
-                        const beat = this.storyBeatsSystem.getBeat('senior_position');
-                        if (beat) this.handleStoryBeat(beat);
-                    }
-                    if (newRankIndex >= 6) {
-                        const beat = this.storyBeatsSystem.getBeat('final_rank');
-                        if (beat) this.handleStoryBeat(beat);
+                    // One rank rule, shared with StoryBeatsSystem.checkBeatTrigger (#1498)
+                    for (const id of ['first_promotion', 'mid_career', 'senior_position', 'final_rank']) {
+                        const beat = this.storyBeatsSystem.getBeat(id);
+                        if (beat && this.storyBeatsSystem.checkBeatTrigger(beat)) this.handleStoryBeat(beat);
                     }
                 }
             }
@@ -3389,15 +3376,15 @@ export class MainGame {
                 this.showToast(`Paid weekly rent: -$${rent}`, 'warning');
                 this.audioManager.play('kaching'); // Or a sad sound?
 
-                // Check for story beat (first rent payment)
+                // Rent was actually charged: count it for the story beat (#1497)
+                this.gameState.rentPaymentsMade = (Number(this.gameState.rentPaymentsMade) || 0) + 1;
+
+                // Weekly story check: refresh the act, then fire every beat whose
+                // trigger is now met (rent, money, reputation, ethics, days...) (#1970)
                 if (this.storyBeatsSystem) {
-                    const timeManager = this.gameState.timeManager;
-                    const weeks = timeManager ? Math.floor((timeManager.totalDays || 0) / 7) : 0;
-                    if (weeks === 1) {
-                        const beat = this.storyBeatsSystem.getBeat('rent_due_first');
-                        if (beat) {
-                            this.handleStoryBeat(beat);
-                        }
+                    this.storylineManager?.checkPhaseTransition?.();
+                    for (const beat of this.storyBeatsSystem.checkForTriggeredBeats()) {
+                        this.handleStoryBeat(beat);
                     }
                 }
 
