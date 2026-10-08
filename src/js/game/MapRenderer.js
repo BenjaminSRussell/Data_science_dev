@@ -5,6 +5,7 @@
  */
 
 import { MapManager } from './MapManager.js';
+import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
 
 export class MapRenderer {
     constructor(container, game) {
@@ -25,11 +26,11 @@ export class MapRenderer {
         const containerHeight = this.container.offsetHeight || 600;
         
         // Initialize map manager with proper tile size based on container
-        const tileSize = Math.min(containerWidth / 30, containerHeight / 30);
+        const tileSize = Math.min(containerWidth / WORLD_GRID_SIZE, containerHeight / WORLD_GRID_SIZE);
         this.mapManager = new MapManager(this.container, {
             grid: {
-                gridWidth: 30,
-                gridHeight: 30,
+                gridWidth: WORLD_GRID_SIZE,
+                gridHeight: WORLD_GRID_SIZE,
                 tileSize: Math.max(15, Math.min(25, tileSize)) // Clamp between 15-25px
             }
         });

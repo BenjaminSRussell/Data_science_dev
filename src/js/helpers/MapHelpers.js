@@ -84,30 +84,37 @@ export function updateMapScreen(game) {
 
     // Use UnifiedMapSystem (PixiJS-based, replaces all old renderers)
     if (!game.unifiedMapSystem && domCache.mapContainer) {
-        try {
-            import('../game/UnifiedMapSystem.js').then(({ UnifiedMapSystem }) => {
-                game.unifiedMapSystem = new UnifiedMapSystem(domCache.mapContainer, game);
-                // Initialize map system
-                game.unifiedMapSystem.initialize().then(() => {
-                    // First visit: the map finished loading after ScreenManager's
-                    // resize call, so size it now if the map is still showing (#2147)
-                    if (game.screenManager?.isScreenActive?.('screen-map')) {
-                        game.unifiedMapSystem?.handleResize?.();
-                    }
+        // One load at a time: repeated calls while the module is still
+        // importing would otherwise each create a PixiJS app (#1167)
+        if (!game.unifiedMapSystemLoading) {
+            try {
+                game.unifiedMapSystemLoading = import('../game/UnifiedMapSystem.js').then(({ UnifiedMapSystem }) => {
+                    if (game.unifiedMapSystem) return;
+                    game.unifiedMapSystem = new UnifiedMapSystem(domCache.mapContainer, game);
+                    // Initialize map system
+                    game.unifiedMapSystem.initialize().then(() => {
+                        // First visit: the map finished loading after ScreenManager's
+                        // resize call, so size it now if the map is still showing (#2147)
+                        if (game.screenManager?.isScreenActive?.('screen-map')) {
+                            game.unifiedMapSystem?.handleResize?.();
+                        }
+                    }).catch(err => {
+                        console.error('UnifiedMapSystem initialization failed:', err);
+                        // Fallback disabled - WorldMapRenderer causes import errors
+                        // Game will continue without map renderer if UnifiedMapSystem fails
+                        logger.warn('Map rendering unavailable - UnifiedMapSystem failed and fallback disabled');
+                    });
                 }).catch(err => {
-                    console.error('UnifiedMapSystem initialization failed:', err);
+                    logger.warn('UnifiedMapSystem load error:', err);
                     // Fallback disabled - WorldMapRenderer causes import errors
                     // Game will continue without map renderer if UnifiedMapSystem fails
-                    logger.warn('Map rendering unavailable - UnifiedMapSystem failed and fallback disabled');
+                    console.warn('Map rendering unavailable - UnifiedMapSystem failed to load');
+                }).finally(() => {
+                    game.unifiedMapSystemLoading = null;
                 });
-            }).catch(err => {
-                logger.warn('UnifiedMapSystem load error:', err);
-                // Fallback disabled - WorldMapRenderer causes import errors
-                // Game will continue without map renderer if UnifiedMapSystem fails
-                console.warn('Map rendering unavailable - UnifiedMapSystem failed to load');
-            });
-        } catch (err) {
-            console.warn('UnifiedMapSystem initialization error:', err);
+            } catch (err) {
+                console.warn('UnifiedMapSystem initialization error:', err);
+            }
         }
     } else if (game.unifiedMapSystem) {
         // Update existing unified map system
