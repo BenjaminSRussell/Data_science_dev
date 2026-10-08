@@ -63,6 +63,9 @@ export class JealousySystem {
      * Increase jealousy level
      */
     increaseJealousy(npcId, amount) {
+        // Ignore negative/NaN amounts so the level can't become NaN or drop here
+        amount = Number(amount);
+        if (!Number.isFinite(amount) || amount <= 0) return;
         const current = this.jealousyLevels.get(npcId) || 0;
         const newLevel = Math.min(100, current + amount);
         this.jealousyLevels.set(npcId, newLevel);

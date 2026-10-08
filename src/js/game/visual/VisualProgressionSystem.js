@@ -4,6 +4,8 @@
  * Better sprites unlock at milestones
  */
 
+const TIER_ORDER = ['basic', 'mid', 'premium'];
+
 export class VisualProgressionSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -115,9 +117,15 @@ export class VisualProgressionSystem {
      * Unlock visual tier
      */
     unlockTier(tier) {
-        if (!this.unlockedTiers.includes(tier)) {
-            this.unlockedTiers.push(tier);
+        if (!TIER_ORDER.includes(tier) || this.unlockedTiers.includes(tier)) return;
+        this.unlockedTiers.push(tier);
+        this.updateCurrentTier();
+        if (tier === this.currentTier) {
             this.applyVisualUpgrade(tier);
+        } else {
+            // A lower tier unlocked after a higher one: record it, but don't
+            // downgrade the visuals that are already showing
+            this.visualUpgrades.set(tier, { applied: true, timestamp: Date.now() });
         }
     }
     
@@ -360,17 +368,29 @@ export class VisualProgressionSystem {
      * Deserialize from save
      */
     fromJSON(data) {
-        if (data.currentTier) this.currentTier = data.currentTier;
-        if (data.unlockedTiers) this.unlockedTiers = data.unlockedTiers;
-        if (data.milestones) {
-            Object.assign(this.milestones, data.milestones);
+        if (!data || typeof data !== 'object') return;
+        if (Array.isArray(data.unlockedTiers)) {
+            const tiers = data.unlockedTiers.filter(t => TIER_ORDER.includes(t));
+            this.unlockedTiers = Array.from(new Set(['basic', ...tiers]));
         }
-        if (data.visualUpgrades) {
-            this.visualUpgrades = new Map(data.visualUpgrades);
-            // Reapply visual upgrades
-            this.unlockedTiers.forEach(tier => {
-                this.applyVisualUpgrade(tier);
-            });
+        if (data.milestones && typeof data.milestones === 'object') {
+            // Only restore the unlocked flag; thresholds and tiers come from the
+            // current code so old saves can't bring back outdated values (#2082)
+            for (const [id, saved] of Object.entries(data.milestones)) {
+                if (this.milestones[id] && saved && typeof saved === 'object') {
+                    this.milestones[id].unlocked = !!saved.unlocked;
+                }
+            }
+        }
+        if (Array.isArray(data.visualUpgrades)) {
+            this.visualUpgrades = new Map(data.visualUpgrades.filter(e => Array.isArray(e) && e.length === 2));
+        }
+        // The current tier is always the highest unlocked one
+        this.updateCurrentTier();
+        if (this.currentTier !== 'basic' || data.visualUpgrades) {
+            // Reapply only the tier that should be showing, so the DOM never
+            // ends up on a lower tier than currentTier
+            this.applyVisualUpgrade(this.currentTier);
         }
     }
 }
