@@ -32,6 +32,29 @@ export class ResearchInboxComponent extends BaseComponent {
             display: none;
         }
 
+        .inbox-backdrop {
+            position: absolute;
+            inset: 0;
+            pointer-events: all;
+        }
+
+        .paper-card:focus-visible {
+            outline: 3px solid #fbbf24;
+            outline-offset: 2px;
+        }
+
+        .unread-label {
+            display: inline-block;
+            margin-bottom: 6px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #3b82f6;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
         .inbox-container {
             position: absolute;
             inset: 5%;
@@ -194,7 +217,8 @@ export class ResearchInboxComponent extends BaseComponent {
         const filteredPapers = this.getFilteredPapers();
 
         return html`
-            <div class="inbox-container">
+            <div class="inbox-backdrop" @click=${this.handleClose}></div>
+            <div class="inbox-container" role="dialog" aria-label="Research Papers Inbox">
                 <div class="inbox-header">
                     <h2> Research Papers Inbox</h2>
                     <button class="inbox-close-btn" @click=${this.handleClose}>×</button>
@@ -230,7 +254,11 @@ export class ResearchInboxComponent extends BaseComponent {
 
         return html`
             <div class="paper-card ${isUnread ? 'unread' : ''} ${isBreakthrough ? 'breakthrough' : ''}"
-                 @click=${() => this.handlePaperClick(notification)}>
+                 tabindex="0" role="button"
+                 aria-label="${isUnread ? 'Unread: ' : ''}${paper.title}"
+                 @click=${() => this.handlePaperClick(notification)}
+                 @keydown=${(e) => this.handlePaperKeydown(e, notification)}>
+                ${isUnread ? html`<span class="unread-label">Unread</span>` : ''}
                 <h3 class="paper-title">${paper.title}</h3>
                 <div class="paper-meta">
                     <span>${paper.authors}</span>
@@ -262,6 +290,14 @@ export class ResearchInboxComponent extends BaseComponent {
 
     handlePaperClick(notification) {
         this.dispatchGameEvent('paper-click', { notification });
+    }
+
+    /** Enter/Space opens a focused card (#1880, #131) */
+    handlePaperKeydown(e, notification) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.handlePaperClick(notification);
+        }
     }
 
     handleClose() {

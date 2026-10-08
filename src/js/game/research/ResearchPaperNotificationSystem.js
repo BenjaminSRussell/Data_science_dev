@@ -5,6 +5,20 @@
  */
 
 export class ResearchPaperNotificationSystem {
+    static PHASE_ORDER = ['pre_attention', 'attention_era', 'post_attention'];
+    // XP for reading a paper the first time (#1669)
+    static READ_XP = 5;
+    static BREAKTHROUGH_READ_XP = 15;
+
+    /** True once `current` has reached or passed `required` (#1323, #929) */
+    static phaseReached(current, required) {
+        const order = ResearchPaperNotificationSystem.PHASE_ORDER;
+        const c = order.indexOf(current);
+        const r = order.indexOf(required);
+        if (r === -1) return true;
+        return c >= r;
+    }
+
     constructor(gameState) {
         this.gameState = gameState;
         this.inbox = [];
@@ -290,9 +304,10 @@ export class ResearchPaperNotificationSystem {
         if (!this.gameState || !this.gameState.timeManager) return;
         
         const currentDay = this.gameState.timeManager?.totalDays || 1;
-        const currentPhase = (this.gameState.aiTrainingStoryline && this.gameState.aiTrainingStoryline?.currentPhase) 
-            ? this.gameState.aiTrainingStoryline.currentPhase 
-            : 'pre_attention';
+        // The AI-training storyline drives the phase when it runs; without it
+        // (it isn't reachable in normal play) the day schedule alone gates the
+        // later papers, so they can still unlock (#2274, #1670)
+        const storylinePhase = this.gameState.aiTrainingStoryline?.currentPhase || null;
         
         // Check scheduled papers
         this.scheduledPapers.forEach(schedule => {
@@ -302,8 +317,10 @@ export class ResearchPaperNotificationSystem {
             // Check if day requirement met
             if (currentDay < schedule.unlockDay) return;
             
-            // Check if phase requirement met
-            if (schedule.requiresPhase && currentPhase !== schedule.phase) return;
+            // Phase requirement: reached-or-passed, never exact equality, so
+            // advancing past a phase can't lock its papers out (#1323, #929)
+            if (schedule.requiresPhase && storylinePhase &&
+                !ResearchPaperNotificationSystem.phaseReached(storylinePhase, schedule.phase)) return;
             
             // Unlock and add to inbox
             this.unlockPaper(schedule.paperId);
@@ -368,10 +385,23 @@ export class ResearchPaperNotificationSystem {
      */
     markAsRead(notificationId) {
         const notification = this.inbox.find(item => item.id === notificationId);
-        if (notification) {
-            notification.read = true;
-            this.readPapers.add(notification.paperId);
-        }
+        if (!notification) return null;
+        notification.read = true;
+        // Reading a paper for the first time teaches something (#1669)
+        if (this.readPapers.has(notification.paperId)) return null;
+        this.readPapers.add(notification.paperId);
+        const paper = this.papers[notification.paperId];
+        const xp = paper?.isBreakthrough
+            ? ResearchPaperNotificationSystem.BREAKTHROUGH_READ_XP
+            : ResearchPaperNotificationSystem.READ_XP;
+        const stats = this.gameState?.characterStats;
+        if (typeof stats?.addExperience === 'function') stats.addExperience('intelligence', xp);
+        return { paperId: notification.paperId, xp, stat: 'intelligence' };
+    }
+
+    /** How many distinct papers the player has read */
+    getReadCount() {
+        return this.readPapers.size;
     }
     
     /**
@@ -400,7 +430,8 @@ export class ResearchPaperNotificationSystem {
      */
     toJSON() {
         return {
-            inbox: this.inbox,
+            // Store a reference (paperId), not a frozen copy of the paper (#1325)
+            inbox: this.inbox.map(({ paper, ...rest }) => rest),
             readPapers: [...this.readPapers],
             papers: Object.fromEntries(
                 Object.entries(this.papers).map(([id, paper]) => [id, { unlocked: paper.unlocked }])
@@ -413,7 +444,12 @@ export class ResearchPaperNotificationSystem {
      */
     fromJSON(data) {
         if (!data) return;
-        if (Array.isArray(data.inbox)) this.inbox = data.inbox;
+        if (Array.isArray(data.inbox)) {
+            // Re-link each notification to the live paper definition (#1325)
+            this.inbox = data.inbox
+                .filter(item => item && this.papers[item.paperId])
+                .map(item => ({ ...item, paper: this.papers[item.paperId] }));
+        }
         if (Array.isArray(data.readPapers)) {
             this.readPapers = new Set(data.readPapers);
         } else {
