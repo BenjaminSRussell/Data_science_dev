@@ -11,7 +11,16 @@ export class EventSystem {
         this.upcomingEvents = [];
         this.activeEvents = [];
         this.eventHistory = [];
+        this.todayEffects = null; // { day, ...merged effects } (#1704, #2414)
         this.initializeEvents();
+    }
+
+    static DAYS_PER_YEAR = 360; // 12 x 30-day months
+
+    /** Absolute game day (TimeManager.totalDays numbering) for a year/month/day */
+    static absoluteDay(year, month, day) {
+        return (Math.max(1, Number(year) || 1) - 1) * EventSystem.DAYS_PER_YEAR
+            + (Number(month) || 0) * 30 + (Number(day) || 1);
     }
     
     /**
@@ -43,11 +52,11 @@ export class EventSystem {
             { id: 'christmas', name: 'Christmas', month: 11, day: 25, type: 'holiday' }
         ];
         
+        // No year pinned: holidays recur every year (#2412, #922)
         holidays.forEach(holiday => {
             this.upcomingEvents.push({
                 ...holiday,
-                scheduled: true,
-                year: this.gameState.timeManager?.year || 1
+                scheduled: true
             });
         });
     }
@@ -164,18 +173,107 @@ export class EventSystem {
         this.activeEvents.push({ ...event, triggeredDay: today });
         
         // Handle event based on type
+        let result;
         switch (event.type) {
             case 'holiday':
-                return this.handleHoliday(event);
+                result = this.handleHoliday(event);
+                break;
             case 'party':
-                return this.handleParty(event);
+                result = this.handleParty(event);
+                break;
             case 'crash':
-                return this.handleStockCrash(event);
+                result = this.handleStockCrash(event);
+                break;
             case 'bull':
-                return this.handleBullMarket(event);
+                result = this.handleBullMarket(event);
+                break;
             default:
-                return { message: `Event: ${event.name}` };
+                result = { message: `Event: ${event.name}` };
         }
+        if (result) {
+            result.eventId = event.id;
+            this.recordEffects(today, result.effects);
+        }
+        return result;
+    }
+
+    /**
+     * Keep today's effects so the rest of the game can honour them instead of
+     * dropping them on the floor (#1704, #2414)
+     */
+    recordEffects(day, effects) {
+        if (!effects) return;
+        if (!this.todayEffects || this.todayEffects.day !== day) this.todayEffects = { day };
+        for (const [k, v] of Object.entries(effects)) {
+            if (k === 'npcAvailability') {
+                const prev = this.todayEffects.npcAvailability;
+                this.todayEffects.npcAvailability = prev === undefined ? v : Math.min(prev, v);
+            } else {
+                this.todayEffects[k] = v;
+            }
+        }
+    }
+
+    /** Effects of events triggered today ({} on a quiet day) */
+    getActiveEffects() {
+        const today = this.gameState?.timeManager?.totalDays ?? 0;
+        if (!this.todayEffects || this.todayEffects.day !== today) return {};
+        const { day, ...effects } = this.todayEffects;
+        return effects;
+    }
+
+    /** Holiday shop closures (#1704) */
+    isShopClosed() {
+        return this.getActiveEffects().shopsClosed === true;
+    }
+
+    /**
+     * Whether an NPC is around today. With npcAvailability 0.5 about half the
+     * cast is out; the pick is stable for the whole day (#1704)
+     */
+    isNPCAvailable(npcId) {
+        const share = this.getActiveEffects().npcAvailability;
+        if (share === undefined || share >= 1) return true;
+        if (share <= 0) return false;
+        const today = this.gameState?.timeManager?.totalDays ?? 0;
+        const key = `${npcId}:${today}`;
+        let h = 0;
+        for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+        return (h % 100) < share * 100;
+    }
+
+    /**
+     * Attend or skip a party (the actions handleParty offers) (#2414).
+     * Attending costs energy and warms up everyone at the venue.
+     */
+    resolvePartyAction(eventId, actionId) {
+        const event = this.upcomingEvents.find(e => e.id === eventId);
+        if (!event || event.type !== 'party') return null;
+        const today = this.gameState?.timeManager?.totalDays ?? 0;
+        const active = this.activeEvents.find(e => e.id === eventId && e.triggeredDay === today);
+        if (!active || active.resolved) return null;
+        active.resolved = actionId;
+        this.eventHistory.push({ id: eventId, action: actionId, day: today });
+        if (this.eventHistory.length > 100) this.eventHistory.splice(0, this.eventHistory.length - 100);
+
+        if (actionId !== 'attend') {
+            return { action: 'skip', message: `You skipped the ${event.name} and kept your energy.` };
+        }
+        const { energyCost = 20, relationshipBonus = 5 } = this.handleParty(event).effects;
+        const tm = this.gameState?.timeManager;
+        if (tm?.hasEnergy && !tm.hasEnergy(energyCost)) {
+            active.resolved = null;
+            this.eventHistory.pop();
+            return { action: 'attend', success: false, message: 'Too tired to go out tonight.' };
+        }
+        tm?.useEnergy?.(energyCost);
+        const boosted = this.gameState?.npcManager?.boostNearbyRelationships?.(relationshipBonus, event.location) || 0;
+        return {
+            action: 'attend', success: true, energyCost, relationshipBonus, boosted,
+            message: boosted
+                ? `Great ${event.name}! +${relationshipBonus} with ${boosted} ${boosted === 1 ? 'person' : 'people'}.`
+                : `You enjoyed the ${event.name}.`
+        };
     }
     
     /**
@@ -261,25 +359,34 @@ export class EventSystem {
     /**
      * Get upcoming events (next 7 days)
      */
-    getUpcomingEvents(days = 7) {
+    getUpcomingEvents(days = 7, { types = null } = {}) {
         if (!this.gameState.timeManager) return [];
         
         const currentDay = this.gameState.timeManager?.totalDays || 1;
         const futureDay = currentDay + days;
         
-        return this.upcomingEvents.filter(event => {
-            const eventDay = this.getEventDay(event);
-            return eventDay >= currentDay && eventDay <= futureDay;
-        });
+        // Compare absolute days, so this keeps working after Year 1 (#1710)
+        return this.upcomingEvents
+            .filter(event => !types || types.includes(event.type))
+            .map(event => ({ event, day: this.getEventDay(event, currentDay) }))
+            .filter(({ day }) => day !== null && day >= currentDay && day <= futureDay)
+            .sort((a, b) => a.day - b.day)
+            .map(({ event, day }) => ({ ...event, occursOnDay: day, inDays: day - currentDay }));
     }
     
     /**
-     * Get event day number
+     * Next absolute day (TimeManager.totalDays numbering) the event happens
+     * on or after `fromDay`. Events pinned to a year occur once; the rest
+     * recur annually. Returns null for a pinned event that already passed.
      */
-    getEventDay(event) {
-        // Calculate day number from month/day
-        const daysPerMonth = 30;
-        return (event.month || 0) * daysPerMonth + (event.day || 1);
+    getEventDay(event, fromDay = this.gameState?.timeManager?.totalDays || 1) {
+        if (event.year) {
+            const d = EventSystem.absoluteDay(event.year, event.month, event.day);
+            return d >= fromDay ? d : null;
+        }
+        const year = Math.floor((Math.max(1, fromDay) - 1) / EventSystem.DAYS_PER_YEAR) + 1;
+        const thisYear = EventSystem.absoluteDay(year, event.month, event.day);
+        return thisYear >= fromDay ? thisYear : EventSystem.absoluteDay(year + 1, event.month, event.day);
     }
 
     /**
@@ -287,7 +394,7 @@ export class EventSystem {
      * the same day's events (#1711)
      */
     toJSON() {
-        return pickState(this, ['upcomingEvents', 'activeEvents', 'eventHistory']);
+        return pickState(this, ['upcomingEvents', 'activeEvents', 'eventHistory', 'todayEffects']);
     }
 
     /**
@@ -295,6 +402,11 @@ export class EventSystem {
      */
     fromJSON(data) {
         if (!data) return;
-        applyState(this, data, ['upcomingEvents', 'activeEvents', 'eventHistory']);
+        applyState(this, data, ['upcomingEvents', 'activeEvents', 'eventHistory', 'todayEffects']);
+        // Older saves pinned holidays to Year 1; let them recur (#2412)
+        if (Array.isArray(this.upcomingEvents)) {
+            this.upcomingEvents = this.upcomingEvents.map(e =>
+                e && e.type === 'holiday' && e.year ? (({ year, ...rest }) => rest)(e) : e);
+        }
     }
 }

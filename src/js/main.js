@@ -884,6 +884,11 @@ export class MainGame {
         });
 
         document.getElementById('btn-nav-shop')?.addEventListener('click', () => {
+            // Holidays close the shops (#1704)
+            if (this.eventSystem?.isShopClosed?.()) {
+                this.showToast('The shop is closed for the holiday. Come back tomorrow.', 'info');
+                return;
+            }
             this.screenManager.showScreen('screen-shop');
             this.uiUpdater.updateShopScreen();
         });
@@ -2856,6 +2861,37 @@ export class MainGame {
     }
 
     /**
+     * Let the player attend or skip a party that's happening today (#2414)
+     */
+    offerPartyChoice(result) {
+        // Don't stomp on a dialog the player already has open
+        const container = document.getElementById('modal-container');
+        if (!container || !container.classList.contains('hidden')) {
+            this.showToast?.(result.message, 'info');
+            return;
+        }
+        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const cost = result.effects?.energyCost ?? 20;
+        const bonus = result.effects?.relationshipBonus ?? 5;
+        this.showModal(`
+            <h2 id="modal-title">${esc(result.name)}</h2>
+            <p>${esc(result.message)}</p>
+            <p class="party-terms">Attending costs ${esc(cost)} energy and gives +${esc(bonus)} relationship with everyone there.</p>
+            <div class="modal-actions">
+                ${(result.actions || []).map(a => `<button class="btn-primary" data-party-action="${esc(a.id)}">${esc(a.text)}</button>`).join('')}
+            </div>
+        `);
+        document.querySelectorAll('#modal-content [data-party-action]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const outcome = this.eventSystem?.resolvePartyAction?.(result.eventId, btn.dataset.partyAction);
+                this.closeModal();
+                if (outcome?.message) this.showToast(outcome.message, outcome.success === false ? 'warning' : 'success');
+                this.uiUpdater?.updateAllUI?.();
+            });
+        });
+    }
+
+    /**
      * Show modal with content
      */
     showModal(content) {
@@ -3801,9 +3837,18 @@ export class MainGame {
                 const todayEvents = this.eventSystem.checkTodayEvents();
                 todayEvents.forEach(event => {
                     const result = this.eventSystem.triggerEvent(event.id);
-                    if (result && this.showToast) {
+                    if (!result) return;
+                    // Parties offer attend/skip instead of a passing toast (#2414)
+                    if (result.type === 'party' && Array.isArray(result.actions)) {
+                        this.offerPartyChoice(result);
+                    } else if (this.showToast) {
                         this.showToast(result.message, result.type === 'crash' ? 'error' : 'info');
                     }
+                });
+                // Heads-up for tomorrow's holidays (#1710)
+                const tomorrow = this.eventSystem.getUpcomingEvents?.(1, { types: ['holiday'] }) || [];
+                tomorrow.filter(e => e.inDays === 1).forEach(e => {
+                    this.showToast?.(`Tomorrow is ${e.name}. Many places will be closed.`, 'info');
                 });
                 this.gameState.lastEventCheck = currentDay;
             }
