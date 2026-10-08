@@ -356,9 +356,9 @@
                             <label style="display: block; color: #888;">Palette</label>
                             <div class="color-palette-picker" id="color-palette" style="display: flex; gap: 0.5rem;">
                                 <button class="palette-btn active" data-palette="corporate"
-                                    style="width: 20px; height: 20px; background: #888; border: none;"></button>
+                                    aria-label="Corporate palette" title="Corporate" aria-pressed="true"></button>
                                 <button class="palette-btn" data-palette="monochrome"
-                                    style="width: 20px; height: 20px; background: #444; border: none;"></button>
+                                    aria-label="Monochrome palette" title="Monochrome" aria-pressed="false"></button>
                             </div>
                         </div>
                         <div class="option-group" style="margin-bottom: 0.5rem;">
@@ -1387,8 +1387,8 @@
             </div>
 
             <!-- Jail Screen -->
-            <section id="screen-jail" class="screen hidden" style="text-align: center; background-color: #2c3e50;">
-                <div class="jail-bars" style="font-size: 100px; margin-top: 50px;"></div>
+            <section id="screen-jail" class="screen hidden" style="text-align: center;">
+                <div class="jail-bars" aria-hidden="true">|||||||</div>
                 <h1 style="color: #e74c3c; font-size: 3rem;">BUSTED!</h1>
                 <p style="color: #bdc3c7; font-size: 1.2rem;">You have been arrested for financial crimes.</p>
 

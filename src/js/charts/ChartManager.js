@@ -40,7 +40,52 @@ const PALETTES = {
     ]
 };
 
+// Text/grid colours Chart.js draws onto the canvas. CSS can't reach the
+// canvas, so these follow [data-theme] by hand (#1893).
+const THEME_COLORS = {
+    dark: {
+        text: '#9ca3af',
+        title: '#f9fafb',
+        dataLabel: '#f9fafb',
+        grid: 'rgba(255, 255, 255, 0.05)',
+        border: 'rgba(255, 255, 255, 0.1)',
+        pointBorder: '#ffffff'
+    },
+    light: {
+        text: '#52525b',
+        title: '#18181b',
+        dataLabel: '#18181b',
+        grid: 'rgba(0, 0, 0, 0.08)',
+        border: 'rgba(0, 0, 0, 0.12)',
+        pointBorder: '#ffffff'
+    }
+};
+
 export class ChartManager {
+    static THEME_COLORS = THEME_COLORS;
+    static PALETTES = PALETTES;
+
+    /**
+     * Chart colours for the active theme
+     */
+    static getThemeColors() {
+        const theme = typeof document !== 'undefined'
+            && document.documentElement?.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        return THEME_COLORS[theme];
+    }
+
+    /**
+     * CSS background for a palette swatch, built from the real palette so the
+     * picker matches the chart (#1892)
+     */
+    static paletteSwatch(name) {
+        const colors = PALETTES[name];
+        if (!colors) return null;
+        const step = 100 / colors.length;
+        const stops = colors.map((c, i) => `${c} ${(i * step).toFixed(0)}% ${((i + 1) * step).toFixed(0)}%`);
+        return `linear-gradient(90deg, ${stops.join(', ')})`;
+    }
+
     constructor(game) {
         this.game = game;
         this.previewChart = null;
@@ -52,11 +97,26 @@ export class ChartManager {
      */
     init() {
         // Set default Chart.js options
-        Chart.defaults.color = '#9ca3af';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        this.applyThemeDefaults();
         Chart.defaults.font.family = "'Inter', sans-serif";
 
 
+    }
+
+    applyThemeDefaults() {
+        const colors = ChartManager.getThemeColors();
+        Chart.defaults.color = colors.text;
+        Chart.defaults.borderColor = colors.border;
+    }
+
+    /**
+     * Redraw charts after the theme changes so canvas text stays readable
+     */
+    refreshTheme() {
+        this.applyThemeDefaults();
+        if (this.previewChart && this.lastPreview) {
+            this.createPreviewChart(this.lastPreview.data, this.lastPreview.config);
+        }
     }
 
     /**
@@ -154,7 +214,7 @@ export class ChartManager {
                 tension: 0.3,
                 fill: type === 'line' ? (config.type === 'area' || !multi) : undefined,
                 pointBackgroundColor: color,
-                pointBorderColor: '#fff',
+                pointBorderColor: ChartManager.getThemeColors().pointBorder,
                 pointRadius: type === 'line' ? 5 : (type === 'scatter' ? 6 : undefined),
                 pointHoverRadius: type === 'line' ? 7 : undefined
             };
@@ -205,6 +265,7 @@ export class ChartManager {
      */
     buildChartOptions(config, chartType, datasetName) {
         const isPolar = ['pie', 'doughnut', 'polarArea', 'radar'].includes(chartType);
+        const theme = ChartManager.getThemeColors();
 
         // Only format y-axis ticks as currency when the plotted series is a
         // currency metric (same heuristic used for the data table)
@@ -226,7 +287,7 @@ export class ChartManager {
                     display: config.showLegend,
                     position: 'top',
                     labels: {
-                        color: '#9ca3af',
+                        color: theme.text,
                         padding: 20,
                         font: {
                             size: 12
@@ -236,7 +297,7 @@ export class ChartManager {
                 title: {
                     display: !!config.title,
                     text: config.title || '',
-                    color: '#f9fafb',
+                    color: theme.title,
                     font: {
                         size: 16,
                         weight: 600
@@ -246,7 +307,7 @@ export class ChartManager {
                     }
                 },
                 datalabels: config.showDataLabels ? {
-                    color: '#fff',
+                    color: theme.dataLabel,
                     anchor: 'end',
                     align: 'top'
                 } : false
@@ -256,20 +317,20 @@ export class ChartManager {
                     display: true,
                     grid: {
                         display: config.showGrid,
-                        color: 'rgba(255, 255, 255, 0.05)'
+                        color: theme.grid
                     },
                     ticks: {
-                        color: '#9ca3af'
+                        color: theme.text
                     }
                 },
                 y: {
                     display: true,
                     grid: {
                         display: config.showGrid,
-                        color: 'rgba(255, 255, 255, 0.05)'
+                        color: theme.grid
                     },
                     ticks: {
-                        color: '#9ca3af',
+                        color: theme.text,
                         callback: function (value) {
                             if (value >= 1000) {
                                 if (isCurrency) {

@@ -21,6 +21,12 @@ describe('Color System', () => {
             const filePath = path.join(stylesDir, file);
             return fs.readFileSync(filePath, 'utf8');
         }).join('\n');
+
+        // Also catch banned colours written as rgb()/rgba() (#1090): append
+        // the hex form of every rgb triplet so the substring checks see it
+        const rgbAsHex = [...allCssContent.matchAll(/rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/g)]
+            .map(m => '#' + m.slice(1, 4).map(n => Number(n).toString(16).padStart(2, '0')).join(''));
+        allCssContent += '\n' + rgbAsHex.join('\n');
     });
 
     describe('Stylesheet Colors', () => {
