@@ -57,12 +57,15 @@ describe('RoommateSystem status and rent (#381)', () => {
     it('relationship level boundaries', () => {
         const r = new RoommateSystem({});
         const at = (v) => { r.setRelationship(v); return r.getRelationshipLevel(); };
+        // Shared RELATIONSHIP_STAGES ladder (#566)
         expect(at(19)).toBe('stranger');
-        expect(at(20)).toBe('acquaintance');
-        expect(at(39)).toBe('acquaintance');
-        expect(at(40)).toBe('friend');
-        expect(at(69)).toBe('friend');
-        expect(at(70)).toBe('close_friend');
+        expect(at(20)).toBe('friendly');
+        expect(at(39)).toBe('friendly');
+        expect(at(40)).toBe('acquaintance');
+        expect(at(59)).toBe('acquaintance');
+        expect(at(60)).toBe('friend');
+        expect(at(79)).toBe('friend');
+        expect(at(80)).toBe('close_friend');
     });
 
     it('isAtHome follows the schedule by slot', () => {
@@ -75,7 +78,7 @@ describe('RoommateSystem status and rent (#381)', () => {
 
     it('getStatus summarizes the roommate', () => {
         const r = new RoommateSystem({ timeManager: { timeSlot: 2 } });
-        expect(r.getStatus()).toEqual({ name: 'Alex', relationship: 30, relationshipLevel: 'acquaintance', atHome: false });
+        expect(r.getStatus()).toEqual({ name: 'Alex', relationship: 30, relationshipLevel: 'friendly', atHome: false });
     });
 });
 
