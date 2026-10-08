@@ -76,11 +76,13 @@ export const SCREEN_THEMES = {
         accent: '#06b6d4',
         gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
     },
+    // The jail's slate colour lives here only; index.html no longer
+    // hardcodes a background that this theme wiped (#1732)
     'screen-jail': {
-        primary: '#1c1917',
-        secondary: '#292524',
-        accent: '#ef4444',
-        gradient: 'linear-gradient(135deg, #1c1917 0%, #292524 50%, #1c1917 100%)'
+        primary: '#2c3e50',
+        secondary: '#34495e',
+        accent: '#e74c3c',
+        gradient: 'linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%)'
     },
     'screen-library': {
         primary: '#0f172a',
