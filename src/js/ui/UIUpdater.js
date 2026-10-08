@@ -17,6 +17,7 @@ import { CommonUtils } from '../utils/CommonUtils.js';
 import { EconomySystem } from '../game/EconomySystem.js';
 import { GameState } from '../game/GameState.js';
 import { insightHint } from '../game/EconomySystem.js';
+import { renderTaskBrief } from '../game/taskBrief.js';
 import { logger } from '../utils/Logger.js';
 import { NEWS_CATEGORIES } from '../game/NewsManager.js';
 
@@ -186,6 +187,9 @@ export class UIUpdater {
                 innerHTML: requirementsHTML
             });
         }
+
+        // Domain, tools, skills, deliverable, context (#2430)
+        renderTaskBrief(task);
 
         // Update task reward
         if (task.potentialReward) {

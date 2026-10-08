@@ -22,8 +22,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 345,
     "skills": [
@@ -57,8 +56,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 339,
     "skills": [
@@ -94,8 +92,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 334,
     "skills": [
@@ -131,8 +128,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 328,
     "skills": [
@@ -168,8 +164,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 323,
     "skills": [
@@ -205,8 +200,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 318,
     "skills": [
@@ -553,13 +547,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 269,
     "skills": [
@@ -595,13 +587,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 264,
     "skills": [
@@ -637,13 +627,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 258,
     "skills": [
@@ -679,13 +667,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 253,
     "skills": [
@@ -722,13 +708,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 247,
     "skills": [
@@ -766,13 +750,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 242,
     "skills": [
@@ -810,13 +792,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 237,
     "skills": [
@@ -855,13 +835,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 231,
     "skills": [
@@ -900,13 +878,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 226,
     "skills": [
@@ -944,13 +920,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 220,
     "skills": [
@@ -989,13 +963,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 215,
     "skills": [
@@ -1029,8 +1001,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 345,
     "skills": [
@@ -1065,8 +1036,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 339,
     "skills": [
@@ -1102,8 +1072,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 334,
     "skills": [
@@ -1139,8 +1108,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 328,
     "skills": [
@@ -1176,8 +1144,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 323,
     "skills": [
@@ -1214,8 +1181,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 318,
     "skills": [
@@ -1569,13 +1535,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 269,
     "skills": [
@@ -1611,13 +1575,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 264,
     "skills": [
@@ -1654,13 +1616,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 258,
     "skills": [
@@ -1697,13 +1657,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 253,
     "skills": [
@@ -1740,13 +1698,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 247,
     "skills": [
@@ -1784,13 +1740,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 242,
     "skills": [
@@ -1828,13 +1782,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 237,
     "skills": [
@@ -1873,13 +1825,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 231,
     "skills": [
@@ -1918,13 +1868,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 226,
     "skills": [
@@ -1963,13 +1911,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 220,
     "skills": [
@@ -2008,13 +1954,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 215,
     "skills": [
@@ -2035,7 +1979,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0051",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 115,970 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 115,970 claims from last year, 4.3% labeled as fraudulent. Features: claim amount ($500-$138,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use Isolation Forest with 36 engineered features. Handle class imbalance using class weighting. Target precision: >91% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 1.0,
@@ -2049,8 +1993,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 345,
     "skills": [
@@ -2070,7 +2013,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0052",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 123,714 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 123,714 claims from last year, 4.0% labeled as fraudulent. Features: claim amount ($100-$42,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use Random Forest with 35 engineered features. Handle class imbalance using random undersampling. Target precision: >81% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 1.4,
@@ -2084,8 +2027,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 339,
     "skills": [
@@ -2105,7 +2047,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0053",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 117,391 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 117,391 claims from last 3 years, 4.4% labeled as fraudulent. Features: claim amount ($100-$135,000), policy age, number of previous claims, time since last claim, claim type (property/casualty/medical). Use LightGBM with 28 engineered features. Handle class imbalance using class weighting. Target precision: >91% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 1.7,
@@ -2120,8 +2062,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 334,
     "skills": [
@@ -2141,7 +2082,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0054",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 99,015 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 99,015 claims from last year, 1.7% labeled as fraudulent. Features: claim amount ($500-$92,000), policy age, number of previous claims, time since last claim, claim type (property/casualty/medical). Use Isolation Forest with 49 engineered features. Handle class imbalance using class weighting. Target precision: >80% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 2.1,
@@ -2156,8 +2097,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 328,
     "skills": [
@@ -2177,7 +2117,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0055",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 106,911 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 106,911 claims from last year, 4.1% labeled as fraudulent. Features: claim amount ($500-$135,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use Isolation Forest with 60 engineered features. Handle class imbalance using ADASYN. Target precision: >80% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 2.4,
@@ -2192,8 +2132,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 323,
     "skills": [
@@ -2213,7 +2152,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0056",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 20,811 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 20,811 claims from last 3 years, 3.2% labeled as fraudulent. Features: claim amount ($200-$133,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use Random Forest with 37 engineered features. Handle class imbalance using random undersampling. Target precision: >90% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 2.8,
@@ -2229,8 +2168,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 318,
     "skills": [
@@ -2250,7 +2188,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0057",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 127,284 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 127,284 claims from last year, 3.7% labeled as fraudulent. Features: claim amount ($500-$148,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use XGBoost with 49 engineered features. Handle class imbalance using class weighting. Target precision: >88% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 3.2,
@@ -2286,7 +2224,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0058",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 179,714 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 179,714 claims from last 3 years, 1.8% labeled as fraudulent. Features: claim amount ($100-$45,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use Random Forest with 37 engineered features. Handle class imbalance using ADASYN. Target precision: >82% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 3.5,
@@ -2323,7 +2261,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0059",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 62,177 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 62,177 claims from last year, 2.2% labeled as fraudulent. Features: claim amount ($100-$139,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use LightGBM with 54 engineered features. Handle class imbalance using class weighting. Target precision: >85% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 3.9,
@@ -2360,7 +2298,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0060",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 38,131 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 38,131 claims from last 3 years, 5.2% labeled as fraudulent. Features: claim amount ($500-$143,000), policy age, number of previous claims, time since last claim, claim type (property/casualty/medical). Use Random Forest with 44 engineered features. Handle class imbalance using random undersampling. Target precision: >85% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 4.2,
@@ -2399,7 +2337,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0061",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 105,894 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 105,894 claims from last 3 years, 1.9% labeled as fraudulent. Features: claim amount ($100-$25,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use XGBoost with 32 engineered features. Handle class imbalance using SMOTE. Target precision: >80% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 4.6,
@@ -2439,7 +2377,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0062",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 47,516 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 47,516 claims from last year, 4.9% labeled as fraudulent. Features: claim amount ($200-$141,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use Isolation Forest with 27 engineered features. Handle class imbalance using random undersampling. Target precision: >89% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 5.0,
@@ -2479,7 +2417,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0063",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 129,991 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 129,991 claims from last 3 years, 3.1% labeled as fraudulent. Features: claim amount ($400-$52,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use Random Forest with 45 engineered features. Handle class imbalance using random undersampling. Target precision: >87% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 5.3,
@@ -2519,7 +2457,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0064",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 41,161 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 41,161 claims from last 3 years, 2.9% labeled as fraudulent. Features: claim amount ($200-$127,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use XGBoost with 50 engineered features. Handle class imbalance using ADASYN. Target precision: >90% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 5.7,
@@ -2560,7 +2498,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0065",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 25,536 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 25,536 claims from last year, 4.9% labeled as fraudulent. Features: claim amount ($300-$29,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use Isolation Forest with 25 engineered features. Handle class imbalance using random undersampling. Target precision: >81% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 6.0,
@@ -2575,13 +2513,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 269,
     "skills": [
@@ -2601,7 +2537,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0066",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 69,717 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 69,717 claims from last 3 years, 3.1% labeled as fraudulent. Features: claim amount ($400-$99,000), policy age, number of previous claims, time since last claim, claim type (property/casualty/medical). Use XGBoost with 31 engineered features. Handle class imbalance using random undersampling. Target precision: >92% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 6.4,
@@ -2616,13 +2552,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 264,
     "skills": [
@@ -2642,7 +2576,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0067",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 199,639 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 199,639 claims from last year, 2.7% labeled as fraudulent. Features: claim amount ($400-$34,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use LightGBM with 46 engineered features. Handle class imbalance using random undersampling. Target precision: >81% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 6.8,
@@ -2658,13 +2592,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 258,
     "skills": [
@@ -2684,7 +2616,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0068",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 193,792 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 193,792 claims from last 3 years, 4.2% labeled as fraudulent. Features: claim amount ($400-$49,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use Isolation Forest with 29 engineered features. Handle class imbalance using SMOTE. Target precision: >84% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 7.1,
@@ -2700,13 +2632,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 253,
     "skills": [
@@ -2726,7 +2656,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0069",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 87,517 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 87,517 claims from last year, 2.4% labeled as fraudulent. Features: claim amount ($100-$114,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use XGBoost with 46 engineered features. Handle class imbalance using random undersampling. Target precision: >92% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 7.5,
@@ -2742,13 +2672,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 247,
     "skills": [
@@ -2768,7 +2696,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0070",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 115,770 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 115,770 claims from last 3 years, 5.6% labeled as fraudulent. Features: claim amount ($400-$99,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use LightGBM with 29 engineered features. Handle class imbalance using SMOTE. Target precision: >83% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 7.8,
@@ -2785,13 +2713,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 242,
     "skills": [
@@ -2811,7 +2737,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0071",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 42,166 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 42,166 claims from last 3 years, 4.3% labeled as fraudulent. Features: claim amount ($200-$121,000), policy age, number of previous claims, time since last claim, claim type (collision/theft/liability). Use Random Forest with 27 engineered features. Handle class imbalance using SMOTE. Target precision: >86% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 8.2,
@@ -2828,13 +2754,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 237,
     "skills": [
@@ -2854,7 +2778,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0072",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 112,211 claims from last 3 years, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 112,211 claims from last 3 years, 3.1% labeled as fraudulent. Features: claim amount ($500-$87,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use Isolation Forest with 59 engineered features. Handle class imbalance using random undersampling. Target precision: >85% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 8.6,
@@ -2872,13 +2796,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 231,
     "skills": [
@@ -2898,7 +2820,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0073",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 57,194 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 57,194 claims from last year, 2.0% labeled as fraudulent. Features: claim amount ($300-$59,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use XGBoost with 43 engineered features. Handle class imbalance using random undersampling. Target precision: >88% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 8.9,
@@ -2916,13 +2838,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 226,
     "skills": [
@@ -2942,7 +2862,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0074",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 85,701 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 85,701 claims from last year, 3.7% labeled as fraudulent. Features: claim amount ($500-$73,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use XGBoost with 56 engineered features. Handle class imbalance using class weighting. Target precision: >90% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 9.3,
@@ -2960,13 +2880,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 220,
     "skills": [
@@ -2986,7 +2904,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0075",
     "name": "Claims Fraud Detection Using Machine Learning",
-    "description": "Build fraud detection model for insurance claims. Dataset: 97,315 claims from last year, standard% labeled as fraudulent. Features: claim amount ($standard-$standard), policy age, number of previous claims, time since last claim, claim type (standard). Use standard with standard engineered features. Handle class imbalance using standard. Target precision: >standard% for fraud class.",
+    "description": "Build fraud detection model for insurance claims. Dataset: 97,315 claims from last year, 2.2% labeled as fraudulent. Features: claim amount ($500-$28,000), policy age, number of previous claims, time since last claim, claim type (auto/home/health). Use Random Forest with 59 engineered features. Handle class imbalance using ADASYN. Target precision: >84% for fraud class.",
     "domain": "finance",
     "subdomain": "insurance",
     "difficulty": 9.6,
@@ -3004,13 +2922,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 215,
     "skills": [
@@ -4019,7 +3935,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0101",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 47,465 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (2), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 47,465 heart failure patients. Features: age (24-89), comorbidities count (0-14), length of stay (2-15 days), discharge location (2), medication count (0-18). Current readmission rate: 15.7%. Build random forest model. Evaluate using precision-recall curve (target AUC-PR: >0.44). Deploy model to the clinical data warehouse for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 1.0,
@@ -4033,8 +3949,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 345,
     "skills": [
@@ -4054,7 +3969,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0102",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 5 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use ARIMA time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 4 hospital departments. Historical data: 5 years, 126,000 admissions. Account for: day of week, seasonality, department capacity (38-137 beds), staffing levels, patient acuity scores. Use ARIMA time series method. Forecast next 30 days. Target MAPE: <10%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 1.3,
@@ -4068,8 +3983,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 340,
     "skills": [
@@ -4089,7 +4003,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0103",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 29,462 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (5), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 29,462 heart failure patients. Features: age (21-85), comorbidities count (0-13), length of stay (2-26 days), discharge location (5), medication count (0-16). Current readmission rate: 22.3%. Build random forest model. Evaluate using precision-recall curve (target AUC-PR: >0.55). Deploy model to a REST scoring API for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 1.5,
@@ -4104,8 +4018,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 336,
     "skills": [
@@ -4125,7 +4038,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0104",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 40,601 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (5), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 40,601 heart failure patients. Features: age (18-85), comorbidities count (0-12), length of stay (1-30 days), discharge location (5), medication count (0-24). Current readmission rate: 17.1%. Build XGBoost model. Evaluate using precision-recall curve (target AUC-PR: >0.42). Deploy model to the clinical data warehouse for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 1.8,
@@ -4140,8 +4053,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 332,
     "skills": [
@@ -4161,7 +4073,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0105",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 40,095 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (2), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 40,095 heart failure patients. Features: age (25-93), comorbidities count (0-8), length of stay (1-36 days), discharge location (2), medication count (0-25). Current readmission rate: 18.6%. Build XGBoost model. Evaluate using precision-recall curve (target AUC-PR: >0.48). Deploy model to the clinical data warehouse for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 2.1,
@@ -4176,8 +4088,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 328,
     "skills": [
@@ -4197,7 +4108,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0106",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 5 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use Prophet time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 12 hospital departments. Historical data: 5 years, 121,000 admissions. Account for: day of week, seasonality, department capacity (41-105 beds), staffing levels, patient acuity scores. Use Prophet time series method. Forecast next 7 days. Target MAPE: <9%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 2.4,
@@ -4212,8 +4123,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 324,
     "skills": [
@@ -4233,7 +4143,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0107",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 9,642 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (2), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 9,642 heart failure patients. Features: age (28-98), comorbidities count (0-9), length of stay (1-41 days), discharge location (2), medication count (0-23). Current readmission rate: 15.0%. Build random forest model. Evaluate using precision-recall curve (target AUC-PR: >0.35). Deploy model to the hospital EHR system for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 2.6,
@@ -4249,8 +4159,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 320,
     "skills": [
@@ -4270,7 +4179,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0108",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 10,171 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (5), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 10,171 heart failure patients. Features: age (18-94), comorbidities count (0-11), length of stay (1-43 days), discharge location (5), medication count (0-29). Current readmission rate: 18.0%. Build random forest model. Evaluate using precision-recall curve (target AUC-PR: >0.55). Deploy model to Epic for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 2.9,
@@ -4286,8 +4195,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 316,
     "skills": [
@@ -4307,7 +4215,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0109",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 2 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use ARIMA time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 14 hospital departments. Historical data: 2 years, 202,000 admissions. Account for: day of week, seasonality, department capacity (50-94 beds), staffing levels, patient acuity scores. Use ARIMA time series method. Forecast next 30 days. Target MAPE: <13%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 3.2,
@@ -4343,7 +4251,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0110",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 6,876 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (4), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 6,876 heart failure patients. Features: age (25-91), comorbidities count (0-12), length of stay (2-27 days), discharge location (4), medication count (0-29). Current readmission rate: 17.4%. Build logistic regression model. Evaluate using precision-recall curve (target AUC-PR: >0.54). Deploy model to the hospital EHR system for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 3.5,
@@ -4379,7 +4287,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0111",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 9,267 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (3), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 9,267 heart failure patients. Features: age (19-86), comorbidities count (0-12), length of stay (1-44 days), discharge location (3), medication count (0-16). Current readmission rate: 16.8%. Build logistic regression model. Evaluate using precision-recall curve (target AUC-PR: >0.41). Deploy model to Epic for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 3.7,
@@ -4416,7 +4324,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0112",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 28,915 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (3), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 28,915 heart failure patients. Features: age (29-92), comorbidities count (0-14), length of stay (2-17 days), discharge location (3), medication count (0-22). Current readmission rate: 20.8%. Build gradient boosting model. Evaluate using precision-recall curve (target AUC-PR: >0.36). Deploy model to the clinical data warehouse for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 4.0,
@@ -4455,7 +4363,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0113",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 2 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use Prophet time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 12 hospital departments. Historical data: 2 years, 279,000 admissions. Account for: day of week, seasonality, department capacity (55-191 beds), staffing levels, patient acuity scores. Use Prophet time series method. Forecast next 30 days. Target MAPE: <12%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 4.3,
@@ -4494,7 +4402,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0114",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 39,365 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (4), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 39,365 heart failure patients. Features: age (24-100), comorbidities count (0-9), length of stay (1-24 days), discharge location (4), medication count (0-18). Current readmission rate: 14.4%. Build XGBoost model. Evaluate using precision-recall curve (target AUC-PR: >0.47). Deploy model to the clinical data warehouse for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 4.5,
@@ -4534,7 +4442,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0115",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 48,735 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (3), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 48,735 heart failure patients. Features: age (23-91), comorbidities count (0-10), length of stay (1-35 days), discharge location (3), medication count (0-24). Current readmission rate: 18.4%. Build gradient boosting model. Evaluate using precision-recall curve (target AUC-PR: >0.49). Deploy model to the hospital EHR system for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 4.8,
@@ -4574,7 +4482,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0116",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 5 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use XGBoost Time Series time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 13 hospital departments. Historical data: 5 years, 87,000 admissions. Account for: day of week, seasonality, department capacity (33-115 beds), staffing levels, patient acuity scores. Use XGBoost Time Series time series method. Forecast next 90 days. Target MAPE: <9%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 5.1,
@@ -4614,7 +4522,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0117",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 10,790 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (5), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 10,790 heart failure patients. Features: age (23-88), comorbidities count (0-9), length of stay (2-27 days), discharge location (5), medication count (0-21). Current readmission rate: 19.7%. Build random forest model. Evaluate using precision-recall curve (target AUC-PR: >0.53). Deploy model to the clinical data warehouse for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 5.4,
@@ -4654,7 +4562,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0118",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 8,517 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (4), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 8,517 heart failure patients. Features: age (25-90), comorbidities count (0-13), length of stay (2-39 days), discharge location (4), medication count (0-19). Current readmission rate: 19.8%. Build logistic regression model. Evaluate using precision-recall curve (target AUC-PR: >0.42). Deploy model to the clinical data warehouse for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 5.6,
@@ -4695,7 +4603,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0119",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 18,466 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (3), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 18,466 heart failure patients. Features: age (22-86), comorbidities count (0-12), length of stay (2-28 days), discharge location (3), medication count (0-19). Current readmission rate: 17.8%. Build random forest model. Evaluate using precision-recall curve (target AUC-PR: >0.47). Deploy model to the hospital EHR system for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 5.9,
@@ -4736,7 +4644,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0120",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 5 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use XGBoost Time Series time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 13 hospital departments. Historical data: 5 years, 78,000 admissions. Account for: day of week, seasonality, department capacity (39-128 beds), staffing levels, patient acuity scores. Use XGBoost Time Series time series method. Forecast next 14 days. Target MAPE: <13%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 6.2,
@@ -4751,13 +4659,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 267,
     "skills": [
@@ -4777,7 +4683,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0121",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 21,587 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (4), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 21,587 heart failure patients. Features: age (28-100), comorbidities count (0-14), length of stay (2-20 days), discharge location (4), medication count (0-15). Current readmission rate: 21.1%. Build logistic regression model. Evaluate using precision-recall curve (target AUC-PR: >0.42). Deploy model to a REST scoring API for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 6.5,
@@ -4792,13 +4698,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 263,
     "skills": [
@@ -4818,7 +4722,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0122",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 2 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use LSTM time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 12 hospital departments. Historical data: 2 years, 272,000 admissions. Account for: day of week, seasonality, department capacity (59-112 beds), staffing levels, patient acuity scores. Use LSTM time series method. Forecast next 90 days. Target MAPE: <10%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 6.7,
@@ -4834,13 +4738,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 259,
     "skills": [
@@ -4860,7 +4762,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0123",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 28,183 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (2), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 28,183 heart failure patients. Features: age (22-86), comorbidities count (0-9), length of stay (2-44 days), discharge location (2), medication count (0-20). Current readmission rate: 15.3%. Build random forest model. Evaluate using precision-recall curve (target AUC-PR: >0.48). Deploy model to Epic for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 7.0,
@@ -4876,13 +4778,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 255,
     "skills": [
@@ -4902,7 +4802,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0124",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 13,617 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (5), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 13,617 heart failure patients. Features: age (26-86), comorbidities count (0-12), length of stay (1-19 days), discharge location (5), medication count (0-28). Current readmission rate: 23.5%. Build gradient boosting model. Evaluate using precision-recall curve (target AUC-PR: >0.54). Deploy model to a REST scoring API for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 7.3,
@@ -4918,13 +4818,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 250,
     "skills": [
@@ -4944,7 +4842,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0125",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 5 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use XGBoost Time Series time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 14 hospital departments. Historical data: 5 years, 348,000 admissions. Account for: day of week, seasonality, department capacity (21-166 beds), staffing levels, patient acuity scores. Use XGBoost Time Series time series method. Forecast next 30 days. Target MAPE: <10%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 7.5,
@@ -4961,13 +4859,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 246,
     "skills": [
@@ -4987,7 +4883,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0126",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 22,227 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (5), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 22,227 heart failure patients. Features: age (30-100), comorbidities count (0-14), length of stay (2-30 days), discharge location (5), medication count (0-29). Current readmission rate: 19.4%. Build logistic regression model. Evaluate using precision-recall curve (target AUC-PR: >0.36). Deploy model to a REST scoring API for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 7.8,
@@ -5004,13 +4900,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 242,
     "skills": [
@@ -5030,7 +4924,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0127",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 5 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use LSTM time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 18 hospital departments. Historical data: 5 years, 298,000 admissions. Account for: day of week, seasonality, department capacity (40-124 beds), staffing levels, patient acuity scores. Use LSTM time series method. Forecast next 90 days. Target MAPE: <12%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 8.1,
@@ -5047,13 +4941,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 238,
     "skills": [
@@ -5073,7 +4965,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0128",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 2 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use Prophet time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 16 hospital departments. Historical data: 2 years, 89,000 admissions. Account for: day of week, seasonality, department capacity (42-154 beds), staffing levels, patient acuity scores. Use Prophet time series method. Forecast next 90 days. Target MAPE: <8%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 8.4,
@@ -5090,13 +4982,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 234,
     "skills": [
@@ -5116,7 +5006,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0129",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 24,219 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (5), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 24,219 heart failure patients. Features: age (24-85), comorbidities count (0-13), length of stay (2-38 days), discharge location (5), medication count (0-19). Current readmission rate: 20.4%. Build logistic regression model. Evaluate using precision-recall curve (target AUC-PR: >0.41). Deploy model to Epic for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 8.6,
@@ -5134,13 +5024,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 230,
     "skills": [
@@ -5160,7 +5048,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0130",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 48,123 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (5), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 48,123 heart failure patients. Features: age (25-100), comorbidities count (0-10), length of stay (2-33 days), discharge location (5), medication count (0-20). Current readmission rate: 17.7%. Build gradient boosting model. Evaluate using precision-recall curve (target AUC-PR: >0.54). Deploy model to Epic for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 8.9,
@@ -5178,13 +5066,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 226,
     "skills": [
@@ -5204,7 +5090,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0131",
     "name": "Patient Length of Stay Forecasting",
-    "description": "Forecast patient length of stay for standard hospital departments. Historical data: 2 years, standard admissions. Account for: day of week, seasonality, department capacity (standard beds), staffing levels, patient acuity scores. Use XGBoost Time Series time series method. Forecast next standard days. Target MAPE: <standard%.",
+    "description": "Forecast patient length of stay for 4 hospital departments. Historical data: 2 years, 230,000 admissions. Account for: day of week, seasonality, department capacity (30-170 beds), staffing levels, patient acuity scores. Use XGBoost Time Series time series method. Forecast next 90 days. Target MAPE: <14%.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 9.2,
@@ -5222,13 +5108,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 222,
     "skills": [
@@ -5248,7 +5132,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0132",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 23,182 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (4), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 23,182 heart failure patients. Features: age (29-88), comorbidities count (0-13), length of stay (2-38 days), discharge location (4), medication count (0-28). Current readmission rate: 22.5%. Build logistic regression model. Evaluate using precision-recall curve (target AUC-PR: >0.48). Deploy model to Epic for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 9.5,
@@ -5266,13 +5150,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 218,
     "skills": [
@@ -5292,7 +5174,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0133",
     "name": "30-Day Hospital Readmission Prediction",
-    "description": "Predict 30-day readmission risk for 37,308 heart failure patients. Features: age (standard), comorbidities count (0-standard), length of stay (standard days), discharge location (4), medication count (standard). Current readmission rate: standard%. Build standard model. Evaluate using precision-recall curve (target AUC-PR: >standard). Deploy model to standard for real-time scoring.",
+    "description": "Predict 30-day readmission risk for 37,308 heart failure patients. Features: age (18-97), comorbidities count (0-11), length of stay (2-44 days), discharge location (4), medication count (0-19). Current readmission rate: 15.0%. Build logistic regression model. Evaluate using precision-recall curve (target AUC-PR: >0.47). Deploy model to a REST scoring API for real-time scoring.",
     "domain": "healthcare",
     "subdomain": "hospitals",
     "difficulty": 9.7,
@@ -5310,13 +5192,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 214,
     "skills": [
@@ -5336,7 +5216,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0134",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 500 patients across 52 sites in 13 months. Current recruitment rate: 16 patients/month. Analyze 15 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 20%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 1.0,
@@ -5350,8 +5230,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 345,
     "skills": [
@@ -5371,7 +5250,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0135",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 530 patients across 33 sites in 26 months. Current recruitment rate: 20 patients/month. Analyze 18 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 16%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 1.3,
@@ -5385,8 +5264,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 340,
     "skills": [
@@ -5406,7 +5284,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0136",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 2,930 patients across 17 sites in 30 months. Current recruitment rate: 67 patients/month. Analyze 9 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 37%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 1.5,
@@ -5421,8 +5299,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 336,
     "skills": [
@@ -5442,7 +5319,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0137",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 2,660 patients across 43 sites in 29 months. Current recruitment rate: 70 patients/month. Analyze 16 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 26%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 1.8,
@@ -5457,8 +5334,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 332,
     "skills": [
@@ -5478,7 +5354,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0138",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 1,200 patients across 76 sites in 12 months. Current recruitment rate: 38 patients/month. Analyze 12 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 39%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 2.1,
@@ -5493,8 +5369,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 328,
     "skills": [
@@ -5514,7 +5389,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0139",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 550 patients across 40 sites in 21 months. Current recruitment rate: 23 patients/month. Analyze 9 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 38%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 2.4,
@@ -5529,8 +5404,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 324,
     "skills": [
@@ -5550,7 +5424,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0140",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 2,110 patients across 12 sites in 15 months. Current recruitment rate: 40 patients/month. Analyze 18 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 38%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 2.6,
@@ -5566,8 +5440,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 320,
     "skills": [
@@ -5587,7 +5460,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0141",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 2,710 patients across 21 sites in 14 months. Current recruitment rate: 102 patients/month. Analyze 8 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 30%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 2.9,
@@ -5603,8 +5476,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 316,
     "skills": [
@@ -5624,7 +5496,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0142",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 1,970 patients across 35 sites in 15 months. Current recruitment rate: 64 patients/month. Analyze 8 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 35%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 3.2,
@@ -5660,7 +5532,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0143",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 1,860 patients across 23 sites in 28 months. Current recruitment rate: 53 patients/month. Analyze 11 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 39%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 3.5,
@@ -5696,7 +5568,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0144",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 2,890 patients across 65 sites in 30 months. Current recruitment rate: 67 patients/month. Analyze 9 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 27%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 3.7,
@@ -5733,7 +5605,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0145",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase IIb clinical trial. Target: recruit 1,640 patients across 57 sites in 24 months. Current recruitment rate: 45 patients/month. Analyze 12 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 35%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 4.0,
@@ -5772,7 +5644,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0146",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase IIb clinical trial. Target: recruit 1,270 patients across 56 sites in 26 months. Current recruitment rate: 61 patients/month. Analyze 10 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 25%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 4.3,
@@ -5811,7 +5683,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0147",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase IIb clinical trial. Target: recruit 670 patients across 52 sites in 16 months. Current recruitment rate: 25 patients/month. Analyze 9 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 19%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 4.5,
@@ -5851,7 +5723,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0148",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 2,300 patients across 19 sites in 25 months. Current recruitment rate: 91 patients/month. Analyze 12 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 21%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 4.8,
@@ -5891,7 +5763,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0149",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 2,170 patients across 37 sites in 30 months. Current recruitment rate: 99 patients/month. Analyze 10 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 39%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 5.1,
@@ -5931,7 +5803,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0150",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 1,870 patients across 55 sites in 30 months. Current recruitment rate: 80 patients/month. Analyze 15 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 24%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 5.4,
@@ -5971,7 +5843,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0151",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase IIb clinical trial. Target: recruit 580 patients across 23 sites in 29 months. Current recruitment rate: 24 patients/month. Analyze 9 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 28%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 5.6,
@@ -6012,7 +5884,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0152",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase IIb clinical trial. Target: recruit 710 patients across 14 sites in 12 months. Current recruitment rate: 35 patients/month. Analyze 17 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 33%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 5.9,
@@ -6053,7 +5925,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0153",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 1,740 patients across 20 sites in 25 months. Current recruitment rate: 33 patients/month. Analyze 12 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 28%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 6.2,
@@ -6068,13 +5940,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 267,
     "skills": [
@@ -6094,7 +5964,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0154",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 1,700 patients across 64 sites in 18 months. Current recruitment rate: 62 patients/month. Analyze 11 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 28%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 6.5,
@@ -6109,13 +5979,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 263,
     "skills": [
@@ -6135,7 +6003,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0155",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 1,890 patients across 17 sites in 29 months. Current recruitment rate: 84 patients/month. Analyze 17 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 21%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 6.7,
@@ -6151,13 +6019,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 259,
     "skills": [
@@ -6177,7 +6043,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0156",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase IIb clinical trial. Target: recruit 320 patients across 71 sites in 14 months. Current recruitment rate: 11 patients/month. Analyze 11 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 31%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 7.0,
@@ -6193,13 +6059,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 255,
     "skills": [
@@ -6219,7 +6083,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0157",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 2,440 patients across 40 sites in 24 months. Current recruitment rate: 92 patients/month. Analyze 13 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 36%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 7.3,
@@ -6235,13 +6099,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 250,
     "skills": [
@@ -6261,7 +6123,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0158",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 2,970 patients across 47 sites in 23 months. Current recruitment rate: 62 patients/month. Analyze 14 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 16%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 7.5,
@@ -6278,13 +6140,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 246,
     "skills": [
@@ -6304,7 +6164,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0159",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 1,170 patients across 46 sites in 23 months. Current recruitment rate: 30 patients/month. Analyze 9 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 17%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 7.8,
@@ -6321,13 +6181,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 242,
     "skills": [
@@ -6347,7 +6205,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0160",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 400 patients across 29 sites in 24 months. Current recruitment rate: 11 patients/month. Analyze 12 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 23%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 8.1,
@@ -6364,13 +6222,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 238,
     "skills": [
@@ -6390,7 +6246,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0161",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase IIb clinical trial. Target: recruit 750 patients across 41 sites in 25 months. Current recruitment rate: 36 patients/month. Analyze 10 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 36%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 8.4,
@@ -6407,13 +6263,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 234,
     "skills": [
@@ -6433,7 +6287,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0162",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 1,610 patients across 26 sites in 16 months. Current recruitment rate: 36 patients/month. Analyze 12 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 26%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 8.6,
@@ -6451,13 +6305,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 230,
     "skills": [
@@ -6477,7 +6329,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0163",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase IIb clinical trial. Target: recruit 2,000 patients across 66 sites in 27 months. Current recruitment rate: 87 patients/month. Analyze 17 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 36%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 8.9,
@@ -6495,13 +6347,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 226,
     "skills": [
@@ -6521,7 +6371,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0164",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase II clinical trial. Target: recruit 2,890 patients across 34 sites in 12 months. Current recruitment rate: 52 patients/month. Analyze 13 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 24%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 9.2,
@@ -6539,13 +6389,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 222,
     "skills": [
@@ -6565,7 +6413,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0165",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 2,230 patients across 72 sites in 19 months. Current recruitment rate: 111 patients/month. Analyze 10 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 34%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 9.5,
@@ -6583,13 +6431,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 218,
     "skills": [
@@ -6609,7 +6455,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0166",
     "name": "Clinical Trial Patient Recruitment Optimization",
-    "description": "Optimize patient recruitment for Phase standard clinical trial. Target: recruit standard patients across standard sites in standard months. Current recruitment rate: standard patients/month. Analyze standard factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by standard%.",
+    "description": "Optimize patient recruitment for Phase III clinical trial. Target: recruit 2,870 patients across 45 sites in 16 months. Current recruitment rate: 65 patients/month. Analyze 9 factors affecting recruitment: site location, patient demographics, inclusion/exclusion criteria, site performance history. Build predictive model to identify high-performing sites. Increase recruitment by 32%.",
     "domain": "healthcare",
     "subdomain": "pharmaceuticals",
     "difficulty": 9.7,
@@ -6627,13 +6473,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 214,
     "skills": [
@@ -7958,7 +7802,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0200",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 8,888 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 8,888 SKUs over next 13 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (10 major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <11%, WAPE <15%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 1.0,
@@ -7972,8 +7816,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 345,
     "skills": [
@@ -7993,7 +7836,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0201",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 4,339 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 4,339 SKUs over next 13 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (10 major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <15%, WAPE <20%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 1.3,
@@ -8007,8 +7850,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 340,
     "skills": [
@@ -8028,7 +7870,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0202",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 831,000 e-commerce sessions. Current abandonment rate: 75.4%. Analyze 15 factors: cart value ($24-$1,358), product categories (21), device type, time on site, checkout step. Identify 3 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 64% of abandoners. Expected recovery rate: 10.9%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 1.5,
@@ -8043,8 +7885,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 336,
     "skills": [
@@ -8064,7 +7905,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0203",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 823 SKUs over next standard weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 823 SKUs over next 8 weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (9 major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <9%, WAPE <20%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 1.8,
@@ -8079,8 +7920,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 332,
     "skills": [
@@ -8100,7 +7940,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0204",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 626,000 e-commerce sessions. Current abandonment rate: 71.6%. Analyze 10 factors: cart value ($29-$489), product categories (40), device type, time on site, checkout step. Identify 5 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 64% of abandoners. Expected recovery rate: 14.6%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 2.1,
@@ -8115,8 +7955,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 328,
     "skills": [
@@ -8136,7 +7975,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0205",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 507 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 507 SKUs over next 26 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (12 major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <15%, WAPE <17%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 2.4,
@@ -8151,8 +7990,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 324,
     "skills": [
@@ -8172,7 +8010,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0206",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 722,000 e-commerce sessions. Current abandonment rate: 74.9%. Analyze 8 factors: cart value ($5-$1,415), product categories (39), device type, time on site, checkout step. Identify 6 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 48% of abandoners. Expected recovery rate: 10.1%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 2.6,
@@ -8188,8 +8026,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 320,
     "skills": [
@@ -8209,7 +8046,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0207",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 2,753 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 2,753 SKUs over next 4 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (10 major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <13%, WAPE <12%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 2.9,
@@ -8225,8 +8062,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 316,
     "skills": [
@@ -8246,7 +8082,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0208",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 196,000 e-commerce sessions. Current abandonment rate: 66.9%. Analyze 13 factors: cart value ($5-$816), product categories (16), device type, time on site, checkout step. Identify 3 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 60% of abandoners. Expected recovery rate: 11.4%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 3.2,
@@ -8282,7 +8118,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0209",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 8,247 SKUs over next standard weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use ARIMA forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 8,247 SKUs over next 12 weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (12 major holidays), product lifecycle stage. Use ARIMA forecasting method. Target accuracy: MAPE <11%, WAPE <19%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 3.5,
@@ -8318,7 +8154,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0210",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 677 SKUs over next standard weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use ARIMA forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 677 SKUs over next 4 weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (8 major holidays), product lifecycle stage. Use ARIMA forecasting method. Target accuracy: MAPE <12%, WAPE <13%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 3.7,
@@ -8355,7 +8191,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0211",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 544,000 e-commerce sessions. Current abandonment rate: 78.7%. Analyze 13 factors: cart value ($37-$433), product categories (35), device type, time on site, checkout step. Identify 4 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 57% of abandoners. Expected recovery rate: 9.0%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 4.0,
@@ -8394,7 +8230,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0212",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 56,000 e-commerce sessions. Current abandonment rate: 69.2%. Analyze 14 factors: cart value ($32-$482), product categories (37), device type, time on site, checkout step. Identify 4 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 48% of abandoners. Expected recovery rate: 12.7%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 4.3,
@@ -8433,7 +8269,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0213",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 379,000 e-commerce sessions. Current abandonment rate: 77.3%. Analyze 14 factors: cart value ($6-$537), product categories (34), device type, time on site, checkout step. Identify 7 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 63% of abandoners. Expected recovery rate: 12.8%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 4.5,
@@ -8473,7 +8309,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0214",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 3,368 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 3,368 SKUs over next 12 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (10 major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <11%, WAPE <15%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 4.8,
@@ -8513,7 +8349,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0215",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 899,000 e-commerce sessions. Current abandonment rate: 68.7%. Analyze 14 factors: cart value ($9-$600), product categories (35), device type, time on site, checkout step. Identify 6 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 48% of abandoners. Expected recovery rate: 12.5%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 5.1,
@@ -8553,7 +8389,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0216",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 5,524 SKUs over next standard weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 5,524 SKUs over next 8 weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (12 major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <14%, WAPE <11%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 5.4,
@@ -8593,7 +8429,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0217",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 232,000 e-commerce sessions. Current abandonment rate: 66.7%. Analyze 12 factors: cart value ($27-$920), product categories (29), device type, time on site, checkout step. Identify 4 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 74% of abandoners. Expected recovery rate: 13.0%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 5.6,
@@ -8634,7 +8470,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0218",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 8,253 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 8,253 SKUs over next 13 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (9 major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <9%, WAPE <12%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 5.9,
@@ -8675,7 +8511,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0219",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 779,000 e-commerce sessions. Current abandonment rate: 79.8%. Analyze 12 factors: cart value ($38-$669), product categories (33), device type, time on site, checkout step. Identify 7 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 62% of abandoners. Expected recovery rate: 9.5%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 6.2,
@@ -8690,13 +8526,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 267,
     "skills": [
@@ -8716,7 +8550,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0220",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 8,653 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use XGBoost forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 8,653 SKUs over next 13 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (9 major holidays), product lifecycle stage. Use XGBoost forecasting method. Target accuracy: MAPE <17%, WAPE <15%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 6.5,
@@ -8731,13 +8565,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 263,
     "skills": [
@@ -8757,7 +8589,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0221",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 5,380 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 5,380 SKUs over next 26 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (10 major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <14%, WAPE <13%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 6.7,
@@ -8773,13 +8605,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 259,
     "skills": [
@@ -8799,7 +8629,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0222",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 7,659 SKUs over next standard weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 7,659 SKUs over next 4 weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (9 major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <12%, WAPE <16%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 7.0,
@@ -8815,13 +8645,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 255,
     "skills": [
@@ -8841,7 +8669,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0223",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 5,117 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 5,117 SKUs over next 13 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (8 major holidays), product lifecycle stage. Use LSTM forecasting method. Target accuracy: MAPE <10%, WAPE <15%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 7.3,
@@ -8857,13 +8685,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 250,
     "skills": [
@@ -8883,7 +8709,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0224",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 2,752 SKUs over next standard weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use Ensemble forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 2,752 SKUs over next 12 weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (11 major holidays), product lifecycle stage. Use Ensemble forecasting method. Target accuracy: MAPE <9%, WAPE <19%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 7.5,
@@ -8900,13 +8726,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 246,
     "skills": [
@@ -8926,7 +8750,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0225",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 8,375 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use XGBoost forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 8,375 SKUs over next 8 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (9 major holidays), product lifecycle stage. Use XGBoost forecasting method. Target accuracy: MAPE <15%, WAPE <14%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 7.8,
@@ -8943,13 +8767,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 242,
     "skills": [
@@ -8969,7 +8791,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0226",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 6,484 SKUs over next standard weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 6,484 SKUs over next 13 weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (9 major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <15%, WAPE <14%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 8.1,
@@ -8986,13 +8808,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 238,
     "skills": [
@@ -9012,7 +8832,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0227",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 191,000 e-commerce sessions. Current abandonment rate: 73.5%. Analyze 10 factors: cart value ($36-$471), product categories (39), device type, time on site, checkout step. Identify 4 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 56% of abandoners. Expected recovery rate: 8.0%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 8.4,
@@ -9029,13 +8849,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 234,
     "skills": [
@@ -9055,7 +8873,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0228",
     "name": "Shopping Cart Abandonment Analysis and Recovery",
-    "description": "Analyze shopping cart abandonment for standard e-commerce sessions. Current abandonment rate: standard%. Analyze standard factors: cart value ($standard-$standard), product categories (standard), device type, time on site, checkout step. Identify standard top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting standard% of abandoners. Expected recovery rate: standard%.",
+    "description": "Analyze shopping cart abandonment for 707,000 e-commerce sessions. Current abandonment rate: 66.8%. Analyze 12 factors: cart value ($17-$974), product categories (25), device type, time on site, checkout step. Identify 7 top abandonment reasons. Build predictive model to score abandonment risk. Design email recovery campaign targeting 71% of abandoners. Expected recovery rate: 9.1%.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 8.6,
@@ -9073,13 +8891,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 230,
     "skills": [
@@ -9099,7 +8915,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0229",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 7,765 SKUs over next standard weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use XGBoost forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 7,765 SKUs over next 12 weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (11 major holidays), product lifecycle stage. Use XGBoost forecasting method. Target accuracy: MAPE <18%, WAPE <15%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 8.9,
@@ -9117,13 +8933,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 226,
     "skills": [
@@ -9143,7 +8957,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0230",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 2,819 SKUs over next standard weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 2,819 SKUs over next 13 weeks. Historical data: 5 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (12 major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <14%, WAPE <18%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 9.2,
@@ -9161,13 +8975,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 222,
     "skills": [
@@ -9187,7 +8999,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0231",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 9,585 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 9,585 SKUs over next 26 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (8 major holidays), product lifecycle stage. Use Prophet forecasting method. Target accuracy: MAPE <11%, WAPE <16%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 9.5,
@@ -9205,13 +9017,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 218,
     "skills": [
@@ -9231,7 +9041,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0232",
     "name": "Product Demand Forecasting for Inventory Management",
-    "description": "Forecast demand for 6,830 SKUs over next standard weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (standard major holidays), product lifecycle stage. Use ARIMA forecasting method. Target accuracy: MAPE <standard%, WAPE <standard%. Integrate with inventory system to trigger reorder points.",
+    "description": "Forecast demand for 6,830 SKUs over next 4 weeks. Historical data: 2 years of daily sales. Account for: seasonality (weekly, monthly, yearly), promotions (10 promotions/year), holidays (8 major holidays), product lifecycle stage. Use ARIMA forecasting method. Target accuracy: MAPE <17%, WAPE <16%. Integrate with inventory system to trigger reorder points.",
     "domain": "ecommerce",
     "subdomain": "retail",
     "difficulty": 9.7,
@@ -9249,13 +9059,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 214,
     "skills": [
@@ -9275,7 +9083,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0233",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 8,345 products on marketplace platform. Consider: competitor prices (monitor 5 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Gradient Boosting for optimization. A/B test: standard week test period, 5,397 products.",
+    "description": "Build dynamic pricing algorithm for 8,345 products on marketplace platform. Consider: competitor prices (monitor 5 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 2 hours. Target: maximize revenue while maintaining 22% market share. Use Gradient Boosting for optimization. A/B test: 2 week test period, 5,397 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 1.0,
@@ -9289,8 +9097,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 345,
     "skills": [
@@ -9310,7 +9117,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0234",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 7,924 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Gradient Boosting for optimization. A/B test: standard week test period, 2,046 products.",
+    "description": "Build dynamic pricing algorithm for 7,924 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 12 hours. Target: maximize revenue while maintaining 15% market share. Use Gradient Boosting for optimization. A/B test: 3 week test period, 2,046 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 1.3,
@@ -9324,8 +9131,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 340,
     "skills": [
@@ -9345,7 +9151,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0235",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 8,730 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Multi-Armed Bandit for optimization. A/B test: standard week test period, 6,800 products.",
+    "description": "Build dynamic pricing algorithm for 8,730 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 12 hours. Target: maximize revenue while maintaining 28% market share. Use Multi-Armed Bandit for optimization. A/B test: 4 week test period, 6,800 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 1.5,
@@ -9360,8 +9166,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 336,
     "skills": [
@@ -9381,7 +9186,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0236",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 6,934 products on marketplace platform. Consider: competitor prices (monitor 3 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Multi-Armed Bandit for optimization. A/B test: standard week test period, 2,065 products.",
+    "description": "Build dynamic pricing algorithm for 6,934 products on marketplace platform. Consider: competitor prices (monitor 3 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 2 hours. Target: maximize revenue while maintaining 24% market share. Use Multi-Armed Bandit for optimization. A/B test: 3 week test period, 2,065 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 1.8,
@@ -9396,8 +9201,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 332,
     "skills": [
@@ -9417,7 +9221,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0237",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 2,282 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Reinforcement Learning for optimization. A/B test: standard week test period, 9,299 products.",
+    "description": "Build dynamic pricing algorithm for 2,282 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 31% market share. Use Reinforcement Learning for optimization. A/B test: 4 week test period, 9,299 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 2.1,
@@ -9432,8 +9236,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 328,
     "skills": [
@@ -9453,7 +9256,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0238",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 9,281 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 6,132 products.",
+    "description": "Build dynamic pricing algorithm for 9,281 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 4 hours. Target: maximize revenue while maintaining 18% market share. Use Neural Network for optimization. A/B test: 3 week test period, 6,132 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 2.4,
@@ -9468,8 +9271,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 324,
     "skills": [
@@ -9489,7 +9291,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0239",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 6,229 products on marketplace platform. Consider: competitor prices (monitor 6 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Multi-Armed Bandit for optimization. A/B test: standard week test period, 5,914 products.",
+    "description": "Build dynamic pricing algorithm for 6,229 products on marketplace platform. Consider: competitor prices (monitor 6 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 23% market share. Use Multi-Armed Bandit for optimization. A/B test: 4 week test period, 5,914 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 2.6,
@@ -9505,8 +9307,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 320,
     "skills": [
@@ -9526,7 +9327,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0240",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 7,417 products on marketplace platform. Consider: competitor prices (monitor 9 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 5,778 products.",
+    "description": "Build dynamic pricing algorithm for 7,417 products on marketplace platform. Consider: competitor prices (monitor 9 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 4 hours. Target: maximize revenue while maintaining 28% market share. Use Neural Network for optimization. A/B test: 4 week test period, 5,778 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 2.9,
@@ -9542,8 +9343,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 316,
     "skills": [
@@ -9563,7 +9363,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0241",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 649 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Gradient Boosting for optimization. A/B test: standard week test period, 1,534 products.",
+    "description": "Build dynamic pricing algorithm for 649 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 21% market share. Use Gradient Boosting for optimization. A/B test: 3 week test period, 1,534 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 3.2,
@@ -9599,7 +9399,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0242",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 7,908 products on marketplace platform. Consider: competitor prices (monitor 9 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 9,889 products.",
+    "description": "Build dynamic pricing algorithm for 7,908 products on marketplace platform. Consider: competitor prices (monitor 9 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 20% market share. Use Neural Network for optimization. A/B test: 2 week test period, 9,889 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 3.5,
@@ -9635,7 +9435,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0243",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 8,608 products on marketplace platform. Consider: competitor prices (monitor 5 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Gradient Boosting for optimization. A/B test: standard week test period, 3,556 products.",
+    "description": "Build dynamic pricing algorithm for 8,608 products on marketplace platform. Consider: competitor prices (monitor 5 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 31% market share. Use Gradient Boosting for optimization. A/B test: 2 week test period, 3,556 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 3.7,
@@ -9672,7 +9472,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0244",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 1,025 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Reinforcement Learning for optimization. A/B test: standard week test period, 6,273 products.",
+    "description": "Build dynamic pricing algorithm for 1,025 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 2 hours. Target: maximize revenue while maintaining 34% market share. Use Reinforcement Learning for optimization. A/B test: 2 week test period, 6,273 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 4.0,
@@ -9711,7 +9511,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0245",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 592 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Multi-Armed Bandit for optimization. A/B test: standard week test period, 4,158 products.",
+    "description": "Build dynamic pricing algorithm for 592 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 35% market share. Use Multi-Armed Bandit for optimization. A/B test: 2 week test period, 4,158 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 4.3,
@@ -9750,7 +9550,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0246",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 6,487 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Gradient Boosting for optimization. A/B test: standard week test period, 4,816 products.",
+    "description": "Build dynamic pricing algorithm for 6,487 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 4 hours. Target: maximize revenue while maintaining 17% market share. Use Gradient Boosting for optimization. A/B test: 4 week test period, 4,816 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 4.5,
@@ -9790,7 +9590,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0247",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 7,030 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 8,414 products.",
+    "description": "Build dynamic pricing algorithm for 7,030 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 2 hours. Target: maximize revenue while maintaining 24% market share. Use Neural Network for optimization. A/B test: 4 week test period, 8,414 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 4.8,
@@ -9830,7 +9630,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0248",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 6,606 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Gradient Boosting for optimization. A/B test: standard week test period, 1,614 products.",
+    "description": "Build dynamic pricing algorithm for 6,606 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 2 hours. Target: maximize revenue while maintaining 20% market share. Use Gradient Boosting for optimization. A/B test: 2 week test period, 1,614 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 5.1,
@@ -9870,7 +9670,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0249",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 9,925 products on marketplace platform. Consider: competitor prices (monitor 3 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 139 products.",
+    "description": "Build dynamic pricing algorithm for 9,925 products on marketplace platform. Consider: competitor prices (monitor 3 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 12 hours. Target: maximize revenue while maintaining 27% market share. Use Neural Network for optimization. A/B test: 4 week test period, 139 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 5.4,
@@ -9910,7 +9710,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0250",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 1,758 products on marketplace platform. Consider: competitor prices (monitor 5 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Multi-Armed Bandit for optimization. A/B test: standard week test period, 2,540 products.",
+    "description": "Build dynamic pricing algorithm for 1,758 products on marketplace platform. Consider: competitor prices (monitor 5 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 23% market share. Use Multi-Armed Bandit for optimization. A/B test: 3 week test period, 2,540 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 5.6,
@@ -9951,7 +9751,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0251",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 8,050 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 2,681 products.",
+    "description": "Build dynamic pricing algorithm for 8,050 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 32% market share. Use Neural Network for optimization. A/B test: 3 week test period, 2,681 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 5.9,
@@ -9992,7 +9792,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0252",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 1,812 products on marketplace platform. Consider: competitor prices (monitor 3 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Reinforcement Learning for optimization. A/B test: standard week test period, 6,626 products.",
+    "description": "Build dynamic pricing algorithm for 1,812 products on marketplace platform. Consider: competitor prices (monitor 3 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 23% market share. Use Reinforcement Learning for optimization. A/B test: 2 week test period, 6,626 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 6.2,
@@ -10007,13 +9807,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 267,
     "skills": [
@@ -10033,7 +9831,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0253",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 6,742 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Gradient Boosting for optimization. A/B test: standard week test period, 1,389 products.",
+    "description": "Build dynamic pricing algorithm for 6,742 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 12 hours. Target: maximize revenue while maintaining 19% market share. Use Gradient Boosting for optimization. A/B test: 3 week test period, 1,389 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 6.5,
@@ -10048,13 +9846,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 263,
     "skills": [
@@ -10074,7 +9870,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0254",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 3,855 products on marketplace platform. Consider: competitor prices (monitor 9 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Reinforcement Learning for optimization. A/B test: standard week test period, 2,140 products.",
+    "description": "Build dynamic pricing algorithm for 3,855 products on marketplace platform. Consider: competitor prices (monitor 9 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 4 hours. Target: maximize revenue while maintaining 16% market share. Use Reinforcement Learning for optimization. A/B test: 4 week test period, 2,140 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 6.7,
@@ -10090,13 +9886,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 259,
     "skills": [
@@ -10116,7 +9910,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0255",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 2,194 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Multi-Armed Bandit for optimization. A/B test: standard week test period, 7,373 products.",
+    "description": "Build dynamic pricing algorithm for 2,194 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 4 hours. Target: maximize revenue while maintaining 22% market share. Use Multi-Armed Bandit for optimization. A/B test: 4 week test period, 7,373 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 7.0,
@@ -10132,13 +9926,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 255,
     "skills": [
@@ -10158,7 +9950,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0256",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 9,926 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Reinforcement Learning for optimization. A/B test: standard week test period, 4,692 products.",
+    "description": "Build dynamic pricing algorithm for 9,926 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 29% market share. Use Reinforcement Learning for optimization. A/B test: 2 week test period, 4,692 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 7.3,
@@ -10174,13 +9966,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 250,
     "skills": [
@@ -10200,7 +9990,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0257",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 7,911 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Reinforcement Learning for optimization. A/B test: standard week test period, 9,365 products.",
+    "description": "Build dynamic pricing algorithm for 7,911 products on marketplace platform. Consider: competitor prices (monitor 10 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 33% market share. Use Reinforcement Learning for optimization. A/B test: 4 week test period, 9,365 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 7.5,
@@ -10217,13 +10007,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 246,
     "skills": [
@@ -10243,7 +10031,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0258",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 9,559 products on marketplace platform. Consider: competitor prices (monitor 5 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 7,535 products.",
+    "description": "Build dynamic pricing algorithm for 9,559 products on marketplace platform. Consider: competitor prices (monitor 5 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 4 hours. Target: maximize revenue while maintaining 29% market share. Use Neural Network for optimization. A/B test: 2 week test period, 7,535 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 7.8,
@@ -10260,13 +10048,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 242,
     "skills": [
@@ -10286,7 +10072,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0259",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 658 products on marketplace platform. Consider: competitor prices (monitor 8 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Reinforcement Learning for optimization. A/B test: standard week test period, 3,964 products.",
+    "description": "Build dynamic pricing algorithm for 658 products on marketplace platform. Consider: competitor prices (monitor 8 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 32% market share. Use Reinforcement Learning for optimization. A/B test: 2 week test period, 3,964 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 8.1,
@@ -10303,13 +10089,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 238,
     "skills": [
@@ -10329,7 +10113,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0260",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 8,141 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 6,155 products.",
+    "description": "Build dynamic pricing algorithm for 8,141 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 2 hours. Target: maximize revenue while maintaining 35% market share. Use Neural Network for optimization. A/B test: 2 week test period, 6,155 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 8.4,
@@ -10346,13 +10130,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 234,
     "skills": [
@@ -10372,7 +10154,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0261",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 1,443 products on marketplace platform. Consider: competitor prices (monitor 9 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Gradient Boosting for optimization. A/B test: standard week test period, 9,164 products.",
+    "description": "Build dynamic pricing algorithm for 1,443 products on marketplace platform. Consider: competitor prices (monitor 9 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 6 hours. Target: maximize revenue while maintaining 20% market share. Use Gradient Boosting for optimization. A/B test: 2 week test period, 9,164 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 8.6,
@@ -10390,13 +10172,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 230,
     "skills": [
@@ -10416,7 +10196,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0262",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 5,161 products on marketplace platform. Consider: competitor prices (monitor 8 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 8,683 products.",
+    "description": "Build dynamic pricing algorithm for 5,161 products on marketplace platform. Consider: competitor prices (monitor 8 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 4 hours. Target: maximize revenue while maintaining 28% market share. Use Neural Network for optimization. A/B test: 3 week test period, 8,683 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 8.9,
@@ -10434,13 +10214,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 226,
     "skills": [
@@ -10460,7 +10238,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0263",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 2,549 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Reinforcement Learning for optimization. A/B test: standard week test period, 7,569 products.",
+    "description": "Build dynamic pricing algorithm for 2,549 products on marketplace platform. Consider: competitor prices (monitor 4 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 4 hours. Target: maximize revenue while maintaining 33% market share. Use Reinforcement Learning for optimization. A/B test: 2 week test period, 7,569 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 9.2,
@@ -10478,13 +10256,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 222,
     "skills": [
@@ -10504,7 +10280,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0264",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 7,783 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Neural Network for optimization. A/B test: standard week test period, 8,401 products.",
+    "description": "Build dynamic pricing algorithm for 7,783 products on marketplace platform. Consider: competitor prices (monitor 7 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 2 hours. Target: maximize revenue while maintaining 31% market share. Use Neural Network for optimization. A/B test: 2 week test period, 8,401 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 9.5,
@@ -10522,13 +10298,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 218,
     "skills": [
@@ -10548,7 +10322,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0265",
     "name": "Dynamic Pricing Algorithm for Marketplace",
-    "description": "Build dynamic pricing algorithm for 4,163 products on marketplace platform. Consider: competitor prices (monitor 3 competitors), demand elasticity, inventory levels, seller performance rating (standard), time of day, day of week. Update prices every standard hours. Target: maximize revenue while maintaining standard% market share. Use Gradient Boosting for optimization. A/B test: standard week test period, 1,259 products.",
+    "description": "Build dynamic pricing algorithm for 4,163 products on marketplace platform. Consider: competitor prices (monitor 3 competitors), demand elasticity, inventory levels, seller performance rating (1-5 stars), time of day, day of week. Update prices every 4 hours. Target: maximize revenue while maintaining 33% market share. Use Gradient Boosting for optimization. A/B test: 3 week test period, 1,259 products.",
     "domain": "ecommerce",
     "subdomain": "marketplace",
     "difficulty": 9.7,
@@ -10566,13 +10340,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 214,
     "skills": [
@@ -11897,7 +11669,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0299",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 50,648 customers using RFM Analysis method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 50,648 customers using RFM Analysis method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $60), acquisition channel, product categories purchased (1-13). Segment customers into 5 tiers. Predict CLV for next 2 years. Use gradient boosting regression model. Target accuracy: R² >0.74.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 1.0,
@@ -11911,8 +11683,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 345,
     "skills": [
@@ -11932,7 +11703,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0300",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last 6 months. Use Position-Based attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 52 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 339,000 conversions over last 6 months. Use Position-Based attribution method. Calculate contribution of each channel. Budget: $6.1M. Optimize budget allocation to increase ROI by 17%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 1.3,
@@ -11946,8 +11717,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 340,
     "skills": [
@@ -11967,7 +11737,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0301",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 13,842 customers using RFM Analysis method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 13,842 customers using RFM Analysis method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $110), acquisition channel, product categories purchased (1-10). Segment customers into 5 tiers. Predict CLV for next 5 years. Use BG/NBD + Gamma-Gamma model. Target accuracy: R² >0.74.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 1.5,
@@ -11982,8 +11752,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 336,
     "skills": [
@@ -12003,7 +11772,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0302",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last 6 months. Use First-Touch attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 59 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 403,000 conversions over last 6 months. Use First-Touch attribution method. Calculate contribution of each channel. Budget: $0.6M. Optimize budget allocation to increase ROI by 16%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 1.8,
@@ -12018,8 +11787,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "pie",
-      "table"
+      "pie"
     ],
     "timeLimit": 332,
     "skills": [
@@ -12039,7 +11807,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0303",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last quarter. Use First-Touch attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 27 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 88,000 conversions over last quarter. Use First-Touch attribution method. Calculate contribution of each channel. Budget: $3.2M. Optimize budget allocation to increase ROI by 18%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 2.1,
@@ -12054,8 +11822,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 328,
     "skills": [
@@ -12075,7 +11842,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0304",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 63,264 customers using Predictive Modeling method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 63,264 customers using Predictive Modeling method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $87), acquisition channel, product categories purchased (1-12). Segment customers into 3 tiers. Predict CLV for next 2 years. Use gradient boosting regression model. Target accuracy: R² >0.73.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 2.4,
@@ -12090,8 +11857,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 324,
     "skills": [
@@ -12111,7 +11877,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0305",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 67,441 customers using RFM Analysis method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 67,441 customers using RFM Analysis method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $53), acquisition channel, product categories purchased (1-11). Segment customers into 4 tiers. Predict CLV for next 4 years. Use Pareto/NBD model. Target accuracy: R² >0.82.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 2.6,
@@ -12127,8 +11893,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 320,
     "skills": [
@@ -12148,7 +11913,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0306",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last quarter. Use Last-Touch attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 21 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 490,000 conversions over last quarter. Use Last-Touch attribution method. Calculate contribution of each channel. Budget: $3.9M. Optimize budget allocation to increase ROI by 20%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 2.9,
@@ -12164,8 +11929,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "acceptableChartTypes": [
       "bar",
-      "line",
-      "table"
+      "line"
     ],
     "timeLimit": 316,
     "skills": [
@@ -12185,7 +11949,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0307",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last year. Use Time-Decay attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 58 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 137,000 conversions over last year. Use Time-Decay attribution method. Calculate contribution of each channel. Budget: $5.9M. Optimize budget allocation to increase ROI by 28%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 3.2,
@@ -12221,7 +11985,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0308",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 33,662 customers using RFM Analysis method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 33,662 customers using RFM Analysis method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $41), acquisition channel, product categories purchased (1-8). Segment customers into 3 tiers. Predict CLV for next 5 years. Use Pareto/NBD model. Target accuracy: R² >0.74.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 3.5,
@@ -12257,7 +12021,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0309",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last year. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 33 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 253,000 conversions over last year. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $2.0M. Optimize budget allocation to increase ROI by 29%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 3.7,
@@ -12294,7 +12058,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0310",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last quarter. Use Position-Based attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 52 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 372,000 conversions over last quarter. Use Position-Based attribution method. Calculate contribution of each channel. Budget: $2.3M. Optimize budget allocation to increase ROI by 19%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 4.0,
@@ -12333,7 +12097,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0311",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last year. Use Linear attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 26 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 327,000 conversions over last year. Use Linear attribution method. Calculate contribution of each channel. Budget: $5.3M. Optimize budget allocation to increase ROI by 11%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 4.3,
@@ -12372,7 +12136,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0312",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last year. Use Linear attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 50 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 59,000 conversions over last year. Use Linear attribution method. Calculate contribution of each channel. Budget: $6.9M. Optimize budget allocation to increase ROI by 23%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 4.5,
@@ -12412,7 +12176,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0313",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 51,653 customers using RFM Analysis method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 51,653 customers using RFM Analysis method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $116), acquisition channel, product categories purchased (1-10). Segment customers into 5 tiers. Predict CLV for next 5 years. Use Pareto/NBD model. Target accuracy: R² >0.78.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 4.8,
@@ -12452,7 +12216,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0314",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 1,473 customers using Predictive Modeling method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 1,473 customers using Predictive Modeling method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $95), acquisition channel, product categories purchased (1-15). Segment customers into 4 tiers. Predict CLV for next 3 years. Use gradient boosting regression model. Target accuracy: R² >0.83.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 5.1,
@@ -12492,7 +12256,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0315",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 55,097 customers using Machine Learning method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 55,097 customers using Machine Learning method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $101), acquisition channel, product categories purchased (1-10). Segment customers into 3 tiers. Predict CLV for next 2 years. Use random forest regression model. Target accuracy: R² >0.74.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 5.4,
@@ -12532,7 +12296,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0316",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last 6 months. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 19 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 215,000 conversions over last 6 months. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $4.1M. Optimize budget allocation to increase ROI by 21%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 5.6,
@@ -12573,7 +12337,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0317",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 5,999 customers using RFM Analysis method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 5,999 customers using RFM Analysis method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $72), acquisition channel, product categories purchased (1-16). Segment customers into 4 tiers. Predict CLV for next 2 years. Use BG/NBD + Gamma-Gamma model. Target accuracy: R² >0.80.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 5.9,
@@ -12614,7 +12378,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0318",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last 6 months. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 30 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 201,000 conversions over last 6 months. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $0.7M. Optimize budget allocation to increase ROI by 25%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 6.2,
@@ -12629,13 +12393,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 267,
     "skills": [
@@ -12655,7 +12417,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0319",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 81,658 customers using RFM Analysis method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 81,658 customers using RFM Analysis method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $171), acquisition channel, product categories purchased (1-17). Segment customers into 3 tiers. Predict CLV for next 2 years. Use Pareto/NBD model. Target accuracy: R² >0.83.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 6.5,
@@ -12670,13 +12432,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 263,
     "skills": [
@@ -12696,7 +12456,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0320",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 71,621 customers using Machine Learning method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 71,621 customers using Machine Learning method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $175), acquisition channel, product categories purchased (1-17). Segment customers into 4 tiers. Predict CLV for next 3 years. Use Pareto/NBD model. Target accuracy: R² >0.80.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 6.7,
@@ -12712,13 +12472,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 259,
     "skills": [
@@ -12738,7 +12496,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0321",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last 6 months. Use First-Touch attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 58 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 151,000 conversions over last 6 months. Use First-Touch attribution method. Calculate contribution of each channel. Budget: $3.5M. Optimize budget allocation to increase ROI by 18%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 7.0,
@@ -12754,13 +12512,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 255,
     "skills": [
@@ -12780,7 +12536,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0322",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 19,910 customers using Predictive Modeling method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 19,910 customers using Predictive Modeling method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $176), acquisition channel, product categories purchased (1-13). Segment customers into 4 tiers. Predict CLV for next 5 years. Use random forest regression model. Target accuracy: R² >0.72.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 7.3,
@@ -12796,13 +12552,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 250,
     "skills": [
@@ -12822,7 +12576,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0323",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 48,443 customers using Predictive Modeling method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 48,443 customers using Predictive Modeling method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $138), acquisition channel, product categories purchased (1-18). Segment customers into 5 tiers. Predict CLV for next 2 years. Use Pareto/NBD model. Target accuracy: R² >0.79.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 7.5,
@@ -12839,13 +12593,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 246,
     "skills": [
@@ -12865,7 +12617,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0324",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 30,299 customers using Predictive Modeling method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 30,299 customers using Predictive Modeling method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $93), acquisition channel, product categories purchased (1-11). Segment customers into 3 tiers. Predict CLV for next 4 years. Use BG/NBD + Gamma-Gamma model. Target accuracy: R² >0.73.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 7.8,
@@ -12882,13 +12634,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 242,
     "skills": [
@@ -12908,7 +12658,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0325",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 61,152 customers using RFM Analysis method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 61,152 customers using RFM Analysis method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $117), acquisition channel, product categories purchased (1-12). Segment customers into 5 tiers. Predict CLV for next 3 years. Use random forest regression model. Target accuracy: R² >0.74.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 8.1,
@@ -12925,13 +12675,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 238,
     "skills": [
@@ -12951,7 +12699,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0326",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last 6 months. Use Position-Based attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 13 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 295,000 conversions over last 6 months. Use Position-Based attribution method. Calculate contribution of each channel. Budget: $5.8M. Optimize budget allocation to increase ROI by 20%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 8.4,
@@ -12968,13 +12716,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 234,
     "skills": [
@@ -12994,7 +12740,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0327",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 68,157 customers using Machine Learning method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 68,157 customers using Machine Learning method. Historical data: 2 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $56), acquisition channel, product categories purchased (1-10). Segment customers into 3 tiers. Predict CLV for next 5 years. Use gradient boosting regression model. Target accuracy: R² >0.82.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 8.6,
@@ -13012,13 +12758,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 230,
     "skills": [
@@ -13038,7 +12782,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0328",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last 6 months. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 35 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 112,000 conversions over last 6 months. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $2.0M. Optimize budget allocation to increase ROI by 16%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 8.9,
@@ -13056,13 +12800,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 226,
     "skills": [
@@ -13082,7 +12824,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0329",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last year. Use First-Touch attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 17 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 38,000 conversions over last year. Use First-Touch attribution method. Calculate contribution of each channel. Budget: $2.8M. Optimize budget allocation to increase ROI by 28%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 9.2,
@@ -13100,13 +12842,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 222,
     "skills": [
@@ -13126,7 +12866,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0330",
     "name": "Multi-Touch Attribution Modeling",
-    "description": "Build attribution model for standard marketing campaigns across standard channels (email, social, search, display, affiliate). Analyze standard conversions over last 6 months. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $standardM. Optimize budget allocation to increase ROI by standard%. Report channel efficiency metrics.",
+    "description": "Build attribution model for 45 marketing campaigns across 5 channels (email, social, search, display, affiliate). Analyze 350,000 conversions over last 6 months. Use Data-Driven (Markov) attribution method. Calculate contribution of each channel. Budget: $4.4M. Optimize budget allocation to increase ROI by 28%. Report channel efficiency metrics.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 9.5,
@@ -13144,13 +12884,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 218,
     "skills": [
@@ -13170,7 +12908,7 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
   {
     "id": "ds_0331",
     "name": "Customer Lifetime Value (CLV) Prediction",
-    "description": "Calculate CLV for 40,337 customers using Machine Learning method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $standard), acquisition channel, product categories purchased (standard). Segment customers into standard tiers. Predict CLV for next standard years. Use standard model. Target accuracy: R\u00b2 >standard.",
+    "description": "Calculate CLV for 40,337 customers using Machine Learning method. Historical data: 5 years of purchase history. Features: recency (days since last purchase), frequency (purchases/year), monetary value (average order value: $130), acquisition channel, product categories purchased (1-10). Segment customers into 5 tiers. Predict CLV for next 2 years. Use gradient boosting regression model. Target accuracy: R² >0.81.",
     "domain": "marketing",
     "subdomain": "digital",
     "difficulty": 9.7,
@@ -13188,13 +12926,11 @@ export const COMPREHENSIVE_DATA_SCIENCE_TASKS = [
     ],
     "optimalChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "acceptableChartTypes": [
       "line",
-      "scatter",
-      "heatmap"
+      "scatter"
     ],
     "timeLimit": 214,
     "skills": [
