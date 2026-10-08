@@ -9,6 +9,7 @@ import path from 'path';
 vi.hoisted(() => { globalThis.__DSD_NO_AUTOBOOT__ = true; });
 
 import { MainGame } from '../../src/js/main.js';
+import { StatisticsAggregator } from '../../src/js/ui/StatisticsAggregator.js';
 
 const root = path.resolve(__dirname, '../..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -74,18 +75,17 @@ describe('menu statistics dashboard icons (#1471)', () => {
     it('renders glyphs instead of repeating the label as a word', () => {
         document.body.innerHTML = '<div id="menu-stats-dashboard"></div>';
         MainGame.prototype.renderStatisticsDashboard.call({
-            statisticsAggregator: {
-                // The dashboard reads through the cache (#140)
-                getStats: () => ({ totalPlaytime: 60, gamesCompleted: 1, highestRankName: 'Intern', totalMoney: 5 }),
-                formatPlaytime: () => '1m',
-                formatMoney: () => '$5'
-            }
+            // The dashboard reads through the cache (#140)
+            statisticsAggregator: Object.assign(new StatisticsAggregator(null), {
+                getStats: () => ({ totalPlaytime: 60, gamesCompleted: 1, highestRankName: 'Intern', totalMoney: 5 })
+            })
         });
         const icons = [...document.querySelectorAll('.stat-icon')];
-        expect(icons).toHaveLength(4);
+        // Eight cards since every aggregated total is shown (#1632)
+        expect(icons).toHaveLength(8);
         for (const icon of icons) {
             expect(icon.getAttribute('aria-hidden')).toBe('true');
-            expect(icon.textContent).not.toMatch(/^(Time|Trophy|Chart|Money)$/);
+            expect(icon.textContent).not.toMatch(/^(Time|Trophy|Chart|Money|Tasks|Star|Slots|Clock)$/);
         }
     });
 });

@@ -609,36 +609,8 @@ export class MainGame {
         }
 
         dashboard.style.display = 'grid';
-        dashboard.innerHTML = `
-            <div class="stat-card">
-                <div class="stat-icon" aria-hidden="true">&#9719;</div>
-                <div class="stat-content">
-                    <div class="stat-label">Total Playtime</div>
-                    <div class="stat-value">${this.statisticsAggregator.formatPlaytime(stats.totalPlaytime)}</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" aria-hidden="true">&#9819;</div>
-                <div class="stat-content">
-                    <div class="stat-label">Games Completed</div>
-                    <div class="stat-value">${stats.gamesCompleted}</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" aria-hidden="true">&#9650;</div>
-                <div class="stat-content">
-                    <div class="stat-label">Highest Rank</div>
-                    <div class="stat-value">${stats.highestRankName}</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" aria-hidden="true">$</div>
-                <div class="stat-content">
-                    <div class="stat-label">Total Money</div>
-                    <div class="stat-value">${this.statisticsAggregator.formatMoney(stats.totalMoney)}</div>
-                </div>
-            </div>
-        `;
+        // All aggregated totals, not just the first four (#1632)
+        dashboard.innerHTML = this.statisticsAggregator.getDashboardHTML(stats);
     }
 
     /**
