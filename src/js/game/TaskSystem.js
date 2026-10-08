@@ -5,6 +5,7 @@
 import { BOSSES } from '../data/bosses.js';
 import { COMPREHENSIVE_DATA_SCIENCE_TASKS } from '../data/comprehensive_datascience_tasks.js';
 import { insightHint, EconomySystem } from './EconomySystem.js';
+import { renderTaskBrief } from './taskBrief.js';
 import { isCurrencyColumn, proportionalSplit, boundedPartition } from '../utils/dataFormat.js';
 
 export class TaskSystem {
@@ -400,6 +401,9 @@ export class TaskSystem {
                 .map(r => `<span class="requirement-tag">${r}</span>`)
                 .join('') + (hint ? `<span class="requirement-tag insight-hint">${hint}</span>` : '');
         }
+
+        // Domain, tools, skills, deliverable, context (#2430)
+        renderTaskBrief(task);
 
         // Update data table
         this.currentTableData = JSON.parse(JSON.stringify(task.data)); // Deep copy to avoid mutating original task data permanently
