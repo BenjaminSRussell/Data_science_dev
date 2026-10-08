@@ -132,6 +132,8 @@ export const OFFICES = [
 ];
 
 // Staff you can hire
+// baseSalary is a daily rate (OfficeManager.getDailyStaffCost); hiring costs
+// OfficeManager.HIRING_COST_DAYS days of it.
 export const STAFF_TYPES = [
     {
         id: "intern",
@@ -312,6 +314,9 @@ export const MARKETING_CHANNELS = [
         icon: "",
         costPerDay: 500,
         leadsPerDay: 3,
+        // Leads from this channel pay 2.5x, so it out-earns conferences per
+        // lead instead of being strictly worse (#154, #1968)
+        payMultiplier: 2.5,
         description: "Fewer leads, but they're high value"
     }
 ];

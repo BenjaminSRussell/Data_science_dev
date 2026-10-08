@@ -91,3 +91,60 @@ describe('ClientManager job capacity (#2231)', () => {
         expect(cm.acceptJob('c')).toBeTruthy();
     });
 });
+
+import { CLIENT_TYPES, MARKETING_CHANNELS } from '../../src/js/data/tycoonData.js';
+
+describe('tycoon data wiring', () => {
+    it('#1799 hiring cost is an explicit number of daily salaries', () => {
+        expect(OfficeManager.HIRING_COST_DAYS).toBe(2);
+        expect(OfficeManager.hiringCost({ baseSalary: 300 })).toBe(600);
+    });
+
+    it('#2230 client patience scales the accept window', () => {
+        const cm = new ClientManager({ rankIndex: 10 });
+        const realRandom = Math.random;
+        Math.random = () => 0; // urgency = relaxed (300s)
+        try {
+            const patient = cm.generateJob({ ...CLIENT_TYPES[0], patience: 1.0 });
+            const impatient = cm.generateJob({ ...CLIENT_TYPES[0], patience: 0.5 });
+            const pw = patient.expiresAt - patient.createdAt;
+            const iw = impatient.expiresAt - impatient.createdAt;
+            expect(pw).toBeGreaterThanOrEqual(299000);
+            expect(iw).toBeLessThan(pw * 0.6);
+        } finally {
+            Math.random = realRandom;
+        }
+    });
+
+    it('#154 #1968 enterprise sales leads pay more than conference leads', () => {
+        const ent = MARKETING_CHANNELS.find(m => m.id === 'enterprise_sales');
+        const conf = MARKETING_CHANNELS.find(m => m.id === 'conference');
+        expect(ent.payMultiplier).toBeGreaterThan(1);
+        // Pay-weighted leads per day now beat conference
+        expect(ent.leadsPerDay * ent.payMultiplier).toBeGreaterThan(conf.leadsPerDay);
+        const cm = new ClientManager({ rankIndex: 10 });
+        const realRandom = Math.random;
+        Math.random = () => 0.5;
+        try {
+            const plain = cm.generateJob(CLIENT_TYPES[0], conf);
+            const premium = cm.generateJob(CLIENT_TYPES[0], ent);
+            expect(premium.payment).toBeGreaterThan(plain.payment);
+            expect(premium.source).toBe('enterprise_sales');
+        } finally {
+            Math.random = realRandom;
+        }
+        expect(cm.pickLeadChannel([conf, ent], 0.1).id).toBe('conference');
+        expect(cm.pickLeadChannel([conf, ent], 0.9).id).toBe('enterprise_sales');
+        expect(cm.pickLeadChannel([], 0.5)).toBeNull();
+    });
+
+    it('#2328 only data-skilled staff add job capacity; team skills are exposed', () => {
+        const om = new OfficeManager({ money: 100000 });
+        om.currentOfficeIndex = OFFICES.length - 1;
+        om.hireStaff('sales');
+        om.hireStaff('analyst');
+        const cm = new ClientManager({ officeManager: om });
+        expect(cm.getJobCapacity()).toBe(ClientManager.BASE_JOB_SLOTS + 1);
+        expect(om.getTeamSkills()).toEqual(expect.arrayContaining(['sales', 'advanced_charts']));
+    });
+});

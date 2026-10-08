@@ -171,10 +171,24 @@ export class OfficeManager {
     }
 
     /**
-     * Hiring cost for a staff type: first two days of salary
+     * baseSalary is a daily rate (getDailyStaffCost sums it per day), so the
+     * hiring fee is a fixed number of days' pay, not a "month" (#1799)
      */
+    static HIRING_COST_DAYS = 2;
+
     static hiringCost(staffType) {
-        return (Number(staffType?.baseSalary) || 0) * 2;
+        return (Number(staffType?.baseSalary) || 0) * OfficeManager.HIRING_COST_DAYS;
+    }
+
+    /**
+     * Skills the current team covers (#2328)
+     */
+    getTeamSkills() {
+        const skills = new Set();
+        for (const member of this.staff) {
+            for (const skill of member?.type?.skills || []) skills.add(skill);
+        }
+        return [...skills];
     }
 
     /**
@@ -205,7 +219,6 @@ export class OfficeManager {
             return { success: false, reason: 'Invalid staff type' };
         }
 
-        // First month salary as hiring cost
         const hiringCost = OfficeManager.hiringCost(staffType);
         if (this.gameState.money < hiringCost) {
             return { success: false, reason: 'Not enough money for hiring' };
