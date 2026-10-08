@@ -1,4 +1,6 @@
 #include "game_state.h"
+#include <cctype>
+#include <limits>
 #include <sstream>
 
 GameState::GameState() { reset(); }
@@ -66,64 +68,72 @@ std::string GameState::toJSON() const {
   return ss.str();
 }
 
+namespace {
+
+// Read the integer value of "key": from a flat JSON object. Only the text
+// right after the key is considered (whitespace, optional '-', digits), so a
+// non-numeric value can't borrow digits from a later field, and malformed or
+// out-of-range values are rejected instead of throwing (#83).
+bool readIntField(const std::string &json, const std::string &key, int &out) {
+  const std::string needle = "\"" + key + "\"";
+  size_t pos = json.find(needle);
+  if (pos == std::string::npos)
+    return false;
+  pos += needle.size();
+  while (pos < json.size() && std::isspace(static_cast<unsigned char>(json[pos])))
+    pos++;
+  if (pos >= json.size() || json[pos] != ':')
+    return false;
+  pos++;
+  while (pos < json.size() && std::isspace(static_cast<unsigned char>(json[pos])))
+    pos++;
+
+  bool negative = false;
+  if (pos < json.size() && json[pos] == '-') {
+    negative = true;
+    pos++;
+  }
+  size_t digitsStart = pos;
+  long long value = 0;
+  while (pos < json.size() && std::isdigit(static_cast<unsigned char>(json[pos]))) {
+    value = value * 10 + (json[pos] - '0');
+    if (value > static_cast<long long>(std::numeric_limits<int>::max()) + 1)
+      return false; // overflow
+    pos++;
+  }
+  if (pos == digitsStart)
+    return false; // no digits: null, string, bare '-', ...
+  // Must end the value: ',', '}', whitespace or end of input (rejects 1.5, 12abc)
+  if (pos < json.size() && json[pos] != ',' && json[pos] != '}' &&
+      !std::isspace(static_cast<unsigned char>(json[pos])))
+    return false;
+
+  if (negative)
+    value = -value;
+  if (value < std::numeric_limits<int>::min() ||
+      value > std::numeric_limits<int>::max())
+    return false;
+  out = static_cast<int>(value);
+  return true;
+}
+
+} // namespace
+
 void GameState::fromJSON(const std::string &json) {
-  // Basic JSON parsing - extracts numeric values from JSON string
-  // For production, consider using a proper JSON library like nlohmann/json
+  // Fields that are missing or malformed keep their reset() defaults
   reset();
-  
-  // Find and extract values using simple string parsing
-  size_t pos = json.find("\"money\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      money = std::stoi(json.substr(start, end - start));
-    }
-  }
-  
-  pos = json.find("\"reputation\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      reputation = std::stoi(json.substr(start, end - start));
-    }
-  }
-  
-  pos = json.find("\"rankIndex\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      int idx = std::stoi(json.substr(start, end - start));
-      setRankIndex(idx);
-    }
-  }
-  
-  pos = json.find("\"tasksCompleted\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      tasksCompleted = std::stoi(json.substr(start, end - start));
-    }
-  }
-  
-  pos = json.find("\"perfectScores\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      perfectScores = std::stoi(json.substr(start, end - start));
-    }
-  }
-  
-  pos = json.find("\"totalEarned\":");
-  if (pos != std::string::npos) {
-    size_t start = json.find_first_of("0123456789-", pos);
-    size_t end = json.find_first_not_of("0123456789", start);
-    if (start != std::string::npos && end != std::string::npos) {
-      totalEarned = std::stoi(json.substr(start, end - start));
-    }
-  }
+
+  int value;
+  if (readIntField(json, "money", value))
+    money = value;
+  if (readIntField(json, "reputation", value))
+    reputation = value;
+  if (readIntField(json, "rankIndex", value))
+    setRankIndex(value);
+  if (readIntField(json, "tasksCompleted", value))
+    tasksCompleted = value;
+  if (readIntField(json, "perfectScores", value))
+    perfectScores = value;
+  if (readIntField(json, "totalEarned", value))
+    totalEarned = value;
 }

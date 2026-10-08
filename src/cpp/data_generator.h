@@ -20,7 +20,11 @@ public:
   std::string generateProductComparisonJSON();
   std::string generateCategoryBreakdownJSON();
   std::string generateTrendAnalysisJSON();
+  // numPoints is clamped to [0, MAX_RANDOM_POINTS]; min/max are swapped if
+  // given in the wrong order
   std::string generateRandomDataJSON(int numPoints, int minVal, int maxVal);
+
+  static constexpr int MAX_RANDOM_POINTS = 10000;
 
 private:
   std::mt19937 rng;

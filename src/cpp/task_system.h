@@ -14,7 +14,13 @@ public:
   // Get difficulty for rank
   int getDifficultyForRank(int rankIndex);
 
-  // Calculate potential reward
+  // Rank-independent base reward for a task: the value to pass to
+  // Economy::calculateReward (#151)
+  int getBaseReward(int difficulty);
+
+  // What the task pays at par (4 stars) for this rank, for display. Rank
+  // scaling comes from Economy's table, applied once (#151, #891); don't
+  // feed this back into Economy::calculateReward.
   int calculatePotentialReward(int rankIndex, int difficulty);
 
   // Get time limit for difficulty

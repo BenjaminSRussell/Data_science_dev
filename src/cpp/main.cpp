@@ -8,6 +8,8 @@
  *      -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 \
  *      -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 \
  *      --bind -o public/wasm/game.js
+ *
+ * Native unit tests (no Emscripten): npm run test:cpp
  */
 
 #include <emscripten/bind.h>
@@ -16,8 +18,22 @@
 #include "data_generator.h"
 #include "scorer.h"
 #include "economy.h"
+#include "task_system.h"
 
 using namespace emscripten;
+
+// Defined before EMSCRIPTEN_BINDINGS takes their addresses (#79)
+
+// Version info
+std::string getVersion() {
+    return "1.0.0";
+}
+
+// Initialize WASM module
+bool initializeWASM() {
+    // Initialization logic here
+    return true;
+}
 
 // Expose C++ classes to JavaScript
 EMSCRIPTEN_BINDINGS(DataScienceTycoon) {
@@ -33,7 +49,7 @@ EMSCRIPTEN_BINDINGS(DataScienceTycoon) {
         .function("addReputation", &GameState::addReputation)
         .function("getRankIndex", &GameState::getRankIndex)
         .function("setRankIndex", &GameState::setRankIndex)
-        .function("canPromote", &GameState::canPromote)
+        // Promotion checks live in Economy::canPromote(reputation, rank) (#893)
         .function("getTasksCompleted", &GameState::getTasksCompleted)
         .function("incrementTasksCompleted", &GameState::incrementTasksCompleted)
         .function("getPerfectScores", &GameState::getPerfectScores)
@@ -68,21 +84,18 @@ EMSCRIPTEN_BINDINGS(DataScienceTycoon) {
         .function("getSalaryMultiplier", &Economy::getSalaryMultiplier)
         .function("canPromote", &Economy::canPromote)
         .function("getRequiredReputation", &Economy::getRequiredReputation);
+
+    // TaskSystem class (#80)
+    class_<TaskSystem>("TaskSystem")
+        .constructor<>()
+        .function("getDifficultyForRank", &TaskSystem::getDifficultyForRank)
+        .function("getBaseReward", &TaskSystem::getBaseReward)
+        .function("calculatePotentialReward", &TaskSystem::calculatePotentialReward)
+        .function("getTimeLimitForDifficulty", &TaskSystem::getTimeLimitForDifficulty);
     
     // Utility functions
     function("getVersion", &getVersion);
     function("initializeWASM", &initializeWASM);
-}
-
-// Version info
-std::string getVersion() {
-    return "1.0.0";
-}
-
-// Initialize WASM module
-bool initializeWASM() {
-    // Initialization logic here
-    return true;
 }
 
 // Main function for WASM

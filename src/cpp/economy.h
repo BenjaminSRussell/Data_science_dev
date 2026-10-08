@@ -9,14 +9,23 @@ public:
   Economy();
   ~Economy();
 
-  // Calculate money reward
+  // Money reward. baseReward must be the rank-independent base (e.g.
+  // TaskSystem::getBaseReward); rank scaling is applied here, once, via
+  // salaryMultiplier (#151). stars outside 1-5 are clamped (#890).
   int calculateReward(int baseReward, int stars, double salaryMultiplier);
 
-  // Calculate reputation gain
+  // Calculate reputation gain (stars clamped to 1-5)
   int calculateReputation(int stars);
 
   // Get salary multiplier for rank
   double getSalaryMultiplier(int rankIndex);
+
+  // The single per-rank pay table, shared with TaskSystem (#891).
+  // Out-of-range ranks get 1.0.
+  static double salaryMultiplierFor(int rankIndex);
+
+  // Clamp a star rating into the valid 1-5 range
+  static int clampStars(int stars);
 
   // Check if promotion is available
   bool canPromote(int reputation, int currentRank) const;
