@@ -1,0 +1,44 @@
+name: cpp
+
+# Native unit tests for src/cpp and an Emscripten compile of the WASM core,
+# so a change that breaks `npm run build:wasm` is caught on the PR (#892, #504)
+on:
+  pull_request:
+    paths:
+      - 'src/cpp/**'
+      - 'test/cpp/**'
+      - 'package.json'
+      - '.github/workflows/cpp.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/cpp/**'
+      - 'test/cpp/**'
+      - 'package.json'
+      - '.github/workflows/cpp.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpp-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm run test:cpp
+
+  wasm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.74
+      - run: mkdir -p public/wasm && npm run build:wasm
+      - run: test -s public/wasm/game.js && test -s public/wasm/game.wasm

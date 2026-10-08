@@ -10,15 +10,14 @@ Economy::Economy() {}
 
 Economy::~Economy() {}
 
+int Economy::clampStars(int stars) { return std::max(1, std::min(5, stars)); }
+
 int Economy::calculateReward(int baseReward, int stars,
                              double salaryMultiplier) {
-  // Star multipliers
-  double starMultipliers[] = {0.2, 0.4, 0.7, 1.0, 1.3};
-
-  double multiplier = 1.0;
-  if (stars >= 1 && stars <= 5) {
-    multiplier = starMultipliers[stars - 1];
-  }
+  // Star multipliers. A 0-star / failed submission pays like 1 star rather
+  // than falling back to a 1.0 multiplier (#890).
+  static const double starMultipliers[] = {0.2, 0.4, 0.7, 1.0, 1.3};
+  double multiplier = starMultipliers[clampStars(stars) - 1];
 
   int reward = static_cast<int>(baseReward * multiplier * salaryMultiplier);
 
@@ -26,20 +25,19 @@ int Economy::calculateReward(int baseReward, int stars,
 }
 
 int Economy::calculateReputation(int stars) {
-  int repRewards[] = {2, 5, 10, 18, 30};
-
-  if (stars >= 1 && stars <= 5) {
-    return repRewards[stars - 1];
-  }
-
-  return 5; // Default
+  static const int repRewards[] = {2, 5, 10, 18, 30};
+  return repRewards[clampStars(stars) - 1];
 }
 
-double Economy::getSalaryMultiplier(int rankIndex) {
-  if (rankIndex >= 0 && rankIndex <= 6) {
+double Economy::salaryMultiplierFor(int rankIndex) {
+  if (rankIndex >= 0 && rankIndex <= MAX_RANK) {
     return SALARY_MULTIPLIERS[rankIndex];
   }
   return 1.0;
+}
+
+double Economy::getSalaryMultiplier(int rankIndex) {
+  return salaryMultiplierFor(rankIndex);
 }
 
 bool Economy::canPromote(int reputation, int currentRank) const {
@@ -51,7 +49,7 @@ bool Economy::canPromote(int reputation, int currentRank) const {
 }
 
 int Economy::getRequiredReputation(int rankIndex) const {
-  if (rankIndex >= 0 && rankIndex <= 6) {
+  if (rankIndex >= 0 && rankIndex <= MAX_RANK) {
     return RANK_THRESHOLDS[rankIndex];
   }
   return 999999; // Unreachable

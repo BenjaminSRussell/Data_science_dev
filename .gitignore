@@ -93,3 +93,6 @@ compression-report.json
 .cache/
 .parcel-cache/
 
+
+# Native C++ test binaries (npm run test:cpp)
+test/cpp/build/

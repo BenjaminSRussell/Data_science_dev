@@ -1,11 +1,29 @@
 #include "scorer.h"
-#include <cstdlib>
-#include <ctime>
+#include <algorithm>
 #include <map>
 
-Scorer::Scorer() { srand(static_cast<unsigned int>(time(nullptr))); }
+Scorer::Scorer() {
+  std::random_device rd;
+  rng.seed(rd());
+}
+
+Scorer::Scorer(unsigned int seed) { rng.seed(seed); }
 
 Scorer::~Scorer() {}
+
+int Scorer::variance(int lo, int hi) {
+  std::uniform_int_distribution<int> dist(lo, hi);
+  return dist(rng);
+}
+
+int Scorer::combineScores(int appropriateness, int clarity, int accuracy) {
+  int weighted = appropriateness * APPROPRIATENESS_WEIGHT +
+                 clarity * CLARITY_WEIGHT + accuracy * ACCURACY_WEIGHT;
+  // Round half up in integer arithmetic (weighted is >= 0 for in-range input)
+  int score = weighted >= 0 ? (weighted * 2 + WEIGHT_TOTAL) / (2 * WEIGHT_TOTAL)
+                            : -((-weighted * 2 + WEIGHT_TOTAL) / (2 * WEIGHT_TOTAL));
+  return std::max(0, std::min(100, score));
+}
 
 int Scorer::calculateChartScore(const std::string &dataType,
                                 const std::string &chartType, bool hasLegend,
@@ -13,12 +31,7 @@ int Scorer::calculateChartScore(const std::string &dataType,
   int appropriateness = scoreChartAppropriateness(dataType, chartType);
   int clarity = scoreVisualClarity(hasLegend, hasTitle, hasGrid);
   int accuracy = scoreDataAccuracy();
-
-  // Weighted average
-  int score =
-      static_cast<int>(appropriateness * 0.4 + clarity * 0.3 + accuracy * 0.3);
-
-  return std::max(0, std::min(100, score));
+  return combineScores(appropriateness, clarity, accuracy);
 }
 
 int Scorer::getStarsFromScore(int score) {
@@ -36,35 +49,27 @@ int Scorer::getStarsFromScore(int score) {
 int Scorer::scoreChartAppropriateness(const std::string &dataType,
                                       const std::string &chartType) {
   int baseScore = getChartTypeScore(dataType, chartType);
-
-  // Add small variance
-  int variance = (rand() % 11) - 5; // -5 to +5
-
-  return std::max(0, std::min(100, baseScore + variance));
+  return std::max(0, std::min(100, baseScore + variance(-5, 5)));
 }
 
 int Scorer::scoreVisualClarity(bool hasLegend, bool hasTitle, bool hasGrid) {
-  int score = 70; // Base score
+  // 50 with nothing, 100 with everything, so a bare chart can drag the
+  // total into 1-star territory (#209)
+  int score = 50;
 
   if (hasLegend)
-    score += 10;
+    score += 20;
   if (hasTitle)
-    score += 10;
+    score += 20;
   if (hasGrid)
-    score += 5;
+    score += 10;
 
-  // Add small variance
-  int variance = (rand() % 6) - 3;
-
-  return std::max(0, std::min(100, score + variance));
+  return std::max(0, std::min(100, score + variance(-3, 3)));
 }
 
 int Scorer::scoreDataAccuracy() {
-  // Base score with variance (simulating data accuracy check)
-  int baseScore = 80;
-  int variance = (rand() % 21) - 5; // -5 to +15
-
-  return std::max(60, std::min(100, baseScore + variance));
+  // Simulated accuracy check: 60-100
+  return std::max(0, std::min(100, 80 + variance(-20, 20)));
 }
 
 int Scorer::getChartTypeScore(const std::string &dataType,

@@ -1,4 +1,5 @@
 #include "task_system.h"
+#include "economy.h"
 
 TaskSystem::TaskSystem() {}
 
@@ -14,19 +15,17 @@ int TaskSystem::getDifficultyForRank(int rankIndex) {
   return 4;   // Expert level
 }
 
+int TaskSystem::getBaseReward(int difficulty) {
+  const int baseReward = 100;
+  const int difficultyBonus = difficulty * 20;
+  return baseReward + difficultyBonus;
+}
+
 int TaskSystem::calculatePotentialReward(int rankIndex, int difficulty) {
-  // Base reward
-  int baseReward = 100;
-
-  // Rank multipliers
-  double rankMultipliers[] = {1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 15.0};
-  double rankMult =
-      (rankIndex >= 0 && rankIndex <= 6) ? rankMultipliers[rankIndex] : 1.0;
-
-  // Difficulty bonus
-  int difficultyBonus = difficulty * 20;
-
-  return static_cast<int>(baseReward * rankMult) + difficultyBonus;
+  const int parStars = 4; // 1.0x star multiplier
+  Economy economy;
+  return economy.calculateReward(getBaseReward(difficulty), parStars,
+                                 Economy::salaryMultiplierFor(rankIndex));
 }
 
 int TaskSystem::getTimeLimitForDifficulty(int difficulty) {

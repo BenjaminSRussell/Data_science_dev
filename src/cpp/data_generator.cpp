@@ -1,4 +1,5 @@
 #include "data_generator.h"
+#include <algorithm>
 #include <cmath>
 #include <random>
 #include <sstream>
@@ -13,6 +14,8 @@ DataGenerator::DataGenerator() {
 DataGenerator::~DataGenerator() {}
 
 int DataGenerator::randomRange(int min, int max) {
+  if (min > max)
+    std::swap(min, max); // never hand the distribution an invalid range
   std::uniform_int_distribution<int> dist(min, max);
   return dist(rng);
 }
@@ -151,19 +154,26 @@ std::string DataGenerator::generateCategoryBreakdownJSON() {
 
   ss << "],\"datasets\":{\"Percentage\":[";
 
-  // Generate percentages that sum to 100
+  // Five percentages, each in [10, 40], summing to exactly 100. Each draw
+  // is bounded so the categories still to come can always fit in [10, 40],
+  // which keeps lo <= hi on every call (the old bound could ask for
+  // randomRange(10, 5), undefined behaviour, #82).
+  const int count = 5, minPct = 10, maxPct = 40;
   int remaining = 100;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < count; i++) {
     if (i > 0)
       ss << ",";
 
     int val;
-    if (i == 4) {
+    int left = count - 1 - i; // categories after this one
+    if (left == 0) {
       val = remaining;
     } else {
-      val = randomRange(10, std::min(40, remaining - (4 - i) * 5));
-      remaining -= val;
+      int lo = std::max(minPct, remaining - maxPct * left);
+      int hi = std::min(maxPct, remaining - minPct * left);
+      val = randomRange(lo, hi);
     }
+    remaining -= val;
     ss << val;
   }
 
@@ -196,6 +206,12 @@ std::string DataGenerator::generateTrendAnalysisJSON() {
 
 std::string DataGenerator::generateRandomDataJSON(int numPoints, int minVal,
                                                   int maxVal) {
+  // These arrive straight from JS via embind: sanitize before they reach
+  // uniform_int_distribution, which is UB for min > max (#208)
+  numPoints = std::max(0, std::min(MAX_RANDOM_POINTS, numPoints));
+  if (minVal > maxVal)
+    std::swap(minVal, maxVal);
+
   std::ostringstream ss;
   ss << "{\"labels\":[";
 
