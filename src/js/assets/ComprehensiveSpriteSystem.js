@@ -6,6 +6,10 @@
 
 import { emotionSpriteMapper } from '../characters/EmotionSpriteMapper.js';
 import { bodyLanguageMapper } from '../characters/BodyLanguageMapper.js';
+import { isAssetMissing } from './MissingAssetBlocklist.js';
+
+/** Size of a combined sprite when the pose image has no natural size */
+const DEFAULT_SPRITE_SIZE = 64;
 
 export class ComprehensiveSpriteSystem {
     constructor(assetManager, spriteSheetManager) {
@@ -65,7 +69,8 @@ export class ComprehensiveSpriteSystem {
             const poses = bodyLanguageMapper.getAllPoses();
             const promises = poses.map(pose => {
                 try {
-                    const config = bodyLanguageMapper.getPose(pose);
+                    // The mapper's accessor is getBodyLanguage(); getPose() never existed (#2301, #1839)
+                    const config = bodyLanguageMapper.getBodyLanguage(pose);
                     if (config && config.sprite) {
                         return this.loadSprite(config.sprite, `pose_${pose}`);
                     }
@@ -85,6 +90,14 @@ export class ComprehensiveSpriteSystem {
      * Load a single sprite
      */
     async loadSprite(url, key) {
+        // Reuse an image the AssetManager already holds under this key (#2136)
+        const cached = this.assetManager?.getAsset?.(key);
+        if (cached) {
+            this.loadedSprites.set(key, cached);
+            return cached;
+        }
+        // Known-missing files: don't request them at all
+        if (isAssetMissing(url)) return null;
         return new Promise((resolve) => {
             const img = new Image();
 
@@ -124,35 +137,8 @@ export class ComprehensiveSpriteSystem {
                     rows: 8
                 });
 
-                // Register emotion animations
-                // Note: Animation registration is handled through sprite sheet configuration
-                // Individual animations are defined in the sprite sheet manifest
-                // const emotions = emotionSpriteMapper.getAllEmotions();
-                // emotions.forEach(emotion => {
-                //     const coords = emotionSpriteMapper.getSpriteSheetCoords(emotion);
-                //     const animation = emotionSpriteMapper.getEmotionAnimation(emotion);
-                //     // Animation frames are handled by SpriteSheetManager.parseAnimations()
-                // });
-
-                // Register body language animations
-                const poses = bodyLanguageMapper.getAllPoses();
-                // Note: registerAnimation method doesn't exist in SpriteSheetManager
-                // Animation registration is handled through registerSpriteSheet instead
-                // poses.forEach(pose => {
-                //     const coords = bodyLanguageMapper.getSpriteSheetCoords(pose);
-                //     const animation = bodyLanguageMapper.getPoseAnimation(pose);
-                //     
-                //     this.spriteSheetManager.registerAnimation('main_character', animation, {
-                //         frames: [
-                //             { row: coords.row, col: coords.col },
-                //             { row: coords.row, col: coords.col + 1 }
-                //         ],
-                //         speed: 8,
-                //         loop: animation.includes('_loop') || animation.includes('_once')
-                //     });
-                // });
-
-
+                // Per-pose/emotion animations come from the sheet configuration;
+                // SpriteSheetManager has no registerAnimation() (#2136)
             } catch (error) {
                 console.warn('Could not register sprite sheets:', error);
             }
@@ -176,8 +162,8 @@ export class ComprehensiveSpriteSystem {
     }
 
     /**
-     * Get combined sprite (emotion + body language)
-     * Returns null if either sprite is missing
+     * Get combined sprite (emotion + body language) as a canvas, which can be
+     * passed straight to drawImage(). Returns null if either sprite is missing
      */
     getCombinedSprite(emotion, pose) {
         const poseSprite = this.getBodyLanguageSprite(pose);
@@ -194,25 +180,29 @@ export class ComprehensiveSpriteSystem {
             return this.spriteCache.get(cacheKey);
         }
 
-        // Create combined sprite (emotion overlay on pose)
+        // Size the canvas from the pose image and scale both layers to it, so
+        // non-64px art isn't cropped or misaligned (#2135)
+        const width = poseSprite.naturalWidth || poseSprite.width || DEFAULT_SPRITE_SIZE;
+        const height = poseSprite.naturalHeight || poseSprite.height || DEFAULT_SPRITE_SIZE;
         const canvas = document.createElement('canvas');
-        canvas.width = 64;
-        canvas.height = 64;
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
 
         // Draw pose first
-        ctx.drawImage(poseSprite, 0, 0);
+        ctx.drawImage(poseSprite, 0, 0, width, height);
 
         // Draw emotion overlay
         ctx.globalAlpha = 0.7;
-        ctx.drawImage(emotionSprite, 0, 0);
+        ctx.drawImage(emotionSprite, 0, 0, width, height);
         ctx.globalAlpha = 1.0;
 
-        const img = new Image();
-        img.src = canvas.toDataURL();
-        this.spriteCache.set(cacheKey, img);
+        // Cache the canvas itself: it is drawable right away, unlike an Image
+        // built from a data URL that hasn't decoded yet (#1052)
+        this.spriteCache.set(cacheKey, canvas);
 
-        return img;
+        return canvas;
     }
 
     /**
@@ -243,6 +233,6 @@ export class ComprehensiveSpriteSystem {
         const total = emotionSpriteMapper.getAllEmotions().length +
             bodyLanguageMapper.getAllPoses().length;
         const loaded = this.loadedSprites.size;
-        return (loaded / total) * 100;
+        return total > 0 ? Math.min(100, (loaded / total) * 100) : 100;
     }
 }
