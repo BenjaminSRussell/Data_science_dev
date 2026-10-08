@@ -49,6 +49,12 @@ describe('NewsManager (#437, #1365, #2238, #1127, #1370, #216, #1701, #2111, #13
         expect(nm.checkEventRequirements(mentor)).toBe(true);
     });
 
+    it('viral_chart needs loaded stats (#1728)', () => {
+        const viral = RANDOM_EVENTS.find(e => e.id === 'viral_chart');
+        expect(new NewsManager({}).checkEventRequirements(viral)).toBe(false);
+        expect(new NewsManager({ characterStats: { getStat: () => 40 } }).checkEventRequirements(viral)).toBe(true);
+    });
+
     it('owning shares satisfies hasInvestments and Market Dip moves prices', () => {
         const gs = { money: 0 };
         gs.stockMarket = new StockMarket(gs);

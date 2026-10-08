@@ -491,8 +491,10 @@ export class NewsManager {
             return false;
         }
 
-        if (req.analytics && this.gameState.characterStats?.getStat('analytics') < req.analytics) {
-            return false;
+        // Fail closed when stats aren't loaded (#1728)
+        if (req.analytics) {
+            const analytics = Number(this.gameState.characterStats?.getStat?.('analytics'));
+            if (!Number.isFinite(analytics) || analytics < req.analytics) return false;
         }
 
         if (req.reputation && (this.gameState.reputation || 0) < req.reputation) {
