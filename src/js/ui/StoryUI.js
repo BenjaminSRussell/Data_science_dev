@@ -82,6 +82,8 @@ export class StoryUI {
                         <div class="story-arc-card" id="story-arc-card">
                             <div class="story-arc-name" id="story-arc-name">The Balanced Path</div>
                             <div class="story-arc-description" id="story-arc-description">You navigate the complexities of life, trying to find balance.</div>
+                            <div class="story-arc-theme" id="story-arc-theme"></div>
+                            <ul class="story-arc-challenges" id="story-arc-challenges" aria-label="Challenges on this path"></ul>
                             <div class="story-arc-progress">
                                 <div class="progress-label">Story Progress</div>
                                 <div class="progress-bar" id="story-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="story-progress-text">
@@ -103,6 +105,18 @@ export class StoryUI {
                                 <div class="goal-item">Learn the basics</div>
                                 <div class="goal-item">Meet people</div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Character Arc Section (#1475) -->
+                    <div class="story-section story-character-arc-section">
+                        <h3 class="story-section-title">Who You're Becoming</h3>
+                        <div class="story-character-arc">
+                            <div class="arc-row"><span class="arc-row-label">Where you started</span>
+                                <div class="arc-start-description" id="arc-start-description">A newcomer with a laptop and a dream.</div></div>
+                            <div class="arc-row"><span class="arc-row-label">Where you are now</span>
+                                <div class="arc-current-description" id="arc-current-description">Still finding your way.</div></div>
+                            <div class="arc-transformation" id="arc-transformation"></div>
                         </div>
                     </div>
 
@@ -185,6 +199,11 @@ export class StoryUI {
      * Setup event listeners
      */
     setupEventListeners() {
+        // initialize() can run more than once; only bind document-level and
+        // button listeners the first time (#1773)
+        if (this._listenersBound) return;
+        this._listenersBound = true;
+
         // Story button
         const storyBtn = document.getElementById('btn-nav-story');
         if (storyBtn) {
@@ -197,12 +216,14 @@ export class StoryUI {
             closeBtn.addEventListener('click', () => this.hideStoryScreen());
         }
 
-        // Close on escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.isOpen) {
+        // Close on escape, but only while the story screen is really on
+        // screen (#1763)
+        this._onKeydown = (e) => {
+            if (e.key === 'Escape' && this.isOpen && this.isStoryScreenVisible()) {
                 this.hideStoryScreen();
             }
-        });
+        };
+        document.addEventListener('keydown', this._onKeydown);
     }
 
     /**
@@ -222,7 +243,24 @@ export class StoryUI {
             storyScreen.classList.add('active');
         }
 
-        this.isOpen = true;
+        // Only count as open if the screen actually displayed (#1763)
+        this.isOpen = this.isStoryScreenVisible();
+    }
+
+    /** Is #screen-story currently showing? */
+    isStoryScreenVisible() {
+        const storyScreen = document.getElementById('screen-story');
+        if (!storyScreen) return false;
+        const current = this.game?.screenManager?.currentScreen;
+        if (current) return current === 'screen-story';
+        return !storyScreen.classList.contains('hidden');
+    }
+
+    /** Remove document-level listeners (#1773) */
+    destroy() {
+        if (this._onKeydown) document.removeEventListener('keydown', this._onKeydown);
+        this._onKeydown = null;
+        this._listenersBound = false;
     }
 
     /**
@@ -263,6 +301,21 @@ export class StoryUI {
         const arcDesc = document.getElementById('story-arc-description');
         if (arcName) arcName.textContent = arc?.name || 'The Balanced Path';
         if (arcDesc) arcDesc.textContent = arc?.description || 'Your journey continues.';
+
+        // Theme and challenges the arc defines (#1422)
+        const pretty = (id) => String(id).replace(/_/g, ' ').replace(/^./, c => c.toUpperCase());
+        const themeEl = document.getElementById('story-arc-theme');
+        if (themeEl) themeEl.textContent = arc?.theme ? `Theme: ${pretty(arc.theme)}` : '';
+        const challengesEl = document.getElementById('story-arc-challenges');
+        if (challengesEl) {
+            challengesEl.innerHTML = '';
+            (arc?.challenges || []).forEach(ch => {
+                const li = document.createElement('li');
+                li.className = 'story-arc-challenge';
+                li.textContent = pretty(ch);
+                challengesEl.appendChild(li);
+            });
+        }
 
         // Update progress
         const progressFill = document.getElementById('story-progress-fill');
@@ -393,7 +446,7 @@ export class StoryUI {
                 <div class="decision-card">
                     <div class="decision-header">
                         <div class="decision-number">Decision ${index + 1}</div>
-                        <div class="decision-week">Week ${decision.week || '?'}</div>
+                        <div class="decision-week">Week ${(decision.week ?? 0) + 1}</div>
                     </div>
                     <div class="decision-title">${decisionData?.title || 'Major Decision'}</div>
                     <div class="decision-choice">
@@ -464,8 +517,10 @@ export class StoryUI {
                 const decisionData = this.getDecisionData(decision.decisionId);
                 if (decisionData) {
                     entries.push({
-                        date: `Week ${decision.week || '?'}`,
-                        text: `${decisionData.title}: You made a choice that shaped your path.`
+                        date: `Week ${(decision.week ?? 0) + 1}`,
+                        text: decisionData.choices?.[decision.choice]?.storyImpact
+                            ? `${decisionData.title}: ${decisionData.choices[decision.choice].storyImpact}`
+                            : `${decisionData.title}: You made a choice that shaped your path.`
                     });
                 }
             });
@@ -559,10 +614,15 @@ export class StoryUI {
 
         const modal = document.createElement('div');
         modal.className = 'story-decision-modal';
+        // Proper dialog semantics, focus trap, Escape, focus restore (#1877)
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'decision-modal-title');
+        const previouslyFocused = document.activeElement;
         modal.innerHTML = `
             <div class="decision-modal-content">
                 <div class="decision-modal-header">
-                    <h3 class="decision-modal-title">${decision.title}</h3>
+                    <h3 class="decision-modal-title" id="decision-modal-title">${decision.title}</h3>
                     <div class="decision-modal-importance">Major Decision</div>
                 </div>
                 <div class="decision-modal-description">${decision.description}</div>
@@ -586,6 +646,43 @@ export class StoryUI {
 
         document.body.appendChild(modal);
 
+        const closeModal = () => {
+            document.removeEventListener('keydown', onKeydown, true);
+            modal.remove();
+            if (previouslyFocused && typeof previouslyFocused.focus === 'function' && document.contains(previouslyFocused)) {
+                previouslyFocused.focus();
+            }
+        };
+        const onKeydown = (e) => {
+            if (!document.body.contains(modal)) {
+                document.removeEventListener('keydown', onKeydown, true);
+                return;
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                closeModal();
+                return;
+            }
+            if (e.key === 'Tab') {
+                const buttons = [...modal.querySelectorAll('button')];
+                if (buttons.length === 0) return;
+                const first = buttons[0];
+                const last = buttons[buttons.length - 1];
+                const inside = modal.contains(document.activeElement);
+                if (e.shiftKey && (document.activeElement === first || !inside)) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+        // Capture phase, so the story screen's own Escape handler doesn't also fire
+        document.addEventListener('keydown', onKeydown, true);
+        modal.querySelector('.decision-choice-btn')?.focus();
+
         // Add click handlers
         modal.querySelectorAll('.decision-choice-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -601,7 +698,7 @@ export class StoryUI {
                     console.error('Error processing decision:', error);
                 } finally {
                     // Always remove the modal, even if there was an error
-                    modal.remove();
+                    closeModal();
                 }
             });
         });
@@ -609,7 +706,7 @@ export class StoryUI {
         // Close on background click
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.remove();
+                closeModal();
             }
         });
     }

@@ -498,3 +498,92 @@
         transform: rotate(90deg);
     }
 }
+/* Narrative context block (#1794) */
+.story-narrative-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.narrative-chapter {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+.narrative-situation {
+    line-height: 1.5;
+}
+.situation-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+.situation-description {
+    opacity: 0.85;
+    line-height: 1.5;
+}
+.narrative-goals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+.goal-item {
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    background: rgba(78, 205, 196, 0.12);
+    border: 1px solid rgba(78, 205, 196, 0.35);
+}
+.goal-item::before {
+    content: "\2192\00a0";
+    opacity: 0.7;
+}
+
+/* Arc theme and challenges (#1422) */
+.story-arc-theme {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    font-style: italic;
+    opacity: 0.8;
+}
+.story-arc-challenges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+}
+.story-arc-challenge {
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: rgba(255, 107, 157, 0.12);
+    border: 1px solid rgba(255, 107, 157, 0.3);
+}
+
+/* Character arc panel (#1475) */
+.story-character-arc {
+    display: grid;
+    gap: 0.6rem;
+}
+.arc-row-label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.65;
+}
+.transformation-label {
+    font-weight: 700;
+    margin-top: 0.25rem;
+}
+.transformation-text {
+    line-height: 1.5;
+    opacity: 0.9;
+}
