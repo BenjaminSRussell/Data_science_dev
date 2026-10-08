@@ -31,6 +31,11 @@ function cloneContract(contract) {
 }
 
 export class ProjectSystem {
+    /** In-game days without work before an active project counts as idle (#263) */
+    static IDLE_DAYS = 3;
+    /** Minimum days between two idle reminders for the same project (#263) */
+    static IDLE_REMIND_EVERY = 3;
+
     constructor(gameState) {
         this.gameState = gameState;
 
@@ -106,7 +111,10 @@ export class ProjectSystem {
             currentStageIndex: 0,
             stageProgress: 0, // 0 to maxProgress
             totalProgress: 0,
-            startTime: Date.now()
+            startTime: Date.now(),
+            // In-game days, for the idle-work reminder (#263)
+            startDay: this.currentDay(),
+            lastWorkedDay: this.currentDay()
         };
         this.lastResult = null;
         this.availableContracts = this.availableContracts.filter(c => c.id !== contractId);
@@ -142,6 +150,7 @@ export class ProjectSystem {
         const hardwareMultiplier = this.gameState.hardwareManager?.getProductivityMultiplier?.() || 1;
         const effectiveWork = Math.max(0, ((Number(workPower) || 0) + aiBonus) * hardwareMultiplier);
         this.activeProject.stageProgress += effectiveWork;
+        if (effectiveWork > 0) this.activeProject.lastWorkedDay = this.currentDay();
         // totalProgress tracks all work put into the project (#1517)
         this.activeProject.totalProgress = (this.activeProject.totalProgress || 0) + effectiveWork;
 
@@ -268,6 +277,39 @@ export class ProjectSystem {
             reputationChange,
             xpGained,
             dataPoints
+        };
+    }
+
+    /** Current in-game day (0 before the clock exists) */
+    currentDay() {
+        return Number(this.gameState?.timeManager?.totalDays) || 0;
+    }
+
+    /**
+     * Idle-work reminder, checked once per new day (#263). Returns a reminder
+     * when the active project hasn't been worked on for IDLE_DAYS in-game
+     * days, at most once every IDLE_REMIND_EVERY days; otherwise null.
+     * @param {number} [day] - in-game day (defaults to today)
+     * @returns {{message: string, idleDays: number, projectId: string}|null}
+     */
+    checkIdleWork(day = this.currentDay()) {
+        const p = this.activeProject;
+        if (!p) return null;
+        // Projects from older saves start their idle clock now
+        if (!Number.isFinite(Number(p.lastWorkedDay))) {
+            p.lastWorkedDay = Number.isFinite(Number(p.startDay)) ? Number(p.startDay) : day;
+        }
+        const idleDays = day - Number(p.lastWorkedDay);
+        if (idleDays < ProjectSystem.IDLE_DAYS) return null;
+        const last = Number(p.lastIdleReminderDay);
+        if (Number.isFinite(last) && day - last < ProjectSystem.IDLE_REMIND_EVERY) return null;
+        p.lastIdleReminderDay = day;
+        const stage = Array.isArray(p.stages) ? p.stages[p.currentStageIndex]?.name : null;
+        return {
+            projectId: p.id,
+            idleDays,
+            message: `"${p.title || p.name || 'Your project'}" has sat idle for ${idleDays} days` +
+                `${stage ? ` (stage: ${stage})` : ''}. Work on it from the Career screen, or cancel it.`
         };
     }
 

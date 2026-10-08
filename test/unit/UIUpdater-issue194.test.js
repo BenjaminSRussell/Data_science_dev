@@ -48,7 +48,11 @@ describe('UIUpdater - Issue #194 Price Formatting (Source Code Verification)', (
             // Verify task reward formatting
             // Now formatted by EconomySystem.rewardRangeText, which uses
             // toLocaleString for both amounts (#965)
-            expect(uiUpdaterSource).toContain('EconomySystem.rewardRangeText(task.potentialReward)');
+            // The task panel is rendered by ui/taskPanel.js for both UIUpdater
+            // and TaskSystem (#1133)
+            const panelSource = fs.readFileSync(path.join(__dirname, '../../src/js/ui/taskPanel.js'), 'utf8');
+            expect(uiUpdaterSource).toContain('renderTaskPanel(task, this.gameState)');
+            expect(panelSource).toContain('EconomySystem.rewardRangeText(task.potentialReward)');
             expect(EconomySystem.rewardRangeText(12345)).toBe('$12,345 (up to $16,049 for 5 stars)');
         });
     });

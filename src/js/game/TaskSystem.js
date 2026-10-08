@@ -4,8 +4,8 @@
 
 import { BOSSES } from '../data/bosses.js';
 import { COMPREHENSIVE_DATA_SCIENCE_TASKS } from '../data/comprehensive_datascience_tasks.js';
-import { insightHint, EconomySystem } from './EconomySystem.js';
-import { renderTaskBrief } from './taskBrief.js';
+import { EconomySystem } from './EconomySystem.js';
+import { renderTaskPanel, bossMoodText } from '../ui/taskPanel.js';
 import { isCurrencyColumn, proportionalSplit, boundedPartition } from '../utils/dataFormat.js';
 
 export class TaskSystem {
@@ -14,11 +14,7 @@ export class TaskSystem {
      * come from BOSS_MOODS in data/bosses.js (#2227)
      */
     static bossMoodText(boss) {
-        const pretty = v => String(v).replace(/[-_]/g, ' ').replace(/^./, c => c.toUpperCase());
-        const parts = [];
-        if (boss?.mood) parts.push(`Mood: ${pretty(boss.mood)}`);
-        if (boss?.personality) parts.push(`Style: ${pretty(boss.personality)}`);
-        return parts.join(' · ');
+        return bossMoodText(boss);
     }
 
     static MAX_RANK_INDEX = 6;
@@ -381,49 +377,8 @@ export class TaskSystem {
         const task = this.gameState.currentTask;
         if (!task) return;
 
-        const dialogueEl = document.getElementById('boss-dialogue');
-        const nameEl = document.getElementById('boss-name');
-        const titleEl = document.getElementById('boss-title');
-        const avatarEl = document.getElementById('boss-avatar');
-        const moodEl = document.getElementById('boss-mood');
-
-        if (dialogueEl) {
-            dialogueEl.querySelector('p').textContent = task.boss.taskIntro || task.template.description;
-        }
-        if (nameEl) nameEl.textContent = task.boss.name;
-        if (titleEl) titleEl.textContent = task.boss.title;
-        // avatar is an image path: show it as an image, never as text (#2210)
-        if (avatarEl) {
-            avatarEl.textContent = '';
-            if (task.boss.avatar) {
-                const img = document.createElement('img');
-                img.src = task.boss.avatar;
-                img.alt = task.boss.name || '';
-                img.addEventListener('error', () => img.remove());
-                avatarEl.appendChild(img);
-            }
-        }
-        // Text-mode panel: show the boss's style (#2210)
-        if (moodEl) moodEl.textContent = TaskSystem.bossMoodText(task.boss);
-
-        // Update task display
-        const taskDesc = document.querySelector('.task-description');
-        if (taskDesc) taskDesc.textContent = task.template.description;
-
-        const taskReward = document.getElementById('task-reward');
-        if (taskReward) taskReward.textContent = EconomySystem.rewardRangeText(task.potentialReward);
-
-        // Update requirements
-        const reqContainer = document.querySelector('.task-requirements');
-        if (reqContainer) {
-            const hint = insightHint(this.gameState, task); // "Data Insight" perk
-            reqContainer.innerHTML = task.requirements
-                .map(r => `<span class="requirement-tag">${r}</span>`)
-                .join('') + (hint ? `<span class="requirement-tag insight-hint">${hint}</span>` : '');
-        }
-
-        // Domain, tools, skills, deliverable, context (#2430)
-        renderTaskBrief(task);
+        // One renderer owns the panel text, shared with UIUpdater (#1133)
+        renderTaskPanel(task, this.gameState);
 
         // Update data table
         this.currentTableData = JSON.parse(JSON.stringify(task.data)); // Deep copy to avoid mutating original task data permanently
