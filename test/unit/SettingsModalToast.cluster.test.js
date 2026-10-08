@@ -37,12 +37,12 @@ describe('settings modal', () => {
     it('labels are tied to their controls and rows are laid out inline', () => {
         const game = fakeGame();
         game.showSettings();
-        for (const id of ['settings-sound', 'settings-music', 'settings-music-volume', 'settings-sound-volume']) {
+        for (const id of ['settings-sound', 'settings-music', 'settings-music-volume', 'settings-sound-volume', 'settings-quality']) {
             const label = document.querySelector(`label[for="${id}"]`);
             expect(label, id).toBeTruthy();
             expect(document.getElementById(id).labels.length).toBeGreaterThan(0);
         }
-        expect(document.querySelectorAll('.settings-row')).toHaveLength(4);
+        expect(document.querySelectorAll('.settings-row')).toHaveLength(5); // + graphics quality (#1449)
         for (const cls of ['.settings-modal', '.settings-row', '.credits-modal', '.credits-content', '.credits-section']) {
             expect(css).toContain(cls);
         }
