@@ -265,6 +265,13 @@ export function handleLearnLibrary(game, libId, LIBRARY_CONTENT) {
     const lib = LIBRARY_CONTENT.find(l => l.id === libId);
     if (!lib) return;
 
+    // The rank requirement was only a disabled button; enforce it here (#1267)
+    const rankIndex = Number(game.gameState.rankIndex) || 0;
+    if (rankIndex < (Number(lib.reqLevel) || 1) - 1) {
+        game.showError(`Requires a higher rank to learn ${lib.name}.`);
+        return;
+    }
+
     if (game.gameState.money < lib.cost) {
         game.showError("Not enough money!");
         return;
