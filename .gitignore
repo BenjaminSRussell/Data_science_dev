@@ -96,3 +96,10 @@ compression-report.json
 
 # Native C++ test binaries (npm run test:cpp)
 test/cpp/build/
+
+# node_modules may be a symlink in extra worktrees; no trailing slash so it matches either
+node_modules
+
+# Python bytecode
+__pycache__/
+*.py[cod]
