@@ -3637,7 +3637,10 @@ export class MainGame {
                 }
             } else if (event.type === 'new_week') {
                 this.publishWeeklyEdition();
-                const rent = this.gameState.rent || 500;
+                // The roommate covers their half (#2055, #1716)
+                const fullRent = this.gameState.rent || 500;
+                const rent = this.gameState.roommateSystem?.playerRentShare?.(fullRent) ?? fullRent;
+                const roommateRent = fullRent - rent;
                 this.gameState.money -= rent;
 
                 // Starter-job paycheck from onboarding (#1071)
@@ -3701,7 +3704,7 @@ export class MainGame {
                     }
                 }
 
-                this.showToast(`Paid weekly rent: -$${rent}`, 'warning');
+                this.showToast(`Paid weekly rent: -$${rent}${roommateRent > 0 ? ` (${this.gameState.roommateSystem?.roommate?.name || 'Your roommate'} covered $${roommateRent})` : ''}`, 'warning');
                 this.audioManager.play('expense');
 
                 // Rent was actually charged: count it for the story beat (#1497)

@@ -54,14 +54,28 @@ export class RoommateSystem {
      * Split rent
      */
     splitRent(totalRent) {
-        const playerShare = totalRent * this.rentSplit;
-        const roommateShare = totalRent * (1 - this.rentSplit);
+        const total = Math.max(0, Number(totalRent) || 0);
+        const split = Math.max(0, Math.min(1, Number(this.rentSplit)));
+        const playerShare = total * (Number.isFinite(split) ? split : 0.5);
+        const roommateShare = total - playerShare;
         
         return {
             player: playerShare,
             roommate: roommateShare,
-            total: totalRent
+            total
         };
+    }
+
+    /**
+     * The part of this week's rent the player pays; the roommate covers the
+     * rest (recorded as their rentContribution). No roommate = full rent.
+     */
+    playerRentShare(totalRent) {
+        const total = Math.max(0, Number(totalRent) || 0);
+        if (!this.roommate) return total;
+        const share = Math.round(this.splitRent(total).player);
+        this.roommate.rentContribution = total - share;
+        return share;
     }
     
     /**
