@@ -210,8 +210,9 @@ export class RomanceProgressionSystem {
             return { success: false, message: 'Unknown project' };
         }
         
-        // Combined income and skills
-        const combinedIncome = (this.gameState.economySystem?.money || 0) + this.romancePartner.income;
+        // Combined income and skills. The player's cash is gameState.money;
+        // EconomySystem has no money field (#2376)
+        const combinedIncome = (Number(this.gameState.money) || 0) + this.romancePartner.income;
         const bonus = this.projectBonus(project);
         
         return {
@@ -284,7 +285,7 @@ export class RomanceProgressionSystem {
         this.syncPartner();
         
         // Combined household income
-        const householdIncome = (this.gameState.economySystem?.money || 0) + this.romancePartner.income;
+        const householdIncome = (Number(this.gameState.money) || 0) + this.romancePartner.income;
         
         return {
             success: true,

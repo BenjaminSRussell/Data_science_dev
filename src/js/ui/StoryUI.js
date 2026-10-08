@@ -275,7 +275,11 @@ export class StoryUI {
         
         // Use screen manager if available
         if (this.game?.screenManager) {
-            this.game.screenManager.showScreen('screen-story');
+            // Remember whether ScreenManager really navigated here (and so
+            // pushed a history entry); hiding only pops history if it did (#1359)
+            const previous = this.game.screenManager.getCurrentScreen?.() ?? this.game.screenManager.currentScreen;
+            const shown = this.game.screenManager.showScreen('screen-story') !== false;
+            this._navigatedHere = shown && (previous !== 'screen-story' || !!this._navigatedHere);
         } else {
             storyScreen.classList.remove('hidden');
             storyScreen.classList.add('active');
@@ -309,13 +313,15 @@ export class StoryUI {
         const storyScreen = document.getElementById('screen-story');
         if (!storyScreen) return;
 
-        if (this.game?.screenManager) {
-            this.game.screenManager.goBack();
+        const sm = this.game?.screenManager;
+        if (sm && this._navigatedHere && sm.goBack() !== false) {
+            // returned to the screen the story was opened from
         } else {
             storyScreen.classList.add('hidden');
             storyScreen.classList.remove('active');
         }
 
+        this._navigatedHere = false;
         this.isOpen = false;
     }
 

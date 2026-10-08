@@ -43,6 +43,23 @@ export function intervalLacksCleanup(line, content) {
     return !content.includes('clearInterval');
 }
 
+/**
+ * True when `line` calls `.name(` but the file defines no `name` in any form
+ * this codebase uses: `function name(`, a class method `name(...) {`, or a
+ * property `name =` / `name:`. The old check looked only for the literal
+ * "function name", and its other clause was always true (#1901).
+ */
+export function definesMethod(content, name) {
+    const n = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(?:function\\s+${n}\\s*\\(|^\\s*(?:async\\s+|static\\s+)*${n}\\s*\\([^)]*\\)\\s*\\{|\\b${n}\\s*[:=](?!=))`, 'm').test(content);
+}
+
+export function callLacksDefinition(line, content, name) {
+    if (!line.includes(`.${name}(`)) return false;
+    if (line.trim().startsWith('//')) return false;
+    return !definesMethod(content, name);
+}
+
 function checkFile(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split('\n');
@@ -53,10 +70,8 @@ function checkFile(filePath) {
         const lineNum = index + 1;
         
         // Check for undefined method calls
-        if (line.includes('.registerAnimation(') && !line.includes('//')) {
-            if (!content.includes('registerAnimation') || !content.includes('function registerAnimation')) {
-                bugs.push(`${fileName}:${lineNum} - Possible undefined method call: registerAnimation`);
-            }
+        if (callLacksDefinition(line, content, 'registerAnimation')) {
+            bugs.push(`${fileName}:${lineNum} - Possible undefined method call: registerAnimation`);
         }
         
         // Check for missing null checks before method calls

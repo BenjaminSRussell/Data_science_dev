@@ -58,7 +58,7 @@ export class ScreenManager {
             if (this.mainGame && this.mainGame.showToast) {
                 this.mainGame.showToast('Screen could not be loaded. Please try again or refresh the page.', 'error');
             }
-            return;
+            return false;
         }
 
         // A modal belongs to the screen it was opened on; leaving the screen
@@ -136,6 +136,7 @@ export class ScreenManager {
                 this.mainGame.unifiedMapSystem?.handleResize?.();
             }, 100);
         }
+        return true;
     }
 
     /**
@@ -154,11 +155,17 @@ export class ScreenManager {
         this.currentScreen = null;
     }
 
+    /**
+     * Go back to the previous screen. Returns whether navigation happened; if
+     * the previous screen can't be shown, history is left as it was instead of
+     * losing an entry (#1359)
+     */
     goBack() {
-        if (this.history.length > 0) {
-            const previousScreen = this.history.pop();
-            this.showScreen(previousScreen, false);
-        }
+        if (this.history.length === 0) return false;
+        const previousScreen = this.history.pop();
+        const ok = this.showScreen(previousScreen, false) !== false;
+        if (!ok) this.history.push(previousScreen);
+        return ok;
     }
 
     /**
