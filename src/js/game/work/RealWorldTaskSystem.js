@@ -4,6 +4,15 @@
  * Teaches actual data science work
  */
 
+import { SKILL_TO_STAT } from '../ProjectSystem.js';
+
+// Task skill ids that aren't in ProjectSystem's map
+const EXTRA_SKILL_TO_STAT = {
+    pandas: 'analytics', matplotlib: 'analytics', data_processing: 'analytics',
+    airflow: 'focus', git: 'focus', testing: 'focus', documentation: 'charisma',
+    optimization: 'focus', performance: 'focus', database: 'analytics'
+};
+
 export class RealWorldTaskSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -341,6 +350,24 @@ export class RealWorldTaskSystem {
                 reward: { money: 750, reputation: 16, experience: 90 }
             },
 
+            // Pipeline Optimization (#249)
+            pipeline_optimization: {
+                id: 'pipeline_optimization',
+                name: 'Optimize a Slow ETL Pipeline',
+                category: 'pipeline',
+                steps: [
+                    { id: 'profile_pipeline', name: 'Profile Pipeline Stages', visual: 'monitoring', duration: 3 },
+                    { id: 'find_bottleneck', name: 'Find the Bottleneck', visual: 'database_extract', duration: 3 },
+                    { id: 'parallelize', name: 'Parallelize and Batch Work', visual: 'code_editor', duration: 4 },
+                    { id: 'add_caching', name: 'Cache Intermediate Results', visual: 'database_load', duration: 3 },
+                    { id: 'verify_outputs', name: 'Verify Outputs and Runtime', visual: 'monitoring', duration: 3 }
+                ],
+                visual: 'pipeline',
+                description: 'Cut the runtime and cost of a nightly ETL job without changing its outputs',
+                skills: ['python', 'airflow', 'optimization', 'performance'],
+                reward: { money: 800, reputation: 17, experience: 95 }
+            },
+
             // API Development
             api_development: {
                 id: 'api_development',
@@ -462,7 +489,8 @@ export class RealWorldTaskSystem {
             ]
         };
         
-        let available = jobTasks[jobId] || allTasks;
+        // Only task types that are actually defined (#249)
+        let available = (jobTasks[jobId] || allTasks).filter(t => this.taskTypes[t]);
         
         // Check if in university lab for AI training
         if (context.inUniversityLab && available.includes('ai_model_training')) {
@@ -481,6 +509,9 @@ export class RealWorldTaskSystem {
      * Start a task
      */
     startTask(task) {
+        if (!task) return null;
+        // One task at a time, like ProjectSystem.startProject (#164)
+        if (this.currentTask && this.currentTask !== task) return null;
         this.currentTask = task;
         this.currentTask.currentStep = 0;
         this.currentTask.startedAt = Date.now();
@@ -533,13 +564,17 @@ export class RealWorldTaskSystem {
                 this.gameState.reputation += task.reward.reputation;
             }
             if (task.reward.experience) {
-                // Add experience to relevant skills
-                task.skills.forEach(skill => {
-                    if (!this.gameState.stats[skill]) {
-                        this.gameState.stats[skill] = 0;
-                    }
-                    this.gameState.stats[skill] += Math.floor(task.reward.experience / task.skills.length);
-                });
+                // XP goes into the canonical CharacterStats store through its
+                // API, the same way ProjectSystem.completeProject grants it (#165)
+                const skills = Array.isArray(task.skills) ? task.skills : Object.keys(task.skills || {});
+                const stats = this.gameState.characterStats;
+                if (skills.length && typeof stats?.addExperience === 'function') {
+                    const perSkill = Math.floor(task.reward.experience / skills.length);
+                    skills.forEach(skill => {
+                        const statId = SKILL_TO_STAT[skill] || EXTRA_SKILL_TO_STAT[skill] || 'analytics';
+                        stats.addExperience(statId, perSkill);
+                    });
+                }
             }
         }
         

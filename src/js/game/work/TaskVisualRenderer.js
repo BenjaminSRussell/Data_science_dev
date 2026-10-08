@@ -207,6 +207,38 @@ export class TaskVisualRenderer {
                 container: 'cluster-container',
                 elements: ['nodes', 'network', 'compute'],
                 animation: 'cluster'
+            },
+
+            // Visuals RealWorldTaskSystem's tasks and steps use (#1227)
+            feature_selection: {
+                container: 'feature-selection-container',
+                elements: ['features', 'importance', 'selected'],
+                animation: 'select'
+            },
+            deployment: {
+                container: 'deployment-container',
+                elements: ['container', 'registry', 'service'],
+                animation: 'deploy'
+            },
+            model_training: {
+                container: 'training-container',
+                elements: ['data', 'model', 'loss-curve'],
+                animation: 'train'
+            },
+            nlp: {
+                container: 'nlp-container',
+                elements: ['text', 'tokens', 'embeddings'],
+                animation: 'tokenize'
+            },
+            database: {
+                container: 'database-container',
+                elements: ['database', 'indexes', 'query-plan'],
+                animation: 'query'
+            },
+            api: {
+                container: 'api-container',
+                elements: ['client', 'endpoint', 'model'],
+                animation: 'request'
             }
         };
     }

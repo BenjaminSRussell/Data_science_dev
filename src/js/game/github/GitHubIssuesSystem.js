@@ -207,7 +207,7 @@ export class GitHubIssuesSystem {
         
         // Create pull request
         const pullRequest = {
-            id: `pr_${Date.now()}`,
+            id: `pr_${this.pullRequests.length + 1}_${Date.now()}`,
             number: this.pullRequests.length + 1,
             title: `Fix #${issue.number}: ${issue.title}`,
             body: `This PR addresses issue #${issue.number}.\n\n## Changes\n- Implemented fix\n- Added tests\n- Updated documentation`,
@@ -264,6 +264,24 @@ export class GitHubIssuesSystem {
     }
     
     /**
+     * Ask a maintainer to review an open pull request. This is the only way
+     * a review gets added, so merges are possible (#931, #2086).
+     * @param {string} prId
+     * @param {{reviewer?: string, approved?: boolean}} [opts]
+     */
+    requestReview(prId, { reviewer = 'maintainer', approved = true } = {}) {
+        const pr = this.pullRequests.find(p => p.id === prId);
+        if (!pr) return { success: false, message: 'Pull request not found' };
+        if (pr.status !== 'open') return { success: false, message: 'Pull request is not open' };
+        if (pr.reviews.some(r => r.reviewer === reviewer)) {
+            return { success: false, message: `${reviewer} already reviewed this pull request` };
+        }
+        const review = { reviewer, state: approved ? 'approved' : 'changes_requested', at: Date.now() };
+        pr.reviews.push(review);
+        return { success: true, review, message: `${reviewer} ${approved ? 'approved' : 'requested changes on'} PR #${pr.number}` };
+    }
+
+    /**
      * Merge pull request
      */
     mergePullRequest(prId) {
@@ -276,9 +294,13 @@ export class GitHubIssuesSystem {
             return { success: false, message: 'Pull request already merged or closed' };
         }
         
-        // Check if reviews are required
-        if (pr.reviews.length < 1) {
-            return { success: false, message: 'Pull request needs at least 1 review' };
+        // Needs at least one approving review, and no outstanding change requests
+        const approvals = pr.reviews.filter(r => (r.state || 'approved') === 'approved');
+        if (approvals.length < 1) {
+            return { success: false, message: 'Pull request needs at least 1 approving review' };
+        }
+        if (pr.reviews.some(r => r.state === 'changes_requested')) {
+            return { success: false, message: 'A reviewer requested changes' };
         }
         
         pr.status = 'merged';
