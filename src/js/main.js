@@ -244,55 +244,23 @@ export class MainGame {
     syncGameStateToStore() {
         const store = this.gameStore.getState();
 
-        // Sync Zustand store values to GameState
-        this.gameState.money = store.money;
-        this.gameState.reputation = store.reputation;
-        this.gameState.rankIndex = store.rankIndex;
-        this.gameState.rent = store.rent;
-        this.gameState.bank = store.bank;
-        this.gameState.tasksCompleted = store.tasksCompleted;
-        this.gameState.perfectScores = store.perfectScores;
-        this.gameState.totalEarned = store.totalEarned;
-        this.gameState.weeklyIncome = store.weeklyIncome;
-        this.gameState.totalRatings = store.totalRatings;
-        this.gameState.ratingSum = store.ratingSum;
-        this.gameState.unlockedChartTypes = store.unlockedChartTypes;
-        this.gameState.purchasedItems = store.purchasedItems;
-        this.gameState.unlockedTools = store.unlockedTools;
-        this.gameState.unlockedLibraries = store.unlockedLibraries;
-        this.gameState.isGameStarted = store.isGameStarted;
-        this.gameState.tutorialCompleted = store.tutorialCompleted;
-        this.gameState.soundEnabled = store.soundEnabled;
-        this.gameState.musicEnabled = store.musicEnabled;
-        this.gameState.currentLocation = store.currentLocation;
-        this.gameState.chartConfig = store.chartConfig;
+        // Sync Zustand store values to GameState. Arrays and objects are
+        // copied, not shared, so in-place gameplay mutations of gameState
+        // can't silently rewrite the store's state (#1612)
+        MainGame.STORE_SYNC_FIELDS.forEach(field => {
+            this.gameState[field] = MainGame.copyStoreValue(store[field]);
+        });
+        this.gameState.bank = MainGame.copyStoreValue(store.bank);
 
-        // Subscribe to store changes to keep GameState in sync
+        // Subscribe to store changes to keep GameState in sync.
+        // NOTE: bank is intentionally NOT synced from the store here. The store
+        // never legitimately owns bank state (nothing calls setBank()), so
+        // copying it back would let the async persist rehydration clobber the
+        // bank object that BankSystem constructs during startNewGame().
         this.gameStore.subscribe((state) => {
-            this.gameState.money = state.money;
-            this.gameState.reputation = state.reputation;
-            this.gameState.rankIndex = state.rankIndex;
-            this.gameState.rent = state.rent;
-            // NOTE: bank is intentionally NOT synced from the store here. The store
-            // never legitimately owns bank state (nothing calls setBank()), so
-            // copying it back would let the async persist rehydration clobber the
-            // bank object that BankSystem constructs during startNewGame().
-            this.gameState.tasksCompleted = state.tasksCompleted;
-            this.gameState.perfectScores = state.perfectScores;
-            this.gameState.totalEarned = state.totalEarned;
-            this.gameState.weeklyIncome = state.weeklyIncome;
-            this.gameState.totalRatings = state.totalRatings;
-            this.gameState.ratingSum = state.ratingSum;
-            this.gameState.unlockedChartTypes = state.unlockedChartTypes;
-            this.gameState.purchasedItems = state.purchasedItems;
-            this.gameState.unlockedTools = state.unlockedTools;
-            this.gameState.unlockedLibraries = state.unlockedLibraries;
-            this.gameState.isGameStarted = state.isGameStarted;
-            this.gameState.tutorialCompleted = state.tutorialCompleted;
-            this.gameState.soundEnabled = state.soundEnabled;
-            this.gameState.musicEnabled = state.musicEnabled;
-            this.gameState.currentLocation = state.currentLocation;
-            this.gameState.chartConfig = state.chartConfig;
+            MainGame.STORE_SYNC_FIELDS.forEach(field => {
+                this.gameState[field] = MainGame.copyStoreValue(state[field]);
+            });
         });
     }
 
@@ -346,38 +314,49 @@ export class MainGame {
         logger.info('Initializing Data Science Tycoon...');
 
         try {
-            logger.debug('Attempting to load game...');
-            // Load saved game if exists
-            // Check for saves in any slot
-            const hasSave = this.saveManager.hasSave();
-            if (hasSave) {
-                // Try to load most recent slot, or slot 0
-                const mostRecentSlot = this.saveManager.getMostRecentSlot() || 0;
-                this.currentSaveSlot = mostRecentSlot;
-                this.saveManager.loadGame(this.gameState, mostRecentSlot);
-            }
+            // Each startup step is guarded on its own: one failing step (say a
+            // corrupt save) must not skip wiring every button in the game (#1657)
+            this.initErrors = [];
+            const step = (name, fn) => {
+                try {
+                    return fn();
+                } catch (error) {
+                    logger.error(`init step "${name}" failed:`, error);
+                    this.initErrors.push(name);
+                    return undefined;
+                }
+            };
 
+            logger.debug('Attempting to load game...');
+            // Load saved game if exists (check every slot, use the most recent)
+            let hasSave = false;
+            step('load save', () => {
+                hasSave = this.saveManager.hasSave();
+                if (hasSave) {
+                    const mostRecentSlot = this.saveManager.getMostRecentSlot() || 0;
+                    this.currentSaveSlot = mostRecentSlot;
+                    this.saveManager.loadGame(this.gameState, mostRecentSlot);
+                }
+            });
             logger.debug(`Game loaded (save found: ${hasSave})`);
 
             // Initialize UI
-            this.screenManager.init();
-
-            logger.debug('Initializing ChartManager...');
-            this.chartManager.init();
-
-            logger.debug('Initializing EnvironmentManager...');
-
+            step('screens', () => this.screenManager.init());
+            step('charts', () => this.chartManager.init());
             // Initialize environment (backgrounds, weather, etc.)
-            this.environmentManager.init();
+            step('environment', () => this.environmentManager.init());
 
-            logger.debug('EnvironmentManager initialized');
-
-            // Initialize menu
-            this.initMenu(hasSave);
+            // Finish menu setup (awaited, in case any part is async) before
+            // the menu is revealed (#1473)
+            try {
+                await this.initMenu(hasSave);
+            } catch (error) {
+                logger.error('init step "menu" failed:', error);
+                this.initErrors.push('menu');
+            }
 
             logger.debug('Setting up event listeners...');
-            // Setup event listeners
-            this.setupEventListeners();
+            step('event listeners', () => this.setupEventListeners());
             logger.debug('Event listeners set up');
 
             // Hide loading screen, show game
@@ -635,28 +614,28 @@ export class MainGame {
         dashboard.style.display = 'grid';
         dashboard.innerHTML = `
             <div class="stat-card">
-                <div class="stat-icon">Time</div>
+                <div class="stat-icon" aria-hidden="true">&#9719;</div>
                 <div class="stat-content">
                     <div class="stat-label">Total Playtime</div>
                     <div class="stat-value">${this.statisticsAggregator.formatPlaytime(stats.totalPlaytime)}</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">Trophy</div>
+                <div class="stat-icon" aria-hidden="true">&#9819;</div>
                 <div class="stat-content">
                     <div class="stat-label">Games Completed</div>
                     <div class="stat-value">${stats.gamesCompleted}</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">Chart</div>
+                <div class="stat-icon" aria-hidden="true">&#9650;</div>
                 <div class="stat-content">
                     <div class="stat-label">Highest Rank</div>
                     <div class="stat-value">${stats.highestRankName}</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">Money</div>
+                <div class="stat-icon" aria-hidden="true">$</div>
                 <div class="stat-content">
                     <div class="stat-label">Total Money</div>
                     <div class="stat-value">${this.statisticsAggregator.formatMoney(stats.totalMoney)}</div>
@@ -1238,8 +1217,9 @@ export class MainGame {
         logger.debug('Game container element:', gameContainer);
 
         if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            loadingScreen.classList.add('hidden');
+            // Fade, then hide: adding .hidden (display:none) in the same tick
+            // made the opacity change invisible (#1064)
+            MainGame.fadeOutElement(loadingScreen);
             logger.debug('Loading screen hidden');
             this.showDiagnostic('Loading screen hidden');
         } else {
@@ -1283,7 +1263,13 @@ export class MainGame {
                 }
             }
             if (slotIndex === null) {
-                slotIndex = 0; // Default to slot 0 if all are full
+                // Every slot is full: overwrite only with the player's OK (#874)
+                const fallback = this.saveManager.getMostRecentSlot?.() ?? 0;
+                const ok = typeof confirm === 'function'
+                    ? confirm(`All save slots are full. Overwrite Save Slot ${fallback + 1}?`)
+                    : false;
+                if (!ok) return false;
+                slotIndex = fallback;
             }
         }
 
@@ -1627,6 +1613,8 @@ export class MainGame {
             setTimeout(() => {
                 this.hideLoadingProgress();
                 if (this.introSystem) {
+                    // The menu closes when the intro takes over (#1360)
+                    this.screenManager?.hideCurrentScreen?.();
                     this.introSystem.showIntro();
                 } else {
                     // Fallback if intro system not available
@@ -1637,8 +1625,32 @@ export class MainGame {
         } catch (error) {
             logger.error(' startNewGame ERROR:', error);
             logger.error('Stack:', error.stack);
-            this.showError('Failed to start game. Please refresh the page.');
+            this.handleStartFailure('Failed to start the game. Please try again or refresh the page.');
         }
+    }
+
+    /**
+     * A start that throws must not leave the player on a frozen loading
+     * screen: hide it, go back to the menu and say what happened (#1678)
+     */
+    handleStartFailure(message) {
+        try {
+            this.hideLoadingProgress();
+        } catch (e) {
+            logger.warn('Could not hide loading screen:', e);
+        }
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+            loadingScreen.classList.add('hidden');
+        }
+        document.getElementById('game-container')?.classList.remove('hidden');
+        try {
+            this.screenManager?.showScreen?.('screen-menu');
+        } catch (e) {
+            logger.warn('Could not return to menu:', e);
+        }
+        this.showError(message);
     }
 
 
@@ -2515,40 +2527,40 @@ export class MainGame {
      */
     showTutorial() {
         const modalContent = `
-            <div class="tutorial-modal">
+            <div class="howto-modal">
                 <h2>How to Play</h2>
-                <div class="tutorial-steps">
-                    <div class="tutorial-step">
-                        <span class="step-number">1</span>
-                        <div class="step-content">
+                <div class="howto-steps">
+                    <div class="howto-step">
+                        <span class="howto-step-number">1</span>
+                        <div class="howto-step-content">
                             <h4> Get Your Task</h4>
                             <p>Your boss will give you data and specific requirements for a visualization.</p>
                         </div>
                     </div>
-                    <div class="tutorial-step">
-                        <span class="step-number">2</span>
-                        <div class="step-content">
+                    <div class="howto-step">
+                        <span class="howto-step-number">2</span>
+                        <div class="howto-step-content">
                             <h4>Analyze the Data</h4>
                             <p>Look at the data table and understand what story it tells.</p>
                         </div>
                     </div>
-                    <div class="tutorial-step">
-                        <span class="step-number">3</span>
-                        <div class="step-content">
+                    <div class="howto-step">
+                        <span class="howto-step-number">3</span>
+                        <div class="howto-step-content">
                             <h4>Create Your Chart</h4>
                             <p>Choose the right chart type and customize it to clearly present the data.</p>
                         </div>
                     </div>
-                    <div class="tutorial-step">
-                        <span class="step-number">4</span>
-                        <div class="step-content">
+                    <div class="howto-step">
+                        <span class="howto-step-number">4</span>
+                        <div class="howto-step-content">
                             <h4>Get Rated</h4>
                             <p>Your boss will rate your work. Better ratings mean more money and reputation!</p>
                         </div>
                     </div>
-                    <div class="tutorial-step">
-                        <span class="step-number">5</span>
-                        <div class="step-content">
+                    <div class="howto-step">
+                        <span class="howto-step-number">5</span>
+                        <div class="howto-step-content">
                             <h4>Climb the Ladder</h4>
                             <p>Earn reputation to get promoted. Unlock new chart types and tools in the shop!</p>
                         </div>
@@ -3870,12 +3882,7 @@ export class MainGame {
      */
     hideLoadingProgress() {
         const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 300);
-        }
+        if (loadingScreen) MainGame.fadeOutElement(loadingScreen);
     }
 
     /**
@@ -3922,6 +3929,11 @@ export class MainGame {
             if (!this.gameState.gameplaySettings) {
                 this.gameState.gameplaySettings = new GameplaySettings();
                 this.gameplaySettings = this.gameState.gameplaySettings;
+                // Settings restored from a save before this system existed (#1250)
+                if (this.gameState.pendingGameplaySettings) {
+                    this.gameplaySettings.fromJSON(this.gameState.pendingGameplaySettings);
+                    this.gameState.pendingGameplaySettings = null;
+                }
             }
 
             // Roommate system
@@ -4041,6 +4053,46 @@ MainGame.taskWorkCost = function (task) {
         timeSlots: difficulty <= 3 ? 1 : (difficulty <= 7 ? 2 : 3),
         energy: Math.round(5 + difficulty * 2)
     };
+};
+
+// Store fields mirrored into GameState (bank is only copied once at startup)
+// currentTask, unlockedThemes, lastScore and settings were missing (#1036)
+MainGame.STORE_SYNC_FIELDS = [
+    'money', 'reputation', 'rankIndex', 'rent', 'tasksCompleted', 'perfectScores',
+    'totalEarned', 'weeklyIncome', 'totalRatings', 'ratingSum', 'unlockedChartTypes',
+    'purchasedItems', 'unlockedTools', 'unlockedLibraries', 'isGameStarted',
+    'tutorialCompleted', 'soundEnabled', 'musicEnabled', 'currentLocation', 'chartConfig',
+    'currentTask', 'unlockedThemes', 'lastScore', 'settings'
+];
+
+MainGame.FADE_MS = 400;
+
+/**
+ * Fade an element out over FADE_MS, then hide it (display:none + .hidden)
+ */
+MainGame.fadeOutElement = function fadeOutElement(element, ms = MainGame.FADE_MS) {
+    if (!element || element.dataset.fading === 'true') return;
+    element.dataset.fading = 'true';
+    element.style.transition = `opacity ${ms}ms ease`;
+    // Let the browser paint the current opacity before changing it
+    const start = () => { element.style.opacity = '0'; };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(start);
+    else start();
+    setTimeout(() => {
+        element.classList.add('hidden');
+        element.style.display = 'none';
+        delete element.dataset.fading;
+    }, ms);
+};
+
+MainGame.copyStoreValue = function copyStoreValue(value) {
+    if (Array.isArray(value)) return value.map(item => MainGame.copyStoreValue(item));
+    if (value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
+        const out = {};
+        for (const [key, item] of Object.entries(value)) out[key] = MainGame.copyStoreValue(item);
+        return out;
+    }
+    return value;
 };
 
 // Initialize on DOM ready

@@ -438,6 +438,12 @@ export class GameState {
             quality: this.performanceManager.quality
         } : null;
 
+        // Gameplay settings (relationships, romance, difficulty...) were
+        // never saved (#1250). Keep a pending copy if the system isn't built yet.
+        data.gameplaySettings = this.gameplaySettings?.settings
+            ? JSON.parse(JSON.stringify(this.gameplaySettings.settings))
+            : (this.pendingGameplaySettings || null);
+
         return data;
     }
 
@@ -525,6 +531,17 @@ export class GameState {
         }
 
         // Restore Phase 1 Visual Systems settings
+        if (data.gameplaySettings && typeof data.gameplaySettings === 'object') {
+            if (this.gameplaySettings?.fromJSON) {
+                this._safeSubsystemStep('restore gameplaySettings', () => {
+                    this.gameplaySettings.fromJSON(data.gameplaySettings);
+                });
+            } else {
+                // Applied when GameplaySettings is constructed later
+                this.pendingGameplaySettings = data.gameplaySettings;
+            }
+        }
+
         if (this.performanceManager && data.performanceManager) {
             this._safeSubsystemStep('restore performanceManager', () => {
                 this.performanceManager.setQuality(data.performanceManager.quality || 'auto');

@@ -7,7 +7,7 @@
  * `GameState` class (src/js/game/GameState.js) hold parallel copies of the
  * same economy data (money, reputation, rank, bank, ...), but they are NOT
  * kept in sync automatically. Every gameplay-facing call site in
- * src/js/**/*.js mutates `GameState` directly (e.g. BankSystem.js,
+ * any src/js file mutates `GameState` directly (e.g. BankSystem.js,
  * EconomySystem.js, StockMarket.js, main.js) and never calls a gameStore
  * action; the only sync that exists is `syncGameStateToStore()`/`subscribe()`
  * inside a running `MainGame` instance in main.js.
