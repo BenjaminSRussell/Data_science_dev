@@ -130,7 +130,8 @@ export class EducationSystem {
         };
     }
 
-    enroll(courseId) {
+    /** Every enrollment check, without charging anything */
+    canEnroll(courseId) {
         if (this.completedCourses.includes(courseId)) return { success: false, message: "Course already completed." };
 
         const course = this.courses[courseId];
@@ -141,6 +142,13 @@ export class EducationSystem {
             return { success: false, message: `Prerequisites not met: ${names}.` };
         }
         if (this.gameState.money < course.cost) return { success: false, message: "Cannot afford tuition." };
+        return { success: true };
+    }
+
+    enroll(courseId) {
+        const check = this.canEnroll(courseId);
+        if (!check.success) return check;
+        const course = this.courses[courseId];
 
         this.gameState.money -= course.cost;
         return { success: true, message: `Enrolled in ${course.name}. Good luck!` };

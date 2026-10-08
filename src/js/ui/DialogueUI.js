@@ -27,6 +27,24 @@ export class DialogueUI {
         this.onClose = null;
 
         this.createContainer();
+
+        // Escape closes an open conversation, like the other overlays (#1160)
+        this.handleKeydown = (e) => {
+            if (e.key !== 'Escape' || !this.isOpen) return;
+            e.preventDefault();
+            e.stopPropagation();
+            this.close();
+        };
+        if (typeof document !== 'undefined') {
+            document.addEventListener('keydown', this.handleKeydown);
+        }
+    }
+
+    /** Remove the document-level key listener */
+    destroy() {
+        if (typeof document !== 'undefined' && this.handleKeydown) {
+            document.removeEventListener('keydown', this.handleKeydown);
+        }
     }
 
     /**
