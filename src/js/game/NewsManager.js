@@ -401,7 +401,7 @@ export class NewsManager {
         }
 
         if (req.hasMetMentor && !this.gameState.npcManager?.metNPCs.some(id =>
-            ['professor_chen', 'sarah_martinez'].includes(id)
+            ['professor_higgins', 'sarah_martinez'] // real mentor id (#107, #2067).includes(id)
         )) {
             return false;
         }

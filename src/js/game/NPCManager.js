@@ -1282,6 +1282,27 @@ export class NPCManager {
     }
 
     /**
+     * Record that the player visited/talked to an NPC: marks them met and
+     * fires the first-NPC story beat. Shared by startConversation() and the
+     * DialogueUI visit path (#1465).
+     * @returns {boolean} true if this was the first meeting
+     */
+    registerVisit(npcId) {
+        if (!this.getNPC(npcId)) return false;
+        const isFirstMeeting = !this.metNPCs.includes(npcId);
+        if (isFirstMeeting) {
+            this.markNPCAsMet(npcId);
+            if (this.metNPCs.length === 1 && this.gameState.mainGame && this.gameState.mainGame.storyBeatsSystem) {
+                const beat = this.gameState.mainGame.storyBeatsSystem?.getBeat('meet_first_npc');
+                if (beat) {
+                    this.gameState.mainGame.handleStoryBeat?.(beat);
+                }
+            }
+        }
+        return isFirstMeeting;
+    }
+
+    /**
      * Get relationship level
      */
     getRelationship(npcId) {
@@ -1373,19 +1394,7 @@ export class NPCManager {
         }
 
         const relationship = this.relationships[npcId] || 0;
-        const isFirstMeeting = !this.metNPCs.includes(npcId);
-
-        if (isFirstMeeting) {
-            this.markNPCAsMet(npcId);
-
-            // Check for story beat (first NPC met)
-            if (this.metNPCs.length === 1 && this.gameState.mainGame && this.gameState.mainGame.storyBeatsSystem) {
-                const beat = this.gameState.mainGame.storyBeatsSystem?.getBeat('meet_first_npc');
-                if (beat) {
-                    this.gameState.mainGame.handleStoryBeat?.(beat);
-                }
-            }
-        }
+        const isFirstMeeting = this.registerVisit(npcId);
 
         // Progressive relationship: Just talking increases relationship slightly
         if (!isFirstMeeting && relationship < 100) {

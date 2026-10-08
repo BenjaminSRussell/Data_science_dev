@@ -238,14 +238,32 @@ function updateLocationActions(game) {
             })
         );
     } else if (locId === 'city_hall') {
-        createCityHallActions(game, domCache.actionsEl);
-        return; // createCityHallActions handles its own buttons
+        createCityHallActions(game, domCache.actionsEl); // appends its own buttons
     }
+
+    // People here: the live way to meet and talk to NPCs (#1467)
+    buttons.push(...createNPCTalkButtons(game, locId));
 
     // Batch append buttons
     if (buttons.length > 0) {
         domCache.actionsEl.appendChild(DOMUtils.batch(buttons));
     }
+}
+
+/**
+ * "Talk to <name>" buttons for the (unlocked) NPCs at a location
+ */
+export function createNPCTalkButtons(game, locId) {
+    const npcManager = game.gameState?.npcManager;
+    const npcs = npcManager?.getNPCsAtLocation?.(locId) || [];
+    return npcs.map(npc => DOMUtils.createElement('button', {
+        className: 'btn-cartoon btn-npc-talk',
+        textContent: `Talk to ${npc.name}`,
+        attributes: { 'data-npc': npc.id },
+        listeners: {
+            click: () => game.handleVisitNPC(npc.id)
+        }
+    }));
 }
 
 /**
