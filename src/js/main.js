@@ -1161,10 +1161,49 @@ export class MainGame {
         // Listen for promotion events
         window.addEventListener('promotion', (e) => {
             const rank = e.detail.rank;
-            this.showToast(`Promoted to ${rank.title}!`, 'success');
-            this.audioManager.play('promotion');
-            this.uiUpdater.updateAllUI();
+            // Show the full promotion moment, falling back to a toast (#1486)
+            if (!this.uiUpdater?.showPromotionAnimation?.(rank)) {
+                this.showToast(`Promoted to ${rank.title}!`, 'success');
+            }
+            this.audioManager?.play?.('promotion');
+            this.uiUpdater?.updateAllUI?.();
         });
+    }
+
+    /**
+     * Load game assets once per session. Waits for the PixiJS managers to
+     * finish importing so a slow import can't force the legacy pipeline
+     * (#1049), and does nothing if a previous game already loaded them (#1679).
+     */
+    loadAssetsInBackground() {
+        if (this.assetLoadPromise) return this.assetLoadPromise;
+        const legacyLoad = () => Promise.resolve(this.assetManager?.loadAll?.())
+            .then(success => {
+                if (success) logger.info('Assets loaded successfully');
+                return !!success;
+            })
+            .catch(err => {
+                logger.warn('Asset loading error:', err);
+                return false;
+            });
+        this.assetLoadPromise = Promise.resolve(this.phase4ManagersReady)
+            .catch(() => null)
+            .then(async () => {
+                if (!this.pixiAssetManager) return legacyLoad();
+                try {
+                    const manifest = this.assetManager.getAssetManifest();
+                    await this.pixiAssetManager.init(manifest);
+                    await this.pixiAssetManager.loadAll();
+                    logger.info('Assets loaded successfully (PixiJS)');
+                    return true;
+                } catch (error) {
+                    logger.warn('PixiJS Assets failed, using fallback:', error);
+                    return legacyLoad();
+                }
+            });
+        // A failed load can be retried by the next game
+        this.assetLoadPromise.then(ok => { if (!ok) this.assetLoadPromise = null; });
+        return this.assetLoadPromise;
     }
 
     /**
@@ -1321,18 +1360,22 @@ export class MainGame {
             this.showLoadingProgress('Preparing assets...', 70);
 
             // Phase 4: Use PixiJS AssetManager (with fallback - lazy load to avoid breaking game)
-            this.assetManager = new AssetManager();
+            // Reuse the AssetManager (and its loaded images) when a new game
+            // starts mid-session instead of re-fetching the manifest (#1679)
+            if (!this.assetManager) this.assetManager = new AssetManager();
             this.gameState.assetManager = this.assetManager;
 
-            // Try to load new managers asynchronously (non-blocking)
-            Promise.all([
+            // Try to load new managers asynchronously (non-blocking). Keep the
+            // promise so the asset loader can wait for it (#1049)
+            this.phase4ManagersReady = Promise.all([
                 import('./assets/PixiAssetManager.js').catch(() => null),
                 import('./assets/PixiSpriteManager.js').catch(() => null),
                 import('./interaction/InteractionManager.js').catch(() => null),
                 import('./ui/TooltipManager.js').catch(() => null)
             ]).then(([PixiAssetManagerModule, PixiSpriteManagerModule, InteractionManagerModule, TooltipManagerModule]) => {
                 // Initialize PixiAssetManager if available
-                if (PixiAssetManagerModule?.PixiAssetManager) {
+                // Keep the already-loaded manager across games (#1679)
+                if (PixiAssetManagerModule?.PixiAssetManager && !this.pixiAssetManager) {
                     try {
                         this.pixiAssetManager = new PixiAssetManagerModule.PixiAssetManager();
                         this.gameState.pixiAssetManager = this.pixiAssetManager;
@@ -1412,35 +1455,7 @@ export class MainGame {
 
             // Load assets in background (non-blocking, low priority)
             // Phase 4: Try PixiJS Assets first, fallback to old AssetManager
-            setTimeout(async () => {
-                if (this.pixiAssetManager) {
-                    try {
-                        const manifest = this.assetManager.getAssetManifest();
-                        await this.pixiAssetManager.init(manifest);
-                        await this.pixiAssetManager.loadAll();
-                        logger.info('Assets loaded successfully (PixiJS)');
-                    } catch (error) {
-                        logger.warn('PixiJS Assets failed, using fallback:', error);
-                        // Fallback to old AssetManager
-                        this.assetManager?.loadAll()?.then(success => {
-                            if (success) {
-                                logger.info('Assets loaded successfully (fallback)');
-                            }
-                        }).catch(err => {
-                            logger.warn('Asset loading error:', err);
-                        });
-                    }
-                } else {
-                    // Fallback to old AssetManager
-                    this.assetManager?.loadAll()?.then(success => {
-                        if (success) {
-                            logger.info('Assets loaded successfully');
-                        }
-                    }).catch(err => {
-                        logger.warn('Asset loading error:', err);
-                    });
-                }
-            }, 500);
+            setTimeout(() => this.loadAssetsInBackground(), 500);
 
             // Make game accessible globally for intro callbacks
             window.game = this;
@@ -2208,6 +2223,17 @@ export class MainGame {
             return;
         }
 
+        // Building and submitting a chart is work: it costs time and energy
+        // like every other activity (#1229)
+        const work = MainGame.taskWorkCost(task);
+        if (this.timeManager?.canPerformAction) {
+            const check = this.timeManager.canPerformAction(work.timeSlots, work.energy);
+            if (!check.can) {
+                this.showError(`${check.reason}. Rest before submitting this chart.`);
+                return;
+            }
+        }
+
         // Stop the task timer when submitting
         this.stopTaskTimer();
 
@@ -2227,6 +2253,11 @@ export class MainGame {
         // Apply rewards now, in the same tick as the rating stats that
         // evaluateChart() just recorded, so the outcome is atomic (#1311).
         this.applyTaskRewards(score);
+
+        if (this.timeManager?.useEnergy) {
+            this.timeManager.useEnergy(work.energy);
+            this.handleTimeAdvance?.(work.timeSlots);
+        }
 
         // Show review screen
         this.screenManager.showScreen('screen-review');
@@ -3885,8 +3916,8 @@ export class MainGame {
                 this.demandingBoss = this.gameState.demandingBoss;
                 this.demandingBoss.initializeBoss({
                     name: 'Mr. Anderson',
-                    title: 'Department Head',
-                    demandLevel: 70
+                    title: 'Department Head'
+                    // demandLevel comes from GameplaySettings' difficulty (#1251)
                 });
             }
 
@@ -4007,6 +4038,18 @@ export class MainGame {
         }
     }
 }
+
+/**
+ * Time slots and energy a chart task takes, from its 1-10 difficulty (#1229)
+ */
+MainGame.taskWorkCost = function (task) {
+    const raw = Number(task?.difficulty);
+    const difficulty = Number.isFinite(raw) ? Math.max(1, Math.min(10, raw)) : 1;
+    return {
+        timeSlots: difficulty <= 3 ? 1 : (difficulty <= 7 ? 2 : 3),
+        energy: Math.round(5 + difficulty * 2)
+    };
+};
 
 /**
  * Palette picker buttons: swatch painted from the real chart palette (#1892),

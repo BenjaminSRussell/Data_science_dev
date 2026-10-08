@@ -25,8 +25,9 @@ export class DemandingBossSystem {
             name: bossData.name || 'Mr. Anderson',
             title: bossData.title || 'Department Head',
             personality: 'demanding',
-            // ?? so an explicit demandLevel of 0 is kept
-            demandLevel: bossData.demandLevel ?? 70,
+            // ?? so an explicit demandLevel of 0 is kept. Otherwise the
+            // player's difficulty setting decides (#1251)
+            demandLevel: bossData.demandLevel ?? this.getDifficultySettings()?.bossDemand ?? 70,
             satisfaction: this.satisfaction
         };
         
@@ -34,9 +35,36 @@ export class DemandingBossSystem {
     }
     
     /**
+     * GameplaySettings' difficulty block is the one source of truth for boss
+     * demand and task frequency (#1251)
+     */
+    getDifficultySettings() {
+        const d = this.gameState?.gameplaySettings?.settings?.difficulty;
+        return d && typeof d === 'object' ? d : null;
+    }
+
+    /**
+     * Pull the current difficulty settings into the boss. Returns false when
+     * there are no settings to follow.
+     */
+    syncDifficultyFromSettings() {
+        const d = this.getDifficultySettings();
+        if (!d) return false;
+        if (Number.isFinite(d.bossDemand)) {
+            this.demandLevel = Math.max(0, Math.min(100, d.bossDemand));
+            if (this.boss) this.boss.demandLevel = this.demandLevel;
+        }
+        if (Number.isFinite(d.taskFrequency) && d.taskFrequency > 0) {
+            this.taskFrequency = d.taskFrequency;
+        }
+        return true;
+    }
+
+    /**
      * Generate demanding task
      */
     generateTask() {
+        this.syncDifficultyFromSettings();
         const difficulty = this.calculateDifficulty();
         const deadline = this.calculateDeadline();
         const reward = this.calculateReward(difficulty);
