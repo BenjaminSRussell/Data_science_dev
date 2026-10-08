@@ -3631,6 +3631,9 @@ export class MainGame {
                     this.showToast(`PROMOTED to ${rank?.title}!`, 'success');
                     this.uiUpdater?.announceRankPromotion?.(rank);
                 }
+                // Nudge about a freelance project left idle (#263)
+                const idleWork = this.gameState.projectSystem?.checkIdleWork?.();
+                if (idleWork) this.showToast(idleWork.message, 'info');
                 // Jealousy cools off a little every day (#915)
                 this.gameState.jealousySystem?.decayAll?.(2);
                 // Neglected relationships cool off and can end (#1076)

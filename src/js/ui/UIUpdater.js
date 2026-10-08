@@ -14,28 +14,13 @@ import { HARDWARE_PARTS, HARDWARE_TYPES } from '../game/HardwareSystems.js';
 import { LitUIManager } from './LitUIManager.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommonUtils } from '../utils/CommonUtils.js';
-import { EconomySystem } from '../game/EconomySystem.js';
 import { GameState } from '../game/GameState.js';
-import { insightHint } from '../game/EconomySystem.js';
-import { renderTaskBrief } from '../game/taskBrief.js';
+import { renderTaskPanel, bossPreferenceText } from './taskPanel.js';
 import { logger } from '../utils/Logger.js';
 import { NEWS_CATEGORIES } from '../game/NewsManager.js';
 
-/**
- * One-line summary of a boss's personality and chart tastes for the task
- * panel, e.g. "Traditional · likes bar, line · dislikes radar" (#1854, #2226)
- */
-export function bossPreferenceText(boss) {
-    if (!boss) return '';
-    const prefs = boss.preferences || {};
-    const parts = [];
-    if (boss.personality) parts.push(boss.personality.charAt(0).toUpperCase() + boss.personality.slice(1));
-    if (prefs.likesChartTypes?.length) parts.push(`likes ${prefs.likesChartTypes.join(', ')}`);
-    if (prefs.dislikesChartTypes?.length) parts.push(`dislikes ${prefs.dislikesChartTypes.join(', ')}`);
-    if (prefs.valuesClarity) parts.push('values clarity');
-    if (prefs.valuesCreativity) parts.push('values creativity');
-    return parts.join(' · ');
-}
+// Moved to taskPanel.js with the rest of the task panel (#1133)
+export { bossPreferenceText };
 
 export class UIUpdater {
     /**
@@ -185,66 +170,9 @@ export class UIUpdater {
         const task = this.gameState.currentTask;
         if (!task) return;
 
-        // Update task description
-        if (task.template) {
-            DOMUtils.updateElement('#task-content .task-description', {
-                textContent: task.template.description || 'Create a visualization for your boss.'
-            });
-        }
-
-        // Update task requirements
-        const requirementsContainer = DOMUtils.query('.task-requirements');
-        if (requirementsContainer && task.requirements) {
-            const hint = insightHint(this.gameState, task);
-            const requirementsHTML = task.requirements.map(req => {
-                return `<span class="requirement-tag">${req}</span>`;
-            }).join('') + (hint ? `<span class="requirement-tag insight-hint">${hint}</span>` : '');
-            DOMUtils.updateElement(requirementsContainer, {
-                innerHTML: requirementsHTML
-            });
-        }
-
-        // Domain, tools, skills, deliverable, context (#2430)
-        renderTaskBrief(task);
-
-        // Update task reward
-        if (task.potentialReward) {
-            DOMUtils.updateElement('#task-reward', {
-                textContent: EconomySystem.rewardRangeText(task.potentialReward)
-            });
-        }
-
-        // Update boss info
-        if (task.boss) {
-            DOMUtils.updateElement('#boss-name', {
-                textContent: task.boss.name || 'Mr. Anderson'
-            });
-            DOMUtils.updateElement('#boss-title', {
-                textContent: task.boss.title || 'Department Head'
-            });
-            // Personality and chart tastes, which now affect the grade (#1854, #2226)
-            const titleEl = document.getElementById('boss-title');
-            let prefsEl = document.getElementById('boss-preferences');
-            if (!prefsEl && titleEl?.parentElement) {
-                prefsEl = document.createElement('div');
-                prefsEl.id = 'boss-preferences';
-                prefsEl.className = 'boss-preferences';
-                titleEl.insertAdjacentElement('afterend', prefsEl);
-            }
-            if (prefsEl) {
-                prefsEl.textContent = bossPreferenceText(task.boss);
-                prefsEl.dataset.bossId = task.boss.id || '';
-            }
-            // bosses.js defines taskIntro (not greeting) — #2615
-            const greeting = task.boss.greeting || task.boss.taskIntro || task.boss.intro;
-            if (greeting) {
-                const bossDialogue = DOMUtils.query('#boss-dialogue');
-                if (bossDialogue) {
-                    const p = bossDialogue.querySelector('p');
-                    if (p) p.textContent = greeting;
-                }
-            }
-        }
+        // One renderer owns the panel text, shared with TaskSystem, so the
+        // result doesn't depend on which of the two ran last (#1133)
+        renderTaskPanel(task, this.gameState);
 
         // Note: TaskSystem.updateBossDialogue() already calls updateDataTable() which sets up sorting/filtering
         // So we don't need to update the table here - it's already done
