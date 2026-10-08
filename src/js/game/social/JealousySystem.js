@@ -14,8 +14,17 @@ export class JealousySystem {
     /**
      * Check for jealousy triggers
      */
-    checkJealousy(playerSuccess) {
-        if (!this.gameState.npcManager) return;
+    /**
+     * Respect the "jealousy" gameplay setting (#1410)
+     */
+    isEnabled() {
+        const rel = this.gameState?.gameplaySettings?.settings?.relationships;
+        if (!rel) return true;
+        return rel.enabled !== false && rel.jealousy !== false;
+    }
+
+    checkJealousy(playerSuccess = {}) {
+        if (!this.gameState.npcManager || !this.isEnabled()) return;
         
         const npcs = this.gameState.npcManager?.getMetNPCs() || [];
         
@@ -58,13 +67,14 @@ export class JealousySystem {
         const newLevel = Math.min(100, current + amount);
         this.jealousyLevels.set(npcId, newLevel);
         
-        // If jealousy is high, reduce relationship
-        if (newLevel > 50) {
+        // Penalties fire once, when a threshold is CROSSED, not on every
+        // further success while already above it (#1408, #2182)
+        if (current <= 50 && newLevel > 50) {
             this.affectRelationship(npcId, -5);
         }
         
         // If jealousy is very high, NPC stops talking
-        if (newLevel > 75) {
+        if (current <= 75 && newLevel > 75) {
             this.stopTalking(npcId);
         }
     }
@@ -127,7 +137,31 @@ export class JealousySystem {
                 flags.willNotTalk = false;
                 delete flags.jealousyMessage;
             }
+            // Once they've calmed down, forgive the relationship damage the
+            // jealousy caused (#1859), using the tracked total (#1858)
+            const owed = -this.getRelationshipChanges(npcId);
+            if (owed > 0 && this.gameState.npcManager) {
+                const rel = this.gameState.npcManager.getRelationship?.(npcId) || 0;
+                this.gameState.npcManager.setRelationship?.(npcId, Math.min(100, rel + owed));
+            }
+            this.relationshipChanges.delete(npcId);
         }
+    }
+
+    /**
+     * Daily cool-down for every jealous NPC
+     */
+    decayAll(amount = 2) {
+        for (const npcId of Array.from(this.jealousyLevels.keys())) {
+            if ((this.jealousyLevels.get(npcId) || 0) > 0) this.reduceJealousy(npcId, amount);
+        }
+    }
+
+    /**
+     * Net relationship change jealousy has caused for an NPC (negative = damage)
+     */
+    getRelationshipChanges(npcId) {
+        return this.relationshipChanges.get(npcId) || 0;
     }
     
     /**
