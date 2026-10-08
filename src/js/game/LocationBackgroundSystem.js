@@ -3,6 +3,8 @@
  * Dynamic backgrounds that change based on location and time
  */
 
+import { dayPhaseForSlot } from './TimeManager.js';
+
 import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
 
 export class LocationBackgroundSystem {
@@ -186,13 +188,9 @@ export class LocationBackgroundSystem {
      * Get time of day
      */
     getTimeOfDay() {
-        // TimeManager tracks 3-hour slots (0-5 = 6:00 ... 21:00), not hours (#215, #1285)
-        const slot = Number(this.gameState.timeManager?.timeSlot);
-        if (!Number.isFinite(slot)) return 'afternoon';
-        if (slot <= 1) return 'morning';     // 6:00 - 12:00
-        if (slot <= 3) return 'afternoon';   // 12:00 - 18:00
-        if (slot === 4) return 'evening';    // 18:00 - 21:00
-        return 'night';                      // 21:00 - 00:00
+        // TimeManager tracks 3-hour slots, not hours (#215, #1285); the shared
+        // phase mapping lives in TimeManager.js (#924)
+        return dayPhaseForSlot(this.gameState.timeManager?.timeSlot) ?? 'afternoon';
     }
 
     /**

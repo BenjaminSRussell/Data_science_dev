@@ -519,6 +519,11 @@ export class StockMarket {
         return 0;
     }
 
+    /** Round a money amount to whole cents (#254) */
+    static toCents(amount) {
+        return Math.round((Number(amount) || 0) * 100) / 100;
+    }
+
     buyStock(stockId, quantity) {
         if (!Portfolio.isValidQuantity(quantity)) {
             return { success: false, reason: 'Enter a whole number of shares greater than zero.' };
@@ -529,7 +534,8 @@ export class StockMarket {
         const stock = this.getStock(stockId);
         if (!stock) return { success: false, reason: 'Stock not found' };
 
-        const totalCost = stock.price * quantity;
+        // Exact cents: prices are unrounded floats (#254)
+        const totalCost = StockMarket.toCents(stock.price * quantity);
         if (this.gameState.money < totalCost) return { success: false, reason: 'Not enough money' };
 
         this.gameState.money -= totalCost;
@@ -554,7 +560,7 @@ export class StockMarket {
             return { success: false, reason: "Not enough shares" };
         }
 
-        const revenue = this.portfolio.sell(stockId, quantity, stock.price);
+        const revenue = StockMarket.toCents(this.portfolio.sell(stockId, quantity, stock.price));
         this.gameState.money += revenue;
         const heat = license.unlicensed ? this.applyUnlicensedTradeHeat() : 0;
         return { success: true, revenue: revenue, stock: stock, unlicensed: !!license.unlicensed, heat };

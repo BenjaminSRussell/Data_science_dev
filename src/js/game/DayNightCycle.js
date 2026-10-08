@@ -4,12 +4,16 @@
  * Changes map appearance based on time
  */
 
+import { dayPhaseForSlot } from './TimeManager.js';
+
 export class DayNightCycle {
     constructor(gameState) {
         this.gameState = gameState;
         // null so the first update() applies the classes even in the morning
         this.currentTimeOfDay = null;
     }
+
+    static PHASE_TO_LOOK = { morning: 'morning', afternoon: 'noon', evening: 'night', night: 'night' };
 
     /**
      * Get current time of day based on time slot
@@ -19,20 +23,10 @@ export class DayNightCycle {
             return 'morning';
         }
 
-        const slot = this.gameState.timeManager?.timeSlot;
-
-        // Morning: slots 0-1 (early morning, late morning)
-        if (slot <= 1) {
-            return 'morning';
-        }
-        // Noon: slots 2-3 (afternoon, late afternoon)
-        else if (slot <= 3) {
-            return 'noon';
-        }
-        // Night: slots 4-5 (evening, night)
-        else {
-            return 'night';
-        }
+        // The map only themes three looks; fold the shared four-phase mapping
+        // from TimeManager.js into them (#924)
+        const phase = dayPhaseForSlot(this.gameState.timeManager?.timeSlot) ?? 'morning';
+        return DayNightCycle.PHASE_TO_LOOK[phase];
     }
 
     /**

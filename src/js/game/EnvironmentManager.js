@@ -3,6 +3,7 @@
  */
 
 import { OFFICE_LOCATIONS, TIME_OF_DAY, WEATHER_EFFECTS, OFFICE_EVENTS } from '../data/locations.js';
+import { slotStartHour } from './TimeManager.js';
 
 export class EnvironmentManager {
     constructor(gameState) {
@@ -176,7 +177,7 @@ export class EnvironmentManager {
     getGameHour() {
         const tm = this.gameState?.timeManager;
         if (tm && Number.isFinite(tm.timeSlot)) {
-            return (6 + tm.timeSlot * 3) % 24;
+            return slotStartHour(tm.timeSlot);
         }
         return new Date().getHours();
     }

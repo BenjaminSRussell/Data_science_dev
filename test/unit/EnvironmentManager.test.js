@@ -93,7 +93,8 @@ describe('EnvironmentManager', () => {
 
     describe('updateTimeOfDay', () => {
         it('follows the in-game time slot, not the computer clock (#921)', () => {
-            const cases = [[0, 'morning'], [1, 'morning'], [2, 'afternoon'], [3, 'afternoon'], [4, 'evening'], [5, 'evening']];
+            // slot 5 (21:00) is TimeManager's Night slot, same phase everywhere (#924)
+            const cases = [[0, 'morning'], [1, 'morning'], [2, 'afternoon'], [3, 'afternoon'], [4, 'evening'], [5, 'night']];
             for (const [slot, id] of cases) {
                 mockGameState.timeManager = { timeSlot: slot };
                 expect(envManager.updateTimeOfDay().id).toBe(id);

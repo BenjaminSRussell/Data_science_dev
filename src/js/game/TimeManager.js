@@ -13,6 +13,25 @@ export const TIME_SLOTS = [
     { id: 'night', name: 'Night', icon: '', hours: '21:00 - 00:00', index: 5 }
 ];
 
+// One shared answer to "what part of the day is it" (#924). Every
+// time-of-day consumer derives from TimeManager.timeSlot through these.
+export const DAY_PHASES = ['morning', 'afternoon', 'evening', 'night'];
+
+/** In-game hour a slot starts at: 6, 9, 12, 15, 18, 21 */
+export function slotStartHour(slot) {
+    return (6 + Number(slot) * 3) % 24;
+}
+
+/** Four-phase bucket for a slot: 0-1 morning, 2-3 afternoon, 4 evening, 5 night */
+export function dayPhaseForSlot(slot) {
+    const s = Number(slot);
+    if (!Number.isFinite(s)) return null;
+    if (s <= 1) return 'morning';
+    if (s <= 3) return 'afternoon';
+    if (s === 4) return 'evening';
+    return 'night';
+}
+
 // Number of time slots in a day — derived from TIME_SLOTS so it is defined once (#2174)
 export const SLOTS_PER_DAY = TIME_SLOTS.length;
 
@@ -80,6 +99,11 @@ export class TimeManager {
      */
     getTimeOfDay() {
         return TIME_SLOTS[this.timeSlot].name;
+    }
+
+    /** Coarse phase (morning/afternoon/evening/night) of the current slot (#924) */
+    getDayPhase() {
+        return dayPhaseForSlot(this.timeSlot);
     }
 
     /**
