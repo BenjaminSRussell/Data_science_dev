@@ -12,7 +12,7 @@ body.visual-basic {
 }
 
 body.visual-mid {
-    --visual-accent: #38bdf8;
+    --visual-accent: var(--color-accent-primary);
 }
 
 body.visual-premium {
@@ -23,8 +23,8 @@ body.visual-premium {
 .panel.visual-mid,
 .card.visual-mid,
 .modal-content.visual-mid {
-    border-color: rgba(56, 189, 248, 0.35);
-    box-shadow: 0 6px 24px rgba(56, 189, 248, 0.08);
+    border-color: rgba(var(--color-accent-rgb), 0.35);
+    box-shadow: 0 6px 24px rgba(var(--color-accent-rgb), 0.08);
 }
 
 .panel.visual-premium,
@@ -38,7 +38,7 @@ body.visual-premium {
 button.visual-mid:hover,
 .btn.visual-mid:hover,
 .button.visual-mid:hover {
-    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+    box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), 0.5);
 }
 
 button.visual-premium:hover,

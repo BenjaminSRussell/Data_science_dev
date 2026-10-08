@@ -72,13 +72,13 @@
 }
 
 .emotion-indicator.sad {
-    background: rgba(149, 117, 205, 0.8);
-    box-shadow: 0 0 20px rgba(149, 117, 205, 0.6);
+    background: var(--color-bg-elevated);
+    box-shadow: 0 0 20px rgba(var(--color-accent-rgb), 0.6);
 }
 
 .emotion-indicator.crying {
-    background: rgba(100, 149, 237, 0.8);
-    box-shadow: 0 0 20px rgba(100, 149, 237, 0.6);
+    background: var(--color-accent-secondary);
+    box-shadow: 0 0 20px rgba(var(--color-accent-rgb), 0.6);
 }
 
 .emotion-indicator.yelling {
