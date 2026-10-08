@@ -7,6 +7,10 @@
 import { pickState, applyState } from '../../utils/StateSerializer.js';
 
 export class DemandingBossSystem {
+    static PRAISE_AT = 80;
+    static ANGRY_AT = 20;
+    static REPUTATION_SWING = 5;
+
     constructor(gameState) {
         this.gameState = gameState;
         this.boss = null;
@@ -156,7 +160,12 @@ export class DemandingBossSystem {
         } else {
             satisfactionChange -= 10;
         }
+
+        // The task matters (#1777): nailing a hard task impresses more, and
+        // stumbling on one is forgiven a little; easy tasks are the reverse.
+        satisfactionChange = Math.round(satisfactionChange * DemandingBossSystem.difficultyFactor(task, satisfactionChange));
         
+        const before = this.satisfaction;
         this.satisfaction = Math.max(0, Math.min(100, this.satisfaction + satisfactionChange));
         // Keep the boss record's copy in sync with the system value
         if (this.boss) this.boss.satisfaction = this.satisfaction;
@@ -164,15 +173,61 @@ export class DemandingBossSystem {
         return {
             satisfaction: this.satisfaction,
             change: satisfactionChange,
-            message: this.getBossMessage(satisfactionChange)
+            message: this.getBossMessage(satisfactionChange),
+            consequence: this.applyConsequences(before, this.satisfaction)
         };
+    }
+
+    /**
+     * Multiplier on a satisfaction swing from the task's difficulty (0-100,
+     * as calculateDifficulty produces). Neutral (1.0) when unknown.
+     */
+    static difficultyFactor(task, change) {
+        let d = Number(task?.difficulty);
+        if (!Number.isFinite(d) || d <= 0) return 1;
+        const hardness = (Math.min(100, d) - 50) / 100; // -0.5 .. +0.5
+        return change >= 0 ? 1 + hardness : 1 - hardness;
+    }
+
+    /**
+     * Satisfaction now touches the player's game (#1779): crossing into
+     * "impressed" earns reputation, crossing into "furious" costs some.
+     */
+    applyConsequences(before, after) {
+        const gs = this.gameState;
+        if (!gs) return null;
+        const { PRAISE_AT, ANGRY_AT, REPUTATION_SWING } = DemandingBossSystem;
+        if (before < PRAISE_AT && after >= PRAISE_AT) {
+            gs.reputation = (Number(gs.reputation) || 0) + REPUTATION_SWING;
+            return { type: 'praise', reputation: REPUTATION_SWING,
+                message: `${this.boss?.name || 'Your boss'} is impressed: +${REPUTATION_SWING} reputation.` };
+        }
+        if (before > ANGRY_AT && after <= ANGRY_AT) {
+            gs.reputation = Math.max(0, (Number(gs.reputation) || 0) - REPUTATION_SWING);
+            return { type: 'warning', reputation: -REPUTATION_SWING,
+                message: `${this.boss?.name || 'Your boss'} is furious: -${REPUTATION_SWING} reputation. Turn it around.` };
+        }
+        return null;
+    }
+
+    /**
+     * Feed a finished Chart Studio task back to the boss (#1014). Quality is
+     * the star rating as a percentage; onTime respects the effective limit.
+     */
+    recordTaskResult(task, score, { now = Date.now(), timeLimit = null } = {}) {
+        if (!task || !score) return null;
+        const quality = Math.max(0, Math.min(100, (Number(score.stars) || 0) * 20));
+        const limit = Number(timeLimit ?? task.timeLimit) || 0;
+        const onTime = !limit || !task.startTime || (now - task.startTime) / 1000 <= limit;
+        return this.evaluateTask(task, quality, onTime);
     }
     
     /**
      * Get boss message
      */
     getBossMessage(change) {
-        if (change > 5) {
+        // >= so decent work delivered on time (+5) counts as good (#1780)
+        if (change >= 5) {
             return 'Good work. Keep it up.';
         } else if (change < -5) {
             return 'This is unacceptable. Do better.';

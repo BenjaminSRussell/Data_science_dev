@@ -6,10 +6,80 @@
  */
 
 export class EmotionalBreakdownSystem {
+    // How long a rejection/betrayal/relationship drop stays "recent" (ms)
+    static RECENT_WINDOW_MS = 10 * 60 * 1000;
+    static DEFAULT_QTE_SECONDS = 5;
+    static MIN_QTE_SECONDS = 3;
+    static MAX_QTE_SECONDS = 30;
+
     constructor(gameState) {
         this.gameState = gameState;
         this.activeBreakdowns = new Map();
         this.breakdownHistory = [];
+        // Event log the trigger checks read (#2070, #2260)
+        this.relationshipEvents = new Map(); // npcId -> [{ delta, at }]
+        this.peakRelationship = new Map();   // npcId -> highest level seen
+        this.rejections = new Map();         // npcId -> timestamp
+        this.betrayals = new Map();          // npcId -> timestamp
+        this.now = () => Date.now();
+    }
+
+    /**
+     * Record a relationship change so relationship_drop and low_relationship
+     * can tell a real fall-out from a stranger (#2069, #2070). Call this from
+     * wherever relationships are modified.
+     */
+    recordRelationshipChange(npcId, delta, newLevel = null) {
+        const d = Number(delta) || 0;
+        if (!npcId || d === 0) return;
+        const list = this.relationshipEvents.get(npcId) || [];
+        list.push({ delta: d, at: this.now() });
+        this.relationshipEvents.set(npcId, this.pruneRecent(list));
+        const level = Number.isFinite(Number(newLevel)) && newLevel !== null
+            ? Number(newLevel)
+            : (Number(this.gameState?.npcManager?.relationships?.[npcId]) || 0);
+        this.peakRelationship.set(npcId, Math.max(this.peakRelationship.get(npcId) || 0, level, level - d));
+    }
+
+    /** The player turned this NPC down (#2260) */
+    recordRejection(npcId) {
+        if (npcId) this.rejections.set(npcId, this.now());
+    }
+
+    /** The player broke this NPC's trust (#2260) */
+    recordBetrayal(npcId) {
+        if (npcId) this.betrayals.set(npcId, this.now());
+    }
+
+    pruneRecent(list) {
+        const cutoff = this.now() - EmotionalBreakdownSystem.RECENT_WINDOW_MS;
+        return list.filter(e => e.at >= cutoff);
+    }
+
+    isRecent(timestamp) {
+        return Number.isFinite(timestamp) && this.now() - timestamp <= EmotionalBreakdownSystem.RECENT_WINDOW_MS;
+    }
+
+    /**
+     * Seconds the player gets to answer a breakdown (#887). Settings can
+     * lengthen it (breakdownQteSeconds), or turn the timeout off entirely
+     * (reduceTimePressure), which returns Infinity.
+     */
+    getQuickTimeSeconds() {
+        const s = this.gameState?.settings || {};
+        if (s.reduceTimePressure) return Infinity;
+        const { DEFAULT_QTE_SECONDS, MIN_QTE_SECONDS, MAX_QTE_SECONDS } = EmotionalBreakdownSystem;
+        const v = Number(s.breakdownQteSeconds);
+        if (!Number.isFinite(v) || v <= 0) return DEFAULT_QTE_SECONDS;
+        return Math.max(MIN_QTE_SECONDS, Math.min(MAX_QTE_SECONDS, v));
+    }
+
+    /** The unresolved breakdown for this NPC, if any (#1021) */
+    getActiveBreakdownFor(npcId) {
+        for (const b of this.activeBreakdowns.values()) {
+            if (b.npcId === npcId && !b.resolved) return b;
+        }
+        return null;
     }
     
     /**
@@ -78,7 +148,10 @@ export class EmotionalBreakdownSystem {
         
         switch (trigger) {
             case 'low_relationship':
-                shouldTrigger = relationship < condition.threshold;
+                // Hurt feelings need a relationship that once existed: a
+                // stranger at the default 0 has nothing to be hurt about (#2069)
+                shouldTrigger = relationship < condition.threshold &&
+                    (this.peakRelationship.get(npc.id) || 0) >= condition.threshold;
                 break;
             case 'relationship_drop':
                 // Check if relationship dropped recently
@@ -108,6 +181,9 @@ export class EmotionalBreakdownSystem {
     triggerBreakdown(npcId, triggerType) {
         const npc = this.gameState.npcManager?.getNPC(npcId);
         if (!npc) return null;
+
+        // One breakdown per NPC at a time (#1021)
+        if (this.getActiveBreakdownFor(npcId)) return null;
         
         const relationship = this.gameState.npcManager?.relationships[npcId] || 0;
         const conditions = this.getBreakdownConditions(npc, relationship, triggerType);
@@ -183,6 +259,14 @@ export class EmotionalBreakdownSystem {
      */
     getBreakdownDialogue(npc, emotion, type) {
         const dialogues = {
+            // low_relationship uses 'sad' (#1831)
+            sad: {
+                hurt: [
+                    "I guess I thought we were friends.",
+                    "You've barely said a word to me lately.",
+                    "I miss how things used to be between us."
+                ]
+            },
             crying: {
                 hurt: [
                     "I... I thought we were closer than this.",
@@ -292,10 +376,29 @@ export class EmotionalBreakdownSystem {
         const breakdown = this.activeBreakdowns.get(breakdownId);
         if (!breakdown) return;
         
-        const timer = 5000; // 5 seconds
+        const seconds = this.getQuickTimeSeconds(); // adjustable (#887)
         const bar = document.getElementById(`qte-bar-${breakdownId}`);
         if (!bar) return;
-        
+
+        const addChoiceListeners = () => {
+            const choices = document.querySelectorAll(`[data-breakdown-id="${breakdownId}"]`);
+            choices.forEach(choice => {
+                choice.addEventListener('click', () => {
+                    if (breakdown.timer) clearInterval(breakdown.timer);
+                    breakdown.timer = null;
+                    this.handleQuickTimeChoice(breakdownId, choice.dataset.choiceId, choice.dataset.effect);
+                });
+            });
+        };
+
+        if (!Number.isFinite(seconds)) {
+            // No time pressure: full bar, wait for a choice
+            bar.style.width = '100%';
+            setTimeout(addChoiceListeners, 100);
+            return;
+        }
+
+        const timer = seconds * 1000;
         let timeLeft = timer;
         const interval = setInterval(() => {
             timeLeft -= 16; // ~60fps
@@ -315,15 +418,7 @@ export class EmotionalBreakdownSystem {
         breakdown.timer = interval;
         
         // Add choice listeners
-        setTimeout(() => {
-            const choices = document.querySelectorAll(`[data-breakdown-id="${breakdownId}"]`);
-            choices.forEach(choice => {
-                choice.addEventListener('click', () => {
-                    clearInterval(interval);
-                    this.handleQuickTimeChoice(breakdownId, choice.dataset.choiceId, choice.dataset.effect);
-                });
-            });
-        }, 100);
+        setTimeout(addChoiceListeners, 100);
     }
     
     /**
@@ -357,8 +452,10 @@ export class EmotionalBreakdownSystem {
         
         breakdown.playerResponse = { choiceId: 'timeout', effect: 'negative' };
         
-        // Negative effect for no response
-        this.gameState.npcManager?.modifyRelationship(breakdown.npcId, -5);
+        // Silence counts as the negative response for this breakdown type, so
+        // ignoring someone is never cheaper than answering badly (#2071)
+        this.gameState.npcManager?.modifyRelationship(
+            breakdown.npcId, this.calculateRelationshipChange('negative', breakdown.type));
         
         this.showBreakdownResult(breakdown, 'negative');
         
@@ -448,27 +545,27 @@ export class EmotionalBreakdownSystem {
      * Check recent relationship drop
      */
     checkRecentRelationshipDrop(npcId) {
-        // Would need to track relationship history
-        // For now, return 0 (no recent drop)
-        return 0;
+        // Net loss over the recent window, from recordRelationshipChange (#2070)
+        const list = this.pruneRecent(this.relationshipEvents.get(npcId) || []);
+        this.relationshipEvents.set(npcId, list);
+        const net = list.reduce((sum, e) => sum + e.delta, 0);
+        return net < 0 ? -net : 0;
     }
     
     /**
      * Check if rejection occurred
      */
     checkRejection(npcId) {
-        // Check if player rejected this NPC recently
-        // Would need to track rejection events
-        return false;
+        // Rejected recently, per recordRejection (#2260)
+        return this.isRecent(this.rejections.get(npcId));
     }
     
     /**
      * Check if betrayal occurred
      */
     checkBetrayal(npcId) {
-        // Check if player betrayed this NPC's trust
-        // Would need to track betrayal events
-        return false;
+        // Betrayed recently, per recordBetrayal (#2260)
+        return this.isRecent(this.betrayals.get(npcId));
     }
     
     /**
