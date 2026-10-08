@@ -140,13 +140,24 @@ describe('VisualProgressionSystem and CharacterStats Synchronization', () => {
 
         it('should handle ethics alignment when evolving to level_2 with evil ethics', () => {
             mockGameState.money = 10000;
-            characterStats.ethics = 30; // Evil ethics
+            characterStats.ethics = -40; // Evil ethics (below -30)
 
             visualProgressionSystem.checkMilestones();
             const evolution = characterStats.checkEvolution(10000, visualProgressionSystem);
 
             expect(evolution.evolved).toBe(true);
             expect(characterStats.visualStage).toBe('level_2_evil');
+        });
+
+        it('a neutral player (ethics 0, the starting value) evolves neutral, not evil', () => {
+            mockGameState.money = 10000;
+            characterStats.ethics = 0;
+
+            visualProgressionSystem.checkMilestones();
+            const evolution = characterStats.checkEvolution(10000, visualProgressionSystem);
+
+            expect(evolution.evolved).toBe(true);
+            expect(characterStats.visualStage).toBe('level_2_neutral');
         });
     });
 });
