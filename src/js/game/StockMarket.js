@@ -28,7 +28,7 @@ export class Stock {
      * @param {Object} worldEvents - Active world events affecting markets
      * @param {Array} relatedStocks - Other stocks for correlation calculations
      */
-    update(marketTrends, sectorEffects = {}, worldEvents = [], relatedStocks = []) {
+    update(marketTrends, sectorEffects = {}, worldEvents = [], relatedStocks = [], volatilityMultiplier = 1) {
         const oldPrice = this.price;
 
         // Base market trend for this stock's market
@@ -74,7 +74,8 @@ export class Stock {
         });
 
         // Random daily fluctuation based on volatility
-        const noise = (Math.random() - 0.5) * 2 * this.volatility;
+        // Volatile news days widen the swings (#1366)
+        const noise = (Math.random() - 0.5) * 2 * this.volatility * (volatilityMultiplier || 1);
 
         // Calculate total percentage change
         const changePct = baseTrend + sectorEffect + correlationEffect + worldEventEffect + noise;
@@ -304,6 +305,12 @@ export class StockMarket {
 
         // Process news effects on sectors
         let sectorEffects = {};
+        // Market-moving headlines (effects.stockVolatility) widen today's swings (#1366)
+        let newsVolatility = 0;
+        newsEvents.forEach(news => {
+            if (news?.effects?.stockVolatility) newsVolatility += news.effects.stockVolatility;
+        });
+        const volatilityMultiplier = 1 + Math.min(0.5, newsVolatility);
         newsEvents.forEach(news => {
             if (news.effects && news.effects.SECTOR) {
                 if (!sectorEffects[news.effects.SECTOR]) sectorEffects[news.effects.SECTOR] = 0;
@@ -353,7 +360,7 @@ export class StockMarket {
 
         // Update each stock with correlations
         this.stocks?.forEach(stock => {
-            stock.update(this.marketTrends, sectorEffects, this.activeWorldEvents, this.stocks);
+            stock.update(this.marketTrends, sectorEffects, this.activeWorldEvents, this.stocks, volatilityMultiplier);
         });
 
         // Artificially pumped prices deflate back toward their real level

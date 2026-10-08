@@ -297,6 +297,8 @@ export class NewsManager {
      * Generate daily newspaper
      */
     generateDailyNews() {
+        // activeEffects describe today's news only, so they can't pile up (#1366)
+        this.activeEffects = {};
         this.dailyPaper = {
             date: this.gameState.timeManager?.getDateString() || '',
             headline: null,
@@ -432,14 +434,27 @@ export class NewsManager {
     }
 
     applyNewsEffects(newsItem) {
-        if (newsItem.effects.stockVolatility) {
+        const fx = newsItem.effects || {};
+        if (fx.stockVolatility) {
             this.activeEffects.stockVolatility = (this.activeEffects.stockVolatility || 0) +
-                newsItem.effects.stockVolatility;
+                fx.stockVolatility;
         }
 
-        if (newsItem.effects.networkingEvent) {
+        if (fx.networkingEvent) {
             this.activeEffects.networkingEventActive = true;
         }
+
+        // Record the remaining template flags for today (job market, VC
+        // funding, rates, new venues) so systems can read them (#1366)
+        ['marketTrend', 'trendingSkill', 'marketOpportunity', 'jobMarket', 'loanRates',
+            'savingsRates', 'vcFunding', 'newLocation', 'talentAvailable'].forEach(key => {
+            if (fx[key] !== undefined) this.activeEffects[key] = fx[key];
+        });
+    }
+
+    /** Today's news effects (reset each morning) */
+    getActiveEffects() {
+        return { ...this.activeEffects };
     }
 
     /**

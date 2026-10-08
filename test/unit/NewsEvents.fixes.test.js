@@ -192,3 +192,21 @@ describe('EventSystem.triggerEvent guard (#159)', () => {
         expect(es.activeEvents).toHaveLength(1);
     });
 });
+
+describe('news effects reach the market (#1366)', () => {
+    it('activeEffects reset daily and volatile news widens price swings', () => {
+        const nm = new NewsManager({ timeManager: tm(1) });
+        for (let i = 0; i < 30; i++) nm.generateDailyNews();
+        expect(nm.getActiveEffects().stockVolatility || 0).toBeLessThanOrEqual(0.2 * 3);
+
+        const calm = new StockMarket({});
+        const wild = new StockMarket({});
+        vi.spyOn(Math, 'random').mockReturnValue(0.9);
+        const p0 = calm.stocks[0].price;
+        calm.update([], []);
+        wild.update([{ effects: { stockVolatility: 0.4 } }], []);
+        const calmMove = Math.abs(calm.stocks[0].price - p0);
+        const wildMove = Math.abs(wild.stocks[0].price - p0);
+        expect(wildMove).toBeGreaterThan(calmMove);
+    });
+});
