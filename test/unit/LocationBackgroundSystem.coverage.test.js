@@ -64,7 +64,7 @@ describe('LocationBackgroundSystem coverage', () => {
 
     it('layers the WorldMap image over the gradient unless the image is known missing', () => {
         const bg = lbs.getLayeredBackground('home');
-        expect(bg).toContain('url("/assets/locations/home/background.png")');
+        expect(bg).toContain('url("/assets/backgrounds/locations/home.png")');
         expect(bg).toContain(lbs.getBackground('home'));
         expect(lbs.getLayeredBackground('atlantis')).toBe(lbs.getDefaultBackground());
     });

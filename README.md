@@ -25,7 +25,7 @@ Web-based simulation game. Start as a Data Entry Clerk, complete data science ta
 - **Skill system** (Python, SQL, Statistics, ML, Communication, Charisma)
 
 ### World & Locations
-- **19 locations**: Apartment, Office, Library, Gym, Coffee Shop, Park, Mall, University, Tech Hub, Downtown, Luxury District, Networking Bar, Car Dealership, Club, Forest, Real Estate, Bank
+- **19 locations** (from `LOCATIONS` in `src/js/game/WorldMap.js`): Studio Apartment, Your Office, Public Library, Fitness Center, Coffee Shop, Donut Delights, Bagel Bros, Flower Shop, The Data Lounge, First National Bank, Stock Exchange, City Hall, Tech University, Shopping Mall, Auto World, Downtown District, Innovation Hub, Platinum Heights, Property Investments
 - Dynamic backgrounds with time-of-day and weather
 - Map navigation system
 - Location-specific activities and NPCs

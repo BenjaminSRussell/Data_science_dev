@@ -3,6 +3,8 @@
  * Tests all locations for errors and allows quick navigation
  */
 
+import { LOCATIONS } from '../game/WorldMap.js';
+
 export class LocationTester {
     constructor(game) {
         this.game = game;
@@ -33,18 +35,12 @@ export class LocationTester {
                 }
             }
 
-            // Add known location IDs if we don't have them yet
-            const knownLocationIds = [
-                'home', 'office', 'library', 'gym', 'coffee_shop', 'park', 'mall',
-                'university', 'tech_hub', 'downtown', 'luxury_district', 'networking_bar',
-                'car_dealership', 'apartment', 'club', 'forest', 'real_estate'
-            ];
-            
-            knownLocationIds.forEach(id => {
-                if (!locationIds.has(id)) {
-                    const name = id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                    locations.push({ id, name });
-                    locationIds.add(id);
+            // Fall back to the real WorldMap roster, not a hand-kept list that
+            // drifted (it had park/apartment/club/forest and missed 6) (#2473)
+            LOCATIONS.forEach(loc => {
+                if (!locationIds.has(loc.id)) {
+                    locations.push(loc);
+                    locationIds.add(loc.id);
                 }
             });
 
