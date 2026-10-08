@@ -1518,8 +1518,10 @@ export class NPCManager {
             choices = this.getDateChoices();
         } else {
             choices = this.getAvailableChoices(conv.stage, relationship);
-            if (conv.currentNode === 'root' && conv.stage === 'greeting' &&
-                !this.gameState.romanceSystem?.partnerId && npc.romanceOptions && relationship >= 30) {
+            // Only offer a date once the romance system exists (#2128)
+            const romance = this.gameState.romanceSystem;
+            if (romance && conv.currentNode === 'root' && conv.stage === 'greeting' &&
+                !romance.partnerId && npc.romanceOptions && relationship >= 30) {
                 choices.push({ text: "Would you like to go on a date?", action: 'date_ask', effect: {} });
             }
         }
