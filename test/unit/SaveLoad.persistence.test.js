@@ -203,15 +203,15 @@ describe('GameState persistence', () => {
 });
 
 describe('AISystem persistence', () => {
-    it('persists xpToNextLevel and isTraining', () => {
+    it('persists xpToNextLevel; the dead isTraining flag is neither saved nor restored (#1808)', () => {
         const ai = new AISystem({});
         ai.level = 3;
         ai.xpToNextLevel = 225;
-        ai.isTraining = true;
         const restored = new AISystem({});
-        restored.fromJSON(JSON.parse(JSON.stringify(ai.toJSON())));
+        restored.fromJSON({ ...JSON.parse(JSON.stringify(ai.toJSON())), isTraining: true });
         expect(restored.xpToNextLevel).toBe(225);
-        expect(restored.isTraining).toBe(true);
+        expect(ai.toJSON()).not.toHaveProperty('isTraining');
+        expect(restored).not.toHaveProperty('isTraining');
     });
 
     it('derives xpToNextLevel from level for older saves', () => {
