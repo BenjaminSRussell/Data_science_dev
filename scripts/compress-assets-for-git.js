@@ -14,7 +14,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.dirname(__dirname);
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+export const MIN_COMPRESS_SIZE = 100 * 1024; // smaller files are left alone
 const COMPRESSION_QUALITY = 75; // PNG compression quality
 const JPEG_QUALITY = 80; // JPEG quality
 
@@ -28,7 +29,7 @@ const stats = {
     files: []
 };
 
-async function compressImage(inputPath, outputPath = null) {
+export async function compressImage(inputPath, outputPath = null) {
     if (!outputPath) {
         outputPath = inputPath; // Overwrite original
     }
@@ -38,7 +39,7 @@ async function compressImage(inputPath, outputPath = null) {
         const originalSize = originalStats.size;
 
         // Skip if already small (< 100KB)
-        if (originalSize < 100 * 1024) {
+        if (originalSize < MIN_COMPRESS_SIZE) {
             stats.skipped++;
             return { skipped: true, reason: 'already small' };
         }
@@ -152,14 +153,22 @@ export function collectImageFiles(rootDir, extensions, out = []) {
     return out;
 }
 
+/**
+ * Git-tracked image trees to compress. downloaded_assets/ is tracked (and is
+ * the largest of the three), so it's included (#1899).
+ */
+export function assetDirectories(root) {
+    return [
+        path.join(root, 'assets'),
+        path.join(root, 'public', 'assets'),
+        path.join(root, 'downloaded_assets')
+    ];
+}
+
 async function findAndCompressAssets() {
     console.log('🔍 Finding assets to compress...\n');
 
-    const directories = [
-        path.join(rootDir, 'assets'),
-        path.join(rootDir, 'public', 'assets')
-        // Note: downloaded_assets is excluded from git, so we skip it
-    ];
+    const directories = assetDirectories(rootDir);
 
     const imageExtensions = ['.png', '.jpg', '.jpeg'];
     const files = [];
