@@ -211,6 +211,11 @@ export class RealisticDialogueSystem {
             return "You're never around. You're always working, always focused on your career. I need someone who's actually present.";
         } else if (reason === 'money') {
             return "I can't keep living like this. The stress, the uncertainty... I need stability. I'm leaving.";
+        } else if (reason === 'betrayal') {
+            // (#1552)
+            return relationship > 60
+                ? "I trusted you with everything, and you threw it away. I can't even look at you right now."
+                : "I don't trust you anymore. And without trust, there's nothing left here.";
         }
         
         return "I think we need to talk. This relationship isn't working for me anymore.";

@@ -1289,6 +1289,8 @@ export class NPCManager {
      */
     registerVisit(npcId) {
         if (!this.getNPC(npcId)) return false;
+        // Talking counts as time together for neglect tracking (#1548)
+        this.gameState?.relationshipEmotionSystem?.recordInteraction?.(npcId);
         const isFirstMeeting = !this.metNPCs.includes(npcId);
         if (isFirstMeeting) {
             this.markNPCAsMet(npcId);
@@ -1851,6 +1853,7 @@ export class NPCManager {
         const before = this.relationships[npcId] || 0;
         this.modifyRelationship(npcId, adjustedGain);
         const newRelationship = this.relationships[npcId];
+        this.gameState?.relationshipEmotionSystem?.recordInteraction?.(npcId);
 
         return {
             success: true,
