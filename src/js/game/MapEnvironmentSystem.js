@@ -3,6 +3,8 @@
  * Environmental elements system - trees, parks, green spaces, decorations
  */
 
+const PLACEMENT_RETRY_RADIUS = 3;
+
 export class MapEnvironmentSystem {
     constructor(gridSystem, roadSystem, zoneSystem, assetPlacer) {
         this.gridSystem = gridSystem;
@@ -35,6 +37,31 @@ export class MapEnvironmentSystem {
         }
     }
 
+    isInZone(bounds, x, y) {
+        return x >= bounds.minX && x <= bounds.maxX && y >= bounds.minY && y <= bounds.maxY;
+    }
+
+    /**
+     * Place an asset at its random spot, or the nearest acceptable free spot
+     * (within PLACEMENT_RETRY_RADIUS) when that one is taken, instead of
+     * silently dropping it.
+     */
+    placeWithRetry(asset, accept) {
+        if (accept(asset.x, asset.y) && this.assetPlacer.placeAsset(asset)) {
+            return true;
+        }
+        if (typeof this.assetPlacer.findAvailablePosition !== 'function') {
+            return false;
+        }
+        const pos = this.assetPlacer.findAvailablePosition(
+            asset.x, asset.y, asset.width ?? 1, asset.height ?? 1, PLACEMENT_RETRY_RADIUS, accept
+        );
+        if (!pos) return false;
+        asset.x = pos.x;
+        asset.y = pos.y;
+        return this.assetPlacer.placeAsset(asset);
+    }
+
     /**
      * Add park elements (trees, benches, etc.)
      */
@@ -46,9 +73,6 @@ export class MapEnvironmentSystem {
             const x = bounds.minX + Math.floor(Math.random() * (bounds.maxX - bounds.minX + 1));
             const y = bounds.minY + Math.floor(Math.random() * (bounds.maxY - bounds.minY + 1));
             
-            // Skip if road or already occupied
-            if (this.roadSystem.isRoad(x, y)) continue;
-            
             const tree = {
                 id: `tree-${zone.id}-${i}`,
                 type: 'tree',
@@ -59,7 +83,7 @@ export class MapEnvironmentSystem {
                 zoneId: zone.id
             };
             
-            if (this.assetPlacer.placeAsset(tree)) {
+            if (this.placeWithRetry(tree, (cx, cy) => this.isInZone(bounds, cx, cy) && !this.roadSystem.isRoad(cx, cy))) {
                 this.environmentElements.push(tree);
             }
         }
@@ -77,13 +101,14 @@ export class MapEnvironmentSystem {
             const x = bounds.minX + Math.floor(Math.random() * (bounds.maxX - bounds.minX + 1));
             const y = bounds.minY + Math.floor(Math.random() * (bounds.maxY - bounds.minY + 1));
             
-            // Check if adjacent to road
-            const isNearRoad = this.roadSystem.isRoad(x - 1, y) || 
-                              this.roadSystem.isRoad(x + 1, y) ||
-                              this.roadSystem.isRoad(x, y - 1) ||
-                              this.roadSystem.isRoad(x, y + 1);
-            
-            if (!isNearRoad || this.roadSystem.isRoad(x, y)) continue;
+            // Must be adjacent to a road but not on it
+            const isStreetSpot = (cx, cy) =>
+                this.isInZone(bounds, cx, cy) &&
+                !this.roadSystem.isRoad(cx, cy) &&
+                (this.roadSystem.isRoad(cx - 1, cy) ||
+                 this.roadSystem.isRoad(cx + 1, cy) ||
+                 this.roadSystem.isRoad(cx, cy - 1) ||
+                 this.roadSystem.isRoad(cx, cy + 1));
             
             const tree = {
                 id: `street-tree-${zone.id}-${i}`,
@@ -95,7 +120,7 @@ export class MapEnvironmentSystem {
                 zoneId: zone.id
             };
             
-            if (this.assetPlacer.placeAsset(tree)) {
+            if (this.placeWithRetry(tree, isStreetSpot)) {
                 this.environmentElements.push(tree);
             }
         }
@@ -112,8 +137,6 @@ export class MapEnvironmentSystem {
             const x = bounds.minX + Math.floor(Math.random() * (bounds.maxX - bounds.minX + 1));
             const y = bounds.minY + Math.floor(Math.random() * (bounds.maxY - bounds.minY + 1));
             
-            if (this.roadSystem.isRoad(x, y)) continue;
-            
             const decoration = {
                 id: `decoration-${zone.id}-${i}`,
                 type: 'decoration',
@@ -124,7 +147,7 @@ export class MapEnvironmentSystem {
                 zoneId: zone.id
             };
             
-            if (this.assetPlacer.placeAsset(decoration)) {
+            if (this.placeWithRetry(decoration, (cx, cy) => this.isInZone(bounds, cx, cy) && !this.roadSystem.isRoad(cx, cy))) {
                 this.environmentElements.push(decoration);
             }
         }
