@@ -11,7 +11,8 @@ export class ResearchInboxComponent extends BaseComponent {
     static properties = {
         papers: { type: Array },
         activeTab: { type: String },
-        isOpen: { type: Boolean },
+        // Reflected so the :host([is-open]) open/close styles apply (#976, #2239)
+        isOpen: { type: Boolean, reflect: true, attribute: 'is-open' },
         unreadCount: { type: Number }
     };
 
@@ -24,7 +25,7 @@ export class ResearchInboxComponent extends BaseComponent {
             pointer-events: none;
         }
 
-        :host([isOpen]) {
+        :host([is-open]) {
             background: rgba(0, 0, 0, 0.8);
         }
 
@@ -71,7 +72,7 @@ export class ResearchInboxComponent extends BaseComponent {
             transition: all 0.3s ease;
         }
 
-        :host([isOpen]) .inbox-container {
+        :host([is-open]) .inbox-container {
             transform: scale(1);
             opacity: 1;
         }
@@ -332,4 +333,6 @@ export class ResearchInboxComponent extends BaseComponent {
     }
 }
 
-customElements.define('research-inbox-component', ResearchInboxComponent);
+if (!customElements.get('research-inbox-component')) {
+    customElements.define('research-inbox-component', ResearchInboxComponent);
+}

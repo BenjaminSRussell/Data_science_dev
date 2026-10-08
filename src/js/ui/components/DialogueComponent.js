@@ -11,7 +11,8 @@ export class DialogueComponent extends BaseComponent {
     static properties = {
         npc: { type: Object },
         currentNode: { type: Object },
-        isOpen: { type: Boolean },
+        // Reflected so the :host([is-open]) open/close styles apply (#976, #2239)
+        isOpen: { type: Boolean, reflect: true, attribute: 'is-open' },
         typingText: { type: String },
         isTyping: { type: Boolean }
     };
@@ -44,7 +45,7 @@ export class DialogueComponent extends BaseComponent {
             transition: transform 0.3s ease;
         }
 
-        :host([isOpen]) .dialogue-container {
+        :host([is-open]) .dialogue-container {
             transform: translateY(0);
         }
 
@@ -153,6 +154,13 @@ export class DialogueComponent extends BaseComponent {
         this.isOpen = false;
         this.typingText = '';
         this.isTyping = false;
+        this._typeTimer = null;
+        this._typeToken = 0;
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback?.();
+        this.cancelTyping();
     }
 
     render() {
@@ -173,7 +181,7 @@ export class DialogueComponent extends BaseComponent {
                     <button class="dialogue-close" @click=${this.handleClose}>×</button>
                 </div>
                 <div class="dialogue-body">
-                    <div class="dialogue-text ${this.isTyping ? 'typing' : ''}">
+                    <div class="dialogue-text ${this.isTyping ? 'typing' : ''}" @click=${this.skipTyping}>
                         ${this.typingText}
                     </div>
                 </div>
@@ -215,9 +223,7 @@ export class DialogueComponent extends BaseComponent {
         this.npc = npc;
         this.currentNode = currentNode;
         this.isOpen = true;
-        this.typingText = '';
-        this.isTyping = true;
-        this.typeText(currentNode.text);
+        this.typeText(currentNode?.text);
     }
 
     /**
@@ -225,15 +231,22 @@ export class DialogueComponent extends BaseComponent {
      * Phase 3: Can be enhanced with GSAP if needed
      */
     typeText(text, speed = 30) {
+        // A new line cancels the previous one, so fast clicks can't interleave
+        // two typewriters into the same text (#2133, #49)
+        this.cancelTyping();
+        const token = this._typeToken;
+        const full = String(text ?? '');
         this.typingText = '';
-        this.isTyping = true;
+        this.isTyping = full.length > 0;
         let i = 0;
         const type = () => {
-            if (i < text.length) {
-                this.typingText += text[i];
+            if (token !== this._typeToken) return;
+            if (i < full.length) {
+                this.typingText += full[i];
                 i++;
-                setTimeout(type, speed);
+                this._typeTimer = setTimeout(type, speed);
             } else {
+                this._typeTimer = null;
                 this.isTyping = false;
             }
         };
@@ -241,17 +254,37 @@ export class DialogueComponent extends BaseComponent {
     }
 
     /**
+     * Stop any running typewriter
+     */
+    cancelTyping() {
+        this._typeToken = (this._typeToken || 0) + 1;
+        if (this._typeTimer) clearTimeout(this._typeTimer);
+        this._typeTimer = null;
+        this.isTyping = false;
+    }
+
+    /**
+     * Show the whole current line at once (e.g. on a click while typing)
+     */
+    skipTyping() {
+        if (!this.isTyping) return;
+        this.cancelTyping();
+        this.typingText = String(this.currentNode?.text ?? '');
+    }
+
+    /**
      * Show node
      */
     showNode(node) {
         this.currentNode = node;
-        this.typeText(node.text);
+        this.typeText(node?.text);
     }
 
     /**
      * Close dialogue
      */
     close() {
+        this.cancelTyping();
         this.isOpen = false;
         this.npc = null;
         this.currentNode = null;
@@ -259,4 +292,6 @@ export class DialogueComponent extends BaseComponent {
     }
 }
 
-customElements.define('dialogue-component', DialogueComponent);
+if (!customElements.get('dialogue-component')) {
+    customElements.define('dialogue-component', DialogueComponent);
+}
