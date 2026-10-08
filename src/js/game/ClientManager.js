@@ -6,6 +6,9 @@
 import { CLIENT_TYPES, MARKETING_CHANNELS, OFFICES } from '../data/tycoonData.js';
 
 export class ClientManager {
+    /** Jobs the player can run alone before needing staff */
+    static BASE_JOB_SLOTS = 2;
+
     constructor(gameState) {
         this.gameState = gameState;
         // Accepted jobs (these are job records, not client records) (#1390)
@@ -146,9 +149,36 @@ export class ClientManager {
     /**
      * Accept a job
      */
+    /**
+     * How many jobs can run at once: the player's own slots plus one per
+     * hired staff member in OfficeManager (#2231)
+     */
+    getJobCapacity() {
+        const staff = this.gameState?.officeManager?.staff;
+        const staffCount = Array.isArray(staff) ? staff.length : 0;
+        return ClientManager.BASE_JOB_SLOTS + staffCount;
+    }
+
+    /**
+     * Whether another job can be taken on right now
+     */
+    hasJobCapacity() {
+        return this.activeJobs.length < this.getJobCapacity();
+    }
+
     acceptJob(jobId) {
         const jobIndex = this.pendingJobs.findIndex(j => j.id === jobId);
         if (jobIndex === -1) return null;
+
+        // Concurrent work is capped by headcount, like hiring is capped by office size (#2231)
+        if (!this.hasJobCapacity()) {
+            this.lastAcceptError = 'No capacity to take on more work';
+            window.dispatchEvent(new CustomEvent('jobrejected', {
+                detail: { jobId, reason: this.lastAcceptError }
+            }));
+            return null;
+        }
+        this.lastAcceptError = null;
 
         // An offer that has run out can't be taken any more (#1388)
         if (this.pendingJobs[jobIndex].expiresAt <= Date.now()) {

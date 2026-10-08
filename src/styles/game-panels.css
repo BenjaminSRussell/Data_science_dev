@@ -693,3 +693,87 @@
 .stat-content .stat-value {
     font-weight: 700;
 }
+
+/* Office scene rendered by OfficeManager.renderOfficeScene() (#1803, #113) */
+.office-scene {
+    position: relative;
+    min-height: 220px;
+    border-radius: 12px;
+    overflow: hidden;
+    color: var(--color-text-primary);
+}
+.office-scene .office-background {
+    position: absolute;
+    inset: 0 0 35% 0;
+    background: rgba(255, 255, 255, 0.04);
+}
+.office-scene .office-floor {
+    position: absolute;
+    inset: 65% 0 0 0;
+    background: rgba(0, 0, 0, 0.25);
+}
+.office-scene .office-desk {
+    position: absolute;
+    left: 50%;
+    bottom: 30%;
+    width: 140px;
+    height: 16px;
+    transform: translateX(-50%);
+    background: var(--color-bg-elevated);
+    border-radius: 4px;
+}
+.office-scene .office-computer {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    width: 48px;
+    height: 32px;
+    transform: translateX(-50%);
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border);
+    border-radius: 3px;
+}
+.office-scene .office-character {
+    position: absolute;
+    left: 50%;
+    bottom: 12%;
+    transform: translateX(-50%);
+}
+.office-scene .character-avatar {
+    min-width: 40px;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 999px;
+}
+.office-scene .office-info {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+}
+.office-scene .office-name {
+    font-weight: 600;
+}
+.office-scene .office-bonuses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.75rem;
+}
+.office-scene .office-bonus {
+    padding: 2px 6px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+}
+.office-scene .office-bonus strong {
+    margin-left: 4px;
+}
