@@ -886,18 +886,56 @@ export class UIUpdater {
         const loan = this.gameState.bank?.loan || 0;
         const creditScore = this.gameState.bank?.creditScore || 500;
 
-        // Calculate dynamic loan limit
-        const limit = 1000 + (this.gameState.reputation * 100);
-        const creditMultiplier = creditScore / 500;
-        const maxLoan = Math.floor(limit * creditMultiplier);
+        // Use the enforced formula, and show the remaining room (#1691, #938)
+        const bankSystem = this.game?.bankSystem || this.gameState.bankSystem;
+        let available;
+        if (bankSystem?.getAvailableCredit) {
+            available = bankSystem.getAvailableCredit();
+        } else {
+            const limit = 1000 + ((this.gameState.reputation || 0) * 100);
+            available = Math.max(0, Math.floor(limit * (creditScore / 500)) - loan);
+        }
 
-        const netWorth = this.gameState.money + savings - loan;
+        const netWorth = (this.gameState.money || 0) + savings - loan;
 
         if (savingsEl) savingsEl.textContent = `$${savings.toLocaleString()}`;
         if (loanEl) loanEl.textContent = `$${loan.toLocaleString()}`;
         if (creditScoreEl) creditScoreEl.textContent = creditScore;
-        if (loanLimitEl) loanLimitEl.textContent = `$${maxLoan.toLocaleString()}`;
+        if (loanLimitEl) loanLimitEl.textContent = `$${available.toLocaleString()}`;
         if (netWorthEl) netWorthEl.textContent = `$${netWorth.toLocaleString()}`;
+
+        this.renderBankTransactions();
+    }
+
+    /**
+     * Show the recorded bank transaction history (#1383)
+     */
+    renderBankTransactions() {
+        const list = document.getElementById('bank-transactions');
+        if (!list) return;
+        const history = this.gameState.bank?.transactionHistory || [];
+        list.textContent = '';
+        if (history.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'bank-transaction-empty';
+            empty.textContent = 'No transactions yet.';
+            list.appendChild(empty);
+            return;
+        }
+        history.slice(0, 20).forEach(tx => {
+            const row = document.createElement('div');
+            row.className = 'bank-transaction';
+            row.style.cssText = 'display:flex;justify-content:space-between;gap:0.5rem;padding:2px 0;border-bottom:1px dotted #333;';
+            const amount = Number(tx.amount) || 0;
+            const when = tx.day ? `Day ${tx.day}` : '';
+            const cells = [when, tx.type, `${amount >= 0 ? '+' : '-'}$${Math.abs(amount).toLocaleString()}`];
+            cells.forEach(text => {
+                const span = document.createElement('span');
+                span.textContent = text;
+                row.appendChild(span);
+            });
+            list.appendChild(row);
+        });
     }
 
     /**
