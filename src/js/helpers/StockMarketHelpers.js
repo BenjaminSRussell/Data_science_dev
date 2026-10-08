@@ -14,10 +14,12 @@ export function updateStockMarketScreen(game) {
     if (!game.stockMarket) return;
 
     // Initialize quotron ticker if not already done
-    if (!quotronTicker) {
+    if (!quotronTicker || !quotronTicker.tickerContent) {
         quotronTicker = new QuotronTicker('quotron-ticker', game.stockMarket);
         quotronTicker.start();
     } else {
+        // A new game or loaded save replaces game.stockMarket (#898)
+        quotronTicker.setStockMarket?.(game.stockMarket);
         quotronTicker.refresh();
     }
 
@@ -35,6 +37,9 @@ export function updateStockMarketScreen(game) {
 
     // Update world events display
     updateWorldEventsDisplay(game);
+
+    // Portfolio summary is refreshed even when the grid is missing (#2233)
+    updatePortfolioSummary(game);
 
     const grid = document.getElementById('stock-grid');
     if (!grid) return;
@@ -72,18 +77,13 @@ export function updateStockMarketScreen(game) {
             const owned = game.stockMarket.portfolio.getQuantity(stock.id);
             const card = document.createElement('div');
             card.className = 'stock-card';
-            card.setAttribute('data-market', stock.market);
-            card.setAttribute('data-sector', stock.sector);
 
-            // Use lastChangePct if available, otherwise calculate from history
-            const changePct = stock.lastChangePct !== undefined
-                ? stock.lastChangePct * 100
-                : (stock.history.length > 1
-                    ? ((stock.price - stock.history[stock.history.length - 2]) / stock.history[stock.history.length - 2]) * 100
-                    : 0);
+            // Stock always initializes lastChange/lastChangePct, so read them
+            // directly (the history fallback could never run, #1524, #1525)
+            const changePct = (stock.lastChangePct || 0) * 100;
             const changeClass = changePct >= 0 ? 'positive' : 'negative';
             const changeSymbol = changePct >= 0 ? '▲' : '▼';
-            const changeValue = stock.lastChange !== undefined ? stock.lastChange : (stock.price - (stock.history[stock.history.length - 2] || stock.price));
+            const changeValue = stock.lastChange || 0;
 
             // Illegal Actions Check
             let illegalActionsHtml = '';
@@ -120,9 +120,16 @@ export function updateStockMarketScreen(game) {
         });
     });
 
-    // Update portfolio summary
-    document.getElementById('portfolio-value').textContent = `$${game.stockMarket?.getPortfolioValue()?.toFixed(2) || '0.00'}`;
-    document.getElementById('liquid-cash').textContent = `$${game.gameState.money.toFixed(2)}`;
+}
+
+/**
+ * Update the portfolio value / cash readout
+ */
+function updatePortfolioSummary(game) {
+    const valueEl = document.getElementById('portfolio-value');
+    if (valueEl) valueEl.textContent = `$${(game.stockMarket?.getPortfolioValue?.() || 0).toFixed(2)}`;
+    const cashEl = document.getElementById('liquid-cash');
+    if (cashEl) cashEl.textContent = `$${(Number(game.gameState.money) || 0).toFixed(2)}`;
 }
 
 /**
@@ -204,12 +211,17 @@ function updateWorldEventsDisplay(game) {
     events.forEach(event => {
         const eventElement = document.createElement('div');
         eventElement.className = 'world-event-alert';
-        const impactClass = event.marketImpact && event.marketImpact < 0 ? 'negative' : 'positive';
+        // Treat 0 as a real (neutral) impact, not "missing" (#1523)
+        const hasImpact = typeof event.marketImpact === 'number';
+        const impactClass = !hasImpact || event.marketImpact === 0
+            ? 'neutral'
+            : (event.marketImpact < 0 ? 'negative' : 'positive');
+        const icon = !hasImpact || event.marketImpact === 0 ? '•' : (event.marketImpact < 0 ? '▼' : '▲');
         eventElement.innerHTML = `
-            <div class="event-icon"></div>
+            <div class="event-icon">${icon}</div>
             <div class="event-content">
                 <div class="event-title">${event.name || event.type || 'World Event'}</div>
-                <div class="event-impact ${impactClass}">Market Impact: ${event.marketImpact ? (event.marketImpact * 100).toFixed(1) + '%' : 'Active'}</div>
+                <div class="event-impact ${impactClass}">Market Impact: ${hasImpact ? (event.marketImpact * 100).toFixed(1) + '%' : 'Active'}</div>
             </div>
         `;
         eventsContainer.appendChild(eventElement);
@@ -245,16 +257,29 @@ function formatVolume(volume) {
  * Handle buying stocks
  */
 export function handleBuyStock(game, stockId) {
-    const qty = parseInt(prompt("How many shares to buy?", "10"));
+    // Consistent guard: bail before prompting if the market isn't loaded (#1526)
+    if (!game.stockMarket) {
+        game.showError('The stock market is not available right now.');
+        return;
+    }
+    const qty = parseInt(prompt("How many shares to buy?", "10"), 10);
     if (!qty || qty <= 0) return;
 
-    const result = game.stockMarket?.buyStock(stockId, qty);
-    if (result.success) {
-        game.showToast(`Bought ${qty} shares of ${result.stock.ticker}`, 'success');
+    const result = game.stockMarket.buyStock(stockId, qty);
+    if (result?.success) {
+        game.showToast(`Bought ${qty} shares of ${result.stock?.ticker || stockId}`, 'success');
+        warnUnlicensed(game, result);
         updateStockMarketScreen(game);
-        game.uiUpdater.updateAllUI();
+        game.uiUpdater?.updateAllUI();
     } else {
-        game.showError(result.reason);
+        game.showError(result?.reason || 'Trade failed.');
+    }
+}
+
+function warnUnlicensed(game, result) {
+    if (result?.unlicensed) {
+        game.showToast(`Unlicensed trade: regulators noticed (+${result.heat || 0} heat).`, 'warning');
+        game.uiUpdater?.updateHeatMeter?.();
     }
 }
 
@@ -262,16 +287,21 @@ export function handleBuyStock(game, stockId) {
  * Handle selling stocks
  */
 export function handleSellStock(game, stockId) {
-    const qty = parseInt(prompt("How many shares to sell?", "10"));
+    if (!game.stockMarket) {
+        game.showError('The stock market is not available right now.');
+        return;
+    }
+    const qty = parseInt(prompt("How many shares to sell?", "10"), 10);
     if (!qty || qty <= 0) return;
 
-    const result = game.stockMarket?.sellStock(stockId, qty);
-    if (result.success) {
-        game.showToast(`Sold ${qty} shares of ${result.stock.ticker}`, 'success');
+    const result = game.stockMarket.sellStock(stockId, qty);
+    if (result?.success) {
+        game.showToast(`Sold ${qty} shares of ${result.stock?.ticker || stockId}`, 'success');
+        warnUnlicensed(game, result);
         updateStockMarketScreen(game);
-        game.uiUpdater.updateAllUI();
+        game.uiUpdater?.updateAllUI();
     } else {
-        game.showError(result.reason);
+        game.showError(result?.reason || 'Trade failed.');
     }
 }
 
@@ -286,6 +316,10 @@ export function updateShadyDealings(game) {
 }
 
 export function handleCrime(game, type, params) {
+    if (!game.crimeSystem) {
+        game.showError('That option is not available right now.');
+        return;
+    }
     const heat = Math.floor(game.crimeSystem?.heat || 0);
     if (!confirm(`This is illegal! If caught, you could go to jail. Proceed?\n\nCurrent heat: ${heat}/100`)) return;
 
@@ -302,8 +336,8 @@ export function handleCrime(game, type, params) {
     const result = game.crimeSystem.commitCrime(type, params);
     if (result.success) {
         game.showToast(result.message, 'success');
-        if (result.profit) {
-            game.showToast(`Profit: $${result.profit}`, 'success');
+        if (typeof result.profit === 'number' && result.profit !== 0) {
+            game.showToast(`Profit: $${Math.round(result.profit).toLocaleString()}`, result.profit > 0 ? 'success' : 'warning');
         }
         updateStockMarketScreen(game);
         game.uiUpdater.updateAllUI();
@@ -336,14 +370,20 @@ export function handleArrest(game, reason) {
     document.getElementById('jail-time-left').textContent = `${game.gameState.jailSentence} days`;
     game.uiUpdater?.updateHeatMeter?.();
 
-    game.gameState.reputation = Math.floor(game.gameState.reputation * (1 - reduction));
-    game.gameState.money -= fine;
+    game.gameState.reputation = Math.floor((game.gameState.reputation || 0) * (1 - reduction));
+    // Like the bribe, the fine can't take more than you have (#1277)
+    const charged = Math.max(0, Math.min(fine, Math.floor(game.gameState.money || 0)));
+    game.gameState.money -= charged;
 
     const lawyerNote = lawyerTier
         ? ` Your lawyer negotiated a ${Math.round(reduction * 100)}% reduction.`
         : '';
-    game.showToast(`You've been arrested! ${sentence} days in jail, $${fine} fine.${lawyerNote}`, 'error');
+    // Say why you were arrested (#1521)
+    const why = reason ? ` ${String(reason).trim()}` : '';
+    game.showToast(`You've been arrested!${why} ${sentence} days in jail, $${charged.toLocaleString()} fine.${lawyerNote}`, 'error');
     game.audioManager.play('error');
+    // Money/reputation changed: refresh the top bar (#1280)
+    game.uiUpdater?.updateAllUI?.();
 }
 
 /**
@@ -371,6 +411,12 @@ export function handleServeJailTime(game) {
  * Handle bribing a guard to escape jail
  */
 export function handleBribeGuard(game) {
+    // Same guard as handleServeJailTime (#2232)
+    if (!(game.gameState.jailSentence > 0)) {
+        game.showToast("You're not in jail!", 'info');
+        game.screenManager?.showScreen('screen-game');
+        return;
+    }
     if (game.gameState.money < 5000) {
         game.showToast("Not enough money!", 'error');
         return;

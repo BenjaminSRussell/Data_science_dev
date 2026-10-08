@@ -12,8 +12,11 @@ export class QuotronTicker {
         this.scrollPosition = 0;
         this.animationFrame = null;
         this.isRunning = false;
+        this.tickerContent = null;
+        this.scrollWrapper = null;
         
         if (!this.container) {
+            // Leave a safe, inert instance: update/start/animate all no-op (#108)
             console.error(`QuotronTicker: Container ${containerId} not found`);
             return;
         }
@@ -44,7 +47,7 @@ export class QuotronTicker {
      * Update ticker with latest stock data
      */
     update() {
-        if (!this.stockMarket) return;
+        if (!this.stockMarket || !this.tickerContent) return;
         
         const recentChanges = this.stockMarket.getRecentChanges(30);
         this.tickerItems = recentChanges;
@@ -89,7 +92,7 @@ export class QuotronTicker {
      * Start the scrolling animation
      */
     start() {
-        if (this.isRunning) return;
+        if (this.isRunning || !this.scrollWrapper) return;
         this.isRunning = true;
         this.animate();
     }
@@ -101,14 +104,33 @@ export class QuotronTicker {
         this.isRunning = false;
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
         }
+    }
+
+    /**
+     * Point the ticker at a different StockMarket (new game / loaded save) (#898)
+     */
+    setStockMarket(stockMarket) {
+        if (stockMarket === this.stockMarket) return;
+        this.stockMarket = stockMarket;
+        this.scrollPosition = 0;
+        this.update();
     }
     
     /**
      * Animation loop for smooth scrolling
      */
     animate() {
-        if (!this.isRunning) return;
+        if (!this.isRunning || !this.scrollWrapper) return;
+
+        // Stop once the stock screen is no longer showing; refresh() restarts
+        // it when the screen is opened again (#2463)
+        const screen = this.container.closest?.('.screen');
+        if (!this.container.isConnected || (screen && !screen.classList.contains('active'))) {
+            this.stop();
+            return;
+        }
         
         this.scrollPosition += 1; // Scroll speed
         

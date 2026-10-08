@@ -2,6 +2,8 @@
  * EducationHelpers.js
  * Helper functions for education system, exams, and certifications
  */
+import * as MapHelpers from './MapHelpers.js';
+
 
 /**
  * Handle starting an exam
@@ -171,7 +173,10 @@ export function handleBuyLicense(game, licenseId) {
     if (result.success) {
         game.showToast(result.message, 'success');
         game.audioManager.play('kaching');
+        // Rebuild City Hall's buttons so the purchase shows as owned (#1163, #2377)
+        MapHelpers.refreshLocationActions?.(game);
         game.updateMapScreen();
+        game.uiUpdater?.updateAllUI?.();
     } else {
         game.showToast(result.message, 'error');
         game.audioManager.play('error');

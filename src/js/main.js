@@ -2830,8 +2830,9 @@ export class MainGame {
         }
 
         // Legal Check: Need LLC to hire staff
+        // Fail closed: no legal system loaded means no LLC on record (#1541)
         const legal = this.legalSystem || this.gameState.legalSystem;
-        if (legal && !legal.hasLicense('llc_registration')) {
+        if (!legal?.hasLicense?.('llc_registration')) {
             this.showToast("You need an LLC Registration to hire employees!", 'error');
             return false;
         }

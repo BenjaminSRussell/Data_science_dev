@@ -122,11 +122,9 @@ export class CrimeSystem {
 
         // Success
         // Notify StockMarket to bump price
-        if (this.gameState.stockMarket) {
-            this.gameState.stockMarket?.manipulateStock(stockId, 'pump', 1.5); // 50% boost
-        }
+        const profit = this.manipulateAndMeasure(stockId, 'pump', 1.5); // 50% boost
 
-        return { success: true, message: 'You successfully hyped the stock! Price is surging!' };
+        return { success: true, message: 'You successfully hyped the stock! Price is surging!', profit };
     }
 
     executeInsiderTrading(stockId, risk, luck, focus) {
@@ -140,11 +138,24 @@ export class CrimeSystem {
 
         // Success: Immediate knowledge (or guaranteed profit next turn)
         // Let's implement as: Stock WILL go up next turn significantly
-        if (this.gameState.stockMarket) {
-            this.gameState.stockMarket?.manipulateStock(stockId, 'insider_pump', 1.3);
-        }
+        const profit = this.manipulateAndMeasure(stockId, 'insider_pump', 1.3);
 
-        return { success: true, message: 'Insider info acquired. The stock is guaranteed to jump.' };
+        return { success: true, message: 'Insider info acquired. The stock is guaranteed to jump.', profit };
+    }
+
+    /**
+     * Manipulate a stock and return the paper gain on the shares the player
+     * holds, so the "Profit" toast has something to show (#904)
+     */
+    manipulateAndMeasure(stockId, type, magnitude) {
+        const market = this.gameState.stockMarket;
+        if (!market) return 0;
+        const stock = market.getStock?.(stockId);
+        const before = stock ? stock.price : 0;
+        market.manipulateStock(stockId, type, magnitude);
+        const owned = market.portfolio?.getQuantity?.(stockId) || 0;
+        if (!stock || !owned) return 0;
+        return Math.round((stock.price - before) * owned * 100) / 100;
     }
 
     executeRathole(amount, risk, luck, focus) {
