@@ -76,6 +76,16 @@ npm run build
 npm run preview
 ```
 
+`dist/` is a static site. The cross-origin isolation headers
+(`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`)
+that `vite.config.js` sets for `npm run dev`/`preview` are only a Vite dev-server
+setting, so production hosts need them configured separately:
+
+- **Netlify / Cloudflare Pages:** `public/_headers` is copied into `dist/` and applies them.
+- **Vercel, nginx, S3/CloudFront, etc.:** add the same two headers in that host's config.
+- **GitHub Pages** can't set response headers. Nothing in the game needs cross-origin
+  isolation today (the WASM core isn't loaded, see #889), so it still works there.
+
 ### Build WASM (Optional)
 
 ```bash

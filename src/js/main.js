@@ -117,6 +117,10 @@ import * as StockMarketHelpers from './helpers/StockMarketHelpers.js';
 import * as EducationHelpers from './helpers/EducationHelpers.js';
 import * as ProjectHelpers from './helpers/ProjectHelpers.js';
 
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, ch => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
+));
+
 let game = null; // Declare game instance
 
 logger.debug('Module loaded - all imports successful');
@@ -1662,7 +1666,8 @@ export class MainGame {
         try {
             logger.debug('[finishGameStart]: completing game initialization');
             this.gameState.isGameStarted = true;
-            this.gameState.tutorialCompleted = true;
+            // tutorialCompleted is set when the player dismisses the tutorial
+            // (dismissTutorial), not here; first-time players see it once (#1680)
 
             // Generate first task
             if (!this.taskSystem) {
@@ -1670,6 +1675,9 @@ export class MainGame {
             }
             this.taskSystem.generateNewTask();
             logger.debug('[finishGameStart]: first task generated');
+            if (!this.gameState.tutorialCompleted && typeof this.showTutorial === 'function') {
+                this.showTutorial();
+            }
 
             // Update task display
             if (this.uiUpdater) {
@@ -2547,8 +2555,19 @@ export class MainGame {
      * Show tutorial modal
      */
     showTutorial() {
+        // Onboarding overview from NarrativeClaritySystem (#1069)
+        const intro = this.gameState?.narrativeClaritySystem?.getTutorialExplanation?.();
+        const introHtml = intro ? `
+                <h2>${escapeHtml(intro.title)}</h2>
+                <div class="howto-intro">
+                    ${intro.sections.map(section => `
+                    <section class="howto-intro-section">
+                        <h4>${escapeHtml(section.title)}</h4>
+                        <p>${escapeHtml(section.content)}</p>
+                    </section>`).join('')}
+                </div>` : '';
         const modalContent = `
-            <div class="howto-modal">
+            <div class="howto-modal">${introHtml}
                 <h2>How to Play</h2>
                 <div class="howto-steps">
                     <div class="howto-step">
@@ -2587,11 +2606,19 @@ export class MainGame {
                         </div>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="game.closeModal()">Got it!</button>
+                <button class="btn btn-primary" onclick="game.dismissTutorial()">Got it!</button>
             </div>
         `;
 
         this.showModal(modalContent);
+    }
+
+    /**
+     * "Got it!" on the tutorial: remember it so it isn't shown again (#1680)
+     */
+    dismissTutorial() {
+        if (this.gameState) this.gameState.tutorialCompleted = true;
+        this.closeModal();
     }
 
     /**
