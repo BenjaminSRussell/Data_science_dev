@@ -4,7 +4,8 @@
 
 import { BOSSES } from '../data/bosses.js';
 import { COMPREHENSIVE_DATA_SCIENCE_TASKS } from '../data/comprehensive_datascience_tasks.js';
-import { insightHint } from './EconomySystem.js';
+import { insightHint, EconomySystem } from './EconomySystem.js';
+import { isCurrencyColumn, proportionalSplit, boundedPartition } from '../utils/dataFormat.js';
 
 export class TaskSystem {
     static MAX_RANK_INDEX = 6;
@@ -12,8 +13,29 @@ export class TaskSystem {
     // Half-width of each rank's band; bands overlap slightly so 1.0-10 is covered
     static DIFFICULTY_TOLERANCE = 0.75;
 
+    // Labels that match each task's domain, so the table fits the scenario
+    // instead of always being Electronics/Clothing or Speed/Quality (#2144)
+    static DOMAIN_LABELS = {
+        finance: { categories: ['Retail', 'Travel', 'Dining', 'Online', 'Fuel'], items: ['Visa Gold', 'Rewards+', 'Business', 'Student', 'Platinum'], metrics: ['Fraud Recall', 'Precision', 'Approval Rate', 'Uptime', 'Compliance'], series: 'Transactions' },
+        healthcare: { categories: ['Cardiology', 'Oncology', 'Pediatrics', 'Orthopedics', 'Neurology'], items: ['Clinic A', 'Clinic B', 'Clinic C', 'Clinic D', 'Clinic E'], metrics: ['Readmission Recall', 'Diagnostic Accuracy', 'Bed Utilization', 'Wait Time Score', 'Patient Satisfaction'], series: 'Admissions' },
+        ecommerce: { categories: ['Electronics', 'Clothing', 'Home', 'Beauty', 'Sports'], items: ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'], metrics: ['Conversion', 'Checkout Speed', 'Search Relevance', 'Recommendation CTR', 'Satisfaction'], series: 'Orders' },
+        marketing: { categories: ['Search', 'Social', 'Email', 'Display', 'Referral'], items: ['Campaign A', 'Campaign B', 'Campaign C', 'Campaign D', 'Campaign E'], metrics: ['CTR', 'Conversion', 'Engagement', 'Reach', 'Brand Lift'], series: 'Leads' },
+        manufacturing: { categories: ['Assembly', 'Machining', 'Painting', 'Packaging', 'QA'], items: ['Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5'], metrics: ['OEE', 'Yield', 'Throughput', 'Defect-Free Rate', 'Uptime'], series: 'Units Produced' },
+        telecommunications: { categories: ['Mobile', 'Broadband', 'TV', 'Enterprise', 'IoT'], items: ['Plan Basic', 'Plan Plus', 'Plan Pro', 'Plan Family', 'Plan Biz'], metrics: ['Network Uptime', 'Call Success', 'Churn Prediction', 'Throughput', 'Satisfaction'], series: 'Active Lines' },
+        transportation: { categories: ['Freight', 'Rail', 'Air', 'Last Mile', 'Maritime'], items: ['Route A', 'Route B', 'Route C', 'Route D', 'Route E'], metrics: ['On-Time Rate', 'Fleet Utilization', 'Fuel Efficiency', 'Safety', 'Satisfaction'], series: 'Shipments' },
+        energy: { categories: ['Solar', 'Wind', 'Gas', 'Hydro', 'Nuclear'], items: ['Plant A', 'Plant B', 'Plant C', 'Plant D', 'Plant E'], metrics: ['Capacity Factor', 'Forecast Accuracy', 'Grid Stability', 'Efficiency', 'Uptime'], series: 'MWh Delivered' },
+        education: { categories: ['STEM', 'Humanities', 'Arts', 'Business', 'Health'], items: ['Course A', 'Course B', 'Course C', 'Course D', 'Course E'], metrics: ['Completion', 'Pass Rate', 'Engagement', 'Retention', 'Satisfaction'], series: 'Enrollments' }
+    };
+
     constructor(gameState) {
         this.gameState = gameState;
+    }
+
+    /**
+     * Labels for a domain (undefined domain keeps the old generic labels)
+     */
+    getDomainLabels(domain) {
+        return TaskSystem.DOMAIN_LABELS[domain] || null;
     }
 
     /**
@@ -118,21 +140,22 @@ export class TaskSystem {
      * Generate data based on task template
      */
     generateData(template) {
-        switch (template.dataType) {
+        const labels = this.getDomainLabels(template?.domain);
+        switch (template?.dataType) {
             case 'quarterly_sales':
                 return this.generateQuarterlySalesData();
             case 'monthly_revenue':
                 return this.generateMonthlyRevenueData();
             case 'product_comparison':
-                return this.generateProductComparisonData();
+                return this.generateProductComparisonData(labels);
             case 'category_breakdown':
-                return this.generateCategoryBreakdownData();
+                return this.generateCategoryBreakdownData(labels);
             case 'trend_analysis':
-                return this.generateTrendAnalysisData();
+                return this.generateTrendAnalysisData(labels);
             case 'customer_demographics':
                 return this.generateDemographicsData();
             case 'performance_metrics':
-                return this.generatePerformanceData();
+                return this.generatePerformanceData(labels);
             default:
                 return this.generateQuarterlySalesData();
         }
@@ -194,11 +217,13 @@ export class TaskSystem {
     /**
      * Generate product comparison data
      */
-    generateProductComparisonData() {
-        const products = ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'];
+    generateProductComparisonData(labels = null) {
+        const products = labels?.items || ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'];
 
         const sales = products.map(() => this.randomRange(5000, 50000));
-        const ratings = products.map(() => (3 + Math.random() * 2).toFixed(1));
+        // Numbers in both the table and the chart; the table used strings,
+        // which broke numeric sorting and formatting (#2428)
+        const ratings = products.map(() => Math.round((3 + Math.random() * 2) * 10) / 10);
 
         return {
             columns: ['Product', 'Sales ($)', 'Rating'],
@@ -206,7 +231,7 @@ export class TaskSystem {
             labels: products,
             datasets: {
                 Sales: sales,
-                Rating: ratings.map(r => parseFloat(r))
+                Rating: ratings
             }
         };
     }
@@ -214,17 +239,12 @@ export class TaskSystem {
     /**
      * Generate category breakdown data
      */
-    generateCategoryBreakdownData() {
-        const categories = ['Electronics', 'Clothing', 'Food', 'Home & Garden', 'Sports'];
+    generateCategoryBreakdownData(labels = null) {
+        const categories = labels?.categories || ['Electronics', 'Clothing', 'Food', 'Home & Garden', 'Sports'];
 
-        // Generate random percentages that sum to 100
-        let remaining = 100;
-        const percentages = categories.map((_, i) => {
-            if (i === categories.length - 1) return remaining;
-            const val = this.randomRange(10, Math.min(40, remaining - (categories.length - i - 1) * 5));
-            remaining -= val;
-            return val;
-        });
+        // Shares of 10-40% that always add up to 100; the old running
+        // remainder could break both bounds (#1855, #960)
+        const percentages = boundedPartition(categories.length, 100, 10, 40);
 
         return {
             columns: ['Category', 'Percentage', 'Revenue'],
@@ -240,8 +260,9 @@ export class TaskSystem {
     /**
      * Generate trend analysis data
      */
-    generateTrendAnalysisData() {
+    generateTrendAnalysisData(labels = null) {
         const weeks = Array.from({ length: 12 }, (_, i) => `Week ${i + 1}`);
+        const series = labels?.series || 'Users';
 
         let value = this.randomRange(1000, 5000);
         const trend = weeks.map(() => {
@@ -251,11 +272,11 @@ export class TaskSystem {
         });
 
         return {
-            columns: ['Week', 'Users'],
+            columns: ['Week', series],
             rows: weeks.map((w, i) => [w, trend[i]]),
             labels: weeks,
             datasets: {
-                Users: trend
+                [series]: trend
             }
         };
     }
@@ -266,13 +287,15 @@ export class TaskSystem {
     generateDemographicsData() {
         const ageGroups = ['18-24', '25-34', '35-44', '45-54', '55+'];
 
-        const counts = [
+        const weights = [
             this.randomRange(15, 25),
             this.randomRange(25, 35),
             this.randomRange(20, 30),
             this.randomRange(10, 20),
             this.randomRange(5, 15)
         ];
+        // Percentages of one audience must add up to 100 (#2427)
+        const counts = proportionalSplit(weights, 100);
 
         return {
             columns: ['Age Group', 'Percentage'],
@@ -287,8 +310,8 @@ export class TaskSystem {
     /**
      * Generate performance metrics data
      */
-    generatePerformanceData() {
-        const metrics = ['Speed', 'Quality', 'Efficiency', 'Satisfaction', 'Reliability'];
+    generatePerformanceData(labels = null) {
+        const metrics = labels?.metrics || ['Speed', 'Quality', 'Efficiency', 'Satisfaction', 'Reliability'];
 
         const scores = metrics.map(() => this.randomRange(60, 100));
 
@@ -360,7 +383,7 @@ export class TaskSystem {
         if (taskDesc) taskDesc.textContent = task.template.description;
 
         const taskReward = document.getElementById('task-reward');
-        if (taskReward) taskReward.textContent = `$${task.potentialReward}`;
+        if (taskReward) taskReward.textContent = EconomySystem.rewardRangeText(task.potentialReward);
 
         // Update requirements
         const reqContainer = document.querySelector('.task-requirements');
@@ -422,14 +445,7 @@ export class TaskSystem {
                 
                 // Check column name to determine formatting
                 const columnName = data.columns[cellIndex]?.toLowerCase() || '';
-                const isCurrency = columnName.includes('revenue') || 
-                                 columnName.includes('expense') || 
-                                 columnName.includes('profit') || 
-                                 columnName.includes('money') ||
-                                 columnName.includes('cost') ||
-                                 columnName.includes('price') ||
-                                 columnName.includes('salary') ||
-                                 columnName.includes('budget');
+                const isCurrency = isCurrencyColumn(columnName);
                 
                 // Format based on column type
                 if (isCurrency) {
@@ -481,6 +497,8 @@ export class TaskSystem {
      * Helper: random number in range
      */
     randomRange(min, max) {
+        // Never invert the range (#960)
+        if (min > max) [min, max] = [max, min];
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 }

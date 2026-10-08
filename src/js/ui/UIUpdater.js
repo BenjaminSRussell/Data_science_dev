@@ -13,6 +13,7 @@ import { HARDWARE_PARTS, HARDWARE_TYPES } from '../game/HardwareSystems.js';
 import { LitUIManager } from './LitUIManager.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommonUtils } from '../utils/CommonUtils.js';
+import { EconomySystem } from '../game/EconomySystem.js';
 import { insightHint } from '../game/EconomySystem.js';
 import { logger } from '../utils/Logger.js';
 import { NEWS_CATEGORIES } from '../game/NewsManager.js';
@@ -187,7 +188,7 @@ export class UIUpdater {
         // Update task reward
         if (task.potentialReward) {
             DOMUtils.updateElement('#task-reward', {
-                textContent: `$${task.potentialReward.toLocaleString()}`
+                textContent: EconomySystem.rewardRangeText(task.potentialReward)
             });
         }
 
