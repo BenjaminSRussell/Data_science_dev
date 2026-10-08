@@ -322,7 +322,8 @@ export class GameState {
             'roommateSystem',
             'jealousySystem',
             'eventSystem',
-            'dirtyDataSystem'
+            'dirtyDataSystem',
+            'detailedMapSystem'
         ];
     }
 

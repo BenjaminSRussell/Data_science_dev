@@ -78,6 +78,38 @@ export class MapGridSystem {
     }
 
     /**
+     * Does a stored position look like grid coordinates? A real bounds check
+     * against the grid size, not a ">100 means grid" guess (#158)
+     */
+    isGridPosition(x, y) {
+        return Number.isFinite(x) && Number.isFinite(y) &&
+            x >= 0 && y >= 0 && x <= this.gridWidth && y <= this.gridHeight;
+    }
+
+    /**
+     * Convert a stored position (grid, or legacy percent/pixel) to percent
+     */
+    positionToPercent(x, y, containerWidth, containerHeight) {
+        if (this.isGridPosition(x, y)) {
+            return this.gridToPercent(x, y, containerWidth || this.totalWidth, containerHeight || this.totalHeight);
+        }
+        if (x <= 100 && y <= 100) return { x, y };
+        return {
+            x: (x / (containerWidth || this.totalWidth)) * 100,
+            y: (y / (containerHeight || this.totalHeight)) * 100
+        };
+    }
+
+    /**
+     * Convert a stored position (grid, or legacy percent/pixel) to grid
+     */
+    positionToGrid(x, y) {
+        if (this.isGridPosition(x, y)) return { x: Math.round(x), y: Math.round(y) };
+        if (x <= 100 && y <= 100) return this.percentToGrid(x, y, this.totalWidth, this.totalHeight);
+        return this.pixelToGrid(x, y);
+    }
+
+    /**
      * Validate grid coordinates are within bounds
      * @param {number} gridX - Grid X coordinate
      * @param {number} gridY - Grid Y coordinate

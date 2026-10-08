@@ -18,12 +18,13 @@ export class MapNavigationSystem {
     findPath(startX, startY, endX, endY) {
         const cacheKey = `${startX},${startY}-${endX},${endY}`;
         if (this.pathCache.has(cacheKey)) {
-            return this.pathCache.get(cacheKey);
+            // Hand out a copy so a caller can't corrupt the cached path
+            return this.pathCache.get(cacheKey).slice();
         }
         
         const path = this.aStarPathfinding(startX, startY, endX, endY);
         this.pathCache.set(cacheKey, path);
-        return path;
+        return path.slice();
     }
 
     /**
@@ -137,7 +138,9 @@ export class MapNavigationSystem {
      * Calculate travel time based on path and vehicle speed
      */
     calculateTravelTime(path, vehicleSpeed = 1) {
-        if (path.length === 0) return 0;
+        if (!Array.isArray(path) || path.length === 0) return 0;
+        // A zero/negative/invalid speed would give Infinity or a negative time
+        if (!(Number(vehicleSpeed) > 0)) vehicleSpeed = 1;
         
         // Base time is path length
         const baseTime = path.length;
@@ -152,7 +155,7 @@ export class MapNavigationSystem {
      * Get visual path data for rendering
      */
     getPathVisualData(path) {
-        if (path.length < 2) return [];
+        if (!Array.isArray(path) || path.length < 2) return [];
         
         const segments = [];
         for (let i = 0; i < path.length - 1; i++) {

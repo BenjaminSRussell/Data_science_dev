@@ -115,9 +115,8 @@ export class MapCoordinateSystem {
      * Returns grid coordinates
      */
     findAvailableCoord(preferredX, preferredY, type = 'location') {
-        // All coordinates are grid coordinates (0-30)
-        const gridX = preferredX;
-        const gridY = preferredY;
+        // Clamp first so the returned coordinate is the cell actually occupied
+        const { x: gridX, y: gridY } = this.gridSystem.clampGridCoord(preferredX, preferredY);
         
         // Try preferred location first - O(1)
         if (this.isAvailable(gridX, gridY)) {
@@ -180,17 +179,8 @@ export class MapCoordinateSystem {
      */
     findNPCHouseCoord(locationX, locationY) {
         // Convert to grid coordinates if needed
-        let gridX, gridY;
-        if (locationX > 100 || locationY > 100) {
-            gridX = locationX;
-            gridY = locationY;
-        } else {
-            const containerWidth = this.gridSystem.totalWidth;
-            const containerHeight = this.gridSystem.totalHeight;
-            const grid = this.gridSystem.percentToGrid(locationX, locationY, containerWidth, containerHeight);
-            gridX = grid.x;
-            gridY = grid.y;
-        }
+        // Bounds-check against the grid instead of a ">100" guess (#158)
+        const { x: gridX, y: gridY } = this.gridSystem.positionToGrid(locationX, locationY);
         
         // Place house 2-4 tiles away from location
         const distance = 2 + Math.random() * 2;
