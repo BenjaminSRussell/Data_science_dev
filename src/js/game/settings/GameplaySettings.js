@@ -20,7 +20,8 @@ export class GameplaySettings {
                 management: true
             },
             difficulty: {
-                bossDemand: 50,
+                // Matches the boss's long-standing default demand (#1251)
+                bossDemand: 70,
                 taskFrequency: 3,
                 competition: 50
             },

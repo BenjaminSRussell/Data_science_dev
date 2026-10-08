@@ -54,7 +54,7 @@
             <div class="top-bar-left">
                 <span class="text-ui-heading" style="font-size: 1.2rem; margin: 0;">[ DATA SCIENCE TYCOON ]</span>
             </div>
-            <div class="top-bar-center" style="display: flex; gap: 1rem;" aria-live="polite" aria-atomic="false">
+            <div class="top-bar-center" aria-live="polite" aria-atomic="false">
                 <div id="stat-money" style="color: #66cc66;">$ <span id="money-value">0</span></div>
                 <div id="stat-reputation" style="color: #66ccff;">REP: <span id="reputation-value">0</span></div>
                 <div id="stat-rank" style="color: #cca300;">RANK: <span id="rank-value">Data Entry Clerk</span></div>
@@ -70,25 +70,25 @@
                 <button class="btn-grey" id="btn-settings" title="Settings">OPTS</button>
                 <button class="btn-grey" id="btn-sound" title="Toggle sound effects" aria-pressed="true">SFX: ON</button>
                 <button class="btn-grey" id="btn-theme-toggle" title="Theme">LIGHT</button>
-                <button class="btn-grey" id="btn-music-radio" title="Radio">MUSIC: OFF</button>
+                <button class="btn-grey" id="btn-music-radio" title="Radio" aria-haspopup="true" aria-expanded="false" aria-controls="music-radio-menu">MUSIC: OFF</button>
                 <!-- Radio Menu -->
-                <div id="music-radio-menu" class="music-radio-menu hidden">
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                <div id="music-radio-menu" class="music-radio-menu hidden" role="menu" aria-label="Music stations">
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="lofi_beats">Lofi Beats</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="folk_radio">Folk Radio</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="jazz_fm">Jazz FM</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="synthwave">Synthwave</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="space_rock">Space Rock</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="glitch_stream">Glitch Stream</button>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%;"
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%;"
                         data-station="zen_garden">Zen Garden</button>
-                    <div style="border-top: 1px dashed #555; margin: 0.25rem 0;"></div>
-                    <button class="radio-station btn-grey" style="text-align: left; width: 100%; color: #aaa;"
+                    <div role="separator" style="border-top: 1px dashed #555; margin: 0.25rem 0;"></div>
+                    <button class="radio-station btn-grey" role="menuitem" style="text-align: left; width: 100%; color: #aaa;"
                         data-station="off">Turn Off</button>
                 </div>
             </div>
@@ -145,7 +145,7 @@
                     </nav>
 
                     <!-- Stats Dashboard -->
-                    <div id="menu-stats-dashboard" class="text-stat-row"
+                    <div id="menu-stats-dashboard" class="menu-stats-dashboard"
                         style="margin-top: 2rem; border-top: 1px dashed #555; padding-top: 1rem; display: none;"></div>
 
                     <footer class="menu-footer" style="margin-top: 2rem; text-align: center; color: #555;">
@@ -362,15 +362,15 @@
                             </div>
                         </div>
                         <div class="option-group" style="margin-bottom: 0.5rem;">
-                            <label>Show Legend</label>
+                            <label for="show-legend">Show Legend</label>
                             <input type="checkbox" id="show-legend" checked>
                         </div>
                         <div class="option-group" style="margin-bottom: 0.5rem;">
-                            <label>Show Grid</label>
+                            <label for="show-grid">Show Grid</label>
                             <input type="checkbox" id="show-grid" checked>
                         </div>
                         <div class="option-group">
-                            <label>Data Labels</label>
+                            <label for="show-data-labels">Data Labels</label>
                             <input type="checkbox" id="show-data-labels">
                         </div>
                     </aside>
