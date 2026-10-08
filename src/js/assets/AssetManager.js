@@ -335,15 +335,13 @@ export class AssetManager {
         const asset = this.getAsset(`backgrounds.locations.${locationId}`);
         if (asset) return asset;
 
-        // Try alternative backdrop variations
-        const variations = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-        for (const variant of variations) {
-            const variantPath = `/assets/backgrounds/locations/${locationId}/${locationId}_backdrop_0${variant}.png`;
-            const variantAsset = this.getAsset(`backgrounds.locations.${locationId}.variant${variant}`);
-            if (variantAsset) return variantAsset;
+        // Nothing loaded under that key: fall back to the backdrop path from
+        // the manifest. The old loop looked up "...variantN" keys that
+        // nothing ever stored, so it always returned null (#2286)
+        const src = this.getAssetManifest()?.backgrounds?.locations?.[locationId];
+        if (typeof src === 'string' && !isAssetMissing(src)) {
+            return { src, fallback: true };
         }
-
-        // Fallback to first backdrop
         return null;
     }
 
