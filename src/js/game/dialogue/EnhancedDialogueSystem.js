@@ -34,7 +34,7 @@ export class EnhancedDialogueSystem {
     /**
      * Build enhanced dialogue tree for NPC with deep stories
      */
-    buildEnhancedTree(npc, relationshipLevel, flags = {}) {
+    buildEnhancedTree(npc, relationshipLevel, flags = {}, options = {}) {
         const story = CHARACTER_STORIES[npc.id];
         if (!story) {
             // Fallback to basic dialogue if no story exists
@@ -44,7 +44,7 @@ export class EnhancedDialogueSystem {
         const nodes = [];
 
         // Root node with relationship-based greeting
-        nodes.push(this.createRootNode(npc, relationshipLevel, story, flags));
+        nodes.push(this.createRootNode(npc, relationshipLevel, story, flags, options));
 
         // Add story reveal nodes based on relationship; the root links to
         // them, so they are reachable (#1144)
@@ -68,8 +68,8 @@ export class EnhancedDialogueSystem {
     /**
      * Create root node with dynamic greeting
      */
-    createRootNode(npc, relationshipLevel, story, flags = {}) {
-        let greeting = this.getGreetingForLevel(npc, relationshipLevel);
+    createRootNode(npc, relationshipLevel, story, flags = {}, options = {}) {
+        let greeting = this.getGreetingForLevel(npc, relationshipLevel, options);
 
         const choices = [
             { id: 'ask_about_work', text: 'Ask about their work' },
@@ -127,9 +127,17 @@ export class EnhancedDialogueSystem {
     /**
      * Get greeting based on relationship level
      */
-    getGreetingForLevel(npc, relationshipLevel) {
-        if (relationshipLevel < 10) {
+    getGreetingForLevel(npc, relationshipLevel, { isFirstMeeting } = {}) {
+        // Whether we've met is tracked by NPCManager.metNPCs, not by the
+        // relationship score: a low score after several chats is not a first
+        // meeting (#1609). Callers that don't know keep the old behaviour.
+        if (isFirstMeeting === true) {
             return this.getFirstMeetingGreeting(npc);
+        }
+        if (relationshipLevel < 10) {
+            return isFirstMeeting === false
+                ? this.getReturningStrangerGreeting(npc)
+                : this.getFirstMeetingGreeting(npc);
         } else if (relationshipLevel < 25) {
             return `Hey ${npc.name.split(' ')[0]}! Good to see you.`;
         } else if (relationshipLevel < 50) {
@@ -139,6 +147,22 @@ export class EnhancedDialogueSystem {
         } else {
             return `My friend! It's been too long. How are things?`;
         }
+    }
+
+    /**
+     * Greeting for someone we've met but don't know well yet (#1609)
+     */
+    getReturningStrangerGreeting(npc) {
+        const first = npc.name.split(' ')[0];
+        const greetings = {
+            friendly: `Oh, hi again! It's ${first}, remember?`,
+            professional: `Hello again. What can I do for you?`,
+            competitive: `You again. What now?`,
+            mysterious: `...You came back.`,
+            generous: `Welcome back! Good to see you again.`,
+            grumpy: `You again. Make it quick.`
+        };
+        return greetings[npc.personality] || `Hello again.`;
     }
 
     /**

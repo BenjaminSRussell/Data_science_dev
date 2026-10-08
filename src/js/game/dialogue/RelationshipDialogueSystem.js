@@ -119,13 +119,34 @@ export class RelationshipDialogueSystem {
      * Check trigger condition
      */
     checkTriggerCondition(condition, trigger) {
-        // Simple condition checking
-        // Can be expanded for complex conditions
+        // Every key in the condition must hold, whatever its name, so the
+        // dialogue files' mentionPast/judgment/playerSupports/playerListens/
+        // mentionKids/npcStruggling/... triggers can fire too (#117).
+        // Comparison strings like relationship: '>40' are compared numerically.
         if (!condition || !trigger) return false;
-        if (condition.playerSuccess && trigger.playerSuccess) return true;
-        if (condition.betrayal && trigger.betrayal) return true;
-        if (condition.rejection && trigger.rejection) return true;
-        return false;
+        const keys = Object.keys(condition);
+        if (!keys.length) return false;
+        return keys.every(key => RelationshipDialogueSystem.conditionHolds(condition[key], trigger[key]));
+    }
+
+    static conditionHolds(expected, actual) {
+        if (typeof expected === 'string') {
+            const m = expected.match(/^\s*(>=|<=|>|<|==)\s*(-?\d+(?:\.\d+)?)\s*$/);
+            if (m) {
+                const value = Number(actual);
+                if (!Number.isFinite(value)) return false;
+                const limit = Number(m[2]);
+                switch (m[1]) {
+                    case '>': return value > limit;
+                    case '>=': return value >= limit;
+                    case '<': return value < limit;
+                    case '<=': return value <= limit;
+                    default: return value === limit;
+                }
+            }
+        }
+        if (expected === true) return Boolean(actual);
+        return actual === expected;
     }
     
     /**

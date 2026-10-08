@@ -61,14 +61,17 @@ describe('NPCDialogueLoader', () => {
 
             const result = await loader.loadNPCDialogue('missing_npc');
 
+            // All 5 stages getRelationshipStage() can return (#2317)
             expect(result).toEqual({
                 npcId: 'missing_npc',
                 stages: {
-                    stranger: { greeting: 'Hello.', topics: [] },
-                    acquaintance: { greeting: 'Hey.', topics: [] },
-                    friend: { greeting: 'Hi there!', topics: [] }
+                    stranger: { greeting: ['Hello.'], topics: {} },
+                    friendly: { greeting: ['Hey, good to see you.'], topics: {} },
+                    acquaintance: { greeting: ['Hey.'], topics: {} },
+                    friend: { greeting: ['Hi there!'], topics: {} },
+                    close_friend: { greeting: ['There you are! I was hoping you would stop by.'], topics: {} }
                 },
-                breakdowns: [],
+                breakdowns: {},
                 emotionalTriggers: []
             });
         });

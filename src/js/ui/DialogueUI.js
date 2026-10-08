@@ -129,10 +129,16 @@ export class DialogueUI {
         // getTree() returns null for NPCs without dialogue data; fall back to
         // a simple greeting tree in that case too.
         // Story phases advance through per-NPC flags, so pass them along
-        const flags = this.game?.gameState?.npcManager?.getNPCFlags?.(npc.id) || null;
-        this.currentTree = (flags
-            ? treeSystem?.getTree?.(npc.id, relLevel, flags)
-            : treeSystem?.getTree?.(npc.id, relLevel)) || null;
+        const npcManager = this.game?.gameState?.npcManager;
+        const flags = npcManager?.getNPCFlags?.(npc.id) || null;
+        // Real first-meeting state, not "relationship under 10" (#1609)
+        const options = Array.isArray(npcManager?.metNPCs)
+            ? { isFirstMeeting: !npcManager.metNPCs.includes(npc.id) }
+            : null;
+        const args = [npc.id, relLevel];
+        if (flags || options) args.push(flags);
+        if (options) args.push(options);
+        this.currentTree = treeSystem?.getTree?.(...args) || null;
         if (!this.currentTree) {
             // Fallback: create simple tree
             this.currentTree = {

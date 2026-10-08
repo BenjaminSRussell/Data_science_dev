@@ -219,7 +219,7 @@ export class DialogueTreeSystem {
      * @param {number} relationshipLevel - Current relationship level (for enhanced dialogue)
      * @returns {DialogueTree} Dialogue tree
      */
-    getTree(npcId, relationshipLevel = 0, flags = null) {
+    getTree(npcId, relationshipLevel = 0, flags = null, options = {}) {
         // Only story-driven (enhanced) trees depend on the relationship level;
         // personality trees are cached once per NPC (#2122). The cache is also
         // bounded so fractional/ever-changing levels can't grow it forever (#913).
@@ -230,8 +230,11 @@ export class DialogueTreeSystem {
             ? Object.keys(flags).filter(k => flags[k]).sort().join(',')
             : '';
         // Personality trees only change per relationship tier (#1580)
+        // The greeting depends on whether we've met (#1609)
+        const metKey = options?.isFirstMeeting === true ? '_first'
+            : options?.isFirstMeeting === false ? '_met' : '';
         const cacheKey = story
-            ? `${npcId}_${level}${flagKey ? `_${flagKey}` : ''}`
+            ? `${npcId}_${level}${flagKey ? `_${flagKey}` : ''}${metKey}`
             : `${npcId}_t${relationshipTier(level)}`;
         if (this.treeCache.has(cacheKey)) {
             const cached = this.treeCache.get(cacheKey);
@@ -249,7 +252,7 @@ export class DialogueTreeSystem {
         }
         
         // Build tree (enhanced system will be used if character has deep story)
-        const tree = this.builder.buildTreeForNPC(npc, level, flags || {});
+        const tree = this.builder.buildTreeForNPC(npc, level, flags || {}, options || {});
         
         // Cache it (LRU, bounded)
         this.treeCache.set(cacheKey, tree);
@@ -295,10 +298,10 @@ export class DialogueTreeBuilder {
      * Build tree for a specific NPC
      * Uses enhanced dialogue system if character has deep story
      */
-    buildTreeForNPC(npc, relationshipLevel = 0, flags = {}) {
+    buildTreeForNPC(npc, relationshipLevel = 0, flags = {}, options = {}) {
         // Try enhanced dialogue system first (if character has deep story)
         try {
-            const enhancedTree = enhancedDialogueSystem.buildEnhancedTree(npc, relationshipLevel, flags);
+            const enhancedTree = enhancedDialogueSystem.buildEnhancedTree(npc, relationshipLevel, flags, options);
             if (enhancedTree?.isUsable?.()) {
                 return enhancedTree;
             }
