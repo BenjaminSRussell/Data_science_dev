@@ -1376,18 +1376,23 @@ export class MainGame {
                 }
             }, 0);
 
-            // LOW PRIORITY - Load last (defer)
+            // LOW PRIORITY - Load last (defer). Each system is built on its own
+            // so one failing constructor can't silently take its siblings down (#2039)
             setTimeout(() => {
-                try {
-                    this.gameState.aiSystem = new AISystem(this.gameState);
-                    this.gameState.hardwareManager = new HardwareManager(this.gameState);
-                    this.gameState.contractSystem = new ContractSystem(this.gameState);
-                    // NOTE: mapProgressionSystem is initialized later in startNewGame, don't duplicate here
-                    // this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
-                    this.linkSessionSystems(); // (#1660)
-                } catch (error) {
-                    logger.warn('Error loading low priority systems:', error);
+                const lowPriority = {
+                    aiSystem: () => new AISystem(this.gameState),
+                    hardwareManager: () => new HardwareManager(this.gameState),
+                    contractSystem: () => new ContractSystem(this.gameState)
+                };
+                // NOTE: mapProgressionSystem is initialized later in startNewGame, don't duplicate here
+                for (const [key, create] of Object.entries(lowPriority)) {
+                    try {
+                        this.gameState[key] = create();
+                    } catch (error) {
+                        logger.warn(`Error loading low priority system ${key}:`, error);
+                    }
                 }
+                this.linkSessionSystems(); // (#1660)
             }, 100);
 
             // HIGH PRIORITY - Needed for intro
@@ -2952,6 +2957,16 @@ export class MainGame {
             this.showToast(result.message, 'error');
             this.audioManager.play('error');
         }
+    }
+
+    /**
+     * Switch back to a hardware part you already own (#1331)
+     */
+    handleEquipHardware(type, partId) {
+        const result = this.gameState.hardwareManager?.equipPart(type, partId);
+        if (!result) return;
+        this.showToast(result.message, result.success ? 'success' : 'error');
+        if (result.success) this.uiUpdater.updateOfficeEquipment();
     }
 
     /**

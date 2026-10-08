@@ -801,10 +801,24 @@ export class UIUpdater {
             const currentPartId = equipped[type];
             const partList = HARDWARE_PARTS[type];
             const currentPart = partList.find(p => p.id === currentPartId) || partList[0];
+            const owned = hm.ownedParts[type] || [];
 
-            // Find next upgrade (first unowned part with higher rank)
-            const nextPart = partList.find(p => !hm.ownedParts[type].includes(p.id) && p.unlockRank <= (this.gameState.currentRank?.level || 0) + 2);
-            // Limit upgrades shown to slightly above rank
+            // Next upgrade: the first part not owned yet. Locked parts show
+            // their rank requirement instead of a buy button (#991)
+            const nextPart = partList.find(p => !owned.includes(p.id));
+            const nextUnlocked = nextPart && (hm.isUnlocked?.(nextPart) ?? true);
+            const nextRank = nextPart ? Math.min(nextPart.unlockRank || 0, RANKS.length - 1) : 0;
+
+            // Owned parts can be re-equipped (#1331)
+            const equipSelect = owned.length > 1
+                ? `<select class="equipment-equip-select" aria-label="Equip ${this.getHardwareName(type)}"
+                        onchange="game.handleEquipHardware('${type}', this.value)">
+                        ${owned.map(id => {
+                            const p = partList.find(x => x.id === id);
+                            return `<option value="${id}" ${id === currentPartId ? 'selected' : ''}>${p?.name || id}</option>`;
+                        }).join('')}
+                   </select>`
+                : '';
 
             return `
                 <div class="equipment-card" data-type="${type}">
@@ -813,12 +827,17 @@ export class UIUpdater {
                     <div class="equipment-level">${currentPart.name}</div>
                     
                     ${this.renderPartStats(currentPart)}
+                    ${equipSelect}
 
-                    ${nextPart
-                    ? `<button class="equipment-upgrade-btn" onclick="game.handleBuyHardware('${type}', '${nextPart.id}')">
-                             Upgrade: ${nextPart.name} ($${nextPart.price})
+                    ${!nextPart
+                    ? `<button class="equipment-upgrade-btn" disabled>Maxed Out</button>`
+                    : nextUnlocked
+                        ? `<button class="equipment-upgrade-btn" onclick="game.handleBuyHardware('${type}', '${nextPart.id}')">
+                             Upgrade: ${nextPart.name} ($${nextPart.price.toLocaleString()})
                            </button>`
-                    : `<button class="equipment-upgrade-btn" disabled>Maxed Out</button>`
+                        : `<button class="equipment-upgrade-btn" disabled>
+                             ${nextPart.name}: requires ${RANKS[nextRank]?.title || `rank ${nextRank + 1}`}
+                           </button>`
                 }
                 </div>
             `;
