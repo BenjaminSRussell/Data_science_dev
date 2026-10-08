@@ -28,8 +28,10 @@ export class LocationView {
 
         this.currentLocation = locationId;
 
-        // Try to use Lit component first
+        // Try to use Lit component first. LitUIManager mounts into
+        // #location-view, which nothing created before (#2130, #1633)
         if (this.game?.uiUpdater?.litUIManager) {
+            this.container = this.ensureContainer();
             const background = this.assetManager?.getLocationBackground(locationId);
             const backgroundImage = background?.src &&
                 typeof background.src === 'string' &&
@@ -45,20 +47,49 @@ export class LocationView {
                 timeOfDay
             );
 
+            // The Lit component only dispatches feature-click; handle it here
+            // like the DOM fallback's click handler (#2063)
+            const component = this.getLitComponent();
+            if (component && !component.__dsdFeatureListener) {
+                component.addEventListener('feature-click', (e) => {
+                    if (e.detail?.feature) this.interactWithFeature(e.detail.feature);
+                });
+                component.__dsdFeatureListener = true;
+            }
+
             // Still render characters (not yet migrated to Lit)
             this.renderCharacters(locationId);
             return;
         }
 
         // Fallback to old DOM method
+        this.container = this.ensureContainer();
+        this.renderLocation(locationId, locationDetails);
+    }
+
+    ensureContainer() {
         let container = document.getElementById('location-view');
         if (!container) {
             container = this.createContainer();
             document.body.appendChild(container);
         }
+        return container;
+    }
 
-        this.container = container;
-        this.renderLocation(locationId, locationDetails);
+    getLitComponent() {
+        return this.game?.uiUpdater?.litUIManager?.components?.get?.('locationView')
+            || document.querySelector('location-view-component');
+    }
+
+    /**
+     * The characters container lives in the Lit component's shadow root
+     * when Lit renders the view, where document.getElementById can't see
+     * it (#2202)
+     */
+    getCharactersContainer() {
+        const shadow = this.getLitComponent()?.shadowRoot;
+        return shadow?.getElementById('location-characters')
+            || document.getElementById('location-characters');
     }
 
     /**
@@ -131,8 +162,18 @@ export class LocationView {
                 <div class="location-feature-label">${feature.name}</div>
             `;
 
+            // Keyboard users can reach and activate features too (#878)
+            featureEl.setAttribute('role', 'button');
+            featureEl.setAttribute('tabindex', '0');
+            featureEl.setAttribute('aria-label', feature.name || feature.id);
             featureEl.addEventListener('click', () => {
                 this.interactWithFeature(feature);
+            });
+            featureEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.interactWithFeature(feature);
+                }
             });
 
             featuresContainer.appendChild(featureEl);
@@ -143,8 +184,11 @@ export class LocationView {
      * Render characters in location
      */
     renderCharacters(locationId) {
-        const charactersContainer = document.getElementById('location-characters');
+        const charactersContainer = this.getCharactersContainer();
         if (!charactersContainer) return;
+        // Rebuild from scratch like renderFeatures(), so repeat calls don't
+        // stack duplicate characters (#2204)
+        charactersContainer.innerHTML = '';
 
         // Get NPCs at this location
         // Only NPCs whose unlock requirements are met appear here
@@ -199,12 +243,10 @@ export class LocationView {
                     this.characterAnimationSystem.createCharacterElement(npc.id, charactersContainer);
 
                     // Set initial emotion based on relationship
+                    // Every band sets an emotion, so dropping back below 50
+                    // no longer leaves the NPC stuck on 'happy' (#2203)
                     const relationship = this.game.gameState.npcManager?.getRelationship(npc.id) || 0;
-                    if (relationship > 50) {
-                        this.characterAnimationSystem.setEmotion(npc.id, 'happy');
-                    } else if (relationship < 20) {
-                        this.characterAnimationSystem.setEmotion(npc.id, 'neutral');
-                    }
+                    this.characterAnimationSystem.setEmotion(npc.id, LocationView.emotionForRelationship(relationship));
                 }
             }
         });
@@ -219,23 +261,57 @@ export class LocationView {
             feature.id
         );
 
-        if (result) {
-            // Show result message
-            if (this.game.showToast) {
-                this.game.showToast(result.result.message, 'info');
-            }
-
-            // Update game state based on result
-            if (result.result.energy) {
-                // Restore energy
-            }
-            if (result.result.skill) {
-                // Increase skill
-            }
-            if (result.result.money) {
-                // Change money
-            }
+        if (!result?.result) return null;
+        const applied = this.applyFeatureResult(result.result);
+        if (this.game.showToast) {
+            this.game.showToast(applied.blocked || result.result.message, applied.blocked ? 'error' : 'info');
         }
+        if (!applied.blocked) this.game.uiUpdater?.updateAllUI?.();
+        return applied;
+    }
+
+    /**
+     * Apply a feature's energy/skill/money effects; they used to be read
+     * and thrown away (#2391, #2063, #45). Paid features need the cash.
+     */
+    applyFeatureResult(res) {
+        const gs = this.game.gameState || {};
+        const money = Number(res.money) || 0;
+        if (money < 0 && (Number(gs.money) || 0) < -money) {
+            return { blocked: `You need $${-money} for that.` };
+        }
+        const applied = { energy: 0, skill: 0, money: 0 };
+        if (money) {
+            gs.money = (Number(gs.money) || 0) + money;
+            if (money < 0) gs.totalSpent = (gs.totalSpent || 0) - money;
+            applied.money = money;
+        }
+        const energy = Number(res.energy) || 0;
+        const tm = this.game.timeManager || gs.timeManager;
+        if (energy > 0 && tm?.restoreEnergy) {
+            tm.restoreEnergy(energy);
+            applied.energy = energy;
+        } else if (energy < 0 && tm?.useEnergy) {
+            tm.useEnergy(-energy);
+            applied.energy = energy;
+        }
+        const skill = Number(res.skill) || 0;
+        const stats = this.game.characterStats || gs.characterStats;
+        if (skill > 0 && stats?.addExperience) {
+            stats.addExperience(LocationView.SKILL_STAT, skill * LocationView.XP_PER_SKILL_POINT);
+            applied.skill = skill;
+        }
+        return applied;
+    }
+
+    static SKILL_STAT = 'intelligence';
+    static XP_PER_SKILL_POINT = 10;
+
+    static emotionForRelationship(relationship) {
+        const r = Number(relationship) || 0;
+        if (r > 50) return 'happy';
+        if (r < 0) return 'sad';
+        return 'neutral';
     }
 
     /**

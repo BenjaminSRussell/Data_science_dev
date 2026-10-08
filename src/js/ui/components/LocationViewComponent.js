@@ -73,8 +73,14 @@ export class LocationViewComponent extends BaseComponent {
             transition: transform 0.2s;
         }
 
-        .location-feature:hover {
+        .location-feature:hover,
+        .location-feature:focus-visible {
             transform: scale(1.1);
+        }
+
+        .location-feature:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
         }
 
         .character-container {
@@ -124,9 +130,12 @@ export class LocationViewComponent extends BaseComponent {
             const top = 30 + Math.floor(index / 5) * 20;
 
             return html`
-                <div class="location-feature" 
+                <div class="location-feature"
+                     role="button" tabindex="0"
+                     aria-label="${feature.name || feature.id}"
                      style="left: ${left}%; top: ${top}%;"
-                     @click=${() => this.handleFeatureClick(feature)}>
+                     @click=${() => this.handleFeatureClick(feature)}
+                     @keydown=${(e) => this.handleFeatureKey(e, feature)}>
                     ${feature.icon && feature.icon.startsWith('/')
                         ? html`<img src="${feature.icon}" alt="${feature.name}" style="width: 32px; height: 32px;">`
                         : html`<span style="font-size: 32px;">${feature.icon || ''}</span>`
@@ -138,6 +147,14 @@ export class LocationViewComponent extends BaseComponent {
 
     handleFeatureClick(feature) {
         this.dispatchGameEvent('feature-click', { feature });
+    }
+
+    // Enter/Space activate a feature like a click (#878)
+    handleFeatureKey(e, feature) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.handleFeatureClick(feature);
+        }
     }
 
     /**
