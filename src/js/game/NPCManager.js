@@ -1174,7 +1174,13 @@ export class NPCManager {
 
     fromJSON(data) {
         if (!data) return;
-        this.relationships = data.relationships || {};
+        // Scores are numbers in 0-100; a string from an edited or older save
+        // would otherwise concatenate in modifyRelationship ("50" + 1) (#252)
+        this.relationships = {};
+        for (const [id, value] of Object.entries(data.relationships || {})) {
+            const v = Number(value);
+            this.relationships[id] = Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : 0;
+        }
         this.npcStates = data.npcStates || {};
         this.interactionHistory = data.interactionHistory || {};
         this.metNPCs = data.metNPCs || [];
@@ -1661,8 +1667,9 @@ export class NPCManager {
             return specialResult(result);
         }
 
-        // Apply the choice's own effects
-        const effects = { ...(choice.effect || {}) };
+        // Apply the choice's own effects. Authored trees loop back to their
+        // root, so a paying choice could be picked again and again (#252)
+        const effects = this.limitRepeatPayout(npcId, choice, { ...(choice.effect || {}) });
         this.applyChoiceEffects(effects);
         this.recordInteraction(npcId, choice.text);
 
@@ -1713,6 +1720,39 @@ export class NPCManager {
             choices,
             ended
         };
+    }
+
+    /**
+     * Strip the rewards from a choice the player has already been paid for.
+     * A choice that sets a flag (a one-off event such as a seed investment or
+     * a loan) pays only while that flag is unset; any other choice pays its
+     * money, reputation, XP and relationship gain at most once per in-game
+     * day. Costs and negative changes always apply. The day ledger lives in
+     * npcStates, so it is saved (#252).
+     * @returns {object} the effects to apply
+     */
+    limitRepeatPayout(npcId, choice, effects) {
+        const rewarding = (Number(effects.money) > 0) || (Number(effects.reputation) > 0) ||
+            Boolean(effects.xp) || (Number(effects.relationship) > 0);
+        if (!rewarding) return effects;
+        const strip = () => {
+            if (Number(effects.money) > 0) delete effects.money;
+            if (Number(effects.reputation) > 0) delete effects.reputation;
+            if (Number(effects.relationship) > 0) delete effects.relationship;
+            delete effects.xp;
+            delete effects.xpAmount;
+            return effects;
+        };
+        const flags = this.getNPCFlags(npcId);
+        if (effects.flag) return flags[effects.flag] ? strip() : effects;
+
+        const state = this.getNPCState(npcId);
+        if (!state.payouts || typeof state.payouts !== 'object') state.payouts = {};
+        const today = this.gameState.timeManager?.totalDays ?? 0;
+        const key = `${this.currentConversation?.currentNode || state.currentNode || 'root'}:${choice.text}`;
+        if (state.payouts[key] === today) return strip();
+        state.payouts[key] = today;
+        return effects;
     }
 
     /**
@@ -1877,10 +1917,9 @@ export class NPCManager {
         this.gameState.money -= cost;
         this.lastGiftDay[npcId] = today;
 
-        // Mark as met if not already
-        if (!this.metNPCs.includes(npcId)) {
-            this.markNPCAsMet(npcId);
-        }
+        // Meeting someone through a gift goes through the same path as
+        // talking, so the first-NPC story beat still fires (#252)
+        this.registerVisit(npcId);
 
         const likesGift = npc.gifts.includes(giftId);
         const baseGain = likesGift ? 15 : 5; // Liked gift = +15, generic = +5
@@ -1894,7 +1933,6 @@ export class NPCManager {
         const before = this.relationships[npcId] || 0;
         this.modifyRelationship(npcId, adjustedGain);
         const newRelationship = this.relationships[npcId];
-        this.gameState?.relationshipEmotionSystem?.recordInteraction?.(npcId);
 
         return {
             success: true,
