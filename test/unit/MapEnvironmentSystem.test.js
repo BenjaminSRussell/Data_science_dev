@@ -249,7 +249,11 @@ describe('MapEnvironmentSystem', () => {
 
             mockAssetPlacer.placeAsset.mockReturnValue(true);
 
+            // Positions are random; pin them to the zone corner (next to the
+            // x=4 / y=4 roads) so the test can't randomly miss every road
+            const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
             mapEnvironmentSystem.addStreetTrees(zone);
+            randomSpy.mockRestore();
 
             // Should have created trees since we have near-road positions
             expect(mapEnvironmentSystem.environmentElements.length).toBeGreaterThan(0);
