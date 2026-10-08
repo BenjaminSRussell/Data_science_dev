@@ -13,6 +13,10 @@ export class VisualProgressionSystem {
         this.unlockedTiers = ['basic'];
         this.milestones = this.initializeMilestones();
         this.visualUpgrades = new Map();
+        // New games start on the basic look too, not only loaded saves (#1577)
+        if (typeof document !== 'undefined' && document.body) {
+            this.upgradeBackgrounds(this.currentTier);
+        }
     }
     
     /**
@@ -52,29 +56,34 @@ export class VisualProgressionSystem {
      */
     checkMilestones() {
         const stats = this.getCurrentStats();
-        let unlockedNewTier = false;
-        
+        const tierBefore = this.currentTier;
+        let unlockedMilestone = null;
+
         for (const [milestoneId, milestone] of Object.entries(this.milestones)) {
             if (milestone.unlocked) continue;
-            
+
             const currentValue = stats[milestone.type] || 0;
-            
+
             if (currentValue >= milestone.threshold) {
                 milestone.unlocked = true;
                 this.unlockTier(milestone.tier);
-                unlockedNewTier = true;
-                
-                // Show upgrade notification
-                this.showVisualUpgradeNotification(milestone.tier, milestoneId);
+                unlockedMilestone = unlockedMilestone || milestoneId;
             }
         }
-        
+
         // Update current tier based on unlocked tiers
         this.updateCurrentTier();
-        
-        return unlockedNewTier;
+
+        // Only an actual tier change is a visual upgrade worth announcing;
+        // later milestones of an already-unlocked tier stay quiet (#2273, #1576)
+        const tierChanged = this.currentTier !== tierBefore;
+        if (tierChanged) {
+            this.showVisualUpgradeNotification(this.currentTier, unlockedMilestone);
+        }
+
+        return tierChanged;
     }
-    
+
     /**
      * Get current player stats
      */
@@ -356,14 +365,19 @@ export class VisualProgressionSystem {
      * Serialize for save
      */
     toJSON() {
+        // Only progress is saved; thresholds and tiers come from code (#1578)
+        const milestones = {};
+        for (const [id, milestone] of Object.entries(this.milestones)) {
+            milestones[id] = { unlocked: !!milestone.unlocked };
+        }
         return {
             currentTier: this.currentTier,
-            unlockedTiers: this.unlockedTiers,
-            milestones: this.milestones,
+            unlockedTiers: [...this.unlockedTiers],
+            milestones,
             visualUpgrades: Array.from(this.visualUpgrades.entries())
         };
     }
-    
+
     /**
      * Deserialize from save
      */
