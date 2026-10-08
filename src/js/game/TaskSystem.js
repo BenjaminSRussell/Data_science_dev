@@ -76,10 +76,30 @@ export class TaskSystem {
         // Pick a random task
         const taskTemplate = availableTasks[Math.floor(Math.random() * availableTasks.length)];
 
-        // Pick a random boss
-        const boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
+        // Pick a boss whose chart tastes fit the task (#1854)
+        const boss = TaskSystem.pickBossFor(taskTemplate);
 
         return this.createTaskFromTemplate(taskTemplate, boss);
+    }
+
+    /**
+     * Choose a boss for a task using bosses.js preferences (#1854): skip
+     * bosses who dislike one of the task's optimal chart types (unless that
+     * leaves nobody), and make bosses who like one twice as likely.
+     */
+    static pickBossFor(taskTemplate, rng = Math.random, bosses = BOSSES) {
+        const optimal = taskTemplate?.optimalChartTypes || [];
+        const dislikes = b => (b.preferences?.dislikesChartTypes || []).some(t => optimal.includes(t));
+        const likes = b => (b.preferences?.likesChartTypes || []).some(t => optimal.includes(t));
+        const pool = bosses.filter(b => !dislikes(b));
+        const candidates = pool.length ? pool : bosses;
+        const weights = candidates.map(b => (likes(b) ? 2 : 1));
+        let roll = rng() * weights.reduce((a, w) => a + w, 0);
+        for (let i = 0; i < candidates.length; i++) {
+            roll -= weights[i];
+            if (roll < 0) return candidates[i];
+        }
+        return candidates[candidates.length - 1];
     }
 
     /**
@@ -96,7 +116,7 @@ export class TaskSystem {
         
         // Pick boss if not provided
         if (!boss) {
-            boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
+            boss = TaskSystem.pickBossFor(taskTemplate);
         }
 
         // Calculate reward based on rank and difficulty

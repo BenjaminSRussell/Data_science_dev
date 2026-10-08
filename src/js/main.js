@@ -2392,6 +2392,23 @@ export class MainGame {
     }
 
     /**
+     * The boss's line for a review: their own successResponses (3+ stars) or
+     * failResponses from bosses.js, else the generic line for that rating,
+     * prefixed when the chart type was one they like or dislike (#2226, #1854)
+     */
+    static bossReviewLine(boss, score, generic = {}, rng = Math.random) {
+        const stars = Math.round(Number(score?.stars) || 3);
+        const pool = stars >= 3 ? boss?.successResponses : boss?.failResponses;
+        let text = Array.isArray(pool) && pool.length
+            ? pool[Math.floor(rng() * pool.length)]
+            : (generic[stars]?.text || generic[3]?.text || '');
+        const type = score?.chartType;
+        if (score?.bossPreference === 'liked') text = `${type ? `A ${type} chart, my favourite. ` : ''}${text}`;
+        if (score?.bossPreference === 'disliked') text = `${type ? `You know I'm not a fan of ${type} charts. ` : ''}${text}`;
+        return text;
+    }
+
+    /**
      * Animate the boss review (visual only — rewards are already applied)
      */
     animateReview(score) {
@@ -2403,7 +2420,7 @@ export class MainGame {
             5: { text: "Excellent work! This is exactly what I needed!" }
         };
 
-        const reaction = bossReactions[score.stars] || bossReactions[3];
+        const reaction = { text: MainGame.bossReviewLine(this.gameState?.currentTask?.boss, score, bossReactions) };
         const stars = Math.max(0, Math.min(5, Math.round(score.stars || 0)));
 
         // Reset presentation from any previous review

@@ -21,6 +21,22 @@ import { renderTaskBrief } from '../game/taskBrief.js';
 import { logger } from '../utils/Logger.js';
 import { NEWS_CATEGORIES } from '../game/NewsManager.js';
 
+/**
+ * One-line summary of a boss's personality and chart tastes for the task
+ * panel, e.g. "Traditional · likes bar, line · dislikes radar" (#1854, #2226)
+ */
+export function bossPreferenceText(boss) {
+    if (!boss) return '';
+    const prefs = boss.preferences || {};
+    const parts = [];
+    if (boss.personality) parts.push(boss.personality.charAt(0).toUpperCase() + boss.personality.slice(1));
+    if (prefs.likesChartTypes?.length) parts.push(`likes ${prefs.likesChartTypes.join(', ')}`);
+    if (prefs.dislikesChartTypes?.length) parts.push(`dislikes ${prefs.dislikesChartTypes.join(', ')}`);
+    if (prefs.valuesClarity) parts.push('values clarity');
+    if (prefs.valuesCreativity) parts.push('values creativity');
+    return parts.join(' · ');
+}
+
 export class UIUpdater {
     /**
      * Icon markup: image paths become <img>, anything else is text. Shop
@@ -206,6 +222,19 @@ export class UIUpdater {
             DOMUtils.updateElement('#boss-title', {
                 textContent: task.boss.title || 'Department Head'
             });
+            // Personality and chart tastes, which now affect the grade (#1854, #2226)
+            const titleEl = document.getElementById('boss-title');
+            let prefsEl = document.getElementById('boss-preferences');
+            if (!prefsEl && titleEl?.parentElement) {
+                prefsEl = document.createElement('div');
+                prefsEl.id = 'boss-preferences';
+                prefsEl.className = 'boss-preferences';
+                titleEl.insertAdjacentElement('afterend', prefsEl);
+            }
+            if (prefsEl) {
+                prefsEl.textContent = bossPreferenceText(task.boss);
+                prefsEl.dataset.bossId = task.boss.id || '';
+            }
             // bosses.js defines taskIntro (not greeting) — #2615
             const greeting = task.boss.greeting || task.boss.taskIntro || task.boss.intro;
             if (greeting) {
