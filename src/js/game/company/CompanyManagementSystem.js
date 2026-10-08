@@ -231,9 +231,11 @@ export class CompanyManagementSystem {
         }
 
         const task = employee.currentTask;
-        const daysWorking = (this.gameState.timeManager?.totalDays || 1) - task.assigned;
+        // A task assigned "later" than today (clock reset, bad save) is 0 days in, not negative (#1399)
+        const daysWorking = Math.max(0, (this.gameState.timeManager?.totalDays || 1) - (Number(task.assigned) || 0));
         const difficulty = Number(task.difficulty) > 0 ? Number(task.difficulty) : 1;
-        const progress = Math.min(100, (daysWorking / difficulty) * this.getEffectiveProductivity(employee));
+        const raw = (daysWorking / difficulty) * this.getEffectiveProductivity(employee);
+        const progress = Number.isFinite(raw) ? Math.min(100, Math.max(0, raw)) : 0;
 
         return {
             status: 'working',

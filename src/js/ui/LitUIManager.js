@@ -6,6 +6,7 @@
 
 // Side-effect imports: each module registers its custom element
 // (<top-bar>, <progress-bar>, <location-view-component>) (#1635)
+import { CommonUtils } from '../utils/CommonUtils.js';
 import './components/TopBar.js';
 import './components/ProgressBar.js';
 import './components/LocationViewComponent.js';
@@ -80,7 +81,7 @@ export class LitUIManager {
         const rankEl = document.getElementById('rank-value');
 
         if (moneyEl && this.game?.gameState) {
-            moneyEl.textContent = `$${(this.game.gameState.money ?? 0).toLocaleString()}`;
+            moneyEl.textContent = CommonUtils.formatMoney(this.game.gameState.money);
         }
 
         if (repEl && this.game?.gameState) {
