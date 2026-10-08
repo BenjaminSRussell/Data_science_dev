@@ -4,6 +4,8 @@ Master Scraper - Runs all specialized scrapers
 Downloads all asset types with proper organization
 """
 
+import os
+import signal
 import subprocess
 import sys
 import time
@@ -58,6 +60,42 @@ SCRAPERS = [
     }
 ]
 
+SCRAPER_TIMEOUT = 3600  # 1 hour max per scraper
+
+
+def run_process_group(cmd, timeout=SCRAPER_TIMEOUT):
+    """subprocess.run equivalent that kills the whole process group on timeout.
+
+    Scrapers shell out to grandchildren (e.g. `git clone`); subprocess.run's
+    timeout only kills the direct child, leaving those orphaned (#623). The
+    child is started in its own session so os.killpg reaches every descendant.
+    """
+    proc = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        start_new_session=(os.name == 'posix'),
+    )
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        _kill_group(proc)
+        stdout, stderr = proc.communicate()
+        raise subprocess.TimeoutExpired(cmd, timeout, output=stdout, stderr=stderr)
+    return subprocess.CompletedProcess(cmd, proc.returncode, stdout, stderr)
+
+
+def _kill_group(proc):
+    if os.name == 'posix':
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+            return
+        except (ProcessLookupError, PermissionError):
+            pass
+    proc.kill()
+
+
 def run_scraper(scraper_info):
     """Run a single scraper"""
     script_path = Path(__file__).parent / scraper_info['script']
@@ -68,12 +106,7 @@ def run_scraper(scraper_info):
     logger.info("=" * 60)
     
     try:
-        result = subprocess.run(
-            [sys.executable, str(script_path)],
-            capture_output=True,
-            text=True,
-            timeout=3600  # 1 hour max per scraper
-        )
+        result = run_process_group([sys.executable, str(script_path)])
         
         if result.returncode == 0:
             logger.info(f"✅ {scraper_info['name']} completed successfully")
