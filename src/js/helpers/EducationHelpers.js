@@ -3,6 +3,7 @@
  * Helper functions for education system, exams, and certifications
  */
 import * as MapHelpers from './MapHelpers.js';
+import { EducationSystem } from '../game/EducationSystem.js';
 
 
 /**
@@ -50,6 +51,11 @@ export function handleStartExam(game, courseId) {
     const byId = (id) => document.getElementById(id);
     if (byId('exam-title')) byId('exam-title').textContent = `${course.name} Exam`;
     byId('exam-intro')?.classList.remove('hidden');
+    const passEl = byId('exam-pass-requirement');
+    if (passEl) {
+        const total = course.questions.length;
+        passEl.textContent = `To pass: ${EducationSystem.requiredCorrect(total)} of ${total} correct`;
+    }
     byId('exam-questions')?.classList.add('hidden');
     byId('exam-results')?.classList.add('hidden');
 
@@ -134,7 +140,8 @@ export function finishExam(game) {
     const total = exam.questions.length;
     const score = exam.score || 0;
     const pct = total > 0 ? Math.round((score / total) * 100) : 0;
-    const passed = pct >= 70;
+    // Pass on a count of correct answers, matching what the intro shows (#1265)
+    const passed = total > 0 && score >= EducationSystem.requiredCorrect(total);
 
     const questionsEl = document.getElementById('exam-questions');
     const resultsEl = document.getElementById('exam-results');

@@ -32,10 +32,11 @@ export class DevTools {
         if (this.isDevMode()) {
             console.log('Developer Tools Enabled');
 
-            // Persist the flag and construct every helper tool BEFORE the menu,
-            // so DevMenu's populate* methods can see window.devTools.storylineNavigator /
-            // locationTester on first render (#129, #1744).
-            try { localStorage.setItem('dev_mode', 'true'); } catch (_) { /* storage disabled */ }
+            // Construct every helper tool BEFORE the menu, so DevMenu's
+            // populate* methods can see window.devTools.storylineNavigator /
+            // locationTester on first render (#129, #1744). The dev_mode flag
+            // is no longer persisted from ?dev (#1743); set it by hand to keep
+            // dev tools on, and use ?dev=off to clear it.
 
             this.dialogueTester = new DialogueTester(this.game);
             this.optionTester = new OptionTester(this.game);

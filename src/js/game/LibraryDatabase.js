@@ -80,5 +80,6 @@ export const CATEGORIES = {
     scraping: ' Scraping',
     cleaning: ' Cleaning',
     modeling: ' Modeling',
-    ai: ' Deep Learning'
+    // Same label as the Library tab (#1642)
+    ai: ' AI'
 };

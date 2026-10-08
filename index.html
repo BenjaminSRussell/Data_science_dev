@@ -1336,7 +1336,7 @@
                     <div class="modal-body">
                         <div id="exam-intro">
                             <p>Answer the following questions correctly to pass.</p>
-                            <p>Passing Score: 70%</p>
+                            <p id="exam-pass-requirement">To pass: 60% correct</p>
                             <button id="btn-start-exam" class="btn-primary">Start Exam</button>
                         </div>
                         <div id="exam-questions" class="hidden">
@@ -1429,8 +1429,13 @@
             console.log(' EARLY SCRIPT EXECUTED - JavaScript is working!');
         })();
 
+        // Dev-only cache busting: unregistering service workers and wiping the
+        // Cache API on every production load threw away anything a real
+        // service worker cached (#1871)
+        const __dsdDevHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
         // Unregister any service workers that might be caching old resources
-        if ('serviceWorker' in navigator) {
+        if (__dsdDevHost && 'serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 for (let registration of registrations) {
                     registration.unregister().then(() => {
@@ -1441,7 +1446,7 @@
         }
 
         // Clear all caches
-        if ('caches' in window) {
+        if (__dsdDevHost && 'caches' in window) {
             caches.keys().then(names => {
                 names.forEach(name => {
                     caches.delete(name);

@@ -42,7 +42,7 @@ The developer tools are **completely separate** from the main game and only load
 Dev tools automatically enable when:
 - Running on `localhost` or `127.0.0.1`
 - URL contains `?dev` parameter
-- `localStorage.setItem('dev_mode', 'true')` is set
+- `localStorage.setItem('dev_mode', 'true')` is set by hand (`?dev` only lasts for that page; `?dev=off` clears the flag)
 
 ## Isolation
 

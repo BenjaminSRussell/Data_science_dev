@@ -3,6 +3,18 @@
  * Manages university courses, degrees, and real-world exams.
  */
 export class EducationSystem {
+    // Share of questions needed to pass. With every course at 3+ questions
+    // this is reachable without a perfect score (#1265)
+    static PASS_RATIO = 0.6;
+
+    /**
+     * Correct answers needed to pass an exam of `total` questions
+     */
+    static requiredCorrect(total) {
+        const n = Math.max(0, Number(total) || 0);
+        return n === 0 ? 0 : Math.max(1, Math.ceil(n * EducationSystem.PASS_RATIO - 1e-9));
+    }
+
     constructor(gameState) {
         this.gameState = gameState;
 
@@ -48,7 +60,8 @@ export class EducationSystem {
                 description: "Probability distributions and hypothesis testing.",
                 questions: [
                     { q: "What is the median of [1, 3, 3, 6, 7, 8, 9]?", options: ["3", "6", "7", "5.2"], correct: 1 },
-                    { q: "In a normal distribution, what % of data falls within 1 SD?", options: ["50%", "68%", "95%", "99%"], correct: 1 }
+                    { q: "In a normal distribution, what % of data falls within 1 SD?", options: ["50%", "68%", "95%", "99%"], correct: 1 },
+                    { q: "A p-value below 0.05 usually means...", options: ["The null hypothesis is proven", "The result is statistically significant", "The sample is too small", "The effect is large"], correct: 1 }
                 ]
             },
             'ml_intro': {
@@ -59,7 +72,8 @@ export class EducationSystem {
                 description: "Supervised vs Unsupervised learning.",
                 questions: [
                     { q: "Which of these is a Supervised Learning algorithm?", options: ["K-Means", "Linear Regression", "PCA", "Apriori"], correct: 1 },
-                    { q: "What is 'Overfitting'?", options: ["Model is too simple", "Model memorizes noise", "Model is too slow", "Data is missing"], correct: 1 }
+                    { q: "What is 'Overfitting'?", options: ["Model is too simple", "Model memorizes noise", "Model is too slow", "Data is missing"], correct: 1 },
+                    { q: "Why hold out a test set?", options: ["To train faster", "To estimate performance on unseen data", "To remove outliers", "To balance classes"], correct: 1 }
                 ]
             },
             'python_201': {
