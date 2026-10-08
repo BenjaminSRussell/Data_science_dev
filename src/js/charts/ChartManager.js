@@ -13,7 +13,9 @@ const PALETTES = {
         'rgba(16, 185, 129, 0.8)',   // Green
         'rgba(245, 158, 11, 0.8)',   // Orange
         'rgba(239, 68, 68, 0.8)',    // Red
-        'rgba(168, 85, 247, 0.8)'    // Indigo
+        // Was a second purple next to the first one; pink keeps all six
+        // series distinguishable (#1891)
+        'rgba(236, 72, 153, 0.8)'    // Pink
     ],
     vibrant: [
         'rgba(255, 99, 132, 0.8)',
@@ -191,6 +193,12 @@ export class ChartManager {
         const multi = plotted.length > 1;
         const isPointType = type === 'scatter' || type === 'bubble';
 
+        // One colour per category for bar/pie-style charts. Past the end of
+        // the palette, colours repeat at lower opacity instead of running out
+        // (#1372)
+        const categoryColors = ChartManager.categoryColors(palette, Math.max(labels.length, ...plotted.map(s => s.values.length)));
+        const withAlpha = ChartManager.withAlpha;
+
         const datasets = plotted.map((s, i) => {
             const color = palette[i % palette.length];
             let points = s.values;
@@ -205,12 +213,16 @@ export class ChartManager {
                         : { x: idx, y };
                 });
             }
-            const lineLike = type === 'line' || isPointType || multi;
+            // Radar draws one filled shape per dataset, so it needs one colour,
+            // not the whole palette (#1489)
+            const lineLike = type === 'line' || type === 'radar' || isPointType || multi;
+            // Opacity is set by parsing the colour, not by replacing "0.8"
+            // (which silently did nothing for monochrome) (#1890, #61)
             return {
                 label: s.key,
                 data: points,
-                backgroundColor: type === 'line' ? color.replace('0.8', '0.2') : (lineLike ? color : palette),
-                borderColor: lineLike ? color.replace('0.8', '1') : palette.map(c => c.replace('0.8', '1')),
+                backgroundColor: (type === 'line' || type === 'radar') ? withAlpha(color, 0.2) : (lineLike ? color : categoryColors),
+                borderColor: lineLike ? withAlpha(color, 1) : categoryColors.map(c => withAlpha(c, 1)),
                 borderWidth: type === 'line' ? 3 : 1,
                 tension: 0.3,
                 fill: type === 'line' ? (config.type === 'area' || !multi) : undefined,
@@ -239,7 +251,108 @@ export class ChartManager {
         return {
             type: type,
             data: { labels, datasets },
-            options
+            options,
+            // Data labels are drawn by our own small plugin; the
+            // chartjs-plugin-datalabels package was never installed (#1490)
+            // It's always attached and draws only while the option is on, so
+            // toggling the checkbox works on an existing preview chart
+            plugins: [ChartManager.dataLabelsPlugin]
+        };
+    }
+
+    /**
+     * Replace a colour's alpha. Understands rgb()/rgba() and #rrggbb.
+     */
+    static withAlpha(color, alpha) {
+        const a = Math.max(0, Math.min(1, Number(alpha)));
+        const str = String(color || '').trim();
+        const m = str.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/i);
+        if (m) return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${a})`;
+        const h = str.match(/^#([0-9a-f]{6})$/i);
+        if (h) {
+            const n = parseInt(h[1], 16);
+            return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+        }
+        return str;
+    }
+
+    /**
+     * count colours from a palette; each pass past the end is fainter so
+     * neighbouring categories stay distinguishable
+     */
+    static categoryColors(palette, count) {
+        const n = Math.max(palette.length, Number(count) || 0);
+        const out = [];
+        for (let i = 0; i < n; i++) {
+            const base = palette[i % palette.length];
+            const pass = Math.floor(i / palette.length);
+            if (pass === 0) {
+                out.push(base);
+            } else {
+                const m = String(base).match(/,\s*([\d.]+)\s*\)$/);
+                const alpha = m ? Number(m[1]) : 0.8;
+                out.push(ChartManager.withAlpha(base, Math.max(0.25, alpha * Math.pow(0.6, pass))));
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Minimal data-labels plugin: writes each value above its bar/point or
+     * in the middle of its slice
+     */
+    static dataLabelsPlugin = {
+        id: 'dsdDataLabels',
+        afterDatasetsDraw(chart) {
+            const opts = chart.options?.plugins?.datalabels;
+            const ctx = chart.ctx;
+            if (!opts || !ctx) return;
+            const color = opts.color || ChartManager.getThemeColors().dataLabel;
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            chart.data.datasets.forEach((dataset, di) => {
+                const meta = chart.getDatasetMeta(di);
+                if (!meta || meta.hidden) return;
+                meta.data.forEach((element, idx) => {
+                    const raw = dataset.data[idx];
+                    const value = raw && typeof raw === 'object' ? raw.y : raw;
+                    if (value === null || value === undefined || Number.isNaN(Number(value))) return;
+                    const pos = typeof element.tooltipPosition === 'function'
+                        ? element.tooltipPosition() : { x: element.x, y: element.y };
+                    ctx.fillText(ChartManager.formatDataLabel(value), pos.x, pos.y - 4);
+                });
+            });
+            ctx.restore();
+        }
+    };
+
+    /**
+     * Compact label text: 1234 -> "1.2k", 2500000 -> "2.5M"
+     */
+    static formatDataLabel(value) {
+        const n = Number(value);
+        const abs = Math.abs(n);
+        if (abs >= 1e6) return `${+(n / 1e6).toFixed(1)}M`;
+        if (abs >= 1e3) return `${+(n / 1e3).toFixed(1)}k`;
+        return Number.isInteger(n) ? String(n) : String(+n.toFixed(2));
+    }
+
+    /**
+     * Radial scale (radar / polar area) styled like the x/y axes, so the
+     * Show Grid toggle works there too (#2436)
+     */
+    static radialScale(config, theme) {
+        return {
+            r: {
+                grid: { display: !!config.showGrid, color: theme.grid },
+                angleLines: { display: !!config.showGrid, color: theme.grid },
+                pointLabels: { color: theme.text },
+                ticks: { color: theme.text, backdropColor: 'transparent' },
+                beginAtZero: true
+            }
         };
     }
 
@@ -306,7 +419,7 @@ export class ChartManager {
                     align: 'top'
                 } : false
             },
-            scales: isPolar ? {} : {
+            scales: isPolar ? (['radar', 'polarArea'].includes(chartType) ? ChartManager.radialScale(config, theme) : {}) : {
                 x: {
                     display: true,
                     grid: {
@@ -401,14 +514,15 @@ export class ChartManager {
                 data: {
                     labels: data.labels || [],
                     datasets: data.datasets.map((ds, i) => ({
-                        backgroundColor: chartType === 'line' ? palette[i % palette.length] : palette,
-                        borderColor: chartType === 'line' ? palette[i % palette.length] : palette.map(c => c.replace('0.8', '1')),
+                        backgroundColor: chartType === 'line' ? palette[i % palette.length] : ChartManager.categoryColors(palette, ds.data?.length),
+                        borderColor: chartType === 'line' ? palette[i % palette.length] : ChartManager.categoryColors(palette, ds.data?.length).map(c => ChartManager.withAlpha(c, 1)),
                         borderWidth: 1,
                         fill: type === 'area' ? true : undefined,
                         ...ds
                     }))
                 },
-                options: this.buildChartOptions({ ...config, type }, chartType, data.datasets[0]?.label || 'Value')
+                options: this.buildChartOptions({ ...config, type }, chartType, data.datasets[0]?.label || 'Value'),
+                plugins: [ChartManager.dataLabelsPlugin]
             };
         } else {
             chartConfig = this.buildChartConfig(data || {}, { ...config, type });
