@@ -53,13 +53,18 @@ export class ConversationScreen {
      * Start conversation
      */
     async startConversation() {
-        const conversation = await this.game.npcManager?.startConversation(this.currentNPC.id);
-        if (!conversation) return;
+        // Each call gets a token; if another showConversation() starts while
+        // we await, this (stale) call must not render (#1696)
+        const token = (this._conversationToken = (this._conversationToken || 0) + 1);
+        const npc = this.currentNPC;
+        const conversation = await this.game.npcManager?.startConversation(npc.id);
+        if (!conversation || token !== this._conversationToken || this.currentNPC !== npc) return;
 
         const npcImage = getNPCImage(this.currentNPC);
         const fallbackIcon = getNPCFallback(this.currentNPC);
         const relationship = this.game.npcManager?.getRelationship(this.currentNPC.id) || 0;
-        const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || 0;
+        // A missing tier must still have a label/color to render (#1694)
+        const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || { label: 'Stranger', color: '#888' };
 
         // Build conversation screen HTML
         this.screenElement.innerHTML = `
@@ -203,7 +208,8 @@ export class ConversationScreen {
 
             // Update relationship display
             const relationship = this.game.npcManager?.getRelationship(this.currentNPC.id) || 0;
-            const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || 0;
+            // A missing tier must still have a label/color to render (#1694)
+        const tier = this.game.npcManager?.getRelationshipTier(this.currentNPC.id) || { label: 'Stranger', color: '#888' };
             const relationshipEl = this.screenElement.querySelector('.conversation-relationship');
             if (relationshipEl) {
                 relationshipEl.innerHTML = `
