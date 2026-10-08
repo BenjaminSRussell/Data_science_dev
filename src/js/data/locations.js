@@ -124,7 +124,7 @@ export const TIME_OF_DAY = [
     {
         id: "evening",
         name: "Evening",
-        hours: [18, 19, 20, 21],
+        hours: [18, 19, 20], // 21:00 is the night slot, like TimeManager's phases (#924)
         overlay: "rgba(100, 100, 200, 0.08)",
         icon: "🌆",
         greeting: "Evening crunch time - let's finish strong!"
@@ -132,7 +132,7 @@ export const TIME_OF_DAY = [
     {
         id: "night",
         name: "Late Night",
-        hours: [22, 23, 0, 1, 2, 3, 4, 5],
+        hours: [21, 22, 23, 0, 1, 2, 3, 4, 5],
         overlay: "rgba(20, 20, 60, 0.15)",
         icon: "🌙",
         greeting: "Burning the midnight oil? Respect! "
