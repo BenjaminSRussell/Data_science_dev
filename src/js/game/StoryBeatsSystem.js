@@ -5,6 +5,7 @@
  */
 
 import { pickState, applyState } from '../utils/StateSerializer.js';
+import { decisionMadeInPhase } from './StorylineManager.js';
 
 export class StoryBeatsSystem {
     constructor(gameState) {
@@ -178,17 +179,21 @@ export class StoryBeatsSystem {
     checkBeatTrigger(beat) {
         const trigger = beat.trigger;
         
+        // Each case is its own block so a binding can't leak into (or be
+        // read before its declaration by) another case (#515)
         switch (trigger.type) {
-            case 'job_obtained':
+            case 'job_obtained': {
                 // undefined used to count as having a job; condition:false
                 // means "has no job" (#1499)
                 return Boolean(this.gameState.currentJob) === (trigger.condition !== false);
+            }
             
-            case 'task_completed':
+            case 'task_completed': {
                 const taskCount = this.gameState.tasksCompleted || 0;
                 return taskCount >= (trigger.count || 1);
+            }
             
-            case 'rank_increase':
+            case 'rank_increase': {
                 // Both bounds apply when both are set (#1971); main.js uses
                 // this same check for promotion beats (#1498)
                 const currentRank = this.gameState.rankIndex || 0;
@@ -196,12 +201,14 @@ export class StoryBeatsSystem {
                 if (trigger.from !== undefined && !(currentRank > trigger.from)) return false;
                 if (trigger.to !== undefined && !(currentRank >= trigger.to)) return false;
                 return true;
+            }
             
-            case 'rent_paid':
+            case 'rent_paid': {
                 // Count actual rent payments, not weeks elapsed (#1497)
                 return (Number(this.gameState.rentPaymentsMade) || 0) >= (trigger.week || 1);
+            }
             
-            case 'npc_met':
+            case 'npc_met': {
                 const npcManager = this.gameState.npcManager;
                 if (!npcManager) return false;
                 // Count recorded meetings; getMetNPCs() drops ids it can't
@@ -210,35 +217,38 @@ export class StoryBeatsSystem {
                     ? npcManager.metNPCs.length
                     : (npcManager.getMetNPCs?.() || []).length;
                 return metCount >= (trigger.count || 1);
+            }
             
-            case 'major_decision':
+            case 'major_decision': {
+                // StorylineManager owns the answer; this used to re-derive it
+                // per beat by calling back into the catalog (#2266, #515)
                 const storylineManager = this.gameState.storylineManager;
                 if (!storylineManager) return false;
-                const decisions = storylineManager.majorDecisions || [];
-                // Prefer the act recorded when the decision was made (#2266)
-                const phaseDecisions = decisions.filter(d => {
-                    if (d.phase) return d.phase === trigger.phase;
-                    const decisionData = storylineManager.getDecision?.(d.decisionId);
-                    return decisionData && decisionData.phase === trigger.phase;
-                });
-                return phaseDecisions.length > 0;
+                return typeof storylineManager.hasDecisionInPhase === 'function'
+                    ? storylineManager.hasDecisionInPhase(trigger.phase)
+                    : decisionMadeInPhase(storylineManager, trigger.phase);
+            }
             
-            case 'money_threshold':
+            case 'money_threshold': {
                 return (this.gameState.money || 0) >= (trigger.amount || 0);
+            }
             
-            case 'reputation_threshold':
+            case 'reputation_threshold': {
                 return (this.gameState.reputation || 0) >= (trigger.amount || 0);
+            }
             
-            case 'ethics_extreme':
+            case 'ethics_extreme': {
                 const characterStats = this.gameState.characterStats;
                 if (!characterStats) return false;
                 const ethics = Number(characterStats.ethics) || 0;
                 return Math.abs(ethics) >= (trigger.threshold || 30);
+            }
             
-            case 'days_threshold':
+            case 'days_threshold': {
                 const timeMgr = this.gameState.timeManager;
                 if (!timeMgr) return false;
                 return (timeMgr.totalDays || 0) >= (trigger.days || 180);
+            }
             
             default:
                 return false;
