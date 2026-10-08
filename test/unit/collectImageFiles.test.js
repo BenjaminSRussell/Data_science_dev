@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * Unit tests for collectImageFiles (scripts/compress-assets-for-git.js)
  */

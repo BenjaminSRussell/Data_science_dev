@@ -55,7 +55,14 @@ describe('park vs street trees are distinguishable (#1563)', () => {
             residential: [{ id: 'r', bounds: { minX: 1, maxX: 6, minY: 1, maxY: 6 } }],
         };
         const { env } = makeEnv({ isRoad, zones });
-        env.initialize();
+        // Placement picks random tiles; pin it to each zone's min corner so
+        // the road-adjacent street tree (x=1) always gets placed (was flaky)
+        const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+        try {
+            env.initialize();
+        } finally {
+            random.mockRestore();
+        }
         const park = env.getElementsByType('park-tree');
         const street = env.getElementsByType('street-tree');
         expect(park.length).toBeGreaterThan(0);
