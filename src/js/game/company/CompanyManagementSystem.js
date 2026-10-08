@@ -248,12 +248,14 @@ export class CompanyManagementSystem {
      * Find new clients. Each lead has a stable id (#1009, #1398).
      */
     findClients() {
+        // Bigger clients only talk to companies with a reputation (#1740)
+        const reputation = Number(this.playerCompany?.reputation ?? this.gameState?.reputation) || 0;
         const potentialClients = [
-            { name: 'TechCorp', needs: 'data_analysis', budget: 5000 },
-            { name: 'RetailCo', needs: 'visualization', budget: 3000 },
-            { name: 'FinanceInc', needs: 'machine_learning', budget: 8000 },
-            { name: 'StartupXYZ', needs: 'statistics', budget: 2000 }
-        ];
+            { name: 'TechCorp', needs: 'data_analysis', budget: 5000, minReputation: 0 },
+            { name: 'RetailCo', needs: 'visualization', budget: 3000, minReputation: 0 },
+            { name: 'FinanceInc', needs: 'machine_learning', budget: 8000, minReputation: 25 },
+            { name: 'StartupXYZ', needs: 'statistics', budget: 2000, minReputation: 0 }
+        ].filter(c => reputation >= c.minReputation).map(({ minReputation, ...c }) => c);
 
         // Contacts made at events expand the pool of potential clients
         const contacts = this.playerCompany?.contacts || 0;

@@ -3,15 +3,37 @@
  * Clients bring you data, you process it for payment
  */
 
-import { CLIENT_TYPES, MARKETING_CHANNELS } from '../data/tycoonData.js';
+import { CLIENT_TYPES, MARKETING_CHANNELS, OFFICES } from '../data/tycoonData.js';
 
 export class ClientManager {
     constructor(gameState) {
         this.gameState = gameState;
-        this.activeClients = [];
+        // Accepted jobs (these are job records, not client records) (#1390)
+        this.activeJobs = [];
         this.pendingJobs = [];
         this.completedJobs = [];
         this.marketingActive = ['word_of_mouth'];
+    }
+
+    /**
+     * Old name kept for callers; it always held jobs (#1390)
+     */
+    get activeClients() {
+        return this.activeJobs;
+    }
+
+    set activeClients(jobs) {
+        this.activeJobs = Array.isArray(jobs) ? jobs : [];
+    }
+
+    /**
+     * The player's office. GameState tracks it as officeIndex into OFFICES;
+     * there is no gameState.currentOffice (#1386)
+     */
+    getCurrentOffice() {
+        const gs = this.gameState || {};
+        if (gs.currentOffice) return gs.currentOffice;
+        return Number.isInteger(gs.officeIndex) ? OFFICES[gs.officeIndex] || null : OFFICES[0] || null;
     }
 
     /**
@@ -29,9 +51,9 @@ export class ClientManager {
         }
 
         // Add office bonus
-        const office = this.gameState.currentOffice;
+        const office = this.getCurrentOffice();
         if (office) {
-            totalLeads *= (1 + office.clientBonus);
+            totalLeads *= (1 + (Number(office.clientBonus) || 0));
         }
 
         // Convert to actual client (probabilistic)
@@ -100,11 +122,13 @@ export class ClientManager {
             critical: 60
         };
 
+        // One roll for both, so the title and description agree (#1387)
+        const jobType = jobTypes[Math.floor(Math.random() * jobTypes.length)];
         return {
             id: `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             clientType: clientType,
-            title: jobTypes[Math.floor(Math.random() * jobTypes.length)],
-            description: `${clientType.name} needs a ${jobTypes[Math.floor(Math.random() * jobTypes.length)].toLowerCase()}`,
+            title: jobType,
+            description: `${clientType.name} needs a ${jobType.toLowerCase()}`,
             payment: Math.floor(
                 clientType.minPay + Math.random() * (clientType.maxPay - clientType.minPay)
             ),
@@ -126,6 +150,13 @@ export class ClientManager {
         const jobIndex = this.pendingJobs.findIndex(j => j.id === jobId);
         if (jobIndex === -1) return null;
 
+        // An offer that has run out can't be taken any more (#1388)
+        if (this.pendingJobs[jobIndex].expiresAt <= Date.now()) {
+            const expired = this.pendingJobs.splice(jobIndex, 1)[0];
+            expired.status = 'expired';
+            return null;
+        }
+
         const job = this.pendingJobs.splice(jobIndex, 1)[0];
         job.status = 'active';
         job.acceptedAt = Date.now();
@@ -133,7 +164,7 @@ export class ClientManager {
         // Generate data for this job
         job.data = this.generateJobData(job);
 
-        this.activeClients.push(job);
+        this.activeJobs.push(job);
 
         window.dispatchEvent(new CustomEvent('jobaccepted', { detail: job }));
 
@@ -232,9 +263,10 @@ export class ClientManager {
      * Update job progress
      */
     updateJobProgress(jobId, progress) {
-        const job = this.activeClients.find(j => j.id === jobId);
+        const job = this.activeJobs.find(j => j.id === jobId);
         if (job) {
-            job.progress = Math.min(100, progress);
+            // Clamp to 0-100; bad input counts as no progress (#1389)
+            job.progress = Math.max(0, Math.min(100, Number(progress) || 0));
 
             if (job.progress >= 100) {
                 this.completeJob(jobId);
@@ -246,12 +278,22 @@ export class ClientManager {
      * Complete a job
      */
     completeJob(jobId) {
-        const jobIndex = this.activeClients.findIndex(j => j.id === jobId);
+        const jobIndex = this.activeJobs.findIndex(j => j.id === jobId);
         if (jobIndex === -1) return null;
 
-        const job = this.activeClients.splice(jobIndex, 1)[0];
+        const job = this.activeJobs.splice(jobIndex, 1)[0];
         job.status = 'completed';
         job.completedAt = Date.now();
+
+        // Get paid for the work (#1385)
+        const payment = Number(job.payment) || 0;
+        if (payment > 0 && this.gameState) {
+            if (typeof this.gameState.addMoney === 'function') {
+                this.gameState.addMoney(payment);
+            } else {
+                this.gameState.money = (Number(this.gameState.money) || 0) + payment;
+            }
+        }
 
         this.completedJobs.push(job);
 
@@ -264,7 +306,7 @@ export class ClientManager {
      * Get active job count
      */
     getActiveJobCount() {
-        return this.activeClients.length;
+        return this.activeJobs.length;
     }
 
     /**

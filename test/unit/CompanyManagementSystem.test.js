@@ -184,18 +184,24 @@ describe('CompanyManagementSystem', () => {
     });
 
     describe('findClients', () => {
-        it('should return the fixed 4-entry hardcoded list', () => {
+        it('a company without reputation only sees the starter clients (#1740)', () => {
             const clients = cms.findClients();
-            expect(clients).toHaveLength(4);
             expect(clients).toEqual([
                 { id: 'client_techcorp', name: 'TechCorp', needs: 'data_analysis', budget: 5000 },
                 { id: 'client_retailco', name: 'RetailCo', needs: 'visualization', budget: 3000 },
-                { id: 'client_financeinc', name: 'FinanceInc', needs: 'machine_learning', budget: 8000 },
                 { id: 'client_startupxyz', name: 'StartupXYZ', needs: 'statistics', budget: 2000 }
             ]);
         });
 
-        it('should return the same list regardless of state', () => {
+        it('reputation unlocks FinanceInc (#1740)', () => {
+            cms.startCompany('Rep Co');
+            cms.playerCompany.reputation = 30;
+            expect(cms.findClients().map(c => c.name)).toContain('FinanceInc');
+            cms.playerCompany.reputation = 10;
+            expect(cms.findClients().map(c => c.name)).not.toContain('FinanceInc');
+        });
+
+        it('existing clients do not change the list', () => {
             const first = cms.findClients();
             cms.clients.push({ name: 'Existing' });
             const second = cms.findClients();

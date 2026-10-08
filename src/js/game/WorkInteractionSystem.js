@@ -72,7 +72,9 @@ export class WorkInteractionSystem {
         if (!coworker) return null;
 
         const relationship = coworker.relationship;
-        const dialogue = coworker.dialogue(relationship);
+        // One line to show, like DemandingBossSystem.getBossDialogue (#1544)
+        const lines = coworker.dialogue(relationship);
+        const dialogue = WorkInteractionSystem.pickLine(lines);
 
         // Small relationship gain from talking
         coworker.relationship = Math.min(100, coworker.relationship + 1);
@@ -80,8 +82,16 @@ export class WorkInteractionSystem {
         return {
             coworker,
             dialogue,
+            lines,
             relationship: coworker.relationship
         };
+    }
+
+    /** A single random line from a tier's options (strings pass through) (#1544) */
+    static pickLine(lines, rand = Math.random) {
+        if (!Array.isArray(lines)) return lines ?? '';
+        if (lines.length === 0) return '';
+        return lines[Math.min(lines.length - 1, Math.floor(rand() * lines.length))];
     }
 
     /**
@@ -157,11 +167,13 @@ export class WorkInteractionSystem {
     talkToBoss() {
         const relationship = this.boss.relationship;
         const promotionReadiness = this.boss.promotionReadiness;
-        const dialogue = this.getBossDialogue(relationship, promotionReadiness);
+        const lines = this.getBossDialogue(relationship, promotionReadiness);
+        const dialogue = WorkInteractionSystem.pickLine(lines);
 
         return {
             boss: this.boss,
             dialogue,
+            lines,
             relationship: this.boss.relationship,
             promotionReadiness: this.boss.promotionReadiness
         };

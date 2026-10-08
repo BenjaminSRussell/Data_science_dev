@@ -2303,6 +2303,15 @@ export class MainGame {
         this.gameState.weeklyIncome += score.moneyEarned; // Track for taxes
         // The boss notices: strong work builds promotion readiness and goodwill (#1543, #1542)
         this.gameState.workInteractionSystem?.recordTaskResult?.(score.stars);
+        // The demanding boss reviews it too; crossing a satisfaction line
+        // changes reputation (#1014, #1779)
+        const bossTask = this.gameState.currentTask;
+        const bossResult = this.gameState.demandingBoss?.recordTaskResult?.(bossTask, score, {
+            timeLimit: this.economySystem?.getEffectiveTimeLimit?.(bossTask) || null
+        });
+        if (bossResult?.consequence?.message) {
+            this.showToast(bossResult.consequence.message, bossResult.consequence.type === 'praise' ? 'success' : 'warning');
+        }
 
         // Check for story beats (task completion)
         if (this.storyBeatsSystem && oldTaskCount === 0) {

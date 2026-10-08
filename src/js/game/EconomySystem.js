@@ -3,6 +3,7 @@
  */
 
 import { VEHICLES } from './WorldMap.js';
+import { RANKS } from '../data/ranks.js';
 
 /**
  * Shop-perk "Data Insight": the hint shown next to the task requirements.
@@ -39,6 +40,17 @@ export class EconomySystem {
         this.gameState = gameState;
     }
 
+    // Rank perks listed in data/ranks.js (#954)
+    static RANK_TIME_BONUS_SECONDS = 15;   // "Time bonus increased"
+    static RANK_BOSS_TOLERANCE = 0.95;     // "Boss tolerance increased": strictness x0.95
+    static RANK_PREMIUM_CLIENTS = 1.1;     // "Premium clients": +10% task pay
+
+    /** True when the player's rank (or an earlier one) grants this perk (#954) */
+    hasRankPerk(perkName) {
+        const idx = Number(this.gameState?.rankIndex) || 0;
+        return RANKS.slice(0, idx + 1).some(r => (r.perks || []).includes(perkName));
+    }
+
     /** True when a shop perk has been bought (#244, #2010) */
     hasPerk(perkId) {
         return (this.gameState?.unlockedPerks || []).includes(perkId);
@@ -54,6 +66,7 @@ export class EconomySystem {
         if (base <= 0) return 0;
         let limit = base;
         if (this.hasPerk('time_bonus')) limit += EconomySystem.PERK_TIME_BONUS_SECONDS;
+        if (this.hasRankPerk('Time bonus increased')) limit += EconomySystem.RANK_TIME_BONUS_SECONDS;
         const speed = Number(this.gameState?.getSoftwareQualityMultiplier?.()?.speedBonus) || 0;
         return Math.round(limit * (1 + Math.max(0, speed)));
     }
@@ -79,6 +92,7 @@ export class EconomySystem {
         let strictness = Number(task?.boss?.strictness) > 0 ? Number(task.boss.strictness) : 1.0;
         // "Office Coffee": bosses are 10% more lenient (#244)
         if (this.hasPerk('boss_favor')) strictness *= EconomySystem.PERK_BOSS_FAVOR;
+        if (this.hasRankPerk('Boss tolerance increased')) strictness *= EconomySystem.RANK_BOSS_TOLERANCE;
         const bossModifier = 1 - (strictness - 1) * 0.5;
 
         // Calculate weighted average
@@ -256,14 +270,18 @@ export class EconomySystem {
         const timeLimit = this.getEffectiveTimeLimit(task);
         if (timeLimit && task.startTime) {
             const elapsed = (Date.now() - task.startTime) / 1000;
-            // 1.2x multiplier if completed in half the time limit or less
-            timeBonus = elapsed < timeLimit / 2 ? 1.2 : 1.0;
+            // 1.2x multiplier if completed in half the time limit or less.
+            // "Maximum bonuses" (top rank): any on-time finish earns it (#954)
+            const window = this.hasRankPerk('Maximum bonuses') ? timeLimit : timeLimit / 2;
+            timeBonus = elapsed < window ? 1.2 : 1.0;
         }
 
         // "Negotiation Skills": +15% money from tasks
         const perkBonus = this.hasPerk('bonus_multiplier') ? EconomySystem.PERK_MONEY_MULTIPLIER : 1.0;
+        // "Premium clients" rank perk: better-paying work (#954)
+        const premium = this.hasRankPerk('Premium clients') ? EconomySystem.RANK_PREMIUM_CLIENTS : 1.0;
 
-        return Math.round((Number(baseReward) || 0) * multiplier * timeBonus * perkBonus);
+        return Math.round((Number(baseReward) || 0) * multiplier * timeBonus * perkBonus * premium);
     }
 
     /**
