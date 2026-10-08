@@ -12,8 +12,8 @@ export class Button extends BaseComponent {
         label: { type: String },
         icon: { type: String },
         variant: { type: String },
-        disabled: { type: Boolean },
-        onclick: { type: Function, attribute: false }
+        disabled: { type: Boolean, reflect: true },
+        type: { type: String }
     };
 
     static styles = css`
@@ -74,27 +74,33 @@ export class Button extends BaseComponent {
         this.icon = '';
         this.variant = 'primary';
         this.disabled = false;
-        this.onclick = null;
+        this.type = 'button';
+        // `onclick` is deliberately NOT a reactive property: declaring it would
+        // replace the native GlobalEventHandlers accessor, so `el.onclick = fn`
+        // would ignore clicks on the host. The inner button's click is composed
+        // and bubbles to the host, so the native handler runs. While disabled,
+        // block host clicks before any handler on the element sees them.
+        this.addEventListener('click', (e) => {
+            if (this.disabled) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+            }
+        }, { capture: true });
     }
 
     render() {
         return html`
-            <button 
+            <button
+                type="${this.type || 'button'}"
                 class="${this.variant}"
-                ?disabled=${this.disabled}
-                @click=${this.handleClick}>
+                ?disabled=${this.disabled}>
                 ${this.icon ? html`<span class="icon">${this.icon}</span>` : ''}
                 <span>${this.label}</span>
             </button>
         `;
     }
-
-    handleClick(e) {
-        if (this.disabled) return;
-        if (this.onclick) {
-            this.onclick(e);
-        }
-    }
 }
 
-customElements.define('game-button', Button);
+if (!customElements.get('game-button')) {
+    customElements.define('game-button', Button);
+}
