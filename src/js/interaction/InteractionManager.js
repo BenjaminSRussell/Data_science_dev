@@ -71,10 +71,28 @@ export class InteractionManager {
                     if (onEnd) onEnd(event);
                 }
             },
-            restrict: restrict || undefined,
-            snap: snap || undefined,
+            // interactjs >=1.3 ignores top-level restrict/snap keys; they are
+            // modifiers now (#2442). inertia is still a per-action option.
+            modifiers: InteractionManager.buildModifiers(interactLib, { restrict, snap }),
             inertia: inertia
         });
+    }
+
+    /**
+     * Translate the legacy restrict/snap option objects into interactjs
+     * modifier instances. Unknown/missing modifier factories are skipped.
+     * @returns {Array} modifiers array for draggable()/resizable()
+     */
+    static buildModifiers(interactLib, { restrict = null, snap = null } = {}) {
+        const factories = interactLib?.modifiers || {};
+        const modifiers = [];
+        if (restrict && typeof factories.restrict === 'function') {
+            modifiers.push(factories.restrict(restrict));
+        }
+        if (snap && typeof factories.snap === 'function') {
+            modifiers.push(factories.snap(snap));
+        }
+        return modifiers;
     }
 
     /**
@@ -130,10 +148,11 @@ export class InteractionManager {
             onDropLeave = null
         } = options;
 
+        // interactjs names the hover events dragenter/dragleave (#2442)
         return interactLib(selector).dropzone({
             ondrop: onDrop,
-            ondropenter: onDropEnter,
-            ondropleave: onDropLeave
+            ondragenter: onDropEnter,
+            ondragleave: onDropLeave
         });
     }
 

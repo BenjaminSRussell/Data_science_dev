@@ -4,6 +4,16 @@
  */
 
 export class WorkSystemValidator {
+    /**
+     * A table filter result is valid when it shows no more rows than the
+     * unfiltered table, and exactly all of them for the empty filter.
+     */
+    static isFilterResultValid(filterValue, visibleCount, originalCount) {
+        if (!Number.isInteger(visibleCount) || visibleCount < 0) return false;
+        if (String(filterValue ?? '').trim() === '') return visibleCount === originalCount;
+        return visibleCount <= originalCount;
+    }
+
     constructor(game) {
         this.game = game;
     }
@@ -180,13 +190,15 @@ export class WorkSystemValidator {
                     await this.wait(200);
 
                     const filteredRows = table.querySelectorAll('tbody tr:not([style*="display: none"])');
-                    
-                    // Verify table didn't crash
-                    if (filteredRows.length >= 0) {
+
+                    // A filter may only hide rows, never add them, and the
+                    // empty filter must show every row again (#73)
+                    const ok = WorkSystemValidator.isFilterResultValid(filterValue, filteredRows.length, originalRowCount);
+                    if (ok) {
                         results.passed++;
                     } else {
                         results.failed++;
-                        results.errors.push(`Filter "${filterValue}" caused issue`);
+                        results.errors.push(`Filter "${filterValue}" showed ${filteredRows.length} of ${originalRowCount} rows`);
                     }
                 } catch (error) {
                     results.failed++;

@@ -3972,9 +3972,10 @@ export class MainGame {
                 }
             }
 
-            // Update inbox UI if open
+            // Update inbox UI if open: new papers show up in the list (#189)
             if (this.researchInboxUI && this.researchInboxUI.isOpen) {
-                this.researchInboxUI.updateUnreadCount();
+                if (typeof this.researchInboxUI.refresh === 'function') this.researchInboxUI.refresh();
+                else this.researchInboxUI.updateUnreadCount();
             }
         } catch (error) {
             logger.error('Error updating inbox badge:', error);
