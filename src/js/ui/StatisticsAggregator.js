@@ -199,6 +199,41 @@ export class StatisticsAggregator {
     }
 
     /**
+     * Cards for the main-menu statistics dashboard. Every aggregated total is
+     * shown, including tasks, reputation, sessions and average session (#1632)
+     */
+    getDashboardCards(stats = this.getStats()) {
+        const avgDays = Number(stats.averageSessionLength) || 0;
+        const avgLabel = avgDays === 0 ? '< 1 day'
+            : `${Number.isInteger(avgDays) ? avgDays : avgDays.toFixed(1)} day${avgDays === 1 ? '' : 's'}`;
+        return [
+            { icon: '&#9719;', label: 'Total Playtime', value: this.formatPlaytime(stats.totalPlaytime || 0) },
+            { icon: '&#9819;', label: 'Games Completed', value: String(stats.gamesCompleted || 0) },
+            { icon: '&#9650;', label: 'Highest Rank', value: String(stats.highestRankName ?? '') },
+            { icon: '$', label: 'Total Money', value: this.formatMoney(stats.totalMoney) },
+            { icon: '&#10003;', label: 'Tasks Completed', value: (stats.totalTasks || 0).toLocaleString() },
+            { icon: '&#9733;', label: 'Total Reputation', value: (stats.totalReputation || 0).toLocaleString() },
+            { icon: '&#9776;', label: 'Save Slots Played', value: String(stats.sessions || 0) },
+            { icon: '&#8987;', label: 'Avg. Session', value: avgLabel }
+        ];
+    }
+
+    /** Markup for the dashboard's stat cards */
+    getDashboardHTML(stats = this.getStats()) {
+        const escape = (text) => String(text).replace(/[&<>"']/g, ch => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[ch]);
+        return this.getDashboardCards(stats).map(card => `
+            <div class="stat-card">
+                <div class="stat-icon" aria-hidden="true">${card.icon}</div>
+                <div class="stat-content">
+                    <div class="stat-label">${card.label}</div>
+                    <div class="stat-value">${escape(card.value)}</div>
+                </div>
+            </div>`).join('');
+    }
+
+    /**
      * Format money
      */
     formatMoney(amount) {
