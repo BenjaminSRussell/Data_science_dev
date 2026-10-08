@@ -3,6 +3,8 @@
  * Replaces generic equipment upgrades with specific parts
  */
 
+import { RANKS } from '../data/ranks.js';
+
 export const HARDWARE_TYPES = {
     COOLING: 'cooling',
     CASE: 'case',
@@ -95,75 +97,117 @@ export const HARDWARE_PARTS = {
  * Hardware Manager Class
  * Manages player's hardware parts and stats
  */
+// RANKS has 7 levels (0-6) but parts are tagged 0-10, so the top tiers
+// all unlock at the final rank.
+const MAX_RANK_INDEX = RANKS.length - 1;
+
+function defaultOwned() {
+    return Object.fromEntries(Object.values(HARDWARE_TYPES).map(t => [t, [HARDWARE_PARTS[t][0].id]]));
+}
+
+function defaultEquipped() {
+    return Object.fromEntries(Object.values(HARDWARE_TYPES).map(t => [t, HARDWARE_PARTS[t][0].id]));
+}
+
 export class HardwareManager {
     constructor(gameState) {
         this.gameState = gameState;
-        this.ownedParts = {
-            [HARDWARE_TYPES.COOLING]: ['stock_cooler'],
-            [HARDWARE_TYPES.CASE]: ['beige_box'],
-            [HARDWARE_TYPES.MONITOR]: ['crt_monitor'],
-            [HARDWARE_TYPES.GPU]: ['gpu_integrated'],
-            [HARDWARE_TYPES.CPU]: ['cpu_generic'],
-            [HARDWARE_TYPES.RAM]: ['ram_4gb'],
-            [HARDWARE_TYPES.STORAGE]: ['hdd_500gb']
-        };
-        this.equippedParts = {
-            [HARDWARE_TYPES.COOLING]: 'stock_cooler',
-            [HARDWARE_TYPES.CASE]: 'beige_box',
-            [HARDWARE_TYPES.MONITOR]: 'crt_monitor',
-            [HARDWARE_TYPES.GPU]: 'gpu_integrated',
-            [HARDWARE_TYPES.CPU]: 'cpu_generic',
-            [HARDWARE_TYPES.RAM]: 'ram_4gb',
-            [HARDWARE_TYPES.STORAGE]: 'hdd_500gb'
-        };
+        this.ownedParts = defaultOwned();
+        this.equippedParts = defaultEquipped();
+    }
+
+    static findPart(type, partId) {
+        return HARDWARE_PARTS[type]?.find(p => p.id === partId) || null;
+    }
+
+    /** Rank index a part needs (#991) */
+    static requiredRankIndex(part) {
+        return Math.min(Number(part?.unlockRank) || 0, MAX_RANK_INDEX);
+    }
+
+    isUnlocked(part) {
+        return (this.gameState?.rankIndex || 0) >= HardwareManager.requiredRankIndex(part);
     }
 
     /**
-     * Get total stats from equipped hardware
+     * Total stats from equipped hardware. Every stat field in HARDWARE_PARTS
+     * is aggregated (#2038); case/monitor `aesthetics` and cooler `style`
+     * both count toward aesthetics (#1330).
      */
     getTotalStats() {
-        let stats = {
+        const stats = {
             cooling: 0,
             noise: 0,
+            noiseDampening: 0,
             aesthetics: 0,
             compute: 0,
+            vram: 0,
+            airflow: 0,
+            powerDraw: 0,
+            resolution: 0,
+            refreshRate: 0,
             productivity: 1.0,
             reliability: 1.0
         };
 
         for (const [type, partId] of Object.entries(this.equippedParts)) {
-            const part = HARDWARE_PARTS[type].find(p => p.id === partId);
-            if (part && part.stats) {
-                if (part.stats.cooling) stats.cooling += part.stats.cooling;
-                if (part.stats.noise) stats.noise += part.stats.noise;
-                if (part.stats.style) stats.aesthetics += part.stats.style;
-                if (part.stats.compute) stats.compute += part.stats.compute;
-                if (part.stats.productivity) stats.productivity = Math.max(stats.productivity, part.stats.productivity); // Max, not add
-                if (part.stats.reliability) stats.reliability *= part.stats.reliability;
-            }
+            const s = HardwareManager.findPart(type, partId)?.stats;
+            if (!s) continue;
+            stats.cooling += s.cooling || 0;
+            stats.noise += s.noise || 0;
+            stats.noiseDampening += s.noise_dampening || 0;
+            stats.aesthetics += (s.aesthetics || 0) + (s.style || 0);
+            stats.compute += s.compute || 0;
+            stats.vram += s.vram || 0;
+            stats.airflow += s.airflow || 0;
+            stats.powerDraw += s.power_draw || 0;
+            stats.resolution = Math.max(stats.resolution, s.resolution || 0);
+            stats.refreshRate = Math.max(stats.refreshRate, s.refresh_rate || 0);
+            if (s.productivity) stats.productivity = Math.max(stats.productivity, s.productivity); // best part, not a sum
+            if (s.reliability) stats.reliability *= s.reliability;
         }
+        // What you actually hear: fan noise minus the case's dampening
+        stats.effectiveNoise = Math.max(0, stats.noise - stats.noiseDampening);
         return stats;
     }
 
+    /**
+     * Work multiplier from the rig, used by ProjectSystem (#1686). Starts at
+     * 1.0 with stock parts.
+     */
+    getProductivityMultiplier() {
+        const p = this.getTotalStats().productivity;
+        return Number.isFinite(p) && p > 0 ? p : 1.0;
+    }
+
     buyPart(type, partId) {
+        if (!HARDWARE_PARTS[type]) return { success: false, message: "Unknown hardware type" };
+        if (!Array.isArray(this.ownedParts[type])) this.ownedParts[type] = [HARDWARE_PARTS[type][0].id];
         if (this.ownedParts[type].includes(partId)) return { success: false, message: "Already owned" };
 
-        const part = HARDWARE_PARTS[type].find(p => p.id === partId);
+        const part = HardwareManager.findPart(type, partId);
         if (!part) return { success: false, message: "Part not found" };
 
-        if (this.gameState.money < part.price) return { success: false, message: "Not enough money" };
+        if (!this.isUnlocked(part)) {
+            const rank = HardwareManager.requiredRankIndex(part);
+            return { success: false, message: `Requires ${RANKS[rank]?.title || `rank ${rank + 1}`}` };
+        }
+
+        if ((this.gameState.money || 0) < part.price) return { success: false, message: "Not enough money" };
 
         this.gameState.money -= part.price;
+        this.gameState.totalSpent = (this.gameState.totalSpent || 0) + part.price;
         this.ownedParts[type].push(partId);
-        this.equippedParts[type] = partId; // Auto-equip
+        this.equippedParts[type] = partId; // Auto-equip; equipPart() switches back (#1331)
 
         return { success: true, message: `Purchased ${part.name}!` };
     }
 
     equipPart(type, partId) {
-        if (!this.ownedParts[type].includes(partId)) return { success: false, message: "Part not owned" };
+        if (!this.ownedParts[type]?.includes(partId)) return { success: false, message: "Part not owned" };
         this.equippedParts[type] = partId;
-        return { success: true, message: "Equipped" };
+        const part = HardwareManager.findPart(type, partId);
+        return { success: true, message: `Equipped ${part?.name || partId}` };
     }
 
     toJSON() {
@@ -173,9 +217,24 @@ export class HardwareManager {
         };
     }
 
+    /**
+     * Merge per hardware type so an old or partial save can't leave a type
+     * without an owned list (#998). Unknown ids are dropped.
+     */
     fromJSON(data) {
         if (!data) return;
-        this.ownedParts = data.ownedParts || this.ownedParts;
-        this.equippedParts = data.equippedParts || this.equippedParts;
+        const owned = defaultOwned();
+        const equipped = defaultEquipped();
+        for (const type of Object.values(HARDWARE_TYPES)) {
+            const savedOwned = data.ownedParts?.[type];
+            if (Array.isArray(savedOwned)) {
+                const valid = savedOwned.filter(id => HardwareManager.findPart(type, id));
+                owned[type] = [...new Set([owned[type][0], ...valid])];
+            }
+            const savedEquipped = data.equippedParts?.[type];
+            if (savedEquipped && owned[type].includes(savedEquipped)) equipped[type] = savedEquipped;
+        }
+        this.ownedParts = owned;
+        this.equippedParts = equipped;
     }
 }

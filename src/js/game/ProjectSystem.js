@@ -133,7 +133,9 @@ export class ProjectSystem {
         // Hardware Bonus Check
         // if (stage.type === PROJECT_TYPES.MODELING && hasGPU) bonus += 5;
 
-        const effectiveWork = Math.max(0, (Number(workPower) || 0) + aiBonus);
+        // A better rig (RAM, SSD, monitors) makes the same work go further (#1686)
+        const hardwareMultiplier = this.gameState.hardwareManager?.getProductivityMultiplier?.() || 1;
+        const effectiveWork = Math.max(0, ((Number(workPower) || 0) + aiBonus) * hardwareMultiplier);
         this.activeProject.stageProgress += effectiveWork;
         // totalProgress tracks all work put into the project (#1517)
         this.activeProject.totalProgress = (this.activeProject.totalProgress || 0) + effectiveWork;
