@@ -2339,6 +2339,10 @@ export class MainGame {
         this.gameState.tasksCompleted++;
         this.gameState.totalEarned += score.moneyEarned;
         this.gameState.weeklyIncome += score.moneyEarned; // Track for taxes
+        // Strong work makes the boss more open to a promotion talk (#1543)
+        if (score.stars >= 4) {
+            this.gameState.workInteractionSystem?.increasePromotionReadiness?.((score.stars - 3) * 5);
+        }
 
         // Check for story beats (task completion)
         if (this.storyBeatsSystem && oldTaskCount === 0) {
@@ -2543,9 +2547,10 @@ export class MainGame {
             return;
         }
 
-        // Calculate remaining time
+        // Calculate remaining time (perks/software extend the limit, #1310)
+        const limit = this.economySystem?.getEffectiveTimeLimit?.(task) || task.timeLimit;
         const elapsed = (Date.now() - task.startTime) / 1000;
-        const remaining = Math.max(0, task.timeLimit - elapsed);
+        const remaining = Math.max(0, limit - elapsed);
 
         // Format as MM:SS
         const minutes = Math.floor(remaining / 60);
@@ -2992,14 +2997,15 @@ export class MainGame {
             return;
         }
 
-        const success = this.gameState.purchaseItem(item);
+        const price = this.economySystem?.getItemPrice?.(item) ?? item.price;
+        const success = this.gameState.purchaseItem(item, price);
         if (success) {
             this.showToast(`Purchased ${item.name}!`, 'success');
             this.audioManager.play('kaching');
             this.uiUpdater.updateShopScreen();
             this.uiUpdater.updateAllUI();
         } else {
-            if (!this.gameState.canAfford(item.price)) {
+            if (!this.gameState.canAfford(price)) {
                 this.showError('Not enough money!');
             } else {
                 this.showError('Item already owned or cannot be purchased');
@@ -3227,6 +3233,12 @@ export class MainGame {
                 // Elite District ending is reachable (#1986)
                 const mapUnlock = this.gameState.mapProgressionSystem?.checkMapUnlocks?.();
                 if (mapUnlock?.unlocked) this.showToast(mapUnlock.message, 'success');
+                // Reputation from contracts, events, dates, ... promotes too (#856)
+                if (this.economySystem?.checkPromotion?.()) {
+                    const rank = this.gameState.currentRank;
+                    this.showToast(`PROMOTED to ${rank?.title}!`, 'success');
+                    this.uiUpdater?.announceRankPromotion?.(rank);
+                }
                 // Jealousy cools off a little every day (#915)
                 this.gameState.jealousySystem?.decayAll?.(2);
                 if (this.newsManager) {

@@ -14,6 +14,7 @@ import { LitUIManager } from './LitUIManager.js';
 import { useGameStore } from '../store/gameStore.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommonUtils } from '../utils/CommonUtils.js';
+import { insightHint } from '../game/EconomySystem.js';
 import { logger } from '../utils/Logger.js';
 import { NEWS_CATEGORIES } from '../game/NewsManager.js';
 
@@ -224,9 +225,10 @@ export class UIUpdater {
         // Update task requirements
         const requirementsContainer = DOMUtils.query('.task-requirements');
         if (requirementsContainer && task.requirements) {
+            const hint = insightHint(this.gameState, task);
             const requirementsHTML = task.requirements.map(req => {
                 return `<span class="requirement-tag">${req}</span>`;
-            }).join('');
+            }).join('') + (hint ? `<span class="requirement-tag insight-hint">${hint}</span>` : '');
             DOMUtils.updateElement(requirementsContainer, {
                 innerHTML: requirementsHTML
             });
@@ -429,7 +431,8 @@ export class UIUpdater {
 
         const shopHTML = items.map(item => {
             const owned = this.gameState.purchasedItems?.includes(item.id) || false;
-            const canAfford = this.gameState.canAfford?.(item.price) || false;
+            const price = this.game?.economySystem?.getItemPrice?.(item) ?? item.price;
+            const canAfford = this.gameState.canAfford?.(price) || false;
 
             return `
                 <div class="shop-item-card ${owned ? 'owned' : ''}" data-id="${item.id}">
@@ -441,7 +444,7 @@ export class UIUpdater {
                     : `<button class="btn ${canAfford ? 'btn-primary' : 'btn-secondary'} btn-sm" 
                             onclick="game.purchaseItem('${item.id}')"
                             ${!canAfford ? 'disabled' : ''}>
-                            $${item.price.toLocaleString()}
+                            $${price.toLocaleString()}
                         </button>`
                 }
                 </div>

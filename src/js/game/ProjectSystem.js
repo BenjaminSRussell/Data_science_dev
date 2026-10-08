@@ -200,6 +200,7 @@ export class ProjectSystem {
         if (project.reward) {
             this.gameState.money = (this.gameState.money || 0) + project.reward;
             this.gameState.totalEarned = (this.gameState.totalEarned || 0) + project.reward;
+            this.gameState.weeklyIncome = (this.gameState.weeklyIncome || 0) + project.reward; // taxed weekly (#1989)
         }
         
         const xpGained = {};

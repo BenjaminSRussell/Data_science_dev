@@ -50,7 +50,7 @@ export class GameState {
         this.dailyMarketingCost = 0;
         this.npcMemories = null;
         this.completedStoryBeats = null;
-        this.currentLocation = 'home'; // Start at home
+        this._currentLocation = 'home'; // Start at home (see currentLocation getter)
         this.bank = null; // Bank state (savings/loan)
 
         // Unlocked content
@@ -181,6 +181,18 @@ export class GameState {
      * Get software quality multiplier based on purchased software
      * Returns an object with quality bonuses
      */
+    /**
+     * Where the player is. The world map owns travel, so read through to it;
+     * the stored value is only a fallback before the map exists (#982, #1987).
+     */
+    get currentLocation() {
+        return this.worldMap?.currentLocation || this._currentLocation;
+    }
+
+    set currentLocation(locationId) {
+        this._currentLocation = locationId;
+    }
+
     getSoftwareQualityMultiplier() {
         const multipliers = {
             visualClarity: 1.0,
@@ -238,12 +250,13 @@ export class GameState {
     /**
      * Purchase an item
      */
-    purchaseItem(item) {
-        if (!this.canAfford(item.price)) return false;
+    purchaseItem(item, price = item.price) {
+        // price comes from EconomySystem.getItemPrice() so discounts apply (#1309)
+        if (!this.canAfford(price)) return false;
         if (this.purchasedItems.includes(item.id)) return false;
 
-        this.money -= item.price;
-        this.totalSpent = (this.totalSpent || 0) + item.price;
+        this.money -= price;
+        this.totalSpent = (this.totalSpent || 0) + price;
         this.purchasedItems.push(item.id);
 
         // Apply item effect
