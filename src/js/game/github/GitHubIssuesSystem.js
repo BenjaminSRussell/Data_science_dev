@@ -4,6 +4,28 @@
  * Real-world issues and pull requests
  */
 
+// Reward per difficulty tier; matches the hand-written starter issues (#2089)
+export const ISSUE_REWARDS = {
+    easy: { money: 200, reputation: 10 },
+    medium: { money: 400, reputation: 20 },
+    hard: { money: 600, reputation: 30 },
+    very_hard: { money: 1000, reputation: 35 },
+    extreme: { money: 1500, reputation: 50 }
+};
+
+// Which character stat an issue skill trains (#932); anything unlisted trains intelligence
+export const SKILL_STATS = {
+    memory_optimization: 'focus',
+    optimization: 'focus',
+    distributed_training: 'focus',
+    data_processing: 'focus',
+    documentation: 'charisma',
+    code_review: 'charisma'
+};
+
+// XP per difficulty tier, split across the issue's skills
+export const ISSUE_XP = { easy: 10, medium: 20, hard: 30, very_hard: 40, extreme: 50 };
+
 export class GitHubIssuesSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -12,6 +34,18 @@ export class GitHubIssuesSystem {
         this.pullRequests = [];
         this.repositories = this.initializeRepositories();
         this.generateInitialIssues();
+        this.refreshRepositoryCounts();
+    }
+
+    /**
+     * Repository issue/PR counts come from the actual open issues and open
+     * pull requests, not hardcoded numbers (#2088)
+     */
+    refreshRepositoryCounts() {
+        for (const repo of this.repositories || []) {
+            repo.issues = this.openIssues.filter(i => i.repository === repo.id).length;
+            repo.pullRequests = this.pullRequests.filter(p => p.repository === repo.id && p.status === 'open').length;
+        }
     }
     
     /**
@@ -57,7 +91,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_1',
                 number: 42,
-                title: ' Data processing fails on null values',
+                title: 'Data processing fails on null values',
                 body: 'When processing data with null values, the pipeline crashes with a KeyError. Need to handle missing data gracefully.',
                 labels: ['bug', 'high-priority', 'data-pipeline'],
                 assignee: null,
@@ -70,7 +104,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_2',
                 number: 43,
-                title: ' Add data validation pipeline',
+                title: 'Add data validation pipeline',
                 body: 'Implement comprehensive data validation to catch errors early in the pipeline. Should include schema validation, type checking, and range validation.',
                 labels: ['enhancement', 'feature', 'data-pipeline'],
                 assignee: null,
@@ -83,7 +117,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_3',
                 number: 44,
-                title: ' Memory leak in large dataset processing',
+                title: 'Memory leak in large dataset processing',
                 body: 'Processing large datasets (>10GB) causes memory issues. Need to implement chunking or streaming processing.',
                 labels: ['bug', 'performance', 'ml_models'],
                 assignee: null,
@@ -96,7 +130,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_4',
                 number: 45,
-                title: ' Add support for time series analysis',
+                title: 'Add support for time series analysis',
                 body: 'Add time series analysis capabilities to the data analysis tools. Should include trend analysis, seasonality detection, and forecasting.',
                 labels: ['enhancement', 'feature', 'data_analysis'],
                 assignee: null,
@@ -109,7 +143,7 @@ export class GitHubIssuesSystem {
             {
                 id: 'issue_5',
                 number: 46,
-                title: ' Improve model training pipeline',
+                title: 'Improve model training pipeline',
                 body: 'The current training pipeline is slow and inefficient. Need to optimize data loading, add distributed training support, and implement checkpointing.',
                 labels: ['enhancement', 'performance', 'ml_models'],
                 assignee: null,
@@ -188,6 +222,7 @@ export class GitHubIssuesSystem {
         
         issue.assignee = 'player';
         issue.assignedAt = Date.now();
+        this.refreshRepositoryCounts();
         
         return {
             success: true,
@@ -237,15 +272,39 @@ export class GitHubIssuesSystem {
                 this.gameState.reputation += issue.reward.reputation;
             }
         }
+        const xpGains = this.awardSkillXP(issue);
+        this.refreshRepositoryCounts();
         
         return {
             success: true,
             pullRequest: pullRequest,
             issue: issue,
+            xpGains,
             message: `Created pull request #${pullRequest.number} for issue #${issue.number}`
         };
     }
     
+    /**
+     * The issue's skills now matter: completing it trains the matching
+     * character stats, like IDESystem projects do (#932)
+     * @returns {Object} stat -> XP awarded
+     */
+    awardSkillXP(issue) {
+        const skills = Array.isArray(issue?.skills) && issue.skills.length ? issue.skills : ['python'];
+        const total = ISSUE_XP[issue?.difficulty] || ISSUE_XP.medium;
+        const perSkill = total / skills.length;
+        const gains = {};
+        for (const skill of skills) {
+            const stat = SKILL_STATS[skill] || 'intelligence';
+            gains[stat] = (gains[stat] || 0) + perSkill;
+        }
+        for (const [stat, xp] of Object.entries(gains)) {
+            gains[stat] = Math.max(1, Math.round(xp));
+            this.gameState.characterStats?.addExperience?.(stat, gains[stat]);
+        }
+        return gains;
+    }
+
     /**
      * Get pull requests
      */
@@ -305,6 +364,7 @@ export class GitHubIssuesSystem {
         
         pr.status = 'merged';
         pr.mergedAt = Date.now();
+        this.refreshRepositoryCounts();
         
         return {
             success: true,
@@ -319,28 +379,43 @@ export class GitHubIssuesSystem {
     generateNewIssue() {
         const issueTemplates = [
             {
-                title: ' Bug in data transformation',
+                title: 'Bug in data transformation',
                 body: 'Data transformation step produces incorrect results for edge cases.',
                 labels: ['bug', 'data-pipeline'],
                 difficulty: 'medium'
             },
             {
-                title: ' Add new visualization type',
+                title: 'Add new visualization type',
                 body: 'Request to add support for heatmap visualizations in the analysis tools.',
                 labels: ['enhancement', 'feature', 'data_analysis'],
                 difficulty: 'medium'
             },
             {
-                title: ' Improve documentation',
+                title: 'Improve documentation',
                 body: 'Documentation is outdated. Need to update examples and add more tutorials.',
                 labels: ['documentation', 'enhancement'],
                 difficulty: 'easy'
             },
             {
-                title: ' Performance optimization needed',
+                title: 'Performance optimization needed',
                 body: 'Current implementation is too slow for production use. Need optimization.',
                 labels: ['performance', 'enhancement'],
-                difficulty: 'hard'
+                difficulty: 'hard',
+                skills: ['python', 'optimization']
+            },
+            {
+                title: 'Add streaming ingestion for real-time dashboards',
+                body: 'Batch loads are too slow; dashboards need data within seconds of arrival.',
+                labels: ['enhancement', 'data-pipeline'],
+                difficulty: 'very_hard',
+                skills: ['python', 'data_processing', 'distributed_training']
+            },
+            {
+                title: 'Shard model training across the GPU cluster',
+                body: 'Training the flagship model takes a week on one node. Distribute it.',
+                labels: ['enhancement', 'ml'],
+                difficulty: 'extreme',
+                skills: ['python', 'tensorflow', 'distributed_training', 'optimization']
             }
         ];
         
@@ -350,23 +425,22 @@ export class GitHubIssuesSystem {
         const issueNumber = (allNums.length ? Math.max(...allNums) : 0) + 1;
         
         const issue = {
-            id: `issue_${Date.now()}`,
+            id: `issue_${Date.now()}_${issueNumber}`,
             number: issueNumber,
-            title: template.title,
+            title: String(template.title).trim(),
             body: template.body,
             labels: template.labels,
             assignee: null,
             repository: this.repositories[Math.floor(Math.random() * this.repositories.length)].id,
             createdAt: Date.now(),
             difficulty: template.difficulty,
-            skills: ['python', 'data_science'],
-            reward: {
-                money: template.difficulty === 'easy' ? 200 : template.difficulty === 'medium' ? 400 : 600,
-                reputation: template.difficulty === 'easy' ? 10 : template.difficulty === 'medium' ? 20 : 30
-            }
+            skills: template.skills || ['python', 'data_science'],
+            // Every tier has its own reward (#2089)
+            reward: { ...(ISSUE_REWARDS[template.difficulty] || ISSUE_REWARDS.medium) }
         };
         
         this.openIssues.push(issue);
+        this.refreshRepositoryCounts();
         return issue;
     }
 }

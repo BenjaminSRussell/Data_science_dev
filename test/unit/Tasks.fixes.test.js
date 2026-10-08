@@ -114,7 +114,7 @@ describe('GitHubIssuesSystem (#931, #2086, #313, #363, #364, #365)', () => {
         expect(gh.mergePullRequest('nope').success).toBe(false);
     });
 
-    it('generateNewIssue numbers issues uniquely with a reward by difficulty', () => {
+    it('generateNewIssue numbers issues uniquely with a reward by difficulty', async () => {
         const { gh } = make();
         const before = gh.openIssues.length;
         const maxNum = Math.max(...gh.openIssues.map(i => i.number));
@@ -123,7 +123,8 @@ describe('GitHubIssuesSystem (#931, #2086, #313, #363, #364, #365)', () => {
         expect(gh.openIssues.length).toBe(before + 2);
         expect(a.number).toBe(maxNum + 1);
         expect(b.number).toBe(maxNum + 2);
-        expect(a.reward.money).toBe({ easy: 200, medium: 400 }[a.difficulty] ?? 600);
+        const { ISSUE_REWARDS } = await import('../../src/js/game/github/GitHubIssuesSystem.js');
+        expect(a.reward.money).toBe(ISSUE_REWARDS[a.difficulty].money);
         expect(gh.repositories.map(r => r.id)).toContain(a.repository);
     });
 });
