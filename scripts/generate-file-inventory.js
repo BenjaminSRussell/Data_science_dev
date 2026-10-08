@@ -9,6 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { groupFilesByExtension } from './lib/groupFilesByExtension.js';
+import { countLinesInText } from './lib/countLines.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,7 +34,7 @@ const folders = [];
 function countLines(filePath) {
     try {
         const content = fs.readFileSync(filePath, 'utf8');
-        return content.split('\n').length;
+        return countLinesInText(content);
     } catch (e) {
         return 0;
     }
