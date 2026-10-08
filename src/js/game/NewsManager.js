@@ -3,6 +3,8 @@
  * Creates dynamic world that changes over time
  */
 
+import { SLOTS_PER_DAY } from './TimeManager.js';
+
 // News categories
 export const NEWS_CATEGORIES = {
     market: { icon: '', color: '#6bcb77' },
@@ -307,14 +309,18 @@ export class NewsManager {
             horoscope: 'Stars align for data analysis today.'
         };
 
+        // Each story in one paper uses a different template, so the same
+        // headline can't repeat as a side story (#2068, #1371)
+        const usedTemplates = new Set();
+
         // Generate 1 Main Headline
-        const headline = this.generateNewsItem();
+        const headline = this.generateNewsItem(usedTemplates);
         this.dailyPaper.headline = headline;
         this.newsHistory.unshift(headline); //Keep history for now/legacy support
 
         // Two smaller articles: the newspaper has two side-story slots (#1127)
         for (let i = 0; i < NewsManager.SIDE_STORIES; i++) {
-            const article = this.generateNewsItem();
+            const article = this.generateNewsItem(usedTemplates);
             this.dailyPaper.articles.push(article);
             this.newsHistory.unshift(article);
         }
@@ -377,8 +383,13 @@ export class NewsManager {
     /**
      * Generate a single news item
      */
-    generateNewsItem() {
-        const template = NEWS_TEMPLATES[Math.floor(Math.random() * NEWS_TEMPLATES.length)];
+    generateNewsItem(usedTemplates = null) {
+        const pool = usedTemplates
+            ? NEWS_TEMPLATES.filter(t => !usedTemplates.has(t))
+            : NEWS_TEMPLATES;
+        const choices = pool.length ? pool : NEWS_TEMPLATES;
+        const template = choices[Math.floor(Math.random() * choices.length)];
+        usedTemplates?.add(template);
 
         // Fill in the template
         let text = template.template;
@@ -463,7 +474,14 @@ export class NewsManager {
     checkRandomEvents() {
         const triggeredEvents = [];
 
-        for (const event of RANDOM_EVENTS) {
+        // At most one life event per day, so a referral bonus, car trouble
+        // and a market dip can't all land on the same morning (#1729)
+        const day = this.gameState.timeManager?.totalDays ?? null;
+        if (day !== null && this.lastRandomEventDay === day) return triggeredEvents;
+
+        // Roll in a shuffled order so earlier table entries aren't favoured
+        const order = [...RANDOM_EVENTS].sort(() => Math.random() - 0.5);
+        for (const event of order) {
             // Check probability
             if (Math.random() > event.probability) continue;
 
@@ -476,7 +494,9 @@ export class NewsManager {
                 ...event,
                 triggeredAt: this.gameState.timeManager?.getDateString() || 'Today'
             });
+            break;
         }
+        if (day !== null) this.lastRandomEventDay = day;
 
         return triggeredEvents;
     }
@@ -487,7 +507,10 @@ export class NewsManager {
     checkEventRequirements(event) {
         const req = event.requirements;
 
-        if (req.completedJobs && (this.gameState.completedJobs || 0) < req.completedJobs) {
+        // Chart Studio tasks count as completed jobs; there's no separate
+        // completedJobs counter in normal play (#2066)
+        const done = Math.max(Number(this.gameState.completedJobs) || 0, Number(this.gameState.tasksCompleted) || 0);
+        if (req.completedJobs && done < req.completedJobs) {
             return false;
         }
 
@@ -513,7 +536,9 @@ export class NewsManager {
             return false;
         }
 
-        if (req.hasActiveJobs && (this.gameState.activeJobs?.length || 0) === 0) {
+        // A task in progress is an active job too (#2066)
+        const hasWork = (this.gameState.activeJobs?.length || 0) > 0 || !!this.gameState.currentTask;
+        if (req.hasActiveJobs && !hasWork) {
             return false;
         }
 
@@ -557,6 +582,62 @@ export class NewsManager {
             const fraction = (effects.portfolioBoost || 0) - (effects.portfolioLoss || 0);
             sm.applyMarketShock?.(fraction);
             results.marketMove = Math.round(fraction * 100);
+        }
+
+        // The rest of the declared effect keys (#1725)
+        if (effects.followers) {
+            this.gameState.followers = (Number(this.gameState.followers) || 0) + effects.followers;
+            results.followers = effects.followers;
+        }
+
+        if (effects.charismaXP) {
+            this.gameState.characterStats?.addExperience?.('charisma', effects.charismaXP);
+            results.xp = { ...(results.xp || {}), charisma: effects.charismaXP };
+        }
+
+        if (effects.meetNPC) {
+            const npcManager = this.gameState.npcManager;
+            const met = npcManager?.metNPCs || [];
+            const here = this.gameState.worldMap?.currentLocation || 'coffee_shop';
+            const candidates = (npcManager?.getNPCsAtLocation?.(here) || []).filter(n => !met.includes(n.id));
+            const npc = candidates[Math.floor(Math.random() * candidates.length)];
+            if (npc) {
+                npcManager.markNPCAsMet?.(npc.id);
+                results.metNPC = npc.id;
+            }
+        }
+
+        if (effects.potentialClient) {
+            this.gameState.potentialClients = (Number(this.gameState.potentialClients) || 0) + 1;
+            results.potentialClients = this.gameState.potentialClients;
+        }
+
+        if (effects.pendingJobLost) {
+            const leads = Number(this.gameState.potentialClients) || 0;
+            if (leads > 0) {
+                this.gameState.potentialClients = leads - 1;
+                results.potentialClients = leads - 1;
+            }
+        }
+
+        if (effects.stressIncrease) {
+            this.gameState.stress = Math.min(100, (Number(this.gameState.stress) || 0) + effects.stressIncrease);
+            results.stress = this.gameState.stress;
+        }
+
+        if (effects.focusPenalty) {
+            // Today's focus penalty, read alongside the other daily effects
+            this.activeEffects.focusPenalty = (this.activeEffects.focusPenalty || 0) + effects.focusPenalty;
+            results.focusPenalty = effects.focusPenalty;
+        }
+
+        if (effects.timeLost && this.gameState.timeManager) {
+            // Lose slots from today without rolling into tomorrow
+            const tm = this.gameState.timeManager;
+            const slot = Number(tm.timeSlot) || 0;
+            const lost = Math.max(0, Math.min(effects.timeLost, SLOTS_PER_DAY - 1 - slot));
+            tm.timeSlot = slot + lost;
+            results.timeLost = lost;
         }
 
         if (effects.energyPenalty && this.gameState.timeManager) {
