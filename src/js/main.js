@@ -2354,6 +2354,8 @@ export class MainGame {
             const promoted = this.economySystem.checkPromotion();
             if (promoted) {
                 const newRank = this.gameState.currentRank;
+                // Career wins make competitive colleagues jealous (#915)
+                this.gameState.jealousySystem?.checkJealousy?.({ type: 'career', level: 15 });
                 this.showToast(`PROMOTED to ${newRank.title}!`, 'success');
                 this.audioManager.play('success');
                 this.uiUpdater.updateAllUI();
@@ -3187,6 +3189,8 @@ export class MainGame {
         // Handle events (new day, etc)
         (events || []).forEach(event => {
             if (event.type === 'new_day') {
+                // Jealousy cools off a little every day (#915)
+                this.gameState.jealousySystem?.decayAll?.(2);
                 if (this.newsManager) {
                     this.newsManager.generateDailyNews();
                     this.updateNewsBadge();

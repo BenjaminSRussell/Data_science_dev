@@ -36,6 +36,21 @@ export class RoommateSystem {
     }
     
     /**
+     * Single write path for the roommate relationship: clamped to 0-100 (#908)
+     * and mirrored onto roommate.relationship so the two copies never diverge (#1718).
+     */
+    changeRelationship(delta) {
+        return this.setRelationship(this.relationship + delta);
+    }
+
+    setRelationship(value) {
+        const v = Math.max(0, Math.min(100, Number(value) || 0));
+        this.relationship = v;
+        if (this.roommate) this.roommate.relationship = v;
+        return v;
+    }
+
+    /**
      * Split rent
      */
     splitRent(totalRent) {
@@ -78,7 +93,7 @@ export class RoommateSystem {
             'Want to grab food together?'
         ];
         
-        this.relationship += 2;
+        this.changeRelationship(2);
         
         return {
             message: `You chat with ${this.roommate.name}`,
@@ -95,10 +110,14 @@ export class RoommateSystem {
             return { message: `${this.roommate.name} seems hesitant to help` };
         }
         
-        this.relationship += 3;
+        this.changeRelationship(3);
+        // Help is real: a little study session with your analyst roommate (#1717)
+        const xp = this.relationship >= 70 ? 20 : 10;
+        this.gameState?.characterStats?.addExperience?.('analytics', xp);
         return {
-            message: `${this.roommate.name} agrees to help you`,
-            help: true
+            message: `${this.roommate.name} agrees to help you (+${xp} analytics XP)`,
+            help: true,
+            xp
         };
     }
     
@@ -106,7 +125,7 @@ export class RoommateSystem {
      * Complain about something
      */
     complain() {
-        this.relationship -= 5;
+        this.changeRelationship(-5);
         return {
             message: `${this.roommate.name} seems annoyed`,
             relationship: this.relationship
@@ -117,11 +136,15 @@ export class RoommateSystem {
      * Hang out with roommate
      */
     hangout() {
-        this.relationship += 5;
+        this.changeRelationship(5);
+        // Hanging out actually recharges you; closer friends recharge more (#1717)
+        const energy = this.relationship >= 70 ? 15 : 10;
+        this.gameState?.timeManager?.restoreEnergy?.(energy);
         return {
-            message: `You spend time with ${this.roommate.name}`,
+            message: `You spend time with ${this.roommate.name} (+${energy} energy)`,
             relationship: this.relationship,
-            benefit: 'energy'
+            benefit: 'energy',
+            energy
         };
     }
     
@@ -178,7 +201,8 @@ export class RoommateSystem {
     fromJSON(data) {
         if (!data) return;
         if (data.roommate) this.roommate = data.roommate;
-        if (typeof data.relationship === 'number') this.relationship = data.relationship;
+        if (typeof data.relationship === 'number') this.setRelationship(data.relationship);
+        else if (typeof this.roommate?.relationship === 'number') this.setRelationship(this.roommate.relationship);
         if (typeof data.rentSplit === 'number') this.rentSplit = data.rentSplit;
     }
 }

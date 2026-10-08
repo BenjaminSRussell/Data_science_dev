@@ -475,9 +475,11 @@ export class EmotionalBreakdownSystem {
      * Check if jealousy should trigger
      */
     checkJealousy(npcId) {
-        // Check if player succeeded while NPC failed
-        // Would need jealousy system integration
-        return false;
+        // Read the real JealousySystem instead of a hard-coded stub (#1409)
+        const js = this.gameState?.jealousySystem;
+        if (!js?.getJealousyLevel) return false;
+        if (js.isEnabled && !js.isEnabled()) return false;
+        return js.getJealousyLevel(npcId) > 75;
     }
 }
 
