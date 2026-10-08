@@ -91,10 +91,12 @@ export class GameState {
         // Settings
         this.soundEnabled = true;
         this.musicEnabled = true;
+        // The colour theme is a device preference (localStorage
+        // 'dst_theme_preference', see MainGame.initTheme), not part of a save;
+        // the old settings.theme here was never read (#1253)
         this.settings = {
             soundEnabled: true,
-            autoSave: true,
-            theme: 'dark'
+            autoSave: true
         };
 
         // Sub-systems storage (these are initialized externally and then linked)
@@ -515,7 +517,9 @@ export class GameState {
         this.soundEnabled = data.soundEnabled ?? true;
         this.musicEnabled = data.musicEnabled ?? true;
         if (data.settings && typeof data.settings === 'object') {
+            // Drop the legacy, never-read settings.theme from old saves (#1253)
             this.settings = { ...this.settings, ...data.settings };
+            delete this.settings.theme;
         }
         this.unlockedLibraries = data.unlockedLibraries || [];
         if (data.housingLevel) this.housingLevel = data.housingLevel;

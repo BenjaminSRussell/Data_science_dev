@@ -7,8 +7,10 @@
 
 // Bundle every per-NPC dialogue file. A @vite-ignore'd template import is
 // never bundled, so it only worked under the dev server (#817-#842).
+import { relationshipStage, RELATIONSHIP_STAGES } from '../../data/relationshipStages.js';
+
 const NPC_DIALOGUE_MODULES = import.meta.glob('./npcs/*.js');
-const STAGE_KEYS = ['stranger', 'friendly', 'acquaintance', 'friend', 'close_friend'];
+const STAGE_KEYS = RELATIONSHIP_STAGES.map(s => s.tier);
 
 export class NPCDialogueLoader {
     constructor() {
@@ -149,11 +151,8 @@ export class NPCDialogueLoader {
      * Get relationship stage
      */
     getRelationshipStage(relationshipLevel) {
-        if (relationshipLevel >= 80) return 'close_friend';
-        if (relationshipLevel >= 60) return 'friend';
-        if (relationshipLevel >= 40) return 'acquaintance';
-        if (relationshipLevel >= 20) return 'friendly';
-        return 'stranger';
+        // Shared scale with NPCManager and RoommateSystem (#916, #566)
+        return relationshipStage(relationshipLevel).tier;
     }
     
     /**

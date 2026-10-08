@@ -95,9 +95,9 @@ const initialData = () => ({
     // Settings
     soundEnabled: true,
     musicEnabled: true,
+    // No theme here: it's a device preference in localStorage (#1253)
     settings: {
-        autoSave: true,
-        theme: 'dark'
+        autoSave: true
     }
 });
 
