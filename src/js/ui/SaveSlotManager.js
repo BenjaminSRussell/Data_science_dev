@@ -163,7 +163,8 @@ export class SaveSlotManager {
         if (!dropdownBtn) {
             dropdownBtn = document.createElement('button');
             dropdownBtn.id = 'btn-continue-dropdown';
-            dropdownBtn.className = 'btn-grey btn-grey-secondary';
+            // Same style as the menu button it replaces; .btn-grey-secondary never existed (#1783)
+            dropdownBtn.className = 'btn-manual-action';
             dropdownBtn.setAttribute('aria-haspopup', 'true');
             dropdownBtn.setAttribute('aria-expanded', 'false');
             dropdownBtn.setAttribute('aria-controls', 'save-slots-dropdown');

@@ -4,6 +4,7 @@
  */
 
 import { getLawyerReduction } from '../game/LegalSystem.js';
+import { CommonUtils } from '../utils/CommonUtils.js';
 import { QuotronTicker } from '../game/QuotronTicker.js';
 
 let quotronTicker = null;
@@ -125,9 +126,10 @@ export function updateStockMarketScreen(game) {
  */
 function updatePortfolioSummary(game) {
     const valueEl = document.getElementById('portfolio-value');
-    if (valueEl) valueEl.textContent = `$${(game.stockMarket?.getPortfolioValue?.() || 0).toFixed(2)}`;
+    // Same money format as the top bar (#142)
+    if (valueEl) valueEl.textContent = CommonUtils.formatMoney(game.stockMarket?.getPortfolioValue?.() || 0);
     const cashEl = document.getElementById('liquid-cash');
-    if (cashEl) cashEl.textContent = `$${(Number(game.gameState.money) || 0).toFixed(2)}`;
+    if (cashEl) cashEl.textContent = CommonUtils.formatMoney(game.gameState.money);
 }
 
 /**

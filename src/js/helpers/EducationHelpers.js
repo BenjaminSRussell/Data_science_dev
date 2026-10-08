@@ -208,7 +208,9 @@ export function finishExam(game) {
             game.audioManager.play('kaching');
         }
         if (game.showToast) {
-            game.showToast(`Passed ${exam.courseId}!`, 'success');
+            // Show the course name, not its internal id (#1639)
+            const courseName = game.gameState.educationSystem.courses?.[exam.courseId]?.name || exam.courseId;
+            game.showToast(`Passed ${courseName}!`, 'success');
         }
     } else if (!passed) {
         if (game.audioManager?.play) {
