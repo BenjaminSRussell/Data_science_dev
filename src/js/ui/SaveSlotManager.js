@@ -131,10 +131,14 @@ export class SaveSlotManager {
      * Create save slots container as dropdown button
      */
     createSlotsContainer(attempt = 0) {
-        const menuNav = document.querySelector('.menu-navigation');
+        // index.html's menu uses .menu-nav; .menu-navigation is the older name (#1063)
+        const menuNav = document.querySelector('.menu-nav, .menu-navigation');
         if (!menuNav) {
             if (attempt >= 20) {
-                console.warn('SaveSlotManager: .menu-navigation never appeared; save slots unavailable');
+                console.warn('SaveSlotManager: menu nav (.menu-nav) never appeared; save slots unavailable');
+                // Don't leave the menu without any way to continue (#1063)
+                const continueBtn = document.getElementById('btn-continue');
+                if (continueBtn) continueBtn.style.display = '';
                 return false;
             }
             // Retry after a short delay, then render once the container exists (#2108)
@@ -513,7 +517,22 @@ export class SaveSlotManager {
                     this.handleMenuAction(action, slotIndex, slotInfo);
                 }
             });
+
+            // Escape closes the options menu and returns focus to its button (#181)
+            menu.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape' || menu.classList.contains('hidden')) return;
+                e.preventDefault();
+                e.stopPropagation();
+                menu.classList.add('hidden');
+                card.querySelector('.slot-btn-grey')?.focus?.();
+            });
         }
+        menuBtn.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape' || menu.classList.contains('hidden')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            menu.classList.add('hidden');
+        });
 
         // Toggle menu on button click
         menuBtn.addEventListener('click', (e) => {
