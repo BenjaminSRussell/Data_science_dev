@@ -3528,6 +3528,8 @@ export class MainGame {
             if (event.type === 'new_day') {
                 // New weather every morning (#1184)
                 this.environmentManager?.updateWeather?.();
+                // Daily high/low-water marks for the weekly ending check (#1134)
+                this.gameState.gameEndingSystem?.trackMarks?.();
                 // Districts unlock as days/reputation/money grow, so the
                 // Elite District ending is reachable (#1986)
                 const mapUnlock = this.gameState.mapProgressionSystem?.checkMapUnlocks?.();

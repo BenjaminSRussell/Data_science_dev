@@ -45,7 +45,7 @@ describe('ContractSystem cluster', () => {
             ]
         });
         active.progress = active.timeRequired;
-        active.deadline = Date.now() - 1; // no early bonus
+        active.deadlineDay = 0; // no early bonus
         const res = cs.completeContract(active.id);
         expect(res.pay).toBe(100);
         expect(Number.isFinite(gs.money)).toBe(true);
@@ -63,7 +63,7 @@ describe('ContractSystem cluster', () => {
             ]
         });
         active.progress = active.timeRequired;
-        active.deadline = Date.now() - 1;
+        active.deadlineDay = 0;
         expect(cs.completeContract(active.id).pay).toBe(200);
     });
 
@@ -83,14 +83,13 @@ describe('ContractSystem cluster', () => {
         expect(old.generator.contractIdCounter).toBe(41);
     });
 
-    it('deadline starts at acceptance (#972)', () => {
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+    it('deadline starts at acceptance, in in-game days (#972, #2113)', () => {
         const { cs } = makeSystem();
         expect(cs.availableContracts[0].deadline).toBeNull();
-        vi.setSystemTime(new Date('2026-01-10T00:00:00Z'));
+        cs.gameState.timeManager = { totalDays: 10 };
         const active = acceptOne(cs);
-        expect(active.deadline).toBe(Date.now() + active.timeRequired * ContractSystem.DAY_MS);
+        expect(active.acceptedDay).toBe(10);
+        expect(active.deadlineDay).toBe(10 + active.timeRequired);
     });
 
     it('getters return copies (#1627)', () => {
