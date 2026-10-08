@@ -99,7 +99,9 @@
     border-left: 4px solid rgba(255, 255, 255, 0.3);
 }
 
-.dialogue-text {
+/* Scoped: a bare .dialogue-text also styled the live DialogueUI text
+   (italic, centred) because this file loads after components.css (#272) */
+.breakdown-dialogue .dialogue-text {
     color: var(--color-text-primary);
     font-size: 1.1rem;
     line-height: 1.6;
