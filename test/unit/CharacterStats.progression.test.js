@@ -12,14 +12,27 @@ describe('CharacterStats progression', () => {
         it('stays at level 1 below $5,000', () => {
             expect(cs.checkEvolution(4999)).toEqual({ evolved: false });
         });
-        it('good path at ethics >= 50, evil below', () => {
-            cs.ethics = 50;
-            expect(cs.checkEvolution(5000)).toEqual({ evolved: true, stage: 'level_2_good' });
-            const evil = new CharacterStats();
-            evil.ethics = 49;
-            expect(evil.checkEvolution(5000).stage).toBe('level_2_evil');
+        it('good above +30, evil below -30, neutral in between (ethics starts at 0)', () => {
+            const at = (ethics) => { const c = new CharacterStats(); c.ethics = ethics; return c.checkEvolution(5000).stage; };
+            expect(new CharacterStats().checkEvolution(5000)).toEqual({ evolved: true, stage: 'level_2_neutral' });
+            expect(at(31)).toBe('level_2_good');
+            expect(at(30)).toBe('level_2_neutral');
+            expect(at(-30)).toBe('level_2_neutral');
+            expect(at(-31)).toBe('level_2_evil');
         });
-        it('level 2 -> level 3 at $50,000, and a repeat call does not re-evolve', () => {
+        it('getAlignment bands', () => {
+            const c = new CharacterStats();
+            expect(c.getAlignment()).toBe('neutral');
+            c.ethics = 100; expect(c.getAlignment()).toBe('good');
+            c.ethics = -100; expect(c.getAlignment()).toBe('evil');
+            c.ethics = 'junk'; expect(c.getAlignment()).toBe('neutral');
+        });
+        it('a neutral level 2 becomes a neutral level 3', () => {
+            const c = new CharacterStats();
+            c.checkEvolution(5000);
+            expect(c.checkEvolution(50000)).toEqual({ evolved: true, stage: 'level_3_neutral' });
+        });
+                it('level 2 -> level 3 at $50,000, and a repeat call does not re-evolve', () => {
             cs.ethics = 60;
             cs.checkEvolution(5000);
             expect(cs.checkEvolution(50000)).toEqual({ evolved: true, stage: 'level_3_good' });

@@ -209,7 +209,7 @@ export class CharacterStats {
         // +100: Saint
         this.ethics = 0; // Neutral start (-100 Evil … +100 Saint); was 50 which forced ethical news (#2639)
         this.level = 1;
-        this.visualStage = 'level_1'; // level_1, level_2_good, level_2_evil, etc.
+        this.visualStage = 'level_1'; // level_1, level_2_{good,neutral,evil}, level_3_{good,neutral,evil}
 
         // (The old parallel `skills` table was never read and shadowed stats.charisma, #1719)
 
@@ -242,6 +242,20 @@ export class CharacterStats {
      * @param {number} netWorth - Current player money/net worth (deprecated, kept for backward compatibility)
      * @param {VisualProgressionSystem} visualProgressionSystem - The canonical visual tier system
      */
+    /**
+     * Moral alignment for visuals. Ethics runs -100..100 and starts at 0
+     * (#2639), so the middle band is neutral rather than "evil". The +/-30
+     * band matches StorylineManager, NarrativeClaritySystem and the act
+     * transition screen.
+     * @returns {'good'|'neutral'|'evil'}
+     */
+    getAlignment() {
+        const ethics = Number(this.ethics) || 0;
+        if (ethics > CharacterStats.ALIGNMENT_THRESHOLD) return 'good';
+        if (ethics < -CharacterStats.ALIGNMENT_THRESHOLD) return 'evil';
+        return 'neutral';
+    }
+
     checkEvolution(netWorth, visualProgressionSystem) {
         let newStage = this.visualStage;
 
@@ -254,9 +268,9 @@ export class CharacterStats {
             if (currentTier === 'basic') {
                 newStage = 'level_1';
             } else if (currentTier === 'mid') {
-                newStage = this.ethics >= 50 ? 'level_2_good' : 'level_2_evil';
+                newStage = `level_2_${this.getAlignment()}`;
             } else if (currentTier === 'premium') {
-                newStage = this.ethics >= 50 ? 'level_3_good' : 'level_3_evil';
+                newStage = `level_3_${this.getAlignment()}`;
             }
         } else {
             // Fallback to old threshold logic if visualProgressionSystem not provided
@@ -264,12 +278,12 @@ export class CharacterStats {
 
             // Level 2 Threshold: $5,000
             if (netWorth >= 5000 && this.visualStage === 'level_1') {
-                newStage = this.ethics >= 50 ? 'level_2_good' : 'level_2_evil';
+                newStage = `level_2_${this.getAlignment()}`;
             }
 
             // Level 3 Threshold: $50,000
             else if (netWorth >= 50000 && this.visualStage.startsWith('level_2')) {
-                newStage = this.ethics >= 50 ? 'level_3_good' : 'level_3_evil';
+                newStage = `level_3_${this.getAlignment()}`;
             }
         }
 
@@ -471,3 +485,6 @@ export class CharacterStats {
         if (data.visuals && typeof data.visuals === 'object') this.visuals = { ...this.visuals, ...data.visuals };
     }
 }
+
+// Ethics beyond +/- this value reads as good/evil; inside it is neutral
+CharacterStats.ALIGNMENT_THRESHOLD = 30;
