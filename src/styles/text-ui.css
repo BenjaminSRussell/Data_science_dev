@@ -6,19 +6,19 @@
 /* Text-based UI container */
 .text-ui {
     font-family: var(--font-mono);
-    background: #1a1a1a;
-    color: #cccccc;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
     padding: 1rem;
-    border: 1px solid #404040;
+    border: 1px solid var(--color-bg-elevated);
     border-radius: 4px;
 }
 
 /* Responsive text sizing */
 .text-ui-heading {
     font-size: clamp(1rem, 2vw, 1.5rem);
-    color: #ffffff;
+    color: var(--color-text-primary);
     margin-bottom: 0.5rem;
-    border-bottom: 1px solid #404040;
+    border-bottom: 1px solid var(--color-bg-elevated);
     padding-bottom: 0.5rem;
 }
 
@@ -57,7 +57,7 @@
 /* Text-based progress bar */
 .text-progress {
     font-family: var(--font-mono);
-    background: #2d2d2d;
+    background: var(--color-bg-tertiary);
     padding: 0.5rem;
     border-radius: 2px;
 }
@@ -65,16 +65,16 @@
 .text-progress-bar {
     display: flex;
     gap: 2px;
-    background: var(--color-bg-tertiary, #2d2d2d);
+    background: var(--color-bg-tertiary);
     min-height: 8px;
     border-radius: 2px;
     overflow: hidden;
 }
 
 .text-progress-filled {
-    color: #999999;
+    color: var(--color-text-secondary);
     /* JS sets the width of these divs, so they need a painted fill (#1782) */
-    background: var(--color-text-secondary, #999999);
+    background: var(--color-text-secondary);
     min-height: 8px;
     transition: width 0.3s ease;
 }
@@ -84,21 +84,21 @@
     display: flex;
     justify-content: space-between;
     padding: 0.25rem 0;
-    border-bottom: 1px dotted #333333;
+    border-bottom: 1px dotted var(--color-bg-tertiary);
 }
 
 .text-stat-label {
-    color: #888888;
+    color: var(--color-text-muted);
 }
 
 .text-stat-value {
-    color: #ffffff;
+    color: var(--color-text-primary);
     font-weight: 600;
 }
 
 /* ASCII-style borders */
 .ascii-box {
-    border: 1px solid #555555;
+    border: 1px solid var(--color-bg-elevated);
     padding: 1rem;
     position: relative;
 }
@@ -108,9 +108,9 @@
     position: absolute;
     top: -0.5rem;
     left: 0.5rem;
-    background: #1a1a1a;
+    background: var(--color-bg-secondary);
     padding: 0 0.25rem;
-    color: #666666;
+    color: var(--color-bg-elevated);
 }
 
 /* .phase-name is styled by story-ui.css; a colour override here dimmed the
@@ -119,9 +119,9 @@
 /* Manual action buttons - prominent */
 .btn-manual-action {
     font-family: var(--font-mono);
-    background: #404040;
-    color: #ffffff;
-    border: 2px solid #666666;
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-bg-elevated);
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
     cursor: pointer;
@@ -129,8 +129,8 @@
 }
 
 .btn-manual-action:hover {
-    background: #555555;
-    border-color: #888888;
+    background: var(--color-bg-elevated);
+    border-color: var(--color-text-muted);
 }
 
 .btn-manual-action:active {
@@ -139,9 +139,9 @@
 
 /* Disabled state */
 .btn-manual-action:disabled {
-    background: #2d2d2d;
-    color: #555555;
-    border-color: #404040;
+    background: var(--color-bg-tertiary);
+    color: var(--color-bg-elevated);
+    border-color: var(--color-bg-elevated);
     cursor: not-allowed;
 }
 
@@ -154,9 +154,9 @@
 
 /* Simple grey button variants */
 .btn-grey {
-    background: linear-gradient(135deg, #444444 0%, #333333 100%);
-    color: #cccccc;
-    border: 1px solid #555555;
+    background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-tertiary) 100%);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-bg-elevated);
     padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
@@ -165,8 +165,8 @@
 }
 
 .btn-grey:hover {
-    background: linear-gradient(135deg, #555555 0%, #444444 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-tertiary) 100%);
+    color: var(--color-text-primary);
 }
 
 /* Badge styling for unread items */
@@ -174,15 +174,15 @@
     position: absolute;
     top: -5px;
     right: -5px;
-    background: #ff4444;
-    color: #fff;
+    background: var(--color-accent-danger);
+    color: var(--color-text-primary);
     border-radius: 10px;
     padding: 2px 6px;
     font-size: 0.7rem;
     font-weight: bold;
     min-width: 18px;
     text-align: center;
-    border: 2px solid #333333;
+    border: 2px solid var(--color-bg-tertiary);
     animation: pulse 1s ease-in-out infinite;
 }
 
