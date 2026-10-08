@@ -515,80 +515,72 @@ export class MainGame {
      * Initialize essential menu enhancements (unique, non-repetitive)
      */
     initMenuEnhancements() {
-        const menuBackground = document.querySelector('.menu-background');
-        const menuContainer = document.querySelector('.menu-container');
+        // The old .menu-background/.menu-container markup is gone; gating on it
+        // meant none of this ever ran (#1320, #2212). Work on #screen-menu.
+        const menuScreen = document.getElementById('screen-menu');
+        if (!menuScreen) return;
 
-        if (!menuBackground || !menuContainer) return;
-
-        // Time-of-day background (subtle, not repetitive)
+        // Time-of-day hint for menu styling
         const hour = new Date().getHours();
-        let timeOfDay = 'evening';
+        let timeOfDay = 'night';
         if (hour >= 6 && hour < 12) timeOfDay = 'morning';
         else if (hour >= 12 && hour < 18) timeOfDay = 'afternoon';
         else if (hour >= 18 && hour < 22) timeOfDay = 'evening';
-        else timeOfDay = 'night';
-        menuBackground.setAttribute('data-time', timeOfDay);
+        menuScreen.setAttribute('data-time', timeOfDay);
 
-        // Enhanced keyboard navigation
-        this.setupMenuKeyboardNavigation();
-
-        // Enhanced focus management
-        this.setupMenuFocusManagement();
-
-        // Accessibility improvements
+        this.setupMenuKeyboardNavigation(menuScreen);
+        this.setupMenuFocusManagement(menuScreen);
         this.setupMenuAccessibility();
     }
 
-    setupMenuKeyboardNavigation() {
-        const buttons = document.querySelectorAll('.btn-manual-action');
-        buttons.forEach((btn, index) => {
-            btn.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowDown' && index < buttons.length - 1) {
-                    e.preventDefault();
-                    buttons[index + 1].focus();
-                } else if (e.key === 'ArrowUp' && index > 0) {
-                    e.preventDefault();
-                    buttons[index - 1].focus();
-                }
-            });
+    /**
+     * Buttons the menu's arrow keys move between: only the menu's own,
+     * visible, enabled buttons (#2474)
+     */
+    getMenuNavButtons(menuScreen = document.getElementById('screen-menu')) {
+        if (!menuScreen) return [];
+        return [...menuScreen.querySelectorAll('button')].filter(btn =>
+            !btn.disabled && !btn.closest('.hidden') && btn.style.display !== 'none');
+    }
+
+    setupMenuKeyboardNavigation(menuScreen = document.getElementById('screen-menu')) {
+        if (!menuScreen || menuScreen.dataset.keyNavBound) return;
+        menuScreen.dataset.keyNavBound = 'true';
+        // One delegated listener, scoped to the menu, that re-reads the
+        // buttons each time so shown/hidden buttons (Continue) are handled
+        menuScreen.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+            const buttons = this.getMenuNavButtons(menuScreen);
+            const index = buttons.indexOf(document.activeElement);
+            if (index === -1) return;
+            const next = e.key === 'ArrowDown' ? index + 1 : index - 1;
+            if (next < 0 || next >= buttons.length) return;
+            e.preventDefault();
+            buttons[next].focus();
         });
     }
 
-    setupMenuFocusManagement() {
-        const menuScreen = document.getElementById('screen-menu');
-        if (menuScreen) {
-            menuScreen.setAttribute('role', 'main');
-            menuScreen.setAttribute('aria-label', 'Main menu');
-        }
+    setupMenuFocusManagement(menuScreen = document.getElementById('screen-menu')) {
+        if (!menuScreen) return;
+        menuScreen.setAttribute('role', 'main');
+        menuScreen.setAttribute('aria-label', 'Main menu');
 
-        const buttons = document.querySelectorAll('.btn-manual-action');
-        buttons.forEach(btn => {
-            if (!btn.getAttribute('aria-label')) {
-                const text = btn.querySelector('.btn-text')?.textContent || 'Menu button';
-                btn.setAttribute('aria-label', text);
+        // Only label buttons that have no visible text; a generic label would
+        // replace a button's real name for screen readers (#2474)
+        menuScreen.querySelectorAll('button').forEach(btn => {
+            if (!btn.getAttribute('aria-label') && !btn.textContent.trim()) {
+                btn.setAttribute('aria-label', btn.title || 'Menu button');
             }
         });
     }
 
     setupMenuAccessibility() {
-        // Respect reduced motion
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // Respect reduced motion (CSS keys off this attribute); focus rings
+        // come from the :focus-visible rule in main.css
+        const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
         if (prefersReducedMotion) {
             document.documentElement.setAttribute('data-reduced-motion', 'true');
         }
-
-        // Enhanced focus indicators
-        const focusableElements = document.querySelectorAll('button, a, input, select, textarea');
-        focusableElements.forEach(el => {
-            el.addEventListener('focus', () => {
-                el.style.outline = '2px solid rgba(139, 92, 246, 0.6)';
-                el.style.outlineOffset = '2px';
-            });
-            el.addEventListener('blur', () => {
-                el.style.outline = '';
-                el.style.outlineOffset = '';
-            });
-        });
     }
 
     /**
@@ -2692,16 +2684,41 @@ export class MainGame {
         }
         radioBtn.dataset.radioBound = 'true';
 
+        // Disclosure state for screen readers, focus in/out, Escape (#879)
+        const setOpen = (open, { returnFocus = false } = {}) => {
+            radioMenu.classList.toggle('hidden', !open);
+            radioBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) {
+                radioMenu.querySelector('.radio-station')?.focus?.();
+            } else if (returnFocus) {
+                radioBtn.focus?.();
+            }
+        };
+
         // Toggle menu visibility
         radioBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            radioMenu.classList.toggle('hidden');
+            setOpen(radioMenu.classList.contains('hidden'));
         });
 
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
             if (!radioBtn.contains(e.target) && !radioMenu.contains(e.target)) {
-                radioMenu.classList.add('hidden');
+                setOpen(false);
+            }
+        });
+
+        // Escape closes and returns focus; arrows move between stations
+        radioMenu.addEventListener('keydown', (e) => {
+            const items = [...radioMenu.querySelectorAll('button')];
+            const index = items.indexOf(document.activeElement);
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                setOpen(false, { returnFocus: true });
+            } else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && index !== -1) {
+                e.preventDefault();
+                const next = (index + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+                items[next].focus();
             }
         });
 
@@ -2711,7 +2728,7 @@ export class MainGame {
                 const stationId = station.dataset.station;
                 this.switchMusicStation(stationId);
                 this.updateRadioUI();
-                radioMenu.classList.add('hidden');
+                setOpen(false, { returnFocus: true });
             });
         });
 
