@@ -207,7 +207,8 @@ export class WorkInteractionSystem {
         const readiness = this.boss.promotionReadiness;
         const relationship = this.boss.relationship;
         const reputation = this.gameState.reputation || 0;
-        const completedTasks = this.gameState.jobSystem?.completedTasks.length || 0;
+        // jobSystem.completedTasks alone never grows from chart work (#1542)
+        const completedTasks = this.getCompletedTaskCount();
 
         // Calculate promotion chance
         let success = false;
@@ -263,6 +264,7 @@ export class WorkInteractionSystem {
         } else if (readiness < 40) {
             this.boss.relationship -= 2; // Slightly annoyed if asked too early
         }
+        this.clampBoss();
 
         return {
             success,
@@ -302,7 +304,40 @@ export class WorkInteractionSystem {
      * Increase promotion readiness (called when completing tasks well)
      */
     increasePromotionReadiness(amount = 1) {
-        this.boss.promotionReadiness = Math.min(100, this.boss.promotionReadiness + amount);
+        this.boss.promotionReadiness += amount;
+        this.clampBoss();
+    }
+
+    /**
+     * Boss relationship and promotion readiness both live on 0-100; every
+     * mutation goes through here (#1016, #219, #1810)
+     */
+    clampBoss() {
+        const clamp = (v) => Math.max(0, Math.min(100, Number(v) || 0));
+        this.boss.relationship = clamp(this.boss.relationship);
+        this.boss.promotionReadiness = clamp(this.boss.promotionReadiness);
+    }
+
+    /**
+     * A finished chart task: great work builds readiness and goodwill, poor
+     * work costs a little goodwill. This is what feeds askForPromotion()'s
+     * readiness and relationship gates (#1542, #1809).
+     */
+    recordTaskResult(stars) {
+        const s = Number(stars) || 0;
+        if (s >= 4) {
+            this.boss.promotionReadiness += (s - 3) * 5;
+            this.boss.relationship += s - 2;
+        } else if (s > 0 && s <= 2) {
+            this.boss.relationship -= 1;
+        }
+        this.clampBoss();
+    }
+
+    /** Tasks the boss has seen you finish: chart tasks plus JobSystem tasks */
+    getCompletedTaskCount() {
+        return (Number(this.gameState.tasksCompleted) || 0) +
+            (this.gameState.jobSystem?.completedTasks?.length || 0);
     }
 
     /**

@@ -2339,10 +2339,8 @@ export class MainGame {
         this.gameState.tasksCompleted++;
         this.gameState.totalEarned += score.moneyEarned;
         this.gameState.weeklyIncome += score.moneyEarned; // Track for taxes
-        // Strong work makes the boss more open to a promotion talk (#1543)
-        if (score.stars >= 4) {
-            this.gameState.workInteractionSystem?.increasePromotionReadiness?.((score.stars - 3) * 5);
-        }
+        // The boss notices: strong work builds promotion readiness and goodwill (#1543, #1542)
+        this.gameState.workInteractionSystem?.recordTaskResult?.(score.stars);
 
         // Check for story beats (task completion)
         if (this.storyBeatsSystem && oldTaskCount === 0) {

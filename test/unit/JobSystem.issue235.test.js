@@ -30,11 +30,13 @@ describe('JobSystem.getAvailableJobs reputation gating', () => {
         expect(categoryIds(jobs)).not.toContain('junior_analyst');
     });
 
-    it('reputation 1200+ returns all 5 categories, not a subset', () => {
+    it('reputation 5000+ returns all 7 categories (one per rank, #953), not a subset', () => {
         const allIds = Object.keys(JOB_CATEGORIES);
-        expect(allIds).toHaveLength(5);
+        expect(allIds).toHaveLength(7);
 
-        const jobs = makeSystem(1200).getAvailableJobs();
+        const jobs = makeSystem(5000).getAvailableJobs();
         expect(categoryIds(jobs)).toEqual(allIds);
+        // 1200 stops at the Lead Data Scientist tier
+        expect(categoryIds(makeSystem(1200).getAvailableJobs())).toEqual(allIds.slice(0, 5));
     });
 });
