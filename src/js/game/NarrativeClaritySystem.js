@@ -21,6 +21,24 @@ export class NarrativeClaritySystem {
         legacy: 'Legacy: build something that outlasts you.'
     };
 
+    static CHAPTERS = {
+        early: 'Chapter 2: Finding Your Way',
+        mid: 'Chapter 3: Building Your Reputation',
+        late: 'Chapter 4: The Climb',
+        endgame: 'Chapter 5: At The Top'
+    };
+
+    /** Day-only fallback matching StorylineManager.determinePhase's day bands */
+    static phaseForDays(days) {
+        return days < 30 ? 'early' : days < 90 ? 'mid' : days < 180 ? 'late' : 'endgame';
+    }
+
+    /** Chapter title for a storyline phase (#512) */
+    static chapterFor(phase, days = 0) {
+        if (phase === 'early' && days < 7) return 'Chapter 1: The Beginning';
+        return NarrativeClaritySystem.CHAPTERS[phase] || NarrativeClaritySystem.CHAPTERS.early;
+    }
+
     /**
      * Get narrative context for current game state
      */
@@ -33,13 +51,12 @@ export class NarrativeClaritySystem {
         const cs = this.gameState.characterStats;
         const ethics = typeof cs?.ethics === 'number' ? cs.ethics : (cs?.getStat?.('ethics') || 0);
 
-        // Determine chapter
-        let chapter = 'Prologue';
-        if (days < 7) chapter = 'Chapter 1: The Beginning';
-        else if (days < 30) chapter = 'Chapter 2: Finding Your Way';
-        else if (days < 90) chapter = 'Chapter 3: Building Your Reputation';
-        else if (days < 180) chapter = 'Chapter 4: The Climb';
-        else chapter = 'Chapter 5: At The Top';
+        // Chapter follows StorylineManager's phase, the one source of truth
+        // for story progress, so the story panel's chapter and phase agree
+        // (#512); only the first week of 'early' is split out as Chapter 1
+        const phase = this.gameState.storylineManager?.storylinePhase
+            ?? NarrativeClaritySystem.phaseForDays(days);
+        const chapter = NarrativeClaritySystem.chapterFor(phase, days);
 
         // Determine player motivation
         let motivation = 'survival';
