@@ -8,20 +8,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 describe('Game Flow Control', () => {
     describe('EnvironmentManager', () => {
         it('should not use setInterval for time updates in init', async () => {
-            // Read the EnvironmentManager source
-            const fs = await import('fs');
-            const path = await import('path');
-            const filePath = path.join(__dirname, '../../src/js/game/EnvironmentManager.js');
-            const content = fs.readFileSync(filePath, 'utf8');
-
-            // Check that the setInterval in init is commented out
-            const initSection = content.slice(
-                content.indexOf('init()'),
-                content.indexOf('updateLocation()')
-            );
-
-            expect(initSection).not.toMatch(/^\s*this\.timeUpdateInterval\s*=\s*setInterval/m);
-            expect(content).toContain('// DISABLED: Automatic time updates');
+            // Behavioural check (#1842, #2333): run init() and make sure it
+            // schedules nothing and never starts the event timer
+            const { EnvironmentManager } = await import('../../src/js/game/EnvironmentManager.js');
+            vi.useFakeTimers();
+            const intervalSpy = vi.spyOn(globalThis, 'setInterval');
+            try {
+                const env = new EnvironmentManager({ rankIndex: 0, tasksCompleted: 0 });
+                const eventTimer = vi.spyOn(env, 'startEventTimer');
+                env.init();
+                expect(intervalSpy).not.toHaveBeenCalled();
+                expect(eventTimer).not.toHaveBeenCalled();
+                expect(env.timeUpdateInterval).toBeNull();
+            } finally {
+                intervalSpy.mockRestore();
+                vi.useRealTimers();
+            }
         });
 
         it('should not auto-start event timer', async () => {
