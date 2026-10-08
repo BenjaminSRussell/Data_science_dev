@@ -3,11 +3,13 @@
  */
 
 import { RANKS } from '../data/ranks.js';
-import { MAX_SAVE_SLOTS } from '../save/SaveManager.js';
+import { StatisticsAggregator } from './StatisticsAggregator.js';
 
 export class MenuLogoDisplay {
-    constructor(saveManager) {
+    constructor(saveManager, aggregator = null) {
         this.saveManager = saveManager;
+        // Same numbers as the stats dashboard: one aggregator, one playtime formula (#1629)
+        this.aggregator = aggregator || new StatisticsAggregator(saveManager);
         this.currentStatIndex = 0;
         this.stats = [];
         this.rotationInterval = null;
@@ -41,44 +43,18 @@ export class MenuLogoDisplay {
      * Calculate statistics from all save slots
      */
     calculateStats() {
-        let totalPlaytime = 0;
-        let highestRank = 0;
-        let totalAchievements = 0;
-        let gamesCompleted = 0;
-        let totalMoney = 0;
-        let totalTasks = 0;
+        const totals = this.aggregator.getStats();
+        const totalPlaytime = totals.totalPlaytime || 0;
+        const highestRank = totals.highestRank || 0;
+        const gamesCompleted = totals.gamesCompleted || 0;
+        const totalMoney = totals.totalMoney || 0;
+        const totalTasks = totals.totalTasks || 0;
 
-        // Scan all save slots
-        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
-            const saveData = this.saveManager.getSaveData(i);
-            if (saveData && saveData.state) {
-                const state = saveData.state;
-                
-                // Calculate playtime (rough estimate: days * 24 hours)
-                const days = state.timeManager?.totalDays || 0;
-                totalPlaytime += days * 24; // Rough estimate
-                
-                // Track highest rank
-                if (state.rankIndex > highestRank) {
-                    highestRank = state.rankIndex;
-                }
-                
-                // Count achievements
-                if (state.completedAchievements) {
-                    totalAchievements += state.completedAchievements.length;
-                }
-                
-                // Count completed games (reached max rank)
-                if (state.rankIndex >= 6) {
-                    gamesCompleted++;
-                }
-                
-                // Sum money
-                totalMoney += state.money || 0;
-                
-                // Sum tasks
-                totalTasks += state.tasksCompleted || 0;
-            }
+        // Achievements aren't in the aggregator; count them per distinct playthrough
+        let totalAchievements = 0;
+        for (const { saveData } of this.aggregator.getDistinctSaves()) {
+            const done = saveData.state.completedAchievements;
+            if (Array.isArray(done)) totalAchievements += done.length;
         }
 
         // Get rank name
@@ -133,17 +109,7 @@ export class MenuLogoDisplay {
      * Format playtime in hours
      */
     formatPlaytime(hours) {
-        if (hours < 24) {
-            return `${Math.round(hours)}h`;
-        } else if (hours < 168) {
-            const days = Math.floor(hours / 24);
-            const remainingHours = Math.round(hours % 24);
-            return `${days}d ${remainingHours}h`;
-        } else {
-            const weeks = Math.floor(hours / 168);
-            const days = Math.floor((hours % 168) / 24);
-            return `${weeks}w ${days}d`;
-        }
+        return this.aggregator.formatPlaytime(hours);
     }
 
     /**

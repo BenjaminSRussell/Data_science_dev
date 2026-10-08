@@ -598,7 +598,7 @@ export class MainGame {
             return;
         }
 
-        const stats = this.statisticsAggregator.calculate();
+        const stats = this.statisticsAggregator.getStats();
 
         // Only show if there's meaningful data
         if (stats.totalPlaytime === 0 && stats.gamesCompleted === 0) {
