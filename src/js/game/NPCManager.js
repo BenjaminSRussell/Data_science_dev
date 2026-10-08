@@ -1582,9 +1582,18 @@ export class NPCManager {
         if (tree?.getNode) {
             const node = tree.getNode(conv.currentNode || 'root');
             if (node?.choices?.length) {
-                return node.choices
-                    .filter(c => !c.conditions?.relationship || relationship >= c.conditions.relationship)
-                    .map(c => ({ text: c.text, next: c.id, effect: {}, treeNode: true }));
+                // A relationship-gated choice stays visible but locked, so the
+                // player can see what a closer relationship unlocks (#1581).
+                // makeChoice() refuses locked choices.
+                return node.choices.map(c => {
+                    const need = Number(c.conditions?.relationship) || 0;
+                    const out = { text: c.text, next: c.id, effect: {}, treeNode: true };
+                    if (need && relationship < need) {
+                        out.locked = true;
+                        out.conditions = { relationship: need };
+                    }
+                    return out;
+                });
             }
         }
 
@@ -1622,7 +1631,7 @@ export class NPCManager {
         const npcId = conv.npc.id;
 
         const choice = (conv.choices || [])[choiceIndex];
-        if (!choice) return null;
+        if (!choice || choice.locked) return null;
 
         const romance = this.gameState.romanceSystem;
         const specialResult = (result) => ({
