@@ -151,7 +151,7 @@ export const STAFF_ROLES = {
     intern: { name: 'Intern', hireCost: 100, salary: 50, efficiency: 0.5, minOffice: 0 },
     junior_analyst: { name: 'Junior Analyst', hireCost: 300, salary: 150, efficiency: 0.8, minOffice: 0 },
     analyst: { name: 'Data Analyst', hireCost: 600, salary: 300, efficiency: 1.0, minOffice: 0 },
-    data_scientist: { name: 'Data Scientist', hireCost: 1500, salary: 800, efficiency: 2.0, minOffice: 3 }
+    data_scientist: { name: 'Data Scientist', hireCost: 1500, salary: 800, efficiency: 2.0, minOffice: 3, requiresLicense: 'business_license' }
 };
 
 // Staff capacity per office tier (index = gameState.officeIndex)
@@ -2840,6 +2840,13 @@ export class MainGame {
             return false;
         }
 
+        // Senior hires also need a Business License from City Hall (#1536)
+        if (spec.requiresLicense && !legal.hasLicense(spec.requiresLicense)) {
+            const name = legal.getLicenseById?.(spec.requiresLicense)?.name || spec.requiresLicense;
+            this.showToast(`You need a ${name} to hire a ${spec.name}.`, 'error');
+            return false;
+        }
+
         const officeIndex = this.gameState.officeIndex || 0;
         if (officeIndex < (spec.minOffice || 0)) {
             this.showError(`${spec.name}s require a bigger office.`);
@@ -3146,6 +3153,10 @@ export class MainGame {
         EducationHelpers.handleBuyLicense(this, licenseId);
     }
 
+    handleHireLawyer(tier) {
+        EducationHelpers.handleHireLawyer(this, tier);
+    }
+
     // ========== EDUCATION METHODS (delegated to EducationHelpers) ==========
 
     handleStartExam(courseId) {
@@ -3334,6 +3345,12 @@ export class MainGame {
 
                 // Reset weekly income tracker
                 this.gameState.weeklyIncome = 0;
+
+                // Legal trouble can turn into an audit (#1538)
+                const legalWeek = this.gameState.legalSystem?.processWeek?.();
+                if (legalWeek?.audited) {
+                    this.showToast(`Audited! Regulators fined you $${legalWeek.fine.toLocaleString()} over your legal trouble.`, 'error');
+                }
 
                 // Company payroll and client retainers (no-op without a company)
                 if (this.companyManagement?.playerCompany) {

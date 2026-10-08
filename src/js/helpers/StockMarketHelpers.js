@@ -3,6 +3,7 @@
  * Helper functions for stock market operations and crime system
  */
 
+import { getLawyerReduction } from '../game/LegalSystem.js';
 import { QuotronTicker } from '../game/QuotronTicker.js';
 
 let quotronTicker = null;
@@ -368,7 +369,7 @@ export function handleArrest(game, reason) {
     // Lawyer tier (LegalSystem.hireLawyer) mitigates the penalty:
     // cheap: 20% reduction, average: 40%, expensive: 60%
     const lawyerTier = game.gameState.legalSystem?.lawyer || null;
-    const reduction = { cheap: 0.2, average: 0.4, expensive: 0.6 }[lawyerTier] || 0;
+    const reduction = getLawyerReduction(lawyerTier);
 
     const baseSentence = 30;
     const baseFine = 5000;
@@ -380,7 +381,10 @@ export function handleArrest(game, reason) {
     document.getElementById('jail-time-left').textContent = `${game.gameState.jailSentence} days`;
     game.uiUpdater?.updateHeatMeter?.();
 
-    game.gameState.reputation = Math.floor((game.gameState.reputation || 0) * (1 - reduction));
+    // An arrest halves reputation; a lawyer softens the hit. This used to be
+    // rep * (1 - reduction), so having a lawyer was the only way to lose rep (#1281)
+    const repLoss = 0.5 * (1 - reduction);
+    game.gameState.reputation = Math.floor((game.gameState.reputation || 0) * (1 - repLoss));
     // Like the bribe, the fine can't take more than you have (#1277)
     const charged = Math.max(0, Math.min(fine, Math.floor(game.gameState.money || 0)));
     game.gameState.money -= charged;
