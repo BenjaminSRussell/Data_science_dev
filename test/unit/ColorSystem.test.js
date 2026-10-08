@@ -49,10 +49,42 @@ describe('Color System', () => {
                 expect(found, `Found forbidden blue color: ${color}`).toBe(false);
             });
 
-            // Check for named colors (excluding CSS comments)
+            // Named colors anywhere in a declaration value - shorthand borders,
+            // gradients, shadows - not just "color: cyan;" (#1861, #2332).
+            // Comments are stripped; \b keeps identifiers like --cyanish out.
             const contentWithoutComments = allCssContent.replace(/\/\*[\s\S]*?\*\//g, '');
-            expect(contentWithoutComments).not.toMatch(/:\s*cyan\s*[;,}]/i);
-            expect(contentWithoutComments).not.toMatch(/:\s*aqua\s*[;,}]/i);
+            const values = [...contentWithoutComments.matchAll(/:\s*([^;{}]+)[;}]/g)].map(m => m[1]);
+            const named = values.filter(v => /(^|[\s,(])(cyan|aqua)(?![\w-])/i.test(v));
+            expect(named, `Found forbidden named colors: ${named.join(' | ')}`).toEqual([]);
+        });
+
+        it('var() is only ever given a custom property, never a literal (#2337, #880)', () => {
+            const bad = [...allCssContent.matchAll(/var\(\s*(?!--)[^)]*\)/g)].map(m => m[0]);
+            expect(bad).toEqual([]);
+        });
+
+        it('no hex/rgb colour falls in the blue, purple or pink hue bands (#1860)', () => {
+            // Parse every hex / rgb() colour and check its hue, instead of a
+            // fixed list of four hex codes. Near-neutral tints (low chroma,
+            // e.g. slate greys) are allowed.
+            const css = allCssContent.replace(/\/\*[\s\S]*?\*\//g, '');
+            const colours = [];
+            for (const m of css.matchAll(/#([0-9a-f]{6}|[0-9a-f]{3})\b/gi)) {
+                const h = m[1].length === 3 ? [...m[1]].map(c => c + c).join('') : m[1];
+                colours.push([parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), m[0]]);
+            }
+            for (const m of css.matchAll(/rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/g)) {
+                colours.push([+m[1], +m[2], +m[3], m[0]]);
+            }
+            const offenders = colours.filter(([r, g, b]) => {
+                const [R, G, B] = [r / 255, g / 255, b / 255];
+                const max = Math.max(R, G, B), min = Math.min(R, G, B), chroma = max - min;
+                if (chroma <= 0.15) return false;
+                let hue = max === R ? ((G - B) / chroma) % 6 : max === G ? (B - R) / chroma + 2 : (R - G) / chroma + 4;
+                hue = (hue * 60 + 360) % 360;
+                return hue >= 170 && hue <= 345; // cyan .. blue .. purple .. pink
+            }).map(c => c[3]);
+            expect([...new Set(offenders)], 'blue/purple/pink colours found').toEqual([]);
         });
 
         it('should not contain pink color values (#f472b6, #ec4899)', () => {

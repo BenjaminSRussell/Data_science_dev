@@ -120,7 +120,7 @@
 }
 
 .btn-danger {
-    background: var(#444444);
+    background: var(--color-accent-danger);
     color: white;
 }
 
@@ -147,17 +147,17 @@
 
 .badge-success {
     background: rgba(100, 100, 100, 0.1);
-    color: var(#888888);
+    color: var(--color-accent-success);
 }
 
 .badge-warning {
     background: rgba(120, 120, 120, 0.1);
-    color: var(#666666);
+    color: var(--color-accent-warning);
 }
 
 .badge-danger {
     background: rgba(80, 80, 80, 0.1);
-    color: var(#444444);
+    color: var(--color-accent-danger);
 }
 
 /* =====================================================
@@ -459,7 +459,7 @@
     right: -2px;
     width: 10px;
     height: 10px;
-    background: var(#444444);
+    background: var(--color-accent-danger);
     border-radius: 50%;
     border: 2px solid var(--color-bg-secondary);
 }
@@ -478,7 +478,7 @@
 }
 
 .counter-money {
-    color: var(#888888);
+    color: var(--color-accent-success);
 }
 
 .counter-money::before {
@@ -531,11 +531,11 @@
 }
 
 .rating-star.filled {
-    color: var(#666666);
+    color: var(--color-accent-warning);
 }
 
 .rating-star.half {
-    background: linear-gradient(90deg, var(#666666) 50%, var(--color-text-muted) 50%);
+    background: linear-gradient(90deg, var(--color-accent-warning) 50%, var(--color-text-muted) 50%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -599,12 +599,12 @@
 
 .countdown.warning {
     background: rgba(120, 120, 120, 0.1);
-    color: var(#666666);
+    color: var(--color-accent-warning);
 }
 
 .countdown.danger {
     background: rgba(80, 80, 80, 0.1);
-    color: var(#444444);
+    color: var(--color-accent-danger);
     animation: pulse 1s infinite;
 }
 
@@ -654,8 +654,8 @@
     top: var(--space-3);
     right: var(--space-3);
     padding: var(--space-1) var(--space-2);
-    background: var(#888888);
-    color: white;
+    background: var(--color-accent-success);
+    color: var(--color-on-status);
     font-size: var(--font-size-xs);
     font-weight: 600;
     border-radius: var(--radius-sm);
@@ -690,7 +690,7 @@
 .shop-item-price {
     font-size: var(--font-size-lg);
     font-weight: 700;
-    color: var(#666666);
+    color: var(--color-accent-warning);
     font-family: var(--font-mono);
 }
 
@@ -708,7 +708,7 @@
 }
 
 .achievement.unlocked {
-    border-color: var(#666666);
+    border-color: var(--color-accent-warning);
     background: rgba(120, 120, 120, 0.1);
 }
 
@@ -1109,7 +1109,7 @@
 }
 
 .slot-menu .menu-item.danger {
-    color: var(#444444);
+    color: var(--color-accent-danger);
 }
 
 .slot-menu .menu-item.danger:hover {
@@ -1160,7 +1160,7 @@
 
 .save-slot-item:focus-visible,
 .save-slot-undo:focus-visible {
-    outline: 2px solid var(--color-accent, #4f9cff);
+    outline: 2px solid var(--color-accent-primary);
     outline-offset: 2px;
 }
 
@@ -1243,8 +1243,8 @@
 }
 .dialogue-container .dialogue-choice:hover,
 .dialogue-container .dialogue-choice:focus-visible {
-    background: rgba(78, 205, 196, 0.18);
-    border-color: rgba(78, 205, 196, 0.6);
+    background: rgba(var(--color-accent-success-rgb), 0.18);
+    border-color: rgba(var(--color-accent-success-rgb), 0.6);
     outline: none;
 }
 
