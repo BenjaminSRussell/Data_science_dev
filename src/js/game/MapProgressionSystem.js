@@ -250,10 +250,11 @@ export class MapProgressionSystem {
      * Serialize for saving
      */
     toJSON() {
+        // Only progress is saved; the map catalog is static code data, so
+        // later changes to thresholds/content reach existing saves (#2013)
         return {
             currentMap: this.currentMap,
-            unlockedMaps: this.unlockedMaps,
-            mapData: this.mapData
+            unlockedMaps: this.unlockedMaps
         };
     }
     
@@ -262,9 +263,16 @@ export class MapProgressionSystem {
      */
     fromJSON(data) {
         if (!data) return;
-        this.currentMap = data.currentMap || 'early_game';
-        this.unlockedMaps = Array.isArray(data.unlockedMaps) && data.unlockedMaps.length > 0 ? data.unlockedMaps : ['early_game'];
-        this.mapData = data.mapData || this.initializeMaps();
+        // Always rebuild the catalog from code; older saves carried a frozen
+        // copy in data.mapData, which is ignored now (#2013)
+        this.mapData = this.initializeMaps();
+        const known = (id) => typeof id === 'string' && Object.prototype.hasOwnProperty.call(this.mapData, id);
+        const unlocked = Array.isArray(data.unlockedMaps) ? [...new Set(data.unlockedMaps.filter(known))] : [];
+        if (!unlocked.includes('early_game')) unlocked.unshift('early_game');
+        // Being on a map means it was unlocked
+        this.currentMap = known(data.currentMap) ? data.currentMap : 'early_game';
+        if (!unlocked.includes(this.currentMap)) unlocked.push(this.currentMap);
+        this.unlockedMaps = unlocked;
     }
 }
 
