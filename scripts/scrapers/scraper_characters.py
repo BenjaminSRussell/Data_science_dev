@@ -19,6 +19,9 @@ from bs4 import BeautifulSoup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Seconds before a git clone is abandoned (#615)
+GIT_CLONE_TIMEOUT = 300
+
 class CharacterSpriteScraper:
     def __init__(self, output_dir="downloaded_assets/characters/sprites"):
         self.output_dir = Path(output_dir)
@@ -124,8 +127,10 @@ class CharacterSpriteScraper:
                 temp_dir.mkdir(parents=True, exist_ok=True)
                 
                 import subprocess
+                # Bounded like every HTTP call in this file (#615); a hung
+                # clone raises TimeoutExpired, caught below per repo
                 result = subprocess.run(['git', 'clone', '--depth', '1', repo_url, str(temp_dir)],
-                                      capture_output=True, text=True)
+                                      capture_output=True, text=True, timeout=GIT_CLONE_TIMEOUT)
                 
                 if result.returncode == 0:
                     for img_file in temp_dir.rglob('*.png'):
