@@ -19,7 +19,7 @@
 }
 
 .breakdown-container {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+    background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-tertiary) 100%);
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 16px;
     padding: 2rem;
@@ -67,7 +67,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    border: 3px solid #fff;
+    border: 3px solid var(--color-text-primary);
     animation: emotionPulse 1s ease-in-out infinite;
 }
 
@@ -100,7 +100,7 @@
 }
 
 .dialogue-text {
-    color: #fff;
+    color: var(--color-text-primary);
     font-size: 1.1rem;
     line-height: 1.6;
     font-style: italic;
@@ -113,7 +113,7 @@
 }
 
 .qte-prompt {
-    color: #fff;
+    color: var(--color-text-primary);
     font-size: 1rem;
     font-weight: bold;
     margin-bottom: 1rem;
@@ -131,7 +131,7 @@
 
 .qte-bar {
     height: 100%;
-    background: linear-gradient(90deg, #4CAF50 0%, #FF9800 50%, #F44336 100%);
+    background: linear-gradient(90deg, var(--color-accent-success) 0%, var(--color-accent-warning) 50%, var(--color-accent-danger) 100%);
     border-radius: 4px;
     transition: width 0.1s linear;
     width: 100%;
@@ -149,7 +149,7 @@
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--color-text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.9rem;
@@ -164,7 +164,7 @@
 }
 
 .qte-choice.positive {
-    border-color: #4CAF50;
+    border-color: var(--color-accent-success);
 }
 
 .qte-choice.positive:hover {
@@ -173,7 +173,7 @@
 }
 
 .qte-choice.neutral {
-    border-color: #FF9800;
+    border-color: var(--color-accent-warning);
 }
 
 .qte-choice.neutral:hover {
@@ -182,7 +182,7 @@
 }
 
 .qte-choice.negative {
-    border-color: #F44336;
+    border-color: var(--color-accent-danger);
 }
 
 .qte-choice.negative:hover {
@@ -195,24 +195,24 @@
     padding: 1rem;
     border-radius: 8px;
     text-align: center;
-    color: #fff;
+    color: var(--color-text-primary);
     font-weight: 500;
     animation: slideIn 0.3s ease;
 }
 
 .breakdown-result.positive {
     background: rgba(76, 175, 80, 0.3);
-    border: 1px solid #4CAF50;
+    border: 1px solid var(--color-accent-success);
 }
 
 .breakdown-result.neutral {
     background: rgba(255, 152, 0, 0.3);
-    border: 1px solid #FF9800;
+    border: 1px solid var(--color-accent-warning);
 }
 
 .breakdown-result.negative {
     background: rgba(244, 67, 54, 0.3);
-    border: 1px solid #F44336;
+    border: 1px solid var(--color-accent-danger);
 }
 
 /* Animations */

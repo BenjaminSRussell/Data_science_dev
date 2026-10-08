@@ -18,7 +18,7 @@
 }
 
 .research-inbox-header {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+    background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-tertiary) 100%);
     padding: 1.5rem;
     display: flex;
     justify-content: space-between;
@@ -28,14 +28,14 @@
 
 .research-inbox-header h2 {
     margin: 0;
-    color: #fff;
+    color: var(--color-text-primary);
     font-size: 1.5rem;
 }
 
 .inbox-close-btn {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--color-text-primary);
     font-size: 2rem;
     cursor: pointer;
     padding: 0;
@@ -74,13 +74,13 @@
 
 .inbox-tab:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .inbox-tab.active {
-    background: linear-gradient(135deg, #6495ed 0%, #4169e1 100%);
-    color: #fff;
-    border-color: #6495ed;
+    background: linear-gradient(135deg, var(--color-accent-primary) 0%, var(--color-accent-secondary) 100%);
+    color: var(--color-bg-primary);
+    border-color: var(--color-accent-primary);
 }
 
 .research-inbox-content {
@@ -116,12 +116,12 @@
 }
 
 .paper-card.unread {
-    border-left: 4px solid #6495ed;
+    border-left: 4px solid var(--color-accent-primary);
     background: rgba(100, 149, 237, 0.1);
 }
 
 .paper-card.breakthrough {
-    border: 2px solid #ffd700;
+    border: 2px solid var(--color-accent-warning);
     background: rgba(255, 215, 0, 0.1);
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
 }
@@ -144,7 +144,7 @@
 .unread-indicator {
     width: 12px;
     height: 12px;
-    background: #6495ed;
+    background: var(--color-accent-primary);
     border-radius: 50%;
     animation: blink 1s ease-in-out infinite;
 }
@@ -154,8 +154,8 @@
     display: inline-block;
     padding: 0.1rem 0.5rem;
     border-radius: 999px;
-    background: #3b82f6;
-    color: #fff;
+    background: var(--color-accent-primary);
+    color: var(--color-bg-primary);
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -171,14 +171,14 @@
 }
 
 .paper-card:focus-visible {
-    outline: 3px solid #fbbf24;
+    outline: 3px solid var(--color-accent-warning);
     outline-offset: 2px;
 }
 
 /* Scoped so the newspaper's .paper-title masthead isn't restyled (#2497) */
 .paper-card .paper-title {
     margin: 0 0 0.75rem 0;
-    color: #fff;
+    color: var(--color-text-primary);
     font-size: 1.2rem;
     font-weight: bold;
     line-height: 1.4;
@@ -223,7 +223,7 @@
     padding: 0.25rem 0.75rem;
     border-radius: 12px;
     font-size: 0.8rem;
-    color: #6495ed;
+    color: var(--color-accent-primary);
 }
 
 /* Paper Detail Modal */
@@ -244,7 +244,7 @@
 }
 
 .paper-detail-content {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+    background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-tertiary) 100%);
     border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     max-width: 800px;
@@ -264,7 +264,7 @@
 
 .paper-detail-header h2 {
     margin: 0;
-    color: #fff;
+    color: var(--color-text-primary);
     font-size: 1.5rem;
     line-height: 1.4;
     flex: 1;
@@ -274,7 +274,7 @@
 .paper-detail-close {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--color-text-primary);
     font-size: 2rem;
     cursor: pointer;
     padding: 0;
@@ -309,13 +309,13 @@
 }
 
 .meta-item strong {
-    color: #fff;
+    color: var(--color-text-primary);
     margin-right: 0.5rem;
 }
 
 .breakthrough-banner {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-    color: #000;
+    background: linear-gradient(135deg, var(--color-accent-warning) 0%, var(--color-accent-warning) 100%);
+    color: var(--color-on-status);
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     font-weight: bold;
@@ -331,7 +331,7 @@
 
 .paper-detail-description h3,
 .paper-detail-impact h3 {
-    color: #fff;
+    color: var(--color-text-primary);
     margin-bottom: 1rem;
     font-size: 1.2rem;
 }
@@ -347,7 +347,7 @@
 }
 
 .paper-detail-keywords h3 {
-    color: #fff;
+    color: var(--color-text-primary);
     margin-bottom: 1rem;
     font-size: 1.2rem;
 }
@@ -366,8 +366,8 @@
 
 .paper-link-btn {
     display: inline-block;
-    background: linear-gradient(135deg, #6495ed 0%, #4169e1 100%);
-    color: #fff;
+    background: linear-gradient(135deg, var(--color-accent-primary) 0%, var(--color-accent-secondary) 100%);
+    color: var(--color-bg-primary);
     padding: 1rem 2rem;
     border-radius: 8px;
     text-decoration: none;
@@ -390,15 +390,15 @@
     position: absolute;
     top: -5px;
     right: -5px;
-    background: #ff4444;
-    color: #fff;
+    background: var(--color-accent-danger);
+    color: var(--color-text-primary);
     border-radius: 10px;
     padding: 2px 6px;
     font-size: 0.7rem;
     font-weight: bold;
     min-width: 18px;
     text-align: center;
-    border: 2px solid #1e3a5f;
+    border: 2px solid var(--color-bg-elevated);
     animation: pulse 1s ease-in-out infinite;
 }
 
