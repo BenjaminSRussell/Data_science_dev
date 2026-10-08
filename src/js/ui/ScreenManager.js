@@ -24,7 +24,72 @@ export class ScreenManager {
             this.screens[screen.id] = screen;
         });
 
+        // Screen-reader announcement of each navigation, driven by the
+        // screenchange event this class dispatches (#1363, #133)
+        if (!this._onScreenChange) {
+            this._onScreenChange = (e) => this.announceScreen(e?.detail?.screen);
+            window.addEventListener('screenchange', this._onScreenChange);
+        }
 
+    }
+
+    /**
+     * Human-readable name for a screen: aria-label, else its first heading,
+     * else the id without the "screen-" prefix.
+     */
+    getScreenLabel(screenId) {
+        const el = this.screens[screenId] || (typeof document !== 'undefined' ? document.getElementById(screenId) : null);
+        const label = el?.getAttribute?.('aria-label') || el?.querySelector?.('h1, h2, h3')?.textContent;
+        if (label && label.trim()) return label.trim();
+        return String(screenId || '').replace(/^screen-/, '').replace(/[-_]+/g, ' ').trim();
+    }
+
+    /**
+     * Write the screen name into a polite live region so assistive tech hears
+     * where navigation went. The region is created on first use.
+     * @returns {HTMLElement|null} the live region
+     */
+    announceScreen(screenId) {
+        if (!screenId || typeof document === 'undefined' || !document.body) return null;
+        let region = document.getElementById('screen-announcer');
+        if (!region) {
+            region = document.createElement('div');
+            region.id = 'screen-announcer';
+            region.className = 'visually-hidden';
+            region.setAttribute('role', 'status');
+            region.setAttribute('aria-live', 'polite');
+            document.body.appendChild(region);
+        }
+        region.textContent = this.getScreenLabel(screenId);
+        return region;
+    }
+
+    /**
+     * Put keyboard focus on a sensible element of a screen: its first heading,
+     * else its first enabled control, else the screen container itself (made
+     * programmatically focusable). Focus inside the screen is left alone.
+     * @param {HTMLElement} screen
+     * @returns {HTMLElement|null} the element that received focus
+     */
+    focusScreen(screen) {
+        if (!screen || typeof screen.focus !== 'function') return null;
+        if (typeof document !== 'undefined' && screen.contains(document.activeElement) && document.activeElement !== screen) {
+            return document.activeElement;
+        }
+        const heading = screen.querySelector('h1, h2, h3');
+        const control = screen.querySelector(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        let target = heading || control || screen;
+        if (target === heading || target === screen) {
+            if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+        }
+        try {
+            target.focus({ preventScroll: true });
+        } catch {
+            target.focus();
+        }
+        return target;
     }
 
     /**
@@ -74,9 +139,13 @@ export class ScreenManager {
             return true;
         }
 
-        // Apply screen theme if theme manager exists
-        if (this.mainGame?.gameState?.screenThemeManager) {
-            this.mainGame.gameState.screenThemeManager?.applyTheme(screenId);
+        // Apply the screen theme. A missing theme manager is a wiring bug
+        // (e.g. a load path that skipped it), so say so instead of failing silently (#1573)
+        const themeManager = this.mainGame?.gameState?.screenThemeManager;
+        if (themeManager) {
+            themeManager.applyTheme(screenId);
+        } else if (this.mainGame?.gameState) {
+            console.warn(`[ScreenManager] screenThemeManager missing, skipping theme for ${screenId}`);
         }
 
         // Transitions are CSS-only: `.screen.active` runs the fadeIn keyframe
@@ -119,7 +188,11 @@ export class ScreenManager {
 
 
 
-        // Dispatch event
+        // Move keyboard focus into the newly shown screen; the control that had
+        // focus was just hidden, which would otherwise drop focus to <body> (#133)
+        this.focusScreen(targetScreen);
+
+        // Announce the navigation; init() listens for this to update the live region (#1363)
         window.dispatchEvent(new CustomEvent('screenchange', {
             detail: { screen: screenId }
         }));

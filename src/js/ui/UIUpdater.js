@@ -229,78 +229,9 @@ export class UIUpdater {
                     this.game.taskSystem.updateDataTable(task.data);
                 }
             }
-        } else {
-            // Fallback to simple update if TaskSystem not available
-            this.updateDataTableSimple(task.data);
         }
-    }
-
-    /**
-     * Update data table with task data (simple version without sorting/filtering)
-     */
-    updateDataTableSimple(data) {
-        const tableBody = document.querySelector('#data-table tbody');
-        const tableHead = document.querySelector('#data-table thead tr');
-        if (!tableBody || !data) return;
-
-        // Clear existing rows
-        tableBody.innerHTML = '';
-
-        // Handle TaskSystem data format (has columns and rows)
-        if (data.columns && data.rows) {
-            // Update table headers
-            if (tableHead) {
-                DOMUtils.updateElement(tableHead, {
-                    innerHTML: data.columns.map(col => `<th>${col}</th>`).join('')
-                });
-            }
-
-            // Add data rows
-            data.rows?.forEach(row => {
-                const tr = document.createElement('tr');
-                row?.forEach((value, i) => {
-                    const td = document.createElement('td');
-                    if (typeof value === 'number') {
-                        // Format numbers with commas and $ if it's likely currency
-                        if (i > 0 && (data.columns[i]?.includes('Revenue') || data.columns[i]?.includes('Expenses') || data.columns[i]?.includes('Profit') || data.columns[i]?.includes('Sales'))) {
-                            td.textContent = `$${value.toLocaleString()}`;
-                        } else {
-                            td.textContent = value.toLocaleString();
-                        }
-                    } else {
-                        td.textContent = value;
-                    }
-                    tr.appendChild(td);
-                });
-                tableBody.appendChild(tr);
-            });
-        } else if (Array.isArray(data)) {
-            // Array of objects
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                Object.values(row).forEach(value => {
-                    const td = document.createElement('td');
-                    td.textContent = typeof value === 'number' ? value.toLocaleString() : value;
-                    tr.appendChild(td);
-                });
-                tableBody.appendChild(tr);
-            });
-        } else if (data.labels && data.datasets) {
-            // Chart.js format - convert to table
-            const labels = data.labels;
-            const dataset = data.datasets[0];
-            labels.forEach((label, i) => {
-                const tr = document.createElement('tr');
-                const td1 = document.createElement('td');
-                td1.textContent = label;
-                tr.appendChild(td1);
-                
-                const td2 = document.createElement('td');
-                td2.textContent = dataset.data[i]?.toLocaleString() || '0';
-                tr.appendChild(td2);
-                tableBody.appendChild(tr);
-            });
-        }
+        // MainGame always constructs TaskSystem before UIUpdater, so the old
+        // updateDataTableSimple() fallback could only ever run with no data (#1131)
     }
 
     /**

@@ -126,12 +126,6 @@ export function updateMapScreen(game) {
         } else {
             game.unifiedMapSystem.update();
         }
-    } else if (game.worldMapRenderer) {
-        // Fallback to old world map renderer
-        game.worldMapRenderer.update();
-    } else if (game.simpleMapRenderer) {
-        // Fallback to old simple map renderer
-        game.simpleMapRenderer.update();
     }
 
     updateVehicleDisplay(game);
