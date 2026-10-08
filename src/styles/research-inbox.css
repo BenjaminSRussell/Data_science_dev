@@ -149,7 +149,8 @@
     animation: blink 1s ease-in-out infinite;
 }
 
-.paper-title {
+/* Scoped so the newspaper's .paper-title masthead isn't restyled (#2497) */
+.paper-card .paper-title {
     margin: 0 0 0.75rem 0;
     color: #fff;
     font-size: 1.2rem;

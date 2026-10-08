@@ -82,10 +82,18 @@
 .text-progress-bar {
     display: flex;
     gap: 2px;
+    background: var(--color-bg-tertiary, #2d2d2d);
+    min-height: 8px;
+    border-radius: 2px;
+    overflow: hidden;
 }
 
 .text-progress-filled {
     color: #999999;
+    /* JS sets the width of these divs, so they need a painted fill (#1782) */
+    background: var(--color-text-secondary, #999999);
+    min-height: 8px;
+    transition: width 0.3s ease;
 }
 
 .text-progress-empty {
@@ -151,9 +159,8 @@
     box-shadow: 0 0 6px #666666;
 }
 
-.phase-name {
-    color: #cccccc;
-}
+/* .phase-name is styled by story-ui.css; a colour override here dimmed the
+   Story screen heading (#1781, #1059) */
 
 /* Manual action buttons - prominent */
 .btn-manual-action {
