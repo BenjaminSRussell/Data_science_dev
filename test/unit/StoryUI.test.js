@@ -32,7 +32,7 @@ describe('StoryUI', () => {
             const mockGame = {};
             const storyUI = new StoryUI(mockGame);
             const result = storyUI.formatConsequences({ money: 1500 });
-            expect(result).toContain('$+1,500');
+            expect(result).toContain('+$1,500');
         });
 
         it('should format empty consequences as empty string', () => {
@@ -47,7 +47,7 @@ describe('StoryUI', () => {
             const storyUI = new StoryUI(mockGame);
             const result = storyUI.formatConsequences({ ethics: 5, money: 1500, reputation: -2 });
             expect(result).toContain('Ethics +5');
-            expect(result).toContain('$+1,500');
+            expect(result).toContain('+$1,500');
             expect(result).toContain('Reputation -2');
             // Verify all three are present and separated by single space between spans
             const spanCount = (result.match(/<span/g) || []).length;

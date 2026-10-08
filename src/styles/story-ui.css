@@ -256,7 +256,8 @@
     margin-right: 0.5rem;
 }
 
-.choice-text {
+/* Scoped: the decisions list and the decision modal both use .choice-text (#1793) */
+.decision-choice .choice-text {
     color: #ddd;
     font-style: italic;
 }
@@ -283,7 +284,6 @@
     background: #222;
     color: #ccc;
 }
-
 
 /* Story Journal */
 .story-journal {
@@ -330,7 +330,8 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.95);
-    z-index: 10000;
+    /* A pending decision blocks play, so it sits above the research inbox (10000) (#1797) */
+    z-index: 10010;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -399,7 +400,7 @@
     border-color: #888;
 }
 
-.choice-text {
+.decision-choice-btn .choice-text {
     font-size: 1rem;
     margin-bottom: 0.5rem;
     color: #fff;
@@ -417,47 +418,6 @@
     color: #666;
     font-size: 0.875rem;
     margin-top: 1rem;
-}
-
-/* Character Arc Display */
-.story-arc-section-full {
-    grid-column: 1 / -1;
-}
-
-.character-arc-display {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    background: #111;
-    border: 1px solid #333;
-}
-
-.arc-start,
-.arc-current {
-    flex: 1;
-    text-align: center;
-}
-
-.arc-label {
-    font-size: 0.75rem;
-    color: #888;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 0.5rem;
-}
-
-.arc-description {
-    color: #ddd;
-    line-height: 1.6;
-    font-size: 0.9rem;
-}
-
-.arc-arrow {
-    font-size: 2rem;
-    color: #555;
-    font-weight: 700;
 }
 
 .arc-transformation {
@@ -489,15 +449,6 @@
     .phase-timeline {
         flex-direction: column;
         gap: 1rem;
-    }
-
-    .character-arc-display {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .arc-arrow {
-        transform: rotate(90deg);
     }
 }
 /* Narrative context block (#1794) */
@@ -588,4 +539,23 @@
 .transformation-text {
     line-height: 1.5;
     opacity: 0.9;
+}
+
+/* What a choice risks, shown before the click (#1503, #1504, #1762) */
+.choice-stakes {
+    font-size: 0.8rem;
+    color: var(--color-accent-danger, var(--color-text-secondary));
+    margin-bottom: 0.5rem;
+}
+
+.consequence.danger {
+    color: var(--color-accent-danger, var(--color-text-primary));
+    font-weight: 600;
+}
+
+/* Arc deltas under "Your Transformation" (#1478) */
+.transformation-changes {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
 }
