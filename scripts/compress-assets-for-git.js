@@ -117,6 +117,15 @@ async function compressImage(inputPath, outputPath = null) {
  *   A new array is created when omitted.
  * @returns {string[]} The array of matched file paths.
  */
+/**
+ * "12.3%", or "0.0%" when nothing was compressed (no NaN%) (#549).
+ */
+export function formatSavings(originalBytes, compressedBytes) {
+    const original = Number(originalBytes) || 0;
+    if (original <= 0) return '0.0%';
+    return `${(((original - (Number(compressedBytes) || 0)) / original) * 100).toFixed(1)}%`;
+}
+
 export function collectImageFiles(rootDir, extensions, out = []) {
     if (!fs.existsSync(rootDir)) {
         return out;
@@ -197,8 +206,7 @@ async function findAndCompressAssets() {
     console.log(`Errors: ${stats.errors}`);
     console.log(`\nOriginal total size: ${(stats.totalOriginalSize / 1024 / 1024).toFixed(2)}MB`);
     console.log(`Compressed total size: ${(stats.totalCompressedSize / 1024 / 1024).toFixed(2)}MB`);
-    const totalSavings = ((stats.totalOriginalSize - stats.totalCompressedSize) / stats.totalOriginalSize * 100).toFixed(1);
-    console.log(`Total savings: ${totalSavings}%`);
+    console.log(`Total savings: ${formatSavings(stats.totalOriginalSize, stats.totalCompressedSize)}`);
     console.log('='.repeat(60));
 
     // Check for files that might still exceed 50MB

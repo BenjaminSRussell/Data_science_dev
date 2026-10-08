@@ -10,6 +10,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { groupFilesByExtension } from './lib/groupFilesByExtension.js';
 import { countLinesInText } from './lib/countLines.js';
+import { buildAnchorMap } from './inventory-anchors.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,8 +20,8 @@ const rootDir = path.dirname(__dirname);
 const targetFolder = process.argv[2] || 'src/js';
 const outputFile = process.argv[3] || 'FILE_INVENTORY.md';
 
-const fullPath = path.join(rootDir, targetFolder);
-const outputPath = path.join(rootDir, outputFile);
+const fullPath = path.resolve(rootDir, targetFolder); // absolute paths work too
+const outputPath = path.resolve(rootDir, outputFile);
 
 // Options
 const includeSize = process.argv.includes('--size');
@@ -109,6 +110,9 @@ markdown += `- [All Files](#all-files)\n`;
 markdown += `- [Folders](#folders)\n\n`;
 markdown += `---\n\n`;
 
+// Unique, GitHub-compatible anchor per file (#2321, #551)
+const anchors = buildAnchorMap(files.map(f => f.path));
+
 // Group files by extension
 const filesByExt = groupFilesByExtension(files);
 
@@ -120,7 +124,7 @@ Object.keys(filesByExt).sort().forEach(ext => {
     markdown += `### ${ext} (${count} files, ${(totalSize / 1024).toFixed(2)} KB)\n\n`;
     
     filesByExt[ext].forEach(file => {
-        markdown += `- [\`${file.path}\`](#${file.path.replace(/[^a-z0-9]/gi, '-').toLowerCase()})\n`;
+        markdown += `- [\`${file.path}\`](#${anchors.get(file.path)})\n`;
     });
     markdown += `\n`;
 });
@@ -131,8 +135,8 @@ markdown += `---\n\n`;
 markdown += `## All Files\n\n`;
 
 files.forEach((file, index) => {
-    const anchor = file.path.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    markdown += `### ${index + 1}. \`${file.path}\` {#${anchor}}\n\n`;
+    const anchor = anchors.get(file.path);
+    markdown += `<a id="${anchor}"></a>\n\n### ${index + 1}. \`${file.path}\`\n\n`;
     
     markdown += `**Full Path:** \`${file.fullPath}\`\n\n`;
     
