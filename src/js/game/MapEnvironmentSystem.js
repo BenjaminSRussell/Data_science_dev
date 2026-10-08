@@ -128,7 +128,8 @@ export class MapEnvironmentSystem {
      */
     addStreetTrees(zone) {
         const bounds = zone.bounds;
-        const treeCount = Math.floor((bounds.maxX - bounds.minX + bounds.maxY - bounds.minY) / 3);
+        // Inclusive bounds, like MapZoneSystem and the other placement counts (#1566)
+        const treeCount = Math.floor(((bounds.maxX - bounds.minX + 1) + (bounds.maxY - bounds.minY + 1)) / 3);
         let placed = 0;
         
         for (let i = 0; i < treeCount; i++) {

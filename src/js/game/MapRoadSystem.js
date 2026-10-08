@@ -5,6 +5,8 @@
  */
 
 export class MapRoadSystem {
+    static MAIN_SPACING = 10;
+
     constructor(gridSystem) {
         this.gridSystem = gridSystem;
         this.roads = [];
@@ -28,29 +30,29 @@ export class MapRoadSystem {
         const gridWidth = this.gridSystem.gridWidth;
         const gridHeight = this.gridSystem.gridHeight;
         
-        // Main horizontal arteries (every 6 rows) - creates larger blocks
-        for (let y = 6; y < gridHeight; y += 6) {
+        // Road spacing leaves real city blocks between bands. With a 3-wide
+        // MAIN every 10 tiles and a 2-wide SECONDARY halfway between, about a
+        // third of a 30x30 grid stays buildable; the old 3-tile spacing tiled
+        // the grid with road (#1919, #1925).
+        const MAIN_SPACING = MapRoadSystem.MAIN_SPACING;
+        const half = Math.floor(MAIN_SPACING / 2);
+
+        // Main arteries
+        for (let y = MAIN_SPACING; y < gridHeight; y += MAIN_SPACING) {
             this.addRoad('horizontal', y, 'MAIN', 0, gridWidth - 1);
         }
-        
-        // Main vertical arteries (every 6 columns)
-        for (let x = 6; x < gridWidth; x += 6) {
+        for (let x = MAIN_SPACING; x < gridWidth; x += MAIN_SPACING) {
             this.addRoad('vertical', x, 'MAIN', 0, gridHeight - 1);
         }
-        
-        // Secondary roads (every 3 rows/cols) - creates medium blocks
-        for (let y = 3; y < gridHeight; y += 6) {
-            if (y % 6 !== 0) { // Not a main road
-                this.addRoad('horizontal', y, 'SECONDARY', 0, gridWidth - 1);
-            }
+
+        // Secondary streets halfway between arteries
+        for (let y = half; y < gridHeight; y += MAIN_SPACING) {
+            this.addRoad('horizontal', y, 'SECONDARY', 0, gridWidth - 1);
         }
-        
-        for (let x = 3; x < gridWidth; x += 6) {
-            if (x % 6 !== 0) { // Not a main road
-                this.addRoad('vertical', x, 'SECONDARY', 0, gridHeight - 1);
-            }
+        for (let x = half; x < gridWidth; x += MAIN_SPACING) {
+            this.addRoad('vertical', x, 'SECONDARY', 0, gridHeight - 1);
         }
-        
+
         // Find and mark intersections
         this.findIntersections();
     }
@@ -82,31 +84,34 @@ export class MapRoadSystem {
         // Mark grid cells as roads
         if (direction === 'horizontal') {
             for (let x = start; x <= end; x++) {
-                // Mark center tile
-                this.markRoadCell(x, position);
-                // If road is wider than 1 tile, mark adjacent tiles
-                if (roadType.width >= 2) {
-                    const halfWidth = Math.floor(roadType.width / 2);
-                    for (let offset = 1; offset <= halfWidth; offset++) {
-                        if (position - offset >= 0) this.markRoadCell(x, position - offset);
-                        if (position + offset < this.gridSystem.gridHeight) this.markRoadCell(x, position + offset);
-                    }
+                for (const offset of MapRoadSystem.widthOffsets(roadType.width)) {
+                    const y = position + offset;
+                    if (y >= 0 && y < this.gridSystem.gridHeight) this.markRoadCell(x, y);
                 }
             }
         } else { // vertical
             for (let y = start; y <= end; y++) {
-                // Mark center tile
-                this.markRoadCell(position, y);
-                // If road is wider than 1 tile, mark adjacent tiles
-                if (roadType.width >= 2) {
-                    const halfWidth = Math.floor(roadType.width / 2);
-                    for (let offset = 1; offset <= halfWidth; offset++) {
-                        if (position - offset >= 0) this.markRoadCell(position - offset, y);
-                        if (position + offset < this.gridSystem.gridWidth) this.markRoadCell(position + offset, y);
-                    }
+                for (const offset of MapRoadSystem.widthOffsets(roadType.width)) {
+                    const x = position + offset;
+                    if (x >= 0 && x < this.gridSystem.gridWidth) this.markRoadCell(x, y);
                 }
             }
         }
+    }
+
+    /**
+     * Cross-axis offsets a road of `width` tiles covers around its centre
+     * line: exactly `width` cells (1 -> [0], 2 -> [0, 1], 3 -> [-1, 0, 1]).
+     * The old floor(width/2) on both sides made a 2-wide road 3 cells wide,
+     * which tiled the 30x30 grid with road and starved every placement
+     * system (#1919, #1925).
+     */
+    static widthOffsets(width) {
+        const w = Math.max(1, Math.floor(Number(width) || 1));
+        const before = Math.floor((w - 1) / 2);
+        const offsets = [];
+        for (let o = -before; o < w - before; o++) offsets.push(o + 0); // +0 normalises -0
+        return offsets;
     }
 
     /**

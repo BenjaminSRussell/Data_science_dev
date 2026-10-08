@@ -4,6 +4,8 @@
  * Creates road tiles, intersections, and markings
  */
 
+import { MapRoadSystem } from './MapRoadSystem.js';
+
 export class MapRoadRenderer {
     constructor(gridSystem, roadSystem, container) {
         this.gridSystem = gridSystem;
@@ -33,52 +35,52 @@ export class MapRoadRenderer {
     }
 
     /**
+     * Grid rectangle a road covers. For a horizontal road `position` is the
+     * row and start/end the columns; for a vertical road `position` is the
+     * column and start/end the rows. The cross-axis span uses the same width
+     * offsets MapRoadSystem marks as road (#2314).
+     * @returns {{x:number, y:number, width:number, height:number}}
+     */
+    static roadTileRect(road) {
+        const offsets = MapRoadSystem.widthOffsets(road.width);
+        const across = position => position + offsets[0];
+        const length = road.end - road.start + 1;
+        if (road.direction === 'horizontal') {
+            return { x: road.start, y: across(road.position), width: length, height: offsets.length };
+        }
+        return { x: across(road.position), y: road.start, width: offsets.length, height: length };
+    }
+
+    /**
      * Render a single road segment
      */
     renderRoad(road) {
         const tileSize = this.gridSystem.tileSize;
         const containerWidth = this.container.offsetWidth || this.gridSystem.totalWidth;
         const containerHeight = this.container.offsetHeight || this.gridSystem.totalHeight;
-        
-        // Convert grid coordinates to pixel positions
-        const startPixel = this.gridSystem.gridToPixel(road.start, road.position);
-        
+
+        const rect = MapRoadRenderer.roadTileRect(road);
         const roadEl = document.createElement('div');
         roadEl.className = `map-road-tile ${road.type.toLowerCase()} ${road.direction}`;
         roadEl.dataset.roadId = road.id;
-        
-        if (road.direction === 'horizontal') {
-            const width = (road.end - road.start + 1) * tileSize;
-            const height = road.width * tileSize;
-            const left = ((startPixel.x - width / 2) / containerWidth) * 100;
-            const top = ((startPixel.y - height / 2) / containerHeight) * 100;
-            roadEl.style.cssText = `
-                position: absolute;
-                left: ${left}%;
-                top: ${top}%;
-                width: ${(width / containerWidth) * 100}%;
-                height: ${(height / containerHeight) * 100}%;
-                background: ${road.color};
-                border: 1px solid rgba(0, 0, 0, 0.3);
-                z-index: 1;
-            `;
-        } else { // vertical
-            const width = road.width * tileSize;
-            const height = (road.end - road.start + 1) * tileSize;
-            const left = ((startPixel.x - width / 2) / containerWidth) * 100;
-            const top = ((startPixel.y - height / 2) / containerHeight) * 100;
-            roadEl.style.cssText = `
-                position: absolute;
-                left: ${left}%;
-                top: ${top}%;
-                width: ${(width / containerWidth) * 100}%;
-                height: ${(height / containerHeight) * 100}%;
-                background: ${road.color};
-                border: 1px solid rgba(0, 0, 0, 0.3);
-                z-index: 1;
-            `;
-        }
-        
+
+        // Top-left of the first tile: gridToPixel() returns tile centres
+        const topLeft = this.gridSystem.gridToPixel(rect.x, rect.y);
+        const left = topLeft.x - tileSize / 2;
+        const top = topLeft.y - tileSize / 2;
+        const width = rect.width * tileSize;
+        const height = rect.height * tileSize;
+        roadEl.style.cssText = `
+            position: absolute;
+            left: ${(left / containerWidth) * 100}%;
+            top: ${(top / containerHeight) * 100}%;
+            width: ${(width / containerWidth) * 100}%;
+            height: ${(height / containerHeight) * 100}%;
+            background: ${road.color};
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        `;
+
         this.container.appendChild(roadEl);
         this.roadElements.set(road.id, roadEl);
     }
