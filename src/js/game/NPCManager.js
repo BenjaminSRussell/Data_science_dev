@@ -1388,9 +1388,13 @@ export class NPCManager {
     /**
      * Start conversation with NPC using dialogue tree system
      */
-    async startConversation(npcId) {
+    async startConversation(npcId, options = {}) {
         const npc = this.getNPC(npcId);
         if (!npc) return null;
+        // preview: build the same greeting/choices without marking the NPC as
+        // met, changing relationship scores, firing story beats or replacing
+        // the live conversation. Used by the dev menu's dialogue tests (#1343)
+        const preview = options?.preview === true;
 
         // A jealous NPC refuses to talk (see JealousySystem.stopTalking)
         const flags = this.getNPCFlags(npcId);
@@ -1408,10 +1412,10 @@ export class NPCManager {
         }
 
         const relationship = this.relationships[npcId] || 0;
-        const isFirstMeeting = this.registerVisit(npcId);
+        const isFirstMeeting = preview ? !this.metNPCs.includes(npcId) : this.registerVisit(npcId);
 
         // Progressive relationship: Just talking increases relationship slightly
-        if (!isFirstMeeting && relationship < 100) {
+        if (!preview && !isFirstMeeting && relationship < 100) {
             let talkGain = 1;
             if (relationship > 60) talkGain = 0.5;
             if (relationship > 85) talkGain = 0.25;
@@ -1437,7 +1441,7 @@ export class NPCManager {
             memoryDialogue = this.gameState.npcMemorySystem?.getMemoryDialogue(npcId, relationship);
             if (memoryDialogue) {
                 // Apply relationship change from memory
-                if (memoryDialogue.relationshipChange) {
+                if (memoryDialogue.relationshipChange && !preview) {
                     this.modifyRelationship(npcId, memoryDialogue.relationshipChange);
                 }
             }
@@ -1462,6 +1466,8 @@ export class NPCManager {
             greetingText = greetingPool[Math.floor(Math.random() * greetingPool.length)].text;
         }
 
+        const previousConversation = this.currentConversation;
+        const previousNode = DIALOGUE_TREES[npcId] ? this.getNPCState(npcId).currentNode : undefined;
         this.currentConversation = {
             npc,
             relationship: relationship,
@@ -1479,6 +1485,11 @@ export class NPCManager {
         // The same list is rendered and later resolved by makeChoice(), so the
         // index the player clicks always matches the choice that runs.
         const choices = this.buildConversationChoices();
+
+        if (preview) {
+            this.currentConversation = previousConversation;
+            if (DIALOGUE_TREES[npcId]) this.getNPCState(npcId).currentNode = previousNode;
+        }
 
         return {
             npc,

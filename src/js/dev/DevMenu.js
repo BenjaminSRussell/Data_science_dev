@@ -361,6 +361,8 @@ export class DevMenu {
     }
 
     populateLocations() {
+        const testAllBtn = document.getElementById('dev-test-all-locations');
+        if (testAllBtn) testAllBtn.onclick = () => this.testAllLocations();
         const container = document.getElementById('dev-locations');
         if (!container) {
             console.warn('Locations container not found');
@@ -444,11 +446,9 @@ export class DevMenu {
 
         const npcs = npcManager.getAllNPCs?.() || [];
         npcs.forEach(npc => {
-            const btn = this.createButton(npc.name || npc.id, () => {
-                if (npcManager.startConversation) {
-                    npcManager.startConversation(npc.id);
-                    this.game.showToast(`Testing dialogue: ${npc.name}`, 'info');
-                }
+            const btn = this.createButton(npc.name || npc.id, async () => {
+                const result = await this.previewDialogue(npcManager, npc.id);
+                this.game.showToast(result ? `${npc.name}: ${result.greeting}` : `No dialogue for ${npc.name}`, result ? 'info' : 'error');
             });
             container.appendChild(btn);
         });
@@ -461,17 +461,32 @@ export class DevMenu {
         const testBtn = document.getElementById('dev-test-dialogue');
         if (testBtn) testBtn.onclick = () => {
             const npcId = document.getElementById('dev-npc-input').value;
-            if (npcId && npcManager.startConversation) {
-                npcManager.startConversation(npcId);
-            }
+            if (!npcId) return;
+            this.previewDialogue(npcManager, npcId).then(result => {
+                this.game.showToast(result ? `${npcId}: ${result.greeting}` : `No dialogue for ${npcId}`, result ? 'info' : 'error');
+            });
         };
+    }
+
+    /**
+     * Run an NPC's opening dialogue without touching save data: no "met"
+     * flag, relationship gain or story beat (#1343)
+     */
+    async previewDialogue(npcManager, npcId) {
+        if (!npcManager?.startConversation) return null;
+        const result = await npcManager.startConversation(npcId, { preview: true });
+        if (result) console.log(`Dialogue preview (${npcId}):`, result);
+        return result;
     }
 
     populateActions() {
         const container = document.getElementById('dev-actions');
 
         container.appendChild(this.createButton('New Game', () => {
-            this.game.startNewGame();
+            // Same guard as Reset State: one misclick shouldn't wipe the run (#1341)
+            if (confirm('Start a new game? Unsaved progress will be lost.')) {
+                this.game.startNewGame();
+            }
         }, 'primary'));
 
         container.appendChild(this.createButton('Give $1000', () => {
@@ -665,10 +680,12 @@ export class DevMenu {
 
         for (const npc of npcs) {
             try {
-                if (npcManager.startConversation) {
-                    npcManager.startConversation(npc.id);
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                const result = await this.previewDialogue(npcManager, npc.id);
+                if (result && typeof result.greeting === 'string' && result.greeting.length > 0) {
                     results.passed++;
+                } else {
+                    results.failed++;
+                    results.errors.push({ npc: npc.id, error: 'no greeting' });
                 }
             } catch (error) {
                 results.failed++;
@@ -699,23 +716,23 @@ export class DevMenu {
         const results = { passed: 0, failed: 0 };
 
         chartTypes.forEach(type => {
+            // Off-screen canvas, removed whatever happens - including when
+            // createChart throws (#1746, #1344)
+            const canvas = this.createScratchCanvas(`test-chart-${type}`);
+            let chart = null;
             try {
-                // Create a temporary canvas
-                const canvas = document.createElement('canvas');
-                canvas.id = `test-chart-${type}`;
-                document.body.appendChild(canvas);
-
-                const chart = chartManager.createChart(canvas.id, type, testData);
+                chart = chartManager.createChart(canvas.id, type, testData);
                 if (chart) {
                     results.passed++;
                 } else {
                     results.failed++;
                 }
-                // Clean up
-                setTimeout(() => { chart?.destroy?.(); canvas.remove(); }, 100);
             } catch (error) {
                 results.failed++;
                 console.error(`Chart type ${type} failed:`, error);
+            } finally {
+                try { chart?.destroy?.(); } catch { /* already gone */ }
+                canvas.remove();
             }
         });
 
@@ -731,6 +748,14 @@ export class DevMenu {
         }
 
         const results = { passed: 0, failed: 0 };
+
+        // Put the player's table back exactly as it was afterwards (#1347)
+        const taskSystem = this.game.taskSystem;
+        const filterEl = document.getElementById('table-filter');
+        const savedFilter = filterEl ? filterEl.value : null;
+        const savedTable = taskSystem?.currentTableData
+            ? JSON.parse(JSON.stringify(taskSystem.currentTableData)) : null;
+        const savedSort = taskSystem ? { col: taskSystem.lastSortCol, asc: taskSystem.lastSortAsc } : null;
 
         // Test sorting
         try {
@@ -755,6 +780,16 @@ export class DevMenu {
         } catch (error) {
             results.failed++;
             console.error('Table filtering failed:', error);
+        }
+
+        if (filterEl) filterEl.value = savedFilter;
+        if (taskSystem && savedTable) {
+            taskSystem.currentTableData = savedTable;
+            if (savedSort) {
+                taskSystem.lastSortCol = savedSort.col;
+                taskSystem.lastSortAsc = savedSort.asc;
+            }
+            taskSystem.updateDataTable?.(savedTable);
         }
 
         this.game.showToast(`Spreadsheet tests: ${results.passed} passed, ${results.failed} failed`, 'info');
@@ -806,35 +841,130 @@ export class DevMenu {
     }
 
     validateGraphs() {
-        // Validate chart accuracy
+        // Build each test chart and check the rendered data really matches
+        // the input; it used to count every case as passed (#2139, #1346)
         const chartManager = this.game.chartManager;
-        if (!chartManager) return;
+        if (!chartManager?.createChart) {
+            this.game.showError('Chart manager not found');
+            return null;
+        }
 
         const testCases = [
-            {
-                data: [10, 20, 30, 40],
-                expectedSum: 100,
-                type: 'bar'
-            },
-            {
-                data: [25, 25, 25, 25],
-                expectedAverage: 25,
-                type: 'line'
-            }
+            { data: [10, 20, 30, 40], expectedSum: 100, type: 'bar' },
+            { data: [25, 25, 25, 25], expectedAverage: 25, type: 'line' }
         ];
 
-        const results = { passed: 0, failed: 0 };
+        const results = { passed: 0, failed: 0, errors: [] };
 
-        testCases.forEach(testCase => {
+        testCases.forEach((testCase, i) => {
+            const canvas = this.createScratchCanvas(`validate-chart-${i}`);
+            let chart = null;
             try {
-                // This would need actual chart validation logic
-                results.passed++;
+                chart = chartManager.createChart(canvas.id, testCase.type, {
+                    labels: testCase.data.map((_, j) => `P${j + 1}`),
+                    datasets: [{ label: 'Validation', data: testCase.data }]
+                });
+                const problem = DevMenu.checkChartAgainstCase(chart, testCase);
+                if (problem) {
+                    results.failed++;
+                    results.errors.push(`${testCase.type}: ${problem}`);
+                } else {
+                    results.passed++;
+                }
             } catch (error) {
                 results.failed++;
+                results.errors.push(`${testCase.type}: ${error.message}`);
+            } finally {
+                try { chart?.destroy?.(); } catch { /* already gone */ }
+                canvas.remove();
             }
         });
 
-        this.game.showToast(`Graph validation: ${results.passed} passed, ${results.failed} failed`, 'info');
+        if (results.errors.length) console.warn('Graph validation problems:', results.errors);
+        this.game.showToast(`Graph validation: ${results.passed} passed, ${results.failed} failed`,
+            results.failed ? 'warning' : 'success');
+        return results;
+    }
+
+    /**
+     * Compare a Chart.js-like chart with a validation case. Returns a
+     * description of the first mismatch, or null when it matches.
+     */
+    static checkChartAgainstCase(chart, testCase) {
+        if (!chart) return 'chart was not created';
+        const type = chart.config?.type ?? chart.type;
+        if (type && type !== testCase.type) return `type is ${type}, expected ${testCase.type}`;
+        const values = (chart.data?.datasets?.[0]?.data || []).map(Number);
+        if (values.length !== testCase.data.length) return `has ${values.length} points, expected ${testCase.data.length}`;
+        const sum = values.reduce((a, b) => a + b, 0);
+        if (testCase.expectedSum !== undefined && Math.abs(sum - testCase.expectedSum) > 1e-9) {
+            return `sum is ${sum}, expected ${testCase.expectedSum}`;
+        }
+        if (testCase.expectedAverage !== undefined && Math.abs(sum / values.length - testCase.expectedAverage) > 1e-9) {
+            return `average is ${sum / values.length}, expected ${testCase.expectedAverage}`;
+        }
+        return null;
+    }
+
+    /**
+     * Hidden canvas for chart tests; callers remove it when done
+     */
+    createScratchCanvas(id) {
+        document.getElementById(id)?.remove();
+        const canvas = document.createElement('canvas');
+        canvas.id = id;
+        canvas.width = 200;
+        canvas.height = 120;
+        canvas.style.cssText = 'position:absolute;left:-9999px;top:-9999px;visibility:hidden;';
+        canvas.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(canvas);
+        return canvas;
+    }
+
+    /**
+     * "Test All Locations": run LocationTester over every location and list
+     * the results under the button (#2140, #72)
+     */
+    async testAllLocations() {
+        const out = document.getElementById('dev-location-results');
+        const tester = window.devTools?.locationTester;
+        if (!tester?.testAllLocations) {
+            if (out) out.textContent = 'Location tester not available';
+            this.game.showToast('Location tester not available', 'error');
+            return null;
+        }
+        if (out) out.textContent = 'Testing...';
+        const results = await tester.testAllLocations();
+        const list = DevMenu.summarizeLocationResults(results);
+        if (out) {
+            out.innerHTML = '';
+            const summary = document.createElement('div');
+            summary.textContent = `${list.passed} passed, ${list.failed} failed`;
+            out.appendChild(summary);
+            list.failures.forEach(f => {
+                const row = document.createElement('div');
+                row.textContent = `✗ ${f.id}: ${f.errors.join(', ')}`;
+                out.appendChild(row);
+            });
+        }
+        this.game.showToast(`Locations: ${list.passed} passed, ${list.failed} failed`, list.failed ? 'warning' : 'success');
+        return results;
+    }
+
+    /**
+     * Normalise LocationTester.testAllLocations() output into counts plus a
+     * failure list
+     */
+    static summarizeLocationResults(results) {
+        const entries = Array.isArray(results) ? results
+            : Array.isArray(results?.results) ? results.results
+            : Array.isArray(results?.details) ? results.details : [];
+        const failures = entries
+            .filter(r => r && (r.success === false || (r.errors || []).length > 0))
+            .map(r => ({ id: r.locationId || r.id || '?', errors: r.errors || [] }));
+        const passed = typeof results?.passed === 'number' ? results.passed : entries.filter(r => r?.success).length;
+        const failed = typeof results?.failed === 'number' ? results.failed : failures.length;
+        return { passed, failed, failures };
     }
 
     async validateWorkSystem() {
@@ -904,7 +1034,8 @@ export class DevMenu {
         if (totalIssues === 0) {
             this.game.showToast('✅ No crash issues detected!', 'success');
         } else {
-            this.game.showWarning(`Found ${totalIssues} potential crash issues. Check console.`);
+            // There is no showWarning; use a warning toast (#2351, #1029)
+            this.game.showToast(`Found ${totalIssues} potential crash issues. Check console.`, 'warning');
             console.log('Crash check results:', checks);
         }
     }
