@@ -46,7 +46,7 @@ describe('WorldEventManager', () => {
 
     describe('processDay', () => {
         it('should trigger tech_boom when the roll succeeds', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.001); // < 0.005
+            vi.spyOn(Math, 'random').mockReturnValue(0.004); // < 0.005, above every other event's chance
             manager.processDay();
 
             expect(mockGameState.stockMarket.triggerBoom).toHaveBeenCalledTimes(1);
@@ -64,7 +64,7 @@ describe('WorldEventManager', () => {
         });
 
         it('should skip a conditioned event without evaluating chance when condition is falsy', () => {
-            const randomSpy = vi.spyOn(Math, 'random');
+            const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.999);
             manager.eventPool.throwaway = {
                 id: 'throwaway',
                 name: 'Throwaway',
@@ -75,7 +75,9 @@ describe('WorldEventManager', () => {
 
             manager.processDay();
 
-            expect(randomSpy).not.toHaveBeenCalled();
+            // Only the unconditioned events roll
+            const unconditioned = Object.values(manager.eventPool).filter(e => !e.condition).length;
+            expect(randomSpy).toHaveBeenCalledTimes(unconditioned);
             expect(manager.eventPool.throwaway.effect).not.toHaveBeenCalled();
             expect(manager.events).toEqual([]);
         });
@@ -108,7 +110,7 @@ describe('WorldEventManager', () => {
 
             expect(mockGameState.stockMarket.triggerCrash).toHaveBeenCalledTimes(1);
             expect(mockGameState.newsManager.addNews).toHaveBeenCalledWith(expect.objectContaining({
-                category: 'finance',
+                category: 'market',
                 sentiment: 'negative'
             }));
             expect(manager.events).toContainEqual({ id: 'market_crash', day: 42 });
@@ -118,18 +120,18 @@ describe('WorldEventManager', () => {
     describe('serialization', () => {
         it('should round-trip events and activeModifiers through toJSON/fromJSON', () => {
             manager.events = [{ id: 'tech_boom', day: 5 }];
-            manager.activeModifiers = [{ id: 'm1', type: 'boost', value: 1, expiry: 10 }];
+            manager.activeModifiers = [{ id: 'tech_boom', type: 'tech_boom', value: 1, expiry: 10 }];
 
             const data = manager.toJSON();
             expect(data).toEqual({
                 events: [{ id: 'tech_boom', day: 5 }],
-                activeModifiers: [{ id: 'm1', type: 'boost', value: 1, expiry: 10 }]
+                activeModifiers: [{ id: 'tech_boom', type: 'tech_boom', value: 1, expiry: 10 }]
             });
 
             const restored = new WorldEventManager(mockGameState);
             restored.fromJSON(data);
             expect(restored.events).toEqual([{ id: 'tech_boom', day: 5 }]);
-            expect(restored.activeModifiers).toEqual([{ id: 'm1', type: 'boost', value: 1, expiry: 10 }]);
+            expect(restored.activeModifiers).toEqual([{ id: 'tech_boom', type: 'tech_boom', value: 1, expiry: 10 }]);
         });
 
         it('should be a no-op when fromJSON receives null', () => {

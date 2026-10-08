@@ -15,6 +15,7 @@ import { useGameStore } from '../store/gameStore.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommonUtils } from '../utils/CommonUtils.js';
 import { logger } from '../utils/Logger.js';
+import { NEWS_CATEGORIES } from '../game/NewsManager.js';
 
 export class UIUpdater {
     constructor(game) {
@@ -583,18 +584,28 @@ export class UIUpdater {
         const horoscopeEl = document.getElementById('paper-horoscope');
 
         if (dateEl) dateEl.textContent = paper.date;
-        if (headlineEl) headlineEl.textContent = paper.headline?.title || 'Breaking News';
+        // Items carry title/description; fall back to text for old saves (#1365)
+        if (headlineEl) {
+            headlineEl.textContent = paper.headline?.title || paper.headline?.text || 'Breaking News';
+            // Category colour from NEWS_CATEGORIES (#2459)
+            headlineEl.style.color = NEWS_CATEGORIES[paper.headline?.category]?.color || '';
+        }
         if (storyEl) storyEl.textContent = paper.headline?.description || '...';
         if (weatherEl) weatherEl.textContent = paper.weather || 'Clear';
         if (horoscopeEl) horoscopeEl.textContent = paper.horoscope || 'Stars align.';
 
         // Side stories
-        paper?.articles?.forEach((article, index) => {
+        // Side stories: fill the two slots, blank any slot without an article
+        for (let index = 0; index < 2; index++) {
+            const article = paper?.articles?.[index];
             const titleEl = document.getElementById(`paper-sub-${index + 1}-title`);
             const textEl = document.getElementById(`paper-sub-${index + 1}-text`);
-            if (titleEl) titleEl.textContent = article.title;
-            if (textEl) textEl.textContent = article.description;
-        });
+            if (titleEl) {
+                titleEl.textContent = article ? (article.title || article.text || '') : '';
+                titleEl.style.color = NEWS_CATEGORIES[article?.category]?.color || '';
+            }
+            if (textEl) textEl.textContent = article?.description || '';
+        }
 
         // Mark headline and articles as read when newspaper is displayed
         if (paper.headline) {

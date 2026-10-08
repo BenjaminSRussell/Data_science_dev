@@ -2077,3 +2077,39 @@ a:hover {
 /* Exam pass/fail status (#2648) */
 .success-text { color: #16a34a; font-weight: 700; }
 .error-text { color: #dc2626; font-weight: 700; }
+
+/* Map news ticker: one line that scrolls (#2501). updateNewsTicker() writes
+   the text twice, so sliding by half loops seamlessly. */
+.news-ticker-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    overflow: hidden;
+}
+.news-label {
+    flex: 0 0 auto;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.news-content-wrapper {
+    flex: 1 1 auto;
+    overflow: hidden;
+    position: relative;
+}
+.news-content {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: news-ticker-scroll 40s linear infinite;
+}
+.news-ticker-container:hover .news-content {
+    animation-play-state: paused;
+}
+@keyframes news-ticker-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .news-content { animation: none; padding-left: 0; white-space: normal; }
+}

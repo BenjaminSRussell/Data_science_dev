@@ -4,17 +4,19 @@
  * Each week has a main story arc that progresses
  */
 
+const DEFAULT_STORYLINES = {
+    techRevolution: 0,
+    marketCrash: 0,
+    corporateScandal: 0,
+    startupBoom: 0,
+    aiRegulation: 0
+};
+
 export class WeeklyNewsSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.weekNumber = 0;
-        this.storylineProgress = {
-            techRevolution: 0,
-            marketCrash: 0,
-            corporateScandal: 0,
-            startupBoom: 0,
-            aiRegulation: 0
-        };
+        this.storylineProgress = { ...DEFAULT_STORYLINES };
         this.weeklyHeadlines = [];
     }
 
@@ -36,6 +38,7 @@ export class WeeklyNewsSystem {
         };
 
         this.weeklyHeadlines.push(paper);
+        if (this.weeklyHeadlines.length > 10) this.weeklyHeadlines.shift();
         this.updateStorylineProgress();
         
         return paper;
@@ -133,14 +136,15 @@ export class WeeklyNewsSystem {
         // Reference specific player decisions
         if (recentDecisions.length > 0) {
             const lastDecision = recentDecisions[recentDecisions.length - 1];
-            const storylineManager = this.gameState.storylineManager;
-            const decisionData = storylineManager?.getDecision?.(lastDecision.decisionId);
+            // majorDecisions are already-made decisions, which getDecision()
+            // (available decisions only) never returns, so match the id (#1418)
+            const decisionId = lastDecision.decisionId;
             
-            if (decisionData) {
-                if (lastDecision.choice === 'accept' && decisionData.id === 'criminal_opportunity') {
+            if (decisionId) {
+                if (lastDecision.choice === 'accept' && decisionId === 'criminal_opportunity') {
                     return "Reports surface of illegal data trading operations. Authorities are investigating...";
                 }
-                if (lastDecision.choice === 'stay_quiet' && decisionData.id === 'whistleblower') {
+                if (lastDecision.choice === 'stay_quiet' && decisionId === 'whistleblower') {
                     return "A major data scandal remains hidden. Those who know stay silent...";
                 }
             }
@@ -159,14 +163,15 @@ export class WeeklyNewsSystem {
         // Reference specific player decisions
         if (recentDecisions.length > 0) {
             const lastDecision = recentDecisions[recentDecisions.length - 1];
-            const storylineManager = this.gameState.storylineManager;
-            const decisionData = storylineManager?.getDecision?.(lastDecision.decisionId);
+            // majorDecisions are already-made decisions, which getDecision()
+            // (available decisions only) never returns, so match the id (#1418)
+            const decisionId = lastDecision.decisionId;
             
-            if (decisionData) {
-                if (lastDecision.choice === 'expose' && decisionData.id === 'whistleblower') {
+            if (decisionId) {
+                if (lastDecision.choice === 'expose' && decisionId === 'whistleblower') {
                     return "A brave data scientist exposed unethical practices, sparking industry-wide reform...";
                 }
-                if (lastDecision.choice === 'reject' && decisionData.id === 'first_job_offer') {
+                if (lastDecision.choice === 'reject' && decisionId === 'first_job_offer') {
                     return "Professionals who stand by their ethics are gaining recognition in the industry...";
                 }
             }
@@ -185,14 +190,15 @@ export class WeeklyNewsSystem {
         // Reference specific player decisions
         if (recentDecisions.length > 0) {
             const lastDecision = recentDecisions[recentDecisions.length - 1];
-            const storylineManager = this.gameState.storylineManager;
-            const decisionData = storylineManager?.getDecision?.(lastDecision.decisionId);
+            // majorDecisions are already-made decisions, which getDecision()
+            // (available decisions only) never returns, so match the id (#1418)
+            const decisionId = lastDecision.decisionId;
             
-            if (decisionData) {
-                if (lastDecision.choice === 'negotiate' && decisionData.id === 'first_job_offer') {
+            if (decisionId) {
+                if (lastDecision.choice === 'negotiate' && decisionId === 'first_job_offer') {
                     return "Professionals are finding creative ways to balance ethics and opportunity...";
                 }
-                if (lastDecision.choice === 'internal_report' && decisionData.id === 'whistleblower') {
+                if (lastDecision.choice === 'internal_report' && decisionId === 'whistleblower') {
                     return "Companies are handling ethical concerns internally, with mixed results...";
                 }
             }
@@ -319,6 +325,13 @@ export class WeeklyNewsSystem {
         if (week % 7 === 0) {
             this.storylineProgress.corporateScandal += 1;
         }
+        // The other two storylines advance too (#1188)
+        if (week % 4 === 0) {
+            this.storylineProgress.startupBoom += 1;
+        }
+        if (week % 6 === 0) {
+            this.storylineProgress.aiRegulation += 1;
+        }
     }
 
     /**
@@ -341,9 +354,15 @@ export class WeeklyNewsSystem {
 
     fromJSON(data) {
         if (!data) return;
-        this.weekNumber = data.weekNumber || 0;
-        this.storylineProgress = data.storylineProgress || {};
-        this.weeklyHeadlines = data.weeklyHeadlines || [];
+        this.weekNumber = Number(data.weekNumber) || 0;
+        // Merge over the defaults so missing/garbage entries can't become NaN (#1188)
+        const saved = data.storylineProgress || {};
+        this.storylineProgress = { ...DEFAULT_STORYLINES };
+        for (const key of Object.keys(DEFAULT_STORYLINES)) {
+            const v = Number(saved[key]);
+            if (Number.isFinite(v)) this.storylineProgress[key] = v;
+        }
+        this.weeklyHeadlines = Array.isArray(data.weeklyHeadlines) ? data.weeklyHeadlines.slice(-10) : [];
     }
 }
 

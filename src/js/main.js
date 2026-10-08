@@ -3181,6 +3181,32 @@ export class MainGame {
     }
 
     /**
+     * Publish the weekly edition: its headline leads the newspaper and its
+     * market shift nudges prices (#920, #2237)
+     */
+    publishWeeklyEdition() {
+        const weekly = this.gameState.weeklyNewsSystem;
+        if (!weekly?.generateWeeklyNews) return null;
+        const paper = weekly.generateWeeklyNews();
+        this.newsManager?.addNews?.({
+            text: paper.headline,
+            title: paper.headline,
+            description: paper.mainStory,
+            category: 'business'
+        });
+        (paper.worldChanges || []).forEach(change => {
+            if (change.type === 'market_shift' && this.gameState.stockMarket?.applyMarketShock) {
+                // magnitude 0.1-0.3 maps to a 1-3% move
+                const move = (change.magnitude || 0) / 10;
+                this.gameState.stockMarket.applyMarketShock(change.effect === 'bust' ? -move : move);
+            }
+        });
+        this.updateNewsBadge?.();
+        this.showToast?.(`Weekly edition: ${paper.headline}`, 'info');
+        return paper;
+    }
+
+    /**
      * Apply the side effects of time events (new day/week) that TimeManager
      * already produced. Used by sleep(), which advances the clock itself, so
      * the day isn't advanced a second time (#917, #1249, #2396).
@@ -3198,6 +3224,27 @@ export class MainGame {
                 }
                 this.showToast('A new day has begun!', 'info');
 
+                // Random life events: referral bonuses, car trouble, ... (#919)
+                if (this.newsManager?.checkRandomEvents) {
+                    this.newsManager.checkRandomEvents().forEach(ev => {
+                        this.newsManager.applyEventEffects(ev);
+                        const kind = ev.type === 'positive' ? 'success' : ev.type === 'negative' ? 'warning' : 'info';
+                        this.showToast(`${(ev.title || '').trim()}: ${ev.description}`, kind);
+                    });
+                }
+
+                // Background world events (crashes, booms, ...) (#918, #2366, #2110)
+                const worldEvents = this.gameState.worldEventManager?.processDay?.() || { started: [], ended: [] };
+                worldEvents.started.forEach(id => {
+                    const name = this.gameState.worldEventManager.eventPool[id]?.name || id;
+                    this.showToast(`World event: ${name}!`, 'warning');
+                });
+                worldEvents.ended.forEach(id => {
+                    const name = this.gameState.worldEventManager.eventPool[id]?.name || id;
+                    this.showToast(`${name} is over.`, 'info');
+                });
+                if (worldEvents.started.length) this.updateNewsBadge?.();
+
                 // Update stock market with today's news events
                 if (this.gameState.stockMarket) {
                     // Gather news events from the daily paper
@@ -3206,8 +3253,9 @@ export class MainGame {
                     if (dailyPaper?.headline) newsEvents.push(dailyPaper.headline);
                     if (dailyPaper?.articles) newsEvents.push(...dailyPaper.articles);
 
-                    // Update stock market prices based on news events
-                    this.gameState.stockMarket.update(newsEvents, []);
+                    // Update stock market prices based on news and running world events
+                    const activeWorld = this.gameState.worldEventManager?.getActiveEvents?.() || [];
+                    this.gameState.stockMarket.update(newsEvents, activeWorld);
                 }
 
                 // Expenses
@@ -3239,6 +3287,7 @@ export class MainGame {
                     this.showToast('The investigation into you was dropped for lack of evidence.', 'success');
                 }
             } else if (event.type === 'new_week') {
+                this.publishWeeklyEdition();
                 const rent = this.gameState.rent || 500;
                 this.gameState.money -= rent;
 
