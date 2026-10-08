@@ -48,6 +48,16 @@ export class DOMUtils {
                 element.addEventListener(event, handler);
             });
         }
+
+        // Child nodes/strings, so callers passing `children` aren't silently dropped (#2462)
+        if (Array.isArray(options.children)) {
+            options.children.forEach(child => {
+                if (child === null || child === undefined || child === false) return;
+                element.appendChild(typeof child === 'string' || typeof child === 'number'
+                    ? document.createTextNode(String(child))
+                    : child);
+            });
+        }
         
         return element;
     }

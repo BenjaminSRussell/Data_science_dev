@@ -153,9 +153,10 @@ export class MapManager {
      * Convert grid coordinates to percentage for rendering
      */
     gridToPercent(gridX, gridY) {
-        const containerWidth = this.container.offsetWidth || this.gridSystem.totalWidth;
-        const containerHeight = this.container.offsetHeight || this.gridSystem.totalHeight;
-        return this.gridSystem.gridToPercent(gridX, gridY, containerWidth, containerHeight);
+        // A percent of the grid's own logical size: gridToPercent's contract
+        // needs containerWidth === totalWidth, and percent positioning then
+        // scales with whatever size the container really is (#1933)
+        return this.gridSystem.gridToPercent(gridX, gridY, this.gridSystem.totalWidth, this.gridSystem.totalHeight);
     }
 
     /**

@@ -138,9 +138,21 @@ export function updateMapScreen(game) {
     updateMapLocationStates(game);
     updatePlayerMarker(game);
 
-    // Update icons to use image assets
-    updateMapLocationIcons(game);
-    updateLockBadges();
+    // Icon/lock-badge decoration only applies to the legacy DOM map renderer's
+    // .map-location nodes; skip the DOM sweeps when that renderer isn't live (#1170)
+    if (game.mapRenderer || document.querySelector('.map-location')) {
+        updateMapLocationIcons(game);
+        updateLockBadges();
+    }
+}
+
+// Locations whose action buttons (#location-actions) live on the map screen,
+// so travel must leave the player there instead of on the office screen (#1165)
+export const MAP_ACTION_LOCATIONS = new Set(['gym', 'library', 'stock_exchange', 'city_hall']);
+
+/** Screen to show after arriving at a location (#1165) */
+export function screenForLocation(locationId) {
+    return MAP_ACTION_LOCATIONS.has(locationId) ? 'screen-map' : 'screen-office';
 }
 
 /**
@@ -555,7 +567,7 @@ export function handleTravel(game, locationId) {
     if (result.success && result.alreadyHere) {
         // No time charged for "travelling" to where you already are (#1434, #2168)
         game.showToast(`You're already at ${result.location?.name || 'this location'}`, 'info');
-        game.screenManager.showScreen('screen-office');
+        game.screenManager.showScreen(screenForLocation(locationId));
         return;
     }
 
@@ -574,8 +586,9 @@ export function handleTravel(game, locationId) {
         updateEnvironmentForLocation(game, locationId);
         game.showToast(`Traveled to ${result.location.name}`, 'success');
 
-        // Switch screen immediately
-        game.screenManager.showScreen('screen-office');
+        // Switch screen immediately: action locations stay on the map, where
+        // their buttons are (#1165)
+        game.screenManager.showScreen(screenForLocation(locationId));
     } else {
         game.showError(result.reason);
     }
