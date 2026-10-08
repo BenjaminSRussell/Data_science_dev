@@ -36,6 +36,7 @@ export class MapManager {
         
         // Initialize asset placer
         this.assetPlacer = new MapAssetPlacer(this.gridSystem, this.roadSystem, this.buildingSystem);
+        this.buildingSystem.setAssetPlacer?.(this.assetPlacer);
         
         // Initialize environment system
         this.environmentSystem = new MapEnvironmentSystem(this.gridSystem, this.roadSystem, this.zoneSystem, this.assetPlacer);

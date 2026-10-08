@@ -12,6 +12,11 @@ export class MapBuildingSystem {
         this.zoneSystem = zoneSystem;
         this.buildings = [];
         this.buildingGrid = new Map(); // Track occupied grid cells
+        this.assetPlacer = null; // set by MapManager once the asset placer exists
+    }
+
+    setAssetPlacer(assetPlacer) {
+        this.assetPlacer = assetPlacer;
     }
 
     /**
@@ -171,6 +176,11 @@ export class MapBuildingSystem {
                 // Check if already occupied
                 const key = this.gridSystem.getGridKey(x, y);
                 if (this.buildingGrid.has(key)) {
+                    return false;
+                }
+
+                // Don't build on top of trees/decorations already placed
+                if (this.assetPlacer?.assetGrid?.has(key)) {
                     return false;
                 }
             }
