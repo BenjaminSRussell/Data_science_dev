@@ -4,9 +4,11 @@
  * Phase 2: Replaces UIUpdater's direct DOM manipulation
  */
 
-import { TopBar } from './components/TopBar.js';
-import { ProgressBar } from './components/ProgressBar.js';
-import { LocationViewComponent } from './components/LocationViewComponent.js';
+// Side-effect imports: each module registers its custom element
+// (<top-bar>, <progress-bar>, <location-view-component>) (#1635)
+import './components/TopBar.js';
+import './components/ProgressBar.js';
+import './components/LocationViewComponent.js';
 
 export class LitUIManager {
     constructor(game) {
@@ -50,25 +52,14 @@ export class LitUIManager {
     }
 
     /**
-     * Update top bar
-     * Phase 4: Uses Zustand store
+     * Update top bar. GameState is the one live source: every gameplay
+     * system writes money/reputation/rank there, while the Zustand store is
+     * never written after startup (#134, #1616, #50).
      */
     updateTopBar() {
         const topBar = this.components.get('topBar');
-        // Phase 4: Get state from Zustand store
-        const gameStore = this.game?.gameStore || (typeof useGameStore !== 'undefined' ? useGameStore : null);
 
-        if (topBar && gameStore) {
-            const state = gameStore.getState();
-            // Create a compatible object for updateFromGameState
-            const gameStateCompat = {
-                money: state.money,
-                reputation: state.reputation,
-                currentRank: state.currentRank
-            };
-            topBar.updateFromGameState(gameStateCompat);
-        } else if (topBar && this.game?.gameState) {
-            // Fallback to GameState
+        if (topBar && this.game?.gameState) {
             topBar.updateFromGameState(this.game.gameState);
         } else {
             // Fallback to old method if component not available
