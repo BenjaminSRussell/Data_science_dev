@@ -22,6 +22,21 @@ logger = logging.getLogger(__name__)
 # Seconds before a git clone is abandoned (#615)
 GIT_CLONE_TIMEOUT = 300
 
+FILENAME_SAFE_PUNCTUATION = ('_', '-', '.')
+
+
+def sanitize_filename(name):
+    """Keep only alphanumerics and _ - . so a scraped title can't add path
+    separators or other filesystem-special characters (#616)."""
+    return ''.join(c for c in name if c.isalnum() or c in FILENAME_SAFE_PUNCTUATION)
+
+
+def opengameart_character_filename(index, title):
+    """Download filename for an OpenGameArt result: the title is trimmed to
+    30 characters *before* sanitizing, then the whole name is sanitized."""
+    return sanitize_filename(f"character_{index}_{title.strip()[:30]}.png")
+
+
 class CharacterSpriteScraper:
     def __init__(self, output_dir="downloaded_assets/characters/sprites"):
         self.output_dir = Path(output_dir)
@@ -90,8 +105,7 @@ class CharacterSpriteScraper:
                     download_link = asset_soup.find('a', href=lambda x: x and '/download' in x)
                     if download_link:
                         file_url = urljoin(base_url, download_link.get('href', ''))
-                        filename = f"character_{len(self.downloaded)}_{title_link.text.strip()[:30]}.png"
-                        filename = ''.join(c for c in filename if c.isalnum() or c in ('_', '-', '.'))
+                        filename = opengameart_character_filename(len(self.downloaded), title_link.text)
                         output_path = self.output_dir / filename
                         
                         if self.download_file(file_url, output_path):
