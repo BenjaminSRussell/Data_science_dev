@@ -22,7 +22,6 @@ export const PERSONALITY = {
         name: 'friendly',
         defaultMood: MOOD.HAPPY,
         color: '#10b981',
-        emoji: '',
         greetings: {
             stranger: ["Hey there! New face around here!", "Oh hi! I don't think we've met!"],
             acquaintance: ["Hey! Good to see you again!", "Oh hey you! What's up?"],
@@ -30,16 +29,15 @@ export const PERSONALITY = {
             close: ["I was just thinking about you!", "Finally! I've been waiting to see you!"]
         },
         reactions: {
-            happy: { emoji: '', text: 'lights up' },
-            annoyed: { emoji: '', text: 'looks a bit uncomfortable' },
-            excited: { emoji: '', text: 'bounces excitedly' }
+            happy: { text: 'lights up' },
+            annoyed: { text: 'looks a bit uncomfortable' },
+            excited: { text: 'bounces excitedly' }
         }
     },
     PROFESSIONAL: {
         name: 'professional',
         defaultMood: MOOD.NEUTRAL,
         color: '#8b5cf6',
-        emoji: '',
         greetings: {
             stranger: ["Good day. How can I help you?", "Hello. What brings you here?"],
             acquaintance: ["Ah, good to see you. What's on your mind?", "Hello again. Business as usual?"],
@@ -47,16 +45,15 @@ export const PERSONALITY = {
             close: ["Perfect timing as always. Come in.", "I've been expecting you."]
         },
         reactions: {
-            happy: { emoji: '', text: 'nods approvingly' },
-            annoyed: { emoji: '', text: 'checks their watch' },
-            excited: { emoji: '', text: 'leans forward with interest' }
+            happy: { text: 'nods approvingly' },
+            annoyed: { text: 'checks their watch' },
+            excited: { text: 'leans forward with interest' }
         }
     },
     COMPETITIVE: {
         name: 'competitive',
         defaultMood: MOOD.NEUTRAL,
         color: '#f59e0b',
-        emoji: '',
         greetings: {
             stranger: ["Who are you? Another competitor?", "New blood, huh? Think you can keep up?"],
             acquaintance: ["Back for more? Glutton for punishment.", "Oh, it's you. Ready to lose again?"],
@@ -64,16 +61,15 @@ export const PERSONALITY = {
             close: ["The only person worth competing against.", "Ready for our rematch?"]
         },
         reactions: {
-            happy: { emoji: '', text: 'smirks confidently' },
-            annoyed: { emoji: '', text: 'scoffs' },
-            excited: { emoji: '', text: 'gets fired up' }
+            happy: { text: 'smirks confidently' },
+            annoyed: { text: 'scoffs' },
+            excited: { text: 'gets fired up' }
         }
     },
     MYSTERIOUS: {
         name: 'mysterious',
         defaultMood: MOOD.NEUTRAL,
-        color: '#8b5cf6',
-        emoji: '',
+        color: '#6366f1',
         greetings: {
             stranger: ["...", "Interesting. You found me."],
             acquaintance: ["You again. The threads of fate intertwine.", "Back so soon? Curious."],
@@ -81,16 +77,15 @@ export const PERSONALITY = {
             close: ["*smiles knowingly* Right on time.", "Some things are meant to be."]
         },
         reactions: {
-            happy: { emoji: '', text: 'eyes glimmer' },
-            annoyed: { emoji: '', text: 'shadows seem to deepen' },
-            excited: { emoji: '', text: 'aura intensifies' }
+            happy: { text: 'eyes glimmer' },
+            annoyed: { text: 'shadows seem to deepen' },
+            excited: { text: 'aura intensifies' }
         }
     },
     GRUMPY: {
         name: 'grumpy',
         defaultMood: MOOD.ANNOYED,
         color: '#ef4444',
-        emoji: '',
         greetings: {
             stranger: ["What do you want?", "Ugh, another one. What?"],
             acquaintance: ["Oh, it's you. Make it quick.", "Back again? *sighs* Fine."],
@@ -98,16 +93,15 @@ export const PERSONALITY = {
             close: ["...glad you're here. Don't make a big deal of it.", "*actually smiles* Hey."]
         },
         reactions: {
-            happy: { emoji: '', text: 'softens slightly' },
-            annoyed: { emoji: '', text: 'vein pops on forehead' },
-            excited: { emoji: '', text: 'eyebrows raise in surprise' }
+            happy: { text: 'softens slightly' },
+            annoyed: { text: 'vein pops on forehead' },
+            excited: { text: 'eyebrows raise in surprise' }
         }
     },
     GENEROUS: {
         name: 'generous',
         defaultMood: MOOD.HAPPY,
         color: '#ec4899',
-        emoji: '',
         greetings: {
             stranger: ["Welcome! Can I get you anything?", "Hello dear! How can I help?"],
             acquaintance: ["So lovely to see you! Tea?", "Oh wonderful! Just in time for cookies!"],
@@ -115,9 +109,9 @@ export const PERSONALITY = {
             close: ["Come here, let me hug you!", "I've been saving something special for you!"]
         },
         reactions: {
-            happy: { emoji: '', text: 'beams warmly' },
-            annoyed: { emoji: '', text: 'looks concerned' },
-            excited: { emoji: '', text: 'claps hands together' }
+            happy: { text: 'beams warmly' },
+            annoyed: { text: 'looks concerned' },
+            excited: { text: 'claps hands together' }
         }
     }
 };
@@ -136,6 +130,18 @@ function getRelationshipTier(level) {
  * SimpleDialogueManager - Clean dialogue handling
  */
 export class SimpleDialogueManager {
+    static REACTION_FOR_MOOD = {
+        [MOOD.HAPPY]: 'happy',
+        [MOOD.EXCITED]: 'excited',
+        [MOOD.FLIRTY]: 'excited',
+        [MOOD.ANNOYED]: 'annoyed',
+        [MOOD.ANGRY]: 'annoyed',
+        [MOOD.SAD]: 'annoyed',
+        [MOOD.SUSPICIOUS]: 'annoyed',
+        [MOOD.NEUTRAL]: null
+    };
+    static HISTORY_LIMIT = 50;
+
     constructor() {
         this.currentNPC = null;
         this.currentMood = MOOD.NEUTRAL;
@@ -146,7 +152,8 @@ export class SimpleDialogueManager {
      * Get NPC personality config
      */
     getPersonality(npc) {
-        const type = npc.personality?.toUpperCase() || 'FRIENDLY';
+        // Null-safe like the rest of the fallback chain (#1605)
+        const type = typeof npc?.personality === 'string' ? npc.personality.toUpperCase() : 'FRIENDLY';
         return PERSONALITY[type] || PERSONALITY.FRIENDLY;
     }
     
@@ -165,7 +172,11 @@ export class SimpleDialogueManager {
      */
     getReaction(npc, mood) {
         const personality = this.getPersonality(npc);
-        return personality.reactions[mood] || personality.reactions.happy;
+        // respond() produces 8 moods but only 3 have reactions; map the rest
+        // to the closest one instead of always falling back to 'happy' (#1604)
+        const key = SimpleDialogueManager.REACTION_FOR_MOOD[mood] ?? mood;
+        if (key === null) return null;
+        return personality.reactions[key] || null;
     }
     
     /**
@@ -181,8 +192,7 @@ export class SimpleDialogueManager {
             greeting: this.getGreeting(npc, relationshipLevel),
             mood: this.currentMood,
             personality: personality,
-            color: personality.color,
-            emoji: personality.emoji
+            color: personality.color
         };
     }
     
@@ -220,7 +230,16 @@ export class SimpleDialogueManager {
         }
         
         this.currentMood = response.mood;
+        // Attach the matching reaction and remember the exchange (#1603, #1604)
+        response = { ...response, reaction: this.getReaction(this.currentNPC, response.mood) };
+        this.dialogueHistory.push({ npcId: this.currentNPC.id ?? null, choiceType, mood: response.mood, text: response.text });
+        if (this.dialogueHistory.length > SimpleDialogueManager.HISTORY_LIMIT) this.dialogueHistory.shift();
         return response;
+    }
+
+    /** Exchanges with one NPC (or all), oldest first (#1603) */
+    getHistory(npcId = null) {
+        return npcId == null ? [...this.dialogueHistory] : this.dialogueHistory.filter(h => h.npcId === npcId);
     }
     
     handleCompliment(personality) {
@@ -256,7 +275,24 @@ export class SimpleDialogueManager {
             grumpy: { text: "*sighs* What now? Make it quick.", mood: MOOD.ANNOYED, effect: { relationship: 0 } },
             generous: { text: "Absolutely! I was hoping you'd ask! What can I do?", mood: MOOD.HAPPY, effect: { relationship: 3 } }
         };
-        return responses[personality.name] || responses.friendly;
+        const response = responses[personality.name] || responses.friendly;
+        return SimpleDialogueManager.closeFriendBoost(response, context);
+    }
+
+    /**
+     * context.relationshipLevel now matters (#1602): close friends (70+) help
+     * and deal more warmly, so the parameter is no longer ignored.
+     */
+    static closeFriendBoost(response, context = {}) {
+        const level = Number(context?.relationshipLevel);
+        if (!(level >= 70)) return response;
+        const mood = response.mood === MOOD.ANNOYED || response.mood === MOOD.NEUTRAL ? MOOD.HAPPY : response.mood;
+        return {
+            ...response,
+            text: `${response.text} For you, anything.`,
+            mood,
+            effect: { ...response.effect, relationship: (response.effect?.relationship || 0) + 1 }
+        };
     }
     
     handleSmallTalk(personality) {
@@ -302,7 +338,7 @@ export class SimpleDialogueManager {
             grumpy: { text: "Fine, let's talk numbers. Just don't waste my time.", mood: MOOD.NEUTRAL, effect: { relationship: 1 } },
             generous: { text: "Of course! And don't worry about the details, I'll give you a good deal!", mood: MOOD.HAPPY, effect: { relationship: 2 } }
         };
-        return responses[personality.name] || responses.friendly;
+        return SimpleDialogueManager.closeFriendBoost(responses[personality.name] || responses.friendly, context);
     }
     
     handleGeneric(personality) {

@@ -50,7 +50,11 @@ export function handleStartExam(game, courseId) {
         game.showToast?.('Unknown course.', 'error');
         return;
     }
-    if (game.gameState.educationSystem.completedCourses.includes(courseId)) return;
+    const edu = game.gameState.educationSystem;
+    if (edu.completedCourses.includes(courseId)) {
+        game.showToast?.('Course already completed.', 'info');
+        return;
+    }
     if (game.gameState.money < course.cost) {
         game.showToast?.('Tuition too high!', 'error');
         game.audioManager?.play?.('error');
@@ -68,8 +72,16 @@ export function handleStartExam(game, courseId) {
         return;
     }
 
-    // Pay tuition
-    game.gameState.money -= course.cost;
+    // Pay tuition through EducationSystem.enroll, the one place that guards
+    // completed courses, prerequisites and affordability (#1426, #1640)
+    const enrolled = typeof edu.enroll === 'function'
+        ? edu.enroll(courseId)
+        : (game.gameState.money -= course.cost, { success: true });
+    if (!enrolled?.success) {
+        game.showToast?.(enrolled?.message || 'Cannot enroll.', 'error');
+        game.audioManager?.play?.('error');
+        return;
+    }
     game.uiUpdater?.updateAllUI?.();
 
     game.currentExam = {
