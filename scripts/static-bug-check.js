@@ -37,6 +37,20 @@ function findJSFiles(dir, fileList = []) {
  * clearInterval. Cleanup can live in stop()/close()/resolve()/etc., so no
  * particular method name ("destroy") is required (#2320).
  */
+/**
+ * Is this line the start of an empty catch block? Only real `catch` syntax
+ * counts (`} catch (e) {` / `catch {`), never a comment or string that just
+ * mentions the word (#88). Handles `catch (e) {}` on one line too.
+ */
+export function isEmptyCatch(line, nextLine) {
+    const trimmed = String(line || '').trim();
+    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) return false;
+    const code = trimmed.replace(/\/\/.*$/, '');
+    if (/\bcatch\s*(\([^)]*\))?\s*\{\s*\}/.test(code)) return true;
+    if (!/\bcatch\s*(\([^)]*\))?\s*\{\s*$/.test(code)) return false;
+    return String(nextLine ?? '').trim() === '}';
+}
+
 export function intervalLacksCleanup(line, content) {
     if (!line.includes('setInterval') || line.includes('clearInterval')) return false;
     if (line.trim().startsWith('//')) return false;
@@ -94,7 +108,7 @@ function checkFile(filePath) {
         }
         
         // Check for empty catch blocks
-        if (line.includes('catch') && lines[index + 1]?.trim() === '}') {
+        if (isEmptyCatch(line, lines[index + 1])) {
             bugs.push(`${fileName}:${lineNum} - Empty catch block (swallows errors)`);
         }
     });
