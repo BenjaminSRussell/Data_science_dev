@@ -2,9 +2,9 @@
  * Unit tests for EnvironmentManager
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { EnvironmentManager } from '../../src/js/game/EnvironmentManager.js';
-import { OFFICE_LOCATIONS, TIME_OF_DAY, WEATHER_EFFECTS } from '../../src/js/data/locations.js';
+import { OFFICE_LOCATIONS, TIME_OF_DAY, WEATHER_EFFECTS, OFFICE_EVENTS } from '../../src/js/data/locations.js';
 
 describe('EnvironmentManager', () => {
     let envManager;
@@ -19,7 +19,13 @@ describe('EnvironmentManager', () => {
         envManager = new EnvironmentManager(mockGameState);
         
         // Mock DOM
-        document.body.innerHTML = '<div id="game-container"></div>';
+        document.body.innerHTML = '<div id="game-container"></div><div class="top-bar-left"></div>';
+    });
+
+    // Every test starts clean: no leaked Date/Math spies or fake timers (#1845)
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.useRealTimers();
     });
 
     describe('constructor', () => {
@@ -35,39 +41,69 @@ describe('EnvironmentManager', () => {
     });
 
     describe('updateLocation', () => {
+        // Exact ids, so the hidden flower_store fallthrough can't pass (#74, #2331, #1844)
         it('should return the first location for rank 0', () => {
             mockGameState.rankIndex = 0;
             const location = envManager.updateLocation();
-            expect(location).toBeDefined();
-            expect(location.rankRequired).toBe(0);
+            expect(location.id).toBe('home_office');
         });
 
         it('should return the highest unlocked location', () => {
             mockGameState.rankIndex = 3;
-            const location = envManager.updateLocation();
-            expect(location).toBeDefined();
-            expect(location.rankRequired).toBeLessThanOrEqual(3);
+            expect(envManager.updateLocation().id).toBe('corporate_floor');
+            mockGameState.rankIndex = 4;
+            expect(envManager.updateLocation().id).toBe('corporate_floor');
+            mockGameState.rankIndex = 99;
+            expect(envManager.updateLocation().id).toBe('executive_suite');
+        });
+
+        it('never picks a hidden decorative location by rank', () => {
+            for (let rank = 0; rank <= 10; rank++) {
+                expect(EnvironmentManager.locationForRank(rank).hidden).toBeFalsy();
+            }
         });
 
         it('should not change location if already set to same location', () => {
             mockGameState.rankIndex = 0;
+            const applySpy = vi.spyOn(envManager, 'applyLocationStyles');
             envManager.updateLocation();
-            const firstLocation = envManager.currentLocation;
             envManager.updateLocation();
-            expect(envManager.currentLocation).toBe(firstLocation);
+            // The identity guard is what keeps this at one call (#1843)
+            expect(applySpy).toHaveBeenCalledTimes(1);
+        });
+
+        it('does not toast an unlock on the first sync after loading (#1182)', () => {
+            mockGameState.rankIndex = 3;
+            mockGameState.tasksCompleted = 20;
+            const toast = vi.spyOn(envManager, 'showLocationUnlock');
+            envManager.updateLocation();
+            expect(toast).not.toHaveBeenCalled();
+            mockGameState.rankIndex = 5;
+            envManager.updateLocation();
+            expect(toast).toHaveBeenCalledTimes(1);
+            expect(toast.mock.calls[0][0].id).toBe('innovation_lab');
+        });
+
+        it('accepts a location id for dev tools and rejects unknown ids (#2177)', () => {
+            expect(envManager.updateLocation('innovation_lab').id).toBe('innovation_lab');
+            expect(envManager.updateLocation('not_a_place')).toBeNull();
+            expect(envManager.currentLocation.id).toBe('innovation_lab');
         });
     });
 
     describe('updateTimeOfDay', () => {
-        it('should set time of day based on current hour', () => {
-            // Mock Date
-            const mockDate = new Date('2024-01-01T10:00:00');
-            vi.spyOn(global, 'Date').mockImplementation(() => mockDate);
-            vi.spyOn(mockDate, 'getHours').mockReturnValue(10);
+        it('follows the in-game time slot, not the computer clock (#921)', () => {
+            const cases = [[0, 'morning'], [1, 'morning'], [2, 'afternoon'], [3, 'afternoon'], [4, 'evening'], [5, 'evening']];
+            for (const [slot, id] of cases) {
+                mockGameState.timeManager = { timeSlot: slot };
+                expect(envManager.updateTimeOfDay().id).toBe(id);
+            }
+        });
 
-            envManager.updateTimeOfDay();
-            expect(envManager.currentTimeOfDay).toBeDefined();
-            expect(envManager.currentTimeOfDay.id).toBe('morning');
+        it('falls back to the real clock without a TimeManager', () => {
+            vi.useFakeTimers();
+            vi.setSystemTime(new Date('2024-01-01T23:00:00'));
+            expect(envManager.updateTimeOfDay().id).toBe('night');
         });
 
         it('should return current time of day', () => {
@@ -86,6 +122,40 @@ describe('EnvironmentManager', () => {
         it('should return current weather', () => {
             const weather = envManager.updateWeather();
             expect(weather).toBeDefined();
+        });
+    });
+
+    describe('weather and office events (#530)', () => {
+        it('picks each weather by its weight band and shows its icon', () => {
+            const total = WEATHER_EFFECTS.reduce((s, w) => s + w.weight, 0);
+            let acc = 0;
+            for (const w of WEATHER_EFFECTS) {
+                const mid = (acc + w.weight / 2) / total;
+                acc += w.weight;
+                vi.spyOn(Math, 'random').mockReturnValue(mid);
+                expect(envManager.updateWeather().id).toBe(w.id);
+                expect(document.getElementById('weather-indicator').textContent).toBe(w.icon);
+                vi.restoreAllMocks();
+            }
+        });
+
+        it('triggerRandomEvent sets one active event, ignores re-triggers, and clears after its duration', () => {
+            vi.useFakeTimers();
+            const notify = vi.spyOn(envManager, 'showEventNotification').mockImplementation(() => {});
+            envManager.triggerRandomEvent();
+            const first = envManager.activeEvent;
+            expect(OFFICE_EVENTS).toContain(first);
+            envManager.triggerRandomEvent();
+            expect(notify).toHaveBeenCalledTimes(1);
+            vi.advanceTimersByTime(first.duration + 1);
+            expect(envManager.activeEvent).toBeNull();
+        });
+
+        it('getBackground layers the office image over a gradient (#1731)', () => {
+            envManager.updateLocation('home_office');
+            const bg = envManager.getBackground('linear-gradient(red, blue)');
+            expect(bg).toContain('url(');
+            expect(bg).toContain('linear-gradient(red, blue)');
         });
     });
 

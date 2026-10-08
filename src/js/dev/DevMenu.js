@@ -509,9 +509,6 @@ export class DevMenu {
             cs.stats[id] = STATS[id]?.maxLevel ?? 100;
             if (cs.xp && id in cs.xp) cs.xp[id] = 0;
         });
-        Object.values(cs.skills || {}).forEach(skill => {
-            skill.value = skill.maxLevel ?? 100;
-        });
         this.game.uiUpdater?.updateAllUI?.();
         this.game.showToast('Maxed all stats', 'success');
         return true;

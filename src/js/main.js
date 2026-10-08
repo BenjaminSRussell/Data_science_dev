@@ -1551,7 +1551,7 @@ export class MainGame {
             this.gameState.ideSystem = new IDESystem(this.gameState);
             this.gameState.locationBackgroundSystem = new LocationBackgroundSystem(this.gameState);
             this.gameState.weeklyNewsSystem = new WeeklyNewsSystem(this.gameState);
-            this.gameState.screenThemeManager = new ScreenThemeManager();
+            this.gameState.screenThemeManager = new ScreenThemeManager(this.environmentManager);
             this.gameState.mapCoordinateSystem = new MapCoordinateSystem();
             this.gameState.gameEndingSystem = new GameEndingSystem(this.gameState);
             this.gameState.gameEndingSystem.gameState.mainGame = this;
@@ -1839,7 +1839,7 @@ export class MainGame {
             ideSystem: () => new IDESystem(gs),
             locationBackgroundSystem: () => new LocationBackgroundSystem(gs),
             weeklyNewsSystem: () => new WeeklyNewsSystem(gs),
-            screenThemeManager: () => new ScreenThemeManager(),
+            screenThemeManager: () => new ScreenThemeManager(this.environmentManager),
             mapCoordinateSystem: () => new MapCoordinateSystem(),
             gameEndingSystem: () => new GameEndingSystem(gs),
             dayNightCycle: () => new DayNightCycle(gs),
@@ -3213,9 +3213,14 @@ export class MainGame {
      * @param {Array} events
      */
     processTimeEvents(events = []) {
+        // Office lighting follows the in-game clock (#921)
+        this.environmentManager?.updateTimeOfDay?.();
+
         // Handle events (new day, etc)
         (events || []).forEach(event => {
             if (event.type === 'new_day') {
+                // New weather every morning (#1184)
+                this.environmentManager?.updateWeather?.();
                 // Jealousy cools off a little every day (#915)
                 this.gameState.jealousySystem?.decayAll?.(2);
                 if (this.newsManager) {

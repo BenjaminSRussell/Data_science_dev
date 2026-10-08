@@ -314,13 +314,13 @@ export class DialogueUI {
         }
 
         if (effects.statBoost && this.game?.gameState?.characterStats) {
-            // Boost stat - use getStat to read and directly modify stats object
+            // One level's worth of XP through CharacterStats' own API, so
+            // xp bookkeeping and the max-level cap stay consistent (#1161)
             const stats = this.game.gameState.characterStats;
-            const current = stats.getStat(effects.statBoost) || 0;
-            if (stats.stats && STATS[effects.statBoost]) {
-                // Directly modify the stat value (cap at maxLevel)
-                const maxLevel = STATS[effects.statBoost].maxLevel || 100;
-                stats.stats[effects.statBoost] = Math.min(maxLevel, current + 1);
+            const id = effects.statBoost;
+            if (STATS[id] && typeof stats.addExperience === 'function') {
+                const toNext = (stats.getXPForNextLevel?.(id) ?? 100) - (stats.xp?.[id] || 0);
+                stats.addExperience(id, Math.max(1, toNext));
             }
         }
 

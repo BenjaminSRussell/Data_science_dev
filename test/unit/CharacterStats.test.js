@@ -77,21 +77,21 @@ describe('CharacterStats - training and derived bonuses', () => {
 
     describe('getTotalBonuses()', () => {
         it('computes each derived bonus from the default stats', () => {
-            const s = stats.stats; // intelligence 10, charisma 10, stamina 100, focus 10, luck 10, analytics 10
+            const s = stats.stats; // every stat starts at 10, stamina included (#992)
             const bonuses = stats.getTotalBonuses();
 
             expect(bonuses.chartQuality).toBe(s.intelligence * 0.5 + s.analytics * 0.3);
             expect(bonuses.chartQuality).toBe(8);
             expect(bonuses.taskSpeed).toBe(s.focus * 0.8 + s.stamina * 0.2);
-            expect(bonuses.taskSpeed).toBe(28);
+            expect(bonuses.taskSpeed).toBe(10);
             expect(bonuses.clientPay).toBe(s.charisma * 0.5);
             expect(bonuses.clientPay).toBe(5);
             expect(bonuses.bonusChance).toBe(s.luck * 1);
             expect(bonuses.bonusChance).toBe(10);
             expect(bonuses.maxEnergy).toBe(100 + s.stamina);
-            expect(bonuses.maxEnergy).toBe(200);
+            expect(bonuses.maxEnergy).toBe(110);
             expect(bonuses.workSlots).toBe(6 + Math.floor(s.stamina / 20));
-            expect(bonuses.workSlots).toBe(11);
+            expect(bonuses.workSlots).toBe(6);
         });
     });
 });
