@@ -401,6 +401,32 @@ export class StoryUI {
         const chapterEl = document.getElementById('narrative-chapter');
         if (chapterEl) chapterEl.textContent = context.chapter;
 
+        // Motivation and themes were computed but never shown (#1533)
+        const infoEl = chapterEl?.parentElement;
+        if (infoEl) {
+            let themesEl = document.getElementById('narrative-themes');
+            if (!themesEl) {
+                themesEl = document.createElement('div');
+                themesEl.id = 'narrative-themes';
+                themesEl.className = 'narrative-themes';
+                chapterEl.insertAdjacentElement('afterend', themesEl);
+            }
+            const motivation = narrativeSystem.constructor?.MOTIVATION_TEXT?.[context.motivation] || '';
+            themesEl.innerHTML = '';
+            if (motivation) {
+                const m = document.createElement('div');
+                m.className = 'narrative-motivation';
+                m.textContent = motivation;
+                themesEl.appendChild(m);
+            }
+            for (const theme of context.themes || []) {
+                const t = document.createElement('span');
+                t.className = 'narrative-theme';
+                t.textContent = theme;
+                themesEl.appendChild(t);
+            }
+        }
+
         // Update situation
         const situationEl = document.getElementById('narrative-situation');
         if (situationEl) {

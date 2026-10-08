@@ -440,9 +440,12 @@ export class EnvironmentManager {
      */
     showLocationUnlock(location) {
         // Similar to event notification but more celebratory
+        // Each location has its own unlockMessage; the generic line is only a fallback (#2176)
+        const message = location?.unlockMessage || `New Location Unlocked: ${location?.name}!`;
         if (window.game?.showToast) {
-            window.game.showToast(` New Location Unlocked: ${location.name}!`, 'success');
+            window.game.showToast(message, 'success');
         }
+        return message;
     }
 
     /**
