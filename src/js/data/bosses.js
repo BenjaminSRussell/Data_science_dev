@@ -2,13 +2,16 @@
  * Boss Characters - Different personalities that give tasks
  */
 
+// Boss moods use the same six states as the old character mood system (#2227)
+export const BOSS_MOODS = ['excited', 'happy', 'neutral', 'tired', 'stressed', 'frustrated'];
+
 export const BOSSES = [
     {
         id: "anderson",
         name: "Mr. Anderson",
         title: "Department Head",
         avatar: "/assets/characters/bosses/anderson.png",
-        mood: "",
+        mood: "neutral",
         personality: "traditional",
         strictness: 1.0,
         preferences: {
@@ -34,7 +37,7 @@ export const BOSSES = [
         name: "Dr. Sarah Chen",
         title: "Head of Analytics",
         avatar: "/assets/characters/bosses/chen.png",
-        mood: "",
+        mood: "stressed",
         personality: "perfectionist",
         strictness: 1.3,
         preferences: {
@@ -60,7 +63,7 @@ export const BOSSES = [
         name: "Carlos Martinez",
         title: "Marketing Director",
         avatar: "/assets/characters/bosses/martinez.png",
-        mood: "",
+        mood: "happy",
         personality: "creative",
         strictness: 0.8,
         preferences: {
@@ -86,7 +89,7 @@ export const BOSSES = [
         name: "Patricia Johnson",
         title: "CFO",
         avatar: "/assets/characters/bosses/johnson.png",
-        mood: "",
+        mood: "frustrated",
         personality: "numbers-focused",
         strictness: 1.2,
         preferences: {
@@ -112,7 +115,7 @@ export const BOSSES = [
         name: "Alex Kim",
         title: "Product Manager",
         avatar: "/assets/characters/bosses/kim.png",
-        mood: "",
+        mood: "excited",
         personality: "fast-paced",
         strictness: 0.9,
         preferences: {
@@ -138,7 +141,7 @@ export const BOSSES = [
         name: "Dr. James Williams",
         title: "Research Director",
         avatar: "/assets/characters/bosses/williams.png",
-        mood: "",
+        mood: "tired",
         personality: "academic",
         strictness: 1.15,
         preferences: {

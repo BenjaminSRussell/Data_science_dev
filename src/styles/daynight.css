@@ -1,0 +1,36 @@
+/*
+ * Time-of-day look for the world map. DayNightCycle toggles time-morning,
+ * time-noon and time-night on <body> and .map-container every frame, but
+ * daynight.css was deleted in 10e57707 ("new intro") and nothing styled
+ * those classes (#2001). Filters only, so the light and dark themes both
+ * keep their own colours.
+ */
+.map-container {
+    transition: filter 1.5s ease;
+}
+
+.map-container.time-morning {
+    filter: brightness(1.04) sepia(0.08);
+}
+
+.map-container.time-noon {
+    filter: none;
+}
+
+.map-container.time-night {
+    filter: brightness(0.8) saturate(0.85) hue-rotate(-8deg);
+}
+
+body.time-night .map-container {
+    box-shadow: inset 0 0 48px rgba(var(--color-accent-rgb), 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .map-container {
+        transition: none;
+    }
+}
+
+[data-reduced-motion="true"] .map-container {
+    transition: none;
+}

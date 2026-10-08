@@ -165,6 +165,45 @@ export class ChartManager {
     }
 
     /**
+     * Every non-empty numeric series in task data (#1491). Previously only
+     * the first one was plotted and the rest silently dropped.
+     */
+    static collectSeries(data = {}) {
+        const series = [];
+        for (const key of Object.keys(data.datasets || {})) {
+            const values = data.datasets?.[key];
+            if (Array.isArray(values) && values.length > 0) series.push({ key, values });
+        }
+        // Fallback to rows if no dataset found
+        if (series.length === 0 && data.rows && data.rows.length > 0) {
+            series.push({ key: data.columns?.[1] || 'Value', values: data.rows.map(r => r[1] || 0) });
+        }
+        if (series.length === 0) series.push({ key: 'Value', values: [] });
+        return series;
+    }
+
+    /**
+     * Single-ring chart types only make sense with one series
+     */
+    static plottedSeries(series, chartJsType) {
+        return ['pie', 'doughnut', 'polarArea'].includes(chartJsType) ? series.slice(0, 1) : series;
+    }
+
+    /**
+     * Which columns the preview actually plots, for the Chart Studio
+     * MAPPING panel (#1494): x is the label column, y the plotted series
+     */
+    describeMapping(data = {}, config = {}) {
+        const type = this.mapChartType(config.type || 'bar');
+        const plotted = ChartManager.plottedSeries(ChartManager.collectSeries(data), type);
+        const columns = data.columns || data.headers || [];
+        return {
+            x: columns[0] || 'Label',
+            y: plotted.map(s => s.key).join(', ')
+        };
+    }
+
+    /**
      * Build Chart.js configuration from game config
      */
     buildChartConfig(data, config) {
@@ -172,24 +211,9 @@ export class ChartManager {
         const type = this.mapChartType(config.type);
         const labels = data.labels || data.rows?.map(r => r[0]) || [];
 
-        // Collect every non-empty numeric series (#1491). Previously only the
-        // first one was plotted and the rest silently dropped.
-        const series = [];
-        for (const key of Object.keys(data.datasets || {})) {
-            const values = data.datasets?.[key];
-            if (Array.isArray(values) && values.length > 0) series.push({ key, values });
-        }
-
-        // Fallback to rows if no dataset found
-        if (series.length === 0 && data.rows && data.rows.length > 0) {
-            series.push({ key: data.columns?.[1] || 'Value', values: data.rows.map(r => r[1] || 0) });
-        }
-        if (series.length === 0) series.push({ key: 'Value', values: [] });
-
+        const series = ChartManager.collectSeries(data);
         const primaryKey = series[0].key;
-        // Single-ring chart types only make sense with one series
-        const isSingleSeriesType = ['pie', 'doughnut', 'polarArea'].includes(type);
-        const plotted = isSingleSeriesType ? series.slice(0, 1) : series;
+        const plotted = ChartManager.plottedSeries(series, type);
         const multi = plotted.length > 1;
         const isPointType = type === 'scatter' || type === 'bubble';
 

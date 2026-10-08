@@ -28,8 +28,10 @@
     function quickTest(name, testFn) {
         try {
             const result = testFn();
-            if (result === false || result === undefined) {
-                bugs.push(name + ': returned false/undefined');
+            // getElementById returns null for a missing element, so null
+            // has to count as a failure too (#2330)
+            if (result === false || result === undefined || result === null) {
+                bugs.push(name + ': returned false/null/undefined');
             }
             return true;
         } catch (e) {
