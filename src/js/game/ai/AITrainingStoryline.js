@@ -6,7 +6,12 @@
  * Lab: Google-like early AI lab
  */
 
+import { SKILL_TO_STAT } from '../ProjectSystem.js';
+
 export class AITrainingStoryline {
+    /** XP per skill learned from a university model (#268) */
+    static LEARN_XP_PER_SKILL = 50;
+
     constructor(gameState) {
         this.gameState = gameState;
         this.currentPhase = 'pre_attention'; // pre_attention, attention_era, post_attention
@@ -386,11 +391,11 @@ export class AITrainingStoryline {
         };
         
         // Apply knowledge gain
+        // Through CharacterStats like every other XP source; gameState.stats
+        // doesn't exist, so the old write threw (#268)
         knowledgeGain.skills.forEach(skill => {
-            if (!this.gameState.stats[skill]) {
-                this.gameState.stats[skill] = 0;
-            }
-            this.gameState.stats[skill] += 50;
+            const statId = SKILL_TO_STAT[skill] || 'intelligence';
+            this.gameState.characterStats?.addExperience?.(statId, AITrainingStoryline.LEARN_XP_PER_SKILL);
         });
         
         return {

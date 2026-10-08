@@ -16,7 +16,11 @@ export const SKILL_TO_STAT = {
     machine_learning: 'intelligence',
     sql: 'analytics',
     communication: 'charisma',
-    charisma: 'charisma'
+    charisma: 'charisma',
+    // AI-training knowledge (AITrainingStoryline.learnFromModel, #268)
+    deep_learning: 'intelligence',
+    neural_networks: 'intelligence',
+    distributed_training: 'focus'
 };
 
 /** Deep-copy a contract so stage edits never mutate the module-level CONTRACTS (#1792) */
