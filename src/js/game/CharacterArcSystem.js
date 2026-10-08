@@ -7,6 +7,13 @@
 import { pickState, applyState } from '../utils/StateSerializer.js';
 
 export class CharacterArcSystem {
+    /**
+     * One ethics cutoff for "this change matters", shared by milestone
+     * recording, milestone direction and the transformation text, so they
+     * can't disagree (#1959)
+     */
+    static ETHICS_NOTABLE = 10;
+
     constructor(gameState) {
         this.gameState = gameState;
         this.arcHistory = [];
@@ -19,23 +26,29 @@ export class CharacterArcSystem {
      * Initialize character arc
      */
     initialize() {
-        this.captureStartingState();
+        // Called from startNewGame(): the baseline is a newcomer who knows
+        // nobody, even if an intro already introduced an NPC (#1961)
+        this.captureStartingState({ newGame: true });
         this.updateCurrentState();
+    }
+
+    /** Player cash with the same fallback everywhere ($0 is a real balance) (#1477) */
+    readMoney() {
+        return Number(this.gameState.money) || 0;
     }
 
     /**
      * Capture starting character state
      */
-    captureStartingState() {
+    captureStartingState({ newGame = false } = {}) {
         if (this.startingState) return; // Already captured
 
         this.startingState = {
             ethics: this.gameState.characterStats?.ethics || 0,
             reputation: this.gameState.reputation || 0,
             rank: this.gameState.rankIndex || 0,
-            // ?? so a real starting balance of $0 isn't recorded as $100
-            money: this.gameState.money ?? 100,
-            relationships: this.getRelationshipCount(),
+            money: this.readMoney(),
+            relationships: newGame ? 0 : this.getRelationshipCount(),
             days: this.gameState.timeManager?.totalDays || 0,
             description: 'A newcomer to Data City, full of potential but uncertain of the path ahead.'
         };
@@ -48,7 +61,7 @@ export class CharacterArcSystem {
         const ethics = this.gameState.characterStats?.ethics || 0;
         const reputation = this.gameState.reputation || 0;
         const rank = this.gameState.rankIndex || 0;
-        const money = this.gameState.money || 0;
+        const money = this.readMoney();
         const relationships = this.getRelationshipCount();
         const days = this.gameState.timeManager?.totalDays || 0;
 
@@ -180,9 +193,9 @@ export class CharacterArcSystem {
             return 'redemption';
         } else if (changes.rank >= 3 && changes.reputation > 300) {
             return 'success';
-        } else if (changes.ethics < -10) {
+        } else if (changes.ethics <= -CharacterArcSystem.ETHICS_NOTABLE) {
             return 'decline';
-        } else if (changes.ethics > 10) {
+        } else if (changes.ethics >= CharacterArcSystem.ETHICS_NOTABLE) {
             return 'growth';
         } else {
             return 'balanced';
@@ -193,7 +206,7 @@ export class CharacterArcSystem {
      * Check if change is significant
      */
     isSignificantChange(changes) {
-        return Math.abs(changes.ethics) >= 10 ||
+        return Math.abs(changes.ethics) >= CharacterArcSystem.ETHICS_NOTABLE ||
                Math.abs(changes.reputation) >= 100 ||
                changes.rank > 0 ||
                Math.abs(changes.money) >= 10000 ||
@@ -237,15 +250,18 @@ export class CharacterArcSystem {
         const rankChange = this.currentState.rank - this.startingState.rank;
         const reputationChange = this.currentState.reputation - this.startingState.reputation;
 
-        if (ethicsChange < -30 && rankChange >= 2) {
+        const notable = CharacterArcSystem.ETHICS_NOTABLE;
+        // Ethics checks come before rank-only ones, so a promotion can't hide
+        // a real ethics decline (#1479); cutoffs match the milestones (#1959)
+        if (ethicsChange <= -notable && rankChange >= 2) {
             return 'You\'ve achieved success, but at a cost. The money and power came with compromises.';
-        } else if (ethicsChange > 20 && reputationChange > 200) {
+        } else if (ethicsChange >= 2 * notable && reputationChange > 200) {
             return 'You\'ve become known for your integrity. People trust you, and opportunities follow.';
+        } else if (ethicsChange <= -notable) {
+            return 'You\'ve made choices that changed who you are. The path you\'re on has consequences.';
         } else if (rankChange >= 3) {
             return 'You\'ve climbed the ladder through hard work and skill. Your dedication has paid off.';
-        } else if (ethicsChange < -20) {
-            return 'You\'ve made choices that changed who you are. The path you\'re on has consequences.';
-        } else if (ethicsChange > 15) {
+        } else if (ethicsChange >= notable) {
             return 'You\'ve grown stronger in your convictions. Your values define you more than ever.';
         } else if (rankChange >= 1) {
             return 'You\'ve made progress in your career. Each step forward brings new challenges.';
