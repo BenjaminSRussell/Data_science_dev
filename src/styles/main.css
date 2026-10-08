@@ -829,6 +829,23 @@ a:hover {
     box-shadow: 0 2px 8px rgba(var(--color-accent-rgb),  0.3);
 }
 
+.task-brief {
+    margin-top: var(--space-2);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    display: grid;
+    gap: var(--space-1);
+}
+
+.task-brief[hidden] {
+    display: none;
+}
+
+.task-brief-label {
+    font-weight: 600;
+    color: var(--color-accent-primary);
+}
+
 .task-reward {
     display: flex;
     justify-content: space-between;
