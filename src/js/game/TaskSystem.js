@@ -2,11 +2,15 @@
  * TaskSystem - Generates and manages data visualization tasks
  */
 
-import { TASKS } from '../data/tasks.js';
 import { BOSSES } from '../data/bosses.js';
 import { COMPREHENSIVE_DATA_SCIENCE_TASKS } from '../data/comprehensive_datascience_tasks.js';
 
 export class TaskSystem {
+    static MAX_RANK_INDEX = 6;
+    static DIFFICULTY_PER_RANK = 1.45;
+    // Half-width of each rank's band; bands overlap slightly so 1.0-10 is covered
+    static DIFFICULTY_TOLERANCE = 0.75;
+
     constructor(gameState) {
         this.gameState = gameState;
     }
@@ -15,18 +19,17 @@ export class TaskSystem {
      * Generate a new task appropriate for player's rank
      */
     generateNewTask() {
-        const rank = this.gameState.currentRank;
         const difficulty = this.getDifficultyForRank(this.gameState.rankIndex);
 
-        // Use comprehensive data science tasks if available, fallback to original tasks
-        const allTasks = COMPREHENSIVE_DATA_SCIENCE_TASKS && COMPREHENSIVE_DATA_SCIENCE_TASKS.length > 0 
-            ? COMPREHENSIVE_DATA_SCIENCE_TASKS 
-            : TASKS;
+        // The task pool is the 1000 comprehensive tasks. (The old data/tasks.js
+        // fallback could never be reached, #2319.)
+        const allTasks = COMPREHENSIVE_DATA_SCIENCE_TASKS || [];
 
-        // Filter tasks by difficulty (with tolerance for difficulty matching)
+        // Each rank owns a band of the 1-10 difficulty scale, so every task
+        // is reachable by some rank (#2141)
         const availableTasks = allTasks.filter(t => {
-            const taskDiff = typeof t.difficulty === 'number' ? t.difficulty : parseInt(t.difficulty) || 1;
-            return Math.abs(taskDiff - difficulty) <= 0.5; // Allow 0.5 difficulty tolerance
+            const taskDiff = typeof t.difficulty === 'number' ? t.difficulty : parseFloat(t.difficulty) || 1;
+            return Math.abs(taskDiff - difficulty) <= TaskSystem.DIFFICULTY_TOLERANCE;
         });
 
         if (availableTasks.length === 0) {
@@ -104,10 +107,10 @@ export class TaskSystem {
      * Get difficulty level based on rank
      */
     getDifficultyForRank(rankIndex) {
-        if (rankIndex <= 1) return 1; // Entry level
-        if (rankIndex <= 3) return 2; // Mid level
-        if (rankIndex <= 5) return 3; // Senior level
-        return 4; // Expert level
+        // Spread the 7 ranks (0-6) across the task scale 1.0-9.7, so the top
+        // ranks get the hard tasks instead of stopping at 4 (#2141)
+        const r = Math.min(TaskSystem.MAX_RANK_INDEX, Math.max(0, Number(rankIndex) || 0));
+        return Math.round((1 + r * TaskSystem.DIFFICULTY_PER_RANK) * 100) / 100;
     }
 
     /**
@@ -141,24 +144,24 @@ export class TaskSystem {
         const quarters = ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'];
         const baseRevenue = this.randomRange(80000, 150000);
 
+        const rows = quarters.map((q, i) => {
+            const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
+            const revenue = Math.round(baseRevenue * growth);
+            const expenses = Math.round(revenue * (0.5 + Math.random() * 0.2));
+            const profit = revenue - expenses;
+
+            return [q, revenue, expenses, profit];
+        });
+
+        // Datasets come from the same rows the table shows (#110)
         return {
             columns: ['Quarter', 'Revenue', 'Expenses', 'Profit'],
-            rows: quarters.map((q, i) => {
-                const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
-                const revenue = Math.round(baseRevenue * growth);
-                const expenses = Math.round(revenue * (0.5 + Math.random() * 0.2));
-                const profit = revenue - expenses;
-
-                return [q, revenue, expenses, profit];
-            }),
+            rows,
             labels: quarters,
             datasets: {
-                Revenue: quarters.map((_, i) => {
-                    const growth = 1 + (i * 0.05) + (Math.random() * 0.1);
-                    return Math.round(baseRevenue * growth);
-                }),
-                Expenses: [],
-                Profit: []
+                Revenue: rows.map(r => r[1]),
+                Expenses: rows.map(r => r[2]),
+                Profit: rows.map(r => r[3])
             }
         };
     }
@@ -302,22 +305,16 @@ export class TaskSystem {
      * Generate a fallback task
      */
     generateFallbackTask() {
-        return {
-            id: `task_${Date.now()}`,
-            template: {
-                name: 'Basic Sales Report',
-                description: 'Create a visualization showing quarterly sales performance.',
-                dataType: 'quarterly_sales',
-                requirements: ['Show trends', 'Compare values'],
-                optimalChartTypes: ['bar', 'line']
-            },
-            boss: BOSSES[0],
-            data: this.generateQuarterlySalesData(),
+        // Through createTaskFromTemplate, so gameState.currentTask and the
+        // boss panel are set like any other task
+        return this.createTaskFromTemplate({
+            name: 'Basic Sales Report',
+            description: 'Create a visualization showing quarterly sales performance.',
+            dataType: 'quarterly_sales',
+            difficulty: 1,
             requirements: ['Show trends', 'Compare values'],
-            optimalChartTypes: ['bar', 'line'],
-            potentialReward: 150,
-            startTime: Date.now()
-        };
+            optimalChartTypes: ['bar', 'line']
+        }, BOSSES[0]);
     }
 
     /**
@@ -338,8 +335,24 @@ export class TaskSystem {
         }
         if (nameEl) nameEl.textContent = task.boss.name;
         if (titleEl) titleEl.textContent = task.boss.title;
-        if (avatarEl) avatarEl.textContent = task.boss.avatar || '';
-        if (moodEl) moodEl.textContent = task.boss.mood || '';
+        // avatar is an image path: show it as an image, never as text (#2210)
+        if (avatarEl) {
+            avatarEl.textContent = '';
+            if (task.boss.avatar) {
+                const img = document.createElement('img');
+                img.src = task.boss.avatar;
+                img.alt = task.boss.name || '';
+                img.addEventListener('error', () => img.remove());
+                avatarEl.appendChild(img);
+            }
+        }
+        // Text-mode panel: show the boss's style (#2210)
+        if (moodEl) {
+            const style = task.boss.mood || task.boss.personality || '';
+            moodEl.textContent = style
+                ? `Style: ${String(style).replace(/[-_]/g, ' ').replace(/^./, c => c.toUpperCase())}`
+                : '';
+        }
 
         // Update task display
         const taskDesc = document.querySelector('.task-description');

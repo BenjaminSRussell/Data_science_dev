@@ -4,6 +4,7 @@
  */
 
 import { pickState, applyState } from '../utils/StateSerializer.js';
+import { BOSSES } from '../data/bosses.js';
 
 export class WorkInteractionSystem {
     constructor(gameState) {
@@ -45,10 +46,13 @@ export class WorkInteractionSystem {
      * Generate boss
      */
     generateBoss() {
+        // Reuse the real BOSSES roster TaskSystem uses (#1811)
+        const template = BOSSES[Math.floor(Math.random() * BOSSES.length)] || {};
         return {
-            id: 'boss',
-            name: this.getBossName(),
-            personality: 'professional',
+            id: template.id || 'boss',
+            name: template.name || this.getBossName(),
+            title: template.title,
+            personality: template.personality || 'professional',
             relationship: 0,
             promotionReadiness: 0, // 0-100
             dialogue: this.getBossDialogue.bind(this)
