@@ -89,6 +89,7 @@ export class GameState {
 
         // Game flags
         this.isGameStarted = false;
+        this.officeEventBonus = null; // "Urgent Deadline" office event (#2434)
         this.tutorialCompleted = false;
 
         // Settings
@@ -439,6 +440,7 @@ export class GameState {
             staff: Array.isArray(this.staff) ? this.staff : [],
             dailyMarketingCost: this.dailyMarketingCost || 0,
             lastEventCheck: this.lastEventCheck ?? 0,
+            officeEventBonus: this.officeEventBonus ?? null,
             npcMemories: this.npcMemories || null,
             completedStoryBeats: this.completedStoryBeats || null,
             playerName: this.playerName || ''
@@ -533,6 +535,8 @@ export class GameState {
         this.staff = Array.isArray(data.staff) ? data.staff : [];
         this.dailyMarketingCost = typeof data.dailyMarketingCost === 'number' ? data.dailyMarketingCost : 0;
         this.lastEventCheck = typeof data.lastEventCheck === 'number' ? data.lastEventCheck : 0;
+        // Pending "Urgent Deadline" pay bonus (#2434)
+        this.officeEventBonus = Number(data.officeEventBonus) > 1 ? Math.min(2, Number(data.officeEventBonus)) : null;
         if (data.npcMemories) this.npcMemories = data.npcMemories;
         if (data.completedStoryBeats) this.completedStoryBeats = data.completedStoryBeats;
 

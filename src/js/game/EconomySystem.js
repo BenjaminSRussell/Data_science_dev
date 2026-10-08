@@ -146,7 +146,13 @@ export class EconomySystem {
         const stars = this.scoreToStars(rawScore);
 
         // Calculate rewards
-        const moneyEarned = this.calculateMoneyReward(task, stars);
+        let moneyEarned = this.calculateMoneyReward(task, stars);
+        // "Urgent Deadline" office event: the next chart pays more, once (#2434)
+        const eventBonus = Number(this.gameState.officeEventBonus);
+        if (eventBonus > 1) {
+            moneyEarned = Math.round(moneyEarned * eventBonus);
+            this.gameState.officeEventBonus = null;
+        }
         const repEarned = this.calculateRepReward(stars);
 
         // Track stats
