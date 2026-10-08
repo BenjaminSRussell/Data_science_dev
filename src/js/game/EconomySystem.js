@@ -18,6 +18,9 @@ export function insightHint(gameState, task) {
 export class EconomySystem {
     // Shop perk tuning (src/js/data/shopItems.js descriptions)
     static PERK_TIME_BONUS_SECONDS = 30;   // perk_time_bonus
+    static TOP_TIER_DIFFICULTY = 8;        // #264: tasks at/above this use topTierAccuracy
+    static PROPORTION_CHARTS = ['pie', 'doughnut', 'polarArea'];
+    static TITLE_STOPWORDS = new Set(['analysis', 'model', 'system', 'data', 'with', 'from', 'using', 'based', 'report', 'chart']);
     static PERK_BOSS_FAVOR = 0.9;          // perk_boss_favor: strictness x0.9
     static PERK_MONEY_MULTIPLIER = 1.15;   // perk_bonus_multiplier
     // Pay per star rating, applied to task.potentialReward
@@ -261,10 +264,57 @@ export class EconomySystem {
     }
 
     /**
+     * Rubric for top-tier tasks (difficulty >= TOP_TIER_DIFFICULTY), #264.
+     * Deterministic and checkable against what the chart studio really sets
+     * (type, title, showLegend, showGrid, showDataLabels):
+     *   chart type   40  optimal 40, acceptable 25, anything else 5
+     *   reading aid  20  pie/doughnut/polarArea need data labels; axis charts need a grid
+     *   title        25  names the task's subject 25, generic title 10, none 0
+     *   legend       15  required for pie/doughnut/polarArea/radar; axis charts get it free
+     */
+    static topTierAccuracy(task, chartConfig) {
+        const cfg = chartConfig || {};
+        const type = cfg.type || cfg.chartType || '';
+        const optimal = Array.isArray(task?.optimalChartTypes) ? task.optimalChartTypes : [];
+        const acceptable = Array.isArray(task?.acceptableChartTypes) ? task.acceptableChartTypes : [];
+        const breakdown = {};
+
+        breakdown.chartType = optimal.includes(type) ? 40 : acceptable.includes(type) ? 25 : 5;
+
+        const proportional = EconomySystem.PROPORTION_CHARTS.includes(type);
+        const aidOn = proportional ? !!cfg.showDataLabels : !!cfg.showGrid;
+        breakdown.readingAid = aidOn ? 20 : 5;
+
+        const title = typeof cfg.title === 'string' ? cfg.title.trim() : '';
+        if (!title) breakdown.title = 0;
+        else breakdown.title = EconomySystem.titleNamesSubject(title, task) ? 25 : 10;
+
+        const legendNeeded = proportional || type === 'radar';
+        breakdown.legend = !legendNeeded || cfg.showLegend ? 15 : 0;
+
+        const score = breakdown.chartType + breakdown.readingAid + breakdown.title + breakdown.legend;
+        return { score: Math.max(0, Math.min(100, score)), breakdown };
+    }
+
+    /** True when the title shares a meaningful word with the task name/subdomain. */
+    static titleNamesSubject(title, task) {
+        const words = (text) => String(text || '').toLowerCase().match(/[a-z0-9]+/g) || [];
+        const subject = new Set(
+            [...words(task?.name), ...words(task?.subdomain)]
+                .filter(w => w.length >= 4 && !EconomySystem.TITLE_STOPWORDS.has(w))
+        );
+        return words(title).some(w => subject.has(w));
+    }
+
+    /**
      * Score data accuracy (mostly simulated)
      */
     scoreDataAccuracy(task, chartConfig) {
-        // Reward real chart wiring when present; small jitter only as tie-break (#25).
+        // Top-tier tasks use a real, deterministic rubric (#264)
+        if (Number(task?.difficulty) >= EconomySystem.TOP_TIER_DIFFICULTY) {
+            return EconomySystem.topTierAccuracy(task, chartConfig).score;
+        }
+        // Lower tiers: reward real chart wiring when present; small jitter only as tie-break (#25).
         let score = 70;
         const cfg = chartConfig || {};
         const req = task?.requirements || task?.requiredFields || {};
