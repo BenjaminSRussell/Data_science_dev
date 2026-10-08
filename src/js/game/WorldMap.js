@@ -357,14 +357,70 @@ export class WorldMap {
      * Get location by ID - O(1) lookup
      */
     getLocation(locationId) {
-        return LOCATIONS_MAP.get(locationId);
+        const base = LOCATIONS_MAP.get(locationId);
+        const override = this.locationOverrides?.[locationId];
+        return base && override ? { ...base, ...override } : base;
+    }
+
+    /**
+     * All locations (with any event overrides applied) (#984, #2353)
+     */
+    getLocations() {
+        return LOCATIONS.map(l => this.getLocation(l.id));
+    }
+
+    /**
+     * Jump straight to a location without travel cost (dev tools / events) (#984, #2353)
+     */
+    setCurrentLocation(locationId) {
+        if (!LOCATIONS_MAP.has(locationId)) {
+            return { success: false, reason: 'Unknown location' };
+        }
+        this.currentLocation = locationId;
+        this.visitedLocations.add(locationId);
+        this._invalidateCache();
+        return { success: true, location: this.getLocation(locationId) };
+    }
+
+    /**
+     * Temporarily re-skin a location (e.g. tech_boom turns the library into an
+     * Innovation Hub) (#1334). Overrides are persisted via locationOverrides.
+     */
+    updateLocation(locationId, overrides = {}) {
+        if (!LOCATIONS_MAP.has(locationId)) return false;
+        this.locationOverrides[locationId] = { ...(this.locationOverrides[locationId] || {}), ...overrides };
+        return true;
+    }
+
+    /**
+     * Remove an event re-skin
+     */
+    resetLocation(locationId) {
+        delete this.locationOverrides[locationId];
+    }
+
+    /**
+     * The vehicle currently in use; falls back to walking for stale/unknown ids (#1431, #2167)
+     */
+    _activeVehicle() {
+        return VEHICLES_MAP.get(this.currentVehicle) || VEHICLES_MAP.get('walking');
+    }
+
+    /**
+     * Fingerprint of everything location accessibility depends on, so the cache
+     * self-invalidates when money/reputation/stats change (#981, #2354)
+     */
+    _accessKey() {
+        const cs = this.gameState?.characterStats;
+        const statPart = cs?.stats ? Object.values(cs.stats).join(',') : '';
+        return `${this.currentVehicle}|${this.gameState?.money}|${this.gameState?.reputation}|${statPart}`;
     }
 
     /**
      * Get current location data - O(1)
      */
     getCurrentLocation() {
-        return LOCATIONS_MAP.get(this.currentLocation);
+        return this.getLocation(this.currentLocation);
     }
 
     /**
@@ -380,11 +436,12 @@ export class WorldMap {
      */
     getAccessibleLocations() {
         // Return cached result if valid
-        if (!this._cacheInvalid && this._accessibleCache) {
+        const key = this._accessKey();
+        if (!this._cacheInvalid && this._accessibleCache && this._accessCacheKey === key) {
             return this._accessibleCache;
         }
 
-        const vehicle = VEHICLES_MAP.get(this.currentVehicle);
+        const vehicle = this._activeVehicle();
         const accessLevel = vehicle?.accessLevel || 0;
         const accessible = [];
 
@@ -411,6 +468,7 @@ export class WorldMap {
 
         // Cache result
         this._accessibleCache = accessible;
+        this._accessCacheKey = key;
         this._cacheInvalid = false;
 
         return accessible;
@@ -431,7 +489,22 @@ export class WorldMap {
             return { can: false, reason: 'Location not accessible with current vehicle/stats' };
         }
 
-        return { can: true, travelTime: location.travelTime };
+        // Report the same slot cost travelTo() will actually charge (#985)
+        return {
+            can: true,
+            travelTime: this.getTravelSlots(locationId),
+            baseTravelTime: location.travelTime
+        };
+    }
+
+    /**
+     * Time slots a trip costs with the current vehicle. 0 when already there (#1434, #2168).
+     */
+    getTravelSlots(locationId) {
+        const location = LOCATIONS_MAP.get(locationId);
+        if (!location || locationId === this.currentLocation) return 0;
+        const speed = this._activeVehicle()?.travelSpeed || 1;
+        return Math.max(0, Math.ceil(location.travelTime / speed));
     }
 
     /**
@@ -441,12 +514,18 @@ export class WorldMap {
         const check = this.canTravelTo(locationId);
         if (!check.can) return check;
 
-        const location = LOCATIONS_MAP.get(locationId);
-        const vehicle = VEHICLES_MAP.get(this.currentVehicle);
+        const location = this.getLocation(locationId);
 
-        // Calculate travel time
-        const baseTravelTime = location.travelTime;
-        const actualSlots = Math.max(0, Math.ceil(baseTravelTime / vehicle.travelSpeed));
+        // Staying put is free (#1434, #2168)
+        if (locationId === this.currentLocation) {
+            return { success: true, location, timeCost: 0, alreadyHere: true };
+        }
+
+        // Stale/unknown vehicle ids fall back to walking instead of crashing (#1431, #2167)
+        if (!VEHICLES_MAP.has(this.currentVehicle)) {
+            this.currentVehicle = 'walking';
+        }
+        const actualSlots = this.getTravelSlots(locationId);
 
         this.currentLocation = locationId;
         this.visitedLocations.add(locationId); // Set.add is O(1)
@@ -475,17 +554,23 @@ export class WorldMap {
         const vehicle = VEHICLES_MAP.get(vehicleId);
         if (!vehicle) return { success: false, reason: 'Unknown vehicle' };
 
-        if (this.gameState.money < vehicle.price) {
-            return { success: false, reason: 'Not enough money' };
-        }
-
+        // Ownership first, so re-buying reports the real reason (#1432)
         if (this.ownedVehicles.has(vehicleId)) { // Set.has is O(1)
             return { success: false, reason: 'Already own this vehicle' };
         }
 
+        if (this.gameState.money < vehicle.price) {
+            return { success: false, reason: 'Not enough money' };
+        }
+
         this.gameState.money -= vehicle.price;
         this.ownedVehicles.add(vehicleId); // Set.add is O(1)
-        this.currentVehicle = vehicleId;
+        // Only switch if the new vehicle isn't a downgrade (#2169)
+        const current = this._activeVehicle();
+        const switched = !current
+            || vehicle.travelSpeed > current.travelSpeed
+            || (vehicle.travelSpeed === current.travelSpeed && vehicle.accessLevel >= current.accessLevel);
+        if (switched) this.currentVehicle = vehicleId;
 
         // Invalidate cache (vehicle change affects accessibility)
         this._invalidateCache();
@@ -493,7 +578,7 @@ export class WorldMap {
         // Add reputation
         this.gameState.reputation += vehicle.reputation;
 
-        return { success: true, vehicle };
+        return { success: true, vehicle, switched };
     }
 
     /**
@@ -571,11 +656,15 @@ export class WorldMap {
      */
     fromJSON(data) {
         if (!data) return;
-        this.currentLocation = data.currentLocation || 'home';
-        this.currentVehicle = data.currentVehicle || 'walking';
-        this.ownedVehicles = new Set(data.ownedVehicles || ['walking']);
+        // Drop unknown ids from older/corrupt saves (#1431)
+        const owned = (Array.isArray(data.ownedVehicles) ? data.ownedVehicles : ['walking'])
+            .filter(id => VEHICLES_MAP.has(id));
+        this.ownedVehicles = new Set(['walking', ...owned]);
+        const cv = data.currentVehicle;
+        this.currentVehicle = (cv && VEHICLES_MAP.has(cv) && this.ownedVehicles.has(cv)) ? cv : 'walking';
+        this.currentLocation = LOCATIONS_MAP.has(data.currentLocation) ? data.currentLocation : 'home';
         this.visitedLocations = new Set(data.visitedLocations || ['home']);
-        this.locationOverrides = data.locationOverrides || {};
+        this.locationOverrides = (data.locationOverrides && typeof data.locationOverrides === 'object') ? data.locationOverrides : {};
         this._invalidateCache();
     }
 }

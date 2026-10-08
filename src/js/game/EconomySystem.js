@@ -352,17 +352,20 @@ export class EconomySystem {
     getTransportationCost() {
         if (!this.gameState.worldMap) return 0;
 
-        const vehicle = this.gameState.worldMap?.currentVehicle || 'walking';
+        const vehicleId = this.gameState.worldMap?.currentVehicle || 'walking';
+        if (vehicleId === 'walking') return 0; // Free
 
-        if (vehicle === 'walking') {
-            return 0; // Free
-        } else if (vehicle === 'bus_pass') {
-            return 2; // $2/day for bus pass
-        } else if (vehicle === 'used_car' || vehicle === 'car') {
-            return 5 + Math.floor(Math.random() * 10); // Gas, maintenance: $5-15/day
+        // Price every vehicle from its catalog upkeep instead of a hard-coded
+        // id list that missed sedan/sports_car/luxury_car (#1700)
+        const vehicle = VEHICLES.find(v => v.id === vehicleId);
+        if (!vehicle) return 0;
+        const dailyUpkeep = (vehicle.monthlyUpkeep || 0) / 30;
+        if (vehicle.isMonthly) {
+            return Math.max(1, Math.round(dailyUpkeep)); // transit pass, no fuel
         }
-
-        return 0;
+        // Cars: upkeep plus fuel that scales with speed
+        const fuel = vehicle.travelSpeed * (1 + Math.floor(Math.random() * 3));
+        return Math.round(dailyUpkeep + fuel);
     }
 
     /**

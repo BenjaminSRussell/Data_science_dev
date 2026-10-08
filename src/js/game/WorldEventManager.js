@@ -29,14 +29,18 @@ export class WorldEventManager {
                     if (game.stockMarket) game.stockMarket.triggerBoom();
 
                     // Transform Library to Innovation Hub
-                    game.worldMap.updateLocation('library', {
+                    game.worldMap?.updateLocation?.('library', {
                         name: "Innovation Hub",
                         icon: "",
                         description: "Co-working space for tech founders.",
                         background: 'linear-gradient(180deg, #2196F3 0%, #0D47A1 100%)'
                     });
 
-                    game.newsManager.addNews({ text: "Tech stocks soar! Library rebrands as Innovation Hub.", category: 'tech', sentiment: 'positive' });
+                    game.newsManager?.addNews?.({ text: "Tech stocks soar! Library rebrands as Innovation Hub.", category: 'tech', sentiment: 'positive' });
+                },
+                // Undo the re-skin when the boom is over (#1334)
+                onEnd: (game) => {
+                    game.worldMap?.resetLocation?.('library');
                 }
             },
 
@@ -47,8 +51,17 @@ export class WorldEventManager {
      * Daily check for events
      */
     processDay() {
-        // Remove expired modifiers
-        // ...
+        // End events whose duration has elapsed
+        const today = this.gameState?.timeManager?.totalDays || 0;
+        (this.events || []).forEach(record => {
+            if (record.ended) return;
+            const def = this.eventPool[record.id];
+            if (!def?.duration) return;
+            if (today - record.day >= def.duration) {
+                record.ended = true;
+                try { def.onEnd?.(this.gameState); } catch (e) { console.warn('World event onEnd failed:', e); }
+            }
+        });
 
         // Roll for new events
         Object.values(this.eventPool).forEach(event => {

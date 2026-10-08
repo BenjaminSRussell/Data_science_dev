@@ -65,7 +65,12 @@ describe('EconomySystem daily finances', () => {
             expect(economy.getTransportationCost()).toBe(2);
         });
 
-        it.each(['used_car', 'car'])('bounds the cost for %s to $5-15/day', (vehicle) => {
+        it('returns 0 for an id that is not in the vehicle catalog (#1700)', () => {
+            mockGameState.worldMap = { currentVehicle: 'car' };
+            expect(economy.getTransportationCost()).toBe(0);
+        });
+
+        it.each(['used_car'])('bounds the cost for %s to $5-15/day', (vehicle) => {
             mockGameState.worldMap = { currentVehicle: vehicle };
             const cost = economy.getTransportationCost();
             expect(cost).toBeGreaterThanOrEqual(5);
