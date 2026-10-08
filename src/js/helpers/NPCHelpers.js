@@ -208,6 +208,14 @@ export function updateRelationshipsScreen(game) {
 
     grid.textContent = '';
 
+    if (npcs.length === 0) {
+        grid.appendChild(DOMUtils.createElement('p', {
+            className: 'npc-grid-empty',
+            textContent: 'No contacts yet. Visit locations around the city to meet people.'
+        }));
+        return;
+    }
+
     const cards = npcs.map(npc => {
         const card = document.createElement('div');
         card.className = 'npc-card';
@@ -252,10 +260,10 @@ export function updateRelationshipsScreen(game) {
             { className: 'relationship-bar' },
             DOMUtils.createElement('div', {
                 className: 'relationship-fill',
-                style: { width: `${npc.relationship}%` }
+                style: { width: `${Math.max(0, Math.min(100, Number(npc.relationship) || 0))}%` }
             })
         );
-        const tier = DOMUtils.createContainer({ className: 'relationship-tier' }, npc.tier.label);
+        const tier = DOMUtils.createContainer({ className: 'relationship-tier' }, npc.tier?.label ?? '');
 
         card.appendChild(avatar);
         card.appendChild(info);

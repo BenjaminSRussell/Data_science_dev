@@ -9,21 +9,32 @@ import * as MapHelpers from './MapHelpers.js';
  * Handle starting an exam
  */
 export function handleStartExam(game, courseId) {
-    const course = game.gameState.educationSystem.courses[courseId];
+    const course = game.gameState?.educationSystem?.courses?.[courseId];
     if (!course) {
         game.showToast?.('Unknown course.', 'error');
         return;
     }
     if (game.gameState.educationSystem.completedCourses.includes(courseId)) return;
     if (game.gameState.money < course.cost) {
-        game.showToast('Tuition too high!', 'error');
-        game.audioManager.play('error');
+        game.showToast?.('Tuition too high!', 'error');
+        game.audioManager?.play?.('error');
+        return;
+    }
+    if (!Array.isArray(course.questions) || course.questions.length === 0) {
+        game.showToast?.('This exam has no questions yet.', 'error');
+        return;
+    }
+    // Check the exam modal exists before charging, so a missing modal can't
+    // take the tuition and then throw
+    const modal = document.getElementById('modal-exam');
+    if (!modal) {
+        game.showToast?.('Exam room unavailable right now.', 'error');
         return;
     }
 
     // Pay tuition
     game.gameState.money -= course.cost;
-    game.uiUpdater.updateAllUI();
+    game.uiUpdater?.updateAllUI?.();
 
     game.currentExam = {
         courseId: courseId,
@@ -33,31 +44,35 @@ export function handleStartExam(game, courseId) {
     };
 
     // Show Modal
-    const modal = document.getElementById('modal-exam');
     modal.classList.remove('hidden');
     modal.classList.add('active');
 
-    document.getElementById('exam-title').textContent = `${course.name} Exam`;
-    document.getElementById('exam-intro').classList.remove('hidden');
-    document.getElementById('exam-questions').classList.add('hidden');
-    document.getElementById('exam-results').classList.add('hidden');
+    const byId = (id) => document.getElementById(id);
+    if (byId('exam-title')) byId('exam-title').textContent = `${course.name} Exam`;
+    byId('exam-intro')?.classList.remove('hidden');
+    byId('exam-questions')?.classList.add('hidden');
+    byId('exam-results')?.classList.add('hidden');
 
     // Bind Start Button
-    document.getElementById('btn-start-exam').onclick = () => startExamQuestions(game);
+    const startBtn = byId('btn-start-exam');
+    if (startBtn) startBtn.onclick = () => startExamQuestions(game);
 
     // Bind Close Button
-    document.querySelector('#modal-exam .close-modal').onclick = () => {
-        modal.classList.remove('active');
-        modal.classList.add('hidden');
-    };
+    const closeBtn = document.querySelector('#modal-exam .close-modal');
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            modal.classList.remove('active');
+            modal.classList.add('hidden');
+        };
+    }
 }
 
 /**
  * Start the exam questions phase
  */
 export function startExamQuestions(game) {
-    document.getElementById('exam-intro').classList.add('hidden');
-    document.getElementById('exam-questions').classList.remove('hidden');
+    document.getElementById('exam-intro')?.classList.add('hidden');
+    document.getElementById('exam-questions')?.classList.remove('hidden');
     showExamQuestion(game);
 }
 
@@ -66,14 +81,17 @@ export function startExamQuestions(game) {
  */
 export function showExamQuestion(game) {
     const exam = game.currentExam;
-    const q = exam.questions[exam.currentQuestionIndex];
+    const q = exam?.questions?.[exam.currentQuestionIndex];
+    if (!q) return;
 
-    document.getElementById('question-text').textContent = `${exam.currentQuestionIndex + 1}. ${q.q}`;
+    const textEl = document.getElementById('question-text');
+    if (textEl) textEl.textContent = `${exam.currentQuestionIndex + 1}. ${q.q}`;
 
     const optsContainer = document.getElementById('options-container');
+    if (!optsContainer) return;
     optsContainer.textContent = '';
 
-    q.options.forEach((opt, idx) => {
+    (q.options || []).forEach((opt, idx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-cartoon';
         btn.textContent = opt;
@@ -87,7 +105,9 @@ export function showExamQuestion(game) {
  */
 export function handleAnswerQuestion(game, answerIndex) {
     const exam = game.currentExam;
-    const q = exam.questions[exam.currentQuestionIndex];
+    const q = exam?.questions?.[exam.currentQuestionIndex];
+    // Ignore stray clicks after the exam ended (double-click on the last answer)
+    if (!q) return;
 
     if (answerIndex === q.correct) {
         exam.score++;
