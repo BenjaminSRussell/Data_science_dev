@@ -3,6 +3,26 @@
  * Generates realistic, natural dialogue that feels authentic
  */
 
+// One set of relationship thresholds for every method (#1598)
+export const RELATIONSHIP = {
+    WARM: 60,   // happy reactions, positive responses
+    CLOSE: 80,  // strongest happiness
+    COLD: 30    // anger, conflict
+};
+
+// Emotions that make a speaker trail off (#1595)
+const UNCERTAIN_EMOTIONS = new Set(['worried', 'sad', 'nervous', 'uncertain', 'confused']);
+
+// How each personality colours a reaction (#1597)
+const PERSONALITY_STYLE = {
+    professional: { gift: { positive: "That's very thoughtful of you. Thank you.", negative: "Thank you, but that isn't necessary." },
+        betrayal: { high_relationship: "I expected better from you. This changes things between us.", low_relationship: "Noted. I won't make the mistake of relying on you again." } },
+    blunt: { gift: { positive: "Nice. Thanks.", negative: "Uh, okay. Not really my thing." },
+        betrayal: { high_relationship: "That was a lousy thing to do, and you know it.", low_relationship: "Figures. Don't expect anything from me now." } },
+    shy: { gift: { positive: "Oh! For me? I... thank you. Really.", negative: "Oh, um... thank you. You didn't have to." },
+        betrayal: { high_relationship: "I... I thought we were friends.", low_relationship: "I guess I shouldn't have trusted you." } }
+};
+
 export class RealisticDialogueSystem {
     constructor() {
         this.dialoguePatterns = this.initializePatterns();
@@ -109,11 +129,26 @@ export class RealisticDialogueSystem {
 
         let dialogue = "";
 
+        // The situation picks the kind of line first (#112)
+        if (situation === 'goodbye') {
+            const style = relationship > RELATIONSHIP.CLOSE ? 'emotional'
+                : personality === 'professional' ? 'formal' : 'casual';
+            dialogue = this.getRandomPattern('goodbye', style);
+            return this.addNaturalSpeech(dialogue, personality, emotion);
+        }
+        if (situation === 'crisis' && emotion !== 'happy') {
+            dialogue = this.getRandomPattern('concern', relationship > 50 ? 'high' : 'low');
+            return this.addNaturalSpeech(dialogue, personality, emotion === 'neutral' ? 'worried' : emotion);
+        }
+
         // Base dialogue on emotion and relationship
-        if (emotion === 'happy' && relationship > 60) {
-            dialogue = this.getRandomPattern('happiness', 'strong');
-        } else if (emotion === 'angry' && relationship < 30) {
-            dialogue = this.getRandomPattern('anger', 'strong');
+        if (emotion === 'happy') {
+            // Same WARM threshold determineEmotion uses; below it, mild happiness (#1598)
+            dialogue = this.getRandomPattern('happiness', relationship > RELATIONSHIP.WARM ? 'strong' : 'mild');
+        } else if (emotion === 'angry') {
+            dialogue = this.getRandomPattern('anger', relationship < RELATIONSHIP.COLD ? 'strong' : 'mild');
+        } else if (situation === 'conflict') {
+            dialogue = this.getRandomPattern('anger', 'mild');
         } else if (emotion === 'worried') {
             dialogue = relationship > 50 
                 ? this.getRandomPattern('concern', 'high')
@@ -130,7 +165,7 @@ export class RealisticDialogueSystem {
         }
 
         // Add filler words and natural speech patterns
-        dialogue = this.addNaturalSpeech(dialogue, personality);
+        dialogue = this.addNaturalSpeech(dialogue, personality, emotion);
 
         return dialogue;
     }
@@ -138,7 +173,7 @@ export class RealisticDialogueSystem {
     /**
      * Add natural speech patterns
      */
-    addNaturalSpeech(text, personality) {
+    addNaturalSpeech(text, personality, emotion = 'neutral') {
         // Add "um", "like", "you know" based on personality
         if (personality === 'casual' && Math.random() > 0.7) {
             const fillers = ['um', 'like', 'you know', 'I mean'];
@@ -150,8 +185,8 @@ export class RealisticDialogueSystem {
             }
         }
 
-        // Add trailing off for uncertain emotions
-        if (Math.random() > 0.8) {
+        // Trail off only when the speaker is actually uncertain (#1595)
+        if (UNCERTAIN_EMOTIONS.has(emotion) && Math.random() > 0.8) {
             return `${text}...`;
         }
 
@@ -189,9 +224,9 @@ export class RealisticDialogueSystem {
      * Determine emotion based on relationship and situation
      */
     determineEmotion(relationship, situation) {
-        if (relationship > 80) {
+        if (relationship > RELATIONSHIP.WARM) {
             return situation === 'crisis' ? 'worried' : 'happy';
-        } else if (relationship < 30) {
+        } else if (relationship < RELATIONSHIP.COLD) {
             return situation === 'conflict' ? 'angry' : 'neutral';
         }
         return 'neutral';
@@ -240,21 +275,14 @@ export class RealisticDialogueSystem {
             }
         };
 
-        const category = responses[action];
-        if (!category) return "I see.";
+        const personality = npc?.personality;
+        const category = { ...(responses[action] || {}), ...(PERSONALITY_STYLE[personality]?.[action] || {}) };
+        if (!responses[action]) return "I see.";
 
-        if (currentRelationship > 60) {
-            return category.positive || category.high_relationship || "Okay.";
-        } else {
-            return category.negative || category.low_relationship || "Fine.";
-        }
+        const text = currentRelationship > RELATIONSHIP.WARM
+            ? (category.positive || category.high_relationship || "Okay.")
+            : (category.negative || category.low_relationship || "Fine.");
+        // Casual speakers still get their fillers (#1597)
+        return personality === 'casual' ? this.addNaturalSpeech(text, personality) : text;
     }
 }
-
-
-
-
-
-
-
-
