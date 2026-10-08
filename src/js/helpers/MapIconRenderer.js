@@ -22,7 +22,7 @@ export function updateMapLocationIcons(game) {
         if (!iconContainer) return;
 
         // Check if already has image (avoid re-rendering)
-        if (iconContainer.querySelector('img')) return;
+        if (iconContainer.querySelector('img') || iconContainer.dataset.iconFailed === 'true') return;
 
         // Clear emoji text
         iconContainer.textContent = '';
@@ -39,8 +39,12 @@ export function updateMapLocationIcons(game) {
 
         // Fallback to default icon if image fails
         img.onerror = () => {
-            iconContainer.textContent = '';
-            iconContainer.style.background = '#ccc';
+            // Drop the broken image and remember the failure, so the
+            // placeholder stays clean and later refreshes don't re-request it (#2382)
+            img.remove();
+            iconContainer.dataset.iconFailed = 'true';
+            iconContainer.textContent = location.name?.charAt(0) || '';
+            iconContainer.style.background = 'var(--color-bg-tertiary, #ccc)';
             iconContainer.style.borderRadius = '4px';
         };
 

@@ -119,10 +119,13 @@ describe('music radio', () => {
         expect(FakeAudio.instances).toHaveLength(1);
     });
 
-    it('switching stations releases the old element', () => {
+    it('switching stations releases the old element (after the crossfade, #1291)', () => {
+        vi.useFakeTimers();
         am.switchStation('lofi_beats');
         const first = FakeAudio.instances[0];
         am.switchStation('zen_garden');
+        vi.advanceTimersByTime(AudioManager.FADE_MS + 100);
+        vi.useRealTimers();
         expect(first.paused).toBe(true);
         expect(first.removeAttribute).toHaveBeenCalledWith('src');
         expect(first.load).toHaveBeenCalled();
