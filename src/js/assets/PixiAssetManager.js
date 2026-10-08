@@ -6,81 +6,107 @@
 
 import { Assets } from 'pixi.js';
 
+// Keys inside a manifest descriptor that describe an asset rather than point at one (#2299)
+const METADATA_KEYS = new Set(['type', 'frameWidth', 'frameHeight', 'columns', 'rows', 'meta']);
+
+/**
+ * Bundle layout for an AssetManager.getAssetManifest()-shaped manifest (#2297):
+ * [bundle name, alias prefix, function that picks the section from the manifest]
+ */
+const BUNDLES = [
+    ['characters', 'characters', m => m.characters],
+    ['locations', 'locations', m => m.backgrounds?.locations ?? m.locations],
+    ['backgrounds', 'backgrounds', m => {
+        const { locations, ...rest } = m.backgrounds || {};
+        return rest;
+    }],
+    ['map', 'map', m => m.map],
+    ['ui', 'icons', m => m.icons ?? m.ui]
+];
+
+// Pixi's Assets.init() may only run once per page, so the flag is shared by every instance (#68)
+let sharedManifest = null;
+
 export class PixiAssetManager {
-    constructor() {
+    constructor(assets = Assets) {
+        this.assets = assets;
         this.manifest = null;
         this.loaded = false;
         this.loadProgress = 0;
+        this.failed = [];
     }
 
     /**
-     * Initialize asset manifest
-     * Phase 4: Uses PixiJS Assets manifest system
+     * Register the manifest with PixiJS Assets. It used to check `Assets.cache`,
+     * which Pixi always sets, so init() returned before calling Assets.init (#68).
      */
-    async init(manifest) {
-        // Check if Assets is already initialized
-        if (Assets.cache) {
-            // Assets already initialized, just return success
+    async init(manifest = {}) {
+        if (sharedManifest && this.assets === Assets) {
+            this.manifest = sharedManifest;
             return true;
         }
+        if (this.manifest) return true;
 
-        this.manifest = {
-            bundles: [
-                {
-                    name: 'characters',
-                    assets: this.convertManifestToAssets(manifest.characters || {})
-                },
-                {
-                    name: 'locations',
-                    assets: this.convertManifestToAssets(manifest.locations || {})
-                },
-                {
-                    name: 'ui',
-                    assets: this.convertManifestToAssets(manifest.ui || {})
-                }
-            ]
-        };
-
+        const bundles = PixiAssetManager.buildBundles(manifest, this);
         try {
-            await Assets.init({ manifest: this.manifest });
-            return true;
+            await this.assets.init({ manifest: { bundles } });
         } catch (error) {
-            // If error is about already being initialized, that's fine
-            if (error.message && error.message.includes('already initialized')) {
-                return true;
+            if (!error?.message?.includes('already initialized')) {
+                console.warn('Asset initialization failed:', error);
+                return false;
             }
-            console.warn('Asset initialization failed:', error);
-            return false;
         }
+        this.manifest = { bundles };
+        if (this.assets === Assets) sharedManifest = this.manifest;
+        return true;
+    }
+
+    /** Build Pixi bundles whose aliases match the getters (#1054, #2297, #2298) */
+    static buildBundles(manifest = {}, converter = PixiAssetManager.prototype) {
+        return BUNDLES
+            .map(([name, prefix, pick]) => ({
+                name,
+                assets: converter.convertManifestToAssets(pick(manifest || {}) || {}, prefix)
+            }))
+            .filter(bundle => bundle.assets.length > 0);
     }
 
     /**
-     * Convert old manifest format to PixiJS Assets format
+     * Turn a nested manifest into Pixi asset entries. A descriptor object with a
+     * `url`/`src` is ONE asset, and metadata fields such as `type: 'spriteSheet'`
+     * are not loadable paths (#2299). `path` seeds the alias prefix (#2298).
      */
     convertManifestToAssets(obj, path = '') {
         const assets = [];
-        
-        for (const key in obj) {
+        if (!obj || typeof obj !== 'object') return assets;
+
+        for (const key of Object.keys(obj)) {
+            const value = obj[key];
             const currentPath = path ? `${path}.${key}` : key;
-            
-            if (typeof obj[key] === 'string') {
-                // It's an asset path
-                assets.push({
-                    alias: currentPath,
-                    src: obj[key]
-                });
-            } else if (typeof obj[key] === 'object') {
-                // It's a nested object - recurse
-                assets.push(...this.convertManifestToAssets(obj[key], currentPath));
+
+            if (typeof value === 'string') {
+                if (METADATA_KEYS.has(key)) continue;
+                assets.push({ alias: currentPath, src: value });
+            } else if (value && typeof value === 'object') {
+                const src = typeof value.url === 'string' ? value.url
+                    : typeof value.src === 'string' ? value.src : null;
+                if (src) {
+                    const data = { ...value };
+                    delete data.url;
+                    delete data.src;
+                    assets.push({ alias: currentPath, src, data });
+                } else {
+                    assets.push(...this.convertManifestToAssets(value, currentPath));
+                }
             }
         }
-        
+
         return assets;
     }
 
     /**
-     * Load all assets
-     * Phase 4: Uses PixiJS Assets.loadBundle()
+     * Load every registered asset. A missing file is recorded and skipped
+     * instead of failing the whole bundle.
      */
     async loadAll() {
         if (!this.manifest) {
@@ -88,19 +114,22 @@ export class PixiAssetManager {
             return false;
         }
 
-        try {
-            // Load all bundles
-            for (const bundle of this.manifest.bundles) {
-                await Assets.loadBundle(bundle.name);
+        const entries = this.manifest.bundles.flatMap(bundle => bundle.assets);
+        let done = 0;
+        this.failed = [];
+        await Promise.all(entries.map(async (entry) => {
+            try {
+                await this.assets.load(entry.alias);
+            } catch {
+                this.failed.push(entry.alias);
             }
-            
-            this.loaded = true;
-            return true;
-        } catch (error) {
-            console.warn('Asset loading failed:', error);
-            this.loaded = true; // Mark as loaded anyway
-            return false;
-        }
+            done++;
+            this.loadProgress = entries.length ? Math.round((done / entries.length) * 100) : 100;
+        }));
+
+        this.loadProgress = 100;
+        this.loaded = true;
+        return this.failed.length < entries.length || entries.length === 0;
     }
 
     /**
@@ -109,7 +138,7 @@ export class PixiAssetManager {
      */
     async loadAsset(src) {
         try {
-            const texture = await Assets.load(src);
+            const texture = await this.assets.load(src);
             return texture;
         } catch (error) {
             console.warn(`Failed to load asset: ${src}`, error);
@@ -122,7 +151,7 @@ export class PixiAssetManager {
      */
     async loadAssets(sources) {
         try {
-            const textures = await Assets.load(sources);
+            const textures = await this.assets.load(sources);
             return textures;
         } catch (error) {
             console.warn('Failed to load assets:', error);
@@ -135,7 +164,7 @@ export class PixiAssetManager {
      */
     getAsset(alias) {
         try {
-            return Assets.get(alias) || null;
+            return this.assets.get(alias) || null;
         } catch (error) {
             return null;
         }
@@ -167,7 +196,7 @@ export class PixiAssetManager {
      * Background load assets (non-blocking)
      */
     backgroundLoad(bundleNames) {
-        Assets.backgroundLoadBundle(bundleNames);
+        this.assets.backgroundLoadBundle?.(bundleNames);
     }
 
     /**
@@ -175,7 +204,7 @@ export class PixiAssetManager {
      */
     async unload(bundleName) {
         try {
-            await Assets.unloadBundle(bundleName);
+            await this.assets.unloadBundle(bundleName);
         } catch (error) {
             console.warn(`Failed to unload bundle: ${bundleName}`, error);
         }
@@ -185,8 +214,11 @@ export class PixiAssetManager {
      * Get loading progress
      */
     getProgress() {
-        // PixiJS Assets doesn't expose progress directly
-        // Can be enhanced with custom tracking if needed
-        return this.loaded ? 100 : 0;
+        return this.loaded ? 100 : this.loadProgress;
+    }
+
+    /** Test hook: forget the shared Assets.init() state */
+    static resetForTests() {
+        sharedManifest = null;
     }
 }
