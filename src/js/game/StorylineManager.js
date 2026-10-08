@@ -32,10 +32,12 @@ export class StorylineManager {
         const days = this.gameState.timeManager?.totalDays || 0;
         const reputation = this.gameState.reputation || 0;
 
-        if (days < 30) return 'early';
-        if (days < 90) return 'mid';
-        if (days < 180) return 'late';
-        return 'endgame';
+        // Time sets the baseline; a strong reputation moves the story on
+        // sooner (#1420)
+        const PHASES = ['early', 'mid', 'late', 'endgame'];
+        const byDays = days < 30 ? 0 : days < 90 ? 1 : days < 180 ? 2 : 3;
+        const byReputation = reputation >= 5000 ? 2 : reputation >= 1000 ? 1 : 0;
+        return PHASES[Math.max(byDays, byReputation)];
     }
 
     /**
@@ -75,6 +77,8 @@ export class StorylineManager {
     processDecision(decisionId, choice) {
         const decision = this.getDecision(decisionId);
         if (!decision) return null;
+        // getDecision sees the full catalog, so stop a decision being made twice
+        if (this.majorDecisions.some(d => d.decisionId === decisionId)) return null;
 
         const result = decision.choices[choice];
         if (!result) return null;
@@ -110,24 +114,27 @@ export class StorylineManager {
      * Get decision by ID
      */
     getDecision(decisionId) {
-        const decisions = this.getAvailableDecisions();
-        return decisions.find(d => d.id === decisionId);
+        // Look in the full catalog: decisions already made (majorDecisions)
+        // must still resolve for the journal, story beats and news (#1102, #2394)
+        return this.getAvailableDecisions({ includeAll: true }).find(d => d.id === decisionId);
     }
 
     /**
      * Get available decisions based on phase and progress
+     * @param {{includeAll?: boolean}} [opts] - includeAll returns every decision
+     *   regardless of phase, ethics, money or whether it was already made
      */
-    getAvailableDecisions() {
+    getAvailableDecisions({ includeAll = false } = {}) {
         const phase = this.storylinePhase;
         const ethics = this.gameState.characterStats?.ethics || 0;
 
         const decisions = [];
 
         // Early game decisions
-        if (phase === 'early') {
+        if (includeAll || phase === 'early') {
             // Only show first_job_offer if player hasn't made it yet
             const hasFirstJobDecision = this.majorDecisions.some(d => d.decisionId === 'first_job_offer');
-            if (!hasFirstJobDecision) {
+            if (includeAll || !hasFirstJobDecision) {
                 decisions.push({
                     id: 'first_job_offer',
                     title: 'Your First Big Opportunity',
@@ -158,7 +165,7 @@ export class StorylineManager {
             }
             // [NEW] Hiring Decision
             const hasHiringDecision = this.majorDecisions.some(d => d.decisionId === 'hire_friend');
-            if (!hasHiringDecision) {
+            if (includeAll || !hasHiringDecision) {
                 decisions.push({
                     id: 'hire_friend',
                     title: 'Hiring Decision',
@@ -184,9 +191,9 @@ export class StorylineManager {
         }
 
         // Mid game decisions
-        if (phase === 'mid') {
+        if (includeAll || phase === 'mid') {
             const hasWhistleblowerDecision = this.majorDecisions.some(d => d.decisionId === 'whistleblower');
-            if (!hasWhistleblowerDecision) {
+            if (includeAll || !hasWhistleblowerDecision) {
                 decisions.push({
                     id: 'whistleblower',
                     title: 'You Discover Something Wrong',
@@ -217,7 +224,7 @@ export class StorylineManager {
             }
             // [NEW] Investment Decision
             const hasInvestmentDecision = this.majorDecisions.some(d => d.decisionId === 'startup_investment');
-            if (!hasInvestmentDecision && this.gameState.money > 20000) {
+            if (includeAll || (!hasInvestmentDecision && this.gameState.money > 20000)) {
                 decisions.push({
                     id: 'startup_investment',
                     title: 'Risky Investment',
@@ -243,9 +250,9 @@ export class StorylineManager {
         }
 
         // Ethics-based decisions
-        if (ethics < -20) {
+        if (includeAll || ethics < -20) {
             const hasCriminalDecision = this.majorDecisions.some(d => d.decisionId === 'criminal_opportunity');
-            if (!hasCriminalDecision) {
+            if (includeAll || !hasCriminalDecision) {
                 decisions.push({
                     id: 'criminal_opportunity',
                     title: 'A Lucrative But Illegal Offer',
@@ -272,9 +279,9 @@ export class StorylineManager {
 
 
         // Endgame decisions
-        if (phase === 'endgame') {
+        if (includeAll || phase === 'endgame') {
             const hasSellDecision = this.majorDecisions.some(d => d.decisionId === 'sell_company');
-            if (!hasSellDecision) {
+            if (includeAll || !hasSellDecision) {
                 decisions.push({
                     id: 'sell_company',
                     title: 'The Exit Strategy',

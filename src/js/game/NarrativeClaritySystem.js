@@ -263,7 +263,11 @@ export class NarrativeClaritySystem {
         const backgrounds = {
             'first_job_offer': 'You\'ve been struggling to make ends meet. This job offer comes at a critical time. The money would solve your immediate problems, but you\'re not sure about the company\'s ethics.',
             'whistleblower': 'You\'ve discovered something that doesn\'t sit right with you. Your career is on the line, but so is your conscience. What kind of person do you want to be?',
-            'criminal_opportunity': 'Someone has made you an offer that would change your financial situation dramatically. But it\'s clearly illegal. The temptation is strong, but so are the risks.'
+            'criminal_opportunity': 'Someone has made you an offer that would change your financial situation dramatically. But it\'s clearly illegal. The temptation is strong, but so are the risks.',
+            // The rest of the decisions StorylineManager can surface (#1532)
+            'hire_friend': 'Your workload is growing and you need help. An old friend needs a break, but a stranger has the stronger resume. Loyalty and competence pull in different directions.',
+            'startup_investment': 'You finally have some cash in reserve, and a founder with a big pitch wants a piece of it. It could be visionary or it could be vaporware.',
+            'sell_company': 'Everything you built has caught the eye of a tech giant. Their offer would set you up for life, but your company as you know it would disappear.'
         };
 
         return backgrounds[decisionId] || 'You face an important decision that will shape your future.';

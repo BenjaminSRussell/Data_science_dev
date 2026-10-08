@@ -6,6 +6,12 @@
 
 import { dialogueTreeSystem } from '../game/dialogue/DialogueTreeSystem.js';
 import { STATS } from '../game/CharacterStats.js';
+import { getNPCImage } from '../utils/NPCImageMapper.js';
+
+// Items a dialogue node can hand over (effects.item) (#47)
+export const DIALOGUE_ITEMS = {
+    gift: { name: 'a small gift', money: 100 }
+};
 
 export class DialogueUI {
     constructor(game) {
@@ -152,6 +158,21 @@ export class DialogueUI {
             const personality = npc.personality || 'friendly';
             avatar.setAttribute('data-personality', personality);
             initial.textContent = npc.name?.[0]?.toUpperCase() || '?';
+            // NPC portrait, with the initial as a fallback (#1158)
+            let portrait = null;
+            try { portrait = getNPCImage(npc); } catch { portrait = null; }
+            avatar.querySelector('img.dialogue-portrait')?.remove();
+            if (portrait) {
+                const img = document.createElement('img');
+                img.className = 'dialogue-portrait';
+                img.src = portrait;
+                img.alt = '';
+                img.addEventListener('error', () => { img.remove(); initial.hidden = false; });
+                initial.hidden = true;
+                avatar.appendChild(img);
+            } else {
+                initial.hidden = false;
+            }
         }
 
         // Update NPC info
@@ -325,8 +346,15 @@ export class DialogueUI {
         }
 
         if (effects.item && this.game?.gameState) {
-            // Give item
-
+            // Hand over the item (#47)
+            const item = DIALOGUE_ITEMS[effects.item];
+            const from = this.currentNPC?.name || 'Someone';
+            if (item) {
+                if (item.money) this.game.gameState.money = (this.game.gameState.money || 0) + item.money;
+                this.game.showToast?.(`${from} gave you ${item.name}${item.money ? ` (+$${item.money})` : ''}!`, 'success');
+            } else {
+                console.warn(`[Dialogue] Unknown item "${effects.item}"`);
+            }
         }
     }
 
