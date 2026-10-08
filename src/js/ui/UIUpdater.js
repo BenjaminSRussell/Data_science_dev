@@ -710,7 +710,12 @@ export class UIUpdater {
                 // Populate Interaction Buttons
                 const grid = document.getElementById('interaction-grid');
                 if (grid) {
-                    grid.innerHTML = (locationData.activities || []).map(activity => {
+                    // Prefer WorldMap's override-aware activity list for the place we're at (#2355)
+                    const wm = this.game?.worldMap || this.game?.gameState?.worldMap;
+                    const activities = (wm?.currentLocation === locationId && typeof wm.getCurrentActivities === 'function')
+                        ? wm.getCurrentActivities()
+                        : (locationData.activities || []);
+                    grid.innerHTML = activities.map(activity => {
                         return `
                             <button class="btn btn-secondary location-action-btn" onclick="game.handleLocationAction('${activity}')">
                                 ${this.getActivityName(activity)}

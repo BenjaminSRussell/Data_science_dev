@@ -122,3 +122,14 @@ describe('updateMapScreen map loading (#1167)', () => {
         expect(game.unifiedMapSystemLoading).toBe(first);
     });
 });
+
+describe('UnifiedMapSystem new-location marker (#2355)', () => {
+    it('flags reachable places the player has never visited', async () => {
+        const { UnifiedMapSystem } = await import('../../src/js/game/UnifiedMapSystem.js');
+        const wm = { currentLocation: 'home', hasVisited: (id) => id === 'home' || id === 'gym' };
+        expect(UnifiedMapSystem.isNewLocation(wm, 'bank')).toBe(true);
+        expect(UnifiedMapSystem.isNewLocation(wm, 'gym')).toBe(false);
+        expect(UnifiedMapSystem.isNewLocation(wm, 'home')).toBe(false);
+        expect(UnifiedMapSystem.isNewLocation(null, 'bank')).toBe(false);
+    });
+});

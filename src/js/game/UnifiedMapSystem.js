@@ -458,6 +458,14 @@ export class UnifiedMapSystem {
     }
 
     /**
+     * True when a location is reachable but the player has never visited it (#2355)
+     */
+    static isNewLocation(worldMap, locationId) {
+        if (!worldMap || typeof worldMap.hasVisited !== 'function') return false;
+        return locationId !== worldMap.currentLocation && !worldMap.hasVisited(locationId);
+    }
+
+    /**
      * Render local location markers
      */
     renderLocalLocations() {
@@ -519,9 +527,18 @@ export class UnifiedMapSystem {
             }
             
             this.layers.locations.addChild(icon);
+
+            // Gold "new" dot on places the player hasn't been yet (#2355)
+            const isNew = UnifiedMapSystem.isNewLocation(this.game.worldMap, location.id);
+            if (isNew) {
+                const dot = new PIXI.Graphics();
+                dot.beginFill(0xf59e0b, 1);
+                dot.drawCircle(x + 10, y - 10, 4);
+                this.layers.locations.addChild(dot);
+            }
             
             // Label (show on hover or if current)
-            const label = new PIXI.Text(location.name, {
+            const label = new PIXI.Text(isNew ? `${location.name} (new)` : location.name, {
                 fontSize: 11,
                 fill: 0xffffff,
                 fontWeight: 'bold',
