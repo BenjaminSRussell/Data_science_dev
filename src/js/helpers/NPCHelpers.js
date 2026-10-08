@@ -86,6 +86,16 @@ export function renderNPCChoices(game, choices = []) {
         const btn = document.createElement('button');
         btn.className = 'btn-cartoon btn-sm';
         btn.textContent = choice.text;
+        // Relationship-gated choices are shown locked, not hidden (#1581)
+        if (choice.locked) {
+            const need = choice.conditions?.relationship;
+            if (need) btn.textContent += ` (relationship ${need})`;
+            btn.disabled = true;
+            btn.classList.add('locked');
+            btn.title = need ? `Needs relationship ${need}` : 'Not available yet';
+            actionsDiv.appendChild(btn);
+            return;
+        }
         btn.onclick = () => {
             // Disable every button so a choice can't be applied twice
             actionsDiv.querySelectorAll('button').forEach(b => { b.disabled = true; });

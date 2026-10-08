@@ -22,7 +22,8 @@ export class AISystem {
 
         // State
         this.name = "Project Prometheus";
-        this.isTraining = false;
+        // Training is a one-shot action (train()), so there is no in-progress
+        // flag; the old isTraining was never set or read (#1808)
         // Data Points earned from completed projects, spent on training (#1807)
         this.dataPoints = 0;
     }
@@ -103,14 +104,14 @@ export class AISystem {
             hardware: this.hardware,
             slots: this.slots,
             name: this.name,
-            isTraining: this.isTraining,
             dataPoints: this.dataPoints
         };
     }
 
     fromJSON(data) {
         if (!data) return;
-        const { gameState, ...rest } = data;
+        // Older saves carry a stale isTraining flag; drop it (#1808)
+        const { gameState, isTraining, ...rest } = data;
         Object.assign(this, rest);
         // Older saves didn't store xpToNextLevel; derive it from level instead of
         // keeping the level-1 default (#1804)

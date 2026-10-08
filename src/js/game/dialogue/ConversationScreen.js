@@ -33,6 +33,9 @@ export class ConversationScreen {
         }
 
         this.screenElement = screen;
+        // Clear the previous NPC's conversation before the screen becomes
+        // visible, so it can't flash while the new one loads (#1695)
+        screen.innerHTML = '<div class="conversation-loading">…</div>';
         screen.classList.add('active');
 
         // Start conversation
@@ -149,19 +152,24 @@ export class ConversationScreen {
             return '<div class="conversation-choice disabled">No options available</div>';
         }
 
+        const relationship = this.game.npcManager?.getRelationship?.(this.currentNPC?.id) || 0;
         return choices.map((choice, index) => {
-            const disabled = choice.conditions &&
-                choice.conditions.relationship &&
-                (this.game.npcManager?.getRelationship(this.currentNPC.id) || 0) < choice.conditions.relationship;
+            const need = Number(choice.conditions?.relationship) || 0;
+            const disabled = !!choice.locked || (need > 0 && relationship < need);
+            const hint = disabled && need ? ` <span class="conversation-choice-lock">(relationship ${need})</span>` : '';
 
             return `
-                <button class="conversation-choice ${disabled ? 'disabled' : ''}" 
+                <button class="conversation-choice ${disabled ? 'disabled' : ''}"
                         data-choice-index="${index}"
-                        ${disabled ? 'disabled' : ''}>
-                    ${choice.text}
+                        ${disabled ? 'disabled aria-disabled="true"' : ''}>
+                    ${ConversationScreen.escape(choice.text)}${hint}
                 </button>
             `;
         }).join('');
+    }
+
+    static escape(value) {
+        return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
     /**
