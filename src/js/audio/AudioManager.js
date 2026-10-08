@@ -122,7 +122,8 @@ export class AudioManager {
      */
     playTone(frequency, duration) {
         try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioContext = this.getAudioContext();
+            if (!audioContext) return;
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
 
@@ -140,6 +141,24 @@ export class AudioManager {
         } catch (e) {
             // Audio not supported or blocked
         }
+    }
+
+    /**
+     * One shared AudioContext for every beep. Creating a new context per
+     * sound hits the browser's context limit after a handful of sounds and
+     * leaks audio threads (#273)
+     */
+    getAudioContext() {
+        if (!this.audioContext || this.audioContext.state === 'closed') {
+            const Ctx = typeof window !== 'undefined' ? (window.AudioContext || window.webkitAudioContext) : null;
+            if (!Ctx) return null;
+            this.audioContext = new Ctx();
+        }
+        // Contexts start suspended until a user gesture; resume on use
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume?.().catch?.(() => {});
+        }
+        return this.audioContext;
     }
 
     /**
