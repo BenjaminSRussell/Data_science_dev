@@ -4,6 +4,7 @@
  * Checks for multiple ending types and triggers appropriate endings
  */
 
+import { STATS } from './CharacterStats.js';
 import { RANKS } from '../data/ranks.js';
 
 export class GameEndingSystem {
@@ -336,7 +337,8 @@ export class GameEndingSystem {
     getSkillStats() {
         if (!this.gameState.characterStats) return {};
         
-        const skills = ['coding', 'analysis', 'design', 'communication', 'focus', 'luck'];
+        // The real CharacterStats stat ids (#1140)
+        const skills = Object.keys(STATS);
         const stats = {};
         
         skills.forEach(skill => {

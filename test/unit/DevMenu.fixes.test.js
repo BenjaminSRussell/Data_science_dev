@@ -55,7 +55,6 @@ describe('DevMenu fixes', () => {
         const menu = new DevMenu(game);
         expect(menu.maxStats()).toBe(true);
         Object.keys(cs.stats).forEach(id => expect(cs.stats[id]).toBe(STATS[id].maxLevel));
-        expect(cs.skills.python.value).toBe(100);
     });
 
     it('Complete Task runs the real submit pipeline (#1856, #2352)', () => {

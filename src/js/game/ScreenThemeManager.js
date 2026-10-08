@@ -8,7 +8,11 @@ import { SCREEN_THEMES } from '../data/themes.js';
 export { SCREEN_THEMES };
 
 export class ScreenThemeManager {
-    constructor() {
+    /**
+     * @param {Object} [environmentManager] - owner of the office background (#1731)
+     */
+    constructor(environmentManager = null) {
+        this.environmentManager = environmentManager;
         this.currentScreen = null;
         this.currentTheme = null;
         this.applyTheme('screen-menu');
@@ -35,8 +39,15 @@ export class ScreenThemeManager {
             screen.style.background = theme.gradient;
         }
 
-        // Update body background
-        document.body.style.background = theme.gradient;
+        // Update body background. On the main game screen the office
+        // background sits on top of the theme gradient instead of being
+        // wiped out by it (#1731)
+        const env = this.environmentManager || (typeof window !== 'undefined' ? window.game?.environmentManager : null);
+        if (screenId === 'screen-game' && env?.getBackground) {
+            document.body.style.background = env.getBackground(theme.gradient);
+        } else {
+            document.body.style.background = theme.gradient;
+        }
     }
 
     /**

@@ -197,7 +197,7 @@ export class CharacterStats {
         this.stats = {
             intelligence: 10,
             charisma: 10,
-            stamina: 100, // Max energy
+            stamina: 10, // Trainable like the others; was 100, i.e. already maxed (#992)
             focus: 10,
             luck: 10,
             analytics: 10
@@ -211,20 +211,13 @@ export class CharacterStats {
         this.level = 1;
         this.visualStage = 'level_1'; // level_1, level_2_good, level_2_evil, etc.
 
-        // Define Skills
-        this.skills = {
-            python: { id: 'python', name: 'Python', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            sql: { id: 'sql', name: 'SQL', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            statistics: { id: 'statistics', name: 'Statistics', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            machine_learning: { id: 'machine_learning', name: 'Machine Learning', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            communication: { id: 'communication', name: 'Communication', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 },
-            charisma: { id: 'charisma', name: 'Charisma', value: 0, maxLevel: 100, xp: 0, xpNeeded: 100 }
-        };
+        // (The old parallel `skills` table was never read and shadowed stats.charisma, #1719)
 
         // Experience points for each stat
         this.xp = {
             intelligence: 0,
             charisma: 0,
+            stamina: 0,
             focus: 0,
             luck: 0,
             analytics: 0

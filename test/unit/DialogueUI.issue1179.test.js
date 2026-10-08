@@ -481,12 +481,27 @@ describe('DialogueUI', () => {
             });
 
             it('should increase character stat by 1 for statBoost', () => {
-                mockGameState.characterStats.getStat.mockReturnValue(5);
+                // Goes through addExperience with exactly one level's worth of XP (#1161)
+                const addExperience = vi.fn();
+                Object.assign(mockGameState.characterStats, {
+                    addExperience,
+                    getXPForNextLevel: () => 100,
+                    xp: { focus: 30 }
+                });
 
-                // Mock STATS to know about strength
-                dialogueUI.applyEffects({ statBoost: 'strength' });
+                dialogueUI.applyEffects({ statBoost: 'focus' });
 
-                expect(mockGameState.characterStats.getStat).toHaveBeenCalledWith('strength');
+                expect(addExperience).toHaveBeenCalledWith('focus', 70);
+            });
+
+            it('levels a real CharacterStats stat by exactly one', async () => {
+                const { CharacterStats } = await import('../../src/js/game/CharacterStats.js');
+                const cs = new CharacterStats();
+                dialogueUI.game.gameState.characterStats = cs;
+                const before = cs.getStat('focus');
+                dialogueUI.applyEffects({ statBoost: 'focus' });
+                expect(cs.getStat('focus')).toBe(before + 1);
+                expect(cs.xp.focus).toBe(0);
             });
 
             it('should cap stat increase at maxLevel', () => {

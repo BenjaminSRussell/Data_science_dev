@@ -13,6 +13,8 @@ export class EnvironmentManager {
         this.activeEvent = null;
         this.eventTimeout = null;
         this.timeUpdateInterval = null;
+        // The first location sync after construction/load is not an unlock (#1182)
+        this.hasInitialized = false;
     }
 
     /**
@@ -37,25 +39,48 @@ export class EnvironmentManager {
     }
 
     /**
-     * Update office location based on rank
+     * Highest office the rank has unlocked. Hidden decorative entries are
+     * never picked by rank (#74).
+     * @param {number} rankIndex
      */
-    updateLocation() {
-        const rankIndex = this.gameState.rankIndex;
-
-        // Find the highest unlocked location
-        let newLocation = OFFICE_LOCATIONS[0];
+    static locationForRank(rankIndex = 0) {
+        let best = OFFICE_LOCATIONS[0];
         for (const location of OFFICE_LOCATIONS) {
-            if (rankIndex >= location.rankRequired) {
-                newLocation = location;
+            if (location.hidden) continue;
+            if ((rankIndex || 0) >= location.rankRequired && location.rankRequired >= best.rankRequired) {
+                best = location;
             }
         }
+        return best;
+    }
+
+    /**
+     * Update office location based on rank
+     * @param {string} [locationId] - force a specific office (dev tools, #2177)
+     * @returns {Object|null} the current location, or null for an unknown id
+     */
+    updateLocation(locationId) {
+        let newLocation;
+        if (locationId !== undefined && locationId !== null) {
+            newLocation = OFFICE_LOCATIONS.find(l => l.id === locationId);
+            if (!newLocation) return null;
+        } else {
+            newLocation = EnvironmentManager.locationForRank(this.gameState.rankIndex);
+        }
+
+        const isFirstSync = !this.hasInitialized;
+        this.hasInitialized = true;
 
         if (this.currentLocation?.id !== newLocation.id) {
+            const previous = this.currentLocation;
             this.currentLocation = newLocation;
             this.applyLocationStyles();
 
-            // Show unlock message if it's a new location
-            if (this.gameState.tasksCompleted > 0) {
+            // Only a real promotion counts as an unlock: not the first sync
+            // after loading a save, and not a forced dev-tool switch (#1182)
+            const promoted = !isFirstSync && !locationId &&
+                (newLocation.rankRequired > (previous?.rankRequired ?? -1));
+            if (promoted && this.gameState.tasksCompleted > 0) {
                 this.showLocationUnlock(newLocation);
             }
         }
@@ -70,8 +95,9 @@ export class EnvironmentManager {
         const gameContainer = document.getElementById('game-container');
         if (!gameContainer || !this.currentLocation) return;
 
-        // Apply background gradient
-        document.body.style.background = this.currentLocation.background;
+        // Apply background. ScreenThemeManager composes this with the screen
+        // gradient so the two don't overwrite each other (#1731)
+        document.body.style.background = this.getBackground() || this.currentLocation.background;
         document.body.style.backgroundAttachment = 'fixed';
 
         // Update location indicator
@@ -79,6 +105,18 @@ export class EnvironmentManager {
 
         // Add floating elements
         this.createFloatingElements();
+    }
+
+    /**
+     * Office background layered over an optional screen gradient (#1731)
+     * @param {string} [gradient]
+     */
+    getBackground(gradient) {
+        const bg = this.currentLocation?.background;
+        if (!bg) return gradient || '';
+        if (!gradient) return bg;
+        // url() images go on top, sized to cover; the gradient shows behind
+        return /^url\(/.test(bg) ? `${bg} center / cover no-repeat, ${gradient}` : bg;
     }
 
     /**
@@ -130,10 +168,23 @@ export class EnvironmentManager {
     }
 
     /**
-     * Update time of day based on real clock
+     * Hour of the in-game day: the start of the current TimeManager slot
+     * (6, 9, 12, 15, 18, 21). Falls back to the real clock only when there
+     * is no TimeManager (#921).
+     */
+    getGameHour() {
+        const tm = this.gameState?.timeManager;
+        if (tm && Number.isFinite(tm.timeSlot)) {
+            return (6 + tm.timeSlot * 3) % 24;
+        }
+        return new Date().getHours();
+    }
+
+    /**
+     * Update time of day from the in-game clock (#921)
      */
     updateTimeOfDay() {
-        const hour = new Date().getHours();
+        const hour = this.getGameHour();
 
         for (const time of TIME_OF_DAY) {
             if (time.hours.includes(hour)) {

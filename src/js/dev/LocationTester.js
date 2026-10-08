@@ -85,9 +85,14 @@ export class LocationTester {
             } else if (this.game?.environmentManager) {
                 // Try environment manager
                 try {
-                    this.game.environmentManager.updateLocation();
-                    results.success = true;
-                    results.message = `Updated environment for ${locationId}`;
+                    // Only office ids are valid here; report anything else (#2177)
+                    const loc = this.game.environmentManager.updateLocation(locationId);
+                    results.success = !!loc;
+                    if (loc) {
+                        results.message = `Updated environment for ${locationId}`;
+                    } else {
+                        results.errors.push(`${locationId} is not an office location`);
+                    }
                 } catch (error) {
                     results.errors.push(`Error updating environment: ${error.message}`);
                 }
