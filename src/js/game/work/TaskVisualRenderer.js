@@ -5,6 +5,19 @@
  */
 
 export class TaskVisualRenderer {
+    // Ids of live game elements a task visual must never take over (#2105)
+    static RESERVED_CONTAINER_IDS = ['data-table-container', 'game-container', 'screen-container', 'preview-chart'];
+
+    /**
+     * Class list for a visual's container. The config names (e.g.
+     * "data-table-container", "chart-container") are namespaced so they
+     * can't pick up the live game's styles for those classes (#2105)
+     */
+    static containerClass(visualConfig) {
+        const name = String(visualConfig?.container || 'default').replace(/[^a-z0-9-]/gi, '');
+        return `task-visual-container task-visual--${name}`;
+    }
+
     constructor() {
         this.visuals = this.initializeVisuals();
     }
@@ -260,6 +273,11 @@ export class TaskVisualRenderer {
             return this.renderDefaultVisual(containerId);
         }
         
+        // Never wipe a live game element such as the task data table (#2105)
+        if (TaskVisualRenderer.RESERVED_CONTAINER_IDS.includes(containerId)) {
+            console.error(`Refusing to render a task visual into live element #${containerId}`);
+            return null;
+        }
         const container = document.getElementById(containerId) || document.querySelector(`#${containerId}`);
         if (!container) {
             console.error(`Container not found: ${containerId}`);
@@ -268,7 +286,7 @@ export class TaskVisualRenderer {
         
         // Clear container
         container.innerHTML = '';
-        container.className = `task-visual-container ${visualConfig.container}`;
+        container.className = TaskVisualRenderer.containerClass(visualConfig);
         
         // Create visual elements
         const visualHTML = this.createVisualHTML(visualType, visualConfig, task, step);

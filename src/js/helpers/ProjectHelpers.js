@@ -328,6 +328,21 @@ export function updateOfficeScreen(game) {
 }
 
 /**
+ * Ask for a new player name and show it on the Stats screen
+ */
+export function renamePlayer(game, promptFn = (msg, value) => window.prompt(msg, value)) {
+    const current = game.gameState.playerName || '';
+    const answer = promptFn('What should we call you?', current);
+    if (answer === null || answer === undefined) return current;
+    const name = typeof game.gameState.setPlayerName === 'function'
+        ? game.gameState.setPlayerName(answer)
+        : (game.gameState.playerName = String(answer).trim().slice(0, 24));
+    const el = document.getElementById('stats-name');
+    if (el) el.textContent = name || 'New Player';
+    return name;
+}
+
+/**
  * Update stats screen
  */
 export function updateStatsScreen(game) {
@@ -336,6 +351,10 @@ export function updateStatsScreen(game) {
     const charName = game.gameState.playerName || 'New Player';
     const statsNameEl = document.getElementById('stats-name');
     if (statsNameEl) statsNameEl.textContent = charName;
+
+    // Nothing ever wrote playerName; let the player set it here (#1295)
+    const renameBtn = document.getElementById('btn-rename-player');
+    if (renameBtn) renameBtn.onclick = () => renamePlayer(game);
 
     // Update stat bars
     game.characterStats?.getAllStats()?.forEach(stat => {

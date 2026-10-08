@@ -28,6 +28,8 @@ export class GameState {
      */
     reset() {
         // Player stats
+        // Shown on the Stats screen; set with setPlayerName() (#1295)
+        this.playerName = '';
         this.money = 100;
         this.reputation = 0;
         this.rankIndex = 0;
@@ -370,6 +372,23 @@ export class GameState {
     /**
      * Serialize state for saving
      */
+    /**
+     * Set the name shown on the Stats screen. Returns the stored name
+     */
+    setPlayerName(name) {
+        this.playerName = GameState.cleanPlayerName(name);
+        return this.playerName;
+    }
+
+    /**
+     * Trim, drop control characters and cap at 24 characters
+     */
+    static cleanPlayerName(name) {
+        if (typeof name !== 'string') return '';
+        // eslint-disable-next-line no-control-regex
+        return name.replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 24);
+    }
+
     toJSON() {
         const data = {
             money: this.money,
@@ -407,7 +426,8 @@ export class GameState {
             dailyMarketingCost: this.dailyMarketingCost || 0,
             lastEventCheck: this.lastEventCheck ?? 0,
             npcMemories: this.npcMemories || null,
-            completedStoryBeats: this.completedStoryBeats || null
+            completedStoryBeats: this.completedStoryBeats || null,
+            playerName: this.playerName || ''
         };
 
         // Sub-systems with their own toJSON()
@@ -458,6 +478,7 @@ export class GameState {
         if (!data) return;
 
         this.money = data.money ?? 100;
+        this.playerName = GameState.cleanPlayerName(data.playerName);
         this.reputation = data.reputation ?? 0;
         this.rankIndex = data.rankIndex ?? 0;
         this.rent = data.rent ?? 500; // Load rent

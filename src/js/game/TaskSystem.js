@@ -8,6 +8,18 @@ import { insightHint, EconomySystem } from './EconomySystem.js';
 import { isCurrencyColumn, proportionalSplit, boundedPartition } from '../utils/dataFormat.js';
 
 export class TaskSystem {
+    /**
+     * Boss panel line, e.g. "Mood: Stressed · Style: Perfectionist". Moods
+     * come from BOSS_MOODS in data/bosses.js (#2227)
+     */
+    static bossMoodText(boss) {
+        const pretty = v => String(v).replace(/[-_]/g, ' ').replace(/^./, c => c.toUpperCase());
+        const parts = [];
+        if (boss?.mood) parts.push(`Mood: ${pretty(boss.mood)}`);
+        if (boss?.personality) parts.push(`Style: ${pretty(boss.personality)}`);
+        return parts.join(' · ');
+    }
+
     static MAX_RANK_INDEX = 6;
     static DIFFICULTY_PER_RANK = 1.45;
     // Half-width of each rank's band; bands overlap slightly so 1.0-10 is covered
@@ -371,12 +383,7 @@ export class TaskSystem {
             }
         }
         // Text-mode panel: show the boss's style (#2210)
-        if (moodEl) {
-            const style = task.boss.mood || task.boss.personality || '';
-            moodEl.textContent = style
-                ? `Style: ${String(style).replace(/[-_]/g, ' ').replace(/^./, c => c.toUpperCase())}`
-                : '';
-        }
+        if (moodEl) moodEl.textContent = TaskSystem.bossMoodText(task.boss);
 
         // Update task display
         const taskDesc = document.querySelector('.task-description');

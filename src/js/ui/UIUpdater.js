@@ -8,6 +8,7 @@ import { RANKS } from '../data/ranks.js';
 import { SHOP_ITEMS } from '../data/shopItems.js';
 import { LIBRARY_CONTENT, CATEGORIES } from '../game/LibraryDatabase.js';
 import { OFFICE_LOCATIONS } from '../data/locations.js';
+import { OFFICES } from '../data/tycoonData.js';
 import { LOCATIONS } from '../game/WorldMap.js';
 import { HARDWARE_PARTS, HARDWARE_TYPES } from '../game/HardwareSystems.js';
 import { LitUIManager } from './LitUIManager.js';
@@ -64,46 +65,15 @@ export class UIUpdater {
      * Update chart type availability in studio
      */
     updateChartTypeGrid() {
+        // Chart type buttons are plain text labels; the old .chart-icon span
+        // lookup never matched anything and was removed (#2211)
         DOMUtils.queryAll('.chart-type-btn').forEach(btn => {
-            const type = btn.dataset.type;
-            const iconEl = btn.querySelector('.chart-icon');
-
-            if (this.gameState.isChartTypeUnlocked(type)) {
-                DOMUtils.toggleClass(btn, 'locked', false);
-                if (iconEl) {
-                    const src = this.getChartIcon(type);
-                    iconEl.innerHTML = '';
-                    const img = document.createElement('img');
-                    img.src = src;
-                    img.alt = type;
-                    img.width = 24; img.height = 24;
-                    img.onerror = () => { iconEl.textContent = type[0]?.toUpperCase() || '?'; };
-                    iconEl.appendChild(img);
-                }
-            } else {
-                DOMUtils.toggleClass(btn, 'locked', true);
-                if (iconEl) {
-                    iconEl.textContent = '';
-                }
-            }
+            const locked = !this.gameState.isChartTypeUnlocked(btn.dataset.type);
+            DOMUtils.toggleClass(btn, 'locked', locked);
+            btn.setAttribute('aria-disabled', locked ? 'true' : 'false');
         });
     }
 
-    /**
-     * Get icon for chart type
-     */
-    getChartIcon(type) {
-        // Return icon path instead of emoji
-        const iconPaths = {
-            bar: '/assets/icons/charts/bar.png',
-            line: '/assets/icons/charts/line.png',
-            pie: '/assets/icons/charts/pie.png',
-            scatter: '/assets/icons/charts/scatter.png',
-            doughnut: '/assets/icons/charts/doughnut.png',
-            area: '/assets/icons/charts/area.png'
-        };
-        return iconPaths[type] || '/assets/icons/charts/bar.png';
-    }
 
     /**
      * Update software display in chart studio
@@ -768,6 +738,15 @@ export class UIUpdater {
 
             // Update Equipment Grid
             this.updateOfficeEquipment();
+        }
+
+        // The LOCATION row shows where you are. It was only written behind a
+        // .office-badge element that isn't in the page (#1126)
+        const locationNameEl = document.getElementById('current-office-name');
+        if (locationNameEl) {
+            locationNameEl.textContent = isShop
+                ? (locationData.name || theme.name)
+                : (OFFICES[this.gameState?.officeIndex || 0]?.name || theme.name);
         }
     }
 

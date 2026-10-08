@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="/src/styles/emotional-breakdown.css">
     <link rel="stylesheet" href="/src/styles/patches.css">
     <link rel="stylesheet" href="/src/styles/game-panels.css">
+    <link rel="stylesheet" href="/src/styles/daynight.css">
     <link rel="stylesheet" href="/src/styles/story-ui.css">
     <link rel="stylesheet" href="/src/styles/text-ui.css">
     <link rel="stylesheet" href="/src/styles/act-transition.css">
@@ -313,13 +314,13 @@
 
                         <div class="data-mapping ascii-box" style="margin-top: 1rem;">
                             <div class="text-ui-heading">MAPPING</div>
-                            <div class="mapping-dropzone" id="x-axis-drop"
-                                style="border: 1px dashed #555; padding: 0.5rem; margin-bottom: 0.5rem;">
+                            <div class="mapping-dropzone" id="x-axis-drop" title="Set from the task's data"
+                                style="border: 1px solid #555; padding: 0.5rem; margin-bottom: 0.5rem;">
                                 <span class="dropzone-label" style="color: #888;">X-Axis:</span>
                                 <span class="dropzone-value" id="x-axis-value">Quarter</span>
                             </div>
-                            <div class="mapping-dropzone" id="y-axis-drop"
-                                style="border: 1px dashed #555; padding: 0.5rem;">
+                            <div class="mapping-dropzone" id="y-axis-drop" title="Set from the task's data"
+                                style="border: 1px solid #555; padding: 0.5rem;">
                                 <span class="dropzone-label" style="color: #888;">Y-Axis:</span>
                                 <span class="dropzone-value" id="y-axis-value">Revenue</span>
                             </div>
@@ -1157,6 +1158,8 @@
                         </div>
                         <div class="character-info">
                             <h3 class="character-name" id="stats-name">New Player</h3>
+                            <button class="btn-grey" id="btn-rename-player" type="button"
+                                aria-label="Change your name" style="font-size: 0.75rem; padding: 0.1rem 0.5rem;">Rename</button>
                             <div class="character-title" id="stats-title">Data Entry Clerk</div>
                             <div class="character-level">
                                 <span>Total Level: </span>

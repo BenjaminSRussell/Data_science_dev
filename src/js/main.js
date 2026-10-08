@@ -2190,6 +2190,21 @@ export class MainGame {
             this.gameState.currentTask.data,
             this.gameState.chartConfig
         );
+        this.updateMappingPanel();
+    }
+
+    /**
+     * Show which columns the preview plots in the MAPPING panel. It used to
+     * be hardcoded to Quarter / Revenue for every task (#1494)
+     */
+    updateMappingPanel() {
+        const data = this.gameState?.currentTask?.data;
+        if (!data || !this.chartManager?.describeMapping) return;
+        const mapping = this.chartManager.describeMapping(data, this.gameState.chartConfig || {});
+        const xEl = document.getElementById('x-axis-value');
+        const yEl = document.getElementById('y-axis-value');
+        if (xEl) xEl.textContent = mapping.x;
+        if (yEl) yEl.textContent = mapping.y;
     }
 
     /**
