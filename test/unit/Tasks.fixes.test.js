@@ -46,7 +46,7 @@ describe('TaskSystem (#2141, #2319, #110, #2210)', () => {
         document.body.innerHTML = '<div id="boss-dialogue"><p></p></div><span id="boss-name"></span><div id="boss-title"></div><div id="boss-mood"></div>';
         const gs = { rankIndex: 0 };
         new TaskSystem(gs).generateFallbackTask();
-        expect(document.getElementById('boss-mood').textContent).toBe('Style: Traditional');
+        expect(document.getElementById('boss-mood').textContent).toBe('Mood: Neutral · Style: Traditional');
         expect(document.getElementById('boss-name').textContent).toBe('Mr. Anderson');
     });
 });
