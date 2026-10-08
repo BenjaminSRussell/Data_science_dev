@@ -126,11 +126,15 @@ export class ResearchInboxUI {
         
         content.innerHTML = papers.map(item => this.createPaperCard(item)).join('');
         
-        // Add click listeners
+        // Click, or Enter/Space from the keyboard, opens a paper (#1880, #131)
         content.querySelectorAll('.paper-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const notificationId = card.dataset.notificationId;
-                this.showPaperDetails(notificationId);
+            const openCard = () => this.showPaperDetails(card.dataset.notificationId);
+            card.addEventListener('click', openCard);
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openCard();
+                }
             });
         });
     }
@@ -145,12 +149,13 @@ export class ResearchInboxUI {
         
         return `
             <div class="paper-card ${isUnread ? 'unread' : ''} ${isBreakthrough ? 'breakthrough' : ''}" 
-                 data-notification-id="${notification.id}">
+                 data-notification-id="${notification.id}" tabindex="0" role="button"
+                 aria-label="${isUnread ? 'Unread: ' : ''}${String(paper.title).replace(/"/g, '&quot;')}">
                 <div class="paper-card-header">
                     <div class="paper-badge ${isBreakthrough ? 'breakthrough-badge' : ''}">
                         ${isBreakthrough ? ' BREAKTHROUGH' : ''}
                     </div>
-                    ${isUnread ? '<div class="unread-indicator"></div>' : ''}
+                    ${isUnread ? '<div class="unread-indicator" aria-hidden="true"></div><span class="unread-label">Unread</span>' : ''}
                 </div>
                 <div class="paper-card-body">
                     <h3 class="paper-title">${paper.title}</h3>
@@ -177,8 +182,11 @@ export class ResearchInboxUI {
 
         const paper = notification.paper;
 
-        // Mark as read
-        this.researchPaperSystem.markAsRead(notificationId);
+        // Mark as read; the first read of a paper grants XP (#1669)
+        const reward = this.researchPaperSystem.markAsRead(notificationId);
+        if (reward?.xp) {
+            window.game?.showToast?.(`Read "${paper.title}": +${reward.xp} intelligence XP`, 'success');
+        }
 
         // Create detail modal
         const modal = document.createElement('div');
@@ -317,6 +325,8 @@ export class ResearchInboxUI {
             );
         } else {
             this.renderPapers(this.getActiveTab());
+            // Keep the "Unread (N)" tab label in step (#2454)
+            this.updateUnreadCount();
         }
     }
     

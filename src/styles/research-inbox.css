@@ -149,6 +149,32 @@
     animation: blink 1s ease-in-out infinite;
 }
 
+/* Unread is also said in text, not only by the dot's colour (#179) */
+.unread-label {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* Card body wrapper: spacing under the header row (#1829) */
+.paper-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.paper-card:focus-visible {
+    outline: 3px solid #fbbf24;
+    outline-offset: 2px;
+}
+
 /* Scoped so the newspaper's .paper-title masthead isn't restyled (#2497) */
 .paper-card .paper-title {
     margin: 0 0 0.75rem 0;
