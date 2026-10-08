@@ -459,8 +459,9 @@ export class WorldMap {
                     const statVal = this.gameState.characterStats?.getStat(req.stat) || 0;
                     if (statVal < req.value) continue;
                 }
-                if (req.reputation && this.gameState.reputation < (req.reputation || 0)) continue;
-                if (req.money && this.gameState.money < req.money) continue;
+                // Missing/NaN values count as 0 so the gates fail closed (#1430)
+                if (req.reputation && !((Number(this.gameState.reputation) || 0) >= req.reputation)) continue;
+                if (req.money && !((Number(this.gameState.money) || 0) >= req.money)) continue;
             }
 
             accessible.push(location);
