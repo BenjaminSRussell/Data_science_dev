@@ -109,8 +109,8 @@ describe('ending screen (#1509, #1510, #1511)', () => {
     });
     it('shows all computed stats', () => {
         const html = buildEndingStatsHTML({ hours: 12, totalEarned: 900, totalSpent: 300, averageRating: 4.25,
-            coursesCompleted: 3, ethics: 20, relationships: { a: 40, b: 60 }, skills: { technical: 9 } });
-        for (const text of ['Hours Played', 'Total Earned', 'Total Spent', 'Average Rating', 'Courses', 'Ethics', 'People Met', 'Technical']) {
+            coursesCompleted: 3, ethics: 20, relationships: { a: 40, b: 60 }, skills: { intelligence: 9 } });
+        for (const text of ['Hours Played', 'Total Earned', 'Total Spent', 'Average Rating', 'Courses', 'Ethics', 'People Met', 'Intelligence']) {
             expect(html).toContain(text);
         }
         expect(html).toContain('4.3');

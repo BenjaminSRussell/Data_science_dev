@@ -304,7 +304,7 @@ describe('MainGame.showGameEnding() via GameEndingModal.createGameEndingModal()'
             expect(modal.style.position).toBe('fixed');
             expect(modal.style.width).toBe('100%');
             expect(modal.style.height).toBe('100%');
-            expect(modal.style.zIndex).toBe('10000');
+            expect(modal.style.zIndex).toBe('10001'); // above the story decision modal (10000)
             expect(modal.style.display).toBe('flex');
         });
 

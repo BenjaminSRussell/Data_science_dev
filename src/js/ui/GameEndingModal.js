@@ -10,16 +10,14 @@
  * @param {string} endingData.title - The ending title (fallback: 'Victory!')
  * @param {string} endingData.message - The ending message (fallback: 'Congratulations on completing your journey!')
  */
+import { STATS } from '../game/CharacterStats.js';
+
 /** "-$500" rather than "$-500" (#1510) */
 export function formatEndingMoney(amount) {
     const n = Number(amount) || 0;
     return `${n < 0 ? '-' : ''}$${Math.abs(n).toLocaleString()}`;
 }
 
-const SKILL_LABELS = {
-    technical: 'Technical', social: 'Social', creativity: 'Creativity',
-    stamina: 'Stamina', business: 'Business', research: 'Research'
-};
 
 function statCell(label, value) {
     return `<div><strong>${label}:</strong> ${value}</div>`;
@@ -33,7 +31,7 @@ export function buildEndingStatsHTML(stats = {}) {
     const avgRel = rel.length ? Math.round(rel.reduce((a, b) => a + b, 0) / rel.length) : 0;
     const rating = Number(stats.averageRating) || 0;
     const skills = Object.entries(stats.skills || {})
-        .map(([id, v]) => statCell(SKILL_LABELS[id] || id, v))
+        .map(([id, v]) => statCell(STATS[id]?.name || id, v))
         .join('');
     return `
         <div class="ending-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
@@ -75,7 +73,7 @@ export function createGameEndingModal(endingData, context) {
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.95);
-        z-index: 10000;
+        z-index: 10001;
         display: flex;
         align-items: center;
         justify-content: center;
