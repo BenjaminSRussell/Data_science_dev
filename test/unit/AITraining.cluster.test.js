@@ -64,3 +64,56 @@ describe('AITrainingStoryline cluster', () => {
         expect(ai.currentPhase).toBe('attention_era');
     });
 });
+
+describe('AITrainingStoryline finished runs (#2036)', () => {
+    beforeEach(() => { delete window.game; });
+
+    it('completing a run removes it from currentProjects and records it in modelsTrained', () => {
+        const ai = make();
+        ai.startAITrainingProject('rnn');
+        ai.startAITrainingProject('cnn');
+        const [first, second] = ai.universityLab.currentProjects.map(p => p.id);
+        ai.completeTrainingProject(first);
+        expect(ai.universityLab.currentProjects.map(p => p.id)).toEqual([second]);
+        expect(ai.modelsTrained.map(m => m.id)).toEqual([first]);
+        expect(ai.findTrainedModel(first).status).toBe('completed');
+    });
+
+    it('currentProjects stays bounded across many runs', () => {
+        const ai = make();
+        for (let i = 0; i < 20; i++) {
+            ai.startAITrainingProject('rnn');
+            ai.completeTrainingProject(ai.universityLab.currentProjects.at(-1).id);
+        }
+        expect(ai.universityLab.currentProjects).toHaveLength(0);
+        expect(ai.modelsTrained).toHaveLength(20);
+        expect(new Set(ai.modelsTrained.map(m => m.id)).size).toBe(20);
+        expect(ai.toJSON().universityLab.currentProjects).toHaveLength(0);
+    });
+
+    it('learnFromModel works on finished runs and refuses runs in progress', () => {
+        const ai = make();
+        ai.gameState.stats = ai.gameState.stats || {};
+        ai.startAITrainingProject('rnn');
+        const id = ai.universityLab.currentProjects[0].id;
+        expect(ai.learnFromModel(id).success).toBe(false);
+        ai.completeTrainingProject(id);
+        expect(ai.learnFromModel(id).success).toBe(true);
+        expect(ai.learnFromModel('missing').success).toBe(false);
+    });
+
+    it('older saves with finished runs in currentProjects are migrated on load', () => {
+        const ai = make();
+        ai.startAITrainingProject('rnn');
+        ai.startAITrainingProject('cnn');
+        const save = JSON.parse(JSON.stringify(ai.toJSON()));
+        const [done, live] = save.universityLab.currentProjects;
+        done.status = 'completed';
+        save.modelsTrained = [];
+        const loaded = make();
+        loaded.fromJSON(save);
+        expect(loaded.universityLab.currentProjects.map(p => p.id)).toEqual([live.id]);
+        expect(loaded.modelsTrained.map(m => m.id)).toEqual([done.id]);
+        expect(loaded.completeTrainingProject(done.id).success).toBe(false);
+    });
+});

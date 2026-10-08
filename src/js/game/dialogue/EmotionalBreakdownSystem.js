@@ -426,7 +426,9 @@ export class EmotionalBreakdownSystem {
      */
     handleQuickTimeChoice(breakdownId, choiceId, effect) {
         const breakdown = this.activeBreakdowns.get(breakdownId);
-        if (!breakdown) return;
+        // Answer once: a second button click (or a click after the timeout)
+        // must not apply the relationship change again (#1020)
+        if (!breakdown || breakdown.playerResponse) return;
         
         breakdown.playerResponse = { choiceId, effect };
         
@@ -448,7 +450,7 @@ export class EmotionalBreakdownSystem {
      */
     handleQuickTimeTimeout(breakdownId) {
         const breakdown = this.activeBreakdowns.get(breakdownId);
-        if (!breakdown) return;
+        if (!breakdown || breakdown.playerResponse) return;
         
         breakdown.playerResponse = { choiceId: 'timeout', effect: 'negative' };
         
