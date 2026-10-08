@@ -92,8 +92,9 @@ export class EnvironmentManager {
      * Apply location-specific styles
      */
     applyLocationStyles() {
-        const gameContainer = document.getElementById('game-container');
-        if (!gameContainer || !this.currentLocation) return;
+        // Everything below styles document.body, so only the location
+        // matters; #game-container being absent is no reason to skip (#1186)
+        if (!this.currentLocation || typeof document === 'undefined' || !document.body) return;
 
         // Apply background. ScreenThemeManager composes this with the screen
         // gradient so the two don't overwrite each other (#1731)
