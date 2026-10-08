@@ -102,7 +102,8 @@ describe('DevTools', () => {
       expect(tools.storylineNavigator).toBeInstanceOf(mockClasses.StorylineNavigator);
       expect(tools.locationTester).toBeInstanceOf(mockClasses.LocationTester);
       expect(window.devTools).toBe(tools);
-      expect(localStorage.getItem('dev_mode')).toBe('true');
+      // ?dev / localhost no longer persist a permanent flag (#1743)
+      expect(localStorage.getItem('dev_mode')).toBeNull();
     });
   });
 

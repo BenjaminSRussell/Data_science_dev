@@ -29,11 +29,26 @@ export class IntroSystem {
         // Show video screen
         videoScreen.classList.remove('hidden');
 
+        let finished = false;
         const finishVideo = () => {
+            // Skip + ended (or a late play() rejection) must not show the
+            // intro text twice
+            if (finished) return;
+            finished = true;
             video.pause();
+            video.onended = null;
+            if (skipBtn) skipBtn.onclick = null;
             videoScreen.classList.add('hidden');
             this.showIntroText();
         };
+
+        // The <video> element is static, so a replayed intro would resume
+        // where the last one stopped; always start from the beginning (#2000)
+        try {
+            video.currentTime = 0;
+        } catch {
+            // Some browsers throw before metadata loads; play() starts at 0 then
+        }
 
         // Setup listeners
         video.onended = finishVideo;

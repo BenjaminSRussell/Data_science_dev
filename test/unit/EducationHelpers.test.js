@@ -41,17 +41,17 @@ describe('finishExam (#200)', () => {
         return game;
     };
 
-    it('70% passes (inclusive boundary) and completes the course', () => {
-        const g = run(7, 10);
-        expect(document.getElementById('exam-score').textContent).toBe('70');
+    it('60% passes (inclusive boundary) and completes the course (#1265)', () => {
+        const g = run(6, 10);
+        expect(document.getElementById('exam-score').textContent).toBe('60');
         expect(document.getElementById('exam-status').textContent).toBe('PASSED!');
         expect(document.getElementById('exam-status').className).toBe('success-text');
         expect(g.gameState.educationSystem.completeCourse).toHaveBeenCalledWith('stats101');
         expect(g.audioManager.play).toHaveBeenCalledWith('kaching');
     });
 
-    it('60% fails, plays the error path and does not complete the course', () => {
-        const g = run(6, 10);
+    it('50% fails, plays the error path and does not complete the course', () => {
+        const g = run(5, 10);
         expect(document.getElementById('exam-status').textContent).toBe('FAILED');
         expect(document.getElementById('exam-status').className).toBe('error-text');
         expect(g.audioManager.play).toHaveBeenCalledWith('error');
@@ -59,10 +59,10 @@ describe('finishExam (#200)', () => {
         expect(g.gameState.educationSystem.completeCourse).not.toHaveBeenCalled();
     });
 
-    it('rounding decides: 2/3 is 67% and fails', () => {
+    it('2 of 3 passes without a perfect score (#1265)', () => {
         run(2, 3);
         expect(document.getElementById('exam-score').textContent).toBe('67');
-        expect(document.getElementById('exam-status').textContent).toBe('FAILED');
+        expect(document.getElementById('exam-status').textContent).toBe('PASSED!');
     });
 
     it('zero questions gives 0%, not NaN', () => {
