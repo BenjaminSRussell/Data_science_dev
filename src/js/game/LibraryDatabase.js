@@ -76,10 +76,11 @@ export const LIBRARY_CONTENT = [
     }
 ];
 
+// Plain labels: the leading space was left over from stripped icons (#1641)
 export const CATEGORIES = {
-    scraping: ' Scraping',
-    cleaning: ' Cleaning',
-    modeling: ' Modeling',
+    scraping: 'Scraping',
+    cleaning: 'Cleaning',
+    modeling: 'Modeling',
     // Same label as the Library tab (#1642)
-    ai: ' AI'
+    ai: 'AI'
 };

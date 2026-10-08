@@ -524,6 +524,8 @@ export class RealWorldTaskSystem {
         if (!task) return null;
         // One task at a time, like ProjectSystem.startProject (#164)
         if (this.currentTask && this.currentTask !== task) return null;
+        // Starting the task that's already running keeps its progress (#1822)
+        if (this.currentTask === task) return this.currentTask;
         // Lab-only work needs the university lab (#2094)
         if (task.requiresLab && !(context.inUniversityLab || task.context?.inUniversityLab)) return null;
         this.currentTask = task;
