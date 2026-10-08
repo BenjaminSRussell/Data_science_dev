@@ -7,13 +7,14 @@
  */
 
 import * as PIXI from 'pixi.js';
+import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
 // Phase 4: Particle effects (lazy loaded to avoid breaking game)
 
 export class UnifiedMapSystem {
     constructor(container, game) {
         this.container = container;
         this.game = game;
-        this.gridSize = 30; // 30×30 grid for local maps
+        this.gridSize = WORLD_GRID_SIZE; // shared city grid (#1934)
         this.currentArea = null;
         this.rendered = false;
         
@@ -160,10 +161,8 @@ export class UnifiedMapSystem {
     async renderLocalMap() {
         const gridSize = this.gridSize;
         
-        // Clear existing content
-        Object.values(this.layers).forEach(layer => {
-            if (layer) layer.removeChildren();
-        });
+        // Clear existing content (destroying it, so re-renders don't leak)
+        Object.values(this.layers).forEach(layer => this.clearLayer(layer));
         
         // Render in order: grass -> zones -> parks -> roads -> buildings -> locations
         this.renderLocalGrass();
@@ -403,7 +402,9 @@ export class UnifiedMapSystem {
             'social': 0xa855f7,
             'training': 0xef4444,
             'business': 0x64748b,
-            'elite': 0xffd700
+            'elite': 0xffd700,
+            'shopping': 0xfb923c,
+            'investment': 0x0ea5e9
         };
         
         const buildingSizes = {
@@ -502,8 +503,11 @@ export class UnifiedMapSystem {
                 this.game.handleTravel?.(location.id);
             });
             
-            // Add icon content (emoji or image)
-            if (location.icon && !location.icon.startsWith('/')) {
+            // Add icon content: image paths load as sprites, anything else is
+            // drawn as text, matching the DOM renderers (#214)
+            if (location.icon && location.icon.startsWith('/')) {
+                this.addIconSprite(location.icon, x, y);
+            } else if (location.icon) {
                 const iconText = new PIXI.Text(location.icon, {
                     fontSize: 10,
                     fill: 0x333333
@@ -574,11 +578,19 @@ export class UnifiedMapSystem {
         pulse.beginFill(0x3b82f6, 0.3);
         pulse.drawCircle(x, y, 15);
         
-        // Pulse on the Pixi ticker (no GSAP animator exists, #2295)
-        this.app.ticker.add(() => {
-            pulse.scale.x = 1 + Math.sin(this.app.ticker.lastTime / 200) * 0.2;
-            pulse.scale.y = 1 + Math.sin(this.app.ticker.lastTime / 200) * 0.2;
-        });
+        // Pulse on the Pixi ticker (no GSAP animator exists, #2295). One
+        // callback at a time: the previous marker's is removed first (#1349)
+        this.removePulseTicker();
+        const ticker = this.app.ticker;
+        if (ticker?.add) {
+            this.pulseTick = () => {
+                const scale = 1 + Math.sin((ticker.lastTime || 0) / 200) * 0.2;
+                pulse.scale.x = scale;
+                pulse.scale.y = scale;
+            };
+            this.pulseTicker = ticker;
+            ticker.add(this.pulseTick);
+        }
         
         // Phase 4: Add particle effect around player marker (optional)
         if (this.particleManager) {
@@ -588,6 +600,52 @@ export class UnifiedMapSystem {
         
         this.layers.ui.addChild(pulse);
         this.layers.ui.addChild(marker);
+    }
+
+    /**
+     * Remove a layer's children and destroy them, so every re-render doesn't
+     * leave orphaned Graphics/Text objects behind (#1909)
+     */
+    clearLayer(layer) {
+        if (!layer) return;
+        const removed = layer.removeChildren() || [];
+        removed.forEach(child => {
+            try {
+                child.destroy?.({ children: true });
+            } catch {
+                // already destroyed
+            }
+        });
+        if (layer === this.layers.ui) this.removePulseTicker();
+    }
+
+    removePulseTicker() {
+        if (this.pulseTick && this.pulseTicker?.remove) {
+            this.pulseTicker.remove(this.pulseTick);
+        }
+        this.pulseTick = null;
+        this.pulseTicker = null;
+    }
+
+    /**
+     * Draw an image icon on a location marker once its texture loads
+     */
+    addIconSprite(url, x, y) {
+        const layer = this.layers.locations;
+        if (!layer || !PIXI.Sprite || !PIXI.Assets?.load) return null;
+        return PIXI.Assets.load(url).then(texture => {
+            // Skip if the map was cleared or destroyed while loading
+            if (!texture || this.layers.locations !== layer || layer.destroyed) return null;
+            const sprite = new PIXI.Sprite(texture);
+            sprite.anchor?.set?.(0.5);
+            sprite.width = 16;
+            sprite.height = 16;
+            sprite.x = x;
+            sprite.y = y;
+            sprite.eventMode = 'none';
+            layer.addChild(sprite);
+            return sprite;
+        }).catch(() => null);
     }
 
     /**
@@ -618,8 +676,8 @@ export class UnifiedMapSystem {
         } else {
             // Update dynamic elements (locations, player marker)
             // Clear and re-render locations layer
-            this.layers.locations.removeChildren();
-            this.layers.ui.removeChildren();
+            this.clearLayer(this.layers.locations);
+            this.clearLayer(this.layers.ui);
             this.renderLocalLocations();
             this.renderPlayerMarker();
         }
@@ -629,6 +687,7 @@ export class UnifiedMapSystem {
      * Cleanup
      */
     destroy() {
+        this.removePulseTicker();
         if (this.onResize) {
             window.removeEventListener('resize', this.onResize);
             this.onResize = null;

@@ -4,11 +4,13 @@
  * Converts between grid coordinates (tiles) and pixel coordinates
  */
 
+import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
+
 export class MapGridSystem {
     constructor(config = {}) {
         // Grid configuration
-        this.gridWidth = config.gridWidth || 30;  // 30 tiles wide
-        this.gridHeight = config.gridHeight || 30; // 30 tiles tall
+        this.gridWidth = config.gridWidth || WORLD_GRID_SIZE;
+        this.gridHeight = config.gridHeight || WORLD_GRID_SIZE;
         this.tileSize = config.tileSize || 20;     // 20px per tile
         
         // Calculate total dimensions

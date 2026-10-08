@@ -4,6 +4,8 @@
  * Ensures all elements are positioned correctly
  */
 
+import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
+
 export class PositioningHelper {
     /**
      * Convert grid coordinates to percentage
@@ -12,7 +14,7 @@ export class PositioningHelper {
      * @param {number} gridSize - Grid size (default: 30)
      * @returns {Object} {x: percentage, y: percentage}
      */
-    static gridToPercent(gridX, gridY, gridSize = 30) {
+    static gridToPercent(gridX, gridY, gridSize = WORLD_GRID_SIZE) {
         return {
             x: (gridX / gridSize) * 100,
             y: (gridY / gridSize) * 100
@@ -26,7 +28,7 @@ export class PositioningHelper {
      * @param {number} gridSize - Grid size (default: 30)
      * @returns {Object} {x: gridX, y: gridY}
      */
-    static percentToGrid(percentX, percentY, gridSize = 30) {
+    static percentToGrid(percentX, percentY, gridSize = WORLD_GRID_SIZE) {
         return {
             x: Math.round((percentX / 100) * gridSize),
             y: Math.round((percentY / 100) * gridSize)
@@ -40,7 +42,7 @@ export class PositioningHelper {
      * @param {number} gridY - Grid Y coordinate
      * @param {number} gridSize - Grid size (default: 30)
      */
-    static positionAtGrid(element, gridX, gridY, gridSize = 30) {
+    static positionAtGrid(element, gridX, gridY, gridSize = WORLD_GRID_SIZE) {
         const percent = this.gridToPercent(gridX, gridY, gridSize);
         element.style.position = 'absolute';
         element.style.left = `${percent.x}%`;
@@ -148,7 +150,7 @@ export class PositioningHelper {
      * @returns {string} 'grid' | 'pixel'
      * @deprecated All locations now use grid coordinates (0-30)
      */
-    static detectCoordinateSystem(position, gridSize = 30) {
+    static detectCoordinateSystem(position, gridSize = WORLD_GRID_SIZE) {
         if (position.x <= gridSize && position.y <= gridSize && 
             Number.isInteger(position.x) && Number.isInteger(position.y)) {
             return 'grid';
@@ -162,7 +164,7 @@ export class PositioningHelper {
      * @param {number} gridSize - Grid size (default: 30)
      * @returns {Object} {x: percentage, y: percentage}
      */
-    static normalizeToPercent(position, gridSize = 30) {
+    static normalizeToPercent(position, gridSize = WORLD_GRID_SIZE) {
         // All positions are grid coordinates - convert to percentage
         return this.gridToPercent(position.x, position.y, gridSize);
     }
@@ -200,7 +202,7 @@ export class PositioningHelper {
             className = '',
             position = { x: 0, y: 0 },
             coordinateSystem = 'grid',
-            gridSize = 30,
+            gridSize = WORLD_GRID_SIZE,
             size = { width: 'auto', height: 'auto' },
             zIndex = null,
             layer = null,
