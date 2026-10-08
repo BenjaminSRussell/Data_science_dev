@@ -390,10 +390,13 @@ if (typeof window !== 'undefined') {
         addIssue
     };
 } else {
-    // For Node.js environment
-    runContinuous().catch(error => {
-        console.error('Fatal error:', error);
-        process.exit(1);
-    });
+    // Under plain Node there is no window/game, so every check is skipped.
+    // Don't loop forever appending to the log (#2326): explain and exit.
+    console.error(
+        'continuous-test-runner.js needs a browser (window.game). Under Node every check is a no-op.\n' +
+        'Use "npm run test:continuous" (vitest watch mode) for continuous unit tests, or open the game with ?autotest\n' +
+        'to run the in-browser continuous runner.'
+    );
+    process.exitCode = 1;
 }
 

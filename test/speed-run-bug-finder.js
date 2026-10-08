@@ -84,16 +84,11 @@ window.speedRunBugFinder = async function() {
             const npcs = npcManager.getAllNPCs();
             for (const npc of npcs.slice(0, 3)) { // Test first 3 NPCs
                 try {
-                    if (npcManager.startConversation) {
-                        npcManager.startConversation(npc.id);
-                        await wait(100);
-                        // Try to get dialogue
-                        if (npcManager.getCurrentDialogue) {
-                            const dialogue = npcManager.getCurrentDialogue();
-                            if (dialogue === null) {
-                                throw new Error(`No dialogue returned for NPC ${npc.id}`);
-                            }
-                        }
+                    // startConversation() is async and resolves to the conversation
+                    // payload (or null for an unknown NPC) — assert on that (#2329)
+                    const conversation = await npcManager.startConversation(npc.id);
+                    if (conversation === null || conversation === undefined) {
+                        throw new Error(`No conversation returned for NPC ${npc.id}`);
                     }
                 } catch (e) {
                     throw new Error(`NPC conversation failed for ${npc.id}: ${e.message}`);
@@ -164,21 +159,21 @@ window.speedRunBugFinder = async function() {
     await safeExecute('Chart Creation', async () => {
         const chartManager = window.game?.chartManager;
         if (chartManager) {
-            // Test creating a simple chart
-            if (chartManager.createChart) {
-                const testData = {
+            // ChartManager.createChart(canvasOrId, type, data) renders into any canvas (#2329)
+            const canvas = document.createElement('canvas');
+            canvas.id = `speedrun-test-canvas-${Date.now()}`;
+            document.body.appendChild(canvas);
+            try {
+                const chart = chartManager.createChart(canvas.id, 'bar', {
                     labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-                    datasets: [{
-                        label: 'Test',
-                        data: [10, 20, 30, 40]
-                    }]
-                };
-                try {
-                    const chart = chartManager.createChart('test-canvas', 'bar', testData);
-                    // Chart should be created without errors
-                } catch (e) {
-                    throw new Error(`Chart creation failed: ${e.message}`);
-                }
+                    datasets: [{ label: 'Test', data: [10, 20, 30, 40] }]
+                });
+                if (!chart) throw new Error('createChart() returned null');
+                chart.destroy?.();
+            } catch (e) {
+                throw new Error(`Chart creation failed: ${e.message}`);
+            } finally {
+                canvas.remove();
             }
         }
     });
@@ -187,23 +182,26 @@ window.speedRunBugFinder = async function() {
     await safeExecute('Save/Load System', async () => {
         const saveManager = window.game?.saveManager;
         if (saveManager) {
-            // Test save
-            if (saveManager.save) {
-                try {
-                    await saveManager.save(0, window.game.gameState);
-                } catch (e) {
-                    throw new Error(`Save failed: ${e.message}`);
+            // Round-trip through the real API, saveGame(gameState, slot) /
+            // loadGame(gameState, slot), using the last slot and restoring
+            // whatever was there so no player save is clobbered (#2329).
+            const slot = 4;
+            const key = `data_science_tycoon_save_${slot}`;
+            const backup = localStorage.getItem(key);
+            try {
+                const saved = saveManager.saveGame(window.game.gameState, slot);
+                if (saved === false) throw new Error('saveGame() returned false');
+                const scratch = new window.game.gameState.constructor();
+                const loaded = saveManager.loadGame(scratch, slot);
+                if (!loaded) throw new Error('loadGame() could not read back the save');
+                if (scratch.money !== window.game.gameState.money) {
+                    throw new Error(`money mismatch after round-trip: ${scratch.money} vs ${window.game.gameState.money}`);
                 }
-            }
-            
-            // Test load
-            if (saveManager.load) {
-                try {
-                    const save = saveManager.load(0);
-                    // Load should not throw, but may return null
-                } catch (e) {
-                    throw new Error(`Load failed: ${e.message}`);
-                }
+            } catch (e) {
+                throw new Error(`Save/Load failed: ${e.message}`);
+            } finally {
+                if (backup === null) localStorage.removeItem(key);
+                else localStorage.setItem(key, backup);
             }
         }
     });
@@ -224,32 +222,27 @@ window.speedRunBugFinder = async function() {
     
     // Test 11: Test Economy System
     await safeExecute('Economy System', async () => {
-        const economy = window.game?.gameState?.economySystem;
+        const economy = window.game?.gameState?.economySystem || window.game?.economySystem;
         if (economy) {
-            // Test getting money
-            if (economy.getMoney !== undefined) {
-                const money = economy.getMoney?.();
-                if (money === undefined) {
-                    throw new Error('getMoney() returned undefined');
-                }
+            // Money is a plain gameState field; check it and the scorer (#2329)
+            const money = window.game.gameState.money;
+            if (typeof money !== 'number' || Number.isNaN(money)) {
+                throw new Error(`gameState.money is not a number: ${money}`);
+            }
+            if (typeof economy.scoreToStars !== 'function' || economy.scoreToStars(95) !== 5) {
+                throw new Error('EconomySystem.scoreToStars() is broken');
             }
         }
     });
     
     // Test 12: Test Bank System
     await safeExecute('Bank System', async () => {
-        const bankSystem = window.game?.gameState?.bankSystem || window.game?.bankSystem;
+        const bankSystem = window.game?.bankSystem;
         if (bankSystem) {
-            // Test getting balance
-            if (bankSystem.getBalance) {
-                try {
-                    const balance = bankSystem.getBalance();
-                    if (balance === undefined) {
-                        throw new Error('getBalance() returned undefined');
-                    }
-                } catch (e) {
-                    throw new Error(`Bank balance check failed: ${e.message}`);
-                }
+            // Balances live on gameState.bank (#2329)
+            const bank = window.game.gameState.bank;
+            if (!bank || typeof bank.savings !== 'number') {
+                throw new Error('gameState.bank.savings missing or not a number');
             }
         }
     });
@@ -259,11 +252,9 @@ window.speedRunBugFinder = async function() {
         const stats = window.game?.gameState?.characterStats;
         if (stats) {
             // Test getting stats
-            if (stats.getStats) {
-                const allStats = stats.getStats();
-                if (!allStats || typeof allStats !== 'object') {
-                    throw new Error('getStats() returned invalid object');
-                }
+            const allStats = stats.getAllStats();
+            if (!allStats || typeof allStats !== 'object') {
+                throw new Error('getAllStats() returned invalid object');
             }
         }
     });
@@ -296,11 +287,9 @@ window.speedRunBugFinder = async function() {
         const eventSystem = window.game?.gameState?.eventSystem;
         if (eventSystem) {
             // Test getting events
-            if (eventSystem.getEvents) {
-                const events = eventSystem.getEvents();
-                if (!Array.isArray(events)) {
-                    throw new Error('getEvents() did not return an array');
-                }
+            const events = eventSystem.getUpcomingEvents(7);
+            if (!Array.isArray(events)) {
+                throw new Error('getUpcomingEvents() did not return an array');
             }
         }
     });

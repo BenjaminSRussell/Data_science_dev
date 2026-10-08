@@ -61,14 +61,21 @@ export class BrowserContinuousTestRunner {
     safeExecute(name, fn, category = 'general') {
         try {
             const result = fn();
+            const markPassed = () => {
+                this.testResults[category] = this.testResults[category] || { passed: 0, failed: 0, errors: [] };
+                this.testResults[category].passed++;
+            };
             if (result instanceof Promise) {
-                return result.catch(error => {
+                // Count async tests as passed when they resolve (#89)
+                return result.then(value => {
+                    markPassed();
+                    return value;
+                }, error => {
                     this.addIssue(category, `${name} failed: ${error.message}`, 'high', { error: error.stack });
                     return null;
                 });
             }
-            this.testResults[category] = this.testResults[category] || { passed: 0, failed: 0, errors: [] };
-            this.testResults[category].passed++;
+            markPassed();
             return result;
         } catch (error) {
             this.addIssue(category, `${name} failed: ${error.message}`, 'high', { error: error.stack });
@@ -188,35 +195,26 @@ export class BrowserContinuousTestRunner {
             return true;
         }, 'save');
         
-        // Test save operation
-        this.safeExecute('Save game', () => {
+        // Save/load round-trip on a scratch slot. The previous version wrote the
+        // live state into real slot 0 every iteration and called loadGame(0)
+        // with the wrong signature (#2327). Back up and restore the slot.
+        this.safeExecute('Save/load round-trip', () => {
             const saveManager = this.game.saveManager;
-            if (saveManager.saveGame) {
-                try {
-                    const result = saveManager.saveGame(this.game.gameState, 0);
-                    // Save can return void or boolean, both are acceptable
-                    return result;
-                } catch (error) {
-                    throw new Error(`Save failed: ${error.message}`);
+            const slot = 4;
+            const key = `data_science_tycoon_save_${slot}`;
+            const backup = localStorage.getItem(key);
+            try {
+                if (saveManager.saveGame(this.game.gameState, slot) === false) {
+                    throw new Error('saveGame returned false');
                 }
-            }
-        }, 'save');
-        
-        // Test load operation
-        this.safeExecute('Load game', () => {
-            const saveManager = this.game.saveManager;
-            if (saveManager.loadGame) {
-                try {
-                    const saveData = saveManager.loadGame(0);
-                    if (saveData && !saveData.state) {
-                        throw new Error('Loaded game missing state object');
-                    }
-                    return saveData;
-                } catch (error) {
-                    // Load can fail if no save exists, that's fine
-                    this.log(`Load failed (might be normal): ${error.message}`, 'warn');
-                    return null;
+                const scratch = new this.game.gameState.constructor();
+                if (!saveManager.loadGame(scratch, slot)) {
+                    throw new Error('loadGame could not read back the save');
                 }
+                return true;
+            } finally {
+                if (backup === null) localStorage.removeItem(key);
+                else localStorage.setItem(key, backup);
             }
         }, 'save');
         
@@ -243,8 +241,9 @@ export class BrowserContinuousTestRunner {
             return true;
         }, 'ui');
         
-        // Test screen transitions
+        // Test screen transitions, then put the player back where they were (#2327)
         const screens = ['screen-menu', 'screen-game', 'screen-map', 'screen-stats'];
+        const originalScreen = this.game.screenManager?.getCurrentScreen?.() || this.game.screenManager?.currentScreen;
         screens.forEach(screenId => {
             this.safeExecute(`Transition to ${screenId}`, () => {
                 try {
@@ -258,6 +257,9 @@ export class BrowserContinuousTestRunner {
                 }
             }, 'ui');
         });
+        if (originalScreen) {
+            try { this.game.screenManager.showScreen(originalScreen); } catch (_) { /* ignore */ }
+        }
         
         // Test UI Updater
         this.safeExecute('UI Updater exists', () => {
@@ -366,23 +368,25 @@ export class BrowserContinuousTestRunner {
         const originalMoney = state.money;
         const originalRank = state.rankIndex;
         
-        // Mutate money
-        this.safeExecute('Money mutation test', () => {
-            state.money = Math.random() * 100000;
-            // Re-test state
-            return this.testGameState();
-        }, 'mutation');
-        
-        // Restore and mutate rank
-        state.money = originalMoney;
-        this.safeExecute('Rank mutation test', () => {
-            state.rankIndex = Math.floor(Math.random() * 10);
-            // Re-test state
-            return this.testGameState();
-        }, 'mutation');
-        
-        // Restore
-        state.rankIndex = originalRank;
+        // Await each async re-test and always restore the real values, so a
+        // live game is never left with random money/rank (#2327, #89)
+        try {
+            await this.safeExecute('Money mutation test', () => {
+                state.money = Math.random() * 100000;
+                return this.testGameState();
+            }, 'mutation');
+        } finally {
+            state.money = originalMoney;
+        }
+
+        try {
+            await this.safeExecute('Rank mutation test', () => {
+                state.rankIndex = Math.floor(Math.random() * 10);
+                return this.testGameState();
+            }, 'mutation');
+        } finally {
+            state.rankIndex = originalRank;
+        }
     }
     
     async runIteration() {
@@ -515,24 +519,7 @@ export class BrowserContinuousTestRunner {
     }
 }
 
-// Auto-start if game is available
-if (typeof window !== 'undefined') {
-    // Wait for game to be ready
-    const checkGame = setInterval(() => {
-        if (window.game) {
-            clearInterval(checkGame);
-            window.continuousTestRunner = new BrowserContinuousTestRunner(window.game);
-            window.continuousTestRunner.start(30000); // Run every 30 seconds
-            console.log('Continuous test runner started automatically');
-        }
-    }, 1000);
-    
-    // Give up after 30 seconds
-    setTimeout(() => {
-        clearInterval(checkGame);
-        if (!window.continuousTestRunner) {
-            console.warn('Game not found after 30 seconds, test runner not started');
-        }
-    }, 30000);
-}
-
+// No module-level auto-start: auto-start-continuous-tests.js is the single
+// entry point, so importing this module never spawns a second, orphaned
+// runner interval (#2325). Start manually with:
+//   window.continuousTestRunner = new BrowserContinuousTestRunner(window.game); window.continuousTestRunner.start();
