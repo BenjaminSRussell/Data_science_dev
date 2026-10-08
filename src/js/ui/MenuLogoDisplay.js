@@ -12,6 +12,20 @@ export class MenuLogoDisplay {
         this.stats = [];
         this.rotationInterval = null;
         this.updateInterval = 3000; // 3 seconds
+        this.renderRetryTimer = null;
+        this.renderRetries = 0;
+        this.maxRenderRetries = 50; // ~5s of waiting for the logo element
+        this.clickTarget = null;
+        this.onLogoClick = () => this.advance();
+    }
+
+    /**
+     * Show the next stat
+     */
+    advance() {
+        if (this.stats.length === 0) return;
+        this.currentStatIndex = (this.currentStatIndex + 1) % this.stats.length;
+        this.render();
     }
 
     /**
@@ -104,8 +118,9 @@ export class MenuLogoDisplay {
             }
         ];
 
-        // Only show stats if there's actual data
-        if (totalPlaytime === 0 && highestRank === 0) {
+        // Only show the welcome entry when no save has any progress at all;
+        // money, tasks or achievements on a rank-0 save still count
+        if (totalPlaytime === 0 && highestRank === 0 && totalMoney === 0 && totalTasks === 0 && totalAchievements === 0) {
             this.stats = [{
                 icon: 'Chart',
                 label: 'Welcome',
@@ -137,10 +152,18 @@ export class MenuLogoDisplay {
     render() {
         const logoIcon = document.querySelector('.menu-logo-icon');
         if (!logoIcon) {
-            // Retry after a short delay if element not found
-            setTimeout(() => this.render(), 100);
+            // Retry after a short delay if element not found, but give up
+            // eventually instead of polling forever
+            if (!this.renderRetryTimer && this.renderRetries < this.maxRenderRetries) {
+                this.renderRetries++;
+                this.renderRetryTimer = setTimeout(() => {
+                    this.renderRetryTimer = null;
+                    this.render();
+                }, 100);
+            }
             return;
         }
+        this.renderRetries = 0;
 
         if (this.stats.length === 0) {
             logoIcon.textContent = 'DS';
@@ -148,6 +171,8 @@ export class MenuLogoDisplay {
             return;
         }
 
+        // Stats can shrink on update(); keep the index in range
+        if (this.currentStatIndex >= this.stats.length) this.currentStatIndex = 0;
         const stat = this.stats[this.currentStatIndex];
         logoIcon.textContent = stat.icon;
         logoIcon.title = `${stat.label}: ${stat.value}`;
@@ -163,18 +188,17 @@ export class MenuLogoDisplay {
     startRotation() {
         if (this.stats.length <= 1) return;
 
-        this.rotationInterval = setInterval(() => {
-            this.currentStatIndex = (this.currentStatIndex + 1) % this.stats.length;
-            this.render();
-        }, this.updateInterval);
+        // Never run two intervals at once
+        this.stopRotation();
+        this.rotationInterval = setInterval(() => this.advance(), this.updateInterval);
 
-        // Also update on hover
+        // Clicking the logo also advances; bind once so repeated starts don't
+        // make one click skip several stats
         const logoIcon = document.querySelector('.menu-logo-icon');
-        if (logoIcon) {
-            logoIcon.addEventListener('click', () => {
-                this.currentStatIndex = (this.currentStatIndex + 1) % this.stats.length;
-                this.render();
-            });
+        if (logoIcon && this.clickTarget !== logoIcon) {
+            this.clickTarget?.removeEventListener('click', this.onLogoClick);
+            logoIcon.addEventListener('click', this.onLogoClick);
+            this.clickTarget = logoIcon;
         }
     }
 
@@ -193,6 +217,12 @@ export class MenuLogoDisplay {
      */
     destroy() {
         this.stopRotation();
+        if (this.renderRetryTimer) {
+            clearTimeout(this.renderRetryTimer);
+            this.renderRetryTimer = null;
+        }
+        this.clickTarget?.removeEventListener('click', this.onLogoClick);
+        this.clickTarget = null;
     }
 
     /**
