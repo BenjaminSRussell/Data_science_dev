@@ -4,6 +4,8 @@
  * Dialogue reveals character depth and personal arcs
  */
 
+import { STORYLINE_CHARACTER_STORIES } from './StorylineCharacterStories.js';
+
 export const CHARACTER_STORIES = {
     professor_higgins: {
         personalStory: {
@@ -596,6 +598,12 @@ export const CHARACTER_STORIES = {
         ]
     }
 };
+
+// Characters written up in story_line/*.txt (#817-#842). Hand-written
+// entries above take precedence.
+for (const [npcId, entry] of Object.entries(STORYLINE_CHARACTER_STORIES)) {
+    if (!CHARACTER_STORIES[npcId]) CHARACTER_STORIES[npcId] = entry;
+}
 
 /**
  * Get story reveal for character at relationship level

@@ -1448,7 +1448,7 @@ export class NPCManager {
         }
 
         // Fallback to dialogue tree system
-        const dialogueTree = dialogueTreeSystem.getTree(npcId, relationship, this.getNPCFlags(npcId));
+        const dialogueTree = dialogueTreeSystem.getTree(npcId, relationship, this.getNPCFlags(npcId), { isFirstMeeting });
         const rootNode = dialogueTree ? dialogueTree.getRootNode() : null;
 
         // Get greeting based on relationship level
