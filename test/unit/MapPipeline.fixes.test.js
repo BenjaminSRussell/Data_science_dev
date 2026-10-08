@@ -152,3 +152,31 @@ describe('MapRoadRenderer.roadTileRect (#2314)', () => {
         expect(pct('height')).toBeCloseTo(100, 5);
     });
 });
+
+describe('mapZones partition (#77, #1927)', () => {
+    it('every grid cell belongs to exactly one zone', () => {
+        const zones = getAllZones();
+        for (let x = 0; x < 30; x++) for (let y = 0; y < 30; y++) {
+            const hits = zones.filter(z => x >= z.bounds.minX && x <= z.bounds.maxX && y >= z.bounds.minY && y <= z.bounds.maxY);
+            expect(hits.length, `${x},${y}`).toBe(1);
+        }
+    });
+
+    it('every WorldMap location resolves to a zone', async () => {
+        const { getZoneAt } = await import('../../src/js/data/mapZones.js');
+        const { LOCATIONS: locations } = await import('../../src/js/game/WorldMap.js');
+        expect(locations.length).toBeGreaterThan(10);
+        for (const loc of locations) expect(getZoneAt(loc.position.x, loc.position.y), loc.id).toBeTruthy();
+        expect(getZoneAt(19, 6).type).toBe('finance');
+        expect(getZoneAt(23, 4).type).toBe('government');
+    });
+});
+
+describe('block.buildings (#1946)', () => {
+    it('records the buildings placed in a block', () => {
+        const c = city();
+        const building = c.buildings.placeBuilding({ id: 'test_shop', type: 'shop', name: 'Shop' });
+        const block = c.blocks.blocks.find(b => b.buildings.includes(building.id));
+        expect(block).toBeTruthy();
+    });
+});

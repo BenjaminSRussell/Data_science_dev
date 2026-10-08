@@ -8,6 +8,7 @@
 
 import * as PIXI from 'pixi.js';
 import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
+import { getAllZones } from '../data/mapZones.js';
 // Phase 4: Particle effects (lazy loaded to avoid breaking game)
 
 export class UnifiedMapSystem {
@@ -211,21 +212,30 @@ export class UnifiedMapSystem {
     /**
      * Render local zones
      */
+    static ZONE_TINTS = {
+        residential: 0xd4a574,
+        commercial: 0xf59e0b,
+        education: 0x8b5cf6,
+        finance: 0x10b981,
+        government: 0x64748b,
+        park: 0x66bb6a,
+        industrial: 0x78716c,
+        mixed: 0x94a3b8
+    };
+
     renderLocalZones() {
         if (!this.game?.worldMap) return;
         
         const { width, height } = this.app.screen;
         const gridSize = this.gridSize;
         
-        const zones = [
-            { type: 'residential', bounds: { minX: 10, minY: 15, maxX: 20, maxY: 25 }, color: 0xd4a574 },
-            { type: 'commercial', bounds: { minX: 5, minY: 5, maxX: 20, maxY: 20 }, color: 0xf59e0b },
-            { type: 'education', bounds: { minX: 20, minY: 5, maxX: 30, maxY: 15 }, color: 0x8b5cf6 },
-            { type: 'finance', bounds: { minX: 15, minY: 5, maxX: 30, maxY: 20 }, color: 0x10b981 },
-            { type: 'government', bounds: { minX: 20, minY: 0, maxX: 30, maxY: 10 }, color: 0x64748b },
-            { type: 'park', bounds: { minX: 0, minY: 0, maxX: 10, maxY: 10 }, color: 0x66bb6a }
-        ];
-        
+        // Draw the canonical zone layout from mapZones.js (#1907) rather than
+        // a private copy that disagreed with it
+        const zones = getAllZones().map(zone => ({
+            ...zone,
+            color: UnifiedMapSystem.ZONE_TINTS[zone.type] ?? 0x94a3b8
+        }));
+
         zones?.forEach(zone => {
             const zoneGraphic = new PIXI.Graphics();
             zoneGraphic.beginFill(zone.color, 0.15);
