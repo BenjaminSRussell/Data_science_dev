@@ -40,10 +40,11 @@ export class MapCoordinateSystem {
      * All coordinates are grid coordinates (0-30)
      */
     isAvailable(x, y, radius = 1) {
-        // Clamp to bounds
-        const clamped = this.gridSystem.clampGridCoord(x, y);
-        const gridX = clamped.x;
-        const gridY = clamped.y;
+        // Off-grid cells are never available, like every other MapGridSystem
+        // consumer; don't silently check a different (clamped) cell (#1932)
+        if (!this.gridSystem.isValidGridCoord(x, y)) return false;
+        const gridX = x;
+        const gridY = y;
         
         // Check all grid cells within radius
         const keys = this.getGridKeysInRadius(gridX, gridY, radius);
@@ -63,10 +64,11 @@ export class MapCoordinateSystem {
      * All coordinates are grid coordinates (0-30)
      */
     occupyCoord(x, y, type) {
-        // Clamp to bounds
-        const clamped = this.gridSystem.clampGridCoord(x, y);
-        const gridX = clamped.x;
-        const gridY = clamped.y;
+        // Reject off-grid cells instead of reserving a clamped one the caller
+        // doesn't know about (#1932). Returns whether the cell was occupied.
+        if (!this.gridSystem.isValidGridCoord(x, y)) return false;
+        const gridX = x;
+        const gridY = y;
         
         const key = this.gridSystem.getGridKey(gridX, gridY);
         
@@ -81,6 +83,7 @@ export class MapCoordinateSystem {
             this.typeIndex.set(type, new Set());
         }
         this.typeIndex.get(type).add(key);
+        return true;
     }
 
     /**
@@ -88,9 +91,9 @@ export class MapCoordinateSystem {
      * All coordinates are grid coordinates (0-30)
      */
     releaseCoord(x, y, type) {
-        // Clamp to bounds
-        const clamped = this.gridSystem.clampGridCoord(x, y);
-        const key = this.gridSystem.getGridKey(clamped.x, clamped.y);
+        // Off-grid cells can't have been occupied (#1932)
+        if (!this.gridSystem.isValidGridCoord(x, y)) return;
+        const key = this.gridSystem.getGridKey(x, y);
         const cell = this.grid.get(key);
         
         if (cell) {

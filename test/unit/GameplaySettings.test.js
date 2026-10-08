@@ -20,7 +20,7 @@ describe('GameplaySettings toggles and get/set (#376)', () => {
 
     it('getSetting returns defaults and null for unknown paths', () => {
         const g = new GameplaySettings();
-        expect(g.getSetting('difficulty', 'bossDemand')).toBe(50);
+        expect(g.getSetting('difficulty', 'bossDemand')).toBe(70);
         expect(g.getSetting('nope', 'x')).toBeNull();
         expect(g.getSetting('visuals', 'nope')).toBeNull();
     });
@@ -56,7 +56,7 @@ describe('GameplaySettings serialization (#377)', () => {
         expect(g.settings.relationships.enabled).toBe(false);
         expect(g.settings.relationships.romance).toBe(true);
         expect(g.settings.company).toEqual(new GameplaySettings().settings.company);
-        expect(g.getSetting('difficulty', 'bossDemand')).toBe(50);
+        expect(g.getSetting('difficulty', 'bossDemand')).toBe(70);
     });
 
     it('fromJSON restores a full round trip across instances', () => {

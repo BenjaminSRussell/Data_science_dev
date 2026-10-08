@@ -1768,6 +1768,37 @@ a:hover {
     animation: modalIn 0.3s ease;
 }
 
+/* Standalone modals such as #modal-exam get the same overlay as
+   #modal-container instead of rendering in page flow (#2290) */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.modal > .modal-content {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+}
+
+.modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+}
+
 /* =====================================================
    TOAST NOTIFICATIONS
    ===================================================== */

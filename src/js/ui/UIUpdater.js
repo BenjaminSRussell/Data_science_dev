@@ -434,24 +434,58 @@ export class UIUpdater {
     }
 
     /**
-     * Show promotion animation
+     * Show promotion animation (#1486: called from the 'promotion' event)
      */
     showPromotionAnimation(rank) {
-        // Create promotion overlay
+        if (!rank || typeof document === 'undefined') return null;
+        // One overlay at a time, e.g. if two promotions land together
+        document.querySelector('.promotion-overlay')?.remove();
+
         const overlay = document.createElement('div');
         overlay.className = 'promotion-overlay';
-        overlay.innerHTML = `
-            <div class="promotion-content animate-scale-in">
-                <div class="promotion-icon"></div>
-                <h2>Promotion!</h2>
-                <p>You've been promoted to</p>
-                <div class="new-rank">${rank.title}</div>
-                <p class="salary-bonus">Salary now ${rank.salaryMultiplier}x!</p>
-                <button class="btn btn-primary" onclick="this.closest('.promotion-overlay').remove()">
-                    Continue
-                </button>
-            </div>
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Promotion');
+
+        const content = document.createElement('div');
+        content.className = 'promotion-content animate-scale-in';
+        content.style.cssText = `
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: var(--space-6, 1.5rem);
+            text-align: center;
+            max-width: 360px;
+            width: 90%;
         `;
+        const heading = document.createElement('h2');
+        heading.textContent = 'Promotion!';
+        const intro = document.createElement('p');
+        intro.textContent = "You've been promoted to";
+        const newRank = document.createElement('div');
+        newRank.className = 'new-rank';
+        newRank.style.cssText = 'font-size: 1.5rem; font-weight: 700; margin: 0.5rem 0;';
+        newRank.textContent = rank.title || 'a new rank';
+        content.append(heading, intro, newRank);
+        if (Number.isFinite(rank.salaryMultiplier)) {
+            const salary = document.createElement('p');
+            salary.className = 'salary-bonus';
+            salary.textContent = `Salary now ${rank.salaryMultiplier}x!`;
+            content.appendChild(salary);
+        }
+        const button = document.createElement('button');
+        button.className = 'btn btn-primary';
+        button.textContent = 'Continue';
+        const close = () => {
+            overlay.remove();
+            document.removeEventListener('keydown', onKey);
+        };
+        const onKey = (e) => { if (e.key === 'Escape') close(); };
+        button.addEventListener('click', close);
+        document.addEventListener('keydown', onKey);
+        content.appendChild(button);
+        overlay.appendChild(content);
 
         overlay.style.cssText = `
             position: fixed;
@@ -463,10 +497,12 @@ export class UIUpdater {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: var(--z-modal, 1000);
         `;
 
         document.body.appendChild(overlay);
+        button.focus?.();
+        return overlay;
     }
     updateLibraryScreen(category = 'all') {
         const grid = document.getElementById('library-grid');

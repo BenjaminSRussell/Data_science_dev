@@ -280,15 +280,16 @@ describe('MapCoordinateSystem occupancy and search (#411)', () => {
         expect(c.grid.has('5,5')).toBe(false);
     });
 
-    it('isAvailable checks the radius and clamps out-of-range input', () => {
+    it('isAvailable checks the radius and rejects out-of-range input', () => {
         const c = new MapCoordinateSystem();
         c.occupyCoord(10, 10, 'x');
         expect(c.isAvailable(10, 10)).toBe(false);
         expect(c.isAvailable(11, 10)).toBe(false);
         expect(c.isAvailable(13, 10)).toBe(true);
         expect(c.isAvailable(13, 10, 3)).toBe(false);
-        c.occupyCoord(-50, -50, 'edge');
-        expect(c.grid.has('0,0')).toBe(true);
+        expect(c.occupyCoord(-50, -50, 'edge')).toBe(false);
+        expect(c.grid.has('0,0')).toBe(false);
+        expect(c.isAvailable(-50, -50)).toBe(false);
     });
 
     it('findAvailableCoord uses the preferred cell, clamped, when free', () => {

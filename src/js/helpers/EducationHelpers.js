@@ -4,6 +4,41 @@
  */
 import * as MapHelpers from './MapHelpers.js';
 
+let examKeyHandler = null;
+let examReturnFocus = null;
+
+/**
+ * Open the exam modal as a real overlay (styled by .modal in main.css):
+ * focus moves into it and Escape closes it (#2290)
+ */
+export function openExamModal(modal) {
+    if (!modal) return;
+    examReturnFocus = document.activeElement;
+    modal.classList.remove('hidden');
+    modal.classList.add('active');
+    if (examKeyHandler) document.removeEventListener('keydown', examKeyHandler);
+    examKeyHandler = (e) => {
+        if (e.key === 'Escape') closeExamModal(modal);
+    };
+    document.addEventListener('keydown', examKeyHandler);
+    modal.querySelector('button')?.focus?.();
+}
+
+/**
+ * Close the exam modal and give focus back to what opened it
+ */
+export function closeExamModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.classList.add('hidden');
+    if (examKeyHandler) {
+        document.removeEventListener('keydown', examKeyHandler);
+        examKeyHandler = null;
+    }
+    if (examReturnFocus && document.contains(examReturnFocus)) examReturnFocus.focus?.();
+    examReturnFocus = null;
+}
+
 
 /**
  * Handle starting an exam
@@ -44,8 +79,7 @@ export function handleStartExam(game, courseId) {
     };
 
     // Show Modal
-    modal.classList.remove('hidden');
-    modal.classList.add('active');
+    openExamModal(modal);
 
     const byId = (id) => document.getElementById(id);
     if (byId('exam-title')) byId('exam-title').textContent = `${course.name} Exam`;
@@ -60,10 +94,7 @@ export function handleStartExam(game, courseId) {
     // Bind Close Button
     const closeBtn = document.querySelector('#modal-exam .close-modal');
     if (closeBtn) {
-        closeBtn.onclick = () => {
-            modal.classList.remove('active');
-            modal.classList.add('hidden');
-        };
+        closeBtn.onclick = () => closeExamModal(modal);
     }
 }
 
@@ -172,11 +203,7 @@ export function finishExam(game) {
     const closeBtn = document.getElementById('btn-close-exam');
     if (closeBtn) {
         closeBtn.onclick = () => {
-            const modal = document.getElementById('modal-exam');
-            if (modal) {
-                modal.classList.remove('active');
-                modal.classList.add('hidden');
-            }
+            closeExamModal(document.getElementById('modal-exam'));
             if (game.updateMapScreen) {
                 game.updateMapScreen();
             }
