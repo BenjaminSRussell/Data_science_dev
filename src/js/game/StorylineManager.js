@@ -92,6 +92,8 @@ export class StorylineManager {
         this.majorDecisions.push({
             decisionId,
             choice,
+            // The act it was made in; the catalog's phase can be dynamic (#2266)
+            phase: decision.phase || this.storylinePhase,
             timestamp: Date.now(),
             week: Math.floor((this.gameState.timeManager?.totalDays || 0) / 7)
         });
@@ -277,6 +279,40 @@ export class StorylineManager {
             }
         }
 
+
+        // Late-game decision: "The Ultimate Test" (#1761, #1501)
+        if (includeAll || phase === 'late') {
+            const hasAuditDecision = this.majorDecisions.some(d => d.decisionId === 'model_audit');
+            if (includeAll || !hasAuditDecision) {
+                decisions.push({
+                    id: 'model_audit',
+                    title: 'The Ultimate Test',
+                    description: 'An outside audit finds that the flagship model you built quietly denies loans to entire neighborhoods. A regulator has not noticed yet. Your biggest client wants it buried before their IPO.',
+                    context: 'Everything you have built rests on this model. Coming clean could cost you the client, the money and your reputation. Burying it keeps the party going, until it does not.',
+                    phase: 'late',
+                    choices: {
+                        disclose: {
+                            message: 'You publish the audit, notify the regulator and retrain the model. The client walks. The press calls you the data scientist who told the truth.',
+                            consequences: { ethics: 25, reputation: 150, money: -15000 },
+                            progress: 20,
+                            storyImpact: 'You chose accountability over the payday. The industry now knows your name for the right reasons.'
+                        },
+                        fix_quietly: {
+                            message: 'You patch the model without telling anyone. The bias shrinks, the IPO goes ahead, and nobody ever knows how close it came.',
+                            consequences: { ethics: 5, money: 10000 },
+                            progress: 12,
+                            storyImpact: 'You fixed the harm but kept the secret. Good outcome, uneasy conscience.'
+                        },
+                        bury: {
+                            message: 'You delete the audit. The client\'s IPO makes you rich. Somewhere, a family is denied a home loan by a model with your name on it.',
+                            consequences: { ethics: -30, money: 40000, reputation: -50 },
+                            progress: 15,
+                            storyImpact: 'You buried it. The money is real, and so is the risk that someone digs it back up.'
+                        }
+                    }
+                });
+            }
+        }
 
         // Endgame decisions
         if (includeAll || phase === 'endgame') {

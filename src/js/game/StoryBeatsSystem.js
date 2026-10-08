@@ -144,13 +144,32 @@ export class StoryBeatsSystem {
         const storylineManager = this.gameState.storylineManager;
         if (!storylineManager) return;
 
+        // Beats from earlier acts stay reachable after the phase advances (#857)
         const phase = storylineManager.storylinePhase;
-        const allBeats = this.getStoryBeatsForPhase(phase);
+        const upTo = Math.max(0, StoryBeatsSystem.PHASES.indexOf(phase));
+        const allBeats = StoryBeatsSystem.PHASES.slice(0, upTo + 1)
+            .flatMap(p => this.getStoryBeatsForPhase(p));
         
         // Filter out completed beats
         this.pendingBeats = allBeats.filter(beat => 
             !this.completedBeats.includes(beat.id)
         );
+    }
+
+    static get PHASES() {
+        return ['early', 'mid', 'late', 'endgame'];
+    }
+
+    /**
+     * The beat to show as "What's next": required beats of the current act
+     * first, then anything else still pending (#2148)
+     */
+    getNextBeat() {
+        this.updatePendingBeats();
+        const phase = this.gameState.storylineManager?.storylinePhase;
+        const current = new Set(this.getStoryBeatsForPhase(phase).map(b => b.id));
+        const rank = (b) => (b.required ? 0 : 2) + (current.has(b.id) ? 0 : 1);
+        return [...this.pendingBeats].sort((a, b) => rank(a) - rank(b))[0] || null;
     }
 
     /**
@@ -161,39 +180,44 @@ export class StoryBeatsSystem {
         
         switch (trigger.type) {
             case 'job_obtained':
-                return this.gameState.currentJob !== null;
+                // undefined used to count as having a job; condition:false
+                // means "has no job" (#1499)
+                return Boolean(this.gameState.currentJob) === (trigger.condition !== false);
             
             case 'task_completed':
                 const taskCount = this.gameState.tasksCompleted || 0;
                 return taskCount >= (trigger.count || 1);
             
             case 'rank_increase':
+                // Both bounds apply when both are set (#1971); main.js uses
+                // this same check for promotion beats (#1498)
                 const currentRank = this.gameState.rankIndex || 0;
-                if (trigger.from !== undefined) {
-                    return currentRank > trigger.from;
-                }
-                if (trigger.to !== undefined) {
-                    return currentRank >= trigger.to;
-                }
-                return false;
+                if (trigger.from === undefined && trigger.to === undefined) return false;
+                if (trigger.from !== undefined && !(currentRank > trigger.from)) return false;
+                if (trigger.to !== undefined && !(currentRank >= trigger.to)) return false;
+                return true;
             
             case 'rent_paid':
-                const timeManager = this.gameState.timeManager;
-                if (!timeManager) return false;
-                const weeks = Math.floor((timeManager.totalDays || 0) / 7);
-                return weeks >= (trigger.week || 1);
+                // Count actual rent payments, not weeks elapsed (#1497)
+                return (Number(this.gameState.rentPaymentsMade) || 0) >= (trigger.week || 1);
             
             case 'npc_met':
                 const npcManager = this.gameState.npcManager;
                 if (!npcManager) return false;
-                const metNPCs = npcManager.getMetNPCs?.() || [];
-                return metNPCs.length >= (trigger.count || 1);
+                // Count recorded meetings; getMetNPCs() drops ids it can't
+                // resolve, which under-counted (#1500)
+                const metCount = Array.isArray(npcManager.metNPCs)
+                    ? npcManager.metNPCs.length
+                    : (npcManager.getMetNPCs?.() || []).length;
+                return metCount >= (trigger.count || 1);
             
             case 'major_decision':
                 const storylineManager = this.gameState.storylineManager;
                 if (!storylineManager) return false;
                 const decisions = storylineManager.majorDecisions || [];
+                // Prefer the act recorded when the decision was made (#2266)
                 const phaseDecisions = decisions.filter(d => {
+                    if (d.phase) return d.phase === trigger.phase;
                     const decisionData = storylineManager.getDecision?.(d.decisionId);
                     return decisionData && decisionData.phase === trigger.phase;
                 });
@@ -208,7 +232,7 @@ export class StoryBeatsSystem {
             case 'ethics_extreme':
                 const characterStats = this.gameState.characterStats;
                 if (!characterStats) return false;
-                const ethics = characterStats.ethics || 0;
+                const ethics = Number(characterStats.ethics) || 0;
                 return Math.abs(ethics) >= (trigger.threshold || 30);
             
             case 'days_threshold':
