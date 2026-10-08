@@ -14,7 +14,9 @@ describe('Color System', () => {
     beforeAll(() => {
         // Read all CSS files from the styles directory
         const stylesDir = path.join(__dirname, '../../src/styles');
-        const cssFiles = fs.readdirSync(stylesDir)
+        // Recursive, so CSS under src/styles/screens/ etc. is checked too (#1862)
+        const cssFiles = fs.readdirSync(stylesDir, { recursive: true })
+            .map(String)
             .filter(f => f.endsWith('.css'));
 
         allCssContent = cssFiles.map(file => {

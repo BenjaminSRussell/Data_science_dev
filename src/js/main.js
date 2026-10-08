@@ -303,9 +303,8 @@ export class MainGame {
         }
 
         // Show brief toast
-        if (this.game && this.game.showToast) {
-            this.game.showToast(`Switched to ${newTheme === 'light' ? 'Light' : 'Dark'} Mode`, 'info');
-        }
+        // MainGame owns showToast; there is no this.game here (#90)
+        this.showToast?.(`Switched to ${newTheme === 'light' ? 'Light' : 'Dark'} Mode`, 'info');
     }
 
     async init() {
@@ -3899,8 +3898,10 @@ export class MainGame {
             this.visualProgressionSystem.checkMilestones();
         }
 
-        // Check for new research papers (only if game is started)
-        if (this.researchPaperSystem && this.gameState.isGameStarted) {
+        // Check for new research papers (only if game is started), throttled
+        // to once per second like the milestone check above (#1324)
+        if (this.researchPaperSystem && this.gameState.isGameStarted && seconds !== this.lastResearchCheckSecond) {
+            this.lastResearchCheckSecond = seconds;
             try {
                 this.researchPaperSystem.checkForNewPapers();
 
