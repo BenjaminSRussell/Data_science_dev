@@ -7,6 +7,22 @@ import { RANKS } from '../data/ranks.js';
 
 
 export class GameState {
+    // Quality bonuses per software item (fractions added to the multipliers)
+    static SOFTWARE_EFFECTS = {
+        soft_ide_pro: { visualClarity: 0.05, dataAccuracy: 0.03 },
+        soft_automl: { speedBonus: 0.10, chartAppropriateness: 0.03 },
+        soft_cloud_basic: { dataAccuracy: 0.05, speedBonus: 0.05 },
+        soft_enterprise_db: { dataAccuracy: 0.08, chartAppropriateness: 0.02 },
+        soft_neural_arch: { visualClarity: 0.10, chartAppropriateness: 0.08, dataAccuracy: 0.05 }
+    };
+
+    static SOFTWARE_STAT_LABELS = {
+        visualClarity: 'Visual Clarity',
+        dataAccuracy: 'Data Accuracy',
+        chartAppropriateness: 'Chart Appropriateness',
+        speedBonus: 'Speed'
+    };
+
     /** Fresh Chart Studio settings (used on reset and for every new task, #1682). */
     static defaultChartConfig() {
         return {
@@ -201,34 +217,26 @@ export class GameState {
             speedBonus: 0  // Percentage bonus (0.1 = 10%)
         };
 
-        // Software quality effects
-        if (this.purchasedItems.includes('soft_ide_pro')) {
-            multipliers.visualClarity += 0.05; // +5% visual clarity (fewer bugs)
-            multipliers.dataAccuracy += 0.03; // +3% accuracy (better code)
-        }
-
-        if (this.purchasedItems.includes('soft_automl')) {
-            multipliers.speedBonus += 0.10; // +10% speed bonus
-            multipliers.chartAppropriateness += 0.03; // +3% (auto-selection helps)
-        }
-
-        if (this.purchasedItems.includes('soft_cloud_basic')) {
-            multipliers.dataAccuracy += 0.05; // +5% (better processing power)
-            multipliers.speedBonus += 0.05; // +5% speed
-        }
-
-        if (this.purchasedItems.includes('soft_enterprise_db')) {
-            multipliers.dataAccuracy += 0.08; // +8% (better data handling)
-            multipliers.chartAppropriateness += 0.02; // +2%
-        }
-
-        if (this.purchasedItems.includes('soft_neural_arch')) {
-            multipliers.visualClarity += 0.10; // +10% (AI-optimized)
-            multipliers.chartAppropriateness += 0.08; // +8% (better selection)
-            multipliers.dataAccuracy += 0.05; // +5%
+        // One table drives both the scoring and the text shown in Chart
+        // Studio, so they can't drift apart (#1484)
+        for (const [id, effects] of Object.entries(GameState.SOFTWARE_EFFECTS)) {
+            if (!this.purchasedItems.includes(id)) continue;
+            for (const [stat, amount] of Object.entries(effects)) {
+                multipliers[stat] += amount;
+            }
         }
 
         return multipliers;
+    }
+
+    /**
+     * Player-facing bonus text for a software item, e.g. "+5% Visual Clarity"
+     */
+    static describeSoftwareEffects(id) {
+        const effects = GameState.SOFTWARE_EFFECTS[id];
+        if (!effects) return [];
+        return Object.entries(effects).map(([stat, amount]) =>
+            `+${Math.round(amount * 100)}% ${GameState.SOFTWARE_STAT_LABELS[stat] || stat}`);
     }
 
     /**
