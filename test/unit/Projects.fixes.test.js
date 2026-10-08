@@ -109,7 +109,7 @@ describe('AISystem / Audio / office pricing', () => {
         const am = Object.create(AudioManager.prototype);
         am.soundEnabled = true;
         am.playTone = vi.fn();
-        expect(am.play('keyboard_typing')).toBe(false);
+        expect(am.play('not_a_sound')).toBe(false);
         expect(am.play('click')).toBe(true);
     });
 

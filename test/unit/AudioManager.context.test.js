@@ -46,6 +46,6 @@ describe('AudioManager AudioContext reuse', () => {
 
     it('unknown sounds return false so callers can fall back', () => {
         const am = new AudioManager();
-        expect(am.play('keyboard_typing')).toBe(false);
+        expect(am.play('not_a_sound')).toBe(false);
     });
 });

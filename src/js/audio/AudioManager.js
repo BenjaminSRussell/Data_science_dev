@@ -106,6 +106,7 @@ export class AudioManager {
             purchase: { freq: 1000, duration: 75 },
             promotion: { freq: 523, duration: 200 },
             kaching: { freq: 1200, duration: 100 },
+            keyboard_typing: { freq: 1500, duration: 20 },
             error: { freq: 150, duration: 300 }
         };
 
@@ -175,13 +176,17 @@ export class AudioManager {
     toggleMusic() {
         this.musicEnabled = !this.musicEnabled;
 
-        if (this.currentMusic) {
+        if (this.musicEnabled && (this.currentStation === 'off' || !this.musicStations[this.currentStation])) {
+            // Turning music back on after the radio was switched off picks a
+            // real station again instead of staying silent forever (#1289)
+            this.switchStation(AudioManager.DEFAULT_STATION);
+        } else if (this.currentMusic) {
             if (this.musicEnabled) {
                 this.currentMusic.play().catch(e => console.log('Audio play failed:', e));
             } else {
                 this.currentMusic.pause();
             }
-        } else if (this.musicEnabled && this.currentStation !== 'off') {
+        } else if (this.musicEnabled) {
             this.switchStation(this.currentStation);
         }
 
@@ -192,11 +197,13 @@ export class AudioManager {
      * Switch to a different music station
      */
     switchStation(stationId) {
-        // Stop current music
-        if (this.currentMusic) {
-            this.currentMusic.pause();
-            this.currentMusic = null;
+        // Re-selecting the station that is already playing keeps the current
+        // track instead of restarting with a new random one (#1293)
+        if (stationId === this.currentStation && this.currentMusic && !this.currentMusic.paused && this.musicEnabled) {
+            return;
         }
+
+        this.stopCurrentMusic();
 
         if (stationId === 'off') {
             this.currentStation = 'off';
@@ -206,6 +213,7 @@ export class AudioManager {
 
         this.currentStation = stationId;
         this.musicEnabled = true;
+        this.trackFailures = 0;
 
         const station = this.musicStations[stationId];
         if (station && station.tracks && station.tracks.length > 0) {
@@ -213,25 +221,82 @@ export class AudioManager {
         }
     }
 
-    playRandomTrack(station) {
-        if (!this.musicEnabled) return;
+    /**
+     * Stop the playing track and release its media resources, so switching
+     * stations doesn't keep old elements buffering in the background (#1290)
+     */
+    stopCurrentMusic() {
+        const audio = this.currentMusic;
+        this.currentMusic = null;
+        if (!audio) return;
+        try {
+            audio.pause();
+            audio.removeAttribute?.('src');
+            audio.load?.();
+        } catch {
+            // Element already released
+        }
+    }
 
-        const randomTrack = station.tracks[Math.floor(Math.random() * station.tracks.length)];
-        const url = `/assets/audio/music/${randomTrack}`;
+    /**
+     * Pick a track from the station, avoiding the one that just played (#1288)
+     */
+    pickTrack(station, exclude = []) {
+        const tracks = station.tracks || [];
+        const avoid = new Set(exclude.filter(Boolean));
+        const candidates = tracks.filter(track => !avoid.has(track));
+        const pool = candidates.length > 0 ? candidates : tracks;
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
 
-        this.currentMusic = new Audio(url);
-        this.currentMusic.volume = this.musicVolume;
+    playRandomTrack(station, exclude = []) {
+        if (!this.musicEnabled || !station?.tracks?.length) return;
+
+        const stationId = Object.keys(this.musicStations).find(key => this.musicStations[key] === station);
+        const track = this.pickTrack(station, [this.lastTrack, ...exclude]);
+        this.lastTrack = track;
+        const url = `/assets/audio/music/${track}`;
+
+        const audio = new Audio(url);
+        audio.volume = this.musicVolume;
+        this.currentMusic = audio;
+        const isCurrent = () => this.currentMusic === audio && this.musicEnabled && this.currentStation === stationId;
+
+        audio.addEventListener('playing', () => {
+            if (this.currentMusic === audio) this.trackFailures = 0;
+        });
 
         // When track ends, play another one from the same station
-        this.currentMusic.addEventListener('ended', () => {
-            if (this.musicEnabled && this.currentStation === Object.keys(this.musicStations).find(key => this.musicStations[key] === station)) {
-                this.playRandomTrack(station);
+        audio.addEventListener('ended', () => {
+            if (isCurrent()) this.playRandomTrack(station);
+        });
+
+        // A track that fails to load moves on to another one instead of
+        // silently killing the station; give up once every track has failed (#860)
+        audio.addEventListener('error', () => {
+            if (!isCurrent()) return;
+            this.trackFailures = (this.trackFailures || 0) + 1;
+            if (this.trackFailures < station.tracks.length) {
+                this.playRandomTrack(station, [track]);
+            } else {
+                console.log(`All tracks failed to load for station ${stationId}`);
+                this.stopCurrentMusic();
             }
         });
 
-        this.currentMusic.play().catch(e => {
+        const playing = audio.play();
+        playing?.catch?.(e => {
             console.log('Audio play failed (interaction likely needed):', e);
         });
+    }
+
+    /**
+     * Every music track URL, for asset validation
+     */
+    getTrackUrls() {
+        return Object.values(this.musicStations)
+            .flatMap(station => station.tracks || [])
+            .map(track => `/assets/audio/music/${track}`);
     }
 
     /**
@@ -261,3 +326,5 @@ export class AudioManager {
         }
     }
 }
+
+AudioManager.DEFAULT_STATION = 'lofi_beats';

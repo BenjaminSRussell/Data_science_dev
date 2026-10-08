@@ -454,7 +454,7 @@ export class MainGame {
                             if (saveData && saveData.state) {
                                 // Create temporary gameState to check unlocks
                                 const tempState = { ...saveData.state };
-                                this.menuThemeSystem.checkThemeUnlocks(tempState);
+                                // updateFromGameState runs checkThemeUnlocks itself (#1474)
                                 this.menuThemeSystem.updateFromGameState(tempState);
                             }
                         }
@@ -1180,7 +1180,7 @@ export class MainGame {
         window.addEventListener('promotion', (e) => {
             const rank = e.detail.rank;
             this.showToast(`Promoted to ${rank.title}!`, 'success');
-            this.audioManager.play('success');
+            this.audioManager.play('promotion');
             this.uiUpdater.updateAllUI();
         });
     }
@@ -2607,6 +2607,7 @@ export class MainGame {
         });
         document.getElementById('settings-music')?.addEventListener('change', (e) => {
             if (e.target.checked !== !!am.musicEnabled) am.toggleMusic();
+            this.updateRadioUI?.();
         });
         document.getElementById('settings-music-volume')?.addEventListener('input', (e) => {
             am.setMusicVolume(Number(e.target.value) / 100);
@@ -2692,6 +2693,14 @@ export class MainGame {
     updateRadioUI() {
         const radioStations = document.querySelectorAll('.radio-station');
         const currentStation = this.audioManager.currentStation;
+
+        // The toolbar button shows what is playing instead of a fixed
+        // "MUSIC: OFF" label (#866)
+        const radioBtn = document.getElementById('btn-music-radio');
+        if (radioBtn) {
+            const on = this.audioManager.musicEnabled && currentStation !== 'off';
+            radioBtn.textContent = on ? `MUSIC: ${this.audioManager.getCurrentStationName()}` : 'MUSIC: OFF';
+        }
 
         radioStations.forEach(station => {
             station.classList.remove('active');
@@ -2969,7 +2978,7 @@ export class MainGame {
 
         if (result.success) {
             this.showToast(result.message, 'success');
-            this.audioManager.play('kaching');
+            this.audioManager.play('purchase');
             this.uiUpdater.updateOfficeEquipment(); // Refresh grid
             this.uiUpdater.updateTopBar(); // Update money
         } else {
@@ -3010,7 +3019,7 @@ export class MainGame {
         this.gameState.officeIndex = currentOffice + 1;
 
         this.showToast(`Office upgraded!`, 'success');
-        this.audioManager.play('kaching');
+        this.audioManager.play('purchase');
         this.updateOfficeScreen();
         this.uiUpdater.updateAllUI();
     }
@@ -3030,7 +3039,7 @@ export class MainGame {
         const success = this.gameState.purchaseItem(item, price);
         if (success) {
             this.showToast(`Purchased ${item.name}!`, 'success');
-            this.audioManager.play('kaching');
+            this.audioManager.play('purchase');
             this.uiUpdater.updateShopScreen();
             this.uiUpdater.updateAllUI();
         } else {

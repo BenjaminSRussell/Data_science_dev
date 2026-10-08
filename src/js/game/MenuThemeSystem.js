@@ -121,56 +121,62 @@ export class MenuThemeSystem {
         if (!gameState) return;
         this.ensureThemes();
 
+        let changed = false;
         Object.values(this.themes).forEach(theme => {
             if (theme.unlocked || !theme.unlockRequirement) return;
-
-            const req = theme.unlockRequirement;
-            let unlocked = true;
-
-            if (req.rankIndex !== undefined) {
-                unlocked = unlocked && (gameState.rankIndex >= req.rankIndex);
-            }
-            if (req.tasksCompleted !== undefined) {
-                unlocked = unlocked && ((gameState.tasksCompleted || 0) >= req.tasksCompleted);
-            }
-            if (req.reputation !== undefined) {
-                unlocked = unlocked && ((gameState.reputation || 0) >= req.reputation);
-            }
-            if (req.money !== undefined) {
-                unlocked = unlocked && ((gameState.money || 0) >= req.money);
-            }
-
-            if (unlocked && !theme.unlocked) {
+            if (this.meetsRequirement(theme.unlockRequirement, gameState)) {
                 theme.unlocked = true;
-                this.saveUnlockedThemes();
+                changed = true;
             }
         });
+        if (changed) this.saveUnlockedThemes();
     }
 
     /**
-     * Get theme based on current game state
+     * Whether a game state satisfies every field of an unlock requirement
+     */
+    meetsRequirement(req, gameState) {
+        if (!req) return true;
+        if (!gameState) return false;
+        const checks = {
+            rankIndex: gameState.rankIndex,
+            tasksCompleted: gameState.tasksCompleted,
+            reputation: gameState.reputation,
+            money: gameState.money
+        };
+        return Object.keys(checks).every(key =>
+            req[key] === undefined || (Number(checks[key]) || 0) >= req[key]
+        );
+    }
+
+    /**
+     * Get theme based on current game state: the most prestigious theme
+     * that is unlocked and whose requirement this save meets. Covers every
+     * theme, not just the rank-based ones, so dataViz and minimalist can be
+     * selected too (#100, #2005, #2406).
      */
     getThemeForGameState(gameState) {
         this.ensureThemes();
         if (!gameState) return this.themes.starter;
 
-        // Check for highest unlocked theme based on rank
-        const rankThemes = ['starter', 'corporate', 'executive'];
-        let selectedTheme = this.themes.starter;
-
-        for (let i = rankThemes.length - 1; i >= 0; i--) {
-            const themeId = rankThemes[i];
+        for (const themeId of MenuThemeSystem.THEME_PRIORITY) {
             const theme = this.themes[themeId];
-            if (theme?.unlocked) {
-                const req = theme.unlockRequirement;
-                if (!req || (req.rankIndex !== undefined && gameState.rankIndex >= req.rankIndex)) {
-                    selectedTheme = theme;
-                    break;
-                }
+            if (theme?.unlocked && this.meetsRequirement(theme.unlockRequirement, gameState)) {
+                return theme;
             }
         }
+        return this.themes.starter;
+    }
 
-        return selectedTheme;
+    /**
+     * CSS background-image layers for a theme (pattern, glow, base)
+     */
+    getMenuBackground(themeId = null) {
+        this.ensureThemes();
+        const theme = this.themes[themeId || this.currentTheme] || this.themes.starter;
+        return [theme.pattern, theme.gradient, theme.background]
+            .filter(layer => layer && layer !== 'none')
+            .join(', ');
     }
 
     /**
@@ -185,7 +191,15 @@ export class MenuThemeSystem {
 
         this.currentTheme = theme.id;
 
-        // Apply background gradient
+        // The text-mode menu has no dedicated background layers any more, so
+        // paint the theme onto the menu screen itself (#2004)
+        const menuScreen = document.getElementById('screen-menu');
+        if (menuScreen) {
+            menuScreen.style.backgroundImage = this.getMenuBackground(theme.id);
+            menuScreen.dataset.menuTheme = theme.id;
+        }
+
+        // Legacy layered background elements, if a custom menu provides them
         const menuBackground = document.querySelector('.menu-background');
         if (menuBackground) {
             menuBackground.style.background = theme.background;
@@ -315,3 +329,6 @@ export class MenuThemeSystem {
     }
 }
 
+// Auto-selection order, most prestigious first. Every theme is listed so
+// none can be unlocked but never shown.
+MenuThemeSystem.THEME_PRIORITY = ['executive', 'minimalist', 'corporate', 'dataViz', 'starter'];
