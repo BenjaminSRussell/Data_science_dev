@@ -129,7 +129,8 @@ export class ActTransitionScreen {
             items.push(`<div class="summary-item"><strong>Relationships:</strong> ${summary.relationships}</div>`);
         }
         
-        if (summary.ethics) {
+        // 0 is a real (balanced) value, not a missing one
+        if (typeof summary.ethics === 'number' && Number.isFinite(summary.ethics)) {
             const ethicsDesc = summary.ethics > 0 ? 'ethical' : summary.ethics < 0 ? 'questionable' : 'balanced';
             items.push(`<div class="summary-item"><strong>Your Path:</strong> ${ethicsDesc}</div>`);
         }
@@ -144,8 +145,7 @@ export class ActTransitionScreen {
         const storylineManager = this.game?.gameState?.storylineManager;
         if (!storylineManager) return '';
 
-        const arc = storylineManager.getCurrentArc();
-        const ethics = this.game?.gameState?.characterStats?.ethics || 0;
+        const ethics = Number(this.game?.gameState?.characterStats?.ethics) || 0;
 
         let arcPreview = '';
         
