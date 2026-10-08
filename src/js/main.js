@@ -340,7 +340,9 @@ export class MainGame {
                 if (hasSave) {
                     const mostRecentSlot = this.saveManager.getMostRecentSlot() || 0;
                     this.currentSaveSlot = mostRecentSlot;
-                    this.saveManager.loadGame(this.gameState, mostRecentSlot);
+                    if (this.saveManager.loadGame(this.gameState, mostRecentSlot)) {
+                        this.applyAudioPrefsFromState();
+                    }
                 }
             });
             logger.debug(`Game loaded (save found: ${hasSave})`);
@@ -1971,6 +1973,9 @@ export class MainGame {
             return;
         }
 
+        // A muted save stays muted (#135)
+        if (loaded) this.applyAudioPrefsFromState();
+
         // Initialize BankSystem AFTER the reload: it fills in default bank state
         // when the save has none, which the reload would otherwise null out (#937)
         this.bankSystem = new BankSystem(this.gameState);
@@ -2705,6 +2710,7 @@ export class MainGame {
         });
         document.getElementById('settings-music')?.addEventListener('change', (e) => {
             if (e.target.checked !== !!am.musicEnabled) am.toggleMusic();
+            this.syncAudioPrefs?.();
             this.updateRadioUI?.();
         });
         document.getElementById('settings-music-volume')?.addEventListener('input', (e) => {
@@ -2726,6 +2732,47 @@ export class MainGame {
     toggleSound() {
         this.audioManager.toggleSound();
         this.updateSoundButton();
+        this.syncAudioPrefs?.();
+    }
+
+    /**
+     * AudioManager is the live mute state; GameState (and the store that
+     * mirrors into it) is the persisted copy. Copy live -> persisted after
+     * every toggle so a save captures what the player chose (#135).
+     */
+    syncAudioPrefs() {
+        const am = this.audioManager;
+        if (!am) return;
+        const soundEnabled = !!am.soundEnabled;
+        const musicEnabled = !!am.musicEnabled;
+        // Store first: its subscription copies these fields into GameState,
+        // so a stale store value would otherwise overwrite the new one
+        const store = this.gameStore?.getState?.();
+        store?.setSoundEnabled?.(soundEnabled);
+        store?.setMusicEnabled?.(musicEnabled);
+        if (this.gameState) {
+            this.gameState.soundEnabled = soundEnabled;
+            this.gameState.musicEnabled = musicEnabled;
+            if (this.gameState.settings) this.gameState.settings.soundEnabled = soundEnabled;
+        }
+    }
+
+    /**
+     * After a save is loaded, push its sound/music flags into AudioManager so
+     * a muted save stays muted (#135).
+     */
+    applyAudioPrefsFromState() {
+        const am = this.audioManager;
+        const gs = this.gameState;
+        if (!am || !gs) return;
+        if (typeof gs.soundEnabled === 'boolean' && gs.soundEnabled !== !!am.soundEnabled) {
+            am.toggleSound();
+        }
+        if (typeof gs.musicEnabled === 'boolean' && gs.musicEnabled !== !!am.musicEnabled) {
+            am.toggleMusic();
+        }
+        this.updateSoundButton?.();
+        this.syncAudioPrefs();
     }
 
     /**
@@ -2813,6 +2860,7 @@ export class MainGame {
      */
     switchMusicStation(stationId) {
         this.audioManager.switchStation(stationId);
+        this.syncAudioPrefs?.();
     }
 
     /**

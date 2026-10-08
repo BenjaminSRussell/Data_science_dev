@@ -5,6 +5,7 @@
 
 import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
 import { dialogueTreeSystem } from './dialogue/DialogueTreeSystem.js';
+import { relationshipStage } from '../data/relationshipStages.js';
 
 // Initialize all NPC images - ensures every NPC has a visual
 function initializeNPCImages() {
@@ -1330,12 +1331,9 @@ export class NPCManager {
      * Get relationship tier (stranger, acquaintance, friend, close friend, best friend)
      */
     getRelationshipTier(npcId) {
-        const level = this.relationships[npcId] || 0;
-        if (level < 10) return { tier: 'stranger', label: 'Stranger', color: '#888' };
-        if (level < 30) return { tier: 'acquaintance', label: 'Acquaintance', color: '#4ecdc4' };
-        if (level < 60) return { tier: 'friend', label: 'Friend', color: '#6bcb77' };
-        if (level < 85) return { tier: 'close_friend', label: 'Close Friend', color: '#a855f7' };
-        return { tier: 'best_friend', label: 'Best Friend', color: '#ffd93d' };
+        // Shared stage scale, same as the dialogue loader and RoommateSystem (#916, #566)
+        const { tier, label, color } = relationshipStage(this.relationships[npcId] || 0);
+        return { tier, label, color };
     }
 
     /**
@@ -1842,13 +1840,13 @@ export class NPCManager {
     getGreetingPool(relationship, isFirstMeeting) {
         if (isFirstMeeting) {
             return DIALOGUE_TEMPLATES.first_meeting;
-        // Boundaries match getRelationshipTier(): stranger/acquaintance (<30),
-        // friend (<60), close friend (<85), best friend
-        } else if (relationship < 30) {
+        // Boundaries follow RELATIONSHIP_STAGES: stranger/friendly (<40),
+        // acquaintance (<60), friend (<80), close friend
+        } else if (relationship < 40) {
             return DIALOGUE_TEMPLATES.low_relationship;
         } else if (relationship < 60) {
             return DIALOGUE_TEMPLATES.medium_relationship;
-        } else if (relationship < 85) {
+        } else if (relationship < 80) {
             return DIALOGUE_TEMPLATES.high_relationship;
         } else {
             return DIALOGUE_TEMPLATES.max_relationship;

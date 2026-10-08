@@ -4,11 +4,13 @@
  * Shared living, rent splitting, interactions
  */
 
+import { relationshipStage } from '../../data/relationshipStages.js';
+
 export class RoommateSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.roommate = null;
-        this.relationship = 30; // Start as acquaintances
+        this.relationship = 30; // Start on friendly terms (RELATIONSHIP_STAGES)
         this.rentSplit = 0.5; // 50/50 split
         this.initializeRoommate();
     }
@@ -178,10 +180,8 @@ export class RoommateSystem {
      * Get relationship level
      */
     getRelationshipLevel() {
-        if (this.relationship < 20) return 'stranger';
-        if (this.relationship < 40) return 'acquaintance';
-        if (this.relationship < 70) return 'friend';
-        return 'close_friend';
+        // Same stage scale as NPCManager and the dialogue loader (#916)
+        return relationshipStage(this.relationship).tier;
     }
     
     /**

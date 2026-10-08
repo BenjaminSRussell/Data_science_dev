@@ -6,6 +6,7 @@
  */
 
 import { npcDialogueLoader } from './NPCDialogueLoader.js';
+import { relationshipStage } from '../../data/relationshipStages.js';
 
 export const PLAYER_START_AGE = 22;
 
@@ -88,11 +89,8 @@ export class RelationshipDialogueSystem {
      * Get relationship stage
      */
     getRelationshipStage(relationshipLevel) {
-        if (relationshipLevel >= 80) return 'close_friend';
-        if (relationshipLevel >= 60) return 'friend';
-        if (relationshipLevel >= 40) return 'acquaintance';
-        if (relationshipLevel >= 20) return 'friendly';
-        return 'stranger';
+        // Shared scale with NPCManager and RoommateSystem (#916, #566)
+        return relationshipStage(relationshipLevel).tier;
     }
     
     /**
