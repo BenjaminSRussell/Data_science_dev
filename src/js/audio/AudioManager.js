@@ -74,6 +74,16 @@ export class AudioManager {
         this.musicVolume = 0.5;
         this.soundVolume = 0.5;
 
+        // Restore the last radio station the player picked (#1236). Nothing
+        // auto-plays here; browsers need a user gesture first.
+        const savedStation = AudioManager.loadStation();
+        if (savedStation === 'off') {
+            this.currentStation = 'off';
+            this.musicEnabled = false;
+        } else if (savedStation && this.musicStations[savedStation]) {
+            this.currentStation = savedStation;
+        }
+
         // We'll use simple Audio API for now
         // In production, consider Howler.js for better control
     }
@@ -107,6 +117,7 @@ export class AudioManager {
             promotion: { freq: 523, duration: 200 },
             kaching: { freq: 1200, duration: 100 },
             keyboard_typing: { freq: 1500, duration: 20 },
+            expense: { freq: 330, duration: 160 },
             error: { freq: 150, duration: 300 }
         };
 
@@ -208,10 +219,12 @@ export class AudioManager {
         if (stationId === 'off') {
             this.currentStation = 'off';
             this.musicEnabled = false;
+            AudioManager.saveStation('off');
             return;
         }
 
         this.currentStation = stationId;
+        if (this.musicStations[stationId]) AudioManager.saveStation(stationId);
         this.musicEnabled = true;
         this.trackFailures = 0;
 
@@ -328,3 +341,19 @@ export class AudioManager {
 }
 
 AudioManager.DEFAULT_STATION = 'lofi_beats';
+
+AudioManager.STATION_KEY = 'musicStation';
+AudioManager.loadStation = function loadStation() {
+    try {
+        return typeof localStorage !== 'undefined' ? localStorage.getItem(AudioManager.STATION_KEY) : null;
+    } catch {
+        return null;
+    }
+};
+AudioManager.saveStation = function saveStation(stationId) {
+    try {
+        if (typeof localStorage !== 'undefined') localStorage.setItem(AudioManager.STATION_KEY, stationId);
+    } catch {
+        // storage unavailable
+    }
+};

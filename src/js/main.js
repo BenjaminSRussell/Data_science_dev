@@ -2564,28 +2564,28 @@ export class MainGame {
     showSettings() {
         const modalContent = `
             <div class="settings-modal">
-                <h2>Settings</h2>
+                <h2 id="modal-title">Settings</h2>
                 <div class="settings-options">
-                    <div class="option-group">
-                        <label>Sound Effects</label>
+                    <div class="settings-row">
+                        <label class="settings-label" for="settings-sound">Sound Effects</label>
                         <label class="toggle">
                             <input type="checkbox" id="settings-sound" ${this.audioManager.soundEnabled ? 'checked' : ''}>
-                            <span class="toggle-slider"></span>
+                            <span class="toggle-slider" aria-hidden="true"></span>
                         </label>
                     </div>
-                    <div class="option-group">
-                        <label>Music</label>
+                    <div class="settings-row">
+                        <label class="settings-label" for="settings-music">Music</label>
                         <label class="toggle">
                             <input type="checkbox" id="settings-music" ${this.audioManager.musicEnabled ? 'checked' : ''}>
-                            <span class="toggle-slider"></span>
+                            <span class="toggle-slider" aria-hidden="true"></span>
                         </label>
                     </div>
-                    <div class="option-group">
-                        <label>Music Volume</label>
+                    <div class="settings-row">
+                        <label class="settings-label" for="settings-music-volume">Music Volume</label>
                         <input type="range" id="settings-music-volume" min="0" max="100" value="${Math.round(this.audioManager.musicVolume * 100)}">
                     </div>
-                    <div class="option-group">
-                        <label>Sound Effects Volume</label>
+                    <div class="settings-row">
+                        <label class="settings-label" for="settings-sound-volume">Sound Effects Volume</label>
                         <input type="range" id="settings-sound-volume" min="0" max="100" value="${Math.round(this.audioManager.soundVolume * 100)}">
                     </div>
                 </div>
@@ -2717,6 +2717,9 @@ export class MainGame {
         if (confirm('Are you sure? This will delete all your progress!')) {
             this.saveManager.stopAutoSave();
             this.saveManager.clearSave(this.currentSaveSlot);
+            // A reset is a fresh start: stop the radio too (#1292)
+            this.audioManager?.stopCurrentMusic?.();
+            this.updateRadioUI?.();
             this.gameState.reset();
             this.closeModal();
             this.screenManager.showScreen('screen-menu');
@@ -2733,12 +2736,74 @@ export class MainGame {
     showModal(content) {
         const container = document.getElementById('modal-container');
         const modalContent = document.getElementById('modal-content');
+        if (!container || !modalContent) return;
+
+        // Remember what had focus so closing hands it back (#1254)
+        if (container.classList.contains('hidden')) {
+            this.modalReturnFocus = document.activeElement;
+        }
 
         modalContent.innerHTML = content;
         container.classList.remove('hidden');
+        modalContent.setAttribute('role', 'dialog');
+        modalContent.setAttribute('aria-modal', 'true');
+        modalContent.setAttribute('tabindex', '-1');
+        if (modalContent.querySelector('#modal-title')) {
+            modalContent.setAttribute('aria-labelledby', 'modal-title');
+        } else {
+            modalContent.removeAttribute('aria-labelledby');
+        }
 
         // Close on backdrop click
-        container.querySelector('.modal-backdrop').onclick = () => this.closeModal();
+        const backdrop = container.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.onclick = () => this.closeModal();
+
+        // Escape closes, Tab stays inside the dialog (#1254, #1879)
+        if (!this.modalKeyHandler) {
+            this.modalKeyHandler = (e) => this.handleModalKeydown(e);
+            document.addEventListener('keydown', this.modalKeyHandler);
+        }
+
+        const focusables = this.getModalFocusables();
+        (focusables[0] || modalContent).focus?.();
+    }
+
+    /**
+     * Focusable elements inside the shared modal
+     */
+    getModalFocusables() {
+        const modalContent = document.getElementById('modal-content');
+        if (!modalContent) return [];
+        return Array.from(modalContent.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )).filter(el => !el.disabled);
+    }
+
+    handleModalKeydown(e) {
+        const container = document.getElementById('modal-container');
+        if (!container || container.classList.contains('hidden')) return;
+        if (e.key === 'Escape') {
+            e.preventDefault?.();
+            this.closeModal();
+            return;
+        }
+        if (e.key !== 'Tab') return;
+        const focusables = this.getModalFocusables();
+        if (focusables.length === 0) {
+            e.preventDefault?.();
+            return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+        const inside = document.getElementById('modal-content')?.contains(active);
+        if (e.shiftKey && (active === first || !inside)) {
+            e.preventDefault?.();
+            last.focus();
+        } else if (!e.shiftKey && (active === last || !inside)) {
+            e.preventDefault?.();
+            first.focus();
+        }
     }
 
     /**
@@ -2746,7 +2811,15 @@ export class MainGame {
      */
     closeModal() {
         const container = document.getElementById('modal-container');
+        if (!container) return;
         container.classList.add('hidden');
+        if (this.modalKeyHandler) {
+            document.removeEventListener('keydown', this.modalKeyHandler);
+            this.modalKeyHandler = null;
+        }
+        const returnTo = this.modalReturnFocus;
+        this.modalReturnFocus = null;
+        if (returnTo && document.contains(returnTo)) returnTo.focus?.();
     }
 
     /**
@@ -2949,11 +3022,24 @@ export class MainGame {
 
         container.appendChild(toast);
 
-        // Remove after 3 seconds
-        setTimeout(() => {
-            toast.style.animation = 'slideOutRight 0.3s ease forwards';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        // Keep the stack readable when many events land at once (e.g. a new
+        // week): at most MAX_TOASTS on screen, oldest leave first, and longer
+        // messages stay up longer (#1246)
+        const MAX_TOASTS = 4;
+        const live = Array.from(container.querySelectorAll('.toast:not(.leaving)'));
+        live.slice(0, Math.max(0, live.length - MAX_TOASTS)).forEach(old => this.dismissToast(old));
+
+        const duration = Math.min(8000, 3000 + String(message).length * 40);
+        toast._dismissTimer = setTimeout(() => this.dismissToast(toast), duration);
+        return toast;
+    }
+
+    dismissToast(toast) {
+        if (!toast || toast.classList.contains('leaving')) return;
+        clearTimeout(toast._dismissTimer);
+        toast.classList.add('leaving');
+        toast.style.animation = 'slideOutRight 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
     }
 
     /**
@@ -3417,7 +3503,7 @@ export class MainGame {
                 }
 
                 this.showToast(`Paid weekly rent: -$${rent}`, 'warning');
-                this.audioManager.play('kaching'); // Or a sad sound?
+                this.audioManager.play('expense');
 
                 // Rent was actually charged: count it for the story beat (#1497)
                 this.gameState.rentPaymentsMade = (Number(this.gameState.rentPaymentsMade) || 0) + 1;
