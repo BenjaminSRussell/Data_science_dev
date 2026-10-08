@@ -207,7 +207,7 @@ export const CHARACTER_STORIES = {
             {
                 id: 'phase_1',
                 title: 'The Intellectual Connection',
-                trigger: { relationship: 15 },
+                trigger: { relationship: 25 },
                 dialogue: "I... I have something to show you. These are some papers I've been reading. I don't usually share them.",
                 options: [
                     {
@@ -233,7 +233,7 @@ export const CHARACTER_STORIES = {
             {
                 id: 'phase_2',
                 title: 'The Secret Revealed',
-                trigger: { relationship: 35, flag: 'phase_1_complete' }, // flag check logic handled in system
+                trigger: { relationship: 40, flag: 'phase_1_complete' }, // after her 'secret' reveal (40)
                 dialogue: "I have to make a choice. A journal wants to interview 'E.B.' about my latest paper. They don't know it's me.",
                 options: [
                     {
@@ -246,7 +246,7 @@ export const CHARACTER_STORIES = {
                         text: "It's time the world knew who 'E.B.' really is.",
                         flag: 'emma_choice_public',
                         response: "It's terrifying... but maybe you're right. Maybe it's time to step into the light.",
-                        effects: { karma: 10, relationship: 5 } // karma mapped to charisma context in plan, using closest simple stat or ignoring if not present
+                        effects: { reputation: 10, relationship: 5 }
                     },
                     {
                         text: "Let's work together. My data science, your history.",
@@ -259,7 +259,7 @@ export const CHARACTER_STORIES = {
             {
                 id: 'phase_3',
                 title: 'The Digitization Project',
-                trigger: { relationship: 55, flag: 'phase_2_complete' },
+                trigger: { relationship: 60, flag: 'phase_2_complete' },
                 dialogue: "The project has been approved! We're starting the digitization. But I need your advice on the priority.",
                 options: [
                     {
@@ -292,19 +292,19 @@ export const CHARACTER_STORIES = {
                         text: "Take the University job. You're a professor at heart.",
                         flag: 'emma_final_professor',
                         response: "Professor Bloom... it has a nice ring to it. I think I will. Thank you for pushing me.",
-                        effects: { relationship: 10, final_outcome: 'professor' }
+                        effects: { relationship: 10 }
                     },
                     {
                         text: "Stay here. Make this library the city's info hub.",
                         flag: 'emma_final_librarian',
                         response: "You're right. My heart is here. We can transform this place into something amazing.",
-                        effects: { relationship: 10, final_outcome: 'tech_librarian' }
+                        effects: { relationship: 10 }
                     },
                     {
                         text: "Whatever you do, I want to be by your side.",
                         flag: 'emma_final_partner',
                         response: "That's all I wanted to hear. Past, future... it doesn't matter as long as we're together.",
-                        effects: { relationship: 20, final_outcome: 'partner' }
+                        effects: { relationship: 20 }
                     }
                 ]
             }
@@ -364,27 +364,27 @@ export const CHARACTER_STORIES = {
         },
         storyReveals: [
             {
-                relationshipLevel: 15,
+                relationshipLevel: 10,
                 topic: 'background',
                 dialogue: "I came here with nothing. Fifty dollars in my pocket. No English, no connections. But I had determination. That's all you need, really."
             },
             {
-                relationshipLevel: 30,
+                relationshipLevel: 25,
                 topic: 'philosophy',
                 dialogue: "Money comes and goes. But impact? Impact lasts. I'd rather invest in a person with a dream than a company with a balance sheet."
             },
             {
-                relationshipLevel: 50,
+                relationshipLevel: 40,
                 topic: 'secret',
                 dialogue: "The truth? I've lost everything. Bad investment. But I can't let people know. They believe in me. I have to prove I can rebuild. I have to."
             },
             {
-                relationshipLevel: 70,
+                relationshipLevel: 60,
                 topic: 'fear',
                 dialogue: "I'm terrified they'll find out. That I'm a fraud. That I'm broke. But I keep going because I have to. Because giving up isn't an option."
             },
             {
-                relationshipLevel: 90,
+                relationshipLevel: 80,
                 topic: 'dream',
                 dialogue: "I want to rebuild. Honestly. Without cutting corners. To prove that I can succeed again. That failure isn't the end - it's just data for the next attempt."
             }
@@ -462,6 +462,11 @@ export const CHARACTER_STORIES = {
                 relationshipLevel: 60,
                 topic: 'fear',
                 dialogue: "I'm scared. All the time. That I'm a fraud. That everyone sees through me. That I'd be nothing without my last name. But I keep going. I have to."
+            },
+            {
+                relationshipLevel: 60,
+                topic: 'dream',
+                dialogue: "You want to know what I actually want? To build one thing - just one - that my family's money never touched. Something people use because it's good, not because of my last name."
             },
             {
                 relationshipLevel: 80,

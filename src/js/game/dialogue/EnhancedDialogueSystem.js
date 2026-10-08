@@ -7,11 +7,30 @@
 import { CHARACTER_STORIES, getStoryReveal, getCharacterStory } from './DeepCharacterStories.js';
 import { DialogueNode, DialogueTree } from './DialogueTreeSystem.js';
 
-export class EnhancedDialogueSystem {
-    constructor() {
-        this.storyCache = new Map();
-    }
+// Reveal topics that already have their own question node; every other topic
+// is a "personal" reveal (#1146, #2217)
+const DEDICATED_TOPICS = new Set(['background', 'dream', 'philosophy']);
 
+const TOPIC_LABELS = {
+    father: 'their father',
+    secret_project: 'their side project',
+    kids: 'their kids',
+    networking: 'networking',
+    intensity: 'what drives them',
+    quiet: 'being quiet',
+    change: 'how they changed',
+    mother: 'their mother',
+    husband: 'their late husband',
+    insecurity: 'what they really think of themselves',
+    family: 'their family',
+    struggle: 'what has been hard lately',
+    secret: 'what they are holding back',
+    fear: 'what scares them'
+};
+
+const lowerFirst = (text = '') => text.charAt(0).toLowerCase() + text.slice(1);
+
+export class EnhancedDialogueSystem {
     /**
      * Build enhanced dialogue tree for NPC with deep stories
      */
@@ -27,12 +46,10 @@ export class EnhancedDialogueSystem {
         // Root node with relationship-based greeting
         nodes.push(this.createRootNode(npc, relationshipLevel, story, flags));
 
-        // Add story reveal nodes based on relationship
-        story.storyReveals.forEach(reveal => {
-            if (relationshipLevel >= reveal.relationshipLevel) {
-                nodes.push(this.createStoryRevealNode(npc, reveal, story));
-            }
-        });
+        // Add story reveal nodes based on relationship; the root links to
+        // them, so they are reachable (#1144)
+        nodes.push(...this.getUnlockedReveals(story, relationshipLevel)
+            .map(({ reveal, nodeId }) => this.createStoryRevealNode(npc, reveal, story, nodeId)));
 
         // Add topic-based dialogue nodes
         nodes.push(...this.createTopicNodes(npc, story, relationshipLevel));
@@ -67,6 +84,18 @@ export class EnhancedDialogueSystem {
                 choices.unshift({ id: `phase_${activePhase.id}`, text: "Talk about something important" });
             }
         }
+
+        // Topic reveals without a dedicated question get their own choice;
+        // the relationship gate sits on the choice, where consumers read it (#1607)
+        this.getUnlockedReveals(story, relationshipLevel)
+            .filter(({ reveal }) => !DEDICATED_TOPICS.has(reveal.topic))
+            .forEach(({ reveal, nodeId }) => {
+                choices.push({
+                    id: nodeId,
+                    text: `Ask about ${TOPIC_LABELS[reveal.topic] || reveal.topic.replace(/_/g, ' ')}`,
+                    conditions: { relationship: reveal.relationshipLevel }
+                });
+            });
 
         // Add story exploration options based on relationship
         if (relationshipLevel >= 10) {
@@ -121,16 +150,33 @@ export class EnhancedDialogueSystem {
             professional: `Hello. I\'m ${npc.name}. How can I help you?`,
             competitive: `Hey. ${npc.name}. What do you want?`,
             mysterious: `...Hello. I\'m ${npc.name}.`,
-            generous: `Welcome! I\'m ${npc.name}. Always happy to help.`
+            generous: `Welcome! I\'m ${npc.name}. Always happy to help.`,
+            grumpy: `${npc.name}. Make it quick.`
         };
 
         return greetings[npc.personality] || `Hello, I\'m ${npc.name}.`;
     }
 
     /**
+     * Unlocked reveals with collision-safe node ids: the first reveal of a
+     * topic is story_<topic>, repeats get story_<topic>_2, _3, ... (#1144)
+     */
+    getUnlockedReveals(story, relationshipLevel) {
+        const seen = new Map();
+        return (story.storyReveals || [])
+            .filter(reveal => relationshipLevel >= reveal.relationshipLevel)
+            .map(reveal => {
+                const count = (seen.get(reveal.topic) || 0) + 1;
+                seen.set(reveal.topic, count);
+                const nodeId = count === 1 ? `story_${reveal.topic}` : `story_${reveal.topic}_${count}`;
+                return { reveal, nodeId };
+            });
+    }
+
+    /**
      * Create story reveal node
      */
-    createStoryRevealNode(npc, reveal, story) {
+    createStoryRevealNode(npc, reveal, story, nodeId = `story_${reveal.topic}`) {
         const choices = [
             { id: 'empathize', text: this.getEmpathyResponse(reveal.topic) },
             { id: 'ask_more', text: 'Tell me more about that' },
@@ -138,7 +184,7 @@ export class EnhancedDialogueSystem {
         ];
 
         return new DialogueNode({
-            id: `story_${reveal.topic}`,
+            id: nodeId,
             text: reveal.dialogue,
             choices: choices,
             conditions: { relationship: reveal.relationshipLevel },
@@ -189,10 +235,25 @@ export class EnhancedDialogueSystem {
             choices: [
                 { id: 'life_empathize', text: this.getEmpathyResponse('struggle') },
                 { id: 'life_ask_more', text: 'How are you handling it?' },
+                ...(relationshipLevel >= 25 && story.personalStory?.relationship
+                    ? [{ id: 'ask_about_people', text: 'Ask about the people in their life', conditions: { relationship: 25 } }]
+                    : []),
                 { id: 'root', text: 'I hope things get better' }
             ],
             effects: { relationship: 2 }
         }));
+
+        if (relationshipLevel >= 25 && story.personalStory?.relationship) {
+            nodes.push(new DialogueNode({
+                id: 'ask_about_people',
+                text: `(From what they share, you piece it together: ${story.personalStory.relationship})`,
+                choices: [
+                    { id: 'life_empathize', text: 'Thanks for telling me' },
+                    { id: 'root', text: 'Talk about something else' }
+                ],
+                effects: { relationship: 2 }
+            }));
+        }
 
         return nodes;
     }
@@ -265,16 +326,32 @@ export class EnhancedDialogueSystem {
                 choices: [
                     { id: 'personal_empathize', text: 'I understand' },
                     { id: 'personal_support', text: 'I\'m here for you' },
+                    ...(this.getPersonalInsight(npc, story, relationshipLevel)
+                        ? [{ id: 'personal_insight', text: 'Read between the lines', conditions: { relationship: 40 } }]
+                        : []),
                     { id: 'root', text: 'Thank you for trusting me' }
                 ],
                 effects: { relationship: 4 }
             }));
+
+            const insight = this.getPersonalInsight(npc, story, relationshipLevel);
+            if (insight) {
+                nodes.push(new DialogueNode({
+                    id: 'personal_insight',
+                    text: insight,
+                    choices: [
+                        { id: 'personal_support', text: 'I\'m here for you' },
+                        { id: 'root', text: 'Talk about something else' }
+                    ],
+                    effects: { relationship: 2 }
+                }));
+            }
         }
 
         if (relationshipLevel >= 60) {
             nodes.push(new DialogueNode({
                 id: 'deep_question',
-                text: this.getDeepReveal(npc, story),
+                text: this.getDeepReveal(npc, story, relationshipLevel),
                 choices: [
                     { id: 'deep_philosophy', text: 'That\'s profound' },
                     { id: 'deep_connect', text: 'I feel the same way' },
@@ -293,7 +370,7 @@ export class EnhancedDialogueSystem {
     getBackgroundReveal(npc, story, relationshipLevel) {
         const reveal = getStoryReveal(npc.id, relationshipLevel, 'background');
         if (reveal) return reveal.dialogue;
-        return story.personalStory.background;
+        return getCharacterStory(npc.id, 'background') || story.personalStory?.background || '';
     }
 
     /**
@@ -302,17 +379,17 @@ export class EnhancedDialogueSystem {
     getDreamReveal(npc, story, relationshipLevel) {
         const reveal = getStoryReveal(npc.id, relationshipLevel, 'dream');
         if (reveal) return reveal.dialogue;
-        return `I have dreams. Big ones. ${story.personalStory.dream}`;
+        return `I have dreams. Big ones. ${getCharacterStory(npc.id, 'dream') || story.personalStory?.dream || ''}`.trim();
     }
 
     /**
      * Get personal reveal
      */
     getPersonalReveal(npc, story, relationshipLevel) {
-        // Get the most recent personal reveal
+        // The most recent reveal on any topic that has no dedicated question
+        // (covers every character's own topics, not a fixed whitelist)
         const reveals = story.storyReveals
-            .filter(r => relationshipLevel >= r.relationshipLevel &&
-                ['secret', 'fear', 'struggle'].includes(r.topic))
+            .filter(r => relationshipLevel >= r.relationshipLevel && !DEDICATED_TOPICS.has(r.topic))
             .sort((a, b) => b.relationshipLevel - a.relationshipLevel);
 
         if (reveals.length > 0) {
@@ -320,6 +397,24 @@ export class EnhancedDialogueSystem {
         }
 
         return `There are things I don't usually talk about. But I trust you.`;
+    }
+
+    /**
+     * Narrated insight from the authored personalStory: their fear once you
+     * are close, the secret they hide once you are very close (#2192)
+     */
+    getPersonalInsight(npc, story, relationshipLevel) {
+        const pick = (element) => getCharacterStory(npc.id, element) || story.personalStory?.[element] || null;
+        const first = (npc.name || 'they').split(' ')[0];
+        const secret = pick('secret');
+        const fear = pick('fear');
+        if (relationshipLevel >= 60 && secret) {
+            return `(You realize what ${first} has been holding back: ${secret})`;
+        }
+        if (relationshipLevel >= 40 && fear) {
+            return `(You sense what ${first} is afraid of: ${lowerFirst(fear)})`;
+        }
+        return null;
     }
 
     /**
@@ -407,10 +502,11 @@ export class EnhancedDialogueSystem {
     /**
      * Get deep reveal (philosophy)
      */
-    getDeepReveal(npc, story) {
-        const reveal = getStoryReveal(npc.id, 80, 'philosophy');
+    getDeepReveal(npc, story, relationshipLevel = 0) {
+        // Use the player's real level, not a hardcoded 80 (#1145)
+        const reveal = getStoryReveal(npc.id, relationshipLevel, 'philosophy');
         if (reveal) return reveal.dialogue;
-        return story.personalStory.philosophy;
+        return getCharacterStory(npc.id, 'philosophy') || story.personalStory?.philosophy || '';
     }
 
     /**

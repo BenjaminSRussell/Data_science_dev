@@ -9,6 +9,8 @@ import { STATS } from '../game/CharacterStats.js';
 import { getNPCImage } from '../utils/NPCImageMapper.js';
 
 // Items a dialogue node can hand over (effects.item) (#47)
+const DIALOGUE_XP_ALIASES = { python: 'analytics', statistics: 'intelligence', sql: 'analytics' };
+
 export const DIALOGUE_ITEMS = {
     gift: { name: 'a small gift', money: 100 }
 };
@@ -126,7 +128,11 @@ export class DialogueUI {
         const treeSystem = this.game?.gameState?.dialogueTreeSystem || this.game?.dialogueTreeSystem || dialogueTreeSystem;
         // getTree() returns null for NPCs without dialogue data; fall back to
         // a simple greeting tree in that case too.
-        this.currentTree = treeSystem?.getTree?.(npc.id, relLevel) || null;
+        // Story phases advance through per-NPC flags, so pass them along
+        const flags = this.game?.gameState?.npcManager?.getNPCFlags?.(npc.id) || null;
+        this.currentTree = (flags
+            ? treeSystem?.getTree?.(npc.id, relLevel, flags)
+            : treeSystem?.getTree?.(npc.id, relLevel)) || null;
         if (!this.currentTree) {
             // Fallback: create simple tree
             this.currentTree = {
@@ -342,6 +348,33 @@ export class DialogueUI {
             if (STATS[id] && typeof stats.addExperience === 'function') {
                 const toNext = (stats.getXPForNextLevel?.(id) ?? 100) - (stats.xp?.[id] || 0);
                 stats.addExperience(id, Math.max(1, toNext));
+            }
+        }
+
+        const gameState = this.game?.gameState;
+        const stats = gameState?.characterStats;
+
+        // Story choices: remember the chosen option so the next phase can
+        // unlock (story phases set effects.flag)
+        if (effects.flag && this.currentNPC) {
+            const flags = gameState?.npcManager?.getNPCFlags?.(this.currentNPC.id);
+            if (flags) flags[effects.flag] = true;
+        }
+
+        if (gameState) {
+            if (typeof effects.ethics === 'number') stats?.modifyEthics?.(effects.ethics);
+            if (typeof effects.reputation === 'number') gameState.reputation = (gameState.reputation || 0) + effects.reputation;
+            if (typeof effects.money === 'number') gameState.money = (gameState.money || 0) + effects.money;
+        }
+
+        // Stat XP: { intelligence: 5 } or { xp: 'analytics', xpAmount: 5 }
+        if (stats && typeof stats.addExperience === 'function') {
+            for (const id of Object.keys(STATS)) {
+                if (typeof effects[id] === 'number' && effects[id] > 0) stats.addExperience(id, effects[id]);
+            }
+            if (typeof effects.xp === 'string') {
+                const id = DIALOGUE_XP_ALIASES[effects.xp] || effects.xp;
+                if (STATS[id]) stats.addExperience(id, effects.xpAmount || 20);
             }
         }
 

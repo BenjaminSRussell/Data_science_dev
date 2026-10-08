@@ -130,11 +130,11 @@ describe('EnhancedDialogueSystem (#309)', () => {
     it('emma phases unlock by relationship and advance once a phase option is chosen', () => {
         const story = CHARACTER_STORIES.emma_bloom;
         const [p1, p2] = story.phases;
-        expect(eds.getActivePhase(emma, story, 10)).toBeNull();
-        expect(eds.getActivePhase(emma, story, 20).id).toBe('phase_1');
+        expect(eds.getActivePhase(emma, story, 20)).toBeNull();
+        expect(eds.getActivePhase(emma, story, 30).id).toBe('phase_1');
         expect(eds.getActivePhase(emma, story, 90).id).toBe('phase_1');
         const afterP1 = { [p1.options[0].flag]: true };
-        expect(eds.getActivePhase(emma, story, 20, afterP1)).toBeNull();
+        expect(eds.getActivePhase(emma, story, 30, afterP1)).toBeNull();
         expect(eds.getActivePhase(emma, story, p2.trigger.relationship, afterP1).id).toBe('phase_2');
         const allDone = Object.fromEntries(story.phases.map(p => [p.options[0].flag, true]));
         expect(eds.getActivePhase(emma, story, 100, allDone)).toBeNull();

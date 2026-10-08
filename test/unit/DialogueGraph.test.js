@@ -56,11 +56,12 @@ describe('dialogue graph integrity', () => {
 
 import { DialogueTreeSystem } from '../../src/js/game/dialogue/DialogueTreeSystem.js';
 describe('DialogueTreeSystem cache (#913, #2122)', () => {
-    it('caches personality trees once per NPC and stays bounded', () => {
+    it('caches personality trees once per NPC relationship tier and stays bounded', () => {
         const sys = new DialogueTreeSystem();
         sys.setNPCManager({ getNPC: id => ({ id, name: id, personality: 'friendly' }) });
+        // levels 0-49 span two tiers (acquaintance < 30 <= friend), #1580
         for (let i = 0; i < 50; i++) sys.getTree('plain_npc', i + 0.37);
-        expect(sys.treeCache.size).toBe(1);
+        expect(sys.treeCache.size).toBe(2);
         for (let i = 0; i < 300; i++) sys.getTree(`npc_${i}`, 0);
         expect(sys.treeCache.size).toBeLessThanOrEqual(DialogueTreeSystem.MAX_CACHE);
     });

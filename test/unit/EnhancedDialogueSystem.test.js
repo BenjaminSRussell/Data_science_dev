@@ -152,7 +152,8 @@ describe('EnhancedDialogueSystem - Reveal Methods', () => {
             const story = CHARACTER_STORIES['professor_higgins'];
             const text = system.getDeepReveal(
                 { id: 'professor_higgins', name: 'Professor Higgins' },
-                story
+                story,
+                80
             );
             // Should return the philosophy reveal at level 80
             expect(text).toContain('data science');
