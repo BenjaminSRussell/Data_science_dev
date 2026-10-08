@@ -3247,6 +3247,13 @@ export class MainGame {
                 }
                 // Jealousy cools off a little every day (#915)
                 this.gameState.jealousySystem?.decayAll?.(2);
+                // Neglected relationships cool off and can end (#1076)
+                const breakups = this.gameState.relationshipEmotionSystem?.processDailyUpdates?.() || [];
+                for (const b of breakups) {
+                    const who = b.npc?.name || 'Your partner';
+                    const extra = b.divorceCost > 0 ? ` The divorce cost you $${b.divorceCost.toLocaleString()}.` : '';
+                    this.showToast(`${who} ended things: "${b.dialogue}"${extra}`, 'error');
+                }
                 if (this.newsManager) {
                     this.newsManager.generateDailyNews();
                     this.updateNewsBadge();

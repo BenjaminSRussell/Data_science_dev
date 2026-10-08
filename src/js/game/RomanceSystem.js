@@ -97,6 +97,8 @@ export class RomanceSystem {
         // matter once engaged/married (#1929, #1931)
         const npcManager = this.gameState.npcManager;
         let relationshipGain = 0;
+        // A date counts as time together for neglect tracking (#1548)
+        this.gameState.relationshipEmotionSystem?.recordInteraction?.(this.partnerId);
         if (npcManager?.modifyRelationship) {
             const before = npcManager.getRelationship?.(this.partnerId) ?? 0;
             npcManager.modifyRelationship(this.partnerId, date.relationship);
@@ -147,6 +149,32 @@ export class RomanceSystem {
         this.modifyHappiness(100); // Max happy
 
         return { success: true, message: "Just married! " };
+    }
+
+    /**
+     * End the current relationship (player-initiated or from
+     * RelationshipEmotionSystem). Divorce costs more than a breakup (#2053, #1077).
+     * @returns {{previousStatus: string, divorceCost: number, partnerId: string|null}}
+     */
+    breakUp(reason = 'mutual') {
+        const previousStatus = this.relationshipStatus;
+        const partnerId = this.partnerId;
+        if (!partnerId) return { previousStatus, divorceCost: 0, partnerId: null };
+
+        let divorceCost = 0;
+        if (previousStatus === 'married') {
+            // Splitting assets: a quarter of your cash and one step down in housing
+            divorceCost = Math.max(0, Math.floor((Number(this.gameState.money) || 0) * 0.25));
+            this.gameState.money = (Number(this.gameState.money) || 0) - divorceCost;
+            this.houseLevel = Math.max(0, (this.houseLevel || 0) - 1);
+        }
+
+        this.partnerId = null;
+        this.relationshipStatus = 'single';
+        this.relationshipScore = 0;
+        this.anniversary = null;
+        this.lastBreakup = { partnerId, reason, previousStatus, day: this.gameState.timeManager?.totalDays ?? null };
+        return { previousStatus, divorceCost, partnerId };
     }
 
     toJSON() {
