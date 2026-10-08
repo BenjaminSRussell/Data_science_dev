@@ -24,7 +24,9 @@ class Logger {
      */
     setLevel(level) {
         if (typeof level === 'string') {
-            this.level = LOG_LEVELS[level.toUpperCase()] || LOG_LEVELS.INFO;
+            const key = level.toUpperCase();
+            // DEBUG is 0, so check membership instead of truthiness
+            this.level = Object.prototype.hasOwnProperty.call(LOG_LEVELS, key) ? LOG_LEVELS[key] : LOG_LEVELS.INFO;
         } else {
             this.level = level;
         }

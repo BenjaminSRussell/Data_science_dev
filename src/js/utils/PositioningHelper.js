@@ -219,6 +219,10 @@ export class PositioningHelper {
         } else {
             this.positionAtPixels(element, position.x, position.y);
         }
+        // center: false keeps the top-left corner on the coordinate
+        if (!center) {
+            element.style.transform = '';
+        }
 
         // Set size
         if (size.width !== 'auto') {

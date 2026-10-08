@@ -8,6 +8,8 @@ export class ResearchPaperNotificationSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.inbox = [];
+        this.readPapers = new Set();
+        this.notificationSeq = 0;
         this.papers = this.initializeResearchPapers();
         this.scheduledPapers = this.schedulePapers();
     }
@@ -319,7 +321,8 @@ export class ResearchPaperNotificationSystem {
         
         // Add to inbox
         this.inbox.push({
-            id: `notification_${Date.now()}`,
+            // Several papers can unlock in the same millisecond, so add a sequence number
+            id: `notification_${Date.now()}_${++this.notificationSeq}`,
             paperId: paperId,
             paper: paper,
             receivedAt: Date.now(),
@@ -346,7 +349,8 @@ export class ResearchPaperNotificationSystem {
      * Get inbox (unread first)
      */
     getInbox() {
-        return this.inbox.sort((a, b) => {
+        // Sort a copy so callers never see the stored order change under them
+        return [...this.inbox].sort((a, b) => {
             if (a.read !== b.read) return a.read ? 1 : -1;
             return b.receivedAt - a.receivedAt;
         });
@@ -366,6 +370,7 @@ export class ResearchPaperNotificationSystem {
         const notification = this.inbox.find(item => item.id === notificationId);
         if (notification) {
             notification.read = true;
+            this.readPapers.add(notification.paperId);
         }
     }
     
@@ -376,6 +381,13 @@ export class ResearchPaperNotificationSystem {
         return this.papers[paperId];
     }
     
+    /**
+     * Get unlocked papers for an AI-history phase
+     */
+    getPapersByPhase(phase) {
+        return Object.values(this.papers).filter(paper => paper.phase === phase && paper.unlocked);
+    }
+
     /**
      * Get breakthrough papers
      */
@@ -389,6 +401,7 @@ export class ResearchPaperNotificationSystem {
     toJSON() {
         return {
             inbox: this.inbox,
+            readPapers: [...this.readPapers],
             papers: Object.fromEntries(
                 Object.entries(this.papers).map(([id, paper]) => [id, { unlocked: paper.unlocked }])
             )
@@ -399,11 +412,20 @@ export class ResearchPaperNotificationSystem {
      * Deserialize from save
      */
     fromJSON(data) {
-        if (data.inbox) this.inbox = data.inbox;
+        if (!data) return;
+        if (Array.isArray(data.inbox)) this.inbox = data.inbox;
+        if (Array.isArray(data.readPapers)) {
+            this.readPapers = new Set(data.readPapers);
+        } else {
+            // Older saves: rebuild from the inbox read flags
+            this.readPapers = new Set(this.inbox.filter(item => item.read).map(item => item.paperId));
+        }
+        // Keep new notification ids unique after loading
+        this.notificationSeq = Math.max(this.notificationSeq, this.inbox.length);
         if (data.papers) {
             Object.entries(data.papers).forEach(([id, state]) => {
-                if (this.papers[id]) {
-                    this.papers[id].unlocked = state.unlocked;
+                if (this.papers[id] && state) {
+                    this.papers[id].unlocked = !!state.unlocked;
                 }
             });
         }

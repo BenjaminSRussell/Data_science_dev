@@ -95,11 +95,31 @@ export class GameplaySettings {
      * Import settings
      */
     fromJSON(json) {
+        let parsed;
         try {
-            this.settings = JSON.parse(json);
+            parsed = typeof json === 'string' ? JSON.parse(json) : json;
         } catch (e) {
             console.error('Failed to load settings:', e);
+            return;
         }
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            console.error('Failed to load settings:', new TypeError('settings must be an object'));
+            return;
+        }
+        // Merge each category over the defaults so a partial or older save
+        // can't wipe out categories it doesn't mention
+        const defaults = new GameplaySettings().settings;
+        const merged = {};
+        for (const key of new Set([...Object.keys(defaults), ...Object.keys(parsed)])) {
+            const base = defaults[key];
+            const incoming = parsed[key];
+            if (base && incoming && typeof incoming === 'object' && !Array.isArray(incoming)) {
+                merged[key] = { ...base, ...incoming };
+            } else {
+                merged[key] = base ? { ...base } : incoming;
+            }
+        }
+        this.settings = merged;
     }
 }
 
