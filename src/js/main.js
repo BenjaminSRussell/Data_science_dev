@@ -3610,6 +3610,14 @@ export class MainGame {
                 const rent = this.gameState.rent || 500;
                 this.gameState.money -= rent;
 
+                // Starter-job paycheck from onboarding (#1071)
+                const pay = IntroSystem.weeklyPay(this.gameState.currentJob);
+                if (pay > 0) {
+                    this.gameState.money += pay;
+                    this.gameState.weeklyIncome = (this.gameState.weeklyIncome || 0) + pay;
+                    this.showToast(`Paycheck from ${this.gameState.currentJob.company}: +$${pay.toLocaleString()}`, 'success');
+                }
+
                 // Calculate and deduct taxes based on previous week's income
                 const weeklyIncome = this.gameState.weeklyIncome || 0;
                 if (weeklyIncome > 0 && this.economySystem) {
