@@ -1698,9 +1698,11 @@ a:hover {
     background: rgba(var(--color-accent-rgb),  0.15);
 }
 
+/* min(250px, 100%) lets the grid collapse to one full-width column on
+   phones narrower than 250px + padding instead of overflowing (#883) */
 .shop-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
     gap: var(--space-4);
 }
 

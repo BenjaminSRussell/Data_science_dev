@@ -880,3 +880,282 @@
     background: var(--color-accent-success);
     transition: width 0.2s ease;
 }
+
+/* ---- Relationships screen (#1466) ---- */
+.npc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+    gap: var(--space-3, 0.75rem);
+}
+
+.npc-grid-empty {
+    grid-column: 1 / -1;
+    padding: var(--space-4, 1rem);
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+
+.npc-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+        "avatar info"
+        "tier tier"
+        "gift gift";
+    align-items: center;
+    gap: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border, var(--color-bg-elevated));
+    border-radius: var(--radius-md, 10px);
+    padding: var(--space-3, 0.75rem);
+    color: var(--color-text-primary);
+    min-width: 0;
+    cursor: pointer;
+}
+
+.npc-card:hover,
+.npc-card:focus-visible {
+    border-color: var(--color-accent-secondary);
+}
+
+.npc-card:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
+.npc-avatar {
+    grid-area: avatar;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full, 9999px);
+    overflow: hidden;
+    background: var(--color-bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.npc-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.npc-avatar-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.npc-info {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1, 0.25rem);
+    min-width: 0;
+}
+
+.npc-name {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.npc-title {
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-text-secondary);
+}
+
+.relationship-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-full, 9999px);
+    overflow: hidden;
+}
+
+.relationship-fill {
+    height: 100%;
+    background: var(--color-accent-success, var(--color-accent-primary));
+    border-radius: inherit;
+    transition: width 0.3s ease;
+}
+
+.relationship-tier {
+    grid-area: tier;
+    font-size: var(--font-size-xs, 0.75rem);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+}
+
+.npc-gift-controls {
+    grid-area: gift;
+    display: flex;
+    gap: var(--space-2, 0.5rem);
+    min-width: 0;
+}
+
+.npc-gift-btn {
+    flex-shrink: 0;
+}
+
+.npc-gift-select {
+    flex: 1;
+    min-width: 0;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border, var(--color-bg-elevated));
+    border-radius: var(--radius-sm, 6px);
+    padding: var(--space-1, 0.25rem) var(--space-2, 0.5rem);
+}
+
+/* ---- Stock market screen and Quotron ticker (#2464) ---- */
+#screen-stock-market .positive { color: var(--color-accent-success); }
+#screen-stock-market .negative { color: var(--color-accent-danger); }
+
+.quotron-ticker-container {
+    overflow: hidden;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border, var(--color-bg-elevated));
+    border-radius: var(--radius-sm, 6px);
+    font-family: var(--font-mono, monospace);
+}
+
+.quotron-ticker-scroll {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.quotron-ticker-content {
+    display: inline-flex;
+    gap: var(--space-6, 1.5rem);
+    padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+    /* QuotronTicker.animate() scrolls the wrapper's scrollLeft */
+}
+
+.quotron-ticker-item {
+    display: inline-flex;
+    gap: var(--space-2, 0.5rem);
+    align-items: baseline;
+}
+
+.ticker-ticker { font-weight: 700; }
+.ticker-price { color: var(--color-text-primary); }
+.ticker-market {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-muted, var(--color-text-secondary));
+}
+
+
+.market-section-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3, 0.75rem);
+    margin-top: var(--space-3, 0.75rem);
+    border-bottom: 1px solid var(--color-border, var(--color-bg-elevated));
+    padding-bottom: var(--space-1, 0.25rem);
+}
+
+.market-name { margin: 0; font-size: 1rem; }
+.market-trend { font-weight: 600; }
+.market-stats {
+    margin-left: auto;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+.stock-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1, 0.25rem);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border, var(--color-bg-elevated));
+    border-radius: var(--radius-md, 10px);
+    padding: var(--space-3, 0.75rem);
+    min-width: 0;
+}
+
+.stock-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2, 0.5rem);
+}
+
+.stock-ticker { font-weight: 700; font-family: var(--font-mono, monospace); }
+
+.stock-market-badge {
+    font-size: var(--font-size-xs, 0.75rem);
+    padding: 0 var(--space-2, 0.5rem);
+    border-radius: var(--radius-full, 9999px);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.stock-name { font-weight: 600; }
+
+.stock-sector,
+.stock-volume,
+.stock-holdings {
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-text-secondary);
+}
+
+.stock-price-large { font-size: 1.5rem; font-weight: 700; }
+.stock-change { font-weight: 600; }
+.stock-change-amount { font-weight: 400; margin-left: var(--space-1, 0.25rem); }
+
+.stock-actions {
+    display: flex;
+    gap: var(--space-2, 0.5rem);
+    margin-top: var(--space-2, 0.5rem);
+}
+
+.stock-actions-illegal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2, 0.5rem);
+}
+
+.market-index,
+.market-summary {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border, var(--color-bg-elevated));
+    border-radius: var(--radius-sm, 6px);
+    padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1, 0.25rem);
+}
+
+.index-name,
+.summary-market { font-weight: 600; color: var(--color-text-secondary); }
+.index-value { font-size: 1.25rem; font-weight: 700; }
+.index-change-amount { margin-left: var(--space-1, 0.25rem); }
+.summary-trend { font-weight: 600; }
+.summary-stats { font-size: var(--font-size-sm, 0.875rem); color: var(--color-text-secondary); }
+
+.world-event-alert {
+    display: flex;
+    gap: var(--space-3, 0.75rem);
+    align-items: flex-start;
+    background: var(--color-bg-secondary);
+    border-left: 3px solid var(--color-accent-warning);
+    border-radius: var(--radius-sm, 6px);
+    padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+}
+
+.event-icon { font-size: 1.25rem; line-height: 1; }
+.event-content { display: flex; flex-direction: column; gap: var(--space-1, 0.25rem); min-width: 0; }
+.event-title { font-weight: 600; }
+.event-impact { font-size: var(--font-size-sm, 0.875rem); }
+
+.no-events {
+    color: var(--color-text-secondary);
+    font-style: italic;
+    padding: var(--space-2, 0.5rem);
+}
