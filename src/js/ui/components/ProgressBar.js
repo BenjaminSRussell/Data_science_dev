@@ -57,7 +57,10 @@ export class ProgressBar extends BaseComponent {
     }
 
     render() {
-        const percentage = Math.min((this.value / this.max) * 100, 100);
+        // Clamp to 0-100; a zero/invalid max or value renders an empty bar
+        // instead of Infinity%/NaN%/negative widths
+        const ratio = this.max > 0 ? (Number(this.value) / this.max) * 100 : 0;
+        const percentage = Number.isFinite(ratio) ? Math.max(0, Math.min(ratio, 100)) : 0;
 
         return html`
             <div class="progress-container">
