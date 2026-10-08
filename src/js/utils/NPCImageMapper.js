@@ -21,6 +21,7 @@ const EXISTING_IMAGES = {
 
 // Generate image path for NPC based on type and name
 export function getNPCImage(npc) {
+    if (!npc || typeof npc !== 'object') npc = {};
     let imagePath = null;
 
     // 1. Check explicit property
@@ -104,6 +105,8 @@ function generateImagePath(npc) {
  * Simple hash function for deterministic image selection
  */
 function simpleHash(str) {
+    // Names and ids can be missing; hash them as empty strings instead of throwing
+    str = String(str ?? '');
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
@@ -137,6 +140,7 @@ export function getNPCFallback(npc) {
  * Get all NPC image paths (for preloading)
  */
 export function getAllNPCImagePaths(npcs) {
+    if (!Array.isArray(npcs)) return [];
     return npcs.map(npc => getNPCImage(npc)).filter(Boolean);
 }
 

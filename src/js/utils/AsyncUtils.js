@@ -137,50 +137,49 @@ export class AsyncUtils {
      * Throttle async function
      */
     static throttleAsync(func, limit) {
-        let inThrottle;
+        let inThrottle = false;
+        let settled = false;
+        let failed = false;
         let lastResult;
         let lastError;
-        let lastArgs;
-        let lastResolve;
-        let lastReject;
-        let pendingResolvers = [];
+        let pending = [];
 
         return function executedFunction(...args) {
             return new Promise((resolve, reject) => {
-                lastArgs = args;
-                lastResolve = resolve;
-                lastReject = reject;
-
                 if (!inThrottle) {
+                    // Leading call: run func and settle this call's own promise
+                    // plus every call that arrived while it was in flight.
                     inThrottle = true;
-                    func(...lastArgs)
+                    settled = false;
+                    Promise.resolve()
+                        .then(() => func(...args))
                         .then(result => {
                             lastResult = result;
                             lastError = undefined;
-                            lastResolve(result);
-                            pendingResolvers.forEach(({ resolve: r }) => r(result));
-                        })
-                        .catch(error => {
+                            failed = false;
+                            settled = true;
+                            resolve(result);
+                            pending.forEach(({ resolve: r }) => r(result));
+                        }, error => {
                             lastError = error;
-                            lastReject(error);
-                            pendingResolvers.forEach(({ reject: r }) => r(error));
+                            failed = true;
+                            settled = true;
+                            reject(error);
+                            pending.forEach(({ reject: r }) => r(error));
                         })
                         .finally(() => {
-                            pendingResolvers = [];
+                            pending = [];
                             setTimeout(() => {
                                 inThrottle = false;
                             }, limit);
                         });
+                } else if (settled) {
+                    // Inside the throttle window after the call settled
+                    if (failed) reject(lastError);
+                    else resolve(lastResult);
                 } else {
-                    // Return last result if available, otherwise wait for the
-                    // in-flight call to settle so this promise always resolves.
-                    if (lastResult !== undefined) {
-                        lastResolve(lastResult);
-                    } else if (lastError !== undefined) {
-                        lastReject(lastError);
-                    } else {
-                        pendingResolvers.push({ resolve: lastResolve, reject: lastReject });
-                    }
+                    // In flight: wait for the leading call to settle
+                    pending.push({ resolve, reject });
                 }
             });
         };
