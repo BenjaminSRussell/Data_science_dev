@@ -51,8 +51,8 @@ export class StatisticsAggregator {
                     highestRank = state.rankIndex;
                 }
                 
-                // Count completed games (reached max rank, index 6)
-                if (state.rankIndex >= 6) {
+                // Count completed games (reached the top rank)
+                if (state.rankIndex >= RANKS.length - 1) {
                     gamesCompleted++;
                 }
                 

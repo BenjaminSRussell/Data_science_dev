@@ -54,36 +54,60 @@ export class UILayerManager {
             return;
         }
 
-        const zIndex = this.getZIndex(layer);
-        element.style.zIndex = zIndex;
-        
-        // Track element
+        // Track element (once) in this layer only
+        for (const [name, elements] of this.layerElements.entries()) {
+            if (name === layer) continue;
+            const index = elements.indexOf(element);
+            if (index !== -1) elements.splice(index, 1);
+        }
         if (!this.layerElements.has(layer)) {
             this.layerElements.set(layer, []);
         }
-        this.layerElements.get(layer).push(element);
+        const elements = this.layerElements.get(layer);
+        if (!elements.includes(element)) elements.push(element);
+
+        // Newer elements stack above older ones within the layer band
+        element.style.zIndex = String(this.getZIndex(layer) + elements.indexOf(element));
     }
 
     /**
      * Bring element to front of its layer
      */
     bringToFront(element) {
-        const currentZIndex = parseInt(element.style.zIndex) || 0;
-        
-        // Find which layer this element belongs to
+        if (!element || !element.style) return false;
+
+        // Prefer the layer the element is tracked in; otherwise pick the layer
+        // whose band contains its z-index (highest base <= z-index)
         let elementLayer = null;
-        for (const [layer, zIndex] of Object.entries(this.layers)) {
-            if (zIndex === currentZIndex) {
+        for (const [layer, elements] of this.layerElements.entries()) {
+            if (elements.includes(element)) {
                 elementLayer = layer;
                 break;
             }
         }
-
-        if (elementLayer) {
-            const layerElements = this.layerElements.get(elementLayer) || [];
-            const maxZIndex = Math.max(...layerElements.map(el => parseInt(el.style.zIndex) || 0));
-            element.style.zIndex = maxZIndex + 1;
+        if (!elementLayer) {
+            const z = parseInt(element.style.zIndex, 10);
+            if (!Number.isFinite(z)) return false;
+            for (const [layer, base] of Object.entries(this.layers)) {
+                if (base <= z && (elementLayer === null || base > this.layers[elementLayer])) {
+                    elementLayer = layer;
+                }
+            }
         }
+        if (!elementLayer) return false;
+
+        // Re-stack the layer with this element on top. Indexes stay packed
+        // just above the layer base, so repeated calls never drift into the
+        // next layer and an empty layer can't produce -Infinity
+        if (!this.layerElements.has(elementLayer)) this.layerElements.set(elementLayer, []);
+        const peers = this.layerElements.get(elementLayer).filter(el => el !== element);
+        peers.push(element);
+        this.layerElements.set(elementLayer, peers);
+        const base = this.layers[elementLayer];
+        peers.forEach((el, index) => {
+            el.style.zIndex = String(base + index);
+        });
+        return true;
     }
 
     /**

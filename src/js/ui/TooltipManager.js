@@ -7,6 +7,8 @@
 export class TooltipManager {
     constructor() {
         this.tooltips = new Map();
+        // element -> function that unbinds listeners and removes the tooltip
+        this.destroyers = new Map();
         this.initialized = false;
     }
 
@@ -100,6 +102,8 @@ export class TooltipManager {
 
         // Show tooltip on hover
         const showTooltip = async () => {
+            // Cancel a pending hide so a quick re-hover doesn't get hidden (#206)
+            clearTimeout(tooltip._hideTimer);
             tooltip.style.display = 'block';
             await updatePosition();
             tooltip.style.opacity = '1';
@@ -107,7 +111,8 @@ export class TooltipManager {
 
         const hideTooltip = () => {
             tooltip.style.opacity = '0';
-            setTimeout(() => {
+            clearTimeout(tooltip._hideTimer);
+            tooltip._hideTimer = setTimeout(() => {
                 tooltip.style.display = 'none';
             }, 200);
         };
@@ -126,20 +131,24 @@ export class TooltipManager {
         }
 
         const bound = tooltip._tipBound;
+        const destroy = () => {
+            if (bound) {
+                element.removeEventListener('mouseenter', bound.showTooltip);
+                element.removeEventListener('mouseleave', bound.hideTooltip);
+                element.removeEventListener('focus', bound.showTooltip);
+                element.removeEventListener('blur', bound.hideTooltip);
+                if (typeof bound.stopAutoUpdate === 'function') bound.stopAutoUpdate();
+            }
+            clearTimeout(tooltip._hideTimer);
+            tooltip.remove();
+            this.tooltips.delete(element);
+            this.destroyers.delete(element);
+        };
+        this.destroyers.set(element, destroy);
         return {
             element: tooltip,
             update: updatePosition,
-            destroy: () => {
-                if (bound) {
-                    element.removeEventListener('mouseenter', bound.showTooltip);
-                    element.removeEventListener('mouseleave', bound.hideTooltip);
-                    element.removeEventListener('focus', bound.showTooltip);
-                    element.removeEventListener('blur', bound.hideTooltip);
-                    if (typeof bound.stopAutoUpdate === 'function') bound.stopAutoUpdate();
-                }
-                tooltip.remove();
-                this.tooltips.delete(element);
-            }
+            destroy
         };
     }
 
@@ -147,6 +156,8 @@ export class TooltipManager {
      * Fallback simple tooltip
      */
     createSimpleTooltip(element, content) {
+        // One tooltip per element: replace any existing one
+        if (this.tooltips.has(element)) this.removeTooltip(element);
         const tooltip = document.createElement('div');
         tooltip.className = 'simple-tooltip';
         tooltip.textContent = content;
@@ -184,16 +195,35 @@ export class TooltipManager {
             tooltip.style.display = 'none';
         };
 
+        // Keyboard focus shows the tooltip too, positioned from the element box
+        const showFromFocus = () => {
+            const rect = element.getBoundingClientRect?.() || { left: 0, bottom: 0 };
+            show({ clientX: rect.left, clientY: rect.bottom });
+        };
+
         element.addEventListener('mouseenter', show);
         element.addEventListener('mouseleave', hide);
+        element.addEventListener('focus', showFromFocus);
+        element.addEventListener('blur', hide);
+
+        const destroy = () => {
+            element.removeEventListener('mouseenter', show);
+            element.removeEventListener('mouseleave', hide);
+            element.removeEventListener('focus', showFromFocus);
+            element.removeEventListener('blur', hide);
+            tooltip.remove();
+            if (this.tooltips.get(element) === tooltip) {
+                this.tooltips.delete(element);
+                this.destroyers.delete(element);
+            }
+        };
+        // Track it so removeTooltip()/cleanup() also clean up fallback tooltips
+        this.tooltips.set(element, tooltip);
+        this.destroyers.set(element, destroy);
 
         return {
             element: tooltip,
-            destroy: () => {
-                element.removeEventListener('mouseenter', show);
-                element.removeEventListener('mouseleave', hide);
-                tooltip.remove();
-            }
+            destroy
         };
     }
 
@@ -201,6 +231,14 @@ export class TooltipManager {
      * Remove tooltip
      */
     removeTooltip(element) {
+        // Unbind listeners too, not just the DOM node
+        const destroy = this.destroyers.get(element);
+        if (destroy) {
+            destroy();
+            this.tooltips.delete(element);
+            this.destroyers.delete(element);
+            return;
+        }
         const tooltip = this.tooltips.get(element);
         if (tooltip) {
             tooltip.remove();
@@ -212,7 +250,10 @@ export class TooltipManager {
      * Cleanup all tooltips
      */
     cleanup() {
-        this.tooltips.forEach(tooltip => tooltip.remove());
+        for (const element of [...this.tooltips.keys()]) {
+            this.removeTooltip(element);
+        }
         this.tooltips.clear();
+        this.destroyers.clear();
     }
 }
