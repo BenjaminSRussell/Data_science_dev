@@ -10,6 +10,7 @@ import { initializeMapRenderer } from '../game/MapSystemInitializer.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { logger } from '../utils/Logger.js';
 import { VEHICLES, VEHICLES_MAP } from '../game/WorldMap.js';
+import { TRAINING_ACTIVITIES } from '../game/CharacterStats.js';
 // WorldMapRenderer imported lazily to avoid circular dependencies
 
 // Cache DOM elements to avoid repeated queries (using DOMUtils cache)
@@ -205,7 +206,13 @@ function updateLocationActions(game) {
     } else if (locId === 'gym') {
         buttons.push(DOMUtils.createElement('button', {
             className: 'btn-cartoon',
-            textContent: 'Workout ($20 / 2h)',
+            // Label derived from the real activity so cost/time can't drift (#1171)
+            textContent: (() => {
+                const act = TRAINING_ACTIVITIES.find(a => a.id === 'gym_workout');
+                if (!act) return 'Workout';
+                const hours = (act.timeSlots || 1) * 3;
+                return `Workout ($${act.cost} / ${hours}h)`;
+            })(),
             listeners: {
                 click: () => game.handleTraining('gym_workout')
             }
