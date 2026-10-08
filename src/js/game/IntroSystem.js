@@ -9,8 +9,19 @@ import { logger } from '../utils/Logger.js';
 export class IntroSystem {
     constructor(game) {
         this.game = game;
-        this.currentStep = 0;
-        this.selectedJob = null;
+        this.selectedJob = null; // card the player highlighted; Enter applies it (#1317)
+        this.hired = false;
+    }
+
+    /**
+     * Weekly pay for the starter job picked in onboarding (#1071). Freelance
+     * income swings between 50% and 150% of its base.
+     */
+    static weeklyPay(job, rand = Math.random) {
+        const base = Math.max(0, Number(job?.salary) || 0);
+        if (!base) return 0;
+        if (job?.id === 'freelance') return Math.round(base * (0.5 + rand()));
+        return base;
     }
 
     /**
@@ -28,6 +39,14 @@ export class IntroSystem {
 
         // Show video screen
         videoScreen.classList.remove('hidden');
+
+        // Respect the game's sound settings (#867)
+        const audio = this.game?.audioManager;
+        if (audio) {
+            video.muted = audio.soundEnabled === false;
+            const vol = Number(audio.soundVolume);
+            if (Number.isFinite(vol)) video.volume = Math.max(0, Math.min(1, vol));
+        }
 
         let finished = false;
         const finishVideo = () => {
@@ -65,6 +84,9 @@ export class IntroSystem {
      * Show intro text screen
      */
     showIntroText() {
+        // A job board left over from a previous run is stale (#1316)
+        document.getElementById('job-application-screen')?.remove();
+        this.hired = false;
         // Create intro screen if not exists
         let intro = document.getElementById('intro-screen');
         if (!intro) {
@@ -177,11 +199,19 @@ export class IntroSystem {
 
         // Add event listeners after creating the screen
         setTimeout(() => {
-            // Add click handlers for job cards
+            // Add click handlers for job cards; Enter on a selected card applies (#1317)
             screen.querySelectorAll('.job-card').forEach(card => {
                 const jobId = card.dataset.jobId;
                 card.addEventListener('click', () => {
                     this.selectJob(jobId);
+                });
+                card.addEventListener('keydown', (e) => {
+                    if (e.target !== card) return; // the Apply button handles itself
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if (this.selectedJob === jobId) this.applyForJob();
+                        else this.selectJob(jobId);
+                    }
                 });
             });
 
@@ -261,7 +291,7 @@ export class IntroSystem {
      */
     renderJobCard(job) {
         return `
-            <div class="job-card" data-job-id="${job.id}">
+            <div class="job-card" data-job-id="${job.id}" tabindex="0" role="button" aria-label="${job.title} at ${job.company}">
                 <div class="job-card-header">
                     <div>
                         <div class="job-card-title">${job.title}</div>
@@ -302,7 +332,7 @@ export class IntroSystem {
         });
 
         // Add selection to clicked card
-        const card = document.querySelector(`[data-job-id="${jobId}"]`);
+        const card = document.querySelector(`.job-card[data-job-id="${jobId}"]`);
         if (card) {
             card.classList.add('selected');
             this.selectedJob = jobId;
@@ -312,18 +342,23 @@ export class IntroSystem {
     /**
      * Apply for job and start game
      */
-    applyForJob(jobId) {
+    applyForJob(jobId = this.selectedJob) {
+        // A fast double-click must not hire twice (#1999)
+        if (this.hired) return;
         const jobs = this.getStarterJobs();
         const job = jobs.find(j => j.id === jobId);
 
         if (!job) return;
+        this.hired = true;
+        this.selectedJob = job.id;
 
-        // Set job in game state
+        // Set job in game state; salary is paid weekly (#1071)
         this.game.gameState.currentJob = {
             id: job.id,
             title: job.title,
             company: job.company,
             salary: job.salaryNum,
+            difficulty: job.difficulty,
             startDate: Date.now()
         };
 
@@ -339,6 +374,8 @@ export class IntroSystem {
      * Show welcome message after getting job
      */
     showJobWelcome(job) {
+        // Reuse-if-present, like the sibling screens (#1999)
+        if (this.welcomeOverlay?.isConnected) return;
         // Create welcome overlay
         const overlay = document.createElement('div');
         overlay.className = 'intro-screen active';
@@ -385,9 +422,13 @@ export class IntroSystem {
             this.welcomeOverlay.remove();
         }
 
-        // Remove intro screen
+        this.welcomeOverlay = null;
+
+        // Remove intro screen and the job board, so a later new game starts
+        // from fresh DOM (#1316)
         const intro = document.getElementById('intro-screen');
         if (intro) intro.remove();
+        document.getElementById('job-application-screen')?.remove();
 
         // Continue with normal game start
         this.game.finishGameStart();
