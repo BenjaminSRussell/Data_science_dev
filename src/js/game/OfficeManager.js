@@ -4,6 +4,16 @@
 
 import { EQUIPMENT, OFFICES, STAFF_TYPES, MARKETING_CHANNELS } from '../data/tycoonData.js';
 
+const EQUIPMENT_TYPES = ['computer', 'desk', 'monitor', 'chair', 'software'];
+
+let staffSeq = 0;
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
 export class OfficeManager {
     constructor(gameState) {
         this.gameState = gameState;
@@ -153,11 +163,47 @@ export class OfficeManager {
      * Get available staff to hire
      */
     getAvailableStaff() {
-        return STAFF_TYPES.filter(s => {
-            // Check capacity
-            if (this.staff.length >= this.currentOffice.capacity) return false;
-            return true;
-        });
+        // A full office can't take anyone (#102)
+        if (this.staff.length >= (this.currentOffice?.capacity ?? 0)) return [];
+        // Only list roles the player can actually pay the hiring cost for
+        const money = Number(this.gameState?.money) || 0;
+        return STAFF_TYPES.filter(s => money >= OfficeManager.hiringCost(s));
+    }
+
+    /**
+     * baseSalary is a daily rate (getDailyStaffCost sums it per day), so the
+     * hiring fee is a fixed number of days' pay, not a "month" (#1799)
+     */
+    static HIRING_COST_DAYS = 2;
+
+    static hiringCost(staffType) {
+        return (Number(staffType?.baseSalary) || 0) * OfficeManager.HIRING_COST_DAYS;
+    }
+
+    /**
+     * Skills the current team covers (#2328)
+     */
+    getTeamSkills() {
+        const skills = new Set();
+        for (const member of this.staff) {
+            for (const skill of member?.type?.skills || []) skills.add(skill);
+        }
+        return [...skills];
+    }
+
+    /**
+     * Sum the role bonuses (project manager, sales rep) of hired staff (#1798)
+     */
+    getStaffBonuses() {
+        const totals = { clientSatisfaction: 0, clientLeadsPerDay: 0 };
+        for (const member of this.staff) {
+            const bonus = member?.type?.bonus;
+            if (!bonus) continue;
+            for (const [key, value] of Object.entries(bonus)) {
+                totals[key] = (totals[key] || 0) + (Number(value) || 0);
+            }
+        }
+        return totals;
     }
 
     /**
@@ -173,8 +219,7 @@ export class OfficeManager {
             return { success: false, reason: 'Invalid staff type' };
         }
 
-        // First month salary as hiring cost
-        const hiringCost = staffType.baseSalary * 2;
+        const hiringCost = OfficeManager.hiringCost(staffType);
         if (this.gameState.money < hiringCost) {
             return { success: false, reason: 'Not enough money for hiring' };
         }
@@ -182,7 +227,8 @@ export class OfficeManager {
         this.gameState.money -= hiringCost;
 
         const newStaff = {
-            id: `staff_${Date.now()}`,
+            // Counter + random suffix: two hires in one millisecond stay distinct (#2229)
+            id: OfficeManager.nextStaffId(this.staff),
             type: staffType,
             hiredAt: Date.now()
         };
@@ -192,6 +238,19 @@ export class OfficeManager {
         window.dispatchEvent(new CustomEvent('staffhired', { detail: newStaff }));
 
         return { success: true, staff: newStaff };
+    }
+
+    /**
+     * Mint a staff id that is unique even within the same millisecond
+     */
+    static nextStaffId(existing = []) {
+        const taken = new Set(existing.map(s => s?.id));
+        let id;
+        do {
+            staffSeq += 1;
+            id = `staff_${Date.now()}_${staffSeq}_${Math.random().toString(36).slice(2, 7)}`;
+        } while (taken.has(id));
+        return id;
     }
 
     /**
@@ -275,11 +334,19 @@ export class OfficeManager {
     fromJSON(data) {
         if (!data) return;
 
-        this.equipmentLevels = data.equipmentLevels || {
-            computer: 0, desk: 0, monitor: 0, chair: 0, software: 0
-        };
-        this.currentOfficeIndex = data.currentOfficeIndex || 0;
-        this.activeMarketing = data.activeMarketing || ['word_of_mouth'];
+        // Merge per key and clamp to real levels so a partial or stale save
+        // can't break getEquipmentBonuses()/getEquipmentDetails() (#1802, #2228)
+        const savedLevels = data.equipmentLevels && typeof data.equipmentLevels === 'object'
+            ? data.equipmentLevels : {};
+        this.equipmentLevels = {};
+        for (const type of EQUIPMENT_TYPES) {
+            const max = (EQUIPMENT[type]?.levels?.length || 1) - 1;
+            this.equipmentLevels[type] = OfficeManager.clampIndex(savedLevels[type], max);
+        }
+        this.currentOfficeIndex = OfficeManager.clampIndex(data.currentOfficeIndex, OFFICES.length - 1);
+        this.activeMarketing = Array.isArray(data.activeMarketing)
+            ? data.activeMarketing.filter(id => MARKETING_CHANNELS.some(m => m.id === id))
+            : ['word_of_mouth'];
 
         // Re-derive the visual office tier from the restored office index
         this.syncOfficeLevel();
@@ -293,6 +360,15 @@ export class OfficeManager {
     }
 
     /**
+     * Whole number in [0, max]; anything else becomes 0
+     */
+    static clampIndex(value, max) {
+        const n = Math.floor(Number(value));
+        if (!Number.isFinite(n) || n < 0) return 0;
+        return Math.min(n, Math.max(0, max));
+    }
+
+    /**
      * Render office scene to element
      */
     renderOfficeScene(containerId) {
@@ -301,24 +377,34 @@ export class OfficeManager {
 
         const office = this.currentOffice;
         const bonuses = this.getEquipmentBonuses();
+        // GameState has no `character`; use the player's name when known (#1803)
+        const playerName = this.gameState?.playerName || this.gameState?.characterStats?.name || '';
+        const bonusRows = [
+            ['Speed', bonuses.speed],
+            ['Comfort', bonuses.comfort],
+            ['Clarity', bonuses.clarity],
+            ['Stamina', bonuses.stamina],
+            ['Capability', bonuses.capability]
+        ].map(([label, value]) =>
+            `<li class="office-bonus"><span>${label}</span><strong>x${Number(value ?? 1).toFixed(2)}</strong></li>`
+        ).join('');
 
         container.innerHTML = `
-            <div class="office-scene" style="background: ${office.background}">
+            <div class="office-scene" style="background: ${escapeHtml(office.background)}">
                 <div class="office-background"></div>
                 <div class="office-floor"></div>
-                
+
                 <div class="office-desk">
                     <div class="office-computer"></div>
                 </div>
-                
+
                 <div class="office-character">
-                    <div class="character-avatar char-working">
-                        ${this.gameState.character?.getEmoji() || ''}
-                    </div>
+                    <div class="character-avatar char-working">${escapeHtml(playerName)}</div>
                 </div>
-                
+
                 <div class="office-info">
-                    <span class="office-name">${office.icon} ${office.name}</span>
+                    <span class="office-name">${escapeHtml(office.icon)} ${escapeHtml(office.name)}</span>
+                    <ul class="office-bonuses" aria-label="Equipment bonuses">${bonusRows}</ul>
                 </div>
             </div>
         `;

@@ -6,6 +6,9 @@
 import { CLIENT_TYPES, MARKETING_CHANNELS, OFFICES } from '../data/tycoonData.js';
 
 export class ClientManager {
+    /** Jobs the player can run alone before needing staff */
+    static BASE_JOB_SLOTS = 2;
+
     constructor(gameState) {
         this.gameState = gameState;
         // Accepted jobs (these are job records, not client records) (#1390)
@@ -62,17 +65,34 @@ export class ClientManager {
 
         const finalClients = newClients + (Math.random() < fractional ? 1 : 0);
 
+        const activeChannels = this.marketingActive
+            .map(id => MARKETING_CHANNELS.find(m => m.id === id))
+            .filter(Boolean);
         for (let i = 0; i < finalClients; i++) {
-            this.generateClient();
+            this.generateClient(this.pickLeadChannel(activeChannels));
         }
 
         return finalClients;
     }
 
     /**
+     * Pick which active channel a lead came from, weighted by its leadsPerDay
+     */
+    pickLeadChannel(channels, roll = Math.random()) {
+        const total = channels.reduce((sum, c) => sum + (Number(c.leadsPerDay) || 0), 0);
+        if (total <= 0) return null;
+        let target = roll * total;
+        for (const channel of channels) {
+            target -= Number(channel.leadsPerDay) || 0;
+            if (target < 0) return channel;
+        }
+        return channels[channels.length - 1];
+    }
+
+    /**
      * Generate a new client based on player's reputation
      */
-    generateClient() {
+    generateClient(channel = null) {
         // Higher reputation = access to better clients
         const availableClients = CLIENT_TYPES.filter(c =>
             c.dataComplexity <= Math.ceil(this.gameState.rankIndex / 2) + 1
@@ -85,7 +105,7 @@ export class ClientManager {
         const clientType = availableClients[Math.floor(Math.random() * availableClients.length)];
 
         // Generate job offer
-        const job = this.generateJob(clientType);
+        const job = this.generateJob(clientType, channel);
 
         this.pendingJobs.push(job);
 
@@ -98,7 +118,7 @@ export class ClientManager {
     /**
      * Generate a job from a client
      */
-    generateJob(clientType) {
+    generateJob(clientType, channel = null) {
         const jobTypes = [
             "Sales Dashboard",
             "Monthly Report",
@@ -124,21 +144,27 @@ export class ClientManager {
 
         // One roll for both, so the title and description agree (#1387)
         const jobType = jobTypes[Math.floor(Math.random() * jobTypes.length)];
+        // Patient clients keep an offer open longer (#2230)
+        const patience = Number.isFinite(clientType.patience) ? clientType.patience : 1;
+        const windowSeconds = Math.max(30, Math.round(baseTime[urgency] * patience));
+        // High-value channels (enterprise sales) bring better-paying work (#154)
+        const payMultiplier = Number(channel?.payMultiplier) > 0 ? Number(channel.payMultiplier) : 1;
         return {
             id: `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             clientType: clientType,
             title: jobType,
             description: `${clientType.name} needs a ${jobType.toLowerCase()}`,
             payment: Math.floor(
-                clientType.minPay + Math.random() * (clientType.maxPay - clientType.minPay)
+                (clientType.minPay + Math.random() * (clientType.maxPay - clientType.minPay)) * payMultiplier
             ),
+            source: channel?.id || null,
             urgency: urgency,
             complexity: clientType.dataComplexity,
             data: null, // Data is assigned when job is accepted
             status: 'pending',
             createdAt: Date.now(),
-            // Accept window scales with urgency (#19); baseTime is seconds.
-            expiresAt: Date.now() + (baseTime[urgency] * 1000),
+            // Accept window scales with urgency (#19) and client patience (#2230); seconds.
+            expiresAt: Date.now() + (windowSeconds * 1000),
             progress: 0
         };
     }
@@ -146,9 +172,39 @@ export class ClientManager {
     /**
      * Accept a job
      */
+    /**
+     * How many jobs can run at once: the player's own slots plus one per
+     * hired staff member in OfficeManager (#2231)
+     */
+    getJobCapacity() {
+        const staff = this.gameState?.officeManager?.staff;
+        // Only staff with a data skill work jobs; PMs and sales reps don't (#2328)
+        const staffCount = Array.isArray(staff)
+            ? staff.filter(s => !s?.type?.skills || s.type.skills.includes('data_entry')).length
+            : 0;
+        return ClientManager.BASE_JOB_SLOTS + staffCount;
+    }
+
+    /**
+     * Whether another job can be taken on right now
+     */
+    hasJobCapacity() {
+        return this.activeJobs.length < this.getJobCapacity();
+    }
+
     acceptJob(jobId) {
         const jobIndex = this.pendingJobs.findIndex(j => j.id === jobId);
         if (jobIndex === -1) return null;
+
+        // Concurrent work is capped by headcount, like hiring is capped by office size (#2231)
+        if (!this.hasJobCapacity()) {
+            this.lastAcceptError = 'No capacity to take on more work';
+            window.dispatchEvent(new CustomEvent('jobrejected', {
+                detail: { jobId, reason: this.lastAcceptError }
+            }));
+            return null;
+        }
+        this.lastAcceptError = null;
 
         // An offer that has run out can't be taken any more (#1388)
         if (this.pendingJobs[jobIndex].expiresAt <= Date.now()) {
