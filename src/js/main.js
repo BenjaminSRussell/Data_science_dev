@@ -15,6 +15,7 @@ import { useGameStore } from './store/gameStore.js';
 logger.debug('useGameStore imported successfully', { hasStore: typeof useGameStore !== 'undefined' });
 // Keep GameState import for backward compatibility during migration
 import { GameState } from './game/GameState.js';
+import { makePortfolioEntry, addPortfolioEntry, renderPortfolioHTML, exportPortfolioJSON } from './game/Portfolio.js';
 import { ScreenManager } from './ui/ScreenManager.js';
 import { ChartManager } from './charts/ChartManager.js';
 import { AudioManager } from './audio/AudioManager.js';
@@ -859,6 +860,10 @@ export class MainGame {
         // Review screen
         document.getElementById('btn-next-task')?.addEventListener('click', () => {
             this.nextTask();
+        });
+
+        document.getElementById('btn-portfolio')?.addEventListener('click', () => {
+            this.showPortfolio();
         });
 
         // Navigation buttons
@@ -2277,6 +2282,7 @@ export class MainGame {
 
         // Store score for display
         this.gameState.lastScore = score;
+        this.recordPortfolioEntry?.(task, score);
 
         // Apply rewards now, in the same tick as the rating stats that
         // evaluateChart() just recorded, so the outcome is atomic (#1311).
@@ -2295,6 +2301,52 @@ export class MainGame {
 
         // Animate the review (presentation only)
         this.animateReview(score);
+    }
+
+    /**
+     * Keep the scored submission in the career portfolio (#2715, #2717)
+     */
+    recordPortfolioEntry(task, score) {
+        const gs = this.gameState;
+        if (!gs || !task || !score) return null;
+        const day = gs.timeManager?.totalDays ?? 0;
+        const entry = makePortfolioEntry(task, gs.chartConfig, score, { day });
+        gs.portfolio = addPortfolioEntry(gs.portfolio, entry);
+        return entry;
+    }
+
+    /** Portfolio modal, optionally filtered by domain */
+    showPortfolio(domain = 'all') {
+        this.portfolioDomain = domain || 'all';
+        this.showModal(renderPortfolioHTML(this.gameState?.portfolio || [], { domain: this.portfolioDomain }));
+    }
+
+    /**
+     * Reopen a past chart: its settings become the Chart Studio settings for
+     * the current (or next) task.
+     */
+    reopenPortfolioEntry(index) {
+        const entry = (this.gameState?.portfolio || [])[index];
+        if (!entry) return false;
+        this.gameState.chartConfig = { ...GameState.defaultChartConfig(), ...entry.chartConfig };
+        this.closeModal?.();
+        this.openChartStudio();
+        return true;
+    }
+
+    /** Download the portfolio as JSON */
+    exportPortfolio() {
+        const json = exportPortfolioJSON(this.gameState?.portfolio || []);
+        if (typeof document === 'undefined' || typeof Blob === 'undefined' || !globalThis.URL?.createObjectURL) return json;
+        const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'data-science-portfolio.json';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        return json;
     }
 
     /**
