@@ -67,7 +67,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`
+Open `http://127.0.0.1:5176`
 
 ### Production Build
 
@@ -130,7 +130,8 @@ test/                        # Unit tests
 
 - Large assets (sprites, backgrounds) are gitignored
 - Compression scripts in `scripts/` for asset optimization
-- See `ASSETS_README.md` for asset management details
+- `assets/` is served at `/assets` by the dev server and copied into `dist/assets` on build (see `vite.config.js`)
+- Asset manifests: `game_asset_manifest.json` and `master_asset_manifest.json`
 
 ## License
 
