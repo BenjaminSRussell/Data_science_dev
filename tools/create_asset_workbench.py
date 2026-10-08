@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import markdown
 
@@ -7,8 +8,18 @@ ASSET_MANIFEST_PATH = "_ASSET_WORKBENCH/ASSET_MANIFEST.md"
 WORKBENCH_DIR = "_ASSET_WORKBENCH/NPC_Images"
 
 def sanitize_filename(filename):
-    """Sanitize the filename to make it safe for file system use."""
-    return "".join(char if char.isalnum() or char in ('.', '_') else '_' for char in filename)
+    """Sanitize a name into a safe, predictable file-name stem.
+
+    Lowercased; anything other than letters, digits, '.' and '_' becomes '_';
+    runs of separators collapse to one '_'; leading/trailing '_' and '.' are
+    stripped so the result can't be a hidden dotfile or a '..' component.
+    Empty or all-punctuation input falls back to 'unnamed'. (#544)
+    """
+    text = "".join(ch if (ch.isalnum() and ch.isascii()) or ch in ('.', '_') else '_' for ch in str(filename or '').lower())
+    text = re.sub(r'_+', '_', text)
+    text = re.sub(r'\.{2,}', '.', text)
+    text = text.strip('._')
+    return text or 'unnamed'
 
 def parse_manifest_and_create_workbench():
     with open(ASSET_MANIFEST_PATH, 'r', encoding='utf-8') as file:

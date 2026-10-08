@@ -8,6 +8,8 @@ from PIL import Image
 import json
 
 def load_image_safe(path):
+    if not path:
+        return None
     try:
         if os.path.exists(path):
             with Image.open(path) as img:
@@ -16,26 +18,43 @@ def load_image_safe(path):
         print(f"Error loading {path}: {e}")
     return None
 
-def create_character_sprite(body_path, hair_path, output_path, sprite_config):
+def create_character_sprite(body_path, hair_path=None, output_path=None, sprite_config=None):
+    """Composite hair over a body sprite.
+
+    The body is required; hair is optional (a missing or unreadable hair
+    image yields a body-only sprite instead of no sprite). The result is
+    saved only when output_path is given, and returned either way. (#598)
+    """
+    sprite_config = sprite_config or {}
     body = load_image_safe(body_path)
-    hair = load_image_safe(hair_path)
-    
-    if not body or not hair:
-        print("Failed to load either body or hair image.")
-        return
-    
+    if body is None:
+        print(f"Could not load body: {body_path}")
+        return None
+
+    hair = load_image_safe(hair_path) if hair_path else None
+    if hair_path and hair is None:
+        print(f"Could not load hair: {hair_path}; using body only")
+
     # Apply transformations based on sprite configuration
     if sprite_config.get('rotate_body'):
         body = body.rotate(sprite_config['rotate_body'])
-    if sprite_config.get('rotate_hair'):
+    if hair is not None and sprite_config.get('rotate_hair'):
         hair = hair.rotate(sprite_config['rotate_hair'])
-    
-    # Composite hair on body
-    body.paste(hair, (0, 0), hair)
-    
-    # Save the resulting sprite
-    body.save(output_path, 'PNG')
-    print(f"Sprite saved to {output_path}")
+
+    # Composite hair on body (alpha-aware)
+    character = body
+    if hair is not None:
+        if getattr(hair, 'size', None) != getattr(body, 'size', None):
+            # alpha_composite needs equal sizes; pin the hair top-left
+            layer = Image.new('RGBA', body.size, (0, 0, 0, 0))
+            layer.paste(hair, (0, 0))
+            hair = layer
+        character = Image.alpha_composite(body, hair)
+
+    if output_path:
+        character.save(output_path, 'PNG')
+        print(f"Sprite saved to {output_path}")
+    return character
 
 if __name__ == "__main__":
     # Example usage
