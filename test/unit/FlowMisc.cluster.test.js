@@ -108,8 +108,10 @@ describe('background asset loading (#1679, #1049)', () => {
         fake.pixiAssetManager = pixi;
         resolveManagers();
         expect(await p).toBe(true);
-        expect(pixi.loadAll).toHaveBeenCalled();
-        expect(fake.assetManager.loadAll).not.toHaveBeenCalled();
+        // Pixi registers the manifest; game images still come from AssetManager (#68)
+        expect(pixi.init).toHaveBeenCalled();
+        expect(pixi.loadAll).not.toHaveBeenCalled();
+        expect(fake.assetManager.loadAll).toHaveBeenCalledTimes(1);
     });
 
     it('does not reload the manifest for a second game in the same session', async () => {

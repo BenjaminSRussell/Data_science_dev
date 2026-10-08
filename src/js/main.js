@@ -1209,17 +1209,20 @@ export class MainGame {
         this.assetLoadPromise = Promise.resolve(this.phase4ManagersReady)
             .catch(() => null)
             .then(async () => {
-                if (!this.pixiAssetManager) return legacyLoad();
-                try {
-                    const manifest = this.assetManager.getAssetManifest();
-                    await this.pixiAssetManager.init(manifest);
-                    await this.pixiAssetManager.loadAll();
-                    logger.info('Assets loaded successfully (PixiJS)');
-                    return true;
-                } catch (error) {
-                    logger.warn('PixiJS Assets failed, using fallback:', error);
-                    return legacyLoad();
+                // Game code reads images from this.assetManager, so it always
+                // loads them. The old code skipped it whenever PixiAssetManager
+                // existed, but Pixi's init never ran (#68), so nothing loaded.
+                // Pixi only registers the same manifest so its getters resolve
+                // once something loads a bundle, without downloading everything twice.
+                if (this.pixiAssetManager) {
+                    try {
+                        const ok = await this.pixiAssetManager.init(this.assetManager.getAssetManifest());
+                        if (!ok) logger.warn('PixiJS Assets manifest was not registered');
+                    } catch (error) {
+                        logger.warn('PixiJS Assets init failed:', error);
+                    }
                 }
+                return legacyLoad();
             });
         // A failed load can be retried by the next game
         this.assetLoadPromise.then(ok => { if (!ok) this.assetLoadPromise = null; });
