@@ -4,6 +4,12 @@
  * Handles placement of buildings, NPCs, decorations, etc.
  */
 
+const isPositiveInt = (n) => Number.isInteger(n) && n > 0;
+
+function isValidFootprint(x, y, width, height) {
+    return Number.isInteger(x) && Number.isInteger(y) && isPositiveInt(width) && isPositiveInt(height);
+}
+
 export class MapAssetPlacer {
     constructor(gridSystem, roadSystem, buildingSystem) {
         this.gridSystem = gridSystem;
@@ -11,26 +17,45 @@ export class MapAssetPlacer {
         this.buildingSystem = buildingSystem;
         this.assetGrid = new Map(); // Track all assets
         this.assets = [];
+        this.placements = new Map(); // id -> footprint actually claimed
     }
 
     /**
-     * Place an asset with collision detection
+     * Place an asset with collision detection.
+     * Re-placing an asset that is already on the map (same id) moves it: its
+     * old cells are released and the asset list keeps a single entry.
      */
     placeAsset(asset) {
+        if (!asset) return false;
         const { x, y, width = 1, height = 1, type = 'generic' } = asset;
+        if (!isValidFootprint(x, y, width, height)) {
+            return false;
+        }
         asset.type = type;
-        
-        // Check if placement is valid
+
+        // Check if placement is valid (the asset's own cells don't block it)
         if (!this.canPlaceAsset(x, y, width, height, asset.id)) {
             return false;
         }
-        
-        // Mark cells as occupied
-        this.markAssetCells(asset);
-        
-        // Store asset
-        this.assets.push(asset);
-        
+
+        const hasId = asset.id !== undefined && asset.id !== null;
+        if (hasId && this.placements.has(asset.id)) {
+            this.unmarkAssetCells(asset.id);
+        }
+
+        // Remember the footprint actually claimed, so removal frees exactly
+        // these cells even if the asset object is mutated later.
+        const footprint = { x, y, width, height };
+        if (hasId) this.placements.set(asset.id, footprint);
+        this.markAssetCells({ ...footprint, id: asset.id });
+
+        const index = hasId ? this.assets.findIndex(a => a.id === asset.id) : -1;
+        if (index === -1) {
+            this.assets.push(asset);
+        } else {
+            this.assets[index] = asset;
+        }
+
         return true;
     }
 
@@ -38,6 +63,10 @@ export class MapAssetPlacer {
      * Check if asset can be placed
      */
     canPlaceAsset(x, y, width, height, excludeId = null) {
+        if (!isValidFootprint(x, y, width, height)) {
+            return false;
+        }
+
         // Check all cells the asset would occupy
         for (let checkY = y; checkY < y + height; checkY++) {
             for (let checkX = x; checkX < x + width; checkX++) {
@@ -70,6 +99,23 @@ export class MapAssetPlacer {
     }
 
     /**
+     * Release the cells recorded for an asset id (only cells it still owns).
+     */
+    unmarkAssetCells(assetId, footprint = this.placements.get(assetId)) {
+        if (!footprint) return;
+        const { x, y, width = 1, height = 1 } = footprint;
+        for (let checkY = y; checkY < y + height; checkY++) {
+            for (let checkX = x; checkX < x + width; checkX++) {
+                const key = this.gridSystem.getGridKey(checkX, checkY);
+                if (this.assetGrid.get(key) === assetId) {
+                    this.assetGrid.delete(key);
+                }
+            }
+        }
+        this.placements.delete(assetId);
+    }
+
+    /**
      * Mark grid cells as occupied by asset
      */
     markAssetCells(asset) {
@@ -86,21 +132,29 @@ export class MapAssetPlacer {
     /**
      * Find available position for asset
      */
-    findAvailablePosition(preferredX, preferredY, width = 1, height = 1, maxRadius = 5) {
+    findAvailablePosition(preferredX, preferredY, width = 1, height = 1, maxRadius = 5, accept = null) {
+        const fits = (x, y) =>
+            (!accept || accept(x, y)) && this.canPlaceAsset(x, y, width, height);
+
         // Try preferred position first
-        if (this.canPlaceAsset(preferredX, preferredY, width, height)) {
+        if (fits(preferredX, preferredY)) {
             return { x: preferredX, y: preferredY };
         }
         
-        // Spiral search
+        // Ring search: check every cell at Chebyshev distance 1..maxRadius,
+        // nearest (Euclidean) first, so no cell in a ring is skipped.
         for (let radius = 1; radius <= maxRadius; radius++) {
-            for (let angle = 0; angle < 360; angle += 15) {
-                const rad = (angle * Math.PI) / 180;
-                const testX = Math.round(preferredX + radius * Math.cos(rad));
-                const testY = Math.round(preferredY + radius * Math.sin(rad));
-                
-                if (this.gridSystem.isValidGridCoord(testX, testY) &&
-                    this.canPlaceAsset(testX, testY, width, height)) {
+            const ring = [];
+            for (let dy = -radius; dy <= radius; dy++) {
+                for (let dx = -radius; dx <= radius; dx++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dy)) === radius) ring.push([dx, dy]);
+                }
+            }
+            ring.sort((a, b) => (a[0] ** 2 + a[1] ** 2) - (b[0] ** 2 + b[1] ** 2));
+            for (const [dx, dy] of ring) {
+                const testX = preferredX + dx;
+                const testY = preferredY + dy;
+                if (this.gridSystem.isValidGridCoord(testX, testY) && fits(testX, testY)) {
                     return { x: testX, y: testY };
                 }
             }
@@ -116,14 +170,9 @@ export class MapAssetPlacer {
         const asset = this.assets.find(a => a.id === assetId);
         if (!asset) return false;
         
-        // Unmark cells
+        // Unmark the cells it was placed on (not wherever the object says now)
         const { x, y, width = 1, height = 1 } = asset;
-        for (let checkY = y; checkY < y + height; checkY++) {
-            for (let checkX = x; checkX < x + width; checkX++) {
-                const key = this.gridSystem.getGridKey(checkX, checkY);
-                this.assetGrid.delete(key);
-            }
-        }
+        this.unmarkAssetCells(assetId, this.placements.get(assetId) ?? { x, y, width, height });
         
         // Remove from assets
         const index = this.assets.findIndex(a => a.id === assetId);
@@ -159,5 +208,6 @@ export class MapAssetPlacer {
     clear() {
         this.assets = [];
         this.assetGrid.clear();
+        this.placements.clear();
     }
 }
