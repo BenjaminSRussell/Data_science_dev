@@ -1192,6 +1192,18 @@ export class NPCManager {
     }
 
     /**
+     * Raise the relationship with everyone available at a location (the
+     * coffee_network activity). Defaults to the player's current location.
+     * @returns {number} how many NPCs were boosted
+     */
+    boostNearbyRelationships(amount, locationId = this.gameState?.worldMap?.currentLocation) {
+        if (!locationId || !(amount > 0)) return 0;
+        const nearby = this.getNPCsAtLocation(locationId);
+        nearby.forEach(npc => this.modifyRelationship(npc.id, amount));
+        return nearby.length;
+    }
+
+    /**
      * Player net worth: cash + bank savings + stock portfolio - loans
      */
     getPlayerNetWorth() {

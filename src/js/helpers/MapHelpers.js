@@ -637,16 +637,22 @@ export function handleLocationAction(game, action) {
     game.gameState.money -= actionData.cost;
     if (actionData.energyGain > 0) {
         // TimeManager exposes restoreEnergy(), not gainEnergy() (#2397)
-        game.timeManager.restoreEnergy(actionData.energyGain);
+        (game.timeManager || game.gameState.timeManager)?.restoreEnergy?.(actionData.energyGain);
     }
-    if (actionData.relationshipGain && game.npcManager?.boostNearbyRelationships) {
-        game.npcManager.boostNearbyRelationships(actionData.relationshipGain);
+    // Networking actually builds relationships with whoever is here; the
+    // method this called never existed, so the gain was silently dropped
+    let networkMessage = '';
+    const npcManager = game.npcManager || game.gameState.npcManager;
+    if (actionData.relationshipGain && npcManager?.boostNearbyRelationships) {
+        const locationId = game.worldMap?.currentLocation || game.gameState.worldMap?.currentLocation;
+        const boosted = npcManager.boostNearbyRelationships(actionData.relationshipGain, locationId);
+        networkMessage = boosted > 0 ? ` (+${actionData.relationshipGain} with ${boosted} ${boosted === 1 ? 'person' : 'people'} here)` : ' (nobody to network with here)';
     }
 
-    game.uiUpdater.updateAllUI();
+    game.uiUpdater?.updateAllUI?.();
     updateMapScreen(game);
-    game.showToast(actionData.message, 'success');
-    game.audioManager.play('kaching');
+    game.showToast(actionData.message + networkMessage, 'success');
+    game.audioManager?.play?.('kaching');
 }
 
 /**

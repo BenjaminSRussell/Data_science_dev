@@ -1018,84 +1018,8 @@ export class MainGame {
             this.showToast('You slept well and feel refreshed!', 'success');
         });
 
-        const mapContainer = document.getElementById('world-map');
-        if (mapContainer) {
-            mapContainer.addEventListener('click', (e) => {
-                if (!this.worldMap) {
-                    return;
-                }
-                const locationEl = e.target.closest('.map-location');
-                if (locationEl && !locationEl.classList.contains('locked')) {
-                    this.handleTravel(locationEl.dataset.location);
-                } else if (locationEl && locationEl.classList.contains('locked')) {
-                    // Show requirement info
-                    const locId = locationEl.dataset.location;
-                    const loc = this.worldMap?.getLocation(locId);
-                    if (loc && loc.unlockRequirement) {
-                        this.showError(`This location is locked. ${this._formatUnlockRequirement(loc.unlockRequirement)}`);
-                    } else {
-                        this.showError("This location is locked.");
-                    }
-                }
-            });
-        }
-
-        // Vehicle selection
-        const vehicleOptions = document.getElementById('vehicle-options');
-        if (vehicleOptions) {
-            vehicleOptions.addEventListener('click', (e) => {
-                if (!this.worldMap) {
-                    this.showError("Game systems not ready yet.");
-                    return;
-                }
-                const option = e.target.closest('.vehicle-option');
-                if (!option) return;
-
-                const vehicleId = option.dataset.vehicle;
-                // Check if owned (ownedVehicles is a Set, use .has() not .includes())
-                if (this.worldMap.ownedVehicles && this.worldMap.ownedVehicles.has(vehicleId)) {
-                    this.worldMap.switchVehicle(vehicleId);
-                    this.updateMapScreen();
-                } else {
-                    // Try to buy
-                    const vehicle = this.worldMap.getVehicle(vehicleId);
-                    if (!vehicle) {
-                        this.showError("Vehicle not found.");
-                        return;
-                    }
-                    // Cars are sold only at Auto World, so the dealership's
-                    // money/bus gate actually matters (#1703)
-                    if (MapHelpers.vehicleRequiresDealership(vehicle) && this.worldMap.currentLocation !== 'car_dealership') {
-                        this.showError('Cars are sold at Auto World. Travel to the car dealership to buy one.');
-                        return;
-                    }
-                    if (confirm(`Buy ${vehicle.name} for $${vehicle.price}?`)) {
-                        const result = this.worldMap.buyVehicle(vehicleId);
-                        if (result.success) {
-                            this.showToast(result.switched === false
-                                ? `Bought ${vehicle.name}! (still driving your faster vehicle — click it to switch)`
-                                : `Bought ${vehicle.name}!`, 'success');
-                            this.updateMapScreen();
-                        } else {
-                            this.showError(result.reason);
-                        }
-                    }
-                }
-            });
-        }
-
-        // Training buttons
-        const trainingGrid = document.getElementById('training-grid');
-        if (trainingGrid) {
-            trainingGrid.addEventListener('click', (e) => {
-                if (e.target.tagName === 'BUTTON') {
-                    const card = e.target.closest('.training-card');
-                    if (card) {
-                        this.handleTraining(card.dataset.activity);
-                    }
-                }
-            });
-        }
+        // World map travel, vehicle, training and shop category clicks (#1100)
+        this.setupWorldInputs();
 
         // Dataset panel Sort/Filter buttons (#2334)
         document.getElementById('btn-sort')?.addEventListener('click', () => {
@@ -1188,15 +1112,6 @@ export class MainGame {
         // because setupEventListeners() runs after that event (#1652, #1097)
         document.addEventListener('click', (e) => {
             if (e.target?.closest?.('#btn-research-inbox')) researchInboxHandler();
-        });
-
-        // Shop category buttons
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.uiUpdater.updateShopScreen(btn.dataset.category);
-            });
         });
 
         // --- Bank System Listeners ---
@@ -2812,6 +2727,102 @@ export class MainGame {
     /**
      * Handle hiring staff
      */
+    /**
+     * Delegated click handling for the world map, vehicle picker, training
+     * grid and shop categories. Split out of setupEventListeners so it can be
+     * tested on its own (#1100)
+     */
+    setupWorldInputs() {
+        const mapContainer = document.getElementById('world-map');
+        if (mapContainer) {
+            mapContainer.addEventListener('click', (e) => {
+                if (!this.worldMap) {
+                    return;
+                }
+                const locationEl = e.target.closest('.map-location');
+                if (locationEl && !locationEl.classList.contains('locked')) {
+                    this.handleTravel(locationEl.dataset.location);
+                } else if (locationEl && locationEl.classList.contains('locked')) {
+                    // Show requirement info
+                    const locId = locationEl.dataset.location;
+                    const loc = this.worldMap?.getLocation(locId);
+                    if (loc && loc.unlockRequirement) {
+                        this.showError(`This location is locked. ${this._formatUnlockRequirement(loc.unlockRequirement)}`);
+                    } else {
+                        this.showError("This location is locked.");
+                    }
+                }
+            });
+        }
+
+        // Vehicle selection
+        const vehicleOptions = document.getElementById('vehicle-options');
+        if (vehicleOptions) {
+            vehicleOptions.addEventListener('click', (e) => {
+                if (!this.worldMap) {
+                    this.showError("Game systems not ready yet.");
+                    return;
+                }
+                const option = e.target.closest('.vehicle-option');
+                if (!option) return;
+
+                const vehicleId = option.dataset.vehicle;
+                // Check if owned (ownedVehicles is a Set, use .has() not .includes())
+                if (this.worldMap.ownedVehicles && this.worldMap.ownedVehicles.has(vehicleId)) {
+                    this.worldMap.switchVehicle(vehicleId);
+                    this.updateMapScreen();
+                } else {
+                    // Try to buy
+                    const vehicle = this.worldMap.getVehicle(vehicleId);
+                    if (!vehicle) {
+                        this.showError("Vehicle not found.");
+                        return;
+                    }
+                    // Cars are sold only at Auto World, so the dealership's
+                    // money/bus gate actually matters (#1703)
+                    if (MapHelpers.vehicleRequiresDealership(vehicle) && this.worldMap.currentLocation !== 'car_dealership') {
+                        this.showError('Cars are sold at Auto World. Travel to the car dealership to buy one.');
+                        return;
+                    }
+                    if (confirm(`Buy ${vehicle.name} for $${vehicle.price}?`)) {
+                        const result = this.worldMap.buyVehicle(vehicleId);
+                        if (result.success) {
+                            this.showToast(result.switched === false
+                                ? `Bought ${vehicle.name}! (still driving your faster vehicle — click it to switch)`
+                                : `Bought ${vehicle.name}!`, 'success');
+                            this.updateMapScreen();
+                        } else {
+                            this.showError(result.reason);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Training buttons
+        const trainingGrid = document.getElementById('training-grid');
+        if (trainingGrid) {
+            trainingGrid.addEventListener('click', (e) => {
+                // closest() so a click on text/icon inside the button counts too
+                const btn = e.target.closest?.('button');
+                if (!btn || btn.disabled) return;
+                const card = btn.closest('.training-card');
+                if (card) {
+                    this.handleTraining(card.dataset.activity);
+                }
+            });
+        }
+
+        // Shop category buttons
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.uiUpdater?.updateShopScreen?.(btn.dataset.category);
+            });
+        });
+    }
+
     handleHireStaff(role) {
         const spec = STAFF_ROLES[role];
         if (!spec) {
@@ -3931,7 +3942,11 @@ const initGame = () => {
 };
 
 // Handle both cases: DOM already loaded or still loading
-if (document.readyState === 'loading') {
+// Unit tests import MainGame without booting a whole game by setting
+// globalThis.__DSD_NO_AUTOBOOT__ before the import (#527)
+if (globalThis.__DSD_NO_AUTOBOOT__) {
+    // no-op: the importer drives MainGame directly
+} else if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initGame);
 } else {
     // DOM already loaded, call immediately
