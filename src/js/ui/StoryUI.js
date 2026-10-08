@@ -5,6 +5,43 @@
  */
 
 export class StoryUI {
+    static ACTS = [
+        { phase: 'mid', day: 30, text: 'You\'ve entered Act 2. The stakes are rising, and your choices matter more than ever.' },
+        { phase: 'late', day: 90, text: 'You\'ve entered Act 3. Your reputation precedes you, and every choice is watched.' },
+        { phase: 'endgame', day: 180, text: 'The final act begins. Everything you\'ve built comes down to what you do next.' }
+    ];
+
+    /**
+     * Journal entries for every act reached so far. Uses the recorded
+     * phaseHistory, falling back to the act's start day for older saves, so
+     * an entry never disappears once you move on (#2151, #1772)
+     */
+    static actEntries(storylineManager) {
+        if (!storylineManager) return [];
+        const order = ['early', 'mid', 'late', 'endgame'];
+        const reached = order.indexOf(storylineManager.storylinePhase);
+        const history = Array.isArray(storylineManager.phaseHistory) ? storylineManager.phaseHistory : [];
+        return StoryUI.ACTS
+            .filter(act => order.indexOf(act.phase) <= reached || history.some(h => h.phase === act.phase))
+            .map(act => {
+                const recorded = history.find(h => h.phase === act.phase);
+                const day = Number.isFinite(recorded?.day) ? recorded.day : act.day;
+                return { day, order: -1, date: `Day ${day}`, text: act.text };
+            });
+    }
+
+    /**
+     * "Ethics +12 · Reputation +300 · Rank +1" from getArcSummary().changes
+     */
+    static formatArcChanges(changes) {
+        if (!changes) return '';
+        const labels = { ethics: 'Ethics', reputation: 'Reputation', rank: 'Rank' };
+        return Object.entries(labels)
+            .filter(([key]) => Number(changes[key]))
+            .map(([key, label]) => `${label} ${changes[key] > 0 ? '+' : ''}${Number(changes[key]).toLocaleString()}`)
+            .join(' · ');
+    }
+
     constructor(game) {
         this.game = game;
         this.container = null;
@@ -35,7 +72,8 @@ export class StoryUI {
         storyBtn.className = 'btn-grey';
         storyBtn.setAttribute('aria-label', 'Your Story');
         storyBtn.setAttribute('title', 'Your Story');
-        storyBtn.innerHTML = '';
+        // Visible label like the other nav buttons (MAP, BANK, OPTS) (#2393)
+        storyBtn.textContent = 'STORY';
         
         // Insert before settings button
         const settingsBtn = document.getElementById('btn-settings');
@@ -483,15 +521,30 @@ export class StoryUI {
             const sign = consequences.ethics > 0 ? '+' : '';
             parts.push(`<span class="consequence ethics">Ethics ${sign}${consequences.ethics}</span>`);
         }
-        if (consequences.money !== undefined) {
-            const sign = consequences.money > 0 ? '+' : '';
-            parts.push(`<span class="consequence money">$${sign}${consequences.money.toLocaleString()}</span>`);
+        if (consequences.money !== undefined && consequences.money !== 0) {
+            parts.push(`<span class="consequence money">${StoryUI.formatMoneyDelta(consequences.money)}</span>`);
         }
         if (consequences.reputation !== undefined) {
             const sign = consequences.reputation > 0 ? '+' : '';
             parts.push(`<span class="consequence reputation">Reputation ${sign}${consequences.reputation}</span>`);
         }
+        // Career and legal consequences are shown up front too (#1503, #1504)
+        if (consequences.fired) {
+            parts.push('<span class="consequence danger">You lose your job (-1 rank)</span>');
+        }
+        if (consequences.risk === 'arrest') {
+            parts.push('<span class="consequence danger">Arrest and jail</span>');
+        }
         return parts.join(' ');
+    }
+
+    /**
+     * "+$5,000" / "-$2,000": the sign goes before the dollar sign (#1775)
+     */
+    static formatMoneyDelta(amount) {
+        const n = Number(amount) || 0;
+        const sign = n > 0 ? '+' : n < 0 ? '-' : '';
+        return `${sign}$${Math.abs(n).toLocaleString()}`;
     }
 
     /**
@@ -512,31 +565,31 @@ export class StoryUI {
             }
         ];
 
-        // Add decision entries
+        // Decisions and act transitions, in the order they happened
+        // (#2151, #1772)
+        const timed = [];
         if (storylineManager?.majorDecisions) {
-            storylineManager.majorDecisions.forEach(decision => {
+            storylineManager.majorDecisions.forEach((decision, i) => {
                 const decisionData = this.getDecisionData(decision.decisionId);
                 if (decisionData) {
-                    entries.push({
+                    const choiceData = decisionData.choices?.[decision.choice];
+                    const impact = decision.outcome && choiceData?.outcomes?.[decision.outcome]?.storyImpact
+                        ? choiceData.outcomes[decision.outcome].storyImpact
+                        : choiceData?.storyImpact;
+                    timed.push({
+                        day: Number.isFinite(decision.day) ? decision.day : (decision.week ?? 0) * 7,
+                        order: i,
                         date: `Week ${(decision.week ?? 0) + 1}`,
-                        text: decisionData.choices?.[decision.choice]?.storyImpact
-                            ? `${decisionData.title}: ${decisionData.choices[decision.choice].storyImpact}`
+                        text: impact
+                            ? `${decisionData.title}: ${impact}`
                             : `${decisionData.title}: You made a choice that shaped your path.`
                     });
                 }
             });
         }
-
-        // Add phase transitions
-        if (storylineManager) {
-            const phase = storylineManager.storylinePhase;
-            if (phase === 'mid' && days >= 30) {
-                entries.push({
-                    date: `Day ${days}`,
-                    text: 'You\'ve entered Act 2. The stakes are rising, and your choices matter more than ever.'
-                });
-            }
-        }
+        StoryUI.actEntries(storylineManager).forEach(e => timed.push(e));
+        timed.sort((a, b) => a.day - b.day || a.order - b.order);
+        timed.forEach(e => entries.push({ date: e.date, text: e.text }));
 
         journal.innerHTML = entries.map(entry => `
             <div class="journal-entry">
@@ -603,9 +656,12 @@ export class StoryUI {
         if (startDesc) startDesc.textContent = summary.start;
         if (currentDesc) currentDesc.textContent = summary.current;
         if (transformation) {
+            // getArcSummary().changes was computed and never shown (#1478)
+            const changes = StoryUI.formatArcChanges(summary.changes);
             transformation.innerHTML = `
                 <div class="transformation-label">Your Transformation</div>
                 <div class="transformation-text">${summary.transformation}</div>
+                ${changes ? `<div class="transformation-changes">${changes}</div>` : ''}
             `;
         }
     }
@@ -634,6 +690,7 @@ export class StoryUI {
                     ${Object.entries(decision.choices || {}).map(([key, choice]) => `
                         <button class="decision-choice-btn" data-choice="${key}">
                             <div class="choice-text">${choice.message}</div>
+                            ${choice.stakes ? `<div class="choice-stakes">${choice.stakes}</div>` : ''}
                             ${choice.consequences ? `
                                 <div class="choice-consequences">
                                     ${this.formatConsequences(choice.consequences)}
@@ -728,19 +785,15 @@ export class StoryUI {
         const result = storylineManager.processDecision(decisionId, choice);
         
         if (result) {
-            // Record decision in NPC memory
-            if (this.game?.npcMemorySystem) {
-                this.game.npcMemorySystem.recordDecision(decisionId, choice);
-            }
+            // Both systems live on gameState, not on the game object (#2395)
+            const gs = this.game?.gameState;
+            gs?.npcMemorySystem?.recordDecision?.(decisionId, choice);
+            gs?.characterArcSystem?.updateCurrentState?.();
 
-            // Update character arc
-            if (this.game?.characterArcSystem) {
-                this.game.characterArcSystem.updateCurrentState();
-            }
-
-            // Show result notification
+            // Show result notification, then what it means for the story (#1107)
             if (this.game?.showToast) {
                 this.game.showToast(result.message, 'info');
+                if (result.storyImpact) this.game.showToast(result.storyImpact, 'info');
             }
 
             // Update UI
