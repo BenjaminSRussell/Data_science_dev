@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { create } from 'zustand';
+import { createStore as create } from 'zustand/vanilla';
 import { RANKS } from '../../src/js/data/ranks.js';
 
 // Helper function to compute currentRank
