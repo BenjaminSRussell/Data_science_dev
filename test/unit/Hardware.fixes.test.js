@@ -72,10 +72,10 @@ describe('HardwareManager', () => {
         ps.workOnProject?.(10);
         const base = ps.activeProject.stageProgress;
         expect(base).toBeGreaterThan(0);
-        state.hardwareManager.buyPart(HARDWARE_TYPES.RAM, 'ram_128gb'); // productivity 2.0
+        state.hardwareManager.buyPart(HARDWARE_TYPES.RAM, 'ram_128gb'); // 2.0 vs 0.8 stock: x2.2 (#1895)
         ps.activeProject.stageProgress = 0;
         ps.workOnProject?.(10);
-        expect(ps.activeProject.stageProgress).toBeCloseTo(base * 2, 5);
+        expect(ps.activeProject.stageProgress).toBeCloseTo(base * 2.2, 5);
     });
 });
 

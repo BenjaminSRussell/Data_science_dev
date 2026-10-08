@@ -36,7 +36,9 @@ export const HARDWARE_PARTS = {
         { id: 'gpu_rtx3060', name: 'RTX 3060', description: 'The people\'s champion.', price: 350, stats: { compute: 12, vram: 12 }, unlockRank: 3 },
         { id: 'gpu_rtx4070', name: 'RTX 4070', description: 'Serious ML training.', price: 600, stats: { compute: 25, vram: 12 }, unlockRank: 4 },
         { id: 'gpu_rtx4090', name: 'RTX 4090', description: 'Melts power cables.', price: 1600, stats: { compute: 60, vram: 24 }, unlockRank: 5 },
-        { id: 'gpu_a4000', name: 'RTX A4000', description: 'Professional stable.', price: 1200, stats: { compute: 45, vram: 16 }, unlockRank: 6 },
+        // Workstation sidegrade: less raw compute than the 4090 but more VRAM and
+        // stability, priced above it (#1000, #1894)
+        { id: 'gpu_a4000', name: 'RTX A4000', description: 'Professional stable.', price: 2000, stats: { compute: 55, vram: 32, reliability: 1.2 }, unlockRank: 6 },
         { id: 'gpu_a6000', name: 'RTX A6000', description: 'VRAM monster.', price: 4500, stats: { compute: 100, vram: 48 }, unlockRank: 7 },
         { id: 'gpu_h100', name: 'H100 Tensor Core', description: 'Banned for export.', price: 30000, stats: { compute: 400, vram: 80 }, unlockRank: 8 },
         { id: 'gpu_pod', name: 'H100 NVL Pod', description: 'Training LLMs daily.', price: 100000, stats: { compute: 2000, vram: 500 }, unlockRank: 10 }
@@ -89,7 +91,7 @@ export const HARDWARE_PARTS = {
         { id: 'ultrawide_34', name: '34" Ultrawide', description: 'No bezels.', price: 600, stats: { resolution: 6, productivity: 1.8 }, unlockRank: 4 },
         { id: '4k_32', name: '32" 4K IPS', description: 'Crisp text.', price: 800, stats: { resolution: 8, productivity: 1.6 }, unlockRank: 5 },
         { id: 'dual_4k', name: 'Dual 4K', description: 'Pixel paradise.', price: 1600, stats: { resolution: 16, productivity: 2.2 }, unlockRank: 7 },
-        { id: 'odyssey_ark', name: '55" Curved Ark', description: 'Cockpit view.', price: 3000, stats: { resolution: 12, productivity: 2.5, aesthetics: 10 }, unlockRank: 9 }
+        { id: 'odyssey_ark', name: '55" Curved Ark', description: 'Cockpit view.', price: 3000, stats: { resolution: 20, productivity: 2.5, aesthetics: 10 }, unlockRank: 9 }
     ]
 };
 
@@ -100,6 +102,18 @@ export const HARDWARE_PARTS = {
 // RANKS has 7 levels (0-6) but parts are tagged 0-10, so the top tiers
 // all unlock at the final rank.
 const MAX_RANK_INDEX = RANKS.length - 1;
+
+// Watts of CPU power the cooling can handle: a base plus a share per cooling point (#1896)
+export const THERMAL_BASE_WATTS = 50;
+export const THERMAL_WATTS_PER_COOLING = 30;
+// Work slows by this much while the rig is overheating
+export const OVERHEAT_PRODUCTIVITY_PENALTY = 0.2;
+
+/** Productivity of a category's stock part; 1.0 when it has none */
+function stockProductivity(type) {
+    const p = HARDWARE_PARTS[type]?.[0]?.stats?.productivity;
+    return Number.isFinite(p) ? p : 1.0;
+}
 
 function defaultOwned() {
     return Object.fromEntries(Object.values(HARDWARE_TYPES).map(t => [t, [HARDWARE_PARTS[t][0].id]]));
@@ -163,11 +177,18 @@ export class HardwareManager {
             stats.powerDraw += s.power_draw || 0;
             stats.resolution = Math.max(stats.resolution, s.resolution || 0);
             stats.refreshRate = Math.max(stats.refreshRate, s.refresh_rate || 0);
-            if (s.productivity) stats.productivity = Math.max(stats.productivity, s.productivity); // best part, not a sum
+            // Each category adds its gain over its own stock part, so RAM,
+            // storage and monitor upgrades all count (#1895)
+            if (Number.isFinite(s.productivity)) stats.productivity += s.productivity - stockProductivity(type);
             if (s.reliability) stats.reliability *= s.reliability;
         }
         // What you actually hear: fan noise minus the case's dampening
         stats.effectiveNoise = Math.max(0, stats.noise - stats.noiseDampening);
+        // CPU power draw against what the cooling can carry (#1896)
+        stats.thermalBudget = THERMAL_BASE_WATTS + stats.cooling * THERMAL_WATTS_PER_COOLING;
+        stats.overheating = stats.powerDraw > stats.thermalBudget;
+        if (stats.overheating) stats.productivity *= (1 - OVERHEAT_PRODUCTIVITY_PENALTY);
+        stats.productivity = Math.max(0.1, stats.productivity);
         return stats;
     }
 
