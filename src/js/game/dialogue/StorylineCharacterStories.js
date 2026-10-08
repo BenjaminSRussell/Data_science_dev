@@ -941,6 +941,45 @@ export const STORYLINE_CHARACTER_STORIES = {
             }
         ]
     },
+    "vinnie_shark": {
+        "personalStory": {
+            "background": "Runs a \"consulting\" business. Lending money at high rates.",
+            "motivation": "Control and Profit.",
+            "secret": "He actually has a soft spot for his nonna's cooking and funds a local bakery (anonymously).",
+            "dream": "To be legitimate. Just not yet.",
+            "fear": "Federal Prison.",
+            "relationship": "It's handled.",
+            "turningPoint": "The day he realized people fear debt more than violence.",
+            "philosophy": "Interest is the only thing that grows without rain."
+        },
+        "storyReveals": [
+            {
+                "relationshipLevel": 10,
+                "topic": "background",
+                "dialogue": "I help people. People with... cash flow issues. Banks say no. Vinnie says yes."
+            },
+            {
+                "relationshipLevel": 25,
+                "topic": "philosophy",
+                "dialogue": "A contract is a promise. You break a promise, you break trust. I don't like broken trust."
+            },
+            {
+                "relationshipLevel": 40,
+                "topic": "secret",
+                "dialogue": "My nonna... she makes the best cannoli. I send a box to the orphanage every Sunday. Don't tell no one."
+            },
+            {
+                "relationshipLevel": 60,
+                "topic": "goal",
+                "dialogue": "One day, I wear a suit. A real suit. Board of Directors. No more back alleys."
+            },
+            {
+                "relationshipLevel": 80,
+                "topic": "warning",
+                "dialogue": "You're a good kid. Don't borrow what you can't earn. Keep it that way."
+            }
+        ]
+    },
     "zero_cool": {
         "personalStory": {
             "background": "A ghost in the machine. Can find dirt on anyone. Nobody knows their real name.",
