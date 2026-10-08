@@ -72,10 +72,9 @@ describe('AssetValidator', () => {
             expect(paths.length).toBeGreaterThan(0);
         });
 
-        it('should include common sprite paths', () => {
+        it('should not add hardcoded sprite paths beyond the manifest (#1438)', () => {
             const paths = validator.getSpritePaths();
-            expect(paths).toContain('/assets/characters/sprites/character_sheet.png');
-            expect(paths).toContain('/assets/characters/sprites/emotion_sheet.png');
+            expect(paths).toHaveLength(5); // 2 sheets + base/walk/idle, nothing extra
         });
 
         it('should not duplicate paths', () => {
@@ -110,9 +109,8 @@ describe('AssetValidator', () => {
         it('should work when game or assetManager is null', () => {
             const nullValidator = new AssetValidator(null);
             const paths = nullValidator.getSpritePaths();
-            // Should still return common sprite paths
-            expect(paths).toContain('/assets/characters/sprites/character_sheet.png');
-            expect(paths).toContain('/assets/characters/sprites/emotion_sheet.png');
+            // No manifest, no paths: nothing hardcoded (#1438)
+            expect(paths).toEqual([]);
         });
     });
 });

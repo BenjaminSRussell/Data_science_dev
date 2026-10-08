@@ -5,6 +5,41 @@
 
 import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
 
+const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i;
+
+/** Every image path in a manifest subtree: strings, `.url` fields, arrays, nested objects */
+function collectImagePaths(node, out = []) {
+    if (!node) return out;
+    if (typeof node === 'string') {
+        if (IMAGE_EXT.test(node)) out.push(node);
+        return out;
+    }
+    if (Array.isArray(node)) {
+        node.forEach(n => collectImagePaths(n, out));
+        return out;
+    }
+    if (typeof node === 'object') {
+        Object.values(node).forEach(n => collectImagePaths(n, out));
+    }
+    return out;
+}
+
+/** Tally per-file results; files on the missing-asset blocklist count as skipped, not loaded (#1438) */
+function tally(paths, fileResults) {
+    const results = { total: paths.length, loaded: 0, failed: 0, skipped: 0, errors: [] };
+    fileResults.forEach((result, index) => {
+        if (result.skipped) {
+            results.skipped++;
+        } else if (result.loaded) {
+            results.loaded++;
+        } else {
+            results.failed++;
+            results.errors.push({ path: paths[index], error: result.error });
+        }
+    });
+    return results;
+}
+
 export class AssetValidator {
     constructor(game) {
         this.game = game;
@@ -29,90 +64,57 @@ export class AssetValidator {
         results.failed = (results.sprites?.failed || 0) + 
                         (results.images?.failed || 0) + 
                         (results.audio?.failed || 0);
+        results.skipped = (results.sprites?.skipped || 0) +
+                         (results.images?.skipped || 0) +
+                         (results.audio?.skipped || 0);
 
         return results;
     }
 
     async validateSprites() {
         const spritePaths = this.getSpritePaths();
-        const results = {
-            total: spritePaths.length,
-            loaded: 0,
-            failed: 0,
-            errors: []
-        };
+        const results = tally(spritePaths, await Promise.all(spritePaths.map(path => this.validateImage(path))));
 
-        const promises = spritePaths.map(path => this.validateImage(path));
-        const imageResults = await Promise.all(promises);
-
-        imageResults.forEach((result, index) => {
-            if (result.loaded) {
-                results.loaded++;
-            } else {
-                results.failed++;
+        // Check frame geometry for sheets that declare it (#1440)
+        results.sheets = [];
+        for (const sheet of this.getSpriteSheets()) {
+            if (isAssetMissing(sheet.url)) continue;
+            const check = await this.validateSpriteSheet(sheet.url, sheet.frameWidth, sheet.frameHeight);
+            const expected = (sheet.columns && sheet.rows) ? sheet.columns * sheet.rows : null;
+            const geometryOk = check.valid && (expected == null || check.totalFrames >= expected);
+            results.sheets.push({ name: sheet.name, url: sheet.url, ...check, expectedFrames: expected, geometryOk });
+            if (check.valid && !geometryOk) {
                 results.errors.push({
-                    path: spritePaths[index],
-                    error: result.error
+                    path: sheet.url,
+                    error: `Sheet has ${check.totalFrames} frames, manifest expects ${expected}`
                 });
             }
-        });
+        }
 
         return results;
+    }
+
+    /**
+     * Sprite sheets in the manifest that declare frame sizes
+     */
+    getSpriteSheets() {
+        const manifest = this.game?.assetManager?.getAssetManifest?.();
+        const sheets = manifest?.characters?.spriteSheets;
+        if (!sheets || typeof sheets !== 'object') return [];
+        return Object.entries(sheets)
+            .filter(([, sheet]) => sheet?.url && sheet.frameWidth > 0 && sheet.frameHeight > 0)
+            .map(([name, sheet]) => ({ name, ...sheet }));
     }
 
     async validateImages() {
         // Validate background images and other assets
         const imagePaths = this.getImagePaths();
-        const results = {
-            total: imagePaths.length,
-            loaded: 0,
-            failed: 0,
-            errors: []
-        };
-
-        const promises = imagePaths.map(path => this.validateImage(path));
-        const imageResults = await Promise.all(promises);
-
-        imageResults.forEach((result, index) => {
-            if (result.loaded) {
-                results.loaded++;
-            } else {
-                results.failed++;
-                results.errors.push({
-                    path: imagePaths[index],
-                    error: result.error
-                });
-            }
-        });
-
-        return results;
+        return tally(imagePaths, await Promise.all(imagePaths.map(path => this.validateImage(path))));
     }
 
     async validateAudio() {
         const audioPaths = this.getAudioPaths();
-        const results = {
-            total: audioPaths.length,
-            loaded: 0,
-            failed: 0,
-            errors: []
-        };
-
-        const promises = audioPaths.map(path => this.validateAudioFile(path));
-        const audioResults = await Promise.all(promises);
-
-        audioResults.forEach((result, index) => {
-            if (result.loaded) {
-                results.loaded++;
-            } else {
-                results.failed++;
-                results.errors.push({
-                    path: audioPaths[index],
-                    error: result.error
-                });
-            }
-        });
-
-        return results;
+        return tally(audioPaths, await Promise.all(audioPaths.map(path => this.validateAudioFile(path))));
     }
 
     getSpritePaths() {
@@ -138,42 +140,22 @@ export class AssetValidator {
             });
         }
 
-        // Also check common sprite paths
-        const commonSprites = [
-            '/assets/characters/sprites/character_sheet.png',
-            '/assets/characters/sprites/emotion_sheet.png'
-        ];
-
-        commonSprites.forEach(path => {
-            if (!paths.includes(path)) paths.push(path);
-        });
-
-        return paths;
+        // Only manifest paths: the old hardcoded character_sheet/emotion_sheet
+        // fallbacks were never real files and always failed (#1438)
+        return [...new Set(paths)];
     }
 
-    getImagePaths() {
-        // Get background and other image paths
-        const paths = [];
-        const assetManager = this.game?.assetManager;
-
-        if (assetManager?.getAssetManifest) {
-            const manifest = assetManager.getAssetManifest();
-            
-            // Background images, at any nesting depth (backgrounds.locations.*) (#2309)
-            if (manifest.backgrounds) {
-                const walk = (node) => {
-                    if (!node) return;
-                    if (typeof node === 'string') { paths.push(node); return; }
-                    if (typeof node === 'object') {
-                        if (typeof node.url === 'string') { paths.push(node.url); return; }
-                        Object.values(node).forEach(walk);
-                    }
-                };
-                walk(manifest.backgrounds);
-            }
-        }
-
-        return paths.slice(0, 20); // Limit to 20 for testing
+    /**
+     * Every image in the manifest except the character sprites validated by
+     * validateSprites(): backgrounds at any depth (#2309, #1437), emotions,
+     * poses, map tiles, icons (#1045). Pass a limit to sample.
+     */
+    getImagePaths(limit = Infinity) {
+        const manifest = this.game?.assetManager?.getAssetManifest?.();
+        if (!manifest) return [];
+        const spritePaths = new Set(this.getSpritePaths());
+        const paths = [...new Set(collectImagePaths(manifest))].filter(p => !spritePaths.has(p));
+        return Number.isFinite(limit) ? paths.slice(0, limit) : paths;
     }
 
     getAudioPaths() {
@@ -187,18 +169,12 @@ export class AssetValidator {
             paths.push(...audioManager.getTrackUrls());
         }
 
-        if (audioManager?.sounds) {
-            Object.values(audioManager.sounds).forEach(sound => {
-                if (sound.url) paths.push(sound.url);
-            });
-        }
-
         return [...new Set(paths)];
     }
 
     async validateImage(path) {
         if (isAssetMissing(path)) {
-            return { loaded: true, skipped: true, error: null };
+            return { loaded: false, skipped: true, error: null };
         }
         return new Promise((resolve) => {
             const img = new Image();
@@ -221,6 +197,9 @@ export class AssetValidator {
     }
 
     async validateAudioFile(path) {
+        if (isAssetMissing(path)) {
+            return { loaded: false, skipped: true, error: null };
+        }
         return new Promise((resolve) => {
             const audio = new Audio();
             const timeout = setTimeout(() => {
