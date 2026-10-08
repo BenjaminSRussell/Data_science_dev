@@ -127,7 +127,7 @@ describe('palette swatches (#1892, #1881)', () => {
 describe('banned colours written as rgba() (#1090)', () => {
     it('no stylesheet ships the purple accent as an rgb triplet', () => {
         const dir = path.join(root, 'src/styles');
-        const css = fs.readdirSync(dir).filter(f => f.endsWith('.css'))
+        const css = fs.readdirSync(dir, { recursive: true }).map(String).filter(f => f.endsWith('.css'))
             .map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n');
         expect(css).not.toMatch(/rgba?\(\s*139,\s*92,\s*246/);
         expect(css).not.toMatch(/rgba?\(\s*167,\s*139,\s*250/);

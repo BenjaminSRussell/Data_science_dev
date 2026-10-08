@@ -61,6 +61,32 @@ export class UIUpdater {
         this.updateChartTypeGrid();
         this.updateSoftwareDisplay();
         this.updateBankScreen();
+        // "All UI" includes the screen the player is looking at, so callers
+        // don't have to remember the matching per-screen refresh (#1483)
+        this.refreshActiveScreen();
+    }
+
+    /** Screen id -> the method that redraws it */
+    static SCREEN_REFRESHERS = {
+        'screen-career': 'updateCareerScreen',
+        'screen-shop': 'updateShopScreen',
+        'screen-library': 'updateLibraryScreen',
+        'screen-newspaper': 'updateNewspaperScreen',
+        'screen-office': 'updateOfficeEquipment'
+    };
+
+    /** Redraw the active screen, if it has a refresher. Returns the method name used. */
+    refreshActiveScreen() {
+        const sm = this.game?.screenManager;
+        const current = sm?.getCurrentScreen?.() ?? sm?.currentScreen;
+        const method = UIUpdater.SCREEN_REFRESHERS[current];
+        if (!method || typeof this[method] !== 'function') return null;
+        try {
+            this[method]();
+        } catch (error) {
+            logger.warn(`refreshActiveScreen: ${method} failed`, error);
+        }
+        return method;
     }
 
     /**
@@ -350,9 +376,13 @@ export class UIUpdater {
     /**
      * Update shop screen
      */
-    updateShopScreen(category = 'tools') {
+    updateShopScreen(category) {
         const grid = document.getElementById('shop-grid');
         if (!grid) return;
+        // A refresh with no argument (after a purchase, or from updateAllUI)
+        // keeps the tab the player was on instead of snapping back to tools
+        category = category || this.currentShopCategory || 'tools';
+        this.currentShopCategory = category;
 
         const items = SHOP_ITEMS.filter(item => item.category === category);
 
