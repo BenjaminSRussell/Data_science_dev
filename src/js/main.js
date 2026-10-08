@@ -635,28 +635,28 @@ export class MainGame {
         dashboard.style.display = 'grid';
         dashboard.innerHTML = `
             <div class="stat-card">
-                <div class="stat-icon">Time</div>
+                <div class="stat-icon" aria-hidden="true">&#9719;</div>
                 <div class="stat-content">
                     <div class="stat-label">Total Playtime</div>
                     <div class="stat-value">${this.statisticsAggregator.formatPlaytime(stats.totalPlaytime)}</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">Trophy</div>
+                <div class="stat-icon" aria-hidden="true">&#9819;</div>
                 <div class="stat-content">
                     <div class="stat-label">Games Completed</div>
                     <div class="stat-value">${stats.gamesCompleted}</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">Chart</div>
+                <div class="stat-icon" aria-hidden="true">&#9650;</div>
                 <div class="stat-content">
                     <div class="stat-label">Highest Rank</div>
                     <div class="stat-value">${stats.highestRankName}</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">Money</div>
+                <div class="stat-icon" aria-hidden="true">$</div>
                 <div class="stat-content">
                     <div class="stat-label">Total Money</div>
                     <div class="stat-value">${this.statisticsAggregator.formatMoney(stats.totalMoney)}</div>
@@ -2484,40 +2484,40 @@ export class MainGame {
      */
     showTutorial() {
         const modalContent = `
-            <div class="tutorial-modal">
+            <div class="howto-modal">
                 <h2>How to Play</h2>
-                <div class="tutorial-steps">
-                    <div class="tutorial-step">
-                        <span class="step-number">1</span>
-                        <div class="step-content">
+                <div class="howto-steps">
+                    <div class="howto-step">
+                        <span class="howto-step-number">1</span>
+                        <div class="howto-step-content">
                             <h4> Get Your Task</h4>
                             <p>Your boss will give you data and specific requirements for a visualization.</p>
                         </div>
                     </div>
-                    <div class="tutorial-step">
-                        <span class="step-number">2</span>
-                        <div class="step-content">
+                    <div class="howto-step">
+                        <span class="howto-step-number">2</span>
+                        <div class="howto-step-content">
                             <h4>Analyze the Data</h4>
                             <p>Look at the data table and understand what story it tells.</p>
                         </div>
                     </div>
-                    <div class="tutorial-step">
-                        <span class="step-number">3</span>
-                        <div class="step-content">
+                    <div class="howto-step">
+                        <span class="howto-step-number">3</span>
+                        <div class="howto-step-content">
                             <h4>Create Your Chart</h4>
                             <p>Choose the right chart type and customize it to clearly present the data.</p>
                         </div>
                     </div>
-                    <div class="tutorial-step">
-                        <span class="step-number">4</span>
-                        <div class="step-content">
+                    <div class="howto-step">
+                        <span class="howto-step-number">4</span>
+                        <div class="howto-step-content">
                             <h4>Get Rated</h4>
                             <p>Your boss will rate your work. Better ratings mean more money and reputation!</p>
                         </div>
                     </div>
-                    <div class="tutorial-step">
-                        <span class="step-number">5</span>
-                        <div class="step-content">
+                    <div class="howto-step">
+                        <span class="howto-step-number">5</span>
+                        <div class="howto-step-content">
                             <h4>Climb the Ladder</h4>
                             <p>Earn reputation to get promoted. Unlock new chart types and tools in the shop!</p>
                         </div>
