@@ -42,17 +42,19 @@ export class Stock {
         relatedStocks.forEach(otherStock => {
             if (otherStock.id === this.id) return;
 
+            // Use the previous tick's change for every stock, regardless of
+            // array order (#1217); StockMarket.update() snapshots it.
+            const otherChange = otherStock.prevChangePct ?? otherStock.lastChangePct ?? 0;
+
             // Same sector correlation (0.3-0.6)
             if (otherStock.sector === this.sector) {
                 const correlation = this.correlation[otherStock.id] || 0.4;
-                const otherChange = otherStock.lastChangePct || 0;
                 correlationEffect += otherChange * correlation * 0.3;
             }
 
             // Same market correlation (0.2-0.4)
             if (otherStock.market === this.market) {
                 const marketCorrelation = 0.25;
-                const otherChange = otherStock.lastChangePct || 0;
                 correlationEffect += otherChange * marketCorrelation * 0.2;
             }
         });
@@ -101,26 +103,43 @@ export class Stock {
 export class Portfolio {
     constructor() {
         this.holdings = {}; // stockId -> quantity
+        this.costBasis = {}; // stockId -> total cost of the shares still held
         this.totalInvested = 0;
         this.history = []; // Portfolio value history
     }
 
     buy(stockId, quantity, price) {
+        if (!Portfolio.isValidQuantity(quantity) || !(price > 0)) return false;
         if (!this.holdings[stockId]) this.holdings[stockId] = 0;
         this.holdings[stockId] += quantity;
+        this.costBasis[stockId] = (this.costBasis[stockId] || 0) + quantity * price;
         this.totalInvested += quantity * price;
+        return true;
     }
 
     sell(stockId, quantity, price) {
-        if (!this.holdings[stockId] || this.holdings[stockId] < quantity) return 0;
-        this.holdings[stockId] -= quantity;
+        if (!Portfolio.isValidQuantity(quantity)) return 0;
+        const held = this.holdings[stockId] || 0;
+        if (!held || held < quantity) return 0;
 
-        // Simplified cost basis logic: assume selling reduces invested amount proportionally?
-        // Actually, profit is calculated at sell time.
-        // For totalInvested tracking, it's tricky. Let's just track current value.
+        // Average-cost basis: selling removes the sold shares' share of the
+        // cost, so totalInvested reflects what is still held (#899, #2365)
+        const basis = this.costBasis[stockId] ?? 0;
+        const soldCost = held > 0 ? basis * (quantity / held) : 0;
+        this.costBasis[stockId] = basis - soldCost;
+        this.totalInvested = Math.max(0, this.totalInvested - soldCost);
 
-        if (this.holdings[stockId] === 0) delete this.holdings[stockId];
+        this.holdings[stockId] = held - quantity;
+        if (this.holdings[stockId] === 0) {
+            delete this.holdings[stockId];
+            delete this.costBasis[stockId];
+        }
         return quantity * price;
+    }
+
+    /** Whole, positive share counts only (#895, #1354) */
+    static isValidQuantity(quantity) {
+        return Number.isInteger(quantity) && quantity > 0;
     }
 
     getQuantity(stockId) {
@@ -129,6 +148,9 @@ export class Portfolio {
 }
 
 export class StockMarket {
+    /** Heat added per unlicensed trade (#1714) */
+    static UNLICENSED_TRADE_HEAT = 5;
+
     constructor(gameState) {
         this.gameState = gameState;
         this.stocks = [];
@@ -144,12 +166,12 @@ export class StockMarket {
 
         // Market indices (like Dow, NASDAQ, etc.)
         this.indices = {
-            DOW: { value: 35000, name: 'Dow Jones', market: 'US' },
-            NASDAQ: { value: 14000, name: 'NASDAQ', market: 'US' },
+            DOW: { value: 35000, name: 'Dow Jones', market: 'US', sectors: ['Finance', 'Retail', 'Auto', 'Transport', 'Health'] },
+            NASDAQ: { value: 14000, name: 'NASDAQ', market: 'US', sectors: ['Tech', 'Hardware', 'Social', 'Media'] },
             S_P_500: { value: 4500, name: 'S&P 500', market: 'US' },
             FTSE: { value: 7500, name: 'FTSE 100', market: 'EU' },
-            NIKKEI: { value: 28000, name: 'Nikkei 225', market: 'ASIA' },
-            HANG_SENG: { value: 18000, name: 'Hang Seng', market: 'ASIA' }
+            NIKKEI: { value: 28000, name: 'Nikkei 225', market: 'ASIA', sectors: ['Auto', 'Hardware'] },
+            HANG_SENG: { value: 18000, name: 'Hang Seng', market: 'ASIA', sectors: ['Tech'] }
         };
 
         // Active world events affecting markets
@@ -224,10 +246,22 @@ export class StockMarket {
             }
         });
 
-        // Update each index
+        // Each index tracks its own basket: an optional sector tilt plus a
+        // little index-specific noise, so DOW/NASDAQ/S&P (and NIKKEI/Hang Seng)
+        // no longer move by the identical percentage every day (#2048)
         Object.keys(this.indices).forEach(indexKey => {
             const index = this.indices[indexKey];
-            const performance = marketPerformance[index.market] || 0;
+            let performance = marketPerformance[index.market] || 0;
+            if (index.sectors && this.stocks?.length) {
+                const basket = this.stocks.filter(s => s.market === index.market && index.sectors.includes(s.sector));
+                if (basket.length > 0) {
+                    const basketChange = basket.reduce((sum, s) => sum + (s.lastChangePct || 0), 0) / basket.length;
+                    performance = performance * 0.5 + basketChange * 0.5;
+                }
+            }
+            if (index.history) {
+                performance += (Math.random() - 0.5) * 0.002;
+            }
             index.value = index.value * (1 + performance * 0.8); // Indices move slightly less than individual stocks
             if (!index.history) index.history = [index.value];
             index.history.push(index.value);
@@ -242,7 +276,7 @@ export class StockMarket {
      */
     update(newsEvents = [], worldEvents = []) {
         // Update active world events
-        this.activeWorldEvents = worldEvents.filter(e => e.active);
+        this.activeWorldEvents = (worldEvents || []).filter(e => e && e.active);
 
         // Update market trends for each region (random walk with mean reversion)
         // Snapshot pre-update values so cross-market influence is symmetric:
@@ -284,8 +318,9 @@ export class StockMarket {
             }
         });
 
-        // Process world events (can cause large market movements)
-        worldEvents.forEach(event => {
+        // Process world events (can cause large market movements) — only the
+        // active ones, like the per-stock impacts below (#896)
+        this.activeWorldEvents.forEach(event => {
             if (event.type === 'market_crash') {
                 // Global crash affects all markets
                 Object.keys(this.marketTrends).forEach(market => {
@@ -312,6 +347,9 @@ export class StockMarket {
                 sectorEffects['Hardware'] = (sectorEffects['Hardware'] || 0) + 0.03;
             }
         });
+
+        // Snapshot yesterday's change so correlations don't depend on array order (#1217)
+        this.stocks?.forEach(stock => { stock.prevChangePct = stock.lastChangePct || 0; });
 
         // Update each stock with correlations
         this.stocks?.forEach(stock => {
@@ -412,8 +450,12 @@ export class StockMarket {
         }
         stock.manipulation.daysLeft = 3;
 
-        stock.price = stock.price * magnitude;
-        if (stock.price < 0.01) stock.price = 0.01;
+        const oldPrice = stock.price;
+        const factor = Number(magnitude) > 0 ? Number(magnitude) : 0.01;
+        stock.price = Math.max(0.01, stock.price * factor);
+        // Record the move so the stock card shows it (#106, #2046)
+        stock.lastChange = stock.price - oldPrice;
+        stock.lastChangePct = oldPrice > 0 ? (stock.price - oldPrice) / oldPrice : 0;
         stock.history.push(stock.price);
         if (stock.history.length > 100) stock.history.shift();
 
@@ -443,16 +485,39 @@ export class StockMarket {
         });
     }
 
-    buyStock(stockId, quantity) {
-        // Legal Check: Needs Series 7 for large trades or specific types?
-        // Let's enforce it for ALL trades to force the license purchase
-        if (!this.gameState.legalSystem?.hasLicense('series_7') && !this.gameState.legalSystem?.hasLicense('series_63')) {
-            // Check if player has low ethics, maybe they can trade illegally?
-            if (this.gameState.characterStats?.ethics > -20) {
-                return { success: false, reason: "You need a Series 7 License to trade stocks legally." };
-            }
-            // If unethical, they can trade but risk huge fines (handled by CrimeSystem later)
+    /**
+     * Shared trading-licence check for buying and selling (#1214, #2364).
+     * Series 7 or Series 63 permits trading. Low-ethics players may trade
+     * without one, but each unlicensed trade draws regulator heat (#1714).
+     * @returns {{allowed: boolean, unlicensed?: boolean, reason?: string}}
+     */
+    checkTradingLicense() {
+        const legal = this.gameState.legalSystem;
+        if (legal?.hasLicense?.('series_7') || legal?.hasLicense?.('series_63')) {
+            return { allowed: true };
         }
+        if ((this.gameState.characterStats?.ethics ?? 0) > -20) {
+            return { allowed: false, reason: "You need a Series 7 or Series 63 License to trade stocks legally." };
+        }
+        return { allowed: true, unlicensed: true };
+    }
+
+    /** Heat for trading without a licence (#1714) */
+    applyUnlicensedTradeHeat() {
+        const crime = this.gameState.crimeSystem;
+        if (crime && typeof crime.addHeat === 'function') {
+            crime.addHeat(StockMarket.UNLICENSED_TRADE_HEAT);
+            return StockMarket.UNLICENSED_TRADE_HEAT;
+        }
+        return 0;
+    }
+
+    buyStock(stockId, quantity) {
+        if (!Portfolio.isValidQuantity(quantity)) {
+            return { success: false, reason: 'Enter a whole number of shares greater than zero.' };
+        }
+        const license = this.checkTradingLicense();
+        if (!license.allowed) return { success: false, reason: license.reason };
 
         const stock = this.getStock(stockId);
         if (!stock) return { success: false, reason: 'Stock not found' };
@@ -462,15 +527,17 @@ export class StockMarket {
 
         this.gameState.money -= totalCost;
         this.portfolio.buy(stockId, quantity, stock.price);
+        const heat = license.unlicensed ? this.applyUnlicensedTradeHeat() : 0;
 
-        return { success: true, message: `Bought ${quantity} shares of ${stockId}`, cost: totalCost, stock: stock };
+        return { success: true, message: `Bought ${quantity} shares of ${stockId}`, cost: totalCost, stock: stock, unlicensed: !!license.unlicensed, heat };
     }
 
     sellStock(stockId, quantity) {
-        // Selling also requires license ideally
-        if (!this.gameState.legalSystem?.hasLicense('series_7') && this.gameState.characterStats?.ethics > -20) {
-            return { success: false, reason: "You need a Series 7 License to trade." };
+        if (!Portfolio.isValidQuantity(quantity)) {
+            return { success: false, reason: 'Enter a whole number of shares greater than zero.' };
         }
+        const license = this.checkTradingLicense();
+        if (!license.allowed) return { success: false, reason: license.reason };
 
         const stock = this.getStock(stockId);
         if (!stock) return { success: false, reason: "Stock not found" };
@@ -482,7 +549,8 @@ export class StockMarket {
 
         const revenue = this.portfolio.sell(stockId, quantity, stock.price);
         this.gameState.money += revenue;
-        return { success: true, revenue: revenue, stock: stock };
+        const heat = license.unlicensed ? this.applyUnlicensedTradeHeat() : 0;
+        return { success: true, revenue: revenue, stock: stock, unlicensed: !!license.unlicensed, heat };
     }
 
     getStock(stockId) {
@@ -528,6 +596,40 @@ export class StockMarket {
     }
 
     /**
+     * Immediate market-wide crash used by EventSystem (#1213, #2411)
+     * @param {number} percent - drop in percent (e.g. 30 = -30%)
+     */
+    crash(percent = 30) {
+        const pct = Math.min(95, Math.max(0, Number(percent) || 0)) / 100;
+        this.applyMarketShock(-pct);
+        this.triggerCrash();
+        return pct * 100;
+    }
+
+    /**
+     * Immediate market-wide rally used by EventSystem (#1213, #2411)
+     * @param {number} percent - gain in percent (e.g. 20 = +20%)
+     */
+    boost(percent = 20) {
+        const pct = Math.min(200, Math.max(0, Number(percent) || 0)) / 100;
+        this.applyMarketShock(pct);
+        return pct * 100;
+    }
+
+    /** Move every stock by the same fraction and record the change */
+    applyMarketShock(fraction) {
+        this.stocks?.forEach(stock => {
+            const old = stock.price;
+            stock.price = Math.max(0.01, stock.price * (1 + fraction));
+            stock.lastChange = stock.price - old;
+            stock.lastChangePct = old > 0 ? (stock.price - old) / old : 0;
+            stock.history.push(stock.price);
+            if (stock.history.length > 100) stock.history.shift();
+        });
+        this.updateIndices();
+    }
+
+    /**
      * Serialize state for saving
      */
     toJSON() {
@@ -542,10 +644,13 @@ export class StockMarket {
                 volatility: stock.volatility,
                 lastChange: stock.lastChange,
                 lastChangePct: stock.lastChangePct,
+                volume: stock.volume || 0, // #1215
+                correlation: stock.correlation || {}, // #1218
                 manipulation: stock.manipulation || null
             })),
             portfolio: {
                 holdings: this.portfolio.holdings,
+                costBasis: this.portfolio.costBasis,
                 totalInvested: this.portfolio.totalInvested,
                 history: this.portfolio.history
             }
@@ -585,6 +690,11 @@ export class StockMarket {
                     stock.volatility = sData.volatility;
                     stock.lastChange = sData.lastChange || 0;
                     stock.lastChangePct = sData.lastChangePct || 0;
+                    stock.volume = Number(sData.volume) || 0; // #1215
+                    // Keep the saved correlations instead of the freshly randomized ones (#1218)
+                    if (sData.correlation && typeof sData.correlation === 'object') {
+                        stock.correlation = { ...sData.correlation };
+                    }
                     if (sData.manipulation) stock.manipulation = { ...sData.manipulation };
                     else delete stock.manipulation;
                 }
@@ -595,6 +705,18 @@ export class StockMarket {
         if (data.portfolio) {
             this.portfolio.holdings = data.portfolio.holdings || {};
             this.portfolio.totalInvested = data.portfolio.totalInvested || 0;
+            if (data.portfolio.costBasis) {
+                this.portfolio.costBasis = { ...data.portfolio.costBasis };
+            } else {
+                // Older saves: spread totalInvested across holdings by current value
+                const value = this.getPortfolioValue();
+                this.portfolio.costBasis = {};
+                for (const [id, qty] of Object.entries(this.portfolio.holdings)) {
+                    const st = this.getStock(id);
+                    const share = value > 0 && st ? (st.price * qty) / value : 0;
+                    this.portfolio.costBasis[id] = this.portfolio.totalInvested * share;
+                }
+            }
             this.portfolio.history = data.portfolio.history || [];
         }
     }

@@ -266,6 +266,23 @@ function createCityHallActions(game, actionsEl) {
     s7Btn.innerHTML = series7Owned ? 'Series 7 Active' : 'Take Series 7 Exam ($1,500)';
     if (!series7Owned) s7Btn.onclick = () => game.handleBuyLicense('series_7');
     actionsEl.appendChild(s7Btn);
+
+    // The cheaper Series 63 alternative for stock trading (#1537)
+    const series63Owned = game.gameState.legalSystem?.hasLicense('series_63') || false;
+    const s63Btn = document.createElement('button');
+    s63Btn.className = `btn-cartoon ${series63Owned ? 'disabled' : ''}`;
+    s63Btn.innerHTML = series63Owned ? 'Series 63 Active' : 'Take Series 63 Exam ($1,000)';
+    if (!series63Owned) s63Btn.onclick = () => game.handleBuyLicense('series_63');
+    actionsEl.appendChild(s63Btn);
+}
+
+/**
+ * Force the location action buttons to rebuild (e.g. after buying a license),
+ * bypassing the "location unchanged" skip (#1163, #2377).
+ */
+export function refreshLocationActions(game) {
+    if (domCache.actionsEl) delete domCache.actionsEl.dataset.currentLocation;
+    updateLocationActions(game);
 }
 
 /**

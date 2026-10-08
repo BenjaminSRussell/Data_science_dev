@@ -3,11 +3,26 @@
  * Manages the player's legal status and licenses.
  */
 
+/**
+ * License catalog. getLicenseById() used to read gameState.licensePacks, which
+ * nothing ever defines, so every City Hall purchase threw a TypeError.
+ */
+export const LICENSES = [
+    { id: 'drivers_license', name: "Driver's License", cost: 200 },
+    { id: 'llc_registration', name: 'LLC Registration', cost: 500 },
+    { id: 'business_license', name: 'Business License', cost: 2000 },
+    { id: 'series_7', name: 'Series 7 License', cost: 1500 },
+    { id: 'series_63', name: 'Series 63 License', cost: 1000 }
+];
+
 export class LegalSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.licenses = {};
         this.lawyer = null;
+        // Recorded legal problems (data violations etc.) (#1173, #2074)
+        this.legalIssues = [];
+        this.legalTrouble = 0; // 0-100
     }
 
     /**
@@ -32,7 +47,7 @@ export class LegalSystem {
 
         this.gameState.money -= license.cost;
         this.licenses[licenseId] = true;
-        return { success: true, message: "License acquired successfully." };
+        return { success: true, message: `Acquired ${license.name}!` };
     }
 
     /**
@@ -69,19 +84,51 @@ export class LegalSystem {
     }
 
     getLicenseById(licenseId) {
-        return this.gameState.licensePacks.find(l => l.id === licenseId);
+        const packs = Array.isArray(this.gameState?.licensePacks) ? this.gameState.licensePacks : [];
+        return LICENSES.find(l => l.id === licenseId) || packs.find(l => l.id === licenseId) || null;
+    }
+
+    /**
+     * Record a legal issue (e.g. getting caught selling data). Raises legal
+     * trouble and regulator heat (#1173, #2074).
+     * @param {{type: string, severity?: number, description?: string}} issue
+     */
+    addLegalIssue(issue = {}) {
+        const severity = Math.max(0, Number(issue.severity) || 0);
+        const entry = {
+            type: issue.type || 'unknown',
+            severity,
+            description: issue.description || '',
+            day: this.gameState?.timeManager?.totalDays || 1
+        };
+        this.legalIssues.push(entry);
+        if (this.legalIssues.length > 50) this.legalIssues.shift();
+        this.legalTrouble = Math.min(100, (this.legalTrouble || 0) + severity);
+        this.gameState?.crimeSystem?.addHeat?.(Math.ceil(severity / 2));
+        return entry;
     }
 
     toJSON() {
         return {
             licenses: this.licenses,
             lawyer: this.lawyer || null,
+            legalIssues: this.legalIssues,
+            legalTrouble: this.legalTrouble
         };
     }
 
     fromJSON(data) {
         if (!data) return;
-        this.licenses = data.licenses || {};
+        // Merge into the live map, and accept the older
+        // { id: { acquired: true } } save shape (#1539)
+        const saved = data.licenses && typeof data.licenses === 'object' ? data.licenses : {};
+        for (const [id, value] of Object.entries(saved)) {
+            const owned = value === true || (value && typeof value === 'object' && value.acquired === true);
+            if (owned) this.licenses[id] = true;
+            else delete this.licenses[id];
+        }
         this.lawyer = data.lawyer || null;
+        this.legalIssues = Array.isArray(data.legalIssues) ? data.legalIssues : [];
+        this.legalTrouble = Number(data.legalTrouble) || 0;
     }
 }
