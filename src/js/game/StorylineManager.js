@@ -4,6 +4,7 @@
  */
 
 import { pickState, applyState } from '../utils/StateSerializer.js';
+import { ethicsBand } from '../data/ethics.js';
 
 export class StorylineManager {
     constructor(gameState) {
@@ -74,14 +75,15 @@ export class StorylineManager {
         const phase = this.storylinePhase || 'early';
 
         let arc;
-        if (ethics < -30) {
+        const band = ethicsBand(ethics); // shared with the newspaper (#1190)
+        if (band === 'dark') {
             arc = {
                 name: 'The Dark Path',
                 description: 'Your choices have consequences. The world reacts to your actions.',
                 theme: 'corruption',
                 challenges: ['legal_trouble', 'relationship_loss', 'isolation']
             };
-        } else if (ethics > 30) {
+        } else if (band === 'righteous') {
             arc = {
                 name: 'The Righteous Path',
                 description: 'You stand for what\'s right, but the world tests your resolve.',

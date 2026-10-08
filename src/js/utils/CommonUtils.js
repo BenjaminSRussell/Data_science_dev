@@ -13,6 +13,18 @@ export class CommonUtils {
     }
 
     /**
+     * Player money, formatted the same on every screen (#142): thousands
+     * separators, and cents only when the amount isn't a whole dollar
+     */
+    static formatMoney(amount) {
+        const cents = Math.round((Number(amount) || 0) * 100);
+        const value = cents / 100;
+        const sign = value < 0 ? '-' : '';
+        const digits = cents % 100 === 0 ? 0 : 2;
+        return `${sign}$${Math.abs(value).toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
+    }
+
+    /**
      * Format number with commas
      */
     static formatNumber(num) {

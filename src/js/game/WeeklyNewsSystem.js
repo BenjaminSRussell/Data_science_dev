@@ -4,6 +4,8 @@
  * Each week has a main story arc that progresses
  */
 
+import { ethicsBand } from '../data/ethics.js';
+
 const DEFAULT_STORYLINES = {
     techRevolution: 0,
     marketCrash: 0,
@@ -106,9 +108,11 @@ export class WeeklyNewsSystem {
         const recentDecisions = this.getRecentDecisions(storylineManager);
         
         // Story changes based on player's ethical choices AND specific decisions
-        if (ethics < -20) {
+        // Same cutoffs as the storyline arc (#1190)
+        const band = ethicsBand(ethics);
+        if (band === 'dark') {
             return this.generateCriminalStory(week, recentDecisions);
-        } else if (ethics > 20) {
+        } else if (band === 'righteous') {
             return this.generateEthicalStory(week, recentDecisions);
         } else {
             return this.generateNeutralStory(week, recentDecisions);
