@@ -56,7 +56,7 @@ describe('ProjectSystem coverage', () => {
         expect(gs.weeklyIncome).toBe(800);
         expect(gs.reputation).toBe(10); // difficulty 1 * 10
         expect(r.reputationChange).toBe(10);
-        expect(gs.characterStats.addExperience).toHaveBeenCalledWith('intelligence', 500);
+        expect(gs.characterStats.addExperience).toHaveBeenCalledWith('python_sql', 500);
         expect(gs.characterStats.addExperience).toHaveBeenCalledWith('focus', 200);
         expect(ps.completedProjects).toEqual(['crypto_scraper']);
         expect(ps.projectHistory).toEqual({ crypto_scraper: 1 });

@@ -82,8 +82,35 @@ export const STATS = {
             dataInsights: 0.5,    // +0.5% insight quality
             automation: 70        // Unlock automation at 70
         }
+    },
+    // Design-doc skills live on the same stats object as the RPG stats (#572)
+    python_sql: {
+        id: 'python_sql',
+        name: 'Python/SQL',
+        icon: '',
+        color: '#3b82f6',
+        description: 'Coding speed and accuracy',
+        maxLevel: 100,
+        effects: {
+            codingSpeed: 0.5,     // +0.5% per point
+            accuracy: 0.3         // +0.3% per point
+        }
+    },
+    statistics: {
+        id: 'statistics',
+        name: 'Statistics',
+        icon: '',
+        color: '#22c55e',
+        description: 'Model performance',
+        maxLevel: 100,
+        effects: {
+            modelPerformance: 0.5 // +0.5% per point
+        }
     }
 };
+
+// These effect keys are "unlock at stat level N" gates, not per-point rates (#1722)
+const THRESHOLD_EFFECTS = new Set(['unlockAdvanced', 'unlockVC', 'multitask', 'automation']);
 
 // Training activities that improve stats
 export const TRAINING_ACTIVITIES = [
@@ -92,7 +119,7 @@ export const TRAINING_ACTIVITIES = [
         name: 'Study Books',
         icon: '',
         location: 'library',
-        stats: { intelligence: 2, analytics: 1 },
+        stats: { intelligence: 2, analytics: 1, python_sql: 2, statistics: 1 },
         cost: 0,
         timeSlots: 2,
         energyCost: 15,
@@ -103,7 +130,7 @@ export const TRAINING_ACTIVITIES = [
         name: 'Online Course',
         icon: '',
         location: 'home',
-        stats: { intelligence: 3, analytics: 2 },
+        stats: { intelligence: 3, analytics: 2, python_sql: 2, statistics: 1 },
         cost: 50,
         timeSlots: 2,
         energyCost: 20,
@@ -158,7 +185,7 @@ export const TRAINING_ACTIVITIES = [
         name: 'Data Challenges',
         icon: '',
         location: 'home',
-        stats: { analytics: 3, intelligence: 1 },
+        stats: { analytics: 3, intelligence: 1, statistics: 2, python_sql: 1 },
         cost: 0,
         timeSlots: 2,
         energyCost: 25,
@@ -180,7 +207,7 @@ export const TRAINING_ACTIVITIES = [
         name: 'Certification Study',
         icon: '',
         location: 'university',
-        stats: { analytics: 4, intelligence: 2 },
+        stats: { analytics: 4, intelligence: 2, statistics: 3, python_sql: 2 },
         cost: 100,
         timeSlots: 3,
         energyCost: 30,
@@ -200,7 +227,9 @@ export class CharacterStats {
             stamina: 10, // Trainable like the others; was 100, i.e. already maxed (#992)
             focus: 10,
             luck: 10,
-            analytics: 10
+            analytics: 10,
+            python_sql: 10,
+            statistics: 10
         };
 
         // Moral Alignment (-100 to 100)
@@ -208,10 +237,10 @@ export class CharacterStats {
         // 0: Neutral
         // +100: Saint
         this.ethics = 0; // Neutral start (-100 Evil … +100 Saint); was 50 which forced ethical news (#2639)
-        this.level = 1;
         this.visualStage = 'level_1'; // level_1, level_2_{good,neutral,evil}, level_3_{good,neutral,evil}
 
-        // (The old parallel `skills` table was never read and shadowed stats.charisma, #1719)
+        // The parallel `skills` table and the unused character `level` counter
+        // were never read (#994, #1719). Stat levels live on this.stats.
 
         // Experience points for each stat
         this.xp = {
@@ -220,7 +249,9 @@ export class CharacterStats {
             stamina: 0,
             focus: 0,
             luck: 0,
-            analytics: 0
+            analytics: 0,
+            python_sql: 0,
+            statistics: 0
         };
 
         // XP needed per level (increases each level)
@@ -378,7 +409,9 @@ export class CharacterStats {
     }
 
     /**
-     * Calculate effect values for a stat at given level
+     * Calculate effect values for a stat at given level.
+     * Per-point rates scale with level. Unlock keys stay the threshold
+     * itself (unlock at N), not N * level (#1722).
      */
     calculateEffects(statId, level) {
         const stat = STATS[statId];
@@ -387,12 +420,28 @@ export class CharacterStats {
         const effects = {};
         for (const [key, value] of Object.entries(stat.effects)) {
             if (typeof value === 'number') {
-                effects[key] = value * level;
+                effects[key] = THRESHOLD_EFFECTS.has(key) ? value : value * level;
             } else if (Array.isArray(value)) {
                 effects[key] = value.filter(v => level >= v).length;
             }
         }
         return effects;
+    }
+
+    /**
+     * Replace the early default stat values with a starter job's modifiers.
+     * Unknown ids are ignored. Called after the player picks a job (#1299).
+     * @param {Record<string, number>} modifiers
+     */
+    applyStartingStats(modifiers) {
+        if (!modifiers || typeof modifiers !== 'object') return;
+        for (const [id, raw] of Object.entries(modifiers)) {
+            if (!Object.prototype.hasOwnProperty.call(this.stats, id)) continue;
+            const n = Number(raw);
+            if (!Number.isFinite(n)) continue;
+            const max = STATS[id]?.maxLevel ?? 100;
+            this.stats[id] = Math.max(0, Math.min(max, Math.round(n)));
+        }
     }
 
     /**
@@ -460,7 +509,6 @@ export class CharacterStats {
             xp: this.xp,
             experience: this.xp, // Keep for backward compatibility
             ethics: this.ethics,
-            level: this.level,
             visualStage: this.visualStage,
             visuals: this.visuals
         };
@@ -478,9 +526,8 @@ export class CharacterStats {
         } else if (data.experience) {
             this.xp = { ...this.xp, ...data.experience };
         }
-        // Ethics/level/appearance used to reset on every reload (#1720, #997)
+        // Ethics and appearance used to reset on every reload (#1720, #997)
         if (typeof data.ethics === 'number') this.ethics = data.ethics;
-        if (typeof data.level === 'number') this.level = data.level;
         if (data.visualStage) this.visualStage = data.visualStage;
         if (data.visuals && typeof data.visuals === 'object') this.visuals = { ...this.visuals, ...data.visuals };
     }

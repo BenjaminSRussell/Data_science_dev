@@ -375,8 +375,11 @@ export class EconomySystem {
         const perkBonus = this.hasPerk('bonus_multiplier') ? EconomySystem.PERK_MONEY_MULTIPLIER : 1.0;
         // "Premium clients" rank perk: better-paying work (#954)
         const premium = this.hasRankPerk('Premium clients') ? EconomySystem.RANK_PREMIUM_CLIENTS : 1.0;
+        // Charisma training raises clientPay, which raises this payout (#1721, #2267)
+        const clientPay = Number(this.gameState?.characterStats?.getTotalBonuses?.()?.clientPay);
+        const statPay = Number.isFinite(clientPay) ? 1 + clientPay / 100 : 1;
 
-        return Math.round((Number(baseReward) || 0) * multiplier * timeBonus * perkBonus * premium);
+        return Math.round((Number(baseReward) || 0) * multiplier * timeBonus * perkBonus * premium * statPay);
     }
 
     /**
