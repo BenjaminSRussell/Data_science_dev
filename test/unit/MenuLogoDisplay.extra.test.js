@@ -2,6 +2,7 @@
  * MenuLogoDisplay: click advance, retry, rank fallback, games completed (#447)
  */
 import { describe, it, expect, afterEach, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { MenuLogoDisplay } from '../../src/js/ui/MenuLogoDisplay.js';
 import { RANKS } from '../../src/js/data/ranks.js';
 
@@ -102,5 +103,15 @@ describe('MenuLogoDisplay extras', () => {
         slots.length = 0;
         expect(() => display.update()).not.toThrow();
         expect(document.querySelector('.menu-logo-icon').textContent).toBe('Chart');
+    });
+});
+
+describe('menu logo is wired (#2157)', () => {
+    it('MainGame constructs MenuLogoDisplay and the menu has its target', () => {
+        const src = readFileSync('src/js/main.js', 'utf8');
+        expect(src).toMatch(/this\.menuLogoDisplay = new MenuLogoDisplay\(this\.saveManager, this\.statisticsAggregator\)/);
+        expect(src).not.toMatch(/this\.menuLogoDisplay = null/);
+        expect(src).toMatch(/this\.menuLogoDisplay\.init\(\)/);
+        expect(readFileSync('index.html', 'utf8')).toContain('class="menu-logo-icon"');
     });
 });
