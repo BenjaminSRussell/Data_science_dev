@@ -2,7 +2,7 @@
 
 ## 1. Who uses `PositioningHelper`?
 
-Nobody in production. `rg "PositioningHelper|PositioningVerifier" src` (excluding tests) finds only the two files themselves: `PositioningVerifier.js` imports `PositioningHelper` (for `detectCoordinateSystem`), and nothing imports either. The live UI positions things in four places, none of which use the helper:
+Nothing in gameplay. `PositioningVerifier` (dev menu only, #2279) imports `PositioningHelper` for `detectCoordinateSystem`. No other production file imports the helper. The live UI positions things in four places, none of which use the helper:
 
 | Live code | What it positions | How |
 |---|---|---|
@@ -15,11 +15,11 @@ So general UI layout already uses CSS and Lit. The only manual positioning is gr
 
 ## 2. Is `PositioningVerifier` ever invoked?
 
-No. It isn't imported anywhere, including `src/js/dev/` (DevMenu, DevTools, StorylineNavigator). It can only run from tests or a hand-typed console import. #2843 fixed crashes in its report and coordinate handling, but didn't wire it in.
+Yes, from the dev menu only. `DevTools` constructs one `PositioningVerifier` when dev mode is on, and DevMenu's "Verify Positioning" button calls `generateReport(game)` then `isPositioningCorrect`. It is not part of normal gameplay. #2843 fixed crashes in its report and coordinate handling; #2279 wires the instance in.
 
 ## 3. Sign of past bugs, or speculative?
 
-Mostly a fossil of a real problem, built speculatively. Both files arrived in the initial commit (`6ffd6c42`) alongside three competing coordinate conventions: grid cells, percents, and pixels. `detectCoordinateSystem()` exists to guess which one a `position` object uses, which only makes sense if mixed conventions were causing misplaced markers. That's consistent with the later map fixes (#1933 grid percent, #1935 integer grid cells). But the verifier was never hooked into anything that would catch such bugs. The live code later standardised on `MapGridSystem.gridToPercent` instead, so the helper's duplicate `gridToPercent`/`percentToGrid` were left behind.
+Mostly a fossil of a real problem, built speculatively. Both files arrived in the initial commit (`6ffd6c42`) alongside three competing coordinate conventions: grid cells, percents, and pixels. `detectCoordinateSystem()` exists to guess which one a `position` object uses, which only makes sense if mixed conventions were causing misplaced markers. That's consistent with the later map fixes (#1933 grid percent, #1935 integer grid cells). The verifier only runs from the dev menu, so it does not catch those bugs during normal play. The live code later standardised on `MapGridSystem.gridToPercent` instead, so the helper's duplicate `gridToPercent`/`percentToGrid` were left behind.
 
 ## 4. Recommendation
 
@@ -27,4 +27,4 @@ Keep the *approach*: manual math only for grid and sprite placement, CSS for eve
 
 - The one piece of logic the live code needs (grid ↔ percent) already lives in `MapGridSystem`. If a shared helper is wanted, move `normalizeToPercent`'s coordinate-system handling there and drop the duplicate in `PositioningHelper`.
 - No UI-layout code was found that should be using CSS or Lit and isn't. `LocationView`/`LocationViewComponent` compute feature hotspot positions inline (`20 + (index % 5) * 15`%), but those are map-like hotspots over a background image, and that code path is unreachable anyway (#2201).
-- Deleting `PositioningHelper.js`/`PositioningVerifier.js` (~530 lines) is the natural end state. They're on the list of unused systems Ben hasn't decided on (#1937, #2279), so this review leaves them in place.
+- `PositioningVerifier` is reachable from the dev menu (#2279); don't delete it as unused. The unused `PositioningHelper` methods (everything except `detectCoordinateSystem`, which `verifyLocations` calls) are still open under #1937.
