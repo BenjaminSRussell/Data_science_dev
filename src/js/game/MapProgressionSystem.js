@@ -1,41 +1,8 @@
 /**
  * MapProgressionSystem.js
- * Different maps for early, mid, and end-game with new characters
- * Includes travel animations
+ * Different maps for early, mid, and end-game with new characters.
+ * Location travel goes through WorldMap.travelTo, not this system.
  */
-
-// TravelAnimationSystem - Optimized: instant travel, no delays
-class TravelAnimationSystem {
-    constructor() {
-        this.currentAnimation = null;
-    }
-    
-    // Instant travel - no animation delays
-    async animateTravel(fromLocation, toLocation, vehicle, onComplete) {
-        // Execute immediately, no animation overlay
-        if (onComplete) {
-            onComplete();
-        }
-        return Promise.resolve();
-    }
-    
-    getVehicleIcon(vehicle) {
-        const icons = {
-            'walking': '/assets/icons/vehicles/walking.png',
-            'bus_pass': '/assets/icons/vehicles/bus_pass.png',
-            'used_car': '/assets/icons/vehicles/used_car.png',
-            'sedan': '/assets/icons/vehicles/sedan.png',
-            'sports_car': '/assets/icons/vehicles/used_car.png',
-            'luxury_car': '/assets/icons/vehicles/luxury_car.png'
-        };
-        return icons[vehicle] || '/assets/icons/vehicles/walking.png';
-    }
-    
-    getTravelDuration(fromLocation, toLocation, vehicle) {
-        // Not used anymore, but kept for compatibility
-        return 0;
-    }
-}
 
 export class MapProgressionSystem {
     constructor(gameState) {
@@ -43,7 +10,6 @@ export class MapProgressionSystem {
         this.currentMap = 'early_game';
         this.unlockedMaps = ['early_game'];
         this.mapData = this.initializeMaps();
-        this.travelAnimation = new TravelAnimationSystem();
     }
 
     /**
@@ -228,24 +194,7 @@ export class MapProgressionSystem {
     getUnlockedMaps() {
         return this.unlockedMaps.map(id => this.mapData[id]).filter(Boolean);
     }
-    
-    /**
-     * Travel to location - instant, no animation delays
-     */
-    async travelToLocation(locationId, vehicle) {
-        if (!this.gameState?.worldMap) return;
-        
-        const fromLocation = this.gameState.worldMap.getCurrentLocation?.();
-        const toLocation = this.gameState.worldMap.getLocation?.(locationId);
-        
-        if (!fromLocation || !toLocation) return;
-        
-        // Instant travel - no animation
-        if (this.gameState.worldMap && typeof this.gameState.worldMap.travelTo === 'function') {
-            this.gameState.worldMap.travelTo(locationId);
-        }
-    }
-    
+
     /**
      * Serialize for saving
      */
