@@ -2338,6 +2338,8 @@ export class MainGame {
         }
         const oldTaskCount = this.gameState.tasksCompleted || 0;
         this.gameState.tasksCompleted++;
+        // Collectible desk decorations unlock off this counter (#2315)
+        this.environmentManager?.syncDeskItems?.({ announce: true });
         this.gameState.totalEarned += score.moneyEarned;
         this.gameState.weeklyIncome += score.moneyEarned; // Track for taxes
         // The boss notices: strong work builds promotion readiness and goodwill (#1543, #1542)
