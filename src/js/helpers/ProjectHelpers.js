@@ -419,12 +419,18 @@ export function updatePlayerAvatar(game) {
     if (!game.gameState.characterStats) return;
 
     const stage = game.gameState.characterStats?.visualStage;
-    let icon = '';
-
-    if (stage === 'level_2_good') icon = '';
-    if (stage === 'level_2_evil') icon = '';
-    if (stage === 'level_3_good') icon = '';
-    if (stage === 'level_3_evil') icon = '';
+    // CharacterStats.visualStage: level_1 and level_{2,3}_{good,neutral,evil}.
+    // Unknown stages stay empty so a marker is not blanked or mislabeled.
+    const icons = {
+        level_1: '🙂',
+        level_2_good: '😇',
+        level_2_neutral: '😐',
+        level_2_evil: '😈',
+        level_3_good: '🦸',
+        level_3_neutral: '🎩',
+        level_3_evil: '🦹'
+    };
+    const icon = icons[stage] || '';
 
     // Tag every marker with the stage for styling; only replace the text
     // when there is an icon, instead of blanking the marker

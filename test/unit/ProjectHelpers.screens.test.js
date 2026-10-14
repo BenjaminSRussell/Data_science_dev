@@ -97,7 +97,7 @@ describe('checkForCharacterEvolution / updatePlayerAvatar', () => {
         expect(g.audioManager.play).toHaveBeenCalledWith('kaching');
         document.querySelectorAll('.player-icon').forEach(el => {
             expect(el.dataset.stage).toBe('level_2_good');
-            expect(el.textContent).toBe('P');
+            expect(el.textContent).toBe('😇');
         });
     });
 
