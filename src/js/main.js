@@ -56,7 +56,6 @@ import { VisualProgressionSystem } from './game/visual/VisualProgressionSystem.j
 import { RealWorldTaskSystem } from './game/work/RealWorldTaskSystem.js';
 import { TaskVisualRenderer } from './game/work/TaskVisualRenderer.js';
 import { AITrainingStoryline } from './game/ai/AITrainingStoryline.js';
-import { GitHubIssuesSystem } from './game/github/GitHubIssuesSystem.js';
 import { ResearchPaperNotificationSystem } from './game/research/ResearchPaperNotificationSystem.js';
 import { ResearchInboxUI } from './ui/ResearchInboxUI.js';
 import { EmotionalBreakdownSystem } from './game/dialogue/EmotionalBreakdownSystem.js';
@@ -4297,12 +4296,6 @@ export class MainGame {
             if (!this.gameState.aiTrainingStoryline) {
                 this.gameState.aiTrainingStoryline = new AITrainingStoryline(this.gameState);
                 this.aiTrainingStoryline = this.gameState.aiTrainingStoryline;
-            }
-
-            // GitHub issues system
-            if (!this.gameState.githubIssuesSystem) {
-                this.gameState.githubIssuesSystem = new GitHubIssuesSystem(this.gameState);
-                this.githubIssuesSystem = this.gameState.githubIssuesSystem;
             }
 
             // Research paper notification system
