@@ -70,15 +70,28 @@ describe('office events have real effects (#2434)', () => {
     });
 
     it('rollDailyEvent fires at the daily chance and applies the effect', () => {
-        const gs = makeGs();
-        const env = new EnvironmentManager(gs);
-        expect(env.rollDailyEvent(() => 0.9)).toBeNull();
-        const praiseIndex = OFFICE_EVENTS.findIndex(e => e.effect === 'rep_boost');
-        const rolls = [0.1, (praiseIndex + 0.5) / OFFICE_EVENTS.length];
-        const res = env.rollDailyEvent(() => rolls.shift());
-        expect(res.event.effect).toBe('rep_boost');
-        expect(res.result).toBe('+5 reputation');
-        expect(gs.reputation).toBe(15);
+        vi.useFakeTimers();
+        try {
+            const gs = makeGs();
+            const env = new EnvironmentManager(gs);
+            const notify = vi.spyOn(env, 'showEventNotification').mockImplementation(() => {});
+            const trigger = vi.spyOn(env, 'triggerRandomEvent');
+            expect(env.rollDailyEvent(() => 0.9)).toBeNull();
+            expect(trigger).not.toHaveBeenCalled();
+            const praiseIndex = OFFICE_EVENTS.findIndex(e => e.effect === 'rep_boost');
+            const rolls = [0.1, (praiseIndex + 0.5) / OFFICE_EVENTS.length];
+            const res = env.rollDailyEvent(() => rolls.shift());
+            expect(res.event.effect).toBe('rep_boost');
+            expect(res.result).toBe('+5 reputation');
+            expect(gs.reputation).toBe(15);
+            // The daily roll is the manual beat that used to be missing (#2433)
+            expect(trigger).toHaveBeenCalledTimes(1);
+            expect(notify).toHaveBeenCalledTimes(1);
+            expect(env.activeEvent?.effect).toBe('rep_boost');
+        } finally {
+            vi.clearAllTimers();
+            vi.useRealTimers();
+        }
     });
 
     it('new_day rolls the office event', () => {
