@@ -18,8 +18,8 @@ describe('BaseComponent', () => {
         document.body.removeChild(component);
     });
 
-    it('should have game property as null by default', () => {
-        expect(component.game).to.be.null;
+    it('should not declare a game property', () => {
+        expect(component.game).to.equal(undefined);
     });
 
     it('should format money correctly', () => {

@@ -63,7 +63,6 @@ export class DialogueUI {
                 }
 
                 this.litComponent = document.createElement('dialogue-component');
-                this.litComponent.game = this.game;
                 this.litComponent.addEventListener('dialogue-choice', (e) => {
                     this.handleChoice(e.detail.choice.id);
                 });

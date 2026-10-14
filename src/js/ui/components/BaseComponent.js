@@ -7,20 +7,11 @@
 import { LitElement, html, css } from 'lit';
 
 export class BaseComponent extends LitElement {
-    static properties = {
-        game: { type: Object, attribute: false }
-    };
-
     static styles = css`
         :host {
             display: block;
         }
     `;
-
-    constructor() {
-        super();
-        this.game = null;
-    }
 
     /**
      * Format money
