@@ -23,7 +23,7 @@ something the player sees.
 | 5 | `utils/NPCImageMapper.js` | module functions | **yes** | `getNPCImage` / `getNPCFallback` back every live NPC portrait: `DialogueUI`, `NPCHelpers`, `NPCManager`. `ConversationScreen` also imports them but is unreachable (#2316). |
 | 6 | `utils/AssetResolver.js` | import commented out (`LocationDetailSystem`) | no | dead (#1046, #2246) |
 | 7 | `assets/AssetFinder.js` | n/a | **removed** | deleted in fad8a277 (#2737); `test/unit/AssetFinder.test.js` guards against it coming back |
-| 8 | `assets/GameAssetLoader.js` | never imported | no | dead (#2287) |
+| 8 | `assets/GameAssetLoader.js` | n/a | **removed** | deleted (#2287); `test/unit/GameAssetLoader.test.js` guards against it coming back. Catalog backdrop variants stay behind `LocationBackgroundSystem`; the 1000 character paths point at unshipped `downloaded_assets/` art |
 | 9 | `assets/ComprehensiveSpriteSystem.js` | yes (deferred systems) | no | `initialize()` preloads emotion and pose images, but none of its getters has a caller (#526, #1841) |
 | 10 | `assets/PixiSpriteManager.js` | yes, lazily | no | no sheet is ever loaded; its consumer `AnimatedCharacterRenderer` is commented out (#2300, #468) |
 | 11 | `assets/SpriteSheetManager.js` | import and constructor commented out | no | #1048, #465 |
@@ -33,8 +33,9 @@ something the player sees.
 
 Totals: of the 11 classes in #525 (plus `SpriteDownloader`), 2 are fully
 live (`IconMapper`, `NPCImageMapper`), 1 is half-live (`AssetManager`: it
-loads, but nothing reads what it loaded), 1 has been removed
-(`AssetFinder`), and the other 8 are dead or constructed-but-unused.
+loads, but nothing reads what it loaded), 2 have been removed
+(`AssetFinder`, `GameAssetLoader`), and the other 7 are dead or
+constructed-but-unused.
 
 ## 2. Do two live systems solve the same problem?
 
@@ -98,10 +99,12 @@ Migration / deprecation, in order:
 3. **Sprite trio:** follow `sprite-pipeline-overlap.md`. Keep at most one
    (PixiSpriteManager, the only one that renders through Pixi) and only once
    an animated character exists.
-4. **Remove the never-imported modules** (`IconRenderer`, `GameAssetLoader`,
-   `AssetResolver`, `SpriteDownloader`). They are already filed as
-   delete-or-wire decisions (#479/#2278, #2287, #1046/#2246, #2293) and are
-   left to Ben.
+4. **Remove the never-imported modules** (`IconRenderer`, `AssetResolver`,
+   `SpriteDownloader`). They are already filed as delete-or-wire decisions
+   (#479/#2278, #1046/#2246, #2293) and are left to Ben. `GameAssetLoader`
+   was the same kind of decision and is removed (#2287): nothing imported
+   it, and wiring it would either 404 (character PNGs are not in the tree)
+   or paint over the WorldMap backgrounds the live screens already use.
 
 Steps 2-4 delete code that open decision issues are still waiting on, so
 this review only recommends them. Step 1 is safe today but changes the
