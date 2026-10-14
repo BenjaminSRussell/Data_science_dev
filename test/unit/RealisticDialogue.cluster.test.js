@@ -35,14 +35,13 @@ describe('RealisticDialogueSystem cluster', () => {
         expect(s.addNaturalSpeech('Fine', 'friendly', 'worried')).toBe('Fine...');
     });
 
-    it('#1597 personality changes gift and betrayal reactions', () => {
+    it('#1597 personality changes betrayal reactions', () => {
         const s = sys();
-        const warm = s.generateEmotionalResponse('gift', { personality: 'friendly' }, 80);
-        const pro = s.generateEmotionalResponse('gift', { personality: 'professional' }, 80);
         const blunt = s.generateEmotionalResponse('betrayal', { personality: 'blunt' }, 10);
-        expect(pro).not.toBe(warm);
         expect(blunt).not.toBe(s.generateEmotionalResponse('betrayal', { personality: 'friendly' }, 10));
         expect(s.generateEmotionalResponse('help', { personality: 'shy' }, 80)).toBe('Thank you so much. I really needed that.');
+        // Gift lines live on the NPC dialogue files, not this unused table (#1306)
+        expect(s.generateEmotionalResponse('gift', { personality: 'professional' }, 80)).toBe('I see.');
         expect(s.generateEmotionalResponse('dance', null, 80)).toBe('I see.');
     });
 });

@@ -58,8 +58,8 @@ describe('RelationshipEmotionSystem', () => {
     });
 
     it('emotional state starts at defaults and stays clamped', () => {
-        res.updateEmotionalState('pat', 'gift', { liked: true });
-        expect(res.emotionalStates.pat).toEqual({ trust: 50, affection: 55, respect: 50, anger: 0, fear: 0 });
+        res.updateEmotionalState('pat', 'support');
+        expect(res.emotionalStates.pat).toEqual({ trust: 53, affection: 53, respect: 50, anger: 0, fear: 0 });
         for (let i = 0; i < 20; i++) res.updateEmotionalState('pat', 'betrayal');
         const s = res.emotionalStates.pat;
         expect(s.trust).toBe(0);
