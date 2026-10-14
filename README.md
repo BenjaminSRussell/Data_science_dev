@@ -54,7 +54,7 @@ Web-based simulation game. Start as a Data Entry Clerk, complete data science ta
 
 - **Frontend**: Vanilla JavaScript (ES6 modules), CSS3
 - **Build Tool**: Vite
-- **WASM Core**: C++ compiled to WebAssembly via Emscripten (optional)
+- **C++ / WASM**: `src/cpp` only. Not loaded by the game (see below)
 - **Rendering**: PixiJS for sprites, Chart.js for data visualizations
 - **State Management**: Zustand
 - **Testing**: Vitest
@@ -84,12 +84,17 @@ setting, so production hosts need them configured separately:
 - **Netlify / Cloudflare Pages:** `public/_headers` is copied into `dist/` and applies them.
 - **Vercel, nginx, S3/CloudFront, etc.:** add the same two headers in that host's config.
 - **GitHub Pages** can't set response headers. Nothing in the game needs cross-origin
-  isolation today (the WASM core isn't loaded, see #889), so it still works there.
+  isolation today (`src/cpp` is not loaded), so it still works there.
 
-### Build WASM (Optional)
+### C++ / WASM core (unused)
+
+`src/cpp` is not loaded by any JS. `public/wasm/` is gitignored (the
+`npm run build:wasm` output is not committed and is not part of the game).
+Live game logic is the JS systems under `src/js/` (for example `GameState.js`,
+`EconomySystem.js`, and `TaskSystem.js`).
 
 ```bash
-# Requires Emscripten SDK
+# Optional compile only. Requires the Emscripten SDK. Output is unused at runtime.
 source /path/to/emsdk/emsdk_env.sh
 npm run build:wasm
 ```
@@ -115,7 +120,7 @@ src/
 │   ├── data/                # Game content (tasks, ranks, NPCs)
 │   └── dev/                 # Developer tools and testing
 ├── styles/                  # CSS files (modular)
-├── cpp/                     # C++ WASM core (optional)
+├── cpp/                     # Unused C++/WASM sources (not loaded by JS)
 └── assets/                  # Game assets
 
 scripts/                     # Build and utility scripts
