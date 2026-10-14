@@ -65,12 +65,6 @@ export class TimeManager {
         // Energy system
         this.energy = 100;
         this.maxEnergy = 100;
-
-        // Event callbacks
-        this.onTimeAdvance = null;
-        this.onDayChange = null;
-        this.onMonthChange = null;
-        this.onYearChange = null;
     }
 
     /**
@@ -134,10 +128,6 @@ export class TimeManager {
                 this.timeSlot = 0;
                 events.push(...this.advanceDay());
             }
-
-            if (this.onTimeAdvance) {
-                this.onTimeAdvance(this.getCurrentSlot());
-            }
         }
 
         return events;
@@ -160,14 +150,6 @@ export class TimeManager {
         if (this.day > DAYS_PER_MONTH) {
             this.day = 1;
             events.push(...this.advanceMonth());
-        }
-
-        if (this.onDayChange) {
-            this.onDayChange({
-                day: this.day,
-                dayOfWeek: DAYS[this.dayOfWeek],
-                isWeekend: this.isWeekend()
-            });
         }
 
         events.push({ type: 'new_day', data: { day: this.totalDays } });
@@ -195,10 +177,6 @@ export class TimeManager {
             events.push(...this.advanceYear());
         }
 
-        if (this.onMonthChange) {
-            this.onMonthChange({ month: MONTHS[this.month] });
-        }
-
         events.push({ type: 'new_month', data: { month: MONTHS[this.month] } });
 
         return events;
@@ -209,10 +187,6 @@ export class TimeManager {
      */
     advanceYear() {
         this.year++;
-
-        if (this.onYearChange) {
-            this.onYearChange({ year: this.year });
-        }
 
         return [{ type: 'new_year', data: { year: this.year } }];
     }
