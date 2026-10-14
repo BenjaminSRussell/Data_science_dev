@@ -52,8 +52,6 @@ import { DirtyDataSystem } from './game/data/DirtyDataSystem.js';
 import { RoomSystem } from './game/locations/RoomSystem.js';
 import { EventSystem } from './game/events/EventSystem.js';
 import { VisualProgressionSystem } from './game/visual/VisualProgressionSystem.js';
-import { RealWorldTaskSystem } from './game/work/RealWorldTaskSystem.js';
-import { TaskVisualRenderer } from './game/work/TaskVisualRenderer.js';
 import { AITrainingStoryline } from './game/ai/AITrainingStoryline.js';
 import { ResearchPaperNotificationSystem } from './game/research/ResearchPaperNotificationSystem.js';
 import { ResearchInboxUI } from './ui/ResearchInboxUI.js';
@@ -4271,18 +4269,6 @@ export class MainGame {
             if (!this.gameState.visualProgressionSystem) {
                 this.gameState.visualProgressionSystem = new VisualProgressionSystem(this.gameState);
                 this.visualProgressionSystem = this.gameState.visualProgressionSystem;
-            }
-
-            // Real-world task system
-            if (!this.gameState.realWorldTaskSystem) {
-                this.gameState.realWorldTaskSystem = new RealWorldTaskSystem(this.gameState);
-                this.realWorldTaskSystem = this.gameState.realWorldTaskSystem;
-            }
-
-            // Task visual renderer
-            if (!this.gameState.taskVisualRenderer) {
-                this.taskVisualRenderer = new TaskVisualRenderer();
-                this.gameState.taskVisualRenderer = this.taskVisualRenderer;
             }
 
             // AI training storyline
