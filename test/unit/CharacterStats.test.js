@@ -75,6 +75,36 @@ describe('CharacterStats - training and derived bonuses', () => {
         });
     });
 
+    describe('sheet stats and unused fields (#572, #994)', () => {
+        it('tracks Python/SQL and Statistics on the same stats object', () => {
+            expect(STATS.python_sql.name).toBe('Python/SQL');
+            expect(STATS.statistics.name).toBe('Statistics');
+            expect(stats.getStat('python_sql')).toBe(10);
+            expect(stats.getStat('statistics')).toBe(10);
+            const ids = stats.getAllStats().map(s => s.id);
+            expect(ids).toEqual(expect.arrayContaining(['python_sql', 'statistics']));
+        });
+
+        it('drops the unused character level and the parallel skills table', () => {
+            expect(stats.level).toBeUndefined();
+            expect(stats.skills).toBeUndefined();
+            expect(stats.toJSON()).not.toHaveProperty('level');
+            stats.fromJSON({ level: 9, stats: { intelligence: 12 } });
+            expect(stats.level).toBeUndefined();
+            expect(stats.getStat('intelligence')).toBe(12);
+        });
+
+        it('applyStartingStats overwrites defaults and ignores unknown ids', () => {
+            stats.stats.charisma = 40;
+            stats.applyStartingStats({ focus: 16, stamina: 14, nope: 99, luck: 80 });
+            expect(stats.getStat('focus')).toBe(16);
+            expect(stats.getStat('stamina')).toBe(14);
+            expect(stats.getStat('luck')).toBe(50); // luck caps at 50
+            expect(stats.getStat('charisma')).toBe(40);
+            expect(stats.stats.nope).toBeUndefined();
+        });
+    });
+
     describe('getTotalBonuses()', () => {
         it('computes each derived bonus from the default stats', () => {
             const s = stats.stats; // every stat starts at 10, stamina included (#992)

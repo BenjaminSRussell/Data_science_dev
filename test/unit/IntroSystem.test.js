@@ -4,6 +4,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { IntroSystem } from '../../src/js/game/IntroSystem.js';
+import { CharacterStats } from '../../src/js/game/CharacterStats.js';
 
 describe('IntroSystem', () => {
     let introSystem;
@@ -63,6 +64,20 @@ describe('IntroSystem', () => {
             introSystem.applyForJob('junior_analyst');
             expect(mockGameState.currentJob).toEqual(expect.objectContaining({ id: 'junior_analyst' }));
             expect(jobApplicationScreen.classList.contains('active')).toBe(false);
+        });
+
+        it('overwrites early CharacterStats defaults with the job modifiers (#1299)', () => {
+            const characterStats = new CharacterStats();
+            introSystem.game.gameState.characterStats = characterStats;
+            introSystem.applyForJob('junior_analyst');
+            expect(characterStats.getStat('analytics')).toBe(16);
+            expect(characterStats.getStat('statistics')).toBe(16);
+            expect(characterStats.getStat('intelligence')).toBe(12);
+            expect(characterStats.getStat('focus')).toBe(10);
+            introSystem.hired = false;
+            introSystem.applyForJob('data_entry_clerk');
+            expect(characterStats.getStat('focus')).toBe(16);
+            expect(characterStats.getStat('stamina')).toBe(14);
         });
 
         it('should return early, no mutation if job does not exist', () => {

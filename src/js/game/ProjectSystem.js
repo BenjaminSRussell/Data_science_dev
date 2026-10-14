@@ -6,16 +6,16 @@ import { CONTRACTS } from './ProjectDatabase.js';
 import { grantWorkReward } from './work/workRewards.js';
 
 /**
- * Contract xpReward keys are data-science skills; CharacterStats only levels
- * its core stats. Map each skill onto the stat it trains so project XP is not
- * silently dropped (#2041).
+ * Contract xpReward keys are data-science skills. Python and SQL train
+ * Python/SQL; statistics trains Statistics (#572). Other skills map onto
+ * the core stat they exercise so project XP is not dropped (#2041).
  */
 export const SKILL_TO_STAT = {
-    python: 'intelligence',
+    python: 'python_sql',
     data_engineering: 'focus',
-    statistics: 'analytics',
+    statistics: 'statistics',
     machine_learning: 'intelligence',
-    sql: 'analytics',
+    sql: 'python_sql',
     communication: 'charisma',
     charisma: 'charisma',
     // AI-training knowledge (AITrainingStoryline.learnFromModel, #268)

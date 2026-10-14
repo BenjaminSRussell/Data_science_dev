@@ -245,6 +245,7 @@ export class IntroSystem {
                 difficulty: 'Easy',
                 description: 'Enter data into spreadsheets. Simple but steady work.',
                 skills: ['Focus', 'Attention to Detail'],
+                startingStats: { focus: 16, stamina: 14 },
                 perks: ['Flexible schedule', 'Free coffee']
             },
             {
@@ -257,6 +258,7 @@ export class IntroSystem {
                 difficulty: 'Medium',
                 description: 'Analyze data and create reports. More challenging but better pay.',
                 skills: ['Excel', 'Basic Statistics'],
+                startingStats: { analytics: 16, statistics: 16, intelligence: 12 },
                 perks: ['Learning opportunities', 'Team lunches']
             },
             {
@@ -269,6 +271,7 @@ export class IntroSystem {
                 difficulty: 'Variable',
                 description: 'Be your own boss. Income varies with effort and luck.',
                 skills: ['Self-motivation', 'Client management'],
+                startingStats: { charisma: 16, luck: 14, python_sql: 12 },
                 perks: ['Freedom', 'Work from anywhere']
             },
             {
@@ -281,6 +284,7 @@ export class IntroSystem {
                 difficulty: 'Easy',
                 description: 'Learn from the best. Low pay but amazing experience.',
                 skills: ['Eagerness to learn'],
+                startingStats: { python_sql: 16, intelligence: 14, statistics: 12 },
                 perks: ['Mentorship', 'Potential for full-time offer']
             }
         ];
@@ -374,6 +378,11 @@ export class IntroSystem {
             difficulty: job.difficulty,
             startDate: Date.now()
         };
+
+        // CharacterStats was built with fixed defaults before this screen.
+        // Overwrite those defaults with this job's starting modifiers (#1299).
+        const stats = this.game.gameState.characterStats || this.game.characterStats;
+        stats?.applyStartingStats?.(job.startingStats);
 
         // Close job application screen
         const jobScreen = document.getElementById('job-application-screen');

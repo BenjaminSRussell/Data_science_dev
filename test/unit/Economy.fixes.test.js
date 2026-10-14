@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { EconomySystem, insightHint } from '../../src/js/game/EconomySystem.js';
+import { CharacterStats } from '../../src/js/game/CharacterStats.js';
 import { GameState } from '../../src/js/game/GameState.js';
 import { ContractSystem } from '../../src/js/game/contracts/ContractSystem.js';
 import { SHOP_ITEMS } from '../../src/js/data/shopItems.js';
@@ -62,6 +63,17 @@ describe('software speed bonus and shop perks (#1310, #2011, #244)', () => {
         const { e } = econ({ unlockedPerks: ['bonus_multiplier', 'rep_boost'] });
         expect(e.calculateMoneyReward({ potentialReward: 100 }, 4)).toBe(115);
         expect(e.calculateRepReward(5)).toBe(36);
+    });
+    it('charisma training raises chart-task pay through getTotalBonuses (#1721, #2267)', () => {
+        const fresh = new CharacterStats();
+        const trained = new CharacterStats();
+        trained.stats.charisma = 50;
+        const base = econ().e.calculateMoneyReward({ potentialReward: 100 }, 4);
+        const withFresh = econ({ characterStats: fresh }).e.calculateMoneyReward({ potentialReward: 100 }, 4);
+        const withTrained = econ({ characterStats: trained }).e.calculateMoneyReward({ potentialReward: 100 }, 4);
+        expect(base).toBe(100);
+        expect(withFresh).toBe(Math.round(100 * (1 + fresh.getTotalBonuses().clientPay / 100)));
+        expect(withTrained).toBeGreaterThan(withFresh);
     });
     it('Office Coffee makes bosses more lenient', () => {
         vi.spyOn(Math, 'random').mockReturnValue(0.5);

@@ -1799,7 +1799,7 @@ export class NPCManager {
         }
 
         // Direct stat rewards from story phases, e.g. { intelligence: 5 }
-        ['intelligence', 'charisma', 'focus', 'luck', 'analytics'].forEach(id => {
+        ['intelligence', 'charisma', 'focus', 'luck', 'analytics', 'python_sql', 'statistics'].forEach(id => {
             if (typeof effects[id] === 'number' && effects[id] > 0) stats?.addExperience?.(id, effects[id]);
         });
 
