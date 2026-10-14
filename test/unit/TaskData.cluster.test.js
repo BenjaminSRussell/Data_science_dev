@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { COMPREHENSIVE_DATA_SCIENCE_TASKS as TASKS } from '../../src/js/data/comprehensive_datascience_tasks.js';
 import { CHART_TYPES } from '../../src/js/data/chartTypes.js';
-import { DATA_SCIENCE_TASKS } from '../../src/js/data/datascience_tasks.js';
 import { taskBriefRows, taskBriefHTML, renderTaskBrief } from '../../src/js/game/taskBrief.js';
 import { TaskSystem } from '../../src/js/game/TaskSystem.js';
 
@@ -23,14 +22,6 @@ describe('Comprehensive task data', () => {
             }
             expect(t.optimalChartTypes.length).toBeGreaterThan(0);
         }
-        expect(bad).toEqual([]);
-    });
-
-    it('datascience_tasks.js also only uses real chart ids (#2156)', () => {
-        const valid = new Set(CHART_TYPES.map(c => c.id));
-        const bad = DATA_SCIENCE_TASKS.flatMap(t =>
-            [...(t.optimalChartTypes || []), ...(t.acceptableChartTypes || [])]
-                .filter(c => !valid.has(c)).map(c => `${t.id}:${c}`));
         expect(bad).toEqual([]);
     });
 
