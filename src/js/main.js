@@ -204,8 +204,9 @@ export class MainGame {
         this.saveSlotManager = null; // Will be initialized in initMenu
         this.currentSaveSlot = 0; // Default to slot 0
         this.menuThemeSystem = new MenuThemeSystem();
-        this.menuLogoDisplay = null; // Will be initialized in initMenu
         this.statisticsAggregator = new StatisticsAggregator(this.saveManager);
+        // Same aggregator as the dashboard; initMenu calls init() (#2157)
+        this.menuLogoDisplay = new MenuLogoDisplay(this.saveManager, this.statisticsAggregator);
         this.taskSystem = new TaskSystem(this.gameState);
         this.uiUpdater = new UIUpdater(this);
         this.storyUI = new StoryUI(this);

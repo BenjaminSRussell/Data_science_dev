@@ -2346,3 +2346,14 @@ html.quality-no-animations *::after {
     0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6); }
     50% { box-shadow: 0 0 0 6px rgba(234, 179, 8, 0); }
 }
+
+/* Rotating menu stat (#2157). After the old logo media queries so those
+   giant icon sizes do not apply to this text-mode line. */
+.menu-logo-icon {
+    margin-top: 0.75rem;
+    font-family: ui-monospace, monospace;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #66cc66;
+    cursor: pointer;
+}
