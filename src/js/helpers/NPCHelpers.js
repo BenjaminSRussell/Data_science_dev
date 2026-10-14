@@ -44,28 +44,6 @@ export function handleVisitNPC(game, npcId) {
     game.dialogueUI.open(npc, relationshipLevel);
 }
 
-/**
- * Handle talking to an NPC
- */
-export async function handleNPCTalk(game, npcId) {
-    const convo = await game.gameState.npcManager.startConversation(npcId);
-    if (!convo) return;
-
-    // Add talking animation
-    const charSprite = document.querySelector('#npc-modal .char-sprite, #npc-modal .npc-avatar-emoji-large');
-    if (charSprite) {
-        charSprite.classList.add('char-talking');
-        setTimeout(() => charSprite.classList.remove('char-talking'), 500);
-    }
-
-    const dialogArea = document.getElementById('npc-dialogue-area');
-    if (dialogArea && convo.greeting) {
-        dialogArea.innerHTML = `"${convo.greeting}"`;
-    }
-
-    renderNPCChoices(game, convo.choices);
-}
-
 function getNPCActionsContainer() {
     return document.querySelector(
         '#npc-modal .npc-modal-actions, #npc-modal .npc-actions, .dialogue-container .dialogue-choices'
@@ -100,42 +78,10 @@ export function renderNPCChoices(game, choices = []) {
         btn.onclick = () => {
             // Disable every button so a choice can't be applied twice
             actionsDiv.querySelectorAll('button').forEach(b => { b.disabled = true; });
-            const result = game.gameState.npcManager.makeChoice(index);
-            handleNPCResponse(game, result);
+            game.gameState.npcManager.makeChoice(index);
         };
         actionsDiv.appendChild(btn);
     });
-}
-
-/**
- * Handle NPC response after player choice
- */
-export function handleNPCResponse(game, result) {
-    if (!result) return;
-
-    // Show what the NPC actually said, plus the relationship change
-    DOMUtils.updateElement('#npc-dialogue-area', {
-        textContent: result.text ? `"${result.text}"` : '...'
-    });
-    if (result.effects?.relationship) {
-        const sign = result.effects.relationship > 0 ? '+' : '';
-        game.showToast?.(`Relationship ${sign}${result.effects.relationship}`, 'info');
-    } else if (result.isSpecialAction && !result.success) {
-        game.showToast?.(result.text, 'warning');
-    }
-
-    if (result.ended || !result.choices || result.choices.length === 0) {
-        setTimeout(() => {
-            const modal = DOMUtils.query('#npc-modal');
-            if (modal) {
-                modal.className = 'modal hidden';
-            }
-            game.showToast?.('Conversation finished.', 'success');
-        }, 1500);
-        return;
-    }
-
-    renderNPCChoices(game, result.choices);
 }
 
 // Shop gift id -> the action keys NPC dialogue files use for it (#1307)
