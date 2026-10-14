@@ -9,7 +9,6 @@
 import * as PIXI from 'pixi.js';
 import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
 import { getAllZones } from '../data/mapZones.js';
-// Phase 4: Particle effects (lazy loaded to avoid breaking game)
 
 export class UnifiedMapSystem {
     constructor(container, game) {
@@ -104,11 +103,6 @@ export class UnifiedMapSystem {
         if (!this.onResize) {
             this.onResize = () => this.handleResize();
             window.addEventListener('resize', this.onResize);
-        }
-        
-        // Initialize particle effects (optional - lazy load)
-        if (this.game?.gameState?.particleEffectManager) {
-            this.particleManager = this.game.gameState.particleEffectManager;
         }
         
         if (this.game?.gameState?.tooltipManager) {
@@ -508,16 +502,7 @@ export class UnifiedMapSystem {
             
             icon.interactive = true;
             icon.cursor = 'pointer';
-            icon.on('pointerdown', (e) => {
-                // Add particle effect on click
-                if (this.particleManager) {
-                    const bounds = icon.getBounds();
-                    this.particleManager.createMagicSparkle(
-                        bounds.x + bounds.width / 2,
-                        bounds.y + bounds.height / 2,
-                        this.layers.locations
-                    );
-                }
+            icon.on('pointerdown', () => {
                 this.game.handleTravel?.(location.id);
             });
             
@@ -629,12 +614,6 @@ export class UnifiedMapSystem {
             };
             this.pulseTicker = ticker;
             ticker.add(this.pulseTick);
-        }
-        
-        // Phase 4: Add particle effect around player marker (optional)
-        if (this.particleManager) {
-            // Subtle particle effect for player marker
-            this.particleManager.createMagicEffect(x, y, this.layers.ui);
         }
         
         this.layers.ui.addChild(pulse);
