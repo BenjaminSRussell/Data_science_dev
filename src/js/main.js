@@ -72,7 +72,6 @@ import { WorldEvolutionSystem } from './game/WorldEvolutionSystem.js';
 import { InvestmentEcommerceSystem } from './game/InvestmentEcommerceSystem.js';
 import { StorylineManager } from './game/StorylineManager.js';
 import { StoryBeatsSystem } from './game/StoryBeatsSystem.js';
-import { CharacterArcSystem } from './game/CharacterArcSystem.js';
 import { NPCMemorySystem } from './game/NPCMemorySystem.js';
 import { StoryUI } from './ui/StoryUI.js';
 import { ActTransitionScreen } from './ui/ActTransitionScreen.js';
@@ -1478,7 +1477,6 @@ export class MainGame {
             this.gameState.investmentEcommerceSystem = new InvestmentEcommerceSystem(this.gameState);
             this.gameState.storylineManager = new StorylineManager(this.gameState);
             this.gameState.storyBeatsSystem = new StoryBeatsSystem(this.gameState);
-            this.gameState.characterArcSystem = new CharacterArcSystem(this.gameState);
             this.gameState.npcMemorySystem = new NPCMemorySystem(this.gameState);
             this.gameState.mapProgressionSystem = new MapProgressionSystem(this.gameState);
             this.gameState.ideSystem = new IDESystem(this.gameState);
@@ -1557,7 +1555,6 @@ export class MainGame {
             this.investmentEcommerceSystem = this.gameState.investmentEcommerceSystem;
             this.storylineManager = this.gameState.storylineManager;
             this.storyBeatsSystem = this.gameState.storyBeatsSystem;
-            this.characterArcSystem = this.gameState.characterArcSystem;
             this.npcMemorySystem = this.gameState.npcMemorySystem;
             this.gameEndingSystem = this.gameState.gameEndingSystem;
             // NOTE: mapProgressionSystem already linked above, don't duplicate
@@ -1594,11 +1591,6 @@ export class MainGame {
             // Initialize story beats system
             if (this.storyBeatsSystem) {
                 this.storyBeatsSystem.initialize();
-            }
-
-            // Initialize character arc system
-            if (this.characterArcSystem) {
-                this.characterArcSystem.initialize();
             }
 
             // Initialize NPC memory system
@@ -1793,7 +1785,6 @@ export class MainGame {
             investmentEcommerceSystem: () => new InvestmentEcommerceSystem(gs),
             storylineManager: () => new StorylineManager(gs),
             storyBeatsSystem: () => new StoryBeatsSystem(gs),
-            characterArcSystem: () => new CharacterArcSystem(gs),
             npcMemorySystem: () => new NPCMemorySystem(gs),
             mapProgressionSystem: () => new MapProgressionSystem(gs),
             ideSystem: () => new IDESystem(gs),
@@ -1837,7 +1828,7 @@ export class MainGame {
             'worldEventManager', 'projectSystem', 'aiSystem', 'hardwareManager', 'contractSystem',
             'mapProgressionSystem', 'jobSystem', 'workInteractionSystem', 'realisticDialogueSystem',
             'relationshipEmotionSystem', 'worldEvolutionSystem', 'investmentEcommerceSystem',
-            'storylineManager', 'storyBeatsSystem', 'characterArcSystem', 'npcMemorySystem',
+            'storylineManager', 'storyBeatsSystem', 'npcMemorySystem',
             'ideSystem', 'locationBackgroundSystem', 'weeklyNewsSystem', 'screenThemeManager',
             'mapCoordinateSystem', 'gameEndingSystem', 'dayNightCycle', 'notificationSystem',
             'narrativeClaritySystem', 'companyManagement', 'demandingBoss', 'performanceManager'
@@ -1851,7 +1842,7 @@ export class MainGame {
      * Run the story systems' initialize() hooks (safe to call after a load)
      */
     initializeStorySystems() {
-        for (const key of ['storylineManager', 'storyBeatsSystem', 'characterArcSystem', 'npcMemorySystem']) {
+        for (const key of ['storylineManager', 'storyBeatsSystem', 'npcMemorySystem']) {
             const system = this[key];
             if (system && typeof system.initialize === 'function') {
                 try {

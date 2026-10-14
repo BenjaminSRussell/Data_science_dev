@@ -1,81 +1,31 @@
+/**
+ * CharacterArcSystem was a third evolution tracker beside
+ * CharacterStats.visualStage (#1960). Its milestone history was never read
+ * (#1103). Evolution stays on checkForCharacterEvolution.
+ */
 import { describe, it, expect } from 'vitest';
-import { CharacterArcSystem } from '../../src/js/game/CharacterArcSystem.js';
+import fs from 'fs';
+import path from 'path';
 
-const make = (o = {}) => {
-    const gs = { money: 0, reputation: 0, rankIndex: 0, characterStats: { ethics: 0 }, timeManager: { totalDays: 1 }, ...o };
-    return { gs, arc: new CharacterArcSystem(gs) };
-};
-const shift = (arc, gs, { ethics = 0, rank = 0, rep = 0 }) => {
-    gs.characterStats.ethics += ethics;
-    gs.rankIndex += rank;
-    gs.reputation += rep;
-    arc.updateCurrentState();
-};
+const root = path.resolve(__dirname, '../..');
 
-describe('CharacterArcSystem cluster', () => {
-    it('#1477 $0 and missing money use the same fallback', () => {
-        const { arc } = make({ money: undefined });
-        arc.initialize();
-        expect(arc.startingState.money).toBe(0);
-        expect(arc.currentState.money).toBe(0);
-        const broke = make({ money: 0 }).arc;
-        broke.initialize();
-        expect(broke.startingState.money).toBe(0);
+describe('CharacterArcSystem removed (#1960, #1103)', () => {
+    it('the module file is gone', () => {
+        expect(fs.existsSync(path.join(root, 'src/js/game/CharacterArcSystem.js'))).toBe(false);
     });
 
-    it('#1961 a new game starts from zero relationships even if an intro met someone', () => {
-        const { arc, gs } = make({ npcManager: { getMetNPCs: () => ['mentor'] } });
-        arc.initialize();
-        expect(arc.startingState.relationships).toBe(0);
-        expect(arc.currentState.relationships).toBe(1);
-        // A baseline captured for an existing game still uses the live count
-        const old = make({ npcManager: { getMetNPCs: () => ['a', 'b'] } }).arc;
-        old.captureStartingState();
-        expect(old.startingState.relationships).toBe(2);
-        expect(gs).toBeTruthy();
+    it('main does not import or construct it', () => {
+        const main = fs.readFileSync(path.join(root, 'src/js/main.js'), 'utf8');
+        expect(main).not.toContain('CharacterArcSystem');
+        expect(main).not.toMatch(/new CharacterArcSystem\s*\(/);
     });
 
-    it('#1959 milestone direction and transformation text agree on ethics cutoffs', () => {
-        for (const delta of [10, 12, 15]) {
-            const { arc, gs } = make();
-            arc.initialize();
-            shift(arc, gs, { ethics: delta });
-            expect(arc.arcHistory.at(-1).direction).toBe('growth');
-            expect(arc.getTransformationDescription()).toMatch(/convictions/);
-        }
-        for (const delta of [-10, -12, -20]) {
-            const { arc, gs } = make();
-            arc.initialize();
-            shift(arc, gs, { ethics: delta });
-            expect(arc.arcHistory.at(-1).direction).toBe('decline');
-            expect(arc.getTransformationDescription()).toMatch(/consequences/);
-        }
-        const { arc, gs } = make();
-        arc.initialize();
-        shift(arc, gs, { ethics: 9 });
-        expect(arc.arcHistory).toHaveLength(0);
-        expect(arc.getTransformationDescription()).toMatch(/still finding your way/);
-    });
-
-    it('#1479 a promotion cannot hide an ethics decline', () => {
-        const a = make();
-        a.arc.initialize();
-        shift(a.arc, a.gs, { ethics: -25 });
-        const b = make();
-        b.arc.initialize();
-        shift(b.arc, b.gs, { ethics: -25, rank: 3 });
-        expect(a.arc.getTransformationDescription()).toMatch(/consequences/);
-        expect(b.arc.getTransformationDescription()).toMatch(/at a cost/);
-        const clean = make();
-        clean.arc.initialize();
-        shift(clean.arc, clean.gs, { rank: 3 });
-        expect(clean.arc.getTransformationDescription()).toMatch(/climbed the ladder/);
-    });
-
-    it('integrity needs a bigger ethics rise plus reputation', () => {
-        const { arc, gs } = make();
-        arc.initialize();
-        shift(arc, gs, { ethics: 20, rep: 300 });
-        expect(arc.getTransformationDescription()).toMatch(/integrity/);
+    it('visual evolution remains the live path', () => {
+        const helpers = fs.readFileSync(path.join(root, 'src/js/helpers/ProjectHelpers.js'), 'utf8');
+        const start = helpers.indexOf('export function checkForCharacterEvolution');
+        const fn = helpers.slice(start, helpers.indexOf('export function updatePlayerAvatar'));
+        expect(fn).toContain('characterStats.checkEvolution');
+        const main = fs.readFileSync(path.join(root, 'src/js/main.js'), 'utf8');
+        expect(main).toContain('this.checkForCharacterEvolution?.()');
     });
 });
