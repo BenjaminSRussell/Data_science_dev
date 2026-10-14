@@ -19,22 +19,24 @@ something the player sees.
 | 1 | `assets/AssetManager.js` | yes (`main.js` `initializeGameSystems`) | **partly** | `loadAll()` runs from `loadAssetsInBackground()` and drives the loading progress (`loadProgress`). It downloads all 165 manifest URLs (49 are on the blocklist and are skipped). But its `Map` is read only by `ComprehensiveSpriteSystem.getAsset` (no live callers) and `getLocationBackground` (only `LocationView`, never instantiated, #2201). No live screen shows an image from it. |
 | 2 | `assets/PixiAssetManager.js` | yes, lazily (`main.js` "Phase 4 managers") | **no** | `init(manifest)` registers AssetManager's manifest as Pixi bundles (#68). Nothing calls `getAsset`, `getCharacterEmotion`, `getLocationBackground` or `loadAll`. The map loads its textures with `PIXI.Assets.load(location.icon)` directly (`UnifiedMapSystem.addIconSprite`), bypassing it. |
 | 3 | `utils/IconMapper.js` | module functions | **yes** | `getTextIcon` is used by `main.js` and `NPCHelpers` to turn emoji into the text-mode labels. |
-| 4 | `utils/IconRenderer.js` | never imported | no | dead (#479, #2278) |
+| 4 | `utils/IconRenderer.js` | n/a | **removed** | deleted (#2278); live icons use IconMapper, NPCImageMapper, and MapIconRenderer |
 | 5 | `utils/NPCImageMapper.js` | module functions | **yes** | `getNPCImage` / `getNPCFallback` back every live NPC portrait: `DialogueUI`, `NPCHelpers`, `NPCManager`. `ConversationScreen` also imports them but is unreachable (#2316). |
 | 6 | `utils/AssetResolver.js` | import commented out (`LocationDetailSystem`) | no | dead (#1046, #2246) |
 | 7 | `assets/AssetFinder.js` | n/a | **removed** | deleted in fad8a277 (#2737); `test/unit/AssetFinder.test.js` guards against it coming back |
 | 8 | `assets/GameAssetLoader.js` | never imported | no | dead (#2287) |
 | 9 | `assets/ComprehensiveSpriteSystem.js` | yes (deferred systems) | no | `initialize()` preloads emotion and pose images, but none of its getters has a caller (#526, #1841) |
 | 10 | `assets/PixiSpriteManager.js` | yes, lazily | no | no sheet is ever loaded; its consumer `AnimatedCharacterRenderer` is commented out (#2300, #468) |
-| 11 | `assets/SpriteSheetManager.js` | import and constructor commented out | no | #1048, #465 |
-| 12 | `assets/SpriteDownloader.js` | never imported | no | #2293 |
+| 11 | `assets/SpriteSheetManager.js` | yes (`startNewGame`, and `loadDeferredSystems` on continue) | registered, not drawn | #1048, #465, #2293 |
+| 12 | `assets/SpriteDownloader.js` | n/a | **removed** | deleted (#2293); instruction catalog had no caller |
 | + | `assets/MissingAssetBlocklist.js` | module | **yes** | `isAssetMissing` is shared by AssetManager, NPCImageMapper, LocationBackgroundSystem and AssetValidator, and stops 404s for art that was never made |
 | + | `game/LocationBackgroundSystem.js` | yes | **yes** | `getLayeredBackground` is the backdrop of every live location screen, via `ScreenThemeManager` and `MapHelpers` |
 
 Totals: of the 11 classes in #525 (plus `SpriteDownloader`), 2 are fully
 live (`IconMapper`, `NPCImageMapper`), 1 is half-live (`AssetManager`: it
-loads, but nothing reads what it loaded), 1 has been removed
-(`AssetFinder`), and the other 8 are dead or constructed-but-unused.
+loads, but nothing reads what it loaded), 3 have been removed
+(`AssetFinder`, `IconRenderer`, `SpriteDownloader`), and the rest are dead or
+constructed-but-unused. `SpriteSheetManager` is constructed (#2293) but
+nothing draws its frames.
 
 ## 2. Do two live systems solve the same problem?
 
@@ -98,10 +100,14 @@ Migration / deprecation, in order:
 3. **Sprite trio:** follow `sprite-pipeline-overlap.md`. Keep at most one
    (PixiSpriteManager, the only one that renders through Pixi) and only once
    an animated character exists.
-4. **Remove the never-imported modules** (`IconRenderer`, `GameAssetLoader`,
-   `AssetResolver`, `SpriteDownloader`). They are already filed as
-   delete-or-wire decisions (#479/#2278, #2287, #1046/#2246, #2293) and are
-   left to Ben.
+4. **Remove the never-imported modules** (`GameAssetLoader`,
+   `AssetResolver`). They are already filed as delete-or-wire decisions
+   (#2287, #1046/#2246) and are left to Ben.
+   `IconRenderer` was removed (#2278).
+   `SpriteDownloader` was removed (#2293): it was a download-instruction
+   catalog with no caller. `SpriteSheetManager` is constructed again so
+   `ComprehensiveSpriteSystem.registerSpriteSheets()` and visual-tier
+   upgrades are not silent no-ops; drawing it is still a separate decision.
 
 Steps 2-4 delete code that open decision issues are still waiting on, so
 this review only recommends them. Step 1 is safe today but changes the

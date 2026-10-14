@@ -4,6 +4,8 @@
  * drive the frame math instead of being overwritten (#2294, #1050).
  */
 import { describe, it, expect, vi } from 'vitest';
+import fs from 'fs';
+import path from 'path';
 
 vi.mock('pixi.js', () => {
     class Sprite { constructor(t) { this.texture = t; } }
@@ -73,5 +75,17 @@ describe('SpriteSheetManager', () => {
         const right = m.getAnimationFrames('s', 'walk_right');
         expect(right.frames[0]).toEqual({ x: 0, y: 128, width: 64, height: 64 }); // frame 16 = row 2
         expect(Object.keys(SpriteSheetManager.DEFAULT_ANIMATIONS)).toContain('talk');
+    });
+});
+
+describe('SpriteSheetManager wiring (#2293)', () => {
+    it('is imported and constructed outside of comments in main.js', () => {
+        const main = fs.readFileSync(path.join(__dirname, '../../src/js/main.js'), 'utf8');
+        const live = main
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/^\s*\/\/.*$/gm, '');
+        expect(live).toMatch(/import\s*\{\s*SpriteSheetManager\s*\}\s*from\s*'\.\/assets\/SpriteSheetManager\.js'/);
+        expect(live).toMatch(/new SpriteSheetManager\s*\(\s*\)/);
+        expect(live).toMatch(/gameState\.spriteSheetManager\s*=\s*this\.spriteSheetManager/);
     });
 });

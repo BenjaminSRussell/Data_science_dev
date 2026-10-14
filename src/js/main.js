@@ -98,7 +98,7 @@ import { HardwareManager } from './game/HardwareSystems.js'; // NEW
 import { LIBRARY_CONTENT, CATEGORIES } from './game/LibraryDatabase.js';
 import { RANKS } from './data/ranks.js';
 import { SHOP_ITEMS } from './data/shopItems.js';
-// import { SpriteSheetManager } from './assets/SpriteSheetManager.js';
+import { SpriteSheetManager } from './assets/SpriteSheetManager.js';
 // import { AnimatedCharacterRenderer } from './characters/AnimatedCharacterRenderer.js';
 import { ThreeCharacterRenderer } from './characters/ThreeCharacterRenderer.js';
 // import { VisualEffectsManager } from './effects/VisualEffectsManager.js';
@@ -1403,11 +1403,12 @@ export class MainGame {
                 logger.warn('Phase 4 managers failed to load (non-critical):', error);
             });
 
-            /*
-            // Keep old SpriteSheetManager for compatibility
+            // Grid sheets for ComprehensiveSpriteSystem and visual-tier upgrades (#2293).
+            // AnimatedCharacterRenderer stays commented out; nothing draws it.
             this.spriteSheetManager = new SpriteSheetManager();
             this.gameState.spriteSheetManager = this.spriteSheetManager;
 
+            /*
             // Particle effects will be initialized when PixiJS app is ready
             this.particleEffectManager = null;
 
@@ -4201,6 +4202,12 @@ export class MainGame {
      */
     loadDeferredSystems() {
         try {
+            // Continue never runs the startNewGame construction (#2293)
+            if (!this.spriteSheetManager) {
+                this.spriteSheetManager = new SpriteSheetManager();
+                this.gameState.spriteSheetManager = this.spriteSheetManager;
+            }
+
             // Location detail system
             if (!this.gameState.locationDetailSystem) {
                 this.gameState.locationDetailSystem = new LocationDetailSystem(this.gameState);
