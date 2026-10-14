@@ -15,12 +15,15 @@ const UNCERTAIN_EMOTIONS = new Set(['worried', 'sad', 'nervous', 'uncertain', 'c
 
 // How each personality colours a reaction (#1597)
 const PERSONALITY_STYLE = {
-    professional: { gift: { positive: "That's very thoughtful of you. Thank you.", negative: "Thank you, but that isn't necessary." },
-        betrayal: { high_relationship: "I expected better from you. This changes things between us.", low_relationship: "Noted. I won't make the mistake of relying on you again." } },
-    blunt: { gift: { positive: "Nice. Thanks.", negative: "Uh, okay. Not really my thing." },
-        betrayal: { high_relationship: "That was a lousy thing to do, and you know it.", low_relationship: "Figures. Don't expect anything from me now." } },
-    shy: { gift: { positive: "Oh! For me? I... thank you. Really.", negative: "Oh, um... thank you. You didn't have to." },
-        betrayal: { high_relationship: "I... I thought we were friends.", low_relationship: "I guess I shouldn't have trusted you." } }
+    professional: {
+        betrayal: { high_relationship: "I expected better from you. This changes things between us.", low_relationship: "Noted. I won't make the mistake of relying on you again." }
+    },
+    blunt: {
+        betrayal: { high_relationship: "That was a lousy thing to do, and you know it.", low_relationship: "Figures. Don't expect anything from me now." }
+    },
+    shy: {
+        betrayal: { high_relationship: "I... I thought we were friends.", low_relationship: "I guess I shouldn't have trusted you." }
+    }
 };
 
 export class RealisticDialogueSystem {
@@ -261,10 +264,6 @@ export class RealisticDialogueSystem {
      */
     generateEmotionalResponse(action, npc, currentRelationship) {
         const responses = {
-            'gift': {
-                positive: "Oh wow, thank you! You didn't have to do that.",
-                negative: "Oh... thanks, I guess. You really shouldn't have."
-            },
             'betrayal': {
                 high_relationship: "I can't believe you did that. I trusted you.",
                 low_relationship: "I knew I couldn't trust you. This confirms it."

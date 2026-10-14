@@ -27,8 +27,6 @@ describe('RelationshipEmotionSystem action coverage (#1850)', () => {
     for (const [action, npc, context] of [
         ['help', friend, {}],
         ['support', friend, {}],
-        ['gift', friend, { liked: false }],
-        ['gift', friend, { liked: true }],
         ['financial_stress', partner, { debt: 6000 }]
     ]) {
         it(`${action} ${JSON.stringify(context)} moves emotions with the relationship`, () => {
@@ -40,6 +38,16 @@ describe('RelationshipEmotionSystem action coverage (#1850)', () => {
             expect(Math.sign(after - before)).toBe(Math.sign(change));
         });
     }
+
+    it('gift is not scored here; NPCManager.giveGift owns the points (#1306)', () => {
+        const sys = system(friend);
+        const before = sum(sys.getRelationshipState(friend.id));
+        const liked = sys.updateRelationship(friend.id, 'gift', { liked: true });
+        const generic = sys.updateRelationship(friend.id, 'gift', { liked: false });
+        expect(liked.change).toBe(0);
+        expect(generic.change).toBe(0);
+        expect(sum(sys.getRelationshipState(friend.id)) - before).toBe(0);
+    });
 
     it('financial stress leaves non-romance NPCs and small debts alone', () => {
         const sys = system(friend);

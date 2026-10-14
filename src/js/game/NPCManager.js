@@ -815,9 +815,6 @@ export const DIALOGUE_CHOICES = {
         { text: "Let's collaborate on something!", effect: { relationship: 5, projectChance: true }, requiredRelationship: 60 },
         { text: "I'm interested in investment opportunities.", effect: { relationship: 2, investmentInfo: true }, requiredRelationship: 50 }
     ],
-    give_gift: [
-        { text: "I brought you something!", effect: { relationship: 10, giftBonus: true } }
-    ],
     farewell: [
         { text: "Great talking to you!", effect: { relationship: 1 } },
         { text: "Let's do this again soon.", effect: { relationship: 2 } },
@@ -1827,7 +1824,7 @@ export class NPCManager {
         if (effects.motivation) stats?.addExperience?.('focus', effects.motivation);
 
         // One-off perks are recorded as per-save NPC flags for other systems
-        ['studyBoost', 'favor', 'referralChance', 'projectChance', 'investmentInfo', 'giftBonus', 'unlockScheme']
+        ['studyBoost', 'favor', 'referralChance', 'projectChance', 'investmentInfo', 'unlockScheme']
             .forEach(key => { if (effects[key]) flags[key] = true; });
 
         if (effects.flag) flags[effects.flag] = true;

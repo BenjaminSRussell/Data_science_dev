@@ -122,10 +122,7 @@ export class RelationshipEmotionSystem {
             }
         }
 
-        // Positive actions
-        if (action === 'gift') {
-            change = context.liked ? 10 : 3;
-        }
+        // Positive actions. Gifts are scored only by NPCManager.giveGift (#1306).
         if (action === 'help') {
             change = 8;
         }
@@ -167,9 +164,6 @@ export class RelationshipEmotionSystem {
         }
         // Every action calculateRelationshipChange() scores also moves at
         // least one emotional stat, in the same direction (#1850)
-        if (action === 'gift') {
-            state.affection += context.liked ? 5 : 1;
-        }
         if (action === 'help' || action === 'support') {
             state.trust += 3;
             state.anger -= 5;
