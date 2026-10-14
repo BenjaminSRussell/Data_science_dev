@@ -1,71 +1,7 @@
 /**
- * Office System - Upgradeable office spaces, equipment, and staff
+ * Office System - Upgradeable office spaces and staff
  * Core tycoon mechanics for building your data science empire
  */
-
-// Equipment that can be upgraded
-export const EQUIPMENT = {
-    computer: {
-        id: "computer",
-        name: "Computer",
-        icon: "",
-        levels: [
-            { name: "Old Laptop", speed: 1.0, price: 0, description: "A beat-up laptop that barely runs Excel" },
-            { name: "Desktop PC", speed: 1.3, price: 500, description: "A decent workstation" },
-            { name: "Gaming Rig", speed: 1.6, price: 2000, description: "Overkill for spreadsheets, but fast!" },
-            { name: "Workstation Pro", speed: 2.0, price: 5000, description: "Professional-grade computing power" },
-            { name: "Server Cluster", speed: 3.0, price: 15000, description: "Big data? No problem." }
-        ]
-    },
-    desk: {
-        id: "desk",
-        name: "Desk",
-        icon: "",
-        levels: [
-            { name: "Folding Table", comfort: 1.0, price: 0, description: "It wobbles, but it works" },
-            { name: "Basic Desk", comfort: 1.2, price: 300, description: "A proper desk at last" },
-            { name: "Standing Desk", comfort: 1.5, price: 800, description: "Good for your health!" },
-            { name: "L-Shaped Desk", comfort: 1.8, price: 1500, description: "Room to spread out" },
-            { name: "Executive Desk", comfort: 2.5, price: 4000, description: "Mahogany. Very prestigious." }
-        ]
-    },
-    monitor: {
-        id: "monitor",
-        name: "Monitor",
-        icon: "",
-        levels: [
-            { name: "Laptop Screen", clarity: 1.0, price: 0, description: "Squinting at 13 inches" },
-            { name: "24\" Monitor", clarity: 1.3, price: 250, description: "Now we're talking" },
-            { name: "Dual Monitors", clarity: 1.6, price: 600, description: "Double the productivity" },
-            { name: "Ultrawide", clarity: 2.0, price: 1200, description: "See all your data at once" },
-            { name: "Triple 4K Setup", clarity: 3.0, price: 3500, description: "Chart visualization heaven" }
-        ]
-    },
-    chair: {
-        id: "chair",
-        name: "Chair",
-        icon: "",
-        levels: [
-            { name: "Kitchen Chair", stamina: 1.0, price: 0, description: "Your back hurts" },
-            { name: "Office Chair", stamina: 1.3, price: 200, description: "Basic lumbar support" },
-            { name: "Ergonomic Chair", stamina: 1.6, price: 600, description: "Proper posture at last" },
-            { name: "Gaming Chair", stamina: 2.0, price: 1000, description: "RGB doesn't help, but it looks cool" },
-            { name: "Herman Miller", stamina: 3.0, price: 2500, description: "Peak comfort achieved" }
-        ]
-    },
-    software: {
-        id: "software",
-        name: "Software",
-        icon: "",
-        levels: [
-            { name: "Spreadsheets", capability: 1.0, price: 0, description: "Excel and Google Sheets" },
-            { name: "Basic BI Tools", capability: 1.4, price: 500, description: "Tableau Public, Power BI free" },
-            { name: "Pro Analytics", capability: 1.8, price: 2000, description: "Full Tableau, Looker" },
-            { name: "Python Stack", capability: 2.2, price: 3500, description: "Pandas, Matplotlib, Seaborn" },
-            { name: "Enterprise Suite", capability: 3.0, price: 8000, description: "Everything. All of it." }
-        ]
-    }
-};
 
 // Office spaces you can unlock
 export const OFFICES = [
@@ -132,8 +68,7 @@ export const OFFICES = [
 ];
 
 // Staff you can hire
-// baseSalary is a daily rate (OfficeManager.getDailyStaffCost); hiring costs
-// OfficeManager.HIRING_COST_DAYS days of it.
+// baseSalary is a daily rate. The live office screen does not hire from this table.
 export const STAFF_TYPES = [
     {
         id: "intern",
@@ -199,124 +134,5 @@ export const STAFF_TYPES = [
         description: "+1 client lead per day",
         skills: ["sales"],
         bonus: { clientLeadsPerDay: 1 }
-    }
-];
-
-// Client types (they bring you data)
-export const CLIENT_TYPES = [
-    {
-        id: "small_business",
-        name: "Small Business",
-        icon: "",
-        minPay: 50,
-        maxPay: 200,
-        dataComplexity: 1,
-        patience: 0.8,
-        description: "Mom and pop shops need simple reports"
-    },
-    {
-        id: "startup",
-        name: "Startup",
-        icon: "",
-        minPay: 150,
-        maxPay: 500,
-        dataComplexity: 2,
-        patience: 0.5,
-        description: "Fast-moving, need quick turnaround"
-    },
-    {
-        id: "agency",
-        name: "Marketing Agency",
-        icon: "",
-        minPay: 200,
-        maxPay: 600,
-        dataComplexity: 2,
-        patience: 0.7,
-        description: "Regular work, fair pay"
-    },
-    {
-        id: "enterprise",
-        name: "Enterprise",
-        icon: "",
-        minPay: 500,
-        maxPay: 2000,
-        dataComplexity: 3,
-        patience: 0.9,
-        description: "Big contracts, complex requirements"
-    },
-    {
-        id: "government",
-        name: "Government",
-        icon: "",
-        minPay: 400,
-        maxPay: 1500,
-        dataComplexity: 3,
-        patience: 1.0,
-        description: "Slow but steady, lots of red tape"
-    },
-    {
-        id: "fortune500",
-        name: "Fortune 500",
-        icon: "",
-        minPay: 2000,
-        maxPay: 10000,
-        dataComplexity: 4,
-        patience: 0.6,
-        description: "The big leagues. Don't mess up."
-    }
-];
-
-// Investments for client acquisition
-export const MARKETING_CHANNELS = [
-    {
-        id: "word_of_mouth",
-        name: "Word of Mouth",
-        icon: "",
-        costPerDay: 0,
-        leadsPerDay: 0.5,
-        description: "Free but slow - happy clients refer others"
-    },
-    {
-        id: "linkedin",
-        name: "LinkedIn Presence",
-        icon: "",
-        costPerDay: 20,
-        leadsPerDay: 1,
-        description: "Professional networking pays off"
-    },
-    {
-        id: "website",
-        name: "Company Website",
-        icon: "",
-        costPerDay: 50,
-        leadsPerDay: 2,
-        description: "SEO and content marketing"
-    },
-    {
-        id: "ads",
-        name: "Online Ads",
-        icon: "",
-        costPerDay: 100,
-        leadsPerDay: 4,
-        description: "Pay-per-click advertising"
-    },
-    {
-        id: "conference",
-        name: "Industry Events",
-        icon: "",
-        costPerDay: 200,
-        leadsPerDay: 6,
-        description: "Networking at conferences and meetups"
-    },
-    {
-        id: "enterprise_sales",
-        name: "Enterprise Sales Team",
-        icon: "",
-        costPerDay: 500,
-        leadsPerDay: 3,
-        // Leads from this channel pay 2.5x, so it out-earns conferences per
-        // lead instead of being strictly worse (#154, #1968)
-        payMultiplier: 2.5,
-        description: "Fewer leads, but they're high value"
     }
 ];
