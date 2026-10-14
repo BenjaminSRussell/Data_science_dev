@@ -58,6 +58,12 @@ export class SaveSlotManager {
     init() {
         // Migrate old save to slot 0 if needed
         this.migrateOldSave();
+        // Copy LocalStorage slots into IndexedDB (shim keys stay). The game
+        // also awaits this before the first load (#2714).
+        const pending = this.saveManager?.prepareStorage?.();
+        if (pending && typeof pending.catch === 'function') {
+            pending.catch((err) => console.error('Failed to prepare save storage:', err));
+        }
 
         // Clean up any old containers first
         this.cleanupOldContainers();

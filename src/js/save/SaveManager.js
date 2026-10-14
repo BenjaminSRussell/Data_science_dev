@@ -1,7 +1,13 @@
 /**
- * SaveManager - Handles game save/load using LocalStorage
- * Supports multiple save slots (0-4) for multiple playthroughs
+ * SaveManager - Save/load for multiple slots (0-4).
+ * New saves are written to IndexedDB. The LocalStorage slot keys remain a
+ * one-release shim so existing browsers keep working (#2714). See
+ * IndexedDBSaveStore.js for the key migration.
  */
+
+import { IndexedDBSaveStore, LEGACY_UNSLOTTED_SAVE_KEY } from './IndexedDBSaveStore.js';
+
+export { LEGACY_UNSLOTTED_SAVE_KEY, LOCALSTORAGE_MIGRATION } from './IndexedDBSaveStore.js';
 
 export const SAVE_KEY_PREFIX = 'data_science_tycoon_save_';
 export const SAVE_VERSION = 1;
@@ -65,13 +71,24 @@ function isValidSlot(slotIndex) {
     return Number.isInteger(slotIndex) && slotIndex >= 0 && slotIndex < MAX_SAVE_SLOTS;
 }
 
+/** JSON text, or the legacy base64 export (UTF-8, then Latin-1). */
+function payloadFromImport(encodedData) {
+    const text = String(encodedData ?? '').trim();
+    if (text.startsWith('{')) return text;
+    try {
+        return decodeSaveString(text);
+    } catch {
+        return atob(text);
+    }
+}
+
 /** null/undefined slot means "default slot 0" (callers pass currentSaveSlot, which may be unset) */
 function normalizeSlot(slotIndex) {
     return (slotIndex === null || slotIndex === undefined) ? 0 : slotIndex;
 }
 
 export class SaveManager {
-    constructor() {
+    constructor(options = {}) {
         this.autoSaveInterval = null;
         // Optional (error, slotIndex) => void so the UI can tell the player a save
         // failed (quota exceeded, storage disabled) instead of failing silently (#1221)
@@ -79,10 +96,204 @@ export class SaveManager {
         // Bumped whenever slot contents may change, so readers such as
         // StatisticsAggregator can reuse cached results (#140)
         this.revision = 0;
+        // IndexedDB is the durable store. Pass options.store in tests.
+        this.idb = options.store ?? new IndexedDBSaveStore(options.indexedDB);
+        this._cache = new Map();
+        this._mirrored = new Map();
+        this._persist = Promise.resolve();
+    }
+
+    /** Resolves when queued IndexedDB writes have finished. */
+    whenPersisted() {
+        return this._persist;
+    }
+
+    _enqueue(work) {
+        this._persist = this._persist.then(async () => {
+            try {
+                await work();
+            } catch (err) {
+                console.error('IndexedDB save failed:', err);
+            }
+        });
+    }
+
+    _readLocal(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch (err) {
+            console.error('Failed to read LocalStorage save:', err);
+            return null;
+        }
     }
 
     /**
-     * Save game to LocalStorage
+     * Write the LocalStorage shim, then the same record to IndexedDB.
+     * Throws if LocalStorage throws so callers can report quota errors.
+     */
+    _persistSlot(slotIndex, record) {
+        if (record && typeof record === 'object' && !Number.isInteger(record.slotIndex)) {
+            record.slotIndex = slotIndex;
+        }
+        localStorage.setItem(SAVE_KEY_PREFIX + slotIndex, JSON.stringify(record));
+        this._mirrorToIdb(record, slotIndex);
+    }
+
+    _mirrorToIdb(record, slotIndex) {
+        if (!this.idb || typeof this.idb.put !== 'function') return;
+        if (!record || typeof record !== 'object') return;
+        let json;
+        try {
+            json = JSON.stringify(record);
+        } catch (err) {
+            console.error('IndexedDB save failed:', err);
+            return;
+        }
+        if (this._mirrored.get(slotIndex) === json) return;
+        let migrated;
+        try {
+            migrated = migrateSaveRecord(JSON.parse(json));
+        } catch (err) {
+            console.error('IndexedDB save failed:', err);
+            return;
+        }
+        if (!migrated || !migrated.state) return;
+        if (!Number.isInteger(migrated.slotIndex)) migrated.slotIndex = slotIndex;
+        this._mirrored.set(slotIndex, json);
+        this._cache.set(slotIndex, migrated);
+        this._enqueue(() => this.idb.put(migrated));
+    }
+
+    _forget(slotIndex) {
+        this._cache.delete(slotIndex);
+        this._mirrored.delete(slotIndex);
+        if (this.idb && typeof this.idb.delete === 'function') {
+            this._enqueue(() => this.idb.delete(slotIndex));
+        }
+    }
+
+    _recordFromLegacy(raw) {
+        let parsed;
+        try {
+            parsed = JSON.parse(raw);
+        } catch {
+            return null;
+        }
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+        const hasState = typeof parsed.state === 'object' && parsed.state !== null;
+        return migrateSaveRecord({
+            version: Number.isInteger(parsed.version) ? parsed.version : 0,
+            timestamp: parsed.timestamp || Date.now(),
+            slotIndex: 0,
+            metadata: {
+                name: 'Migrated Save',
+                createdAt: parsed.timestamp || Date.now(),
+                lastPlayed: parsed.timestamp || Date.now()
+            },
+            state: hasState ? parsed.state : parsed
+        });
+    }
+
+    /**
+     * Load IndexedDB slots into memory when the LocalStorage shim is missing,
+     * then copy LocalStorage slots (and the legacy unslotted key) into
+     * IndexedDB. Does not delete LocalStorage keys. See LOCALSTORAGE_MIGRATION.
+     * @returns {Promise<{migrated: number[], legacy: boolean, hydrated: number[]}>}
+     */
+    async prepareStorage() {
+        const hydrated = await this.hydrateFromIndexedDB();
+        const migrated = await this.migrateFromLocalStorage();
+        return { hydrated, ...migrated };
+    }
+
+    async hydrateFromIndexedDB() {
+        if (!this.idb || typeof this.idb.getAll !== 'function') return [];
+        let rows;
+        try {
+            rows = await this.idb.getAll();
+        } catch (err) {
+            console.error('IndexedDB read failed:', err);
+            return [];
+        }
+        const loaded = [];
+        for (const row of rows || []) {
+            if (!row || !Number.isInteger(row.slotIndex)) continue;
+            if (this._readLocal(SAVE_KEY_PREFIX + row.slotIndex) !== null) continue;
+            const migrated = migrateSaveRecord(row);
+            if (!migrated || !migrated.state) continue;
+            this._cache.set(row.slotIndex, migrated);
+            try {
+                this._mirrored.set(row.slotIndex, JSON.stringify(row));
+            } catch { /* non-serializable row; cache still serves reads */ }
+            loaded.push(row.slotIndex);
+        }
+        return loaded;
+    }
+
+    async migrateFromLocalStorage() {
+        const migrated = [];
+        let legacy = false;
+        if (!this.idb || typeof this.idb.get !== 'function' || typeof this.idb.put !== 'function') {
+            return { migrated, legacy };
+        }
+
+        for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
+            const raw = this._readLocal(SAVE_KEY_PREFIX + i);
+            if (!raw) continue;
+            let existing = null;
+            try {
+                existing = await this.idb.get(i);
+            } catch (err) {
+                console.error('IndexedDB read failed:', err);
+            }
+            if (existing) continue;
+            let parsed;
+            try {
+                parsed = migrateSaveRecord(JSON.parse(raw));
+            } catch {
+                continue;
+            }
+            if (!parsed || !parsed.state) continue;
+            parsed.slotIndex = i;
+            const ok = await this.idb.put(parsed);
+            if (ok === false) continue;
+            this._cache.set(i, parsed);
+            this._mirrored.set(i, JSON.stringify(parsed));
+            migrated.push(i);
+        }
+
+        const legacyRaw = this._readLocal(LEGACY_UNSLOTTED_SAVE_KEY);
+        const slot0 = this._readLocal(SAVE_KEY_PREFIX + 0);
+        if (legacyRaw && !slot0 && !migrated.includes(0)) {
+            let existing = null;
+            try {
+                existing = await this.idb.get(0);
+            } catch (err) {
+                console.error('IndexedDB read failed:', err);
+            }
+            const parsed = existing ? null : this._recordFromLegacy(legacyRaw);
+            if (parsed && parsed.state) {
+                parsed.slotIndex = 0;
+                const ok = await this.idb.put(parsed);
+                if (ok !== false) {
+                    try {
+                        localStorage.setItem(SAVE_KEY_PREFIX + 0, JSON.stringify(parsed));
+                    } catch (err) {
+                        console.error('Failed to write LocalStorage save shim:', err);
+                    }
+                    this._cache.set(0, parsed);
+                    this._mirrored.set(0, JSON.stringify(parsed));
+                    migrated.push(0);
+                    legacy = true;
+                }
+            }
+        }
+
+        return { migrated, legacy };
+    }
+
+    /**
+     * Save game to IndexedDB and the LocalStorage shim
      * @param {GameState} gameState - The game state to save
      * @param {number} slotIndex - Save slot index (0-4), defaults to 0
      * @returns {boolean} Success status
@@ -108,8 +319,7 @@ export class SaveManager {
                 state: gameState.toJSON()
             };
 
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.setItem(saveKey, JSON.stringify(saveData));
+            this._persistSlot(slotIndex, saveData);
 
             return true;
         } catch (error) {
@@ -122,7 +332,7 @@ export class SaveManager {
     }
 
     /**
-     * Load game from LocalStorage
+     * Load game from the LocalStorage shim, or from IndexedDB if the shim is empty
      * @param {GameState} gameState - The game state to load into
      * @param {number} slotIndex - Save slot index (0-4), defaults to 0
      * @returns {boolean} Success status
@@ -135,15 +345,10 @@ export class SaveManager {
                 return false;
             }
 
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            const saveData = localStorage.getItem(saveKey);
+            const saved = this.getSaveData(slotIndex);
+            if (!saved) return false;
 
-            if (!saveData) {
-
-                return false;
-            }
-
-            const parsed = migrateSaveRecord(JSON.parse(saveData));
+            const parsed = migrateSaveRecord(saved);
             if (!parsed || !parsed.state) {
                 console.error(`Save in slot ${slotIndex} is unreadable or from an unsupported version`);
                 return false;
@@ -154,7 +359,7 @@ export class SaveManager {
             // Update last played timestamp
             if (parsed.metadata) {
                 parsed.metadata.lastPlayed = Date.now();
-                localStorage.setItem(saveKey, JSON.stringify(parsed));
+                this._persistSlot(slotIndex, parsed);
             }
 
 
@@ -171,15 +376,10 @@ export class SaveManager {
      * @returns {boolean} True if save exists
      */
     hasSave(slotIndex = null) {
+        const slots = slotIndex !== null ? [slotIndex] : [...Array(MAX_SAVE_SLOTS).keys()];
         try {
-            if (slotIndex !== null) {
-                const saveKey = SAVE_KEY_PREFIX + slotIndex;
-                return localStorage.getItem(saveKey) !== null;
-            }
-
-            // Check all slots
-            for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
-                if (localStorage.getItem(SAVE_KEY_PREFIX + i) !== null) {
+            for (const slot of slots) {
+                if (localStorage.getItem(SAVE_KEY_PREFIX + slot) !== null || this._cache.has(slot)) {
                     return true;
                 }
             }
@@ -187,6 +387,9 @@ export class SaveManager {
         } catch (error) {
             // localStorage can throw (privacy mode / disabled storage) (#1224)
             console.error('Failed to check for saves:', error);
+            for (const slot of slots) {
+                if (this._cache.has(slot)) return true;
+            }
             return false;
         }
     }
@@ -237,8 +440,8 @@ export class SaveManager {
                 return false;
             }
 
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.removeItem(saveKey);
+            localStorage.removeItem(SAVE_KEY_PREFIX + slotIndex);
+            this._forget(slotIndex);
 
             return true;
         } catch (error) {
@@ -259,11 +462,11 @@ export class SaveManager {
         }
 
         try {
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            const saveData = localStorage.getItem(saveKey);
-            if (!saveData) return null;
-
-            return encodeSaveString(saveData); // UTF-8 safe base64 for easy sharing
+            const saveData = localStorage.getItem(SAVE_KEY_PREFIX + slotIndex);
+            if (saveData) return encodeSaveString(saveData);
+            const cached = this._cache.get(slotIndex);
+            if (!cached) return null;
+            return encodeSaveString(JSON.stringify(cached));
         } catch (error) {
             console.error('Failed to export save:', error);
             return null;
@@ -271,8 +474,31 @@ export class SaveManager {
     }
 
     /**
-     * Import save from JSON string
-     * @param {string} encodedData - Base64 encoded save data
+     * Export one slot as a JSON string (Settings backup). Null if the slot is empty.
+     * @param {number} slotIndex
+     * @returns {string|null}
+     */
+    exportSaveJSON(slotIndex = 0) {
+        if (!isValidSlot(slotIndex)) {
+            console.error(`Invalid slot index: ${slotIndex}. Must be 0-${MAX_SAVE_SLOTS - 1}`);
+            return null;
+        }
+        try {
+            const data = this.getSaveData(slotIndex);
+            if (!data) return null;
+            const parsed = migrateSaveRecord(data);
+            if (!parsed || !parsed.state) return null;
+            parsed.slotIndex = slotIndex;
+            return JSON.stringify(parsed);
+        } catch (error) {
+            console.error('Failed to export save:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Import save from a JSON string or a legacy base64 export
+     * @param {string} encodedData - JSON record, or base64 encoded save data
      * @param {GameState} gameState - Game state to load into
      * @param {number} slotIndex - Target slot index, defaults to 0
      * @returns {boolean} Success status
@@ -285,12 +511,7 @@ export class SaveManager {
                 return false;
             }
 
-            let saveData;
-            try {
-                saveData = decodeSaveString(encodedData);
-            } catch (_) {
-                saveData = atob(encodedData); // Legacy Latin-1 exports
-            }
+            const saveData = payloadFromImport(encodedData);
             const parsed = migrateSaveRecord(JSON.parse(saveData));
             if (!parsed || !parsed.state || typeof parsed.state !== 'object') {
                 console.error('Import failed: not a valid save file');
@@ -308,8 +529,7 @@ export class SaveManager {
             }
 
             // Store the updated record object, not the raw decoded string (#56)
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.setItem(saveKey, JSON.stringify(parsed));
+            this._persistSlot(slotIndex, parsed);
             if (gameState && typeof gameState.fromJSON === 'function') {
                 gameState.fromJSON(parsed.state);
             }
@@ -356,11 +576,22 @@ export class SaveManager {
      * @returns {Object|null} Parsed save data
      */
     getSaveData(slotIndex = 0) {
+        let raw;
         try {
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            const saveData = localStorage.getItem(saveKey);
-            if (!saveData) return null;
-            return JSON.parse(saveData);
+            raw = localStorage.getItem(SAVE_KEY_PREFIX + slotIndex);
+        } catch (error) {
+            console.error('Failed to get save data:', error);
+            const cached = this._cache.get(slotIndex);
+            return cached ? JSON.parse(JSON.stringify(cached)) : null;
+        }
+        if (!raw) {
+            const cached = this._cache.get(slotIndex);
+            return cached ? JSON.parse(JSON.stringify(cached)) : null;
+        }
+        try {
+            const parsed = JSON.parse(raw);
+            this._mirrorToIdb(parsed, slotIndex);
+            return parsed;
         } catch (error) {
             console.error('Failed to get save data:', error);
             return null;
@@ -423,8 +654,7 @@ export class SaveManager {
             }
             saveData.metadata.name = name;
 
-            const saveKey = SAVE_KEY_PREFIX + slotIndex;
-            localStorage.setItem(saveKey, JSON.stringify(saveData));
+            this._persistSlot(slotIndex, saveData);
             return true;
         } catch (error) {
             console.error('Failed to set slot name:', error);
@@ -482,8 +712,7 @@ export class SaveManager {
             clonedData.metadata.name = (clonedData.metadata.name || `Save Slot ${sourceSlot + 1}`) + ' (Copy)';
             clonedData.metadata.lastPlayed = Date.now();
 
-            const saveKey = SAVE_KEY_PREFIX + targetSlot;
-            localStorage.setItem(saveKey, JSON.stringify(clonedData));
+            this._persistSlot(targetSlot, clonedData);
 
             return true;
         } catch (error) {

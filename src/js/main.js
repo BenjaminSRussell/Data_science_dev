@@ -20,6 +20,7 @@ import { ScreenManager } from './ui/ScreenManager.js';
 import { ChartManager } from './charts/ChartManager.js';
 import { AudioManager } from './audio/AudioManager.js';
 import { SaveManager, MAX_SAVE_SLOTS } from './save/SaveManager.js';
+import { downloadSaveJson, promptImportSaveJson } from './save/saveTransferUI.js';
 import { SaveSlotManager } from './ui/SaveSlotManager.js';
 import { MenuThemeSystem } from './game/MenuThemeSystem.js';
 import { MenuLogoDisplay } from './ui/MenuLogoDisplay.js';
@@ -323,6 +324,12 @@ export class MainGame {
             // Each startup step is guarded on its own: one failing step (say a
             // corrupt save) must not skip wiring every button in the game (#1657)
             this.initErrors = [];
+            try {
+                await this.saveManager.prepareStorage?.();
+            } catch (error) {
+                logger.error('init step "save storage" failed:', error);
+                this.initErrors.push('save storage');
+            }
             const step = (name, fn) => {
                 try {
                     return fn();
@@ -2770,6 +2777,11 @@ export class MainGame {
                         <span id="settings-quality-current" class="settings-hint">${MainGame.prototype.describeQualitySetting.call(this)}</span>
                     </div>
                 </div>
+                <div class="settings-backup">
+                    <p class="settings-hint">Saves are kept in IndexedDB. A LocalStorage copy remains for one release. Export a JSON backup to move a career between browsers.</p>
+                    <button type="button" class="btn btn-secondary" id="settings-export-save">Export save (JSON)</button>
+                    <button type="button" class="btn btn-secondary" id="settings-import-save">Import save (JSON)</button>
+                </div>
                 <div class="settings-danger">
                     <button class="btn btn-danger" onclick="game.resetProgress()">Reset Progress</button>
                 </div>
@@ -2801,6 +2813,18 @@ export class MainGame {
         document.getElementById('settings-quality')?.addEventListener('change', (e) => {
             this.gameState?.performanceManager?.setQuality(e.target.value);
             MainGame.prototype.updateQualitySetting.call(this);
+        });
+        document.getElementById('settings-export-save')?.addEventListener('click', () => {
+            const slot = this.currentSaveSlot ?? 0;
+            const ok = downloadSaveJson(this.saveManager, slot);
+            this.showToast?.(ok ? 'Save exported as JSON.' : 'No save in this slot to export.', ok ? 'success' : 'error');
+        });
+        document.getElementById('settings-import-save')?.addEventListener('click', () => {
+            promptImportSaveJson(this.saveManager, {
+                gameState: this.gameState,
+                preferredSlot: this.currentSaveSlot ?? 0,
+                notify: (message, type) => this.showToast?.(message, type)
+            });
         });
     }
 
