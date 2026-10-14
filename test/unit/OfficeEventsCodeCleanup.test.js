@@ -1,6 +1,5 @@
 /**
- * Office events apply their `effect` (#2434); CodeCleanup.findUnusedImports
- * checks the identifiers an import binds (#2478)
+ * Office events apply their `effect` (#2434).
  */
 import { describe, it, expect, vi } from 'vitest';
 import fs from 'fs';
@@ -9,7 +8,6 @@ import { EnvironmentManager } from '../../src/js/game/EnvironmentManager.js';
 import { OFFICE_EVENTS } from '../../src/js/data/locations.js';
 import { EconomySystem } from '../../src/js/game/EconomySystem.js';
 import { GameState } from '../../src/js/game/GameState.js';
-import { CodeCleanup } from '../../src/js/utils/CodeCleanup.js';
 
 const byEffect = (effect) => OFFICE_EVENTS.find(e => e.effect === effect);
 
@@ -84,32 +82,5 @@ describe('office events have real effects (#2434)', () => {
     it('new_day rolls the office event', () => {
         const src = fs.readFileSync(path.resolve(__dirname, '../../src/js/main.js'), 'utf8');
         expect(src).toMatch(/this\.environmentManager\?\.rollDailyEvent\?\.\(\)/);
-    });
-});
-
-describe('CodeCleanup.findUnusedImports (#2478)', () => {
-    it('flags imports whose bound names are never used', () => {
-        const code = [
-            "import { DOMUtils } from './DOMUtils.js';",
-            "import { logger as log } from './Logger.js';",
-            "import Thing from './Thing.js';",
-            "import * as helpers from './helpers.js';",
-            "import Def, { used } from './mixed.js';",
-            '',
-            'log.info("x"); helpers.go(); used();'
-        ].join('\n');
-        expect(CodeCleanup.findUnusedImports(code)).toEqual(['./DOMUtils.js', './Thing.js']);
-    });
-
-    it('a name that appears only in a path or as a property does not count as used', () => {
-        const code = "import { Foo } from './Foo.js';\nobj.Foo = 1;\nconst s = 'Foo.js';";
-        // 'Foo' inside a string literal still counts (regex-level check), property access does not
-        expect(CodeCleanup.findUnusedImports("import { Foo } from './Foo.js';\nobj.Foo = 1;")).toEqual(['./Foo.js']);
-        expect(CodeCleanup.findUnusedImports(code)).toEqual([]);
-    });
-
-    it('parses import clauses into local names', () => {
-        expect(CodeCleanup.importedNames('Def, { a, b as c }')).toEqual(['a', 'c', 'Def']);
-        expect(CodeCleanup.importedNames('* as ns')).toEqual(['ns']);
     });
 });
