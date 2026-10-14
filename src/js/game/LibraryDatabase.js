@@ -1,6 +1,8 @@
 /**
  * LibraryDatabase.js
  * Contains real-world technical libraries and frameworks the player can learn.
+ * gameEffect is the player-facing copy. The numbers are applied by
+ * LibraryEffects.js once the library is in unlockedLibraries (#2418).
  */
 
 export const LIBRARY_CONTENT = [

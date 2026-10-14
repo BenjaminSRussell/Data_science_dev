@@ -327,7 +327,12 @@ export function handleLearnLibrary(game, libId, LIBRARY_CONTENT) {
     game.gameState.money -= lib.cost;
     game.gameState.unlockedLibraries.push(libId);
 
-    game.showToast(`Learned ${lib.name}!`, 'success');
+    // Newly learned libraries change which contracts are offered (#2418)
+    game.gameState.projectSystem?.refreshContracts?.();
+    game.gameState.contractSystem?.refreshContracts?.();
+
+    const effect = lib.gameEffect ? ` ${lib.gameEffect}.` : '';
+    game.showToast(`Learned ${lib.name}!${effect}`, 'success');
     game.audioManager.play('kaching');
     game.uiUpdater.updateAllUI();
     game.uiUpdater.updateLibraryScreen();
