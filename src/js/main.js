@@ -49,7 +49,6 @@ import { DemandingBossSystem } from './game/work/DemandingBossSystem.js';
 import { GameplaySettings } from './game/settings/GameplaySettings.js';
 import { RoommateSystem } from './game/social/RoommateSystem.js';
 import { DirtyDataSystem } from './game/data/DirtyDataSystem.js';
-import { DetailedMapSystem } from './game/map/DetailedMapSystem.js';
 import { RoomSystem } from './game/locations/RoomSystem.js';
 import { EventSystem } from './game/events/EventSystem.js';
 import { VisualProgressionSystem } from './game/visual/VisualProgressionSystem.js';
@@ -4254,12 +4253,6 @@ export class MainGame {
             if (!this.gameState.dirtyDataSystem) {
                 this.gameState.dirtyDataSystem = new DirtyDataSystem(this.gameState);
                 this.dirtyDataSystem = this.gameState.dirtyDataSystem;
-            }
-
-            // Detailed map system
-            if (!this.gameState.detailedMapSystem) {
-                this.gameState.detailedMapSystem = new DetailedMapSystem(this.gameState);
-                this.detailedMapSystem = this.gameState.detailedMapSystem;
             }
 
             // Room system
