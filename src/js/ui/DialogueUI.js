@@ -6,6 +6,7 @@
 
 import { dialogueTreeSystem } from '../game/dialogue/DialogueTreeSystem.js';
 import { STATS } from '../game/CharacterStats.js';
+import { conversationSituation, SOCIAL_REACTION_ACTIONS } from '../game/RealisticDialogueSystem.js';
 import { getNPCImage } from '../utils/NPCImageMapper.js';
 
 // Items a dialogue node can hand over (effects.item) (#47)
@@ -131,6 +132,60 @@ export class DialogueUI {
         });
     }
 
+    /** RealisticDialogueSystem, when the game actually constructed one. */
+    realisticDialogue() {
+        return this.game?.gameState?.realisticDialogueSystem || this.game?.realisticDialogueSystem || null;
+    }
+
+    talkRelationship() {
+        const fromManager = this.game?.gameState?.npcManager?.getRelationship?.(this.currentNPC?.id);
+        if (Number.isFinite(fromManager)) return fromManager;
+        return Number(this._talkRelationship) || 0;
+    }
+
+    /**
+     * Line the player hears. The tree node is not rewritten: it is cached and
+     * its text is asserted. Root greetings and synthesized social reactions
+     * come from RealisticDialogueSystem so those pools are actually spoken (#2272).
+     */
+    spokenText(node) {
+        const sys = this.realisticDialogue();
+        if (!sys || !node || !this.currentNPC) return node?.text;
+        const relationship = this.talkRelationship();
+        if (node.id === 'root') {
+            const state = this.game?.gameState?.relationshipEmotionSystem?.getRelationshipState?.(this.currentNPC.id);
+            const situation = conversationSituation(this.currentNPC, relationship, state);
+            return sys.generateRelationshipDialogue(this.currentNPC, relationship, situation) || node.text;
+        }
+        const action = node.synthesized ? SOCIAL_REACTION_ACTIONS[node.id] : null;
+        if (action) {
+            return sys.generateEmotionalResponse(action, this.currentNPC, relationship) || node.text;
+        }
+        return node.text;
+    }
+
+    /** View copy so Lit can show the spoken line without mutating the cached node. */
+    displayNode(node) {
+        const text = this.spokenText(node);
+        if (!node || text === node.text) return node;
+        return { ...node, text };
+    }
+
+    /** Goodbye is closed by this UI before any goodbye node can render. */
+    speakFarewell() {
+        const sys = this.realisticDialogue();
+        const npc = this.currentNPC;
+        if (!sys || !npc) return;
+        const line = sys.generateDialogue({
+            speaker: npc.name,
+            emotion: 'neutral',
+            relationship: this.talkRelationship(),
+            situation: 'goodbye',
+            personality: npc.personality || 'friendly'
+        });
+        if (line) this.game?.showToast?.(`${npc.name}: "${line}"`, 'info');
+    }
+
     /**
      * Open dialogue with an NPC
      * Phase 2: Uses Lit component if available
@@ -142,6 +197,7 @@ export class DialogueUI {
 
         // Build dialogue tree for this NPC
         const relLevel = relationshipLevel || this.game?.gameState?.npcManager?.getRelationship?.(npc.id) || 0;
+        this._talkRelationship = relLevel;
         const treeSystem = this.game?.gameState?.dialogueTreeSystem || this.game?.dialogueTreeSystem || dialogueTreeSystem;
         // getTree() returns null for NPCs without dialogue data; fall back to
         // a simple greeting tree in that case too.
@@ -174,7 +230,7 @@ export class DialogueUI {
 
         // Use Lit component if available
         if (this.litComponent) {
-            this.litComponent.open(npc, this.currentNode);
+            this.litComponent.open(npc, this.displayNode(this.currentNode));
             this.isOpen = true;
             return;
         }
@@ -232,14 +288,16 @@ export class DialogueUI {
         this.currentNode = node;
 
         // Use Lit component if available
+        // One roll: displayNode calls spokenText, and random greetings must not be drawn twice
+        const view = this.displayNode(node);
         if (this.litComponent) {
-            this.litComponent.showNode(node);
+            this.litComponent.showNode(view);
             return;
         }
 
         // Fallback to DOM method
         // Type out text
-        this.typeText(node.text);
+        this.typeText(view?.text);
 
         // Show choices
         if (node.choices && node.choices.length > 0) {
@@ -308,6 +366,7 @@ export class DialogueUI {
      */
     handleChoice(choiceId) {
         if (choiceId === 'close' || choiceId === 'goodbye') {
+            this.speakFarewell();
             this.close();
             return;
         }
