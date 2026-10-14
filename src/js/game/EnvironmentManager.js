@@ -34,6 +34,8 @@ export class EnvironmentManager {
             this.updateWeather();
             // DISABLED: Auto-progression removed - game requires manual button clicks
             // this.startEventTimer();
+            // Office events still fire on the manual new_day beat: rollDailyEvent()
+            // calls triggerRandomEvent() (#2433).
 
             // DISABLED: Automatic time updates - game should not auto-progress
             // User must manually advance time
@@ -424,33 +426,61 @@ export class EnvironmentManager {
 
     /**
      * Turn-based office event for the start of a day: the real-time event
-     * timer is off (no auto-progression), so new_day rolls instead (#2434).
+     * timer is off (no auto-progression), so new_day rolls instead (#2434)
+     * and that roll is what calls triggerRandomEvent() (#2433).
+     * @param {() => number} [rand]
      * @returns {{event: object, result: string}|null}
      */
     rollDailyEvent(rand = Math.random) {
         if (rand() >= EnvironmentManager.DAILY_EVENT_CHANCE) return null;
         const event = OFFICE_EVENTS[Math.floor(rand() * OFFICE_EVENTS.length)] || OFFICE_EVENTS[0];
-        const result = this.applyEventEffect(event);
-        return result ? { event, result } : null;
+        // A new morning replaces an event still on the board, so the
+        // active-event guard inside triggerRandomEvent cannot swallow the roll.
+        this.dismissActiveEvent();
+        const presented = this.triggerRandomEvent(event);
+        if (!presented?.result) {
+            this.dismissActiveEvent();
+            return null;
+        }
+        return presented;
     }
 
     /**
-     * Trigger a random office event
+     * Drop the current office event and cancel its real-time expiry.
      */
-    triggerRandomEvent() {
-        if (this.activeEvent) return; // Already have an event
+    dismissActiveEvent() {
+        this.activeEvent = null;
+        if (this.eventTimeout) {
+            clearTimeout(this.eventTimeout);
+            this.eventTimeout = null;
+        }
+    }
 
-        const event = OFFICE_EVENTS[Math.floor(Math.random() * OFFICE_EVENTS.length)];
+    /**
+     * Trigger an office event. Pass a pre-selected event (the daily roll)
+     * or omit it to pick one. No-ops while an event is already active.
+     * @param {object} [preset]
+     * @returns {{event: object, result: string|null}|null}
+     */
+    triggerRandomEvent(preset) {
+        if (this.activeEvent) return null;
+
+        const event = preset || OFFICE_EVENTS[Math.floor(Math.random() * OFFICE_EVENTS.length)];
+        if (!event) return null;
         this.activeEvent = event;
-        this.applyEventEffect(event);
+        const result = this.applyEventEffect(event);
 
         // Show event notification
         this.showEventNotification(event);
 
-        // Clear after duration
-        setTimeout(() => {
-            this.activeEvent = null;
+        // Clear after duration. Only this timer may null eventTimeout:
+        // startEventTimer overwrites the field with its own schedule.
+        const timer = setTimeout(() => {
+            if (this.activeEvent === event) this.activeEvent = null;
+            if (this.eventTimeout === timer) this.eventTimeout = null;
         }, event.duration);
+        this.eventTimeout = timer;
+        return { event, result };
     }
 
     /**
