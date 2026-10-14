@@ -275,46 +275,6 @@ export class NarrativeClaritySystem {
     }
 
     /**
-     * Get story explanation for current phase
-     */
-    getStoryExplanation() {
-        const context = this.getNarrativeContext();
-        const storylineManager = this.gameState.storylineManager;
-        const arc = storylineManager?.currentArc;
-
-        let explanation = `You are in ${context.chapter}. `;
-        explanation += context.situation.description + '\n\n';
-
-        if (arc) {
-            explanation += `Current Story Arc: ${arc.name}\n`;
-            explanation += `${arc.description}\n\n`;
-        }
-
-        explanation += 'Your Current Goals:\n';
-        context.situation.goals.forEach((goal, index) => {
-            explanation += `${index + 1}. ${goal}\n`;
-        });
-
-        return explanation;
-    }
-
-    /**
-     * Get decision context for major choices
-     */
-    getDecisionContext(decisionId) {
-        const decision = this.gameState.storylineManager?.getDecision?.(decisionId);
-        if (!decision) return null;
-
-        const context = this.getNarrativeContext();
-
-        return {
-            background: this.getDecisionBackground(decisionId, context),
-            consequences: this.getConsequenceExplanation(decision),
-            recommendation: this.getDecisionRecommendation(decision, context)
-        };
-    }
-
-    /**
      * Get background for a decision
      */
     getDecisionBackground(decisionId, context) {
@@ -418,23 +378,6 @@ export class NarrativeClaritySystem {
                     content: 'Check the story panel to understand your current situation, goals, and story context. The narrative adapts to your choices.'
                 }
             ]
-        };
-    }
-
-    /**
-     * Get world state explanation
-     */
-    getWorldStateExplanation() {
-        const days = this.gameState.timeManager?.totalDays || 0;
-        const news = this.gameState.newsManager?.getCurrentNews?.() || [];
-        const events = this.gameState.worldEventManager?.getActiveEvents?.() || [];
-
-        return {
-            time: `Day ${days} of your journey in Data City`,
-            news: news.length > 0 ? `Recent news: ${news[0]?.title || news[0]?.text || 'All quiet'}` : 'No major news',
-            events: events.length > 0 ? `${events.length} active world events` : 'No active events',
-            economy: this.getEconomyState(),
-            social: this.getSocialState()
         };
     }
 
