@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { VisualProgressionSystem } from '../../src/js/game/visual/VisualProgressionSystem.js';
-import { CharacterArcSystem } from '../../src/js/game/CharacterArcSystem.js';
 
 afterEach(() => { vi.restoreAllMocks(); delete window.game; document.body.innerHTML = ''; document.body.className = ''; });
 
@@ -152,78 +151,5 @@ describe('VisualProgressionSystem URLs and save/load (#384)', () => {
         expect(v.unlockedTiers).toEqual(['basic', 'mid']);
         expect(v.currentTier).toBe('mid');
         expect(() => v.fromJSON(null)).not.toThrow();
-    });
-});
-
-describe('CharacterArcSystem (#393)', () => {
-    it('captureStartingState only captures once', () => {
-        const gs = { money: 500, reputation: 5 };
-        const c = new CharacterArcSystem(gs);
-        c.captureStartingState();
-        gs.money = 99999;
-        c.captureStartingState();
-        expect(c.startingState.money).toBe(500);
-    });
-
-    it('a real $0 starting balance is kept', () => {
-        const c = new CharacterArcSystem({ money: 0 });
-        c.captureStartingState();
-        expect(c.startingState.money).toBe(0);
-    });
-
-    it('direction checks run in source order', () => {
-        const c = new CharacterArcSystem({});
-        const base = { ethics: 0, reputation: 0, rank: 0, money: 0, relationships: 0 };
-        expect(c.determineArcDirection({ ...base, ethics: -25, money: 60000 })).toBe('corruption');
-        expect(c.determineArcDirection({ ...base, ethics: 25, reputation: 600 })).toBe('redemption');
-        expect(c.determineArcDirection({ ...base, rank: 3, reputation: 400 })).toBe('success');
-        expect(c.determineArcDirection({ ...base, ethics: -15 })).toBe('decline');
-        expect(c.determineArcDirection({ ...base, ethics: 15 })).toBe('growth');
-        expect(c.determineArcDirection(base)).toBe('balanced');
-    });
-
-    it('isSignificantChange thresholds', () => {
-        const c = new CharacterArcSystem({});
-        const z = { ethics: 0, reputation: 0, rank: 0, money: 0, relationships: 0 };
-        expect(c.isSignificantChange(z)).toBe(false);
-        expect(c.isSignificantChange({ ...z, ethics: 9 })).toBe(false);
-        expect(c.isSignificantChange({ ...z, ethics: -10 })).toBe(true);
-        expect(c.isSignificantChange({ ...z, reputation: 99 })).toBe(false);
-        expect(c.isSignificantChange({ ...z, reputation: 100 })).toBe(true);
-        expect(c.isSignificantChange({ ...z, rank: 1 })).toBe(true);
-        expect(c.isSignificantChange({ ...z, money: 9999 })).toBe(false);
-        expect(c.isSignificantChange({ ...z, money: -10000 })).toBe(true);
-        expect(c.isSignificantChange({ ...z, relationships: 1 })).toBe(true);
-    });
-
-    it('trackArcProgression only logs significant changes, measured from the last entry', () => {
-        const gs = { money: 100, reputation: 0, characterStats: { ethics: 0 } };
-        const c = new CharacterArcSystem(gs);
-        c.initialize();
-        expect(c.arcHistory).toHaveLength(0);
-        gs.characterStats.ethics = -15;
-        c.updateCurrentState();
-        expect(c.arcHistory).toHaveLength(1);
-        expect(c.arcHistory[0].direction).toBe('decline');
-        c.updateCurrentState();
-        expect(c.arcHistory).toHaveLength(1);
-    });
-
-    it('getArcSummary defaults before initialize; relationship count is 0 without npcManager', () => {
-        const c = new CharacterArcSystem({});
-        expect(c.getArcSummary()).toEqual({
-            start: 'Your journey is just beginning.',
-            current: 'You are at the start of your path.',
-            transformation: 'No significant changes yet.'
-        });
-        expect(c.getRelationshipCount()).toBe(0);
-    });
-
-    it('career tone uses the real reputation scale', () => {
-        const c = new CharacterArcSystem({});
-        expect(c.getCareerDescription(0, 70)).toContain('mostly unknown');
-        expect(c.getCareerDescription(1, 150)).toContain('still proving yourself');
-        expect(c.getCareerDescription(3, 800)).toContain('building a solid name');
-        expect(c.getCareerDescription(6, 3000)).toContain('widely respected');
     });
 });

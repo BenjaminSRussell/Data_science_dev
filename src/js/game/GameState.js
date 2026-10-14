@@ -334,7 +334,6 @@ export class GameState {
             'relationshipEmotionSystem',
             'storylineManager',
             'storyBeatsSystem',
-            'characterArcSystem',
             'npcMemorySystem',
             'workInteractionSystem',
             'demandingBoss',

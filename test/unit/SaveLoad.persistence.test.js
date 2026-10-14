@@ -13,7 +13,6 @@ import { InvestmentEcommerceSystem } from '../../src/js/game/InvestmentEcommerce
 import { CompanyManagementSystem } from '../../src/js/game/company/CompanyManagementSystem.js';
 import { RelationshipEmotionSystem } from '../../src/js/game/RelationshipEmotionSystem.js';
 import { StorylineManager } from '../../src/js/game/StorylineManager.js';
-import { CharacterArcSystem } from '../../src/js/game/CharacterArcSystem.js';
 import { StoryBeatsSystem } from '../../src/js/game/StoryBeatsSystem.js';
 import { NPCMemorySystem } from '../../src/js/game/NPCMemorySystem.js';
 import { WorkInteractionSystem } from '../../src/js/game/WorkInteractionSystem.js';
@@ -127,7 +126,6 @@ describe('GameState persistence', () => {
         gs.companyManagement = new CompanyManagementSystem(gs);
         gs.relationshipEmotionSystem = new RelationshipEmotionSystem(gs);
         gs.storylineManager = new StorylineManager(gs);
-        gs.characterArcSystem = new CharacterArcSystem(gs);
         gs.storyBeatsSystem = new StoryBeatsSystem(gs);
         gs.npcMemorySystem = new NPCMemorySystem(gs);
         gs.workInteractionSystem = new WorkInteractionSystem(gs);
@@ -144,8 +142,6 @@ describe('GameState persistence', () => {
         gs.relationshipEmotionSystem.emotionalStates = { sarah: { trust: 70 } };
         gs.storylineManager.majorDecisions = [{ id: 'd1' }];
         gs.storylineManager.storylineProgress = 42;
-        gs.characterArcSystem.startingState = { ethics: 5 };
-        gs.characterArcSystem.arcHistory = [{ week: 1 }];
         gs.storyBeatsSystem.completedBeats = ['b1'];
         gs.npcMemorySystem.npcMemories = { mike: { decisions: [], reactions: ['x'] } };
         gs.workInteractionSystem.boss.relationship = 77;
@@ -163,7 +159,6 @@ describe('GameState persistence', () => {
         loaded.companyManagement = new CompanyManagementSystem(loaded);
         loaded.relationshipEmotionSystem = new RelationshipEmotionSystem(loaded);
         loaded.storylineManager = new StorylineManager(loaded);
-        loaded.characterArcSystem = new CharacterArcSystem(loaded);
         loaded.storyBeatsSystem = new StoryBeatsSystem(loaded);
         loaded.npcMemorySystem = new NPCMemorySystem(loaded);
         loaded.workInteractionSystem = new WorkInteractionSystem(loaded);
@@ -182,8 +177,9 @@ describe('GameState persistence', () => {
         expect(loaded.relationshipEmotionSystem.emotionalStates).toEqual({ sarah: { trust: 70 } });
         expect(loaded.storylineManager.majorDecisions).toEqual([{ id: 'd1' }]);
         expect(loaded.storylineManager.storylineProgress).toBe(42);
-        expect(loaded.characterArcSystem.startingState).toEqual({ ethics: 5 });
-        expect(loaded.characterArcSystem.arcHistory).toEqual([{ week: 1 }]);
+        // Arc history was a third evolution log (#1960, #1103). It is not saved.
+        expect('characterArcSystem' in data).toBe(false);
+        expect(loaded.characterArcSystem).toBeNull();
         expect(loaded.storyBeatsSystem.completedBeats).toEqual(['b1']);
         expect(loaded.completedStoryBeats).toEqual(['b1']);
         expect(loaded.npcMemorySystem.npcMemories.mike.reactions).toEqual(['x']);
