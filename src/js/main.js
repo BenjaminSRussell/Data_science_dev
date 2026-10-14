@@ -1372,9 +1372,8 @@ export class MainGame {
             // promise so the asset loader can wait for it (#1049)
             this.phase4ManagersReady = Promise.all([
                 import('./assets/PixiAssetManager.js').catch(() => null),
-                import('./assets/PixiSpriteManager.js').catch(() => null),
-                import('./ui/TooltipManager.js').catch(() => null)
-            ]).then(([PixiAssetManagerModule, PixiSpriteManagerModule, TooltipManagerModule]) => {
+                import('./assets/PixiSpriteManager.js').catch(() => null)
+            ]).then(([PixiAssetManagerModule, PixiSpriteManagerModule]) => {
                 // Initialize PixiAssetManager if available
                 // Keep the already-loaded manager across games (#1679)
                 if (PixiAssetManagerModule?.PixiAssetManager && !this.pixiAssetManager) {
@@ -1393,16 +1392,6 @@ export class MainGame {
                         this.gameState.pixiSpriteManager = this.pixiSpriteManager;
                     } catch (error) {
                         logger.warn('PixiSpriteManager initialization failed:', error);
-                    }
-                }
-
-                // Initialize TooltipManager if available
-                if (TooltipManagerModule?.TooltipManager) {
-                    try {
-                        this.tooltipManager = new TooltipManagerModule.TooltipManager();
-                        this.gameState.tooltipManager = this.tooltipManager;
-                    } catch (error) {
-                        logger.warn('TooltipManager initialization failed:', error);
                     }
                 }
             }).catch(error => {
