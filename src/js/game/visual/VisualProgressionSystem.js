@@ -4,6 +4,8 @@
  * Better sprites unlock at milestones
  */
 
+import { LPC_SHEET_URLS, lpcSheet } from '../../assets/AssetManager.js';
+
 const TIER_ORDER = ['basic', 'mid', 'premium'];
 
 export class VisualProgressionSystem {
@@ -178,34 +180,13 @@ export class VisualProgressionSystem {
      */
     upgradeSpriteSheets(tier) {
         const spriteSheetManager = this.gameState?.spriteSheetManager;
-        if (!spriteSheetManager) return;
-        
-        // Register better sprite sheets for higher tiers
-        const spriteSheets = {
-            basic: {
-                url: '/assets/characters/sprites/basic_character_sheet.png',
-                quality: 'low'
-            },
-            mid: {
-                url: '/assets/characters/sprites/mid_character_sheet.png',
-                quality: 'medium'
-            },
-            premium: {
-                url: '/assets/characters/sprites/premium_character_sheet.png',
-                quality: 'high'
-            }
-        };
-        
-        const sheet = spriteSheets[tier];
-        if (sheet) {
-            spriteSheetManager.registerSpriteSheet(`character_${tier}`, {
-                url: sheet.url,
-                frameWidth: tier === 'premium' ? 128 : 64,
-                frameHeight: tier === 'premium' ? 128 : 64,
-                columns: 8,
-                rows: 8
-            });
-        }
+        if (!spriteSheetManager?.registerSpriteSheet) return;
+
+        // Tier sheets are real LPC files, all 64px cells. The old
+        // basic/mid/premium_character_sheet.png names were never created (#2542).
+        const url = LPC_SHEET_URLS[tier];
+        if (!url) return;
+        spriteSheetManager.registerSpriteSheet(`character_${tier}`, lpcSheet(url));
     }
     
     /**
@@ -325,13 +306,10 @@ export class VisualProgressionSystem {
      * Get sprite sheet URL for current tier
      */
     getSpriteSheetUrl(characterType = 'main') {
-        const urls = {
-            basic: `/assets/characters/sprites/${characterType}_basic.png`,
-            mid: `/assets/characters/sprites/${characterType}_mid.png`,
-            premium: `/assets/characters/sprites/${characterType}_premium.png`
-        };
-        
-        return urls[this.currentTier] || urls.basic;
+        // characterType 'basic'|'mid'|'premium' selects that tier's sheet.
+        // Anything else (including 'main') follows the unlocked tier.
+        if (LPC_SHEET_URLS[characterType]) return LPC_SHEET_URLS[characterType];
+        return LPC_SHEET_URLS[this.currentTier] || LPC_SHEET_URLS.basic;
     }
     
     /**

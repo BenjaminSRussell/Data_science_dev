@@ -94,7 +94,7 @@ export class SpriteDownloader {
                 emotions: 'assets/characters/emotions/',
                 body_language: 'assets/characters/body_language/',
                 files: [
-                    'character_sheet.png',
+                    'lpc_sprite_5.png',
                     'character_walk.png',
                     'character_idle.png',
                     'happy.png',

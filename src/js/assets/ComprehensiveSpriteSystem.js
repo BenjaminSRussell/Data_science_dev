@@ -7,6 +7,7 @@
 import { emotionSpriteMapper } from '../characters/EmotionSpriteMapper.js';
 import { bodyLanguageMapper } from '../characters/BodyLanguageMapper.js';
 import { isAssetMissing } from './MissingAssetBlocklist.js';
+import { lpcSheet, LPC_SHEET_URLS } from './AssetManager.js';
 
 /** Size of a combined sprite when the pose image has no natural size */
 const DEFAULT_SPRITE_SIZE = 64;
@@ -126,22 +127,22 @@ export class ComprehensiveSpriteSystem {
      * Register sprite sheets
      */
     async registerSpriteSheets() {
-        // Main character sprite sheet
-        if (this.spriteSheetManager?.registerSpriteSheet) {
-            try {
-                await this.spriteSheetManager?.registerSpriteSheet('main_character', {
-                    url: '/assets/characters/sprites/character_sheet.png',
-                    frameWidth: 64,
-                    frameHeight: 64,
-                    columns: 8,
-                    rows: 8
-                });
-
-                // Per-pose/emotion animations come from the sheet configuration;
-                // SpriteSheetManager has no registerAnimation() (#2136)
-            } catch (error) {
-                console.warn('Could not register sprite sheets:', error);
-            }
+        if (!this.spriteSheetManager?.registerSpriteSheet) return;
+        const fromManifest = this.assetManager?.getAssetManifest?.()?.characters?.spriteSheets?.main;
+        const sheet = fromManifest?.url ? fromManifest : lpcSheet(LPC_SHEET_URLS.basic);
+        // Never register a filename that was never drawn (#2542)
+        if (isAssetMissing(sheet.url)) return;
+        try {
+            await this.spriteSheetManager.registerSpriteSheet('main_character', {
+                url: sheet.url,
+                frameWidth: sheet.frameWidth,
+                frameHeight: sheet.frameHeight,
+                columns: sheet.columns,
+                rows: sheet.rows,
+                animations: sheet.animations
+            });
+        } catch (error) {
+            console.warn('Could not register sprite sheets:', error);
         }
     }
 
