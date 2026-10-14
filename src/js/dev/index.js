@@ -12,6 +12,7 @@ import { WorkSystemValidator } from './WorkSystemValidator.js';
 import { StorylineNavigator } from './StorylineNavigator.js';
 import { LocationTester } from './LocationTester.js';
 import { isDevModeEnabled } from './devMode.js';
+import { PositioningVerifier } from '../utils/PositioningVerifier.js';
 
 export class DevTools {
     constructor(game) {
@@ -24,6 +25,7 @@ export class DevTools {
         this.workValidator = null;
         this.storylineNavigator = null;
         this.locationTester = null;
+        this.positioningVerifier = null;
         
         this.init();
     }
@@ -45,6 +47,8 @@ export class DevTools {
             this.workValidator = new WorkSystemValidator(this.game);
             this.storylineNavigator = new StorylineNavigator(this.game);
             this.locationTester = new LocationTester(this.game);
+            // Dev-only diagnostics. Not used by gameplay (#2279).
+            this.positioningVerifier = new PositioningVerifier();
 
             // Make tools globally available
             window.devTools = this;

@@ -28,6 +28,7 @@ vi.mock('../../src/js/dev/StorylineNavigator.js', () => ({ StorylineNavigator: m
 vi.mock('../../src/js/dev/LocationTester.js', () => ({ LocationTester: mockClasses.LocationTester }));
 
 import { DevTools } from '../../src/js/dev/index.js';
+import { PositioningVerifier } from '../../src/js/utils/PositioningVerifier.js';
 
 const game = { name: 'mock-game' };
 
@@ -104,6 +105,13 @@ describe('DevTools', () => {
       expect(window.devTools).toBe(tools);
       // ?dev / localhost no longer persist a permanent flag (#1743)
       expect(localStorage.getItem('dev_mode')).toBeNull();
+    });
+
+    it('constructs PositioningVerifier when dev mode is on (#2279)', () => {
+      setLocation({ hostname: 'localhost' });
+      const tools = new DevTools(game);
+      expect(tools.positioningVerifier).toBeInstanceOf(PositioningVerifier);
+      expect(window.devTools).toBe(tools);
     });
   });
 

@@ -669,6 +669,10 @@ export class DevMenu {
         container.appendChild(this.createButton('Check Crashes', () => {
             this.checkForCrashes();
         }));
+
+        container.appendChild(this.createButton('Verify Positioning', () => {
+            this.verifyPositioning();
+        }));
     }
 
     async testAllDialogues() {
@@ -965,6 +969,38 @@ export class DevMenu {
         const passed = typeof results?.passed === 'number' ? results.passed : entries.filter(r => r?.success).length;
         const failed = typeof results?.failed === 'number' ? results.failed : failures.length;
         return { passed, failed, failures };
+    }
+
+    /**
+     * Run PositioningVerifier against the live game and log the report (#2279).
+     */
+    async verifyPositioning() {
+        const verifier = window.devTools?.positioningVerifier
+            || this.game?.devTools?.positioningVerifier
+            || this.game?.dev?.positioningVerifier;
+        if (!verifier?.generateReport) {
+            this.game.showToast('PositioningVerifier unavailable', 'warning');
+            return null;
+        }
+        try {
+            const report = await verifier.generateReport(this.game);
+            const ok = typeof verifier.isPositioningCorrect === 'function'
+                ? verifier.isPositioningCorrect(report)
+                : false;
+            const loc = report?.summary?.locations || {};
+            const elementErrors = (report?.summary?.elements?.errors || 0)
+                + (report?.summary?.images?.errors || 0);
+            const msg = ok
+                ? 'Positioning OK'
+                : `Positioning issues: ${loc.invalid || 0} invalid, ${loc.conflicts || 0} conflicts, ${elementErrors} element errors`;
+            console.log('PositioningVerifier', report);
+            this.game.showToast(msg, ok ? 'success' : 'warning');
+            return report;
+        } catch (error) {
+            console.error('PositioningVerifier failed:', error);
+            this.game.showToast(`PositioningVerifier failed: ${error.message}`, 'error');
+            return null;
+        }
     }
 
     async validateWorkSystem() {

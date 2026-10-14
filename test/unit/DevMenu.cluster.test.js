@@ -133,6 +133,43 @@ describe('DevMenu cluster', () => {
         expect(game.startNewGame).toHaveBeenCalledTimes(1);
     });
 
+    it('Verify Positioning runs PositioningVerifier against the live game (#2279)', async () => {
+        const report = {
+            summary: {
+                locations: { total: 1, gridCoordinates: 1, invalid: 0, conflicts: 0 },
+                elements: { errors: 0 },
+                images: { errors: 0 }
+            }
+        };
+        const generateReport = vi.fn(async () => report);
+        const isPositioningCorrect = vi.fn(() => true);
+        window.devTools = { positioningVerifier: { generateReport, isPositioningCorrect } };
+        const game = makeGame();
+        await bare(game).verifyPositioning();
+        expect(generateReport).toHaveBeenCalledWith(game);
+        expect(isPositioningCorrect).toHaveBeenCalledWith(report);
+        expect(game.showToast).toHaveBeenCalledWith('Positioning OK', 'success');
+    });
+
+    it('dev menu exposes Verify Positioning (#2279)', () => {
+        const game = makeGame();
+        new DevMenu(game);
+        const btn = [...document.querySelectorAll('#dev-validation button')]
+            .find(b => b.textContent === 'Verify Positioning');
+        expect(btn).toBeTruthy();
+        window.devTools = {
+            positioningVerifier: {
+                generateReport: vi.fn(async () => ({ summary: { locations: { invalid: 1, conflicts: 0 }, elements: { errors: 0 }, images: { errors: 0 } } })),
+                isPositioningCorrect: () => false
+            }
+        };
+        btn.click();
+        return vi.waitFor(() => expect(game.showToast).toHaveBeenCalledWith(
+            expect.stringMatching(/Positioning issues: 1 invalid/),
+            'warning'
+        ));
+    });
+
     it('Test Spreadsheets puts the table back (#1347)', () => {
         document.body.innerHTML = '<table id="data-table"><thead><tr><th>a</th></tr></thead></table><input id="table-filter" value="keep">';
         const original = { headers: ['a'], rows: [['x'], ['test'], ['y']] };
