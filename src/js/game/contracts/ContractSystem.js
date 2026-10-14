@@ -5,6 +5,7 @@
  */
 
 import { grantWorkReward } from '../work/workRewards.js';
+import { libraryRequirementMet, stageWorkMultiplier, cleaningBugChance, CLEANING_BUG_WASTE } from '../LibraryEffects.js';
 
 /**
  * Contract Categories - Different types of work contracts
@@ -80,6 +81,21 @@ export const CONTRACT_CATEGORIES = {
         name: 'Executive Strategy',
         minReputation: 10000,
         basePay: 10000,
+        contracts: []
+    },
+    // Learned libraries, not reputation, open these (#2418)
+    DYNAMIC_SCRAPER: {
+        name: 'Dynamic Scraper',
+        minReputation: 0,
+        basePay: 250,
+        requiresLibrary: 'lib_selenium',
+        contracts: []
+    },
+    BASIC_ML: {
+        name: 'Basic ML',
+        minReputation: 0,
+        basePay: 400,
+        requiresLibrary: 'lib_sklearn',
         contracts: []
     }
 };
@@ -409,6 +425,58 @@ export class ContractGenerator {
                         }
                     ]
                 }
+            ],
+            DYNAMIC_SCRAPER: [
+                {
+                    title: 'Dynamic Scraper: JS Storefront',
+                    description: 'Scrape a JavaScript-rendered storefront Selenium can drive.',
+                    timeRequired: 8,
+                    difficulty: 3,
+                    deliverables: ['Scraped product feed', 'Selector notes'],
+                    requiredStats: { intelligence: 15 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'intelligence',
+                            value: 20,
+                            multiplier: 0.1
+                        }
+                    ]
+                }
+            ],
+            BASIC_ML: [
+                {
+                    title: 'Basic Regression',
+                    description: 'Fit a regression on tabular customer data.',
+                    timeRequired: 10,
+                    difficulty: 4,
+                    deliverables: ['Regression model', 'Error report'],
+                    requiredStats: { intelligence: 20 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'intelligence',
+                            value: 25,
+                            multiplier: 0.1
+                        }
+                    ]
+                },
+                {
+                    title: 'Basic Classification',
+                    description: 'Train a classifier for a labeled table.',
+                    timeRequired: 10,
+                    difficulty: 4,
+                    deliverables: ['Classifier', 'Confusion matrix'],
+                    requiredStats: { intelligence: 20 },
+                    bonusConditions: [
+                        {
+                            type: 'skill_requirement',
+                            skill: 'intelligence',
+                            value: 25,
+                            multiplier: 0.1
+                        }
+                    ]
+                }
             ]
         };
 
@@ -459,7 +527,7 @@ export class ContractSystem {
         
         // Generate contracts for each category player qualifies for
         Object.entries(CONTRACT_CATEGORIES).forEach(([category, config]) => {
-            if (this.gameState.reputation >= config.minReputation) {
+            if (this.gameState.reputation >= config.minReputation && libraryRequirementMet(this.gameState, config)) {
                 const contracts = this.generator.generateContractsForCategory(category, 2);
                 this.availableContracts.push(...contracts);
             }
@@ -475,6 +543,11 @@ export class ContractSystem {
     acceptContract(contractId) {
         const contract = this.availableContracts.find(c => c.id === contractId);
         if (!contract) return { success: false, reason: 'Contract not found' };
+
+        const categoryConfig = CONTRACT_CATEGORIES[contract.category];
+        if (categoryConfig && !libraryRequirementMet(this.gameState, categoryConfig)) {
+            return { success: false, reason: 'You have not learned the library this contract requires.' };
+        }
         
         // Check requirements
         if (this.gameState.reputation < contract.requirements.reputation) {
@@ -514,8 +587,17 @@ export class ContractSystem {
     workOnContract(contractId, workAmount, options = {}) {
         const contract = this.activeContracts.find(c => c.id === contractId);
         if (!contract) return null;
-        
-        contract.progress += Math.max(0, Number(workAmount) || 0);
+
+        // Pandas speeds data-cleaning work. A passed rng can waste a buggy tick (#2418).
+        let amount = Math.max(0, Number(workAmount) || 0);
+        if (contract.category === 'DATA_CLEANING') {
+            amount *= stageWorkMultiplier(this.gameState, { type: 'cleaning' });
+            if (typeof options.rng === 'function' && options.rng() < cleaningBugChance(this.gameState)) {
+                amount *= CLEANING_BUG_WASTE;
+                contract.cleaningBugs = (contract.cleaningBugs || 0) + 1;
+            }
+        }
+        contract.progress += amount;
         
         // Check completion
         if (contract.progress >= contract.timeRequired) {

@@ -4,6 +4,15 @@
  */
 import { CONTRACTS } from './ProjectDatabase.js';
 import { grantWorkReward } from './work/workRewards.js';
+import {
+    stageWorkMultiplier,
+    cleaningBugChance,
+    effectiveCreativity,
+    isCreativeStage,
+    isCleaningStage,
+    libraryRequirementMet,
+    CLEANING_BUG_WASTE
+} from './LibraryEffects.js';
 
 /**
  * Contract xpReward keys are data-science skills. Python and SQL train
@@ -73,6 +82,8 @@ export class ProjectSystem {
      * - fails closed when the stat store is unavailable (#1519)
      */
     meetsRequirements(contract) {
+        // Selenium / Scikit-Learn gate whole contracts; no library means open (#2418)
+        if (!libraryRequirementMet(this.gameState, contract)) return false;
         const req = contract?.requirements;
         if (!req) return true;
         if (req.stat) {
@@ -125,8 +136,11 @@ export class ProjectSystem {
     /**
      * Work on the current project (called by Game Loop)
      * @param {number} workPower - Base work amount per tick
+     * @param {function} [rng] - Random source for cleaning bugs. Omitted in
+     *   tests and direct calls so progress stays deterministic; the work
+     *   loop passes Math.random (#2418).
      */
-    workOnProject(workPower) {
+    workOnProject(workPower, rng = null) {
         if (!this.activeProject) return null;
 
         const stages = this.activeProject.stages;
@@ -138,17 +152,25 @@ export class ProjectSystem {
         let aiBonus = 0;
         if (this.gameState.aiSystem) {
             aiBonus = this.gameState.aiSystem?.processingPower || 0;
-
-            // Intelligence Bonus for specific stages?
-            // e.g. Cleaning is faster with high AI Int
         }
 
-        // Hardware Bonus Check
-        // if (stage.type === PROJECT_TYPES.MODELING && hasGPU) bonus += 5;
+        // Creativity speeds game-dev / creative stages only (#2418)
+        const creativityWork = isCreativeStage(stage) ? effectiveCreativity(this.gameState) : 0;
 
-        // A better rig (RAM, SSD, monitors) makes the same work go further (#1686)
+        // A better rig (RAM, SSD, monitors) makes the same work go further (#1686).
+        // Learned libraries multiply scraping (static) and cleaning on top (#2418).
         const hardwareMultiplier = this.gameState.hardwareManager?.getProductivityMultiplier?.() || 1;
-        const effectiveWork = Math.max(0, ((Number(workPower) || 0) + aiBonus) * hardwareMultiplier);
+        const libraryMultiplier = stageWorkMultiplier(this.gameState, stage);
+        let effectiveWork = Math.max(0, ((Number(workPower) || 0) + aiBonus + creativityWork) * hardwareMultiplier * libraryMultiplier);
+
+        // A cleaning bug wastes half this tick. RegEx halves how often that happens (#2418).
+        let bugged = false;
+        if (isCleaningStage(stage) && typeof rng === 'function' && rng() < cleaningBugChance(this.gameState)) {
+            effectiveWork *= CLEANING_BUG_WASTE;
+            bugged = true;
+            this.activeProject.cleaningBugs = (this.activeProject.cleaningBugs || 0) + 1;
+        }
+
         this.activeProject.stageProgress += effectiveWork;
         if (effectiveWork > 0) this.activeProject.lastWorkedDay = this.currentDay();
         // totalProgress tracks all work put into the project (#1517)
@@ -164,7 +186,8 @@ export class ProjectSystem {
         return {
             status: 'working',
             stage: stage.name,
-            progress: (this.activeProject.stageProgress / stage.maxProgress) * 100
+            progress: (this.activeProject.stageProgress / stage.maxProgress) * 100,
+            bugged
         };
     }
 

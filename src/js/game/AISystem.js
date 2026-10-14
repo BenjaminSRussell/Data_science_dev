@@ -3,6 +3,8 @@
  * Manages the player's AI Companion, hardware, and automation capabilities.
  */
 
+import { trainingXpMultiplier, creativityBonus } from './LibraryEffects.js';
+
 export class AISystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -44,17 +46,26 @@ export class AISystem {
     }
 
     /**
+     * Creativity including PyTorch's +2. The stored stat stays the base so
+     * a save/load does not stack the bonus (#2418).
+     */
+    getEffectiveCreativity() {
+        return (Number(this.creativity) || 0) + creativityBonus(this.gameState);
+    }
+
+    /**
      * Train the AI
      * Consumes Data (from completed projects) or just Time?
      * Design: Consumes "Data Points" earned from projects.
      */
     train(dataPoints) {
-        // For now, simple XP gain
+        // TensorFlow makes the same data worth 50% more XP (#2418)
         const points = Math.max(0, Number(dataPoints) || 0);
-        this.xp += points * 10;
+        const xpGained = Math.floor(points * 10 * trainingXpMultiplier(this.gameState));
+        this.xp += xpGained;
         let levelsGained = 0;
         while (this.checkLevelUp()) levelsGained++;
-        return { success: true, xpGained: points * 10, leveledUp: levelsGained > 0, levelsGained };
+        return { success: true, xpGained, leveledUp: levelsGained > 0, levelsGained };
     }
 
     checkLevelUp() {

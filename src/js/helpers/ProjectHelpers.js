@@ -3,6 +3,7 @@
  * Helper functions for project work, work sessions, and AI training
  */
 import { OFFICES } from '../data/tycoonData.js';
+import { creativityBonus } from '../game/LibraryEffects.js';
 
 /**
  * Price to move into each office tier, from the canonical OFFICES table (#1767)
@@ -196,7 +197,8 @@ export function simulateWorkTick(game) {
     // Apply focus/stamina task-speed bonus
     const taskSpeedBonus = 1 + ((game.characterStats?.getTotalBonuses()?.taskSpeed || 0) / 100);
     let tickPower = basePower * 0.1 * taskSpeedBonus;
-    game.projectSystem.workOnProject(tickPower);
+    // Math.random lets a cleaning tick hit a bug; direct workOnProject calls stay exact (#2418)
+    game.projectSystem.workOnProject(tickPower, Math.random);
 }
 
 /**
@@ -306,6 +308,13 @@ export function updateOfficeScreen(game) {
         if (aiLevelEl) aiLevelEl.textContent = ai.level;
         if (aiIntEl) aiIntEl.textContent = ai.intelligence;
         if (aiSpdEl) aiSpdEl.textContent = ai.speed;
+        const aiCreaEl = document.getElementById('ai-stat-crea');
+        if (aiCreaEl) {
+            const crea = typeof ai.getEffectiveCreativity === 'function'
+                ? ai.getEffectiveCreativity()
+                : (Number(ai.creativity) || 0) + creativityBonus(game.gameState);
+            aiCreaEl.textContent = String(crea);
+        }
 
         if (aiXpFillEl) {
             const xpPct = ai.xpToNextLevel > 0 ? (ai.xp / ai.xpToNextLevel) * 100 : 0;

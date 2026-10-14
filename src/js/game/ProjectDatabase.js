@@ -22,6 +22,8 @@ export const CONTRACTS = [
         stages: [
             {
                 type: PROJECT_TYPES.SCRAPING,
+                // JS-rendered page: BeautifulSoup's static-site bonus does not apply (#2418)
+                site: 'dynamic',
                 name: 'Data Collection',
                 description: 'Choose the right library to scrape Twitter.',
                 options: [
@@ -104,6 +106,115 @@ export const CONTRACTS = [
                 name: 'Train Risk Model',
                 description: 'xgboost model for default probability.',
                 maxProgress: 250
+            }
+        ]
+    },
+    {
+        id: 'static_catalog_scraper',
+        client: 'Luna Books',
+        title: 'Static Catalog Scraper',
+        description: 'Pull titles and prices from a plain HTML catalog.',
+        difficulty: 1,
+        reward: 500,
+        xpReward: { python: 30, data_engineering: 15 },
+        stages: [
+            {
+                type: PROJECT_TYPES.SCRAPING,
+                site: 'static',
+                name: 'Scrape Catalog Pages',
+                description: 'Walk static HTML. BeautifulSoup is built for this.',
+                maxProgress: 100
+            }
+        ]
+    },
+    {
+        id: 'dynamic_storefront_scraper',
+        client: 'Casey Lee',
+        title: 'Dynamic Scraper Contract',
+        description: 'The storefront is rendered by JavaScript. A static parser cannot see the products.',
+        difficulty: 2,
+        reward: 1200,
+        xpReward: { python: 40, data_engineering: 30 },
+        requiresLibrary: 'lib_selenium',
+        stages: [
+            {
+                type: PROJECT_TYPES.SCRAPING,
+                site: 'dynamic',
+                name: 'Drive the Dynamic Page',
+                description: 'Selenium loads the JavaScript storefront and collects the rows.',
+                maxProgress: 140
+            },
+            {
+                type: PROJECT_TYPES.CLEANING,
+                name: 'Normalize Product Rows',
+                description: 'Clean prices and drop empty listings.',
+                maxProgress: 80
+            }
+        ]
+    },
+    {
+        id: 'basic_regression_contract',
+        client: 'Analytics Pro',
+        title: 'Basic Regression Contract',
+        description: 'Fit a regression on a tabular sales history.',
+        difficulty: 2,
+        reward: 1500,
+        xpReward: { statistics: 40, machine_learning: 20 },
+        requiresLibrary: 'lib_sklearn',
+        stages: [
+            {
+                type: PROJECT_TYPES.CLEANING,
+                name: 'Prepare Features',
+                description: 'Clean the training table before the fit.',
+                maxProgress: 80
+            },
+            {
+                type: PROJECT_TYPES.MODELING,
+                name: 'Fit Regression',
+                description: 'Train a linear regression.',
+                maxProgress: 120
+            }
+        ]
+    },
+    {
+        id: 'basic_classification_contract',
+        client: 'Insight Systems',
+        title: 'Basic Classification Contract',
+        description: 'Classify customers into churn and stay.',
+        difficulty: 2,
+        reward: 1600,
+        xpReward: { statistics: 25, machine_learning: 30 },
+        requiresLibrary: 'lib_sklearn',
+        stages: [
+            {
+                type: PROJECT_TYPES.CLEANING,
+                name: 'Label Cleanup',
+                description: 'Fix mislabeled rows.',
+                maxProgress: 90
+            },
+            {
+                type: PROJECT_TYPES.MODELING,
+                name: 'Train Classifier',
+                description: 'Train a basic classifier.',
+                maxProgress: 120
+            }
+        ]
+    },
+    {
+        id: 'data_toy_prototype',
+        client: 'Sam Taylor',
+        title: 'Data Toy Prototype',
+        description: 'A small playful visual. Your AI companion\'s creativity carries this one.',
+        difficulty: 1,
+        reward: 400,
+        xpReward: { python: 60 },
+        stages: [
+            {
+                type: PROJECT_TYPES.GAME_DEV,
+                creative: true,
+                name: 'Sketch the Toy',
+                description: 'Prototype a tiny interactive data toy.',
+                maxProgress: 120
             }
         ]
     }
