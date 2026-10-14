@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
-    "@pixi/particle-emitter": "^5.0.8",
     "chart.js": "^4.4.1",
     "interactjs": "^1.10.27",
     "lit": "^3.3.1",
