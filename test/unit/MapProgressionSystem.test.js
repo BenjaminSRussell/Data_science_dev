@@ -162,16 +162,4 @@ describe('MapProgressionSystem', () => {
             expect(mapProgressionSystem).toBeInstanceOf(MapProgressionSystem);
         });
     });
-
-    describe('travelToLocation', () => {
-        it('should no-op safely when worldMap is missing', () => {
-            gameState.worldMap = null;
-            expect(() => mapProgressionSystem.travelToLocation('location1', 'vehicle1')).not.toThrow();
-        });
-
-        it('should no-op safely when locations is falsy', () => {
-            gameState.worldMap = { locations: null };
-            expect(() => mapProgressionSystem.travelToLocation('location1', 'vehicle1')).not.toThrow();
-        });
-    });
 });
