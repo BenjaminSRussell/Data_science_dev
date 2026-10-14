@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ComprehensiveSpriteSystem } from '../../src/js/assets/ComprehensiveSpriteSystem.js';
 import { bodyLanguageMapper } from '../../src/js/characters/BodyLanguageMapper.js';
+import { LPC_SHEET_URLS } from '../../src/js/assets/AssetManager.js';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -23,6 +24,25 @@ describe('ComprehensiveSpriteSystem cluster', () => {
         const sys = new ComprehensiveSpriteSystem({ getAsset: (k) => (k === 'pose_standing' ? img : null) }, null);
         await expect(sys.loadSprite('/x.png', 'pose_standing')).resolves.toBe(img);
         expect(sys.getBodyLanguageSprite('standing')).toBe(img);
+    });
+
+    it('#2542 registerSpriteSheets points main_character at a real LPC sheet', async () => {
+        const registerSpriteSheet = vi.fn();
+        const sys = new ComprehensiveSpriteSystem(null, { registerSpriteSheet });
+        await sys.registerSpriteSheets();
+        expect(registerSpriteSheet).toHaveBeenCalledWith('main_character', expect.objectContaining({
+            url: LPC_SHEET_URLS.basic,
+            frameWidth: 64,
+            columns: 13,
+            rows: 21
+        }));
+        const blocked = new ComprehensiveSpriteSystem(
+            { getAssetManifest: () => ({ characters: { spriteSheets: { main: { url: '/assets/characters/sprites/character_sheet.png', frameWidth: 32, frameHeight: 32, columns: 4, rows: 4 } } } }) },
+            { registerSpriteSheet }
+        );
+        registerSpriteSheet.mockClear();
+        await blocked.registerSpriteSheets();
+        expect(registerSpriteSheet).not.toHaveBeenCalled();
     });
 
     it('#2135 #1052 combined sprite scales to the pose size and is a ready-to-draw canvas', () => {

@@ -6,6 +6,54 @@
 
 import { isAssetMissing } from './MissingAssetBlocklist.js';
 
+/**
+ * Shipped LPC sheets are 832×1344: 13×21 cells of 64px (#2542).
+ * Populated rows (up-facing rows in each block are blank):
+ * spellcast 1–3 (7), thrust 5–7 (8), walk 9–11 (9), slash 13–15 (6),
+ * shoot 17–19 (13), hurt 20 (5).
+ */
+export const LPC_SHEET_GRID = {
+    frameWidth: 64,
+    frameHeight: 64,
+    columns: 13,
+    rows: 21,
+    type: 'spriteSheet'
+};
+
+/** Real files under assets/characters/sprites. lpc_sprite_0–4 are nearly empty. */
+export const LPC_SHEET_URLS = {
+    basic: '/assets/characters/sprites/lpc_sprite_5.png',
+    mid: '/assets/characters/sprites/lpc_sprite_12.png',
+    premium: '/assets/characters/sprites/lpc_sprite_19.png'
+};
+
+export const LPC_SHEET_ANIMATIONS = {
+    idle: { row: 10, frameCount: 1 },
+    // Up-facing rows are blank in the shipped sheets, so reuse the down walk.
+    walk_up: { row: 10, frameCount: 9 },
+    walk_left: { row: 9, frameCount: 9 },
+    walk_down: { row: 10, frameCount: 9 },
+    walk_right: { row: 11, frameCount: 9 },
+    talk: { row: 14, frameCount: 6 },
+    hurt: { row: 20, frameCount: 5 },
+    spellcast_left: { row: 1, frameCount: 7 },
+    spellcast_down: { row: 2, frameCount: 7 },
+    spellcast_right: { row: 3, frameCount: 7 },
+    thrust_left: { row: 5, frameCount: 8 },
+    thrust_down: { row: 6, frameCount: 8 },
+    thrust_right: { row: 7, frameCount: 8 },
+    slash_left: { row: 13, frameCount: 6 },
+    slash_down: { row: 14, frameCount: 6 },
+    slash_right: { row: 15, frameCount: 6 },
+    shoot_left: { row: 17, frameCount: 13 },
+    shoot_down: { row: 18, frameCount: 13 },
+    shoot_right: { row: 19, frameCount: 13 }
+};
+
+export function lpcSheet(url) {
+    return { url, ...LPC_SHEET_GRID, animations: LPC_SHEET_ANIMATIONS };
+}
+
 export class AssetManager {
     // Images requested at once while preloading (#1676)
     static LOAD_CONCURRENCY = 8;
@@ -55,24 +103,10 @@ export class AssetManager {
     getAssetManifest() {
         return {
             characters: {
-                // Sprite sheets (preferred - has animations)
+                // LPC sheets that exist on disk. Emotions are the SVGs below;
+                // emotion_sheet.png was never created (#2542).
                 spriteSheets: {
-                    main: {
-                        url: '/assets/characters/sprites/character_sheet.png',
-                        frameWidth: 64,
-                        frameHeight: 64,
-                        columns: 8,
-                        rows: 8,
-                        type: 'spriteSheet'
-                    },
-                    emotions: {
-                        url: '/assets/characters/sprites/emotion_sheet.png',
-                        frameWidth: 64,
-                        frameHeight: 64,
-                        columns: 6,
-                        rows: 1,
-                        type: 'spriteSheet'
-                    }
+                    main: lpcSheet(LPC_SHEET_URLS.basic)
                 },
                 // Low-poly character sprites (1000 available)
                 // Using available NPC character assets as fallback

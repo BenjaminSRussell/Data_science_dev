@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PixiAssetManager } from '../../src/js/assets/PixiAssetManager.js';
-import { AssetManager } from '../../src/js/assets/AssetManager.js';
+import { AssetManager, LPC_SHEET_URLS } from '../../src/js/assets/AssetManager.js';
+import { isAssetMissing } from '../../src/js/assets/MissingAssetBlocklist.js';
 
 const fakeAssets = (missing = new Set()) => {
     const store = new Map();
@@ -41,8 +42,11 @@ describe('PixiAssetManager cluster', () => {
         expect(entries.some(e => e.src === 'spriteSheet')).toBe(false);
         expect(entries.some(e => e.alias.endsWith('.type'))).toBe(false);
         const sheet = entries.find(e => e.alias === 'characters.spriteSheets.main');
-        expect(sheet.src).toBe('/assets/characters/sprites/character_sheet.png');
-        expect(sheet.data).toMatchObject({ frameWidth: 64, columns: 8, type: 'spriteSheet' });
+        expect(sheet.src).toBe(LPC_SHEET_URLS.basic);
+        expect(sheet.src).toMatch(/\/lpc_sprite_\d+\.png$/);
+        expect(isAssetMissing(sheet.src)).toBe(false);
+        expect(entries.some(e => /character_sheet|emotion_sheet/.test(e.src))).toBe(false);
+        expect(sheet.data).toMatchObject({ frameWidth: 64, frameHeight: 64, columns: 13, rows: 21, type: 'spriteSheet' });
     });
 
     it('#2297 bundles come from the real manifest sections, none empty', () => {

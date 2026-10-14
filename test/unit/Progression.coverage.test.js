@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { VisualProgressionSystem } from '../../src/js/game/visual/VisualProgressionSystem.js';
+import { LPC_SHEET_URLS } from '../../src/js/assets/AssetManager.js';
 
 afterEach(() => { vi.restoreAllMocks(); delete window.game; document.body.innerHTML = ''; document.body.className = ''; });
 
@@ -59,14 +60,19 @@ describe('VisualProgressionSystem milestones (#382)', () => {
 });
 
 describe('VisualProgressionSystem DOM upgrades (#383)', () => {
-    it('upgradeSpriteSheets registers 64px for mid and 128px for premium', () => {
+    it('upgradeSpriteSheets registers real 64px LPC sheets for mid and premium', () => {
         const registerSpriteSheet = vi.fn();
         const v = new VisualProgressionSystem({ spriteSheetManager: { registerSpriteSheet } });
         v.upgradeSpriteSheets('mid');
-        expect(registerSpriteSheet).toHaveBeenCalledWith('character_mid', expect.objectContaining({ frameWidth: 64, frameHeight: 64 }));
+        expect(registerSpriteSheet).toHaveBeenCalledWith('character_mid', expect.objectContaining({
+            url: LPC_SHEET_URLS.mid, frameWidth: 64, frameHeight: 64, columns: 13, rows: 21
+        }));
         v.upgradeSpriteSheets('premium');
-        expect(registerSpriteSheet).toHaveBeenCalledWith('character_premium', expect.objectContaining({ frameWidth: 128, frameHeight: 128 }));
+        expect(registerSpriteSheet).toHaveBeenCalledWith('character_premium', expect.objectContaining({
+            url: LPC_SHEET_URLS.premium, frameWidth: 64, frameHeight: 64, columns: 13, rows: 21
+        }));
         expect(() => new VisualProgressionSystem({}).upgradeSpriteSheets('mid')).not.toThrow();
+        expect(() => new VisualProgressionSystem({ spriteSheetManager: {} }).upgradeSpriteSheets('mid')).not.toThrow();
     });
 
     it('upgradeBackgrounds swaps the tier class on body and location views', () => {
@@ -104,11 +110,11 @@ describe('VisualProgressionSystem URLs and save/load (#384)', () => {
         const v = new VisualProgressionSystem({});
         for (const tier of ['basic', 'mid', 'premium']) {
             v.currentTier = tier;
-            expect(v.getSpriteSheetUrl('main')).toBe(`/assets/characters/sprites/main_${tier}.png`);
+            expect(v.getSpriteSheetUrl('main')).toBe(LPC_SHEET_URLS[tier]);
             expect(v.getBackgroundUrl('downtown')).toBe(`/assets/backgrounds/locations/downtown_${tier}.png`);
         }
         v.currentTier = 'ultra';
-        expect(v.getSpriteSheetUrl()).toBe('/assets/characters/sprites/main_basic.png');
+        expect(v.getSpriteSheetUrl()).toBe(LPC_SHEET_URLS.basic);
     });
 
     it('isTierUnlocked reflects membership', () => {
