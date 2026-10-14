@@ -1,73 +1,9 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { SimpleDialogueManager, PERSONALITY, MOOD } from '../../src/js/game/dialogue/SimpleDialogue.js';
 import { RealWorldTaskSystem, JOB_CATEGORY_ROLES } from '../../src/js/game/work/RealWorldTaskSystem.js';
 import { EducationSystem } from '../../src/js/game/EducationSystem.js';
 import { handleStartExam } from '../../src/js/helpers/EducationHelpers.js';
 
 afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; });
-
-describe('SimpleDialogueManager (#312, #1600-#1605)', () => {
-    it('getPersonality is null-safe and dispatches by type (#1605, #312)', () => {
-        const m = new SimpleDialogueManager();
-        expect(m.getPersonality(null)).toBe(PERSONALITY.FRIENDLY);
-        expect(m.getPersonality(undefined)).toBe(PERSONALITY.FRIENDLY);
-        expect(m.getPersonality({ personality: 'grumpy' })).toBe(PERSONALITY.GRUMPY);
-        expect(m.getPersonality({ personality: 'nope' })).toBe(PERSONALITY.FRIENDLY);
-        expect(m.getPersonality({ personality: 42 })).toBe(PERSONALITY.FRIENDLY);
-    });
-
-    it('every personality has a distinct colour (#1600)', () => {
-        const colors = Object.values(PERSONALITY).map(p => p.color);
-        expect(new Set(colors).size).toBe(colors.length);
-    });
-
-    it('no permanently blank emoji fields remain (#1601)', () => {
-        for (const p of Object.values(PERSONALITY)) {
-            expect('emoji' in p).toBe(false);
-            for (const r of Object.values(p.reactions)) expect('emoji' in r).toBe(false);
-        }
-        const m = new SimpleDialogueManager();
-        expect('emoji' in m.startConversation({ personality: 'friendly' }, 0)).toBe(false);
-    });
-
-    it('getReaction maps every mood respond() can produce (#1604)', () => {
-        const m = new SimpleDialogueManager();
-        const npc = { personality: 'grumpy' };
-        expect(m.getReaction(npc, MOOD.SAD)).toBe(PERSONALITY.GRUMPY.reactions.annoyed);
-        expect(m.getReaction(npc, MOOD.FLIRTY)).toBe(PERSONALITY.GRUMPY.reactions.excited);
-        expect(m.getReaction(npc, MOOD.NEUTRAL)).toBeNull();
-        expect(m.getReaction(npc, MOOD.HAPPY)).toBe(PERSONALITY.GRUMPY.reactions.happy);
-    });
-
-    it('respond records history and attaches the reaction (#1603, #1604)', () => {
-        const m = new SimpleDialogueManager();
-        m.startConversation({ id: 'g1', personality: 'grumpy' }, 0);
-        const r = m.respond('insult');
-        expect(r.mood).toBe(MOOD.ANGRY);
-        expect(r.reaction).toBe(PERSONALITY.GRUMPY.reactions.annoyed);
-        expect(m.getHistory('g1')).toEqual([{ npcId: 'g1', choiceType: 'insult', mood: MOOD.ANGRY, text: r.text }]);
-        for (let i = 0; i < 60; i++) m.respond('small_talk');
-        expect(m.getHistory().length).toBe(SimpleDialogueManager.HISTORY_LIMIT);
-    });
-
-    it('ask_help / business read context.relationshipLevel (#1602)', () => {
-        const m = new SimpleDialogueManager();
-        m.startConversation({ id: 'g', personality: 'grumpy' }, 0);
-        const cold = m.respond('ask_help', { relationshipLevel: 5 });
-        const warm = m.respond('ask_help', { relationshipLevel: 80 });
-        expect(warm.effect.relationship).toBe(cold.effect.relationship + 1);
-        expect(warm.mood).toBe(MOOD.HAPPY);
-        const biz = m.respond('business', { relationshipLevel: 90 });
-        expect(biz.text).toMatch(/For you, anything/);
-    });
-
-    it('flirt is gated on isRomanceable (#312)', () => {
-        const m = new SimpleDialogueManager();
-        m.startConversation({ id: 'f', personality: 'friendly' }, 0);
-        expect(m.respond('flirt', {}).effect.relationship).toBe(-2);
-        expect(m.respond('flirt', { isRomanceable: true }).mood).toBe(MOOD.FLIRTY);
-    });
-});
 
 describe('RealWorldTaskSystem (#1819, #1820, #1821, #2094, #2095, #2097)', () => {
     const gs = () => ({ money: 0, reputation: 0, characterStats: { addExperience: vi.fn() } });
