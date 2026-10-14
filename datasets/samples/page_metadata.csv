@@ -1,0 +1,4 @@
+url,domain,title,word_count,quality_score,processed_at
+https://example.com/a,example.com,Example A,420,0.82,2026-01-15T12:05:00Z
+https://news.example.org/b,news.example.org,News B,1280,0.67,2026-02-02T08:40:00Z
+https://data.example.net/c,data.example.net,Data C,90,0.91,2026-03-11T16:50:00Z

@@ -1,0 +1,4 @@
+domain,url_count,file_types,last_crawl,success_rate
+example.com,128,3,2026-01-15T12:00:00Z,96.1
+news.example.org,54,2,2026-02-02T08:30:00Z,88.9
+data.example.net,17,4,2026-03-11T16:45:00Z,100.0

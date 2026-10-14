@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "description": "Shared catalog linking notebook outputs to Scrapy Delta Lake tables and Data-visualizer datasets.",
+  "datasets": [
+    {
+      "name": "urls_by_domain",
+      "description": "Domain rollup of URLs discovered in the Scrapy stage1 lake, shaped like the Data-visualizer urls_by_domain dataset.",
+      "path": "datasets/samples/urls_by_domain.csv",
+      "lake_path": "scrapy:Scraping_project/data/delta_lake/stage1_discovery",
+      "visualizer_path": "data-visualizer:/api/datasets/urls_by_domain",
+      "schema": {
+        "fields": [
+          { "name": "domain", "type": "string" },
+          { "name": "url_count", "type": "integer" },
+          { "name": "file_types", "type": "integer" },
+          { "name": "last_crawl", "type": "timestamp" },
+          { "name": "success_rate", "type": "number" }
+        ]
+      },
+      "produced_by": "notebooks/01_urls_by_domain.ipynb"
+    },
+    {
+      "name": "page_metadata",
+      "description": "Page title, length, and quality taken from the stage2 page-analysis lake and aligned with the visualizer page-metadata dataset.",
+      "path": "datasets/samples/page_metadata.csv",
+      "lake_path": "scrapy:Scraping_project/data/delta_lake/stage2_page_analysis",
+      "visualizer_path": "data-visualizer:/api/datasets/page_metadata_with_urls",
+      "schema": {
+        "fields": [
+          { "name": "url", "type": "string" },
+          { "name": "domain", "type": "string" },
+          { "name": "title", "type": "string" },
+          { "name": "word_count", "type": "integer" },
+          { "name": "quality_score", "type": "number" },
+          { "name": "processed_at", "type": "timestamp" }
+        ]
+      },
+      "produced_by": "notebooks/02_page_metadata.ipynb"
+    },
+    {
+      "name": "http_status_codes",
+      "description": "HTTP status histogram from the Scrapy error_log lake, shaped like the visualizer status-code distribution.",
+      "path": "datasets/samples/http_status_codes.csv",
+      "lake_path": "scrapy:Scraping_project/data/delta_lake/error_log",
+      "visualizer_path": "data-visualizer:/api/datasets/status_codes_distribution",
+      "schema": {
+        "fields": [
+          { "name": "status_code", "type": "integer" },
+          { "name": "count", "type": "integer" },
+          { "name": "percentage", "type": "number" }
+        ]
+      },
+      "produced_by": "notebooks/03_http_status_codes.ipynb"
+    }
+  ]
+}
