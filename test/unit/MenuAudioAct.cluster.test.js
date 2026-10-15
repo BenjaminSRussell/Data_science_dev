@@ -9,6 +9,7 @@ import { readFileSync } from 'node:fs';
 vi.hoisted(() => { globalThis.__DSD_NO_AUTOBOOT__ = true; });
 
 import { MainGame } from '../../src/js/main.js';
+import { MenuLogoDisplay } from '../../src/js/ui/MenuLogoDisplay.js';
 import { MenuThemeSystem } from '../../src/js/game/MenuThemeSystem.js';
 import { ScreenThemeManager } from '../../src/js/game/ScreenThemeManager.js';
 import { AudioManager } from '../../src/js/audio/AudioManager.js';
@@ -96,8 +97,46 @@ describe('menu theme selection', () => {
             MainGame.prototype.initMenu.call(fake, true);
         } catch {
             // later menu setup needs more of the game; only the theme part matters
+        } finally {
+            fake.menuLogoDisplay?.destroy();
         }
         expect(check).toHaveBeenCalledTimes(1);
+    });
+
+    it('initMenu constructs MenuLogoDisplay and paints the logo stat (#1665)', () => {
+        document.body.innerHTML = `
+            <section id="screen-menu">
+                <div class="menu-logo-icon" title="Data Science Tycoon">DS</div>
+                <nav class="menu-nav"></nav>
+            </section>`;
+        const fake = {
+            menuThemeSystem: null,
+            saveManager: {
+                getSaveData: () => null,
+                getAllSlotsInfo: () => []
+            },
+            statisticsAggregator: {
+                getStats: () => ({
+                    totalPlaytime: 2,
+                    highestRank: 1,
+                    gamesCompleted: 0,
+                    totalMoney: 10,
+                    totalTasks: 4
+                }),
+                getDistinctSaves: () => [{ saveData: { state: { completedAchievements: ['a'] } } }],
+                formatPlaytime: (h) => `${h}h`
+            }
+        };
+        try {
+            MainGame.prototype.initMenu.call(fake, false);
+            expect(fake.menuLogoDisplay).toBeInstanceOf(MenuLogoDisplay);
+            const logo = document.querySelector('.menu-logo-icon');
+            expect(logo.textContent).not.toBe('DS');
+            expect(logo.title).toMatch(/:/);
+            expect(fake.menuLogoDisplay.stats.find(s => s.label === 'Total Achievements').value).toBe('1');
+        } finally {
+            fake.menuLogoDisplay?.destroy();
+        }
     });
 });
 
