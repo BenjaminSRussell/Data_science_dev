@@ -50,6 +50,30 @@ describe('LocationViewComponent behavior', () => {
             expect(component.backgroundImage).toBe('');
             expect(component.timeOfDay).toBe('noon');
         });
+
+        it('re-renders a revisited cached location after in-place mutation', async () => {
+            const details = {
+                name: 'Office',
+                description: 'Desks.',
+                features: [{ id: 'desk', name: 'Desk', icon: '🖥️' }]
+            };
+            component.updateLocation('office', details, '/bg/office.png', 'noon');
+            await component.updateComplete;
+
+            expect(component.shadowRoot.querySelector('.location-description').textContent).toBe('Desks.');
+            expect(component.shadowRoot.querySelectorAll('.location-feature')).toHaveLength(1);
+
+            details.description = 'Unlocked lab.';
+            details.features.push({ id: 'lab', name: 'Lab', icon: '🧪' });
+            component.updateLocation('office', details, '/bg/office.png', 'noon');
+            await component.updateComplete;
+
+            expect(component.locationDetails).toBe(details);
+            expect(component.shadowRoot.querySelector('.location-description').textContent).toBe('Unlocked lab.');
+            const features = component.shadowRoot.querySelectorAll('.location-feature');
+            expect(features).toHaveLength(2);
+            expect(features[1].getAttribute('aria-label')).toBe('Lab');
+        });
     });
 
     describe('feature-click events', () => {
