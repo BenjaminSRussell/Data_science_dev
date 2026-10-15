@@ -100,6 +100,8 @@ export class SaveManager {
         this.idb = options.store ?? new IndexedDBSaveStore(options.indexedDB);
         this._cache = new Map();
         this._mirrored = new Map();
+        // Slots whose LocalStorage shim could not take the latest save (quota). Their IndexedDB copy is newer.
+        this._shimStale = new Set();
         this._persist = Promise.resolve();
     }
 
@@ -129,17 +131,34 @@ export class SaveManager {
 
     /**
      * Write the LocalStorage shim, then the same record to IndexedDB.
-     * Throws if LocalStorage throws so callers can report quota errors.
+     * If the shim cannot take the record (quota) and IndexedDB is available, the
+     * save still goes to IndexedDB: reads use that copy, and the stale shim entry
+     * is dropped once IndexedDB confirms the write (#2714). Otherwise this throws
+     * so callers can report quota errors.
      */
     _persistSlot(slotIndex, record) {
         if (record && typeof record === 'object' && !Number.isInteger(record.slotIndex)) {
             record.slotIndex = slotIndex;
         }
-        localStorage.setItem(SAVE_KEY_PREFIX + slotIndex, JSON.stringify(record));
-        this._mirrorToIdb(record, slotIndex);
+        const json = JSON.stringify(record);
+        let shimWritten = true;
+        try {
+            localStorage.setItem(SAVE_KEY_PREFIX + slotIndex, json);
+        } catch (err) {
+            if (!this.idb?.available) throw err;
+            console.warn('LocalStorage save shim failed; saving to IndexedDB only:', err);
+            shimWritten = false;
+        }
+        if (shimWritten) this._shimStale.delete(slotIndex);
+        else this._shimStale.add(slotIndex);
+        this._mirrorToIdb(record, slotIndex, !shimWritten);
     }
 
-    _mirrorToIdb(record, slotIndex) {
+    /**
+     * @param {boolean} retireShim - true for a save the shim could not take: always
+     *   write it, then drop the stale shim entry once IndexedDB confirms the write
+     */
+    _mirrorToIdb(record, slotIndex, retireShim = false) {
         if (!this.idb || typeof this.idb.put !== 'function') return;
         if (!record || typeof record !== 'object') return;
         let json;
@@ -149,7 +168,7 @@ export class SaveManager {
             console.error('IndexedDB save failed:', err);
             return;
         }
-        if (this._mirrored.get(slotIndex) === json) return;
+        if (!retireShim && this._mirrored.get(slotIndex) === json) return;
         let migrated;
         try {
             migrated = migrateSaveRecord(JSON.parse(json));
@@ -161,12 +180,36 @@ export class SaveManager {
         if (!Number.isInteger(migrated.slotIndex)) migrated.slotIndex = slotIndex;
         this._mirrored.set(slotIndex, json);
         this._cache.set(slotIndex, migrated);
-        this._enqueue(() => this.idb.put(migrated));
+        this._enqueue(async () => {
+            const ok = await this.idb.put(migrated);
+            if (!retireShim) return;
+            if (ok === true) {
+                this._retireShim(slotIndex);
+            } else if (typeof this.onSaveError === 'function') {
+                // The shim is full and IndexedDB refused the save, so the save did not stick (#1221)
+                try {
+                    this.onSaveError(new Error('IndexedDB write failed'), slotIndex);
+                } catch { /* never let the handler break saving */ }
+            }
+        });
+    }
+
+    /** Remove a stale shim entry: IndexedDB now holds the newer record. */
+    _retireShim(slotIndex) {
+        if (!this._shimStale.has(slotIndex)) return;
+        try {
+            localStorage.removeItem(SAVE_KEY_PREFIX + slotIndex);
+        } catch (err) {
+            console.error('Failed to remove stale LocalStorage save:', err);
+            return;
+        }
+        this._shimStale.delete(slotIndex);
     }
 
     _forget(slotIndex) {
         this._cache.delete(slotIndex);
         this._mirrored.delete(slotIndex);
+        this._shimStale.delete(slotIndex);
         if (this.idb && typeof this.idb.delete === 'function') {
             this._enqueue(() => this.idb.delete(slotIndex));
         }
@@ -462,7 +505,8 @@ export class SaveManager {
         }
 
         try {
-            const saveData = localStorage.getItem(SAVE_KEY_PREFIX + slotIndex);
+            // A stale shim must not be exported in place of the newer IndexedDB copy (#2714)
+            const saveData = this._shimStale.has(slotIndex) ? null : localStorage.getItem(SAVE_KEY_PREFIX + slotIndex);
             if (saveData) return encodeSaveString(saveData);
             const cached = this._cache.get(slotIndex);
             if (!cached) return null;
@@ -578,7 +622,8 @@ export class SaveManager {
     getSaveData(slotIndex = 0) {
         let raw;
         try {
-            raw = localStorage.getItem(SAVE_KEY_PREFIX + slotIndex);
+            // A stale shim must not hide the newer IndexedDB copy (#2714)
+            raw = this._shimStale.has(slotIndex) ? null : localStorage.getItem(SAVE_KEY_PREFIX + slotIndex);
         } catch (error) {
             console.error('Failed to get save data:', error);
             const cached = this._cache.get(slotIndex);
