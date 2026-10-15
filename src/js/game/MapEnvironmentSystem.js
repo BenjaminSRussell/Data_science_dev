@@ -72,6 +72,19 @@ export class MapEnvironmentSystem {
     }
 
     /**
+     * Same bounds check as isInZone, but known zones go through
+     * MapZoneSystem.isInZone so placement and the zone map agree (#1928).
+     * Zones the zone system does not know keep the local bounds check.
+     */
+    cellInZone(zone, x, y) {
+        const known = zone?.id && this.zoneSystem?.getZoneById?.(zone.id);
+        if (known && typeof this.zoneSystem.isInZone === 'function') {
+            return this.zoneSystem.isInZone(x, y, zone.id);
+        }
+        return this.isInZone(zone.bounds, x, y);
+    }
+
+    /**
      * Place an asset at its random spot, or the nearest acceptable free spot
      * (within PLACEMENT_RETRY_RADIUS) when that one is taken, instead of
      * silently dropping it.
@@ -115,7 +128,7 @@ export class MapEnvironmentSystem {
                 zoneId: zone.id
             };
             
-            if (this.placeWithRetry(tree, (cx, cy) => this.isInZone(bounds, cx, cy) && !this.roadSystem.isRoad(cx, cy))) {
+            if (this.placeWithRetry(tree, (cx, cy) => this.cellInZone(zone, cx, cy) && !this.roadSystem.isRoad(cx, cy))) {
                 this.environmentElements.push(tree);
                 placed++;
             }
@@ -139,7 +152,7 @@ export class MapEnvironmentSystem {
             
             // Must be adjacent to a road but not on it
             const isStreetSpot = (cx, cy) =>
-                this.isInZone(bounds, cx, cy) &&
+                this.cellInZone(zone, cx, cy) &&
                 !this.roadSystem.isRoad(cx, cy) &&
                 (this.roadSystem.isRoad(cx - 1, cy) ||
                  this.roadSystem.isRoad(cx + 1, cy) ||
@@ -187,7 +200,7 @@ export class MapEnvironmentSystem {
                 zoneId: zone.id
             };
             
-            if (this.placeWithRetry(decoration, (cx, cy) => this.isInZone(bounds, cx, cy) && !this.roadSystem.isRoad(cx, cy))) {
+            if (this.placeWithRetry(decoration, (cx, cy) => this.cellInZone(zone, cx, cy) && !this.roadSystem.isRoad(cx, cy))) {
                 this.environmentElements.push(decoration);
                 placed++;
             }
