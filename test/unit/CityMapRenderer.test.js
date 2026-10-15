@@ -149,4 +149,130 @@ describe('CityMapRenderer', () => {
     expect(secondLocationsContainer).not.toBe(firstLocationsContainer);
     expect(secondLocationsContainer.querySelector('.city-location[data-location="loc-2"]')).not.toBeNull();
   });
+
+  function withLocation() {
+    game.worldMap.getAccessibleLocations = vi.fn(() => [{
+      id: 'loc-resize',
+      name: 'Lab',
+      icon: 'L',
+      type: 'lab',
+      position: { x: 4, y: 4 },
+    }]);
+  }
+
+  function setContainerSize(width, height) {
+    Object.defineProperty(container, 'offsetWidth', { configurable: true, value: width });
+    Object.defineProperty(container, 'offsetHeight', { configurable: true, value: height });
+  }
+
+  it('recomputes tileSize from ResizeObserver and updates grid and building px', () => {
+    const observers = [];
+    class RecordingResizeObserver {
+      constructor(callback) {
+        this.callback = callback;
+        observers.push(this);
+      }
+      observe(target) {
+        this.target = target;
+      }
+      disconnect() {
+        this.disconnected = true;
+      }
+    }
+    vi.stubGlobal('ResizeObserver', RecordingResizeObserver);
+    try {
+      withLocation();
+      setContainerSize(900, 600);
+      renderer.initialize();
+
+      expect(observers).toHaveLength(1);
+      expect(observers[0].target).toBe(container);
+      expect(renderer.tileSize).toBe(20);
+
+      const grid = container.querySelector('.city-map-grid');
+      const buildingsContainer = container.querySelector('.city-buildings-container');
+      const roadsContainer = container.querySelector('.city-roads-container');
+      const building = container.querySelector('.city-building');
+      expect(building.style.width).toBe('40px');
+      expect(building.style.height).toBe('40px');
+
+      // Still hidden / zero: do not replace a real measurement with the 600 fallback.
+      setContainerSize(0, 0);
+      observers[0].callback();
+      expect(renderer.tileSize).toBe(20);
+      expect(building.style.width).toBe('40px');
+
+      // 1200×900 -> min(40, 30) = 30; buildings are 2 tiles.
+      setContainerSize(1200, 900);
+      observers[0].callback();
+      expect(renderer.tileSize).toBe(30);
+      expect(grid.style.backgroundSize).toBe('30px 30px');
+      expect(building.style.width).toBe('60px');
+      expect(building.style.height).toBe('60px');
+      expect(container.querySelector('.city-buildings-container')).toBe(buildingsContainer);
+      expect(container.querySelector('.city-roads-container')).toBe(roadsContainer);
+      expect(container.querySelector('.city-map-grid')).toBe(grid);
+
+      renderer.destroy();
+      expect(observers[0].disconnected).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('does not lock the 600 fallback when initialize runs while the container is hidden', () => {
+    const observers = [];
+    class RecordingResizeObserver {
+      constructor(callback) {
+        this.callback = callback;
+        observers.push(this);
+      }
+      observe() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', RecordingResizeObserver);
+    try {
+      withLocation();
+      setContainerSize(0, 0);
+      renderer.initialize();
+
+      // First paint still uses 600/30 = 20, but the measurement is provisional.
+      expect(renderer.tileSize).toBe(20);
+      expect(container.querySelector('.city-building').style.width).toBe('40px');
+
+      // Shown at 1500×900 -> min(50, 30) = 30, not the baked-in 20.
+      setContainerSize(1500, 900);
+      observers[0].callback();
+      expect(renderer.tileSize).toBe(30);
+      expect(container.querySelector('.city-map-grid').style.backgroundSize).toBe('30px 30px');
+      expect(container.querySelector('.city-building').style.width).toBe('60px');
+      expect(container.querySelector('.city-building').style.height).toBe('60px');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('updates tileSize on window resize when ResizeObserver is unavailable', () => {
+    vi.stubGlobal('ResizeObserver', undefined);
+    try {
+      withLocation();
+      setContainerSize(600, 600);
+      renderer.initialize();
+      expect(renderer.tileSize).toBe(20);
+
+      setContainerSize(300, 300);
+      window.dispatchEvent(new Event('resize'));
+
+      expect(renderer.tileSize).toBe(10);
+      expect(container.querySelector('.city-building').style.width).toBe('20px');
+      expect(container.querySelector('.city-map-grid').style.backgroundSize).toBe('10px 10px');
+
+      renderer.destroy();
+      setContainerSize(900, 900);
+      window.dispatchEvent(new Event('resize'));
+      expect(renderer.tileSize).toBe(10);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });
