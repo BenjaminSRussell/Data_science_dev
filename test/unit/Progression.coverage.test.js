@@ -62,15 +62,24 @@ describe('VisualProgressionSystem milestones (#382)', () => {
 describe('VisualProgressionSystem DOM upgrades (#383)', () => {
     it('upgradeSpriteSheets registers real 64px LPC sheets for mid and premium', () => {
         const registerSpriteSheet = vi.fn();
-        const v = new VisualProgressionSystem({ spriteSheetManager: { registerSpriteSheet } });
+        const loadSpriteSheet = vi.fn(() => Promise.resolve(true));
+        const v = new VisualProgressionSystem({ spriteSheetManager: { registerSpriteSheet, loadSpriteSheet } });
         v.upgradeSpriteSheets('mid');
         expect(registerSpriteSheet).toHaveBeenCalledWith('character_mid', expect.objectContaining({
             url: LPC_SHEET_URLS.mid, frameWidth: 64, frameHeight: 64, columns: 13, rows: 21
         }));
+        expect(loadSpriteSheet).toHaveBeenCalledWith('character_mid');
+        v.currentTier = 'premium';
         v.upgradeSpriteSheets('premium');
         expect(registerSpriteSheet).toHaveBeenCalledWith('character_premium', expect.objectContaining({
             url: LPC_SHEET_URLS.premium, frameWidth: 64, frameHeight: 64, columns: 13, rows: 21
         }));
+        expect(loadSpriteSheet).toHaveBeenCalledWith('character_premium');
+        // The sheet the character renderer looks up is loaded too
+        expect(registerSpriteSheet).toHaveBeenCalledWith('main_character', expect.objectContaining({
+            url: LPC_SHEET_URLS.premium
+        }));
+        expect(loadSpriteSheet).toHaveBeenCalledWith('main_character');
         expect(() => new VisualProgressionSystem({}).upgradeSpriteSheets('mid')).not.toThrow();
         expect(() => new VisualProgressionSystem({ spriteSheetManager: {} }).upgradeSpriteSheets('mid')).not.toThrow();
     });
@@ -108,13 +117,19 @@ describe('VisualProgressionSystem DOM upgrades (#383)', () => {
 describe('VisualProgressionSystem URLs and save/load (#384)', () => {
     it('URL lookups follow the current tier and fall back to basic', () => {
         const v = new VisualProgressionSystem({});
+        const backdrops = { basic: '00', mid: '04', premium: '09' };
         for (const tier of ['basic', 'mid', 'premium']) {
             v.currentTier = tier;
             expect(v.getSpriteSheetUrl('main')).toBe(LPC_SHEET_URLS[tier]);
-            expect(v.getBackgroundUrl('downtown')).toBe(`/assets/backgrounds/locations/downtown_${tier}.png`);
+            expect(v.getBackgroundUrl('downtown')).toBe(
+                `/assets/backgrounds/locations/downtown/downtown_backdrop_${backdrops[tier]}.png`
+            );
         }
         v.currentTier = 'ultra';
         expect(v.getSpriteSheetUrl()).toBe(LPC_SHEET_URLS.basic);
+        expect(v.getBackgroundUrl('downtown')).toBe('/assets/backgrounds/locations/downtown/downtown_backdrop_00.png');
+        // Non-player types still resolve to a shipped LPC sheet
+        expect(v.getSpriteSheetUrl('emma')).toMatch(/^\/assets\/characters\/sprites\/lpc_sprite_\d+\.png$/);
     });
 
     it('isTierUnlocked reflects membership', () => {

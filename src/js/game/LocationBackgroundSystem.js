@@ -114,11 +114,24 @@ export class LocationBackgroundSystem {
     }
 
     /**
+     * Tier backdrop from VisualProgressionSystem, when that location
+     * actually has one. Unknown locations stay on the gradient (#2084).
+     */
+    tierBackgroundUrl(locationId) {
+        const url = this.gameState?.visualProgressionSystem?.getBackgroundUrl?.(locationId);
+        if (!url || isAssetMissing(url)) return null;
+        const known = this.gameState?.worldMap?.getLocation?.(locationId) || this.backgrounds[locationId];
+        return known ? url : null;
+    }
+
+    /**
      * Background for a location with the WorldMap's own image layered on top
      * of the gradient, which still shows if the image is missing (#2470)
      */
     getLayeredBackground(locationId) {
         const gradient = this.getBackground(locationId);
+        const tierUrl = this.tierBackgroundUrl(locationId);
+        if (tierUrl) return `url("${tierUrl}"), ${gradient}`;
         const image = this.gameState.worldMap?.getLocation?.(locationId)?.background;
         const match = typeof image === 'string' ? image.match(/url\(["']?([^"')]+)["']?\)/) : null;
         if (!match || isAssetMissing(match[1])) return gradient;

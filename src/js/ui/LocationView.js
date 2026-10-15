@@ -4,6 +4,8 @@
  * Phase 2: Now uses Lit component (LocationViewComponent) with fallback
  */
 
+import { isAssetMissing } from '../assets/MissingAssetBlocklist.js';
+
 export class LocationView {
     constructor(game, assetManager, characterAnimationSystem, threeRenderer) {
         this.game = game;
@@ -33,11 +35,7 @@ export class LocationView {
         if (this.game?.uiUpdater?.litUIManager) {
             this.container = this.ensureContainer();
             const background = this.assetManager?.getLocationBackground(locationId);
-            const backgroundImage = background?.src &&
-                typeof background.src === 'string' &&
-                !background.src.includes('data:') &&
-                !background.src.includes('canvas')
-                ? background.src : '';
+            const backgroundImage = this.backgroundSrc(locationId, background);
             const timeOfDay = this.game.dayNightCycle?.getTimeOfDay() || 'noon';
 
             this.game.uiUpdater?.litUIManager?.updateLocationView(
@@ -109,13 +107,9 @@ export class LocationView {
         const background = this.assetManager?.getLocationBackground(locationId);
         const timeOfDay = this.game.dayNightCycle?.getTimeOfDay() || 'noon';
 
-        // Only set inline background-image if we have a valid asset
-        const backgroundStyle = background && background.src &&
-            typeof background.src === 'string' &&
-            !background.src.includes('data:') &&
-            !background.src.includes('canvas')
-            ? `background-image: url('${background.src}');`
-            : '';
+        // Tier backdrop wins over the default asset when one is unlocked (#2084)
+        const backgroundSrc = this.backgroundSrc(locationId, background);
+        const backgroundStyle = backgroundSrc ? `background-image: url('${backgroundSrc}');` : '';
 
         this.container.innerHTML = `
             <div class="location-background ${locationId} time-${timeOfDay}" 
@@ -135,6 +129,24 @@ export class LocationView {
 
         // Render characters in location
         this.renderCharacters(locationId);
+    }
+
+    /**
+     * Image URL for a location: the visual-tier backdrop when that file
+     * is not blocklisted, otherwise the asset manager's own src (#2084).
+     */
+    backgroundSrc(locationId, assetBackground) {
+        const vps = this.game?.gameState?.visualProgressionSystem || this.game?.visualProgressionSystem;
+        const tierUrl = vps?.getBackgroundUrl?.(locationId);
+        const src = assetBackground?.src;
+        const assetOk = typeof src === 'string' && src && !src.includes('data:') && !src.includes('canvas');
+        const tierOk = typeof tierUrl === 'string' && tierUrl && !isAssetMissing(tierUrl);
+        // Only swap in the tier backdrop for a location that already has art,
+        // or that exists on the world map. Anything else keeps the old src (#2084).
+        const known = assetOk || !!this.game?.gameState?.worldMap?.getLocation?.(locationId)
+            || !!this.game?.worldMap?.getLocation?.(locationId);
+        if (tierOk && known) return tierUrl;
+        return assetOk ? src : '';
     }
 
     /**
