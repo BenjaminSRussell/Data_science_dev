@@ -200,7 +200,8 @@ export class GameState {
     }
 
     /**
-     * Check if a chart type is unlocked
+     * Check if a chart type is unlocked.
+     * Charts are not rank-gated. ranks.js must not promise chart access (#2012).
      */
     isChartTypeUnlocked(type) {
         return true; // Liberalization: All charts unlocked by default!
