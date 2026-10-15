@@ -266,25 +266,46 @@ export class LocationView {
         if (this.game.showToast) {
             this.game.showToast(applied.blocked || result.result.message, applied.blocked ? 'error' : 'info');
         }
-        if (!applied.blocked) this.game.uiUpdater?.updateAllUI?.();
+        if (!applied.blocked) {
+            const screen = result.result.openScreen;
+            if (screen) {
+                this.game.screenManager?.showScreen?.(screen);
+                if (screen === 'screen-stock-market') this.game.updateStockMarketScreen?.();
+            }
+            this.game.uiUpdater?.updateAllUI?.();
+        }
         return applied;
     }
 
     /**
      * Apply a feature's energy/skill/money effects; they used to be read
      * and thrown away (#2391, #2063, #45). Paid features need the cash.
+     * A City Hall license is filed through LegalSystem so the catalog price
+     * is charged once (#2064). Reputation from social rooms is applied here.
      */
     applyFeatureResult(res) {
         const gs = this.game.gameState || {};
-        const money = Number(res.money) || 0;
-        if (money < 0 && (Number(gs.money) || 0) < -money) {
-            return { blocked: `You need $${-money} for that.` };
-        }
         const applied = { energy: 0, skill: 0, money: 0 };
-        if (money) {
-            gs.money = (Number(gs.money) || 0) + money;
-            if (money < 0) gs.totalSpent = (gs.totalSpent || 0) - money;
-            applied.money = money;
+        let moneyAlreadyApplied = false;
+
+        if (res?.licenseId && typeof gs.legalSystem?.acquireLicense === 'function') {
+            const before = Number(gs.money) || 0;
+            const out = gs.legalSystem.acquireLicense(res.licenseId);
+            if (!out?.success) return { blocked: out?.message || 'The license application was refused.' };
+            applied.money = (Number(gs.money) || 0) - before;
+            moneyAlreadyApplied = true;
+        }
+
+        const money = Number(res.money) || 0;
+        if (!moneyAlreadyApplied) {
+            if (money < 0 && (Number(gs.money) || 0) < -money) {
+                return { blocked: `You need $${-money} for that.` };
+            }
+            if (money) {
+                gs.money = (Number(gs.money) || 0) + money;
+                if (money < 0) gs.totalSpent = (gs.totalSpent || 0) - money;
+                applied.money = money;
+            }
         }
         const energy = Number(res.energy) || 0;
         const tm = this.game.timeManager || gs.timeManager;
@@ -300,6 +321,11 @@ export class LocationView {
         if (skill > 0 && stats?.addExperience) {
             stats.addExperience(LocationView.SKILL_STAT, skill * LocationView.XP_PER_SKILL_POINT);
             applied.skill = skill;
+        }
+        const reputation = Number(res.reputation) || 0;
+        if (reputation) {
+            gs.reputation = (Number(gs.reputation) || 0) + reputation;
+            applied.reputation = reputation;
         }
         return applied;
     }
