@@ -1,6 +1,10 @@
 /**
  * RealisticDialogueSystem.js
- * Generates realistic, natural dialogue that feels authentic
+ * Generates realistic, natural dialogue that feels authentic.
+ *
+ * Keep (#1596). Fallback flavor text for greetings, generic reactions,
+ * farewells, and breakups. Authored NPC dialogue stays canonical.
+ * See docs/reviews/realistic-dialogue-system.md.
  */
 
 // One set of relationship thresholds for every method (#1598)
