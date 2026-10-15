@@ -882,6 +882,16 @@ export class MainGame {
             this.uiUpdater.updateCareerScreen();
         });
 
+        // Workplace panel on the career screen (#2259)
+        document.getElementById('btn-talk-boss')?.addEventListener('click', () => this.handleTalkToBoss());
+        document.getElementById('btn-ask-promotion')?.addEventListener('click', () => this.handleAskForPromotion());
+        document.getElementById('btn-quit-job')?.addEventListener('click', () => this.handleQuitJob());
+        document.getElementById('workplace-coworkers')?.addEventListener('click', (e) => {
+            const btn = e.target.closest?.('[data-coworker-id]');
+            if (!btn || btn.disabled) return;
+            this.handleTalkToCoworker(btn.dataset.coworkerId);
+        });
+
         document.getElementById('btn-nav-shop')?.addEventListener('click', () => {
             // Holidays close the shops (#1704)
             if (this.eventSystem?.isShopClosed?.()) {
@@ -3328,6 +3338,81 @@ export class MainGame {
         this.updateStaffScreen();
         this.showToast(`${removed.name} has left the team.`, 'info');
         return true;
+    }
+
+    /**
+     * WorkInteractionSystem lives on gameState; MainGame mirrors it after boot.
+     */
+    workInteractions() {
+        return this.workInteractionSystem || this.gameState?.workInteractionSystem || null;
+    }
+
+    /** @returns {boolean} */
+    _requireJob(action) {
+        if (this.workInteractions() && this.gameState?.currentJob) return true;
+        this.showToast?.(`You need a job before you can ${action}.`, 'info');
+        return false;
+    }
+
+    _showWorkplace(message, type = 'info', refreshTopBar = false) {
+        const el = document.getElementById('workplace-dialogue');
+        if (el && message) el.textContent = message;
+        if (message) this.showToast?.(message, type);
+        if (refreshTopBar) this.uiUpdater?.updateTopBar?.();
+        this.uiUpdater?.updateWorkplacePanel?.();
+    }
+
+    /**
+     * Talk to the job's boss. Dialogue follows the current relationship;
+     * the conversation itself adds a little trust (#2259).
+     */
+    handleTalkToBoss() {
+        if (!this._requireJob('talk to your boss')) return null;
+        const result = this.workInteractions().talkToBoss();
+        const name = result?.boss?.name || 'Boss';
+        this._showWorkplace(`${name}: "${result?.dialogue || ''}"`, 'info');
+        return result;
+    }
+
+    /**
+     * Talk to one coworker (Sarah, Mike, Jessica, or whoever the job generated).
+     */
+    handleTalkToCoworker(coworkerId) {
+        if (!this._requireJob('talk to coworkers')) return null;
+        const result = this.workInteractions().talkToCoworker(coworkerId);
+        if (!result) {
+            this.showToast?.('That coworker is not around.', 'warning');
+            return null;
+        }
+        const name = result.coworker?.name || 'Coworker';
+        this._showWorkplace(`${name}: "${result.dialogue}"`, 'info');
+        return result;
+    }
+
+    /**
+     * Ask the boss for a promotion. The system decides; this only surfaces it.
+     */
+    handleAskForPromotion() {
+        if (!this._requireJob('ask for a promotion')) return null;
+        const result = this.workInteractions().askForPromotion();
+        this._showWorkplace(result?.message || 'No response.', result?.success ? 'success' : 'info', true);
+        if (result?.success) this.audioManager?.play?.('promotion');
+        return result;
+    }
+
+    /**
+     * Quit the current job after a confirm. Records history inside quitJob.
+     */
+    handleQuitJob() {
+        if (!this._requireJob('quit')) return null;
+        const label = UIUpdater.workplaceJobLabel(this.gameState.currentJob);
+        const ask = typeof window !== 'undefined' && typeof window.confirm === 'function'
+            ? window.confirm
+            : null;
+        if (ask && !ask(`Quit ${label}?`)) return null;
+        const result = this.workInteractions().quitJob();
+        this._showWorkplace(result?.message || 'You quit.', 'info', true);
+        return result;
     }
 
     /**

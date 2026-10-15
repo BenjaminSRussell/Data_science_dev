@@ -465,6 +465,37 @@
                         &lt; BACK </button>
                     <div class="text-ui-heading">CONTRACTS & PROJECTS</div>
 
+                    <!-- Workplace: talk, promotion, quit (#2259) -->
+                    <div id="workplace-panel" class="ascii-box" style="margin-bottom: 1rem;">
+                        <div class="text-ui-heading">YOUR JOB</div>
+                        <div class="text-stat-row">
+                            <span class="text-stat-label">Job:</span>
+                            <span class="text-stat-value" id="workplace-job">Unemployed</span>
+                        </div>
+                        <div class="text-stat-row">
+                            <span class="text-stat-label">Boss:</span>
+                            <span class="text-stat-value" id="workplace-boss">—</span>
+                        </div>
+                        <div class="text-stat-row">
+                            <span class="text-stat-label">Trust:</span>
+                            <span class="text-stat-value" id="workplace-boss-rel">0</span>
+                        </div>
+                        <div class="text-stat-row">
+                            <span class="text-stat-label">Promotion:</span>
+                            <span class="text-stat-value" id="workplace-readiness">0</span>
+                        </div>
+                        <p id="workplace-dialogue" style="font-style: italic; margin: 0.5rem 0;">
+                            Talk to your boss and coworkers, ask for a promotion, or quit.
+                        </p>
+                        <div class="project-actions" style="display: grid; gap: 0.5rem;">
+                            <button class="btn-manual-action" id="btn-talk-boss" type="button">[ TALK TO BOSS ]</button>
+                            <button class="btn-manual-action" id="btn-ask-promotion" type="button">[ ASK FOR PROMOTION ]</button>
+                            <button class="btn-manual-action" id="btn-quit-job" type="button">[ QUIT JOB ]</button>
+                        </div>
+                        <div class="text-ui-heading" style="margin-top: 0.75rem;">COWORKERS</div>
+                        <div id="workplace-coworkers" style="display: grid; gap: 0.5rem;"></div>
+                    </div>
+
                     <!-- Active Project Section -->
                     <div id="active-project-container" class="ascii-box hidden"
                         style="border: 1px dashed #555; margin-bottom: 1rem;">

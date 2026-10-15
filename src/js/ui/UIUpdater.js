@@ -192,9 +192,80 @@ export class UIUpdater {
     }
 
     /**
+     * Job label for the workplace panel. Strings and {title, company} both occur.
+     */
+    static workplaceJobLabel(job) {
+        if (!job) return 'Unemployed';
+        if (typeof job === 'string') return job;
+        const title = job.title || job.name || 'Employee';
+        return job.company ? `${title} at ${job.company}` : String(title);
+    }
+
+    /**
+     * Boss, coworkers, and whether workplace actions are available (#2259).
+     * Does not touch #workplace-dialogue, so a line the player just heard stays.
+     */
+    updateWorkplacePanel() {
+        if (typeof document === 'undefined') return;
+        if (!document.getElementById('workplace-panel')) return;
+
+        const wis = this.game?.workInteractionSystem || this.gameState?.workInteractionSystem;
+        const job = this.gameState?.currentJob;
+        const employed = Boolean(job) && Boolean(wis);
+        const set = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        set('workplace-job', UIUpdater.workplaceJobLabel(job));
+        const boss = wis?.boss;
+        set('workplace-boss', boss
+            ? ([boss.name, boss.title].filter(Boolean).join(', ') || 'Boss')
+            : '—');
+        set('workplace-boss-rel', boss ? String(Math.round(Number(boss.relationship) || 0)) : '—');
+        set('workplace-readiness', boss ? String(Math.round(Number(boss.promotionReadiness) || 0)) : '—');
+
+        for (const id of ['btn-talk-boss', 'btn-ask-promotion', 'btn-quit-job']) {
+            const btn = document.getElementById(id);
+            if (btn) btn.disabled = !employed;
+        }
+
+        const list = document.getElementById('workplace-coworkers');
+        if (!list) return;
+        list.replaceChildren();
+        const coworkers = Array.isArray(wis?.coworkers) ? wis.coworkers : [];
+        if (coworkers.length === 0) {
+            const empty = document.createElement('p');
+            empty.textContent = 'No coworkers yet.';
+            list.appendChild(empty);
+            return;
+        }
+        for (const coworker of coworkers) {
+            const row = document.createElement('div');
+            row.className = 'text-stat-row';
+            const label = document.createElement('span');
+            label.className = 'text-stat-label';
+            label.textContent = coworker?.name || coworker?.id || 'Coworker';
+            const value = document.createElement('span');
+            value.className = 'text-stat-value';
+            const personality = coworker?.personality ? `${coworker.personality} · ` : '';
+            value.textContent = `${personality}${Math.round(Number(coworker?.relationship) || 0)}`;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-manual-action';
+            btn.dataset.coworkerId = coworker?.id || '';
+            btn.textContent = '[ TALK ]';
+            btn.disabled = !employed || !coworker?.id;
+            row.append(label, value, btn);
+            list.appendChild(row);
+        }
+    }
+
+    /**
      * Update career screen
      */
     updateCareerScreen() {
+        this.updateWorkplacePanel();
         const ps = this.gameState.projectSystem;
         if (!ps) return;
 
