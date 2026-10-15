@@ -1,7 +1,8 @@
 /**
  * MapProgressionSystem.js
  * Different maps for early, mid, and end-game with new characters.
- * Location travel goes through WorldMap.travelTo, not this system.
+ * Location travel goes through WorldMap.travelTo. switchMap wires that
+ * map's locations into the world map and brings companions along.
  */
 
 export class MapProgressionSystem {
@@ -9,6 +10,7 @@ export class MapProgressionSystem {
         this.gameState = gameState;
         this.currentMap = 'early_game';
         this.unlockedMaps = ['early_game'];
+        this.followingNPCs = [];
         this.mapData = this.initializeMaps();
     }
 
@@ -118,7 +120,10 @@ export class MapProgressionSystem {
     }
 
     /**
-     * Switch to a different map
+     * Switch to a different map.
+     * When a world map is present, success requires every destination
+     * location to be in that map's location set (#2014). With no world
+     * map, only the progression pointer changes (#2015).
      */
     switchMap(mapId) {
         if (!this.unlockedMaps.includes(mapId)) {
@@ -130,29 +135,110 @@ export class MapProgressionSystem {
             return { success: false, message: 'Map not found.' };
         }
 
-        this.currentMap = mapId;
-
-        // Update world map with new locations
-        if (this.gameState.worldMap) {
-            this.updateWorldMapLocations(map);
+        const worldMap = this.gameState?.worldMap;
+        if (worldMap) {
+            const merged = this.updateWorldMapLocations(map);
+            if (!merged) {
+                return { success: false, message: 'Could not update locations for this map.' };
+            }
         }
+
+        this.currentMap = mapId;
+        const companions = this._carryCompanions(map);
 
         return {
             success: true,
             map,
+            companions,
             message: `You've arrived in ${map.name}.`
         };
     }
 
     /**
-     * Update world map with new locations
+     * Merge map.locations into gameState.worldMap.
+     * Catalog ids already in the set count as merged. New ids are added
+     * in WorldMap's location shape. Returns false unless every id is
+     * present afterwards.
      */
     updateWorldMapLocations(map) {
-        // This would integrate with WorldMap to add/update locations
-        map?.locations?.forEach(loc => {
-            // Add location to world map if it doesn't exist
-            // Implementation depends on WorldMap structure
+        const worldMap = this.gameState?.worldMap;
+        if (!worldMap || typeof worldMap !== 'object') return false;
+        const locations = map?.locations;
+        if (!Array.isArray(locations) || locations.length === 0) return false;
+
+        for (const loc of locations) {
+            if (!loc || typeof loc.id !== 'string' || loc.id.length === 0) return false;
+            if (typeof worldMap.mergeLocation === 'function') {
+                if (!worldMap.mergeLocation(loc)) return false;
+            } else if (!this._mergeIntoLocationArray(worldMap, loc)) {
+                return false;
+            }
+        }
+
+        if (typeof worldMap.getLocation === 'function') {
+            return locations.every(loc => worldMap.getLocation(loc.id));
+        }
+        const ids = new Set((Array.isArray(worldMap.locations) ? worldMap.locations : []).map(l => l && l.id));
+        return locations.every(loc => ids.has(loc.id));
+    }
+
+    /**
+     * Plain-object world maps keep a locations array in WorldMap's shape.
+     */
+    _mergeIntoLocationArray(worldMap, loc) {
+        if (!Array.isArray(worldMap.locations)) {
+            if (!Object.isExtensible(worldMap)) return false;
+            worldMap.locations = [];
+        }
+        if (worldMap.locations.some(existing => existing && existing.id === loc.id)) return true;
+        const x = Number.isFinite(loc.x) ? loc.x : loc.position?.x;
+        const y = Number.isFinite(loc.y) ? loc.y : loc.position?.y;
+        const name = typeof loc.name === 'string' && loc.name
+            ? loc.name
+            : loc.id.split('_').filter(Boolean).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+        worldMap.locations.push({
+            id: loc.id,
+            name,
+            icon: typeof loc.icon === 'string' ? loc.icon : '',
+            description: typeof loc.description === 'string' ? loc.description : '',
+            type: typeof loc.type === 'string' ? loc.type : 'district',
+            travelTime: Number.isFinite(loc.travelTime) ? loc.travelTime : 1,
+            requiresVehicle: loc.requiresVehicle || false,
+            unlockRequirement: loc.unlockRequirement ?? null,
+            activities: Array.isArray(loc.activities) ? loc.activities : [],
+            position: {
+                x: Number.isFinite(x) ? x : 0,
+                y: Number.isFinite(y) ? y : 0
+            },
+            background: typeof loc.background === 'string' ? loc.background : ''
         });
+        return true;
+    }
+
+    /**
+     * Carry NPCs whose getNPCsThatFollow().willFollow is true.
+     * Placement is stored here so the shared NPC catalog is not mutated.
+     */
+    _carryCompanions(map) {
+        const destination = Array.isArray(map?.locations)
+            ? (map.locations.find(loc => loc && loc.id)?.id || null)
+            : null;
+        const coming = [];
+        for (const entry of this.getNPCsThatFollow()) {
+            if (!entry?.willFollow || !entry.npc) continue;
+            coming.push({
+                id: entry.npc.id ?? null,
+                relationship: entry.relationship,
+                mapId: map.id,
+                locationId: destination
+            });
+        }
+        this.followingNPCs = coming;
+        const worldMap = this.gameState?.worldMap;
+        if (worldMap && typeof worldMap === 'object') {
+            worldMap.followingNPCs = coming.map(c => ({ ...c }));
+        }
+        return coming.map(c => c.id);
     }
 
     /**
@@ -222,6 +308,8 @@ export class MapProgressionSystem {
         this.currentMap = known(data.currentMap) ? data.currentMap : 'early_game';
         if (!unlocked.includes(this.currentMap)) unlocked.push(this.currentMap);
         this.unlockedMaps = unlocked;
+        // Companions are not part of the save; don't keep a previous switch.
+        this.followingNPCs = [];
     }
 }
 

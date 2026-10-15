@@ -348,6 +348,8 @@ export class WorldMap {
         this.ownedVehicles = new Set(['walking']); // Use Set for O(1) lookups
         this.visitedLocations = new Set(['home']); // Use Set for O(1) lookups
         this.locationOverrides = {};
+        // Session pins added by map progression. Same shape as LOCATIONS (#2014).
+        this.addedLocations = new Map();
 
         // Cache for accessible locations (invalidated on state change)
         this._accessibleCache = null;
@@ -358,7 +360,7 @@ export class WorldMap {
      * Get location by ID - O(1) lookup
      */
     getLocation(locationId) {
-        const base = LOCATIONS_MAP.get(locationId);
+        const base = LOCATIONS_MAP.get(locationId) || this.addedLocations?.get(locationId);
         const override = this.locationOverrides?.[locationId];
         return base && override ? { ...base, ...override } : base;
     }
@@ -367,14 +369,66 @@ export class WorldMap {
      * All locations (with any event overrides applied) (#984, #2353)
      */
     getLocations() {
-        return LOCATIONS.map(l => this.getLocation(l.id));
+        const catalog = LOCATIONS.map(l => this.getLocation(l.id));
+        if (!this.addedLocations || this.addedLocations.size === 0) return catalog;
+        const extras = [];
+        for (const loc of this.addedLocations.values()) {
+            extras.push(this.getLocation(loc.id));
+        }
+        return catalog.concat(extras);
+    }
+
+    /**
+     * True when id is in the static catalog or was merged in this session.
+     */
+    hasLocation(locationId) {
+        return LOCATIONS_MAP.has(locationId) || !!this.addedLocations?.has(locationId);
+    }
+
+    /**
+     * Ensure a location is in this map's set (#2014).
+     * Catalog ids are already present and are not rewritten.
+     * Unknown ids are stored in the same shape as LOCATIONS.
+     * @returns {boolean} true when the id is present afterwards
+     */
+    mergeLocation(partial) {
+        if (!partial || typeof partial.id !== 'string' || partial.id.length === 0) return false;
+        if (this.hasLocation(partial.id)) return true;
+
+        const x = Number.isFinite(partial.x) ? partial.x : partial.position?.x;
+        const y = Number.isFinite(partial.y) ? partial.y : partial.position?.y;
+        const name = typeof partial.name === 'string' && partial.name
+            ? partial.name
+            : partial.id.split('_').filter(Boolean).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+        const safeFile = /^[a-z0-9_]+$/.test(partial.id) ? partial.id : 'downtown';
+        const location = {
+            id: partial.id,
+            name,
+            icon: typeof partial.icon === 'string' ? partial.icon : `/assets/icons/locations/${safeFile}.png`,
+            description: typeof partial.description === 'string' ? partial.description : '',
+            type: typeof partial.type === 'string' ? partial.type : 'district',
+            travelTime: Number.isFinite(partial.travelTime) ? partial.travelTime : 1,
+            requiresVehicle: partial.requiresVehicle || false,
+            unlockRequirement: partial.unlockRequirement ?? null,
+            activities: Array.isArray(partial.activities) ? partial.activities : [],
+            position: {
+                x: Number.isFinite(x) ? x : 0,
+                y: Number.isFinite(y) ? y : 0
+            },
+            background: typeof partial.background === 'string'
+                ? partial.background
+                : `url("/assets/backgrounds/locations/${safeFile}.png")`
+        };
+        this.addedLocations.set(location.id, location);
+        this._invalidateCache();
+        return true;
     }
 
     /**
      * Jump straight to a location without travel cost (dev tools / events) (#984, #2353)
      */
     setCurrentLocation(locationId) {
-        if (!LOCATIONS_MAP.has(locationId)) {
+        if (!this.hasLocation(locationId)) {
             return { success: false, reason: 'Unknown location' };
         }
         this.currentLocation = locationId;
@@ -388,7 +442,7 @@ export class WorldMap {
      * Innovation Hub) (#1334). Overrides are persisted via locationOverrides.
      */
     updateLocation(locationId, overrides = {}) {
-        if (!LOCATIONS_MAP.has(locationId)) return false;
+        if (!this.hasLocation(locationId)) return false;
         this.locationOverrides[locationId] = { ...(this.locationOverrides[locationId] || {}), ...overrides };
         this._invalidateCache(); // cached accessible list holds location objects (#1339)
         return true;
@@ -479,6 +533,27 @@ export class WorldMap {
             accessible.push(this.getLocation(location.id));
         }
 
+        // Pins merged by map progression use the same gates (#2014)
+        if (this.addedLocations) {
+            for (const location of this.addedLocations.values()) {
+                if (location.requiresVehicle === 'car' && accessLevel < 2) continue;
+                if (location.requiresVehicle === 'luxury_car' && accessLevel < 3) continue;
+                if (location.requiresVehicle === 'bus' && accessLevel < 1) continue;
+
+                if (location.unlockRequirement) {
+                    const req = location.unlockRequirement;
+                    if (req.stat) {
+                        const statVal = this.gameState.characterStats?.getStat(req.stat) || 0;
+                        if (statVal < req.value) continue;
+                    }
+                    if (req.reputation && !((Number(this.gameState.reputation) || 0) >= req.reputation)) continue;
+                    if (req.money && !((Number(this.gameState.money) || 0) >= req.money)) continue;
+                }
+
+                accessible.push(this.getLocation(location.id));
+            }
+        }
+
         // Cache result, plus an id Set so canTravelTo() is O(1) (#1435)
         this._accessibleCache = accessible;
         this._accessibleIds = new Set(accessible.map(l => l.id));
@@ -493,7 +568,7 @@ export class WorldMap {
      * (rebuilding it after a state change is O(n)) (#1435)
      */
     canTravelTo(locationId) {
-        const location = LOCATIONS_MAP.get(locationId);
+        const location = LOCATIONS_MAP.get(locationId) || this.addedLocations?.get(locationId);
         if (!location) return { can: false, reason: 'Unknown location' };
 
         const accessible = this.getAccessibleLocations();
@@ -516,7 +591,7 @@ export class WorldMap {
      * Time slots a trip costs with the current vehicle. 0 when already there (#1434, #2168).
      */
     getTravelSlots(locationId) {
-        const location = LOCATIONS_MAP.get(locationId);
+        const location = LOCATIONS_MAP.get(locationId) || this.addedLocations?.get(locationId);
         if (!location || locationId === this.currentLocation) return 0;
         const speed = this._activeVehicle()?.travelSpeed || 1;
         return Math.max(0, Math.ceil(location.travelTime / speed));
