@@ -6,6 +6,7 @@
 
 // AssetResolver not currently used - using direct SVG paths
 // import { AssetResolver } from '../../utils/AssetResolver.js';
+import { relationshipFeature } from '../settings/GameplaySettings.js';
 
 export class LocationDetailSystem {
     constructor(gameState) {
@@ -396,6 +397,9 @@ export class LocationDetailSystem {
      * Execute feature action
      */
     executeAction(action, locationId, featureId) {
+        if ((action === 'gossip' || action === 'socialize') && !relationshipFeature(this.gameState, 'social')) {
+            return { message: 'Social interactions are turned off in gameplay settings.' };
+        }
         switch (action) {
             case 'rest':
                 return { energy: 50, message: 'You rest and restore energy' };

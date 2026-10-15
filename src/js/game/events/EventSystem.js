@@ -4,6 +4,7 @@
  */
 
 import { pickState, applyState } from '../../utils/StateSerializer.js';
+import { relationshipFeature } from '../settings/GameplaySettings.js';
 
 export class EventSystem {
     constructor(gameState) {
@@ -252,6 +253,9 @@ export class EventSystem {
         const today = this.gameState?.timeManager?.totalDays ?? 0;
         const active = this.activeEvents.find(e => e.id === eventId && e.triggeredDay === today);
         if (!active || active.resolved) return null;
+        if (actionId === 'attend' && !relationshipFeature(this.gameState, 'social')) {
+            return { action: 'attend', success: false, message: 'Social events are turned off in gameplay settings.' };
+        }
         active.resolved = actionId;
         this.eventHistory.push({ id: eventId, action: actionId, day: today });
         if (this.eventHistory.length > 100) this.eventHistory.splice(0, this.eventHistory.length - 100);

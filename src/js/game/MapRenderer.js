@@ -6,6 +6,7 @@
 
 import { MapManager } from './MapManager.js';
 import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
+import { readGameplayFlag } from './settings/GameplaySettings.js';
 
 export class MapRenderer {
     constructor(container, game) {
@@ -197,6 +198,7 @@ export class MapRenderer {
      * Render buildings
      */
     renderBuildings() {
+        const motion = readGameplayFlag(this.game?.gameState, 'visuals', 'animations');
         const buildings = this.mapManager.getBuildingSystem().getAllBuildings();
         const gridSystem = this.mapManager.getGridSystem();
         const containerWidth = this.container.offsetWidth || this.mapManager.getGridSystem().totalWidth;
@@ -245,7 +247,7 @@ export class MapRenderer {
                     0 6px 16px rgba(0, 0, 0, 0.5),
                     inset 0 2px 4px rgba(255, 255, 255, 0.2),
                     inset 0 -2px 4px rgba(0, 0, 0, 0.3);
-                transition: all 0.2s ease;
+                transition: ${motion ? 'all 0.2s ease' : 'none'};
             `;
             
             // Add hover effect
@@ -277,7 +279,10 @@ export class MapRenderer {
         const containerWidth = this.container.offsetWidth || this.mapManager.getGridSystem().totalWidth;
         const containerHeight = this.container.offsetHeight || this.mapManager.getGridSystem().totalHeight;
         
-        // Trees (park and street) and commercial decorations all get drawn (#1452)
+        // Trees (park and street) and commercial decorations all get drawn (#1452).
+        // Extra detail follows the visuals.details toggle; missing settings stay on (#2276).
+        const showDetails = readGameplayFlag(this.game?.gameState, 'visuals', 'details');
+        const lowPoly = readGameplayFlag(this.game?.gameState, 'visuals', 'lowPoly');
         const CLASS_BY_KIND = {
             'park-tree': 'map-tree map-tree--park',
             'street-tree': 'map-tree map-tree--street',
@@ -287,6 +292,7 @@ export class MapRenderer {
         elements.forEach(element => {
             const className = CLASS_BY_KIND[element.subtype] || CLASS_BY_KIND[element.type];
             if (!className) return;
+            if (!showDetails && (element.type === 'decoration' || element.subtype === 'decoration')) return;
             const el = document.createElement('div');
             el.className = className;
             el.dataset.envType = element.subtype || element.type;
@@ -294,7 +300,7 @@ export class MapRenderer {
             const pixel = gridSystem.gridToPixel(element.x, element.y);
             const left = (pixel.x / containerWidth) * 100;
             const top = (pixel.y / containerHeight) * 100;
-            const size = element.type === 'decoration' ? 12 : 20;
+            const size = (element.type === 'decoration' ? 12 : 20) * (lowPoly ? 1 : 1.4);
 
             el.style.cssText = `
                 position: absolute;

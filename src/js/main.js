@@ -47,7 +47,7 @@ import { NotificationSystem } from './game/NotificationSystem.js';
 import { LocationDetailSystem } from './game/locations/LocationDetailSystem.js';
 import { JealousySystem } from './game/social/JealousySystem.js';
 import { DemandingBossSystem } from './game/work/DemandingBossSystem.js';
-import { GameplaySettings } from './game/settings/GameplaySettings.js';
+import { GameplaySettings, readGameplayFlag, companyFeature } from './game/settings/GameplaySettings.js';
 import { RoommateSystem } from './game/social/RoommateSystem.js';
 import { DirtyDataSystem } from './game/data/DirtyDataSystem.js';
 import { RoomSystem } from './game/locations/RoomSystem.js';
@@ -719,21 +719,29 @@ export class MainGame {
         const animate = () => {
             if (!alive) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // visuals.details / animations / lowPoly. Defaults match this loop (#2276).
+            if (!readGameplayFlag(this.gameState, 'visuals', 'details')) {
+                rafId = requestAnimationFrame(animate);
+                return;
+            }
+            const motion = readGameplayFlag(this.gameState, 'visuals', 'animations');
+            const lowPoly = readGameplayFlag(this.gameState, 'visuals', 'lowPoly');
 
             particles.forEach((particle, i) => {
-                // Update position
-                particle.x += particle.speedX;
-                particle.y += particle.speedY;
+                // Animations off: draw a frozen frame, don't move it (#2276)
+                if (motion) {
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+                    if (particle.x < 0) particle.x = canvas.width;
+                    if (particle.x > canvas.width) particle.x = 0;
+                    if (particle.y < 0) particle.y = canvas.height;
+                    if (particle.y > canvas.height) particle.y = 0;
+                }
 
-                // Wrap around edges
-                if (particle.x < 0) particle.x = canvas.width;
-                if (particle.x > canvas.width) particle.x = 0;
-                if (particle.y < 0) particle.y = canvas.height;
-                if (particle.y > canvas.height) particle.y = 0;
-
-                // Draw particle with theme color
+                // Draw particle with theme color. Low-poly off draws a larger dot.
+                const radius = lowPoly ? particle.radius : particle.radius * 2;
                 ctx.beginPath();
-                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                ctx.arc(particle.x, particle.y, radius, 0, Math.PI * 2);
                 // Extract color and apply opacity
                 if (particle.color) {
                     const colorMatch = particle.color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
@@ -2773,6 +2781,14 @@ export class MainGame {
      * Show settings modal
      */
     showSettings() {
+        let gameplayHtml = '';
+        if (this.gameState) {
+            if (!this.gameState.gameplaySettings) {
+                this.gameState.gameplaySettings = new GameplaySettings();
+            }
+            this.gameplaySettings = this.gameState.gameplaySettings;
+            gameplayHtml = `<h3 class="gameplay-settings-heading">Gameplay</h3><div class="gameplay-settings">${this.gameState.gameplaySettings.renderControls()}</div>`;
+        }
         const modalContent = `
             <div class="settings-modal">
                 <h2 id="modal-title">Settings</h2>
@@ -2808,6 +2824,7 @@ export class MainGame {
                         <span id="settings-quality-current" class="settings-hint">${MainGame.prototype.describeQualitySetting.call(this)}</span>
                     </div>
                 </div>
+                ${gameplayHtml}
                 <div class="settings-backup">
                     <p class="settings-hint">Saves are kept in IndexedDB. A LocalStorage copy remains for one release. Export a JSON backup to move a career between browsers.</p>
                     <button type="button" class="btn btn-secondary" id="settings-export-save">Export save (JSON)</button>
@@ -2856,6 +2873,21 @@ export class MainGame {
                 preferredSlot: this.currentSaveSlot ?? 0,
                 notify: (message, type) => this.showToast?.(message, type)
             });
+        });
+        const gp = this.gameState?.gameplaySettings;
+        document.querySelectorAll('[data-gp-cat]').forEach((input) => {
+            const apply = () => {
+                if (!gp) return;
+                const category = input.dataset.gpCat;
+                const key = input.dataset.gpKey;
+                const value = input.type === 'checkbox' ? input.checked : Number(input.value);
+                gp.setSetting(category, key, value);
+                const hint = document.getElementById(`${input.id}-value`);
+                if (hint) hint.textContent = String(gp.getSetting(category, key));
+                if (category === 'difficulty') this.gameState?.demandingBoss?.syncDifficultyFromSettings?.();
+            };
+            input.addEventListener('input', apply);
+            input.addEventListener('change', apply);
         });
     }
 
@@ -3265,6 +3297,11 @@ export class MainGame {
         const spec = STAFF_ROLES[role];
         if (!spec) {
             this.showError('Invalid staff role');
+            return false;
+        }
+
+        if (!companyFeature(this.gameState, 'hiring')) {
+            this.showToast('Hiring is turned off in gameplay settings.', 'error');
             return false;
         }
 
@@ -4242,6 +4279,18 @@ export class MainGame {
                 this.locationDetailSystem = this.gameState.locationDetailSystem;
             }
 
+            // Gameplay settings before the systems that read them (#2276, #1251)
+            if (!this.gameState.gameplaySettings) {
+                this.gameState.gameplaySettings = new GameplaySettings();
+                this.gameplaySettings = this.gameState.gameplaySettings;
+                // Settings restored from a save before this system existed (#1250)
+                if (this.gameState.pendingGameplaySettings) {
+                    this.gameplaySettings.fromJSON(this.gameState.pendingGameplaySettings);
+                    this.gameState.pendingGameplaySettings = null;
+                }
+            }
+            this.gameState.gameplaySettings.applyVisuals?.();
+
             // Jealousy system
             if (!this.gameState.jealousySystem) {
                 this.gameState.jealousySystem = new JealousySystem(this.gameState);
@@ -4257,17 +4306,6 @@ export class MainGame {
                     title: 'Department Head'
                     // demandLevel comes from GameplaySettings' difficulty (#1251)
                 });
-            }
-
-            // Gameplay settings
-            if (!this.gameState.gameplaySettings) {
-                this.gameState.gameplaySettings = new GameplaySettings();
-                this.gameplaySettings = this.gameState.gameplaySettings;
-                // Settings restored from a save before this system existed (#1250)
-                if (this.gameState.pendingGameplaySettings) {
-                    this.gameplaySettings.fromJSON(this.gameState.pendingGameplaySettings);
-                    this.gameState.pendingGameplaySettings = null;
-                }
             }
 
             // Roommate system

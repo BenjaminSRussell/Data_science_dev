@@ -2376,3 +2376,59 @@ html.quality-no-animations *::after {
     line-height: 1;
     cursor: default;
 }
+
+/* Gameplay settings. Classes are only present when a toggle leaves its default (#2276). */
+.gameplay-settings-heading {
+    margin: var(--space-3) 0 var(--space-2);
+    font-size: var(--font-size-sm);
+}
+
+.gameplay-settings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.gameplay-settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.gameplay-settings-row .settings-label {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.gameplay-settings-row input[type="range"] {
+    flex: 0 1 50%;
+}
+
+.gameplay-settings-row .settings-hint {
+    flex: 0 0 2.5rem;
+    text-align: right;
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary);
+}
+
+html.gp-no-animations *,
+html.gp-no-animations *::before,
+html.gp-no-animations *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+}
+
+html.gp-no-details .map-decoration,
+html.gp-no-details #menu-particles-canvas {
+    visibility: hidden;
+}
+
+html.gp-smooth canvas,
+html.gp-smooth img {
+    image-rendering: auto;
+}

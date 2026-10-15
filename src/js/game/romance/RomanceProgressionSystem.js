@@ -5,6 +5,7 @@
  */
 
 import { pickState, applyState } from '../../utils/StateSerializer.js';
+import { readGameplayFlag } from '../settings/GameplaySettings.js';
 
 // What each bias means; used for the advice text (#123)
 export const PARTNER_BIASES = {
@@ -33,7 +34,19 @@ export class RomanceProgressionSystem {
     /**
      * Start dating someone
      */
+    romanceBlocked() {
+        if (!readGameplayFlag(this.gameState, 'relationships', 'enabled')) {
+            return 'Relationships are turned off in gameplay settings.';
+        }
+        if (!readGameplayFlag(this.gameState, 'relationships', 'romance')) {
+            return 'Romance is turned off in gameplay settings.';
+        }
+        return null;
+    }
+
     startDating(partnerId) {
+        const blocked = this.romanceBlocked();
+        if (blocked) return { success: false, message: blocked };
         const partner = this.gameState.npcManager?.getNPC(partnerId);
         if (!partner) return { success: false, message: 'Unknown person' };
 
@@ -263,6 +276,8 @@ export class RomanceProgressionSystem {
      * Propose marriage
      */
     propose() {
+        const blocked = this.romanceBlocked();
+        if (blocked) return { success: false, message: blocked };
         if (this.relationshipStage !== 'dating' || this.relationshipPoints < PROPOSE_POINTS) {
             return { success: false, message: 'Not ready for marriage' };
         }
@@ -277,6 +292,8 @@ export class RomanceProgressionSystem {
      * Get married
      */
     getMarried() {
+        const blocked = this.romanceBlocked();
+        if (blocked) return { success: false, message: blocked };
         if (this.relationshipStage !== 'engaged') {
             return { success: false, message: 'Not engaged' };
         }

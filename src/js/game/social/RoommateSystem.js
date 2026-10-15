@@ -5,6 +5,7 @@
  */
 
 import { relationshipStage } from '../../data/relationshipStages.js';
+import { relationshipFeature } from '../settings/GameplaySettings.js';
 
 export class RoommateSystem {
     constructor(gameState) {
@@ -80,6 +81,15 @@ export class RoommateSystem {
         return share;
     }
     
+    /** Social roommate actions respect the social gameplay toggle (#2276). */
+    socialBlocked() {
+        if (relationshipFeature(this.gameState, 'social')) return null;
+        return {
+            message: 'Social interactions are turned off in gameplay settings.',
+            relationship: this.relationship
+        };
+    }
+
     /**
      * Interact with roommate
      */
@@ -102,6 +112,8 @@ export class RoommateSystem {
      * Talk to roommate
      */
     talk() {
+        const blocked = this.socialBlocked();
+        if (blocked) return blocked;
         const topics = [
             'How was work today?',
             'Any plans for the weekend?',
@@ -122,6 +134,8 @@ export class RoommateSystem {
      * Ask roommate for help
      */
     askForHelp() {
+        const blocked = this.socialBlocked();
+        if (blocked) return blocked;
         if (this.relationship < 40) {
             return { message: `${this.roommate.name} seems hesitant to help` };
         }
@@ -141,6 +155,8 @@ export class RoommateSystem {
      * Complain about something
      */
     complain() {
+        const blocked = this.socialBlocked();
+        if (blocked) return blocked;
         this.changeRelationship(-5);
         return {
             message: `${this.roommate.name} seems annoyed`,
@@ -152,6 +168,8 @@ export class RoommateSystem {
      * Hang out with roommate
      */
     hangout() {
+        const blocked = this.socialBlocked();
+        if (blocked) return blocked;
         this.changeRelationship(5);
         // Hanging out actually recharges you; closer friends recharge more (#1717)
         const energy = this.relationship >= 70 ? 15 : 10;
