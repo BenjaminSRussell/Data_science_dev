@@ -58,8 +58,16 @@ export class UIUpdater {
      * Update all UI elements
      */
     updateAllUI() {
-        this.updateTopBar();
-        this.updateRankProgress();
+        // LitUIManager.updateAllUI is the Lit top bar + rank pair. Calling
+        // updateTopBar/updateRankProgress as well would paint them twice,
+        // and a manager-less double (tests, the initialize-only mock) still
+        // needs those wrappers (#1634).
+        if (typeof this.litUIManager?.updateAllUI === 'function') {
+            this.litUIManager.updateAllUI();
+        } else {
+            this.updateTopBar();
+            this.updateRankProgress();
+        }
         this.updateChartTypeGrid();
         this.updateSoftwareDisplay();
         this.updateBankScreen();
