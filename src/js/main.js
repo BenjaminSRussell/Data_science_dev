@@ -75,7 +75,6 @@ import { IDESystem } from './game/IDESystem.js';
 import { LocationBackgroundSystem } from './game/LocationBackgroundSystem.js';
 import { WeeklyNewsSystem } from './game/WeeklyNewsSystem.js';
 import { ScreenThemeManager } from './game/ScreenThemeManager.js';
-import { MapCoordinateSystem } from './game/MapCoordinateSystem.js';
 import { GameEndingSystem } from './game/GameEndingSystem.js';
 import { NarrativeClaritySystem } from './game/NarrativeClaritySystem.js';
 // import { VisualSystem } from './visual/VisualSystem.js';
@@ -1473,7 +1472,6 @@ export class MainGame {
             this.gameState.locationBackgroundSystem = new LocationBackgroundSystem(this.gameState);
             this.gameState.weeklyNewsSystem = new WeeklyNewsSystem(this.gameState);
             this.gameState.screenThemeManager = new ScreenThemeManager(this.environmentManager);
-            this.gameState.mapCoordinateSystem = new MapCoordinateSystem();
             this.gameState.gameEndingSystem = new GameEndingSystem(this.gameState);
             this.gameState.gameEndingSystem.gameState.mainGame = this;
             this.gameState.narrativeClaritySystem = new NarrativeClaritySystem(this.gameState);
@@ -1551,7 +1549,6 @@ export class MainGame {
             this.locationBackgroundSystem = this.gameState.locationBackgroundSystem;
             this.weeklyNewsSystem = this.gameState.weeklyNewsSystem;
             this.screenThemeManager = this.gameState.screenThemeManager;
-            this.mapCoordinateSystem = this.gameState.mapCoordinateSystem;
 
             // Link Phase 1 Visual Systems
             this.visualSystem = this.gameState.visualSystem;
@@ -1589,12 +1586,6 @@ export class MainGame {
             // Initialize story UI
             if (this.storyUI) {
                 this.storyUI.initialize();
-            }
-
-            // Initialize map coordinate system with existing locations
-            if (this.worldMap) {
-                const locations = this.worldMap.getAccessibleLocations();
-                this.mapCoordinateSystem.initializeWithLocations(locations);
             }
 
             logger.debug('[startNewGame]: managers linked');
@@ -1779,7 +1770,6 @@ export class MainGame {
             locationBackgroundSystem: () => new LocationBackgroundSystem(gs),
             weeklyNewsSystem: () => new WeeklyNewsSystem(gs),
             screenThemeManager: () => new ScreenThemeManager(this.environmentManager),
-            mapCoordinateSystem: () => new MapCoordinateSystem(),
             gameEndingSystem: () => new GameEndingSystem(gs),
             dayNightCycle: () => new DayNightCycle(gs),
             // Created before the reload so the saved quality setting is applied (#1256)
@@ -1818,7 +1808,7 @@ export class MainGame {
             'relationshipEmotionSystem', 'worldEvolutionSystem', 'investmentEcommerceSystem',
             'storylineManager', 'storyBeatsSystem', 'npcMemorySystem',
             'ideSystem', 'locationBackgroundSystem', 'weeklyNewsSystem', 'screenThemeManager',
-            'mapCoordinateSystem', 'gameEndingSystem', 'dayNightCycle', 'notificationSystem',
+            'gameEndingSystem', 'dayNightCycle', 'notificationSystem',
             'narrativeClaritySystem', 'companyManagement', 'demandingBoss', 'performanceManager'
         ];
         for (const key of keys) {
@@ -1838,13 +1828,6 @@ export class MainGame {
                 } catch (error) {
                     logger.warn(`[initializeStorySystems] ${key}.initialize failed:`, error);
                 }
-            }
-        }
-        if (this.worldMap && this.mapCoordinateSystem?.initializeWithLocations) {
-            try {
-                this.mapCoordinateSystem.initializeWithLocations(this.worldMap.getAccessibleLocations());
-            } catch (error) {
-                logger.warn('[initializeStorySystems] map coordinates failed:', error);
             }
         }
     }

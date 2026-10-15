@@ -15,7 +15,7 @@ Reviewed on main at the time of PR "Fix UnifiedMapSystem render leaks, icons, co
 | Teardown | `destroy()` removes the resize listener and the pulse ticker callback, and destroys the Pixi app |
 
 Other live map pieces:
-- `MapCoordinateSystem` is constructed in `main.js` (`gameState.mapCoordinateSystem`) and seeded with `initializeWithLocations()`. It builds a `MapGridSystem`, so **`MapGridSystem` is live through `MapCoordinateSystem`**, not through the renderer.
+- Location coordinates are the static grid points on `WorldMap` locations. `UnifiedMapSystem` draws those points; nothing places NPC houses or other entities at runtime (`renderNPCHouses` is a no-op).
 - `PositioningHelper` (utils) is live for DOM positioning.
 - The DOM helpers in `MapHelpers.js` (location states, player marker, icons, lock badges) run on every `updateMapScreen`.
 
@@ -49,7 +49,7 @@ Still open, not fixed here:
 
 Delete the dead renderer chain (`MapSystemInitializer`, `MapRenderer`, `MapManager`, and the eight `Map*System`/`Map*Renderer`/`MapAssetPlacer` files it pulls in, plus `CityMapRenderer`, `WorldMapRenderer` and the `worldMapRenderer`/`simpleMapRenderer` fallback branches in `MapHelpers`). `UnifiedMapSystem` already covers what they draw.
 
-Keep `MapGridSystem` and `MapCoordinateSystem`, since they are live.
+Keep `MapGridSystem`: the map-pipeline modules and their tests still use it. `MapCoordinateSystem` is not part of this chain. Its occupancy map was written once from the static location list and never read, and NPC houses are not placed, so the class was removed (#2283).
 
 Before deleting, port only one piece: `MapNavigationSystem.aStarPathfinding()`. It is the only logic with no equivalent in the live system, and it would be needed if travel ever animates along roads. Move it into a small standalone `src/js/utils/pathfinding.js` with tests, then delete the rest.
 
