@@ -131,10 +131,8 @@ const storeConfig = (set, get) => ({
         return state;
     }),
 
-    isChartTypeUnlocked: (type) => {
-        // Liberalization: All charts unlocked by default!
-        return true;
-    },
+    // Honor the persisted unlock list; the old stub always returned true (#1614)
+    isChartTypeUnlocked: (type) => get().unlockedChartTypes.includes(type),
 
     canAfford: (price) => {
         return get().money >= price;
