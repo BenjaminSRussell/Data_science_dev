@@ -98,13 +98,6 @@ export class ScreenThemeManager {
             return null;
         }
     }
-
-    /**
-     * Get current theme
-     */
-    getCurrentTheme() {
-        return SCREEN_THEMES[this.currentScreen] || SCREEN_THEMES['screen-game'];
-    }
 }
 
 
