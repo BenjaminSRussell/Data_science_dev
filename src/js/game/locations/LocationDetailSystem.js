@@ -393,29 +393,92 @@ export class LocationDetailSystem {
     }
     
     /**
-     * Execute feature action
+     * Execute feature action.
+     * Numeric fields scale with the location's prestige tier. Tier 1
+     * returns the payouts below unchanged (#2441).
      */
     executeAction(action, locationId, featureId) {
+        let reward;
         switch (action) {
             case 'rest':
-                return { energy: 50, message: 'You rest and restore energy' };
+                reward = { energy: 50, message: 'You rest and restore energy' };
+                break;
             case 'work':
-                return { skill: 1, message: 'You work on improving your skills' };
+                reward = { skill: 1, message: 'You work on improving your skills' };
+                break;
             case 'computer':
-                return { info: true, message: 'You check your computer' };
+                reward = { info: true, message: 'You check your computer' };
+                break;
             case 'cook':
-                return { money: -5, energy: 10, message: 'You cook a meal' };
+                reward = { money: -5, energy: 10, message: 'You cook a meal' };
+                break;
             case 'read':
-                return { skill: 2, message: 'You read and learn' };
+                reward = { skill: 2, message: 'You read and learn' };
+                break;
             case 'coffee':
-                return { energy: 20, money: -3, message: 'You get coffee' };
+                reward = { energy: 20, money: -3, message: 'You get coffee' };
+                break;
             case 'gossip':
-                return { relationship: 1, message: 'You chat with coworkers' };
+                reward = { relationship: 1, message: 'You chat with coworkers' };
+                break;
             case 'boss':
-                return { meeting: true, message: 'You meet with your boss' };
+                reward = { meeting: true, message: 'You meet with your boss' };
+                break;
             default:
-                return { message: 'You interact with ' + featureId };
+                reward = { message: 'You interact with ' + featureId };
+                break;
         }
+        return LocationDetailSystem.scaleRewardForLocation(reward, locationId);
+    }
+
+    /**
+     * Prestige tier for feature rewards. Tier 1 is the starter payout.
+     * Unknown ids stay tier 1 so a missing location cannot inflate rewards.
+     */
+    static LOCATION_TIERS = {
+        home: 1,
+        coffee_shop: 1,
+        library: 1,
+        gym: 1,
+        donut_shop: 1,
+        bagel_shop: 1,
+        flower_store: 1,
+        office: 2,
+        university: 2,
+        mall: 2,
+        city_hall: 2,
+        networking_bar: 2,
+        bank: 2,
+        stock_exchange: 2,
+        car_dealership: 2,
+        downtown: 2,
+        tech_hub: 2,
+        real_estate: 3,
+        luxury_district: 3,
+        executive_tower: 3,
+        private_club: 3,
+        research_center: 3,
+        venture_capital: 3,
+        mansion_district: 3
+    };
+
+    static locationTier(locationId) {
+        const tier = LocationDetailSystem.LOCATION_TIERS[locationId];
+        return Number.isInteger(tier) && tier > 0 ? tier : 1;
+    }
+
+    /**
+     * Multiply numeric reward fields by the location tier. Booleans and
+     * the message stay as written. Tier 1 returns the same object.
+     */
+    static scaleRewardForLocation(reward, locationId) {
+        const tier = LocationDetailSystem.locationTier(locationId);
+        if (tier === 1) return reward;
+        const scaled = {};
+        for (const [key, value] of Object.entries(reward)) {
+            scaled[key] = typeof value === 'number' ? value * tier : value;
+        }
+        return scaled;
     }
 }
 
