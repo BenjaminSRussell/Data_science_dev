@@ -2,6 +2,7 @@
  * MapProgressionSystem.js
  * Different maps for early, mid, and end-game with new characters.
  * Location travel goes through WorldMap.travelTo, not this system.
+ * travelTo calls bringFollowingNPCs so companions come along (#1705).
  */
 
 export class MapProgressionSystem {
@@ -137,9 +138,13 @@ export class MapProgressionSystem {
             this.updateWorldMapLocations(map);
         }
 
+        // Companions who will follow move onto the new map (#1705)
+        const followers = this.bringFollowingNPCs(this.followerDestination(map));
+
         return {
             success: true,
             map,
+            followers,
             message: `You've arrived in ${map.name}.`
         };
     }
@@ -159,26 +164,64 @@ export class MapProgressionSystem {
      * Get NPCs that can follow player to new map
      */
     getNPCsThatFollow() {
-        const npcManager = this.gameState.npcManager;
-        if (!npcManager) return [];
+        const npcManager = this.gameState?.npcManager;
+        if (!npcManager?.getMetNPCs) return [];
 
-        const metNPCs = npcManager?.getMetNPCs() || [];
+        const metNPCs = npcManager.getMetNPCs() || [];
         const followingNPCs = [];
 
-        metNPCs?.forEach(npc => {
-            const relationship = npcManager?.getRelationship(npc.id) || 0;
-            
-            // NPCs with high relationship might follow
-            if (relationship > 70) {
-                followingNPCs.push({
-                    npc,
-                    relationship,
-                    willFollow: relationship > 85 || npc.type === 'romance'
-                });
+        metNPCs.forEach(npc => {
+            if (!npc?.id) return;
+            const raw = npcManager.getRelationship?.(npc.id);
+            const relationship = Number.isFinite(Number(raw)) ? Number(raw) : (Number(npc.relationship) || 0);
+            const romance = npc.type === 'romance';
+            // Romance partners follow at any relationship. The old `> 70`
+            // gate ran first, so this clause never saw a partner at 70 or
+            // below (#1705). Everyone else follows only above 85.
+            const willFollow = relationship > 85 || romance;
+            if (relationship > 70 || romance) {
+                followingNPCs.push({ npc, relationship, willFollow });
             }
         });
 
         return followingNPCs;
+    }
+
+    /**
+     * Place every companion with willFollow at locationId.
+     * Writes through NPCManager so getNPCsAtLocation sees them (#1705).
+     * @returns {string[]} ids that moved
+     */
+    bringFollowingNPCs(locationId) {
+        if (typeof locationId !== 'string' || !locationId) return [];
+        const npcManager = this.gameState?.npcManager;
+        if (typeof npcManager?.setNPCLocation !== 'function') return [];
+
+        const moved = [];
+        this.getNPCsThatFollow().forEach(entry => {
+            if (!entry?.willFollow || !entry.npc?.id) return;
+            if (npcManager.setNPCLocation(entry.npc.id, locationId)) {
+                moved.push(entry.npc.id);
+            }
+        });
+        return moved;
+    }
+
+    /**
+     * A location on `map` the player can actually meet someone at.
+     * Prefer where the player already is, then the first real world location.
+     */
+    followerDestination(map) {
+        const here = this.gameState?.worldMap?.currentLocation || this.gameState?.currentLocation || null;
+        const ids = (map?.locations || []).map(loc => loc?.id).filter(id => typeof id === 'string');
+        if (here && ids.includes(here)) return here;
+        const known = this.gameState?.worldMap?.getLocation
+            ? ids.find(id => this.gameState.worldMap.getLocation(id))
+            : null;
+        if (known) return known;
+        // end_game pins are not world-map locations; stay with the player
+        if (typeof here === 'string' && here) return here;
+        return ids[0] || null;
     }
 
     /**

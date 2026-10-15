@@ -1124,6 +1124,11 @@ export class NPCManager {
         // NPCs met
         this.metNPCs = [];
 
+        // Where a companion is traveling, when that differs from the catalog
+        // location. The NPC list is shared static data, so follow state lives
+        // here and is what getNPCsAtLocation filters on (#1705).
+        this.followedLocations = {};
+
         // Active conversations
         this.currentConversation = null;
 
@@ -1166,7 +1171,8 @@ export class NPCManager {
             interactionHistory: this.interactionHistory,
             metNPCs: this.metNPCs,
             relationshipCarry: this.relationshipCarry,
-            lastGiftDay: this.lastGiftDay
+            lastGiftDay: this.lastGiftDay,
+            followedLocations: this.followedLocations
         };
     }
 
@@ -1184,9 +1190,46 @@ export class NPCManager {
         this.metNPCs = data.metNPCs || [];
         this.relationshipCarry = data.relationshipCarry || {};
         this.lastGiftDay = data.lastGiftDay || {};
+        this.followedLocations = {};
 
         // Re-init if needed to ensure all NPCs exist
         this.initializeRelationships();
+
+        const rawFollowed = data.followedLocations;
+        if (rawFollowed && typeof rawFollowed === 'object') {
+            for (const [id, loc] of Object.entries(rawFollowed)) {
+                if (typeof loc === 'string' && loc && this.getNPC(id)) {
+                    this.followedLocations[id] = loc;
+                }
+            }
+        }
+    }
+
+    /**
+     * Catalog location, or the place a companion has traveled to (#1705).
+     */
+    getNPCLocation(npcOrId) {
+        const npc = typeof npcOrId === 'string' ? this.getNPC(npcOrId) : npcOrId;
+        const id = typeof npcOrId === 'string' ? npcOrId : npc?.id;
+        if (!id) return npc?.location ?? null;
+        const override = this.followedLocations?.[id];
+        if (typeof override === 'string' && override) return override;
+        return npc?.location ?? null;
+    }
+
+    /**
+     * Move an NPC for the session (and the save) without editing the shared
+     * catalog. Passing their home location clears the override.
+     * @returns {boolean} false when the NPC or location is missing
+     */
+    setNPCLocation(npcId, locationId) {
+        if (typeof npcId !== 'string' || typeof locationId !== 'string' || !locationId) return false;
+        const npc = this.getNPC(npcId);
+        if (!npc) return false;
+        if (!this.followedLocations) this.followedLocations = {};
+        if (locationId === npc.location) delete this.followedLocations[npcId];
+        else this.followedLocations[npcId] = locationId;
+        return true;
     }
 
     /**
@@ -1195,8 +1238,13 @@ export class NPCManager {
     getNPCsAtLocation(locationId) {
         // Holidays keep some people home (EventSystem npcAvailability, #1704)
         const events = this.gameState?.eventSystem;
-        return NPCs.filter(npc => npc.location === locationId && this.isNPCUnlocked(npc) &&
-            events?.isNPCAvailable?.(npc.id) !== false);
+        return NPCs.filter(npc => this.getNPCLocation(npc) === locationId && this.isNPCUnlocked(npc) &&
+            events?.isNPCAvailable?.(npc.id) !== false)
+            .map(npc => {
+                const location = this.getNPCLocation(npc);
+                // Callers filter and render on npc.location; show where they are now
+                return location === npc.location ? npc : { ...npc, location };
+            });
     }
 
     /**
@@ -1286,6 +1334,7 @@ export class NPCManager {
 
             return {
                 ...npc,
+                location: this.getNPCLocation(npc),
                 relationship: this.relationships[npcId] || 0,
                 tier: this.getRelationshipTier(npcId)
             };

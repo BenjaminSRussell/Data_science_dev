@@ -548,10 +548,15 @@ export class WorldMap {
         // Invalidate cache
         this._invalidateCache();
 
+        // Companions travel with the player. MapProgressionSystem has no
+        // travelToLocation; this is the location-travel path (#1705).
+        const followers = this.gameState?.mapProgressionSystem?.bringFollowingNPCs?.(locationId) || [];
+
         return {
             success: true,
             location,
-            timeCost: actualSlots
+            timeCost: actualSlots,
+            followers
         };
     }
 
