@@ -10,6 +10,7 @@ import { DialogueUI } from '../ui/DialogueUI.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { logger } from '../utils/Logger.js';
 import { GIFT_COSTS } from '../game/NPCManager.js';
+import { RELATIONSHIP } from '../game/RealisticDialogueSystem.js';
 import { npcDialogueLoader } from '../game/dialogue/NPCDialogueLoader.js';
 
 /**
@@ -122,8 +123,18 @@ export function handleNPCGift(game, npcId, giftId = 'coffee') {
     // Fresh lookups: the dialogue area can be re-rendered, so DOMUtils'
     // selector cache could hand back a detached node
     const dialogueArea = () => (typeof document !== 'undefined' ? document.getElementById('npc-dialogue-area') : null);
+    let generic = result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess.";
+    const realistic = game.gameState?.realisticDialogueSystem;
+    if (realistic?.generateEmotionalResponse) {
+        const npc = game.gameState.npcManager?.getNPC?.(npcId);
+        const rel = Number(game.gameState.npcManager?.getRelationship?.(npcId)) || 0;
+        // A gift they like is a warm reaction even when you just met
+        const spokenRel = result.liked ? Math.max(rel, RELATIONSHIP.WARM + 1) : rel;
+        const line = realistic.generateEmotionalResponse('help', npc, spokenRel);
+        if (line) generic = line;
+    }
     DOMUtils.updateElement(dialogueArea(), {
-        textContent: result.liked ? "Wow! I love this! Thanks!" : "Oh... thanks, I guess."
+        textContent: generic
     });
     // Swap in the NPC's own line for this gift once its dialogue file loads (#1307)
     const reactionReady = Promise.resolve(npcDialogueLoader.loadNPCDialogue(npcId))

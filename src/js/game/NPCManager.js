@@ -5,6 +5,7 @@
 
 import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
 import { dialogueTreeSystem } from './dialogue/DialogueTreeSystem.js';
+import { conversationSituation, SOCIAL_REACTION_ACTIONS } from './RealisticDialogueSystem.js';
 import { relationshipStage } from '../data/relationshipStages.js';
 
 // Initialize all NPC images - ensures every NPC has a visual
@@ -1465,6 +1466,12 @@ export class NPCManager {
             greetingText = memoryDialogue.text;
         } else if (dialogueText) {
             greetingText = dialogueText;
+        } else if (this.gameState.realisticDialogueSystem) {
+            // No authored file and no memory: the generator is the greeting (#2272)
+            const state = this.gameState.relationshipEmotionSystem?.getRelationshipState?.(npcId);
+            greetingText = this.gameState.realisticDialogueSystem.generateRelationshipDialogue(
+                npc, relationship, conversationSituation(npc, relationship, state)
+            );
         } else if (rootNode) {
             greetingText = this.getDynamicGreeting(npc, relationship, rootNode);
         } else {
@@ -1683,6 +1690,12 @@ export class NPCManager {
             const exists = tree.nodes?.has ? tree.nodes.has(choice.next) : true;
             const node = exists ? tree.getNode(choice.next) : null;
             replyText = node?.text || null;
+            const reactionAction = node?.synthesized ? SOCIAL_REACTION_ACTIONS[node.id] : null;
+            if (reactionAction && this.gameState.realisticDialogueSystem) {
+                replyText = this.gameState.realisticDialogueSystem.generateEmotionalResponse(
+                    reactionAction, conv.npc, this.relationships[npcId] || 0
+                ) || replyText;
+            }
             if (node?.effects && Object.keys(node.effects).length) {
                 this.applyChoiceEffects(node.effects);
                 Object.entries(node.effects).forEach(([k, v]) => {
@@ -1756,6 +1769,14 @@ export class NPCManager {
      * Short NPC reaction used when the dialogue data has no authored reply.
      */
     getGenericReply(npc, reaction) {
+        const sys = this.gameState?.realisticDialogueSystem;
+        const relationship = this.relationships?.[npc?.id] || 0;
+        if (sys && npc) {
+            if (reaction === 'negative') return sys.generateEmotionalResponse('betrayal', npc, relationship);
+            if (reaction === 'positive') return sys.generateEmotionalResponse('help', npc, relationship);
+            const state = this.gameState.relationshipEmotionSystem?.getRelationshipState?.(npc.id);
+            return sys.generateRelationshipDialogue(npc, relationship, conversationSituation(npc, relationship, state));
+        }
         const replies = {
             positive: ["I appreciate that.", "Ha, good point!", "I like the way you think."],
             neutral: ["Hm, I see.", "Fair enough.", "Okay."],

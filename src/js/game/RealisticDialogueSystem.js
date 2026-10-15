@@ -13,6 +13,34 @@ export const RELATIONSHIP = {
 // Emotions that make a speaker trail off (#1595)
 const UNCERTAIN_EMOTIONS = new Set(['worried', 'sad', 'nervous', 'uncertain', 'confused']);
 
+// DialogueTree.repairGraph invents these nodes. The live conversation speaks
+// them with generateEmotionalResponse instead of the static library (#2272).
+export const SOCIAL_REACTION_ACTIONS = {
+    compliment: 'help',
+    compliment_elaborate: 'help',
+    empathize: 'help',
+    life_empathize: 'help',
+    past_empathize: 'help',
+    personal_empathize: 'help',
+    personal_support: 'help',
+    gifts_thank: 'help',
+    deep_connect: 'help'
+};
+
+const HOSTILE_PERSONALITIES = new Set(['hostile', 'aggressive']);
+
+/**
+ * Situation for a live greeting: anger and fear change the pool, otherwise casual.
+ */
+export function conversationSituation(npc, relationship, emotionalState) {
+    const rel = Number(relationship) || 0;
+    if ((emotionalState?.anger >= 40) || (rel < RELATIONSHIP.COLD && HOSTILE_PERSONALITIES.has(npc?.personality))) {
+        return 'conflict';
+    }
+    if ((Number(emotionalState?.fear) || 0) >= 40) return 'crisis';
+    return 'casual';
+}
+
 // How each personality colours a reaction (#1597)
 const PERSONALITY_STYLE = {
     professional: {

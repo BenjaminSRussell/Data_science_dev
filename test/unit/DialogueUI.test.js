@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DialogueUI } from '../../src/js/ui/DialogueUI.js';
 import { STATS } from '../../src/js/game/CharacterStats.js';
+import { RealisticDialogueSystem } from '../../src/js/game/RealisticDialogueSystem.js';
 
 /**
  * Build a minimal game mock sufficient to drive DialogueUI.open() into a
@@ -138,6 +139,61 @@ describe('DialogueUI', () => {
       expect(ui.isOpen).toBe(before.isOpen);
       expect(ui.currentNPC).toBe(before.currentNPC);
       expect(ui.currentNode).toBe(before.currentNode);
+    });
+
+    it('speaks a RealisticDialogueSystem greeting without rewriting the tree node (#2272)', () => {
+      vi.useFakeTimers();
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+      game.gameState.realisticDialogueSystem = new RealisticDialogueSystem();
+      ui.open(npc);
+      vi.runAllTimers();
+
+      const heard = document.querySelector('#dialogue-text').textContent;
+      const expected = game.gameState.realisticDialogueSystem.generateRelationshipDialogue(
+        { ...npc, personality: 'friendly' }, 0, 'casual'
+      );
+      expect(ui.currentNode.text).toBe('Root text');
+      expect(heard).toBe(expected);
+      expect(heard).not.toBe('Root text');
+      random.mockRestore();
+    });
+
+    it('a synthesized compliment is an emotional response (#2272)', () => {
+      vi.useFakeTimers();
+      game.gameState.realisticDialogueSystem = new RealisticDialogueSystem();
+      game.gameState.npcManager.getRelationship.mockReturnValue(80);
+      ui.open(npc);
+      ui.showNode({
+        id: 'compliment',
+        synthesized: true,
+        text: 'static library line',
+        choices: [{ id: 'close', text: 'Goodbye' }]
+      });
+      vi.runAllTimers();
+
+      expect(ui.currentNode.text).toBe('static library line');
+      expect(document.querySelector('#dialogue-text').textContent)
+        .toBe('Thank you so much. I really needed that.');
+    });
+
+    it('goodbye speaks generateDialogue and still closes (#2272)', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+      const sys = new RealisticDialogueSystem();
+      game.gameState.realisticDialogueSystem = sys;
+      game.showToast = vi.fn();
+      ui.open(npc);
+      ui.handleChoice('goodbye');
+
+      const line = sys.generateDialogue({
+        speaker: 'Alice',
+        emotion: 'neutral',
+        relationship: 0,
+        situation: 'goodbye',
+        personality: 'friendly'
+      });
+      expect(ui.isOpen).toBeFalsy();
+      expect(game.showToast).toHaveBeenCalledWith(`Alice: "${line}"`, 'info');
+      random.mockRestore();
     });
 
     it('schedules a 1000ms callback to show the root node when nextNode lookup fails', () => {
