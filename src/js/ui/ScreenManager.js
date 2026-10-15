@@ -211,6 +211,11 @@ export class ScreenManager {
                 this.mainGame.unifiedMapSystem?.handleResize?.();
             }, 100);
         }
+
+        // Office lists unethical data jobs (#2417)
+        if (screenId === 'screen-office') {
+            this.mainGame?.uiUpdater?.updateDirtyDataPanel?.();
+        }
         return true;
     }
 
