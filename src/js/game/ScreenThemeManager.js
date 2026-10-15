@@ -35,13 +35,6 @@ export class ScreenThemeManager {
         this.currentScreen = screenId;
         this.currentTheme = theme;
 
-        // Apply CSS variables
-        const root = document.documentElement;
-        root.style.setProperty('--screen-primary', theme.primary);
-        root.style.setProperty('--screen-secondary', theme.secondary);
-        root.style.setProperty('--screen-accent', theme.accent);
-        root.style.setProperty('--screen-gradient', theme.gradient);
-
         // The location screen shows where you are: LocationBackgroundSystem's
         // background for the current location, instead of one fixed theme
         // that overwrote it on every visit (#2008, #1065)
