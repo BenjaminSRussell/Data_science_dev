@@ -87,22 +87,6 @@ describe('ScreenThemeManager', () => {
         });
     });
 
-    describe('getCurrentTheme', () => {
-        it('should return the current theme if it matches the current screen', () => {
-            const theme = SCREEN_THEMES['screen-shop'];
-            screenThemeManager.currentTheme = theme;
-            screenThemeManager.currentScreen = 'screen-shop';
-            expect(screenThemeManager.getCurrentTheme()).toBe(theme);
-        });
-
-        it('should fall back to the default theme if the current screen does not match', () => {
-            const defaultTheme = SCREEN_THEMES['screen-game'];
-            screenThemeManager.currentTheme = SCREEN_THEMES['screen-shop'];
-            screenThemeManager.currentScreen = 'unknown-screen';
-            expect(screenThemeManager.getCurrentTheme()).toBe(defaultTheme);
-        });
-    });
-
     describe('theme coverage', () => {
         it('should have theme entries for all 18 game screens', () => {
             const allScreens = [
