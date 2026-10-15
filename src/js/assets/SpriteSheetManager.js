@@ -1,7 +1,15 @@
 /**
  * SpriteSheetManager.js
- * Manages sprite sheets with animation frames
- * Supports frame sequences for smooth animations
+ *
+ * @deprecated Replaced by PixiSpriteManager (#1841). Register sheets with
+ * PixiSpriteManager.loadSpriteSheet(id, jsonUrl, imageUrl) and the LPC
+ * atlas at assets/characters/sprites/lpc_grid.atlas.json. Kept for its grid
+ * frame math and tests, and as the legacy fallback in
+ * VisualProgressionSystem.upgradeSpriteSheets when no PixiSpriteManager
+ * exists. Do not add new callers.
+ *
+ * Manages sprite sheets with animation frames.
+ * Supports frame sequences for smooth animations.
  */
 
 export class SpriteSheetManager {

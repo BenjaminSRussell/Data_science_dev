@@ -4329,16 +4329,21 @@ export class MainGame {
             this.gameState.relationshipDialogueSystem = new RelationshipDialogueSystem(this.gameState);
             this.relationshipDialogueSystem = this.gameState.relationshipDialogueSystem;
 
-            // Initialize comprehensive sprite system
+            // Initialize comprehensive sprite system. PixiSpriteManager is the
+            // canonical sheet loader (#1841). It can still be null here, so the
+            // 1s init below re-reads it once the Phase 4 imports have resolved.
             this.comprehensiveSpriteSystem = new ComprehensiveSpriteSystem(
                 this.assetManager,
-                this.spriteSheetManager
+                this.pixiSpriteManager || this.gameState?.pixiSpriteManager || null
             );
             this.gameState.comprehensiveSpriteSystem = this.comprehensiveSpriteSystem;
 
             // Initialize sprite system in background
             setTimeout(async () => {
                 try {
+                    if (this.phase4ManagersReady) await this.phase4ManagersReady;
+                    const pixi = this.pixiSpriteManager || this.gameState?.pixiSpriteManager;
+                    if (pixi) this.comprehensiveSpriteSystem.spriteSheetManager = pixi;
                     await this.comprehensiveSpriteSystem.initialize();
 
                 } catch (error) {

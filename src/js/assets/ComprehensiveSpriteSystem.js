@@ -7,15 +7,17 @@
 import { emotionSpriteMapper } from '../characters/EmotionSpriteMapper.js';
 import { bodyLanguageMapper } from '../characters/BodyLanguageMapper.js';
 import { isAssetMissing } from './MissingAssetBlocklist.js';
-import { lpcSheet, LPC_SHEET_URLS } from './AssetManager.js';
+import { lpcSheet, LPC_ATLAS_URL, LPC_SHEET_URLS } from './AssetManager.js';
 
 /** Size of a combined sprite when the pose image has no natural size */
 const DEFAULT_SPRITE_SIZE = 64;
 
 export class ComprehensiveSpriteSystem {
-    constructor(assetManager, spriteSheetManager) {
+    constructor(assetManager, pixiSpriteManager) {
         this.assetManager = assetManager;
-        this.spriteSheetManager = spriteSheetManager;
+        // Canonical Phase 4 manager (PixiSpriteManager). Do not pass the legacy
+        // SpriteSheetManager: its loadSpriteSheet(id) has another signature (#1841).
+        this.spriteSheetManager = pixiSpriteManager;
         this.loadedSprites = new Map();
         this.spriteCache = new Map();
     }
@@ -124,23 +126,22 @@ export class ComprehensiveSpriteSystem {
     }
 
     /**
-     * Register sprite sheets
+     * Register sprite sheets with PixiSpriteManager.loadSpriteSheet
+     * (id, atlas JSON, image). The legacy registerSpriteSheet(id, config)
+     * shape is not called: PixiSpriteManager has no such method, so the old
+     * guard skipped registration whenever the Phase 4 manager was passed (#1841).
      */
     async registerSpriteSheets() {
-        if (!this.spriteSheetManager?.registerSpriteSheet) return;
+        const manager = this.spriteSheetManager;
+        if (typeof manager?.loadSpriteSheet !== 'function') return;
         const fromManifest = this.assetManager?.getAssetManifest?.()?.characters?.spriteSheets?.main;
         const sheet = fromManifest?.url ? fromManifest : lpcSheet(LPC_SHEET_URLS.basic);
-        // Never register a filename that was never drawn (#2542)
-        if (isAssetMissing(sheet.url)) return;
+        const imageUrl = sheet.url;
+        const jsonUrl = sheet.jsonUrl || LPC_ATLAS_URL;
+        // Never register a filename that was never drawn (#2542, #1841)
+        if (isAssetMissing(imageUrl) || isAssetMissing(jsonUrl)) return;
         try {
-            await this.spriteSheetManager.registerSpriteSheet('main_character', {
-                url: sheet.url,
-                frameWidth: sheet.frameWidth,
-                frameHeight: sheet.frameHeight,
-                columns: sheet.columns,
-                rows: sheet.rows,
-                animations: sheet.animations
-            });
+            await manager.loadSpriteSheet('main_character', jsonUrl, imageUrl);
         } catch (error) {
             console.warn('Could not register sprite sheets:', error);
         }
