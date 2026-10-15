@@ -20,7 +20,7 @@ something the player sees.
 | 2 | `assets/PixiAssetManager.js` | yes, lazily (`main.js` "Phase 4 managers") | **no** | `init(manifest)` registers AssetManager's manifest as Pixi bundles (#68). Nothing calls `getAsset`, `getCharacterEmotion`, `getLocationBackground` or `loadAll`. The map loads its textures with `PIXI.Assets.load(location.icon)` directly (`UnifiedMapSystem.addIconSprite`), bypassing it. |
 | 3 | `utils/IconMapper.js` | module functions | **yes** | `getTextIcon` is used by `main.js` and `NPCHelpers` to turn emoji into the text-mode labels. |
 | 4 | `utils/IconRenderer.js` | n/a | **removed** | deleted (#2278); live icons use IconMapper, NPCImageMapper, and MapIconRenderer |
-| 5 | `utils/NPCImageMapper.js` | module functions | **yes** | `getNPCImage` / `getNPCFallback` back every live NPC portrait: `DialogueUI`, `NPCHelpers`, `NPCManager`. `ConversationScreen` also imports them but is unreachable (#2316). |
+| 5 | `utils/NPCImageMapper.js` | module functions | **yes** | `getNPCImage` / `getNPCFallback` back every live NPC portrait: `DialogueUI`, `NPCHelpers`, `NPCManager`. |
 | 6 | `utils/AssetResolver.js` | import commented out (`LocationDetailSystem`) | no | dead (#1046, #2246) |
 | 7 | `assets/AssetFinder.js` | n/a | **removed** | deleted in fad8a277 (#2737); `test/unit/AssetFinder.test.js` guards against it coming back |
 | 8 | `assets/GameAssetLoader.js` | never imported | no | dead (#2287) |

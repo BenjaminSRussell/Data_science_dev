@@ -40,7 +40,6 @@ import { NPCManager, NPCs } from './game/NPCManager.js';
 import { ContractSystem } from './game/contracts/ContractSystem.js';
 import { MapProgressionSystem } from './game/MapProgressionSystem.js';
 import { dialogueTreeSystem } from './game/dialogue/DialogueTreeSystem.js';
-import { ConversationScreen } from './game/dialogue/ConversationScreen.js';
 import { IntroSystem } from './game/IntroSystem.js';
 import { DayNightCycle } from './game/DayNightCycle.js';
 import { NotificationSystem } from './game/NotificationSystem.js';
@@ -1359,9 +1358,6 @@ export class MainGame {
 
             // HIGH PRIORITY - Needed for intro
             this.showLoadingProgress('Loading UI systems...', 50);
-            this.conversationScreen = new ConversationScreen(this);
-            this.gameState.conversationScreen = this.conversationScreen;
-
             this.introSystem = new IntroSystem(this);
             this.gameState.introSystem = this.introSystem;
 

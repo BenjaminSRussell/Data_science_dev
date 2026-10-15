@@ -222,10 +222,9 @@ export class LocationView {
                 });
                 charEl.appendChild(modelEl);
 
-                // We might want to add click handlers here if not handled by the renderer
+                // Live dialogue is interactWithNPC -> DialogueUI (#2316)
                 charEl.addEventListener('click', () => {
-                    // Trigger conversation or interaction
-                    this.game.conversationScreen?.showConversation(npc.id);
+                    this.game.interactWithNPC?.(npc.id);
                 });
 
             } else {

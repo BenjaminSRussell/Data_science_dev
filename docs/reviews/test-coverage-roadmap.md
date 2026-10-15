@@ -38,7 +38,7 @@ Money and save state get the most weight.
 6. **`helpers/MapHelpers.js` (28%).** Travel, vehicles and shop actions cost money and energy. `handleLocationAction` is covered since #2780.
 7. **`game/ai/AITrainingStoryline.js` (31%)** and **`game/WorkInteractionSystem.js` (52%).** These carry progression logic. WorkInteractionSystem is pending a decision on whether to wire it in or delete it.
 
-Not ranked, because they're unreachable or pending that decision: `MapRenderer`, `MapEnvironmentSystem`, `RoomSystem`, `ConversationScreen`, `EmotionalBreakdownSystem`, `TaskVisualRenderer`, the sprite managers and `IconRenderer`. Test them only if they get wired in.
+Not ranked, because they're unreachable or pending that decision: `MapRenderer`, `MapEnvironmentSystem`, `RoomSystem`, `EmotionalBreakdownSystem`, `TaskVisualRenderer`, the sprite managers and `IconRenderer`. Test them only if they get wired in. `ConversationScreen` was removed (#2316); NPC talk goes through `DialogueUI`.
 
 ## 3. Proposed order of work
 
