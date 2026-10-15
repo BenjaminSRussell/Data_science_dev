@@ -11,6 +11,7 @@ import { initializeMapRenderer } from '../game/MapSystemInitializer.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { logger } from '../utils/Logger.js';
 import { VEHICLES, VEHICLES_MAP } from '../game/WorldMap.js';
+import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
 import { TRAINING_ACTIVITIES } from '../game/CharacterStats.js';
 // WorldMapRenderer imported lazily to avoid circular dependencies
 
@@ -98,6 +99,8 @@ export function updateMapScreen(game) {
                         if (game.screenManager?.isScreenActive?.('screen-map')) {
                             game.unifiedMapSystem?.handleResize?.();
                         }
+                        // Pixi init clears the container; redraw the route after (#1966)
+                        renderNavigationPath(game);
                     }).catch(err => {
                         console.error('UnifiedMapSystem initialization failed:', err);
                         // Fallback disabled - WorldMapRenderer causes import errors
@@ -131,6 +134,7 @@ export function updateMapScreen(game) {
     updateVehicleDisplay(game);
     updateMapLocationStates(game);
     updatePlayerMarker(game);
+    renderNavigationPath(game);
 
     // Icon/lock-badge decoration only applies to the legacy DOM map renderer's
     // .map-location nodes; skip the DOM sweeps when that renderer isn't live (#1170)
@@ -844,4 +848,49 @@ function handleSellCar(game) {
             game.showError(result.reason);
         }
     }
+}
+
+/**
+ * Draw the last road route on #world-map, in the same grid space the rendered
+ * map uses for location markers (x / WORLD_GRID_SIZE). UnifiedMapSystem is
+ * left alone; this overlay sits on the container it paints into (#1966).
+ */
+export function renderNavigationPath(game) {
+    const container = typeof document !== 'undefined' ? document.getElementById('world-map') : null;
+    if (!container) return;
+    const path = game?.worldMap?.lastRoute?.path;
+    let svg = container.querySelector('svg.map-nav-path');
+    if (!Array.isArray(path) || path.length < 2) {
+        svg?.remove();
+        return;
+    }
+    if (!container.style.position || container.style.position === 'static') {
+        container.style.position = 'relative';
+    }
+    if (!svg) {
+        svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'map-nav-path');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        svg.setAttribute('preserveAspectRatio', 'none');
+        svg.style.position = 'absolute';
+        svg.style.inset = '0';
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.pointerEvents = 'none';
+        svg.style.zIndex = '4';
+        container.appendChild(svg);
+    }
+    let line = svg.querySelector('polyline');
+    if (!line) {
+        line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        line.setAttribute('fill', 'none');
+        line.setAttribute('stroke', '#38bdf8');
+        line.setAttribute('stroke-width', '0.7');
+        line.setAttribute('stroke-linejoin', 'round');
+        line.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(line);
+    }
+    line.setAttribute('points', path.map(p =>
+        `${(p.x / WORLD_GRID_SIZE) * 100},${(p.y / WORLD_GRID_SIZE) * 100}`
+    ).join(' '));
 }

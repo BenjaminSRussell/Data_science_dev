@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WorldMap, VEHICLES } from '../../src/js/game/WorldMap.js';
 import { EconomySystem } from '../../src/js/game/EconomySystem.js';
 import { WorldEventManager } from '../../src/js/game/WorldEventManager.js';
-import { vehicleRequiresDealership, handleTravel } from '../../src/js/helpers/MapHelpers.js';
+import { vehicleRequiresDealership, handleTravel, renderNavigationPath } from '../../src/js/helpers/MapHelpers.js';
 
 function makeState(extra = {}) {
     return { money: 0, reputation: 0, characterStats: { stats: {}, getStat: () => 0 }, ...extra };
@@ -38,6 +38,20 @@ describe('WorldMap travel & vehicles', () => {
         expect(res.success).toBe(true);
         expect(res.timeCost).toBe(0);
         expect(res.alreadyHere).toBe(true);
+    });
+
+    it('draws the road route on the map container', () => {
+        document.body.innerHTML = '<div id="world-map"></div>';
+        const trip = wm.travelTo('office');
+        expect(trip.path.length).toBeGreaterThan(1);
+        renderNavigationPath({ worldMap: wm });
+        const line = document.querySelector('#world-map svg.map-nav-path polyline');
+        expect(line).toBeTruthy();
+        const points = line.getAttribute('points').trim().split(/\s+/);
+        expect(points.length).toBe(trip.path.length);
+        expect(points[0]).toBe(`${(trip.path[0].x / 30) * 100},${(trip.path[0].y / 30) * 100}`);
+        renderNavigationPath({ worldMap: { lastRoute: null } });
+        expect(document.querySelector('#world-map svg.map-nav-path')).toBeNull();
     });
 
     it('handleTravel does not advance time when already there', () => {
