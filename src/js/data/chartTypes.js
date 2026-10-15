@@ -1,5 +1,6 @@
 /**
- * Chart Types - Available visualization types
+ * Chart Types - Available visualization types.
+ * All of these are available from rank 0. Rank perks do not gate them (#2012).
  */
 
 export const CHART_TYPES = [
@@ -7,72 +8,54 @@ export const CHART_TYPES = [
         id: "bar",
         name: "Bar Chart",
         icon: "",
-        description: "Compare values across categories",
-        unlockRank: 0,
-        bestFor: ["comparisons", "categories", "rankings"]
+        description: "Compare values across categories"
     },
     {
         id: "line",
         name: "Line Chart",
         icon: "",
-        description: "Show trends over time",
-        unlockRank: 0,
-        bestFor: ["trends", "time series", "changes"]
+        description: "Show trends over time"
     },
     {
         id: "pie",
         name: "Pie Chart",
         icon: "",
-        description: "Show proportions of a whole",
-        unlockRank: 0,
-        bestFor: ["proportions", "percentages", "distributions"]
+        description: "Show proportions of a whole"
     },
     {
         id: "scatter",
         name: "Scatter Plot",
         icon: "",
-        description: "Show relationships between variables",
-        unlockRank: 2,
-        bestFor: ["correlations", "distributions", "outliers"]
+        description: "Show relationships between variables"
     },
     {
         id: "doughnut",
         name: "Donut Chart",
         icon: "",
-        description: "Proportions with center space",
-        unlockRank: 2,
-        bestFor: ["proportions", "progress", "comparisons"]
+        description: "Proportions with center space"
     },
     {
         id: "radar",
         name: "Radar Chart",
         icon: "",
-        description: "Compare multiple variables",
-        unlockRank: 3,
-        bestFor: ["multi-dimensional", "performance", "profiles"]
+        description: "Compare multiple variables"
     },
     {
         id: "area",
         name: "Area Chart",
         icon: "",
-        description: "Show volume over time",
-        unlockRank: 3,
-        bestFor: ["cumulative", "volume", "trends"]
+        description: "Show volume over time"
     },
     {
         id: "bubble",
         name: "Bubble Chart",
         icon: "⭕",
-        description: "Three-dimensional comparisons",
-        unlockRank: 4,
-        bestFor: ["3 variables", "correlations", "size comparisons"]
+        description: "Three-dimensional comparisons"
     },
     {
         id: "polarArea",
         name: "Polar Area",
         icon: "",
-        description: "Radial proportional chart",
-        unlockRank: 5,
-        bestFor: ["cyclical data", "comparisons", "proportions"]
+        description: "Radial proportional chart"
     }
 ];

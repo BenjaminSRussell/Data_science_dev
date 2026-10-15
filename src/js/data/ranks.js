@@ -1,5 +1,8 @@
 /**
  * Career Ranks - Progression ladder for the game
+ *
+ * Every chart type is available from the start (GameState.isChartTypeUnlocked).
+ * Perk strings here are only the ones EconomySystem.hasRankPerk applies (#2012).
  */
 
 export const RANKS = [
@@ -17,7 +20,7 @@ export const RANKS = [
         salaryMultiplier: 1.5,
         repRequired: 100,
         description: "You've shown basic competence. Keep improving!",
-        perks: ["Access to Line Charts"]
+        perks: []
     },
     {
         id: 3,
@@ -25,7 +28,7 @@ export const RANKS = [
         salaryMultiplier: 2.0,
         repRequired: 300,
         description: "A solid analyst who can handle most requests.",
-        perks: ["Access to Scatter Plots"]
+        perks: []
     },
     {
         id: 4,
@@ -33,7 +36,7 @@ export const RANKS = [
         salaryMultiplier: 3.0,
         repRequired: 600,
         description: "Your visualizations are trusted across departments.",
-        perks: ["Access to Radar Charts", "Time bonus increased"]
+        perks: ["Time bonus increased"]
     },
     {
         id: 5,
@@ -41,7 +44,7 @@ export const RANKS = [
         salaryMultiplier: 5.0,
         repRequired: 1200,
         description: "You lead visualization projects for the entire company.",
-        perks: ["Access to Heatmaps", "Boss tolerance increased"]
+        perks: ["Boss tolerance increased"]
     },
     {
         id: 6,
@@ -49,7 +52,7 @@ export const RANKS = [
         salaryMultiplier: 8.0,
         repRequired: 2500,
         description: "Your work influences major business decisions.",
-        perks: ["Access to Sankey Diagrams", "Premium clients"]
+        perks: ["Premium clients"]
     },
     {
         id: 7,
@@ -57,6 +60,6 @@ export const RANKS = [
         salaryMultiplier: 15.0,
         repRequired: 5000,
         description: "You've reached the top. The data world is yours!",
-        perks: ["All chart types unlocked", "Maximum bonuses"]
+        perks: ["Maximum bonuses"]
     }
 ];

@@ -132,7 +132,7 @@ const storeConfig = (set, get) => ({
     }),
 
     isChartTypeUnlocked: (type) => {
-        // Liberalization: All charts unlocked by default!
+        // Same as GameState: charts are not rank-gated (#2012).
         return true;
     },
 
