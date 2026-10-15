@@ -4,6 +4,8 @@
  * list is O(n) to build, then cached with an id Set for O(1) checks)
  */
 
+import { MapManager } from './MapManager.js';
+
 // Location data - indexed by ID for O(1) access
 export const LOCATIONS_MAP = new Map();
 export const LOCATIONS = [
@@ -352,6 +354,8 @@ export class WorldMap {
         // Cache for accessible locations (invalidated on state change)
         this._accessibleCache = null;
         this._cacheInvalid = true;
+        // Last road route, so the rendered map can draw the path (#1966)
+        this.lastRoute = null;
     }
 
     /**
@@ -513,17 +517,39 @@ export class WorldMap {
     }
 
     /**
-     * Time slots a trip costs with the current vehicle. 0 when already there (#1434, #2168).
+     * Road route and slot cost from here to locationId. 0 slots when already
+     * there (#1434, #2168). Falls back to the authored travelTime only when
+     * the city has no road route (every current location pair does).
      */
-    getTravelSlots(locationId) {
+    _planTrip(locationId) {
         const location = LOCATIONS_MAP.get(locationId);
-        if (!location || locationId === this.currentLocation) return 0;
         const speed = this._activeVehicle()?.travelSpeed || 1;
-        return Math.max(0, Math.ceil(location.travelTime / speed));
+        if (!location || locationId === this.currentLocation) {
+            return { slots: 0, path: [], visuals: [] };
+        }
+        const from = LOCATIONS_MAP.get(this.currentLocation);
+        if (from?.position && location.position) {
+            const route = MapManager.shared().planTravel(from.position, location.position, speed);
+            if (route.path.length >= 2) {
+                return { slots: route.slots, path: route.path, visuals: route.visuals };
+            }
+        }
+        return {
+            slots: Math.max(0, Math.ceil(location.travelTime / speed)),
+            path: [],
+            visuals: []
+        };
     }
 
     /**
-     * Travel to a location - O(1)
+     * Time slots a trip costs with the current vehicle. 0 when already there (#1434, #2168).
+     */
+    getTravelSlots(locationId) {
+        return this._planTrip(locationId).slots;
+    }
+
+    /**
+     * Travel to a location. Slot cost is the road route from where you are.
      */
     travelTo(locationId) {
         const check = this.canTravelTo(locationId);
@@ -533,17 +559,18 @@ export class WorldMap {
 
         // Staying put is free (#1434, #2168)
         if (locationId === this.currentLocation) {
-            return { success: true, location, timeCost: 0, alreadyHere: true };
+            return { success: true, location, timeCost: 0, alreadyHere: true, path: [] };
         }
 
         // Stale/unknown vehicle ids fall back to walking instead of crashing (#1431, #2167)
         if (!VEHICLES_MAP.has(this.currentVehicle)) {
             this.currentVehicle = 'walking';
         }
-        const actualSlots = this.getTravelSlots(locationId);
+        const plan = this._planTrip(locationId);
 
         this.currentLocation = locationId;
         this.visitedLocations.add(locationId); // Set.add is O(1)
+        this.lastRoute = plan;
 
         // Invalidate cache
         this._invalidateCache();
@@ -551,7 +578,8 @@ export class WorldMap {
         return {
             success: true,
             location,
-            timeCost: actualSlots
+            timeCost: plan.slots,
+            path: plan.path
         };
     }
 

@@ -1,8 +1,9 @@
 /**
  * WorldMap accessibility gating, caching, travel and save (#423)
  */
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WorldMap, LOCATIONS, VEHICLES_MAP } from '../../src/js/game/WorldMap.js';
+import { MapManager } from '../../src/js/game/MapManager.js';
 
 function makeState(extra = {}) {
     const stats = { analytics: 0, charisma: 0 };
@@ -62,18 +63,39 @@ describe('WorldMap coverage', () => {
         expect(ids(wm)).toEqual(expect.arrayContaining(['stock_exchange', 'downtown', 'bank']));
     });
 
-    it('travelTo charges ceil(travelTime / speed) and refuses inaccessible places', () => {
+    it('travelTo charges the road-route slot cost and refuses inaccessible places', () => {
         const target = LOCATIONS.find(l => !l.requiresVehicle && !l.unlockRequirement && l.id !== 'home');
+        const home = LOCATIONS.find(l => l.id === 'home');
+        const speed = VEHICLES_MAP.get('walking').travelSpeed;
+        const route = MapManager.shared().planTravel(home.position, target.position, speed);
+        const authored = Math.max(0, Math.ceil(target.travelTime / speed));
+        const spy = vi.spyOn(MapManager.shared().navigationSystem, 'findPath');
         const r = wm.travelTo(target.id);
         expect(r.success).toBe(true);
-        expect(r.timeCost).toBe(Math.max(0, Math.ceil(target.travelTime / VEHICLES_MAP.get('walking').travelSpeed)));
+        expect(spy).toHaveBeenCalled();
+        expect(r.timeCost).toBe(route.slots);
+        // Office is travelTime 1 on the flat table and a longer walk on the roads
+        expect(r.timeCost).not.toBe(authored);
+        expect(r.path[0]).toEqual(home.position);
+        expect(r.path.at(-1)).toEqual(target.position);
         expect(wm.currentLocation).toBe(target.id);
         expect(wm.visitedLocations.has(target.id)).toBe(true);
+        spy.mockRestore();
 
         const locked = wm.travelTo('luxury_district');
         expect(locked.can).toBe(false);
         expect(wm.currentLocation).toBe(target.id);
         expect(wm.travelTo('atlantis').reason).toBe('Unknown location');
+    });
+
+    it('the same destination costs more from farther away than the flat table says', () => {
+        const coffee = LOCATIONS.find(l => l.id === 'coffee_shop');
+        expect(coffee.travelTime).toBe(0);
+        const near = wm.getTravelSlots('coffee_shop');
+        const far = new WorldMap(makeState());
+        far.setCurrentLocation('city_hall');
+        expect(far.getTravelSlots('coffee_shop')).toBeGreaterThan(near);
+        expect(near).toBeGreaterThan(0);
     });
 
     it('buyVehicle: money, ownership, price and reputation', () => {

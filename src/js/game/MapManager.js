@@ -166,4 +166,40 @@ export class MapManager {
     update() {
         this.roadRenderer.update();
     }
+
+    /**
+     * One city for travel. WorldMap asks this instance so pathfinding runs on
+     * the same roads and grid the map systems place locations on (#1966).
+     */
+    static shared() {
+        if (!MapManager._shared) {
+            MapManager._shared = new MapManager(null);
+        }
+        return MapManager._shared;
+    }
+
+    /**
+     * Raw path time is in tiles (often 4–30). A day is 6 slots, so each slot
+     * covers this many tiles of calculateTravelTime(); the longest walk then
+     * still fits in one day instead of several.
+     */
+    static TILES_PER_SLOT = 6;
+
+    static slotsForRoute(path, raw) {
+        if (!Array.isArray(path) || path.length < 2) return 0;
+        const tiles = Number(raw);
+        if (!(tiles > 0)) return 0;
+        return Math.max(1, Math.ceil(tiles / MapManager.TILES_PER_SLOT));
+    }
+
+    /**
+     * Road route between two grid cells. Travel time comes from
+     * navigationSystem, not from a flat per-location table (#1966).
+     */
+    planTravel(start, end, vehicleSpeed = 1) {
+        const path = this.navigationSystem.findPath(start.x, start.y, end.x, end.y);
+        const raw = this.navigationSystem.calculateTravelTime(path, vehicleSpeed);
+        const visuals = this.navigationSystem.getPathVisualData(path);
+        return { path, raw, visuals, slots: MapManager.slotsForRoute(path, raw) };
+    }
 }
