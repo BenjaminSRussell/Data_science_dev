@@ -59,6 +59,30 @@ export class OptionTester {
             }
         }
 
+        // Dropdowns and text fields were never reached from testAll (#2284).
+        // Skip dev-menu chrome, same as getAllButtons, so this pass does not
+        // drive the menu that launched it.
+        results.dropdowns = [];
+        for (const dropdown of document.querySelectorAll('select')) {
+            if (dropdown.closest('#dev-menu') || dropdown.id.includes('dev-')) {
+                continue;
+            }
+            try {
+                const dropdownResult = this.testDropdownOptions(dropdown.id || dropdown);
+                results.dropdowns.push({
+                    element: this.getElementId(dropdown),
+                    ...dropdownResult
+                });
+            } catch (error) {
+                results.errors.push({
+                    element: this.getElementId(dropdown),
+                    error: error.message
+                });
+            }
+        }
+
+        results.inputs = this.testInputFields();
+
         this.results = results;
         return results;
     }
@@ -152,7 +176,10 @@ export class OptionTester {
     }
 
     testDropdownOptions(dropdownId) {
-        const dropdown = document.getElementById(dropdownId);
+        // An id-less <select> can be passed directly; testAll does that.
+        const dropdown = dropdownId instanceof Element
+            ? dropdownId
+            : document.getElementById(dropdownId);
         if (!dropdown) {
             return { error: 'Dropdown not found' };
         }
@@ -163,22 +190,34 @@ export class OptionTester {
             passed: 0,
             failed: 0
         };
+        const originalIndex = dropdown.selectedIndex;
 
         options.forEach((option, index) => {
             try {
                 dropdown.selectedIndex = index;
                 dropdown.dispatchEvent(new Event('change'));
                 results.passed++;
-            } catch (error) {
+            } catch {
                 results.failed++;
             }
         });
+
+        // Put the control (and its change listeners) back. A smoke pass must
+        // not leave settings or portfolio filters on the last option.
+        dropdown.selectedIndex = originalIndex;
+        try {
+            dropdown.dispatchEvent(new Event('change'));
+        } catch {
+            // The per-option loop already counted handler failures.
+        }
 
         return results;
     }
 
     testInputFields() {
-        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+        const inputs = Array.from(
+            document.querySelectorAll('input[type="text"], input[type="number"], textarea')
+        ).filter(input => !input.closest('#dev-menu') && !input.id.includes('dev-'));
         const results = {
             total: inputs.length,
             passed: 0,
@@ -187,15 +226,16 @@ export class OptionTester {
         };
 
         inputs.forEach(input => {
+            const original = input.value;
             try {
                 // Test input
                 input.value = 'test';
                 input.dispatchEvent(new Event('input'));
-                
+
                 // Test clearing
                 input.value = '';
                 input.dispatchEvent(new Event('input'));
-                
+
                 results.passed++;
             } catch (error) {
                 results.failed++;
@@ -203,6 +243,13 @@ export class OptionTester {
                     element: this.getElementId(input),
                     error: error.message
                 });
+            } finally {
+                input.value = original;
+                try {
+                    input.dispatchEvent(new Event('input'));
+                } catch {
+                    // Value is restored even if the listener rejects the original text.
+                }
             }
         });
 

@@ -360,4 +360,140 @@ describe('OptionTester', () => {
             expect(elapsed).toBeGreaterThanOrEqual(40); // Allow some tolerance
         });
     });
+
+    describe('testDropdownOptions', () => {
+        function makeSelect(id, values, selectedIndex = 0) {
+            const select = document.createElement('select');
+            if (id) select.id = id;
+            values.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+            select.selectedIndex = selectedIndex;
+            document.body.appendChild(select);
+            return select;
+        }
+
+        it('cycles every option by id and restores the original selection', () => {
+            const select = makeSelect('settings-quality', ['low', 'medium', 'high'], 1);
+            const seen = [];
+            select.addEventListener('change', () => seen.push(select.value));
+
+            const result = optionTester.testDropdownOptions('settings-quality');
+
+            expect(result).toEqual({ total: 3, passed: 3, failed: 0 });
+            expect(seen).toEqual(['low', 'medium', 'high', 'medium']);
+            expect(select.value).toBe('medium');
+        });
+
+        it('accepts a select element that has no id', () => {
+            const select = makeSelect('', ['only']);
+
+            const result = optionTester.testDropdownOptions(select);
+
+            expect(result).toEqual({ total: 1, passed: 1, failed: 0 });
+            expect(result.error).toBeUndefined();
+        });
+
+        it('returns an error when the dropdown id is missing', () => {
+            expect(optionTester.testDropdownOptions('missing-dropdown')).toEqual({
+                error: 'Dropdown not found'
+            });
+        });
+    });
+
+    describe('testInputFields', () => {
+        it('exercises text, number, and textarea values then restores them', () => {
+            const text = document.createElement('input');
+            text.type = 'text';
+            text.value = 'keep-me';
+            const number = document.createElement('input');
+            number.type = 'number';
+            number.value = '4';
+            const area = document.createElement('textarea');
+            area.value = 'note';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            document.body.append(text, number, area, checkbox);
+
+            const result = optionTester.testInputFields();
+
+            expect(result.total).toBe(3);
+            expect(result.passed).toBe(3);
+            expect(result.failed).toBe(0);
+            expect(result.errors).toEqual([]);
+            expect(text.value).toBe('keep-me');
+            expect(number.value).toBe('4');
+            expect(area.value).toBe('note');
+        });
+
+        it('skips inputs inside the dev menu and inputs with dev- ids', () => {
+            const menu = document.createElement('div');
+            menu.id = 'dev-menu';
+            const menuInput = document.createElement('input');
+            menuInput.type = 'text';
+            menuInput.value = 'npc';
+            menu.appendChild(menuInput);
+            const devId = document.createElement('input');
+            devId.type = 'text';
+            devId.id = 'dev-npc-input';
+            devId.value = 'leave';
+            document.body.append(menu, devId);
+
+            const result = optionTester.testInputFields();
+
+            expect(result.total).toBe(0);
+            expect(menuInput.value).toBe('npc');
+            expect(devId.value).toBe('leave');
+        });
+    });
+
+    describe('testAll', () => {
+        it('runs dropdown and input smoke tests and skips dev-menu controls', async () => {
+            optionTester.wait = () => Promise.resolve();
+
+            const select = document.createElement('select');
+            select.id = 'settings-quality';
+            const option = document.createElement('option');
+            option.value = 'low';
+            select.appendChild(option);
+            select.selectedIndex = 0;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = 'hello';
+
+            const dev = document.createElement('div');
+            dev.id = 'dev-menu';
+            const devSelect = document.createElement('select');
+            devSelect.id = 'dev-storyline-phase';
+            const devOption = document.createElement('option');
+            devOption.value = '1';
+            devSelect.appendChild(devOption);
+            const devInput = document.createElement('input');
+            devInput.type = 'text';
+            devInput.value = 'npc-id';
+            dev.append(devSelect, devInput);
+            document.body.append(select, input, dev);
+
+            const dropdownSpy = vi.spyOn(optionTester, 'testDropdownOptions');
+            const inputSpy = vi.spyOn(optionTester, 'testInputFields');
+
+            const results = await optionTester.testAll();
+
+            expect(dropdownSpy).toHaveBeenCalledTimes(1);
+            expect(dropdownSpy).toHaveBeenCalledWith('settings-quality');
+            expect(inputSpy).toHaveBeenCalledTimes(1);
+            expect(results.dropdowns).toEqual([
+                { element: 'settings-quality', total: 1, passed: 1, failed: 0 }
+            ]);
+            expect(results.inputs.total).toBe(1);
+            expect(results.inputs.passed).toBe(1);
+            expect(input.value).toBe('hello');
+            expect(devInput.value).toBe('npc-id');
+            expect(select.value).toBe('low');
+        });
+    });
 });
