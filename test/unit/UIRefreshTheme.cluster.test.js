@@ -33,6 +33,25 @@ describe('updateAllUI refreshes the active screen (#1483)', () => {
         expect(() => u.updateAllUI()).not.toThrow();
     });
 
+    it('delegates the top bar and rank to LitUIManager.updateAllUI (#1634)', () => {
+        const u = updater('screen-game');
+        const lit = { updateAllUI: vi.fn() };
+        u.litUIManager = lit;
+        u.updateAllUI();
+        expect(lit.updateAllUI).toHaveBeenCalledTimes(1);
+        expect(u.updateTopBar).not.toHaveBeenCalled();
+        expect(u.updateRankProgress).not.toHaveBeenCalled();
+        expect(u.updateChartTypeGrid).toHaveBeenCalledTimes(1);
+        expect(u.updateBankScreen).toHaveBeenCalledTimes(1);
+    });
+
+    it('refreshes the top bar itself when there is no Lit manager (#1634)', () => {
+        const u = updater('screen-game');
+        u.updateAllUI();
+        expect(u.updateTopBar).toHaveBeenCalledTimes(1);
+        expect(u.updateRankProgress).toHaveBeenCalledTimes(1);
+    });
+
     it('a shop refresh keeps the tab the player picked', () => {
         document.body.innerHTML = '<div id="shop-grid"></div>';
         const u = updater('screen-shop');

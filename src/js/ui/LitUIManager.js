@@ -165,11 +165,11 @@ export class LitUIManager {
     }
 
     /**
-     * Update all UI
+     * Lit top bar and rank progress. UIUpdater.updateAllUI delegates here
+     * (#1634); chart, software, bank, and the active screen stay on UIUpdater.
      */
     updateAllUI() {
         this.updateTopBar();
         this.updateRankProgress();
-        // Other updates can be added here
     }
 }
