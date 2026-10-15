@@ -33,6 +33,15 @@ describe('ProjectSystem fixes', () => {
         expect(ps.startProject('fashion_trends').success).toBe(false);
     });
 
+    it('contract stages have no unread options or challenge menus (#2171)', () => {
+        for (const contract of CONTRACTS) {
+            for (const stage of contract.stages) {
+                expect(stage, `${contract.id}/${stage.name}`).not.toHaveProperty('options');
+                expect(stage, `${contract.id}/${stage.name}`).not.toHaveProperty('challenge');
+            }
+        }
+    });
+
     it('startProject deep-copies stages (#1792)', () => {
         ps.startProject('crypto_scraper');
         ps.activeProject.stages[0].maxProgress = 1;
