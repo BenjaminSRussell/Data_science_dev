@@ -680,6 +680,9 @@ export class UIUpdater {
                 ? (locationData.name || theme.name)
                 : (OFFICES[this.gameState?.officeIndex || 0]?.name || theme.name);
         }
+
+        // Interior view is constructed in startNewGame; travel is what shows it (#2201)
+        this.game?.locationView?.showLocation?.(locationId);
     }
 
     /**
