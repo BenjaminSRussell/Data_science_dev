@@ -2376,3 +2376,26 @@ html.quality-no-animations *::after {
     line-height: 1;
     cursor: default;
 }
+
+/* Lit TopBar / ProgressBar (#2131). Legacy nodes stay for the unmounted fallback. */
+#top-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#top-bar-container.lit-mounted > :not(top-bar) {
+    display: none;
+}
+
+#top-bar top-bar {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    gap: 1rem;
+}
+
+#rank-progress-container.lit-mounted > .text-progress-bar,
+.rank-display.lit-rank-mounted > .current-rank {
+    display: none;
+}

@@ -6,6 +6,7 @@
 
 import { BaseComponent } from './BaseComponent.js';
 import { html, css } from 'lit';
+import { CommonUtils } from '../../utils/CommonUtils.js';
 
 export class TopBar extends BaseComponent {
     static properties = {
@@ -77,6 +78,13 @@ export class TopBar extends BaseComponent {
                 <span class="stat-value rank-value">${this.rank || 'None'}</span>
             </div>
         `;
+    }
+
+    /**
+     * Same currency string as the DOM fallback and the other screens (#142)
+     */
+    formatMoney(amount) {
+        return CommonUtils.formatMoney(amount);
     }
 
     /**

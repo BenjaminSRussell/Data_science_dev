@@ -57,9 +57,11 @@
                 <span class="text-ui-heading" style="font-size: 1.2rem; margin: 0;">[ DATA SCIENCE TYCOON ]</span>
             </div>
             <div class="top-bar-center" aria-live="polite" aria-atomic="false">
-                <div id="stat-money" style="color: #66cc66;"><span id="money-value">$0</span></div>
-                <div id="stat-reputation" style="color: #66ccff;">REP: <span id="reputation-value">0</span></div>
-                <div id="stat-rank" style="color: #cca300;">RANK: <span id="rank-value">Data Entry Clerk</span></div>
+                <div id="top-bar-container">
+                    <div id="stat-money" style="color: #66cc66;"><span id="money-value">$0</span></div>
+                    <div id="stat-reputation" style="color: #66ccff;">REP: <span id="reputation-value">0</span></div>
+                    <div id="stat-rank" style="color: #cca300;">RANK: <span id="rank-value">Data Entry Clerk</span></div>
+                </div>
             </div>
             <!-- Visually hidden assertive region: rank promotions are significant milestones and get a dedicated, immediate announcement -->
             <div id="rank-announcement" aria-live="assertive"
@@ -259,8 +261,10 @@
                             <div class="text-ui-heading">CAREER PROGRESS</div>
                             <div class="rank-display">
                                 <span class="current-rank" id="current-rank">Data Entry Clerk</span>
-                                <div class="text-progress-bar" style="margin: 0.5rem 0;">
-                                    <div class="text-progress-filled" id="rank-progress" style="width: 0%"></div>
+                                <div id="rank-progress-container">
+                                    <div class="text-progress-bar" style="margin: 0.5rem 0;">
+                                        <div class="text-progress-filled" id="rank-progress" style="width: 0%"></div>
+                                    </div>
                                 </div>
                                 <span class="next-rank" style="font-size: 0.8rem; color: #888;">Next: Junior
                                     Analyst</span>

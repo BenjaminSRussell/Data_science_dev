@@ -32,7 +32,17 @@ export class LitUIManager {
         if (topBarEl && !this.components.has('topBar')) {
             const topBar = document.createElement('top-bar');
             topBar.game = this.game;
+            // Legacy nodes sit in .top-bar-center's live region. Once they are
+            // hidden, the host announces the shadow-DOM stats instead.
+            topBar.setAttribute('aria-live', 'polite');
+            topBar.setAttribute('aria-atomic', 'true');
             topBarEl.appendChild(topBar);
+            topBarEl.classList.add('lit-mounted');
+            const liveRegion = topBarEl.closest('[aria-live]');
+            if (liveRegion && liveRegion !== topBar) {
+                liveRegion.removeAttribute('aria-live');
+                liveRegion.removeAttribute('aria-atomic');
+            }
             this.components.set('topBar', topBar);
         } else if (!topBarEl && !this.warnedAboutTopBarMount) {
             console.warn('LitUIManager: #top-bar-container element not found, Lit TopBar component will not mount');
@@ -45,6 +55,9 @@ export class LitUIManager {
             const progressBar = document.createElement('progress-bar');
             progressBar.showValue = true;
             rankProgressEl.appendChild(progressBar);
+            rankProgressEl.classList.add('lit-mounted');
+            // Hide the duplicate rank title; .next-rank stays, the bar does not render it.
+            rankProgressEl.closest('.rank-display')?.classList.add('lit-rank-mounted');
             this.components.set('rankProgress', progressBar);
         } else if (!rankProgressEl && !this.warnedAboutRankProgressMount) {
             console.warn('LitUIManager: #rank-progress-container element not found, Lit ProgressBar component will not mount');
@@ -62,14 +75,14 @@ export class LitUIManager {
 
         if (topBar && this.game?.gameState) {
             topBar.updateFromGameState(this.game.gameState);
-        } else {
-            // Fallback to old method if component not available
-            if (!this.warnedAboutTopBarFallback) {
-                console.warn('LitUIManager: TopBar component not available, falling back to DOM manipulation');
-                this.warnedAboutTopBarFallback = true;
-            }
-            this.updateTopBarFallback();
+        } else if (!this.warnedAboutTopBarFallback) {
+            console.warn('LitUIManager: TopBar component not available, falling back to DOM manipulation');
+            this.warnedAboutTopBarFallback = true;
         }
+
+        // #money-value and friends stay current for readers. .lit-mounted hides
+        // them once <top-bar> is the visible stats.
+        this.updateTopBarFallback();
     }
 
     /**
@@ -103,14 +116,14 @@ export class LitUIManager {
             progressBar.value = gameState.progressToNextRank || 0;
             progressBar.max = 100;
             progressBar.label = `Rank: ${gameState.currentRank?.title || 'None'}`;
-        } else {
-            // Fallback to old method
-            if (!this.warnedAboutRankProgressFallback) {
-                console.warn('LitUIManager: RankProgress component not available, falling back to DOM manipulation');
-                this.warnedAboutRankProgressFallback = true;
-            }
-            this.updateRankProgressFallback();
+        } else if (!this.warnedAboutRankProgressFallback) {
+            console.warn('LitUIManager: RankProgress component not available, falling back to DOM manipulation');
+            this.warnedAboutRankProgressFallback = true;
         }
+
+        // <progress-bar> does not render .next-rank, so the legacy nodes stay
+        // in sync whether or not the Lit bar mounted.
+        this.updateRankProgressFallback();
     }
 
     /**
