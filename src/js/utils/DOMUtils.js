@@ -103,19 +103,6 @@ export class DOMUtils {
     }
 
     /**
-     * Get or create element
-     */
-    static getOrCreate(selector, tag = 'div', options = {}) {
-        let element = this.query(selector);
-        if (!element) {
-            element = this.createElement(tag, { ...options, id: selector.replace('#', '') });
-            const parent = options.parent || document.body;
-            parent.appendChild(element);
-        }
-        return element;
-    }
-
-    /**
      * Update element content
      */
     static updateElement(element, updates = {}) {
@@ -154,22 +141,6 @@ export class DOMUtils {
     }
 
     /**
-     * Remove element
-     */
-    static remove(element) {
-        if (typeof element === 'string') {
-            element = this.query(element);
-        }
-        if (element && element.parentNode) {
-            element.parentNode.removeChild(element);
-            // Clear cache
-            if (element.id) {
-                this.queryCache.delete(`#${element.id}`);
-            }
-        }
-    }
-
-    /**
      * Clear container
      */
     static clear(container) {
@@ -194,29 +165,6 @@ export class DOMUtils {
     }
 
     /**
-     * Show/hide element
-     */
-    static show(element) {
-        if (typeof element === 'string') {
-            element = this.query(element);
-        }
-        if (element) {
-            element.style.display = '';
-            element.classList.remove('hidden');
-        }
-    }
-
-    static hide(element) {
-        if (typeof element === 'string') {
-            element = this.query(element);
-        }
-        if (element) {
-            element.style.display = 'none';
-            element.classList.add('hidden');
-        }
-    }
-
-    /**
      * Batch DOM operations
      */
     static batch(operations) {
@@ -230,35 +178,6 @@ export class DOMUtils {
             }
         });
         return fragment;
-    }
-
-    /**
-     * Debounce DOM updates
-     */
-    static debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    /**
-     * Throttle DOM updates
-     */
-    static throttle(func, limit) {
-        let inThrottle;
-        return function executedFunction(...args) {
-            if (!inThrottle) {
-                func.apply(this, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        };
     }
 }
 

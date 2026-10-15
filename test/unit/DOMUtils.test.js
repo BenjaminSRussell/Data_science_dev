@@ -73,31 +73,4 @@ describe('DOMUtils', () => {
             expect(container.textContent).toBe('Hello World');
         });
     });
-
-    describe('getOrCreate', () => {
-        it('should return an existing element by selector', () => {
-            const existingElement = document.createElement('div');
-            existingElement.id = 'test-id';
-            document.body.appendChild(existingElement);
-            const element = DOMUtils.getOrCreate('#test-id', 'div');
-            expect(element).toBe(existingElement);
-        });
-
-        it('should create a new element and append it to the body', () => {
-            const element = DOMUtils.getOrCreate('#test-id', 'div');
-            expect(element.tagName).toBe('DIV');
-            expect(element.id).toBe('test-id');
-            expect(document.body.contains(element)).toBe(true);
-        });
-
-        it('should create a new element and append it to a specified parent', () => {
-            const parent = document.createElement('div');
-            parent.id = 'parent-id';
-            document.body.appendChild(parent);
-            const element = DOMUtils.getOrCreate('#child-id', 'div', { parent });
-            expect(element.tagName).toBe('DIV');
-            expect(element.id).toBe('child-id');
-            expect(parent.contains(element)).toBe(true);
-        });
-    });
 });
