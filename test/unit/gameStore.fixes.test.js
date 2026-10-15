@@ -36,4 +36,16 @@ describe('gameStore fixes', () => {
     it('does not inject a debug overlay into the page (#57)', () => {
         expect(document.getElementById('debug-store-info')).toBeNull();
     });
+
+    it('isChartTypeUnlocked reads unlockedChartTypes (#1614)', () => {
+        const store = useGameStore.getState();
+        expect(store.isChartTypeUnlocked('bar')).toBe(true);
+        expect(store.isChartTypeUnlocked('line')).toBe(true);
+        expect(store.isChartTypeUnlocked('pie')).toBe(true);
+        expect(store.isChartTypeUnlocked('scatter')).toBe(false);
+        store.unlockChartType('scatter');
+        expect(useGameStore.getState().unlockedChartTypes).toContain('scatter');
+        expect(useGameStore.getState().isChartTypeUnlocked('scatter')).toBe(true);
+        expect(useGameStore.getState().isChartTypeUnlocked('radar')).toBe(false);
+    });
 });
