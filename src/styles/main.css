@@ -2021,12 +2021,6 @@ a:hover {
         min-height: clamp(52px, 8vw, 68px);
     }
 
-    .menu-stats-dashboard {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.625rem;
-        padding: 0 0.5rem;
-    }
-
     .menu-footer {
         padding-top: clamp(1rem, 3vw, 1.75rem);
         margin-top: clamp(0.5rem, 2vw, 1rem);
@@ -2085,12 +2079,6 @@ a:hover {
     .menu-btn {
         padding: clamp(0.75rem, 2vw, 1.125rem) clamp(1rem, 3vw, 1.75rem);
         min-height: clamp(52px, 10vw, 68px);
-    }
-
-    .menu-stats-dashboard {
-        grid-template-columns: 1fr;
-        gap: 0.625rem;
-        padding: 0 0.5rem;
     }
 
     .stat-card {
