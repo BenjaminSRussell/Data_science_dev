@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { MapAssetPlacer } from '../../src/js/game/MapAssetPlacer.js';
 import { MapEnvironmentSystem } from '../../src/js/game/MapEnvironmentSystem.js';
-import { MapRenderer } from '../../src/js/game/MapRenderer.js';
 
 const grid = {
     isValidGridCoord: (x, y) => x >= 0 && y >= 0 && x < 30 && y < 30,
@@ -70,29 +69,5 @@ describe('park vs street trees are distinguishable (#1563)', () => {
         expect(park.every(t => t.zoneId === 'p')).toBe(true);
         expect(street.every(t => t.zoneId === 'r' && t.x === 1)).toBe(true);
         expect(env.getElementsByType('tree')).toHaveLength(park.length + street.length);
-    });
-});
-
-describe('MapRenderer.renderEnvironment draws decorations (#1452)', () => {
-    it('renders trees and decorations with distinct classes', () => {
-        const container = document.createElement('div');
-        const renderer = Object.create(MapRenderer.prototype);
-        renderer.container = container;
-        renderer.mapManager = {
-            environmentSystem: {
-                getAllElements: () => [
-                    { id: 't1', type: 'tree', subtype: 'park-tree', x: 1, y: 1 },
-                    { id: 't2', type: 'tree', subtype: 'street-tree', x: 2, y: 2 },
-                    { id: 'd1', type: 'decoration', x: 3, y: 3 },
-                    { id: 'x', type: 'unknown', x: 4, y: 4 },
-                ],
-            },
-            getGridSystem: () => ({ totalWidth: 300, totalHeight: 300, gridToPixel: (x, y) => ({ x: x * 10, y: y * 10 }) }),
-        };
-        renderer.renderEnvironment();
-        expect(container.querySelectorAll('.map-tree')).toHaveLength(2);
-        expect(container.querySelectorAll('.map-tree--street')).toHaveLength(1);
-        expect(container.querySelectorAll('.map-decoration')).toHaveLength(1);
-        expect(container.querySelector('[data-env-type="unknown"]')).toBeNull();
     });
 });

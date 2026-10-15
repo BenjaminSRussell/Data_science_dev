@@ -7,7 +7,6 @@
 import { LAWYER_TIERS } from '../game/LegalSystem.js';
 import { CameraSystem } from '../camera/CameraSystem.js';
 import { updateMapLocationIcons, updateLockBadges } from './MapIconRenderer.js';
-import { initializeMapRenderer } from '../game/MapSystemInitializer.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { logger } from '../utils/Logger.js';
 import { VEHICLES, VEHICLES_MAP } from '../game/WorldMap.js';
