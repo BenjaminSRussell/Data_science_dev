@@ -6,6 +6,14 @@
 import { STATS } from '../CharacterStats.js';
 import { getNPCImage, getNPCFallback } from '../../utils/NPCImageMapper.js';
 import { ThreeCharacterRenderer } from '../../characters/ThreeCharacterRenderer.js';
+import { GIFT_COSTS } from '../NPCManager.js';
+import { loadGiftReaction } from '../../helpers/NPCHelpers.js';
+
+// Spoken reactions in dialogue files that aren't gifts (#2318)
+const SOCIAL_ACTIONS = [
+    ['compliment', 'Give a compliment'],
+    ['ask_help', 'Ask for help']
+];
 
 export class ConversationScreen {
     constructor(game) {
@@ -256,29 +264,134 @@ export class ConversationScreen {
         }
     }
 
-    /**
-     * Handle gift giving
-     */
-    handleGift() {
-        // Disable gift button for now - feature not implemented
-        const giftBtn = this.screenElement?.querySelector('.conversation-action-btn');
-        if (giftBtn) {
-            giftBtn.disabled = true;
-            giftBtn.style.opacity = '0.5';
-            giftBtn.style.cursor = 'not-allowed';
-        }
+    dialogueSystem() {
+        return this.game.relationshipDialogueSystem || this.game.gameState?.relationshipDialogueSystem || null;
+    }
+
+    npcManager() {
+        return this.game.npcManager || this.game.gameState?.npcManager || null;
+    }
+
+    setDialogueText(text) {
+        const dialogueText = this.screenElement?.querySelector('#conversation-dialogue-text');
+        if (dialogueText && text) dialogueText.textContent = text;
+    }
+
+    restoreChoices() {
+        const area = this.screenElement?.querySelector('#conversation-choices');
+        if (!area) return;
+        const choices = this.npcManager()?.currentConversation?.choices || [];
+        area.innerHTML = this.renderChoices(choices);
+        this.attachChoiceHandlers();
     }
 
     /**
-     * Handle topic discussion
+     * Gift and other authored action replies (actions.gift_* / compliment / ask_help).
      */
-    handleTopic() {
-        // Disable topic button for now - feature not implemented
-        const topicBtn = this.screenElement?.querySelectorAll('.conversation-action-btn')[1];
-        if (topicBtn) {
-            topicBtn.disabled = true;
-            topicBtn.style.opacity = '0.5';
-            topicBtn.style.cursor = 'not-allowed';
+    async handleGift() {
+        const npc = this.currentNPC;
+        const area = this.screenElement?.querySelector('#conversation-choices');
+        if (!npc || !area) return;
+
+        const buttons = Object.entries(GIFT_COSTS).map(([id, cost]) => {
+            const label = id.replace(/_/g, ' ');
+            return `<button type="button" class="conversation-choice" data-gift-id="${ConversationScreen.escape(id)}">Give ${ConversationScreen.escape(label)} ($${cost})</button>`;
+        });
+
+        const rds = this.dialogueSystem();
+        for (const [id, label] of SOCIAL_ACTIONS) {
+            let line;
+            try {
+                line = await rds?.getActionResponse?.(npc.id, id);
+            } catch {
+                // A bad dialogue file just hides this action.
+            }
+            if (typeof line === 'string' && line.trim()) {
+                buttons.push(`<button type="button" class="conversation-choice" data-action-id="${ConversationScreen.escape(id)}">${ConversationScreen.escape(label)}</button>`);
+            }
+        }
+        buttons.push('<button type="button" class="conversation-choice" data-action-id="back">Back</button>');
+
+        area.innerHTML = buttons.join('');
+        area.querySelectorAll('[data-gift-id]').forEach(btn => {
+            btn.addEventListener('click', () => { this.giveSelectedGift(btn.dataset.giftId); });
+        });
+        area.querySelectorAll('[data-action-id]').forEach(btn => {
+            btn.addEventListener('click', () => { this.playAction(btn.dataset.actionId); });
+        });
+    }
+
+    async giveSelectedGift(giftId) {
+        const npc = this.currentNPC;
+        if (!npc || !giftId) return;
+        const result = this.npcManager()?.giveGift?.(npc.id, giftId);
+        if (!result?.success) {
+            const message = result?.message || 'Unable to give gift right now.';
+            this.setDialogueText(message);
+            this.game.showToast?.(message, 'warning');
+            return;
+        }
+        let line;
+        try {
+            line = await loadGiftReaction(this.game, npc.id, giftId);
+        } catch {
+            // Fall through to the generic liked/generic reaction.
+        }
+        const fallback = result.liked ? 'Wow! I love this! Thanks!' : 'Oh... thanks, I guess.';
+        this.setDialogueText(line || fallback);
+        const gain = Math.round((result.relationshipGain || 0) * 10) / 10;
+        this.game.showToast?.(
+            `Gift given (-$${result.cost}): Relationship ${gain >= 0 ? '+' : ''}${gain}`,
+            result.liked ? 'success' : 'info'
+        );
+        this.restoreChoices();
+    }
+
+    async playAction(action) {
+        if (action === 'back') {
+            this.restoreChoices();
+            return;
+        }
+        const npc = this.currentNPC;
+        if (!npc || !action) return;
+        let line;
+        try {
+            line = await this.dialogueSystem()?.getActionResponse?.(npc.id, action);
+        } catch {
+            // No authored line for this action.
+        }
+        if (typeof line === 'string' && line.trim()) this.setDialogueText(line);
+    }
+
+    /**
+     * Speak the next authored topic for this relationship stage.
+     */
+    async handleTopic() {
+        const npc = this.currentNPC;
+        if (!npc || this._topicBusy) return;
+        const rds = this.dialogueSystem();
+        if (!rds?.getAvailableTopics) {
+            this.game.showToast?.('No topics to discuss yet.', 'info');
+            return;
+        }
+        this._topicBusy = true;
+        try {
+            const relationship = this.npcManager()?.getRelationship?.(npc.id) || 0;
+            const topics = await rds.getAvailableTopics(npc.id, relationship) || [];
+            if (!topics.length) {
+                this.game.showToast?.(`${npc.name} doesn't have anything else to share yet.`, 'info');
+                return;
+            }
+            if (!this._topicCursor) this._topicCursor = new Map();
+            const n = this._topicCursor.get(npc.id) || 0;
+            this._topicCursor.set(npc.id, n + 1);
+            const topic = topics[n % topics.length];
+            const line = await rds.getDialogue?.(npc.id, relationship, topic);
+            this.setDialogueText(line || "They don't want to talk about that.");
+        } catch {
+            this.game.showToast?.('No topics to discuss yet.', 'info');
+        } finally {
+            this._topicBusy = false;
         }
     }
 

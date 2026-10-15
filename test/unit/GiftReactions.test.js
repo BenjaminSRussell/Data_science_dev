@@ -35,6 +35,18 @@ describe('per-NPC gift reactions (#1307)', () => {
         expect(document.getElementById('npc-dialogue-area').textContent).toBe(emma.actions.gift_books);
     });
 
+    it('asks RelationshipDialogueSystem.getActionResponse when the system is present (#2318)', async () => {
+        document.body.innerHTML = '<div id="npc-dialogue-area"></div>';
+        const g = makeGame();
+        g.gameState.relationshipDialogueSystem = {
+            getActionResponse: vi.fn(async (_id, action) => action === 'gift_books' ? 'My own books line.' : null)
+        };
+        const line = await handleNPCGift(g, 'emma_bloom', 'books');
+        expect(g.gameState.relationshipDialogueSystem.getActionResponse).toHaveBeenCalledWith('emma_bloom', 'gift_books');
+        expect(line).toBe('My own books line.');
+        expect(document.getElementById('npc-dialogue-area').textContent).toBe('My own books line.');
+    });
+
     it('falls back to the generic line when the NPC has no line for that gift', async () => {
         document.body.innerHTML = '<div id="npc-dialogue-area"></div>';
         const g = makeGame();

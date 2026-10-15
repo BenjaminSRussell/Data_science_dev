@@ -72,15 +72,49 @@ describe('ConversationScreen (#304)', () => {
         expect(cs.currentNode).toBeNull();
     });
 
-    it('handleGift/handleTopic disable their own buttons', () => {
-        const { cs } = makeScreen();
-        cs.handleGift();
-        cs.handleTopic();
+    it('topic and gift buttons stay usable and read authored dialogue (#2318)', async () => {
+        const { cs, game, toasts } = makeScreen(40);
+        // No dialogue system and no choice list: nothing to throw, buttons stay enabled
+        await cs.handleTopic();
+        await cs.handleGift();
         for (const b of cs.screenElement.querySelectorAll('.conversation-action-btn')) {
-            expect(b.disabled).toBe(true);
-            expect(b.style.opacity).toBe('0.5');
-            expect(b.style.cursor).toBe('not-allowed');
+            expect(b.disabled).toBe(false);
         }
+        expect(toasts.some(([m]) => /topics/i.test(m))).toBe(true);
+
+        game.relationshipDialogueSystem = {
+            getAvailableTopics: vi.fn(async () => ['work', 'dream']),
+            getDialogue: vi.fn(async (_id, _rel, topic) => `About ${topic}`),
+            getActionResponse: vi.fn(async (_id, action) => {
+                if (action === 'compliment') return 'That means a lot.';
+                if (action === 'gift_coffee') return 'Thanks for the coffee.';
+                return null;
+            })
+        };
+        game.npcManager.giveGift = vi.fn(() => ({ success: true, liked: true, cost: 5, relationshipGain: 3 }));
+        game.npcManager.currentConversation = { choices: [{ text: 'Hello' }] };
+        cs.screenElement.innerHTML += '<div id="conversation-dialogue-text">Hi</div><div id="conversation-choices"></div>';
+
+        await cs.handleTopic();
+        expect(game.relationshipDialogueSystem.getAvailableTopics).toHaveBeenCalledWith('npc1', 40);
+        expect(cs.screenElement.querySelector('#conversation-dialogue-text').textContent).toBe('About work');
+        await cs.handleTopic();
+        expect(cs.screenElement.querySelector('#conversation-dialogue-text').textContent).toBe('About dream');
+
+        await cs.handleGift();
+        expect(cs.screenElement.querySelector('[data-gift-id="coffee"]')).not.toBeNull();
+        expect(cs.screenElement.querySelector('[data-action-id="compliment"]')).not.toBeNull();
+        expect(cs.screenElement.querySelector('[data-action-id="ask_help"]')).toBeNull();
+        await cs.giveSelectedGift('coffee');
+        expect(game.npcManager.giveGift).toHaveBeenCalledWith('npc1', 'coffee');
+        expect(game.relationshipDialogueSystem.getActionResponse).toHaveBeenCalledWith('npc1', 'gift_coffee');
+        expect(cs.screenElement.querySelector('#conversation-dialogue-text').textContent).toBe('Thanks for the coffee.');
+        // A successful gift returns to the conversation choices
+        expect(cs.screenElement.querySelector('#conversation-choices').textContent).toContain('Hello');
+
+        await cs.handleGift();
+        await cs.playAction('compliment');
+        expect(cs.screenElement.querySelector('#conversation-dialogue-text').textContent).toBe('That means a lot.');
     });
 });
 
