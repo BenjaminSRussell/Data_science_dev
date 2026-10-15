@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { EnvironmentManager } from '../../src/js/game/EnvironmentManager.js';
-import { OFFICE_LOCATIONS, TIME_OF_DAY, WEATHER_EFFECTS, OFFICE_EVENTS } from '../../src/js/data/locations.js';
+import { OFFICE_LOCATIONS, TIME_OF_DAY, WEATHER_EFFECTS, OFFICE_EVENTS, DESK_ITEMS } from '../../src/js/data/locations.js';
 
 describe('EnvironmentManager', () => {
     let envManager;
@@ -26,6 +26,7 @@ describe('EnvironmentManager', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         vi.useRealTimers();
+        delete window.game;
     });
 
     describe('constructor', () => {
@@ -173,6 +174,64 @@ describe('EnvironmentManager', () => {
                 weather: envManager.currentWeather,
                 activeEvent: envManager.activeEvent
             });
+        });
+    });
+
+    describe('desk collectibles (#2315)', () => {
+        it('unlocks DESK_ITEMS once tasksCompleted reaches unlockedAfter', () => {
+            const ids = (n) => EnvironmentManager.unlockedDeskItems(n).map(item => item.id);
+            expect(ids(0)).toEqual(['coffee_mug']);
+            expect(ids(1)).toEqual(['coffee_mug', 'stress_ball']);
+            expect(ids(2)).toEqual(['coffee_mug', 'plant', 'stress_ball']);
+            expect(ids(15)).toEqual(DESK_ITEMS.map(item => item.id));
+            expect(EnvironmentManager.unlockedDeskItems(undefined)).toEqual(EnvironmentManager.unlockedDeskItems(0));
+        });
+
+        it('renders unlocked icons into the top bar', () => {
+            mockGameState.tasksCompleted = 3;
+            const shown = envManager.renderDeskItems();
+            const strip = document.getElementById('desk-collectibles');
+            expect(strip.parentElement.className).toBe('top-bar-left');
+            expect(strip.getAttribute('aria-label')).toBe('Desk decorations');
+            expect([...strip.querySelectorAll('[data-item-id]')].map(el => el.getAttribute('data-item-id')))
+                .toEqual(shown.map(item => item.id));
+            expect(strip.querySelector('[data-item-id="coffee_mug"]').textContent).toBe('☕');
+            expect(strip.querySelector('[data-item-id="photo_frame"]').getAttribute('aria-label')).toBe('Photo Frame');
+            expect(strip.querySelector('[data-item-id="trophy"]')).toBeNull();
+        });
+
+        it('toasts only decorations that newly cross a threshold', () => {
+            mockGameState.tasksCompleted = 0;
+            envManager.renderDeskItems();
+            const toast = vi.fn();
+            window.game = { showToast: toast };
+            mockGameState.tasksCompleted = 2;
+            envManager.syncDeskItems({ announce: true });
+            expect(toast.mock.calls.map(call => call[0])).toEqual([
+                'Desk decoration unlocked: Desk Plant',
+                'Desk decoration unlocked: Stress Ball'
+            ]);
+            envManager.syncDeskItems({ announce: true });
+            expect(toast).toHaveBeenCalledTimes(2);
+            delete window.game;
+        });
+
+        it('does not toast when the strip is painted for the first time', () => {
+            const toast = vi.fn();
+            window.game = { showToast: toast };
+            mockGameState.tasksCompleted = 15;
+            envManager.syncDeskItems({ announce: true });
+            expect(toast).not.toHaveBeenCalled();
+            expect(document.querySelectorAll('#desk-collectibles [data-item-id]')).toHaveLength(DESK_ITEMS.length);
+            delete window.game;
+        });
+
+        it('updateLocation refreshes the strip without waiting for a new office', () => {
+            envManager.updateLocation();
+            expect(document.querySelectorAll('#desk-collectibles [data-item-id]')).toHaveLength(1);
+            mockGameState.tasksCompleted = 5;
+            envManager.updateLocation();
+            expect(document.querySelector('[data-item-id="trophy"]')).not.toBeNull();
         });
     });
 

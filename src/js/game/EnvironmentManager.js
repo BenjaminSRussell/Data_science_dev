@@ -2,7 +2,7 @@
  * EnvironmentManager - Handles dynamic backgrounds, locations, and visual effects
  */
 
-import { OFFICE_LOCATIONS, TIME_OF_DAY, WEATHER_EFFECTS, OFFICE_EVENTS } from '../data/locations.js';
+import { OFFICE_LOCATIONS, TIME_OF_DAY, WEATHER_EFFECTS, OFFICE_EVENTS, DESK_ITEMS } from '../data/locations.js';
 import { slotStartHour } from './TimeManager.js';
 
 export class EnvironmentManager {
@@ -94,7 +94,78 @@ export class EnvironmentManager {
             }
         }
 
+        // Desk decorations follow tasksCompleted, not the office id (#2315)
+        this.renderDeskItems();
+
         return this.currentLocation;
+    }
+
+    /**
+     * Desk decorations earned so far. `unlockedAfter` is a tasksCompleted
+     * threshold; order matches DESK_ITEMS so the strip doesn't reshuffle (#2315).
+     * @param {number} tasksCompleted
+     * @returns {Array}
+     */
+    static unlockedDeskItems(tasksCompleted = 0) {
+        const done = Number(tasksCompleted) || 0;
+        return DESK_ITEMS.filter(item => done >= (Number(item.unlockedAfter) || 0));
+    }
+
+    /**
+     * Paint unlocked DESK_ITEMS into the top bar. Icons are text, never HTML.
+     * @returns {Array} the items now shown
+     */
+    renderDeskItems() {
+        if (typeof document === 'undefined' || !document.body) return [];
+        const items = EnvironmentManager.unlockedDeskItems(this.gameState?.tasksCompleted);
+
+        let strip = document.getElementById('desk-collectibles');
+        if (!strip) {
+            strip = document.createElement('div');
+            strip.id = 'desk-collectibles';
+            strip.className = 'desk-collectibles';
+            strip.setAttribute('role', 'list');
+            strip.setAttribute('aria-label', 'Desk decorations');
+            const host = document.querySelector('.top-bar-left') || document.body;
+            host.appendChild(strip);
+        }
+
+        strip.replaceChildren();
+        for (const item of items) {
+            const el = document.createElement('span');
+            el.className = 'desk-collectible';
+            el.setAttribute('role', 'listitem');
+            el.setAttribute('data-item-id', item.id);
+            el.title = item.name;
+            el.setAttribute('aria-label', item.name);
+            el.textContent = item.icon || '';
+            strip.appendChild(el);
+        }
+        return items;
+    }
+
+    /**
+     * Refresh the desk strip. When `announce` is set and the strip was already
+     * on screen, newly crossed thresholds toast once (not the free starter
+     * item, and not a save load that paints the strip for the first time).
+     * @param {{announce?: boolean}} [options]
+     * @returns {Array}
+     */
+    syncDeskItems({ announce = false } = {}) {
+        const strip = typeof document !== 'undefined' ? document.getElementById('desk-collectibles') : null;
+        const had = new Set(
+            strip ? [...strip.querySelectorAll('[data-item-id]')].map(el => el.getAttribute('data-item-id')) : []
+        );
+        const items = this.renderDeskItems();
+        if (!announce || !strip) return items;
+        for (const item of items) {
+            if (had.has(item.id) || !(Number(item.unlockedAfter) > 0)) continue;
+            const message = `Desk decoration unlocked: ${item.name}`;
+            if (typeof window !== 'undefined' && window.game?.showToast) {
+                window.game.showToast(message, 'success');
+            }
+        }
+        return items;
     }
 
     /**
@@ -555,6 +626,6 @@ export class EnvironmentManager {
         if (this.timeUpdateInterval) {
             clearInterval(this.timeUpdateInterval);
         }
-        document.querySelectorAll('.env-floating-element, .weather-effect').forEach(el => el.remove());
+        document.querySelectorAll('.env-floating-element, .weather-effect, #desk-collectibles').forEach(el => el.remove());
     }
 }

@@ -2363,3 +2363,16 @@ html.quality-no-animations *::after {
     font-size: var(--font-size-xs, 0.75rem);
     color: var(--color-text-secondary);
 }
+
+/* Desk collectibles from DESK_ITEMS, painted by EnvironmentManager (#2315) */
+.desk-collectibles {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+}
+.desk-collectible {
+    font-size: 1rem;
+    line-height: 1;
+    cursor: default;
+}
