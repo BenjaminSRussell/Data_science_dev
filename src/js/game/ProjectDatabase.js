@@ -72,7 +72,7 @@ export const CONTRACTS = [
                 type: PROJECT_TYPES.MODELING,
                 name: 'Train CNN Model',
                 description: 'Train a Convolutional Neural Network.',
-                hardwareReq: 'gpu_basic', // Requires GPU
+                hardwareReq: 'gpu_gtx1650', // Entry-level CUDA; id must exist in HARDWARE_PARTS
                 maxProgress: 300
             }
         ]
