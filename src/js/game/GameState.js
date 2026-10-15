@@ -6,6 +6,7 @@
 import { AchievementSystem } from './AchievementSystem.js';
 import { RANKS } from '../data/ranks.js';
 import { normalizePortfolio } from './Portfolio.js';
+import { isHousingLevel } from './Housing.js';
 
 
 export class GameState {
@@ -160,6 +161,7 @@ export class GameState {
         // Additional state
         this.currentJob = null;
         this.housingLevel = 'apartment';
+        this.lastHousingRentWeek = null; // collect_rent is once per week (#2009)
         this.officeLevel = 'small';
         this.mainGame = null; // Reference to MainGame instance
     }
@@ -440,6 +442,7 @@ export class GameState {
             settings: this.settings,
             unlockedLibraries: this.unlockedLibraries || [],
             housingLevel: this.housingLevel,
+            lastHousingRentWeek: Number.isInteger(this.lastHousingRentWeek) ? this.lastHousingRentWeek : null,
             officeLevel: this.officeLevel,
             officeIndex: this.officeIndex ?? 0,
             staff: Array.isArray(this.staff) ? this.staff : [],
@@ -535,7 +538,8 @@ export class GameState {
             delete this.settings.theme;
         }
         this.unlockedLibraries = data.unlockedLibraries || [];
-        if (data.housingLevel) this.housingLevel = data.housingLevel;
+        if (isHousingLevel(data.housingLevel)) this.housingLevel = data.housingLevel;
+        this.lastHousingRentWeek = Number.isInteger(data.lastHousingRentWeek) ? data.lastHousingRentWeek : null;
         if (data.officeLevel) this.officeLevel = data.officeLevel;
         this.officeIndex = Number.isInteger(data.officeIndex) ? data.officeIndex : 0;
         this.staff = Array.isArray(data.staff) ? data.staff : [];

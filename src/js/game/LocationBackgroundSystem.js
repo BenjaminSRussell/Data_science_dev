@@ -119,6 +119,10 @@ export class LocationBackgroundSystem {
      */
     getLayeredBackground(locationId) {
         const gradient = this.getBackground(locationId);
+        // The starter photo would cover every upgrade. A bought home is its gradient (#2009)
+        if (locationId === 'home' && this.getPlayerState().housingLevel !== 'apartment') {
+            return gradient;
+        }
         const image = this.gameState.worldMap?.getLocation?.(locationId)?.background;
         const match = typeof image === 'string' ? image.match(/url\(["']?([^"')]+)["']?\)/) : null;
         if (!match || isAssetMissing(match[1])) return gradient;

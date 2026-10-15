@@ -12,6 +12,7 @@ import { DOMUtils } from '../utils/DOMUtils.js';
 import { logger } from '../utils/Logger.js';
 import { VEHICLES, VEHICLES_MAP } from '../game/WorldMap.js';
 import { TRAINING_ACTIVITIES } from '../game/CharacterStats.js';
+import { buyNextHome, collectHousingRent, housingListings } from '../game/Housing.js';
 // WorldMapRenderer imported lazily to avoid circular dependencies
 
 // Cache DOM elements to avoid repeated queries (using DOMUtils cache)
@@ -624,6 +625,12 @@ export function handleLocationAction(game, action) {
         return;
     }
 
+    // Property Investments: browse / buy the next home / collect weekly rent (#2009)
+    if (action === 'browse_properties' || action === 'buy_property' || action === 'collect_rent') {
+        handleHousingAction(game, action);
+        return;
+    }
+
     // Handle simple shop actions
     const actions = {
         'buy_donut': { cost: 5, energyGain: 10, message: "Yummy donut! +10 Energy" },
@@ -844,4 +851,41 @@ function handleSellCar(game) {
             game.showError(result.reason);
         }
     }
+}
+
+/**
+ * Real-estate activities. Buying writes gameState.housingLevel (#2009).
+ */
+function handleHousingAction(game, action) {
+    const gs = game.gameState;
+    if (!gs) {
+        game.showError?.('Real estate office is closed.');
+        return;
+    }
+
+    if (action === 'browse_properties') {
+        game.showToast?.(`Properties:\n\n${housingListings(gs.housingLevel)}`, 'info');
+        return;
+    }
+
+    const result = action === 'buy_property' ? buyNextHome(gs) : collectHousingRent(gs);
+    if (!result.success) {
+        game.showError?.(result.message);
+        return;
+    }
+
+    const locId = game.worldMap?.currentLocation || gs.worldMap?.currentLocation;
+    if (locId === 'home') {
+        const system = game.locationBackgroundSystem || gs.locationBackgroundSystem;
+        const screen = typeof document !== 'undefined' ? document.getElementById('screen-office') : null;
+        if (system && screen) system.applyBackground('home', screen);
+    }
+    if (locId && typeof document !== 'undefined' && document.getElementById('interaction-grid')) {
+        try { game.uiUpdater?.updateLocationLayout?.(locId); } catch { /* partial DOM */ }
+    }
+
+    game.uiUpdater?.updateAllUI?.();
+    updateMapScreen(game);
+    game.showToast?.(result.message, 'success');
+    game.audioManager?.play?.('kaching');
 }

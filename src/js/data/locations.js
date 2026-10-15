@@ -98,6 +98,18 @@ export const OFFICE_LOCATIONS = [
         elements: ["🌹", "🌻", "🪴", "🎀"],
         unlockMessage: "",
         hidden: true
+    },
+    {
+        // Visitable office, not a workplace: buy_property lives on its buttons (#2009)
+        id: "real_estate",
+        name: "Property Investments",
+        description: "Buy a bigger home. Your home screen changes with it.",
+        rankRequired: 0,
+        background: 'url("/assets/backgrounds/locations/real_estate.png")',
+        ambiance: "",
+        elements: [],
+        unlockMessage: "",
+        hidden: true
     }
 ];
 
