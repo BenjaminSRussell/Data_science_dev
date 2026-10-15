@@ -140,26 +140,6 @@
     border-radius: var(--radius-full);
 }
 
-.badge-primary {
-    background: rgba(244, 244, 245, 0.1);
-    color: var(--color-accent-primary);
-}
-
-.badge-success {
-    background: rgba(100, 100, 100, 0.1);
-    color: var(--color-accent-success);
-}
-
-.badge-warning {
-    background: rgba(120, 120, 120, 0.1);
-    color: var(--color-accent-warning);
-}
-
-.badge-danger {
-    background: rgba(80, 80, 80, 0.1);
-    color: var(--color-accent-danger);
-}
-
 /* =====================================================
    PROGRESS BARS
    ===================================================== */
@@ -287,11 +267,6 @@
     border-color: var(--color-accent-secondary);
 }
 
-.card-interactive:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
-
 .card-header {
     display: flex;
     align-items: center;
@@ -363,51 +338,6 @@
 }
 
 /* =====================================================
-   DIVIDERS
-   ===================================================== */
-.divider {
-    height: 1px;
-    background: var(--glass-border);
-    margin: var(--space-6) 0;
-}
-
-.divider-vertical {
-    width: 1px;
-    height: 100%;
-    background: var(--glass-border);
-}
-
-/* =====================================================
-   SKELETON LOADING
-   ===================================================== */
-.skeleton {
-    background: linear-gradient(90deg,
-            var(--color-bg-tertiary) 25%,
-            var(--color-bg-elevated) 50%,
-            var(--color-bg-tertiary) 75%);
-    background-size: 200% 100%;
-    animation: skeleton 1.5s infinite;
-    border-radius: var(--radius-md);
-}
-
-.skeleton-text {
-    height: 1em;
-    margin-bottom: var(--space-2);
-}
-
-.skeleton-heading {
-    height: 1.5em;
-    width: 60%;
-    margin-bottom: var(--space-4);
-}
-
-.skeleton-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-}
-
-/* =====================================================
    EMPTY STATES
    ===================================================== */
 .empty-state {
@@ -446,60 +376,8 @@
 }
 
 /* =====================================================
-   NOTIFICATION DOT
+   HIGHLIGHT
    ===================================================== */
-.notification-dot {
-    position: relative;
-}
-
-.notification-dot::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 10px;
-    height: 10px;
-    background: var(--color-accent-danger);
-    border-radius: 50%;
-    border: 2px solid var(--color-bg-secondary);
-}
-
-/* =====================================================
-   COUNTERS & NUMBERS
-   ===================================================== */
-.counter {
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-}
-
-.counter-large {
-    font-size: var(--font-size-4xl);
-}
-
-.counter-money {
-    color: var(--color-accent-success);
-}
-
-.counter-money::before {
-    content: '$';
-}
-
-/* =====================================================
-   HIGHLIGHT & GLOW EFFECTS
-   ===================================================== */
-.glow-primary {
-    box-shadow: var(--shadow-glow);
-}
-
-.glow-success {
-    box-shadow: var(--shadow-glow);
-}
-
-.glow-warning {
-    box-shadow: var(--shadow-glow);
-}
-
 .highlight {
     position: relative;
 }
@@ -514,98 +392,6 @@
     border: 2px solid var(--color-accent-primary);
     border-radius: inherit;
     animation: pulse-border 2s infinite;
-}
-
-/* =====================================================
-   RATING STARS
-   ===================================================== */
-.rating {
-    display: inline-flex;
-    gap: var(--space-1);
-}
-
-.rating-star {
-    font-size: 1.5rem;
-    color: var(--color-text-muted);
-    transition: all var(--transition-fast);
-}
-
-.rating-star.filled {
-    color: var(--color-accent-warning);
-}
-
-.rating-star.half {
-    background: linear-gradient(90deg, var(--color-accent-warning) 50%, var(--color-text-muted) 50%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* =====================================================
-   LEVEL / XP BAR
-   ===================================================== */
-.xp-bar-container {
-    position: relative;
-}
-
-.xp-bar {
-    height: 12px;
-    background: var(--color-bg-tertiary);
-    border-radius: var(--radius-full);
-    overflow: hidden;
-}
-
-.xp-bar-fill {
-    height: 100%;
-    background: var(--gradient-grey-light);
-    border-radius: var(--radius-full);
-    transition: width var(--transition-slow);
-    position: relative;
-}
-
-.xp-bar-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
-    animation: shimmer 2s infinite;
-}
-
-.xp-label {
-    position: absolute;
-    right: 0;
-    top: -20px;
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-    font-family: var(--font-mono);
-}
-
-/* =====================================================
-   COUNTDOWN TIMER
-   ===================================================== */
-.countdown {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-bg-tertiary);
-    border-radius: var(--radius-md);
-    font-family: var(--font-mono);
-    font-size: var(--font-size-sm);
-}
-
-.countdown.warning {
-    background: rgba(120, 120, 120, 0.1);
-    color: var(--color-accent-warning);
-}
-
-.countdown.danger {
-    background: rgba(80, 80, 80, 0.1);
-    color: var(--color-accent-danger);
-    animation: pulse 1s infinite;
 }
 
 /* =====================================================
