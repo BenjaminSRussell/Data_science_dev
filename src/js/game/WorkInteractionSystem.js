@@ -169,6 +169,11 @@ export class WorkInteractionSystem {
         const lines = this.getBossDialogue(relationship, promotionReadiness);
         const dialogue = WorkInteractionSystem.pickLine(lines);
 
+        // Same small goodwill as talking to a coworker. Dialogue was chosen
+        // from the relationship before this bump (#2259).
+        this.boss.relationship += 1;
+        this.clampBoss();
+
         return {
             boss: this.boss,
             dialogue,
@@ -351,7 +356,7 @@ export class WorkInteractionSystem {
     recordTaskResult(stars) {
         const s = Number(stars) || 0;
         if (s >= 4) {
-            this.boss.promotionReadiness += (s - 3) * 5;
+            this.increasePromotionReadiness((s - 3) * 5);
             this.boss.relationship += s - 2;
         } else if (s > 0 && s <= 2) {
             this.boss.relationship -= 1;
