@@ -334,6 +334,9 @@ export function updateOfficeScreen(game) {
         if (nextIconEl) nextIconEl.textContent = officeIcons[currentOffice + 1];
         if (nextNameEl) nextNameEl.textContent = officeNames[currentOffice + 1];
     }
+
+    // Same panel ScreenManager fills when the office screen is shown (#2417)
+    game.uiUpdater?.updateDirtyDataPanel?.();
 }
 
 /**

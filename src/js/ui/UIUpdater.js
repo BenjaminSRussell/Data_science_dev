@@ -15,6 +15,7 @@ import { LitUIManager } from './LitUIManager.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { CommonUtils } from '../utils/CommonUtils.js';
 import { GameState } from '../game/GameState.js';
+import { DirtyDataSystem } from '../game/data/DirtyDataSystem.js';
 import { renderTaskPanel, bossPreferenceText } from './taskPanel.js';
 import { logger } from '../utils/Logger.js';
 import { NEWS_CATEGORIES } from '../game/NewsManager.js';
@@ -902,5 +903,97 @@ export class UIUpdater {
 
         const jailHeat = document.getElementById('jail-heat-value');
         if (jailHeat) jailHeat.textContent = heat;
+    }
+
+    /**
+     * DirtyDataSystem on game or gameState, creating it the same way main does
+     * when the office screen opens before deferred init (#2417).
+     */
+    ensureDirtyDataSystem() {
+        const game = this.game;
+        const gs = game?.gameState;
+        const ready = (system) => system
+            && typeof system.getDirtyOptions === 'function'
+            && typeof system.performAction === 'function'
+            && typeof system.getReputationLevel === 'function';
+
+        if (ready(game?.dirtyDataSystem)) {
+            if (gs && !gs.dirtyDataSystem) gs.dirtyDataSystem = game.dirtyDataSystem;
+            return game.dirtyDataSystem;
+        }
+        if (ready(gs?.dirtyDataSystem)) {
+            if (game) game.dirtyDataSystem = gs.dirtyDataSystem;
+            return gs.dirtyDataSystem;
+        }
+        if (!gs) return null;
+        const created = new DirtyDataSystem(gs);
+        gs.dirtyDataSystem = created;
+        if (game) game.dirtyDataSystem = created;
+        return created;
+    }
+
+    /**
+     * Office panel: list getDirtyOptions() and show getReputationLevel() (#2417).
+     */
+    updateDirtyDataPanel() {
+        if (typeof document === 'undefined') return;
+        const optionsEl = document.getElementById('dirty-data-options');
+        if (!optionsEl) return;
+
+        const standingEl = document.getElementById('dirty-data-standing');
+        const system = this.ensureDirtyDataSystem();
+        if (!system) {
+            optionsEl.textContent = 'Unethical work is not available right now.';
+            return;
+        }
+
+        if (standingEl) standingEl.textContent = system.getReputationLevel();
+
+        optionsEl.textContent = '';
+        const options = system.getDirtyOptions();
+        if (!options.length) {
+            optionsEl.textContent = 'No jobs on offer.';
+            return;
+        }
+        for (const action of options) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-cartoon btn-sm btn-danger';
+            btn.dataset.dirtyAction = action.id;
+            const reward = Number(action.reward) || 0;
+            btn.textContent = `${action.name} ($${reward.toLocaleString()}, ${action.risk}% caught)`;
+            btn.title = action.description || action.name;
+            btn.addEventListener('click', () => this.performDirtyDataAction(action.id));
+            optionsEl.appendChild(btn);
+        }
+    }
+
+    /**
+     * Run one dirty-data job and refresh the panel plus the top bar (#2417).
+     */
+    performDirtyDataAction(actionId) {
+        const system = this.ensureDirtyDataSystem();
+        if (!system) {
+            this.game?.showError?.('That option is not available right now.');
+            return null;
+        }
+        const action = system.getDirtyOptions().find(a => a.id === actionId);
+        const ask = globalThis.confirm;
+        if (action && typeof ask === 'function') {
+            const ok = ask(`"${action.name}" is unethical. Risk of being caught: ${action.risk}%. Proceed?`);
+            if (!ok) return null;
+        }
+        const result = system.performAction(actionId);
+        const resultEl = typeof document !== 'undefined' ? document.getElementById('dirty-data-result') : null;
+        if (resultEl) resultEl.textContent = result?.message || '';
+        if (result?.message) {
+            const tone = result.caught ? 'error' : (result.success ? 'success' : 'warning');
+            this.game?.showToast?.(result.message, tone);
+        }
+        if (result?.caught) this.game?.audioManager?.play?.('error');
+        else if (result?.success) this.game?.audioManager?.play?.('kaching');
+        this.updateDirtyDataPanel();
+        this.updateAllUI();
+        return result;
     }
 }
