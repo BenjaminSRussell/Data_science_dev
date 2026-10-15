@@ -109,4 +109,20 @@ describe('checkForCharacterEvolution / updatePlayerAvatar', () => {
         expect(() => checkForCharacterEvolution(g2)).not.toThrow();
         expect(() => updatePlayerAvatar({ gameState: {} })).not.toThrow();
     });
+
+    it('paints the tier sprite without wiping the evolution emoji (#2084)', () => {
+        document.body.innerHTML = '<span class="player-icon">P</span>';
+        const url = '/assets/characters/sprites/lpc_sprite_8.png';
+        updatePlayerAvatar({
+            gameState: {
+                characterStats: { visualStage: 'level_2_good' },
+                visualProgressionSystem: { getSpriteSheetUrl: () => url }
+            }
+        });
+        const el = document.querySelector('.player-icon');
+        expect(el.textContent).toBe('😇');
+        expect(el.style.backgroundImage).toContain(url);
+        // Row 10 (down-facing), not cell (0,0), which is blank in every LPC sheet
+        expect(el.style.backgroundPosition).toBe('0% 50%');
+    });
 });

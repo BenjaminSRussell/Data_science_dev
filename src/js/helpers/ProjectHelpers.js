@@ -4,6 +4,7 @@
  */
 import { OFFICES } from '../data/tycoonData.js';
 import { creativityBonus } from '../game/LibraryEffects.js';
+import { mountTierSprite } from '../game/visual/VisualProgressionSystem.js';
 
 /**
  * Price to move into each office tier, from the canonical OFFICES table (#1767)
@@ -444,9 +445,13 @@ export function updatePlayerAvatar(game) {
     // Tag every marker with the stage for styling; only replace the text
     // when there is an icon, instead of blanking the marker
     const markers = document.querySelectorAll('.player-icon');
+    const vps = game.gameState.visualProgressionSystem;
+    const spriteUrl = vps?.getSpriteSheetUrl?.('main');
     markers.forEach(el => {
         if (stage) el.dataset.stage = stage;
         if (icon) el.textContent = icon;
+        // Tier sheet behind the emoji. mountTierSprite does not clear text (#2084)
+        if (spriteUrl) mountTierSprite(el, spriteUrl);
     });
 }
 

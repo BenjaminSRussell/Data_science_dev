@@ -6,6 +6,7 @@
 
 import { MapManager } from './MapManager.js';
 import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
+import { mountTierSprite } from './visual/VisualProgressionSystem.js';
 
 export class MapRenderer {
     constructor(container, game) {
@@ -435,6 +436,9 @@ export class MapRenderer {
             animation: playerBounce 1s ease-in-out infinite;
         `;
         icon.textContent = '';
+        const vps = this.game?.visualProgressionSystem || this.game?.gameState?.visualProgressionSystem;
+        const spriteUrl = vps?.getSpriteSheetUrl?.('main');
+        if (spriteUrl) mountTierSprite(icon, spriteUrl);
         marker.appendChild(icon);
         
         this.container.appendChild(marker);

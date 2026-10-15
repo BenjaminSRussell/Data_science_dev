@@ -127,20 +127,33 @@ export class ComprehensiveSpriteSystem {
      * Register sprite sheets
      */
     async registerSpriteSheets() {
-        if (!this.spriteSheetManager?.registerSpriteSheet) return;
+        // main_character is the sheet the player draws. character_sheet.png is
+        // blocklisted: prefer the unlocked tier's sheet (#2084), else the
+        // manifest's LPC sheet, whose 13x21 grid every shipped LPC file has (#2542)
+        const mgr = this.spriteSheetManager;
+        if (!mgr?.registerSpriteSheet) return;
         const fromManifest = this.assetManager?.getAssetManifest?.()?.characters?.spriteSheets?.main;
-        const sheet = fromManifest?.url ? fromManifest : lpcSheet(LPC_SHEET_URLS.basic);
+        const base = fromManifest?.url ? fromManifest : lpcSheet(LPC_SHEET_URLS.basic);
+        const vps = typeof window !== 'undefined'
+            ? window.game?.visualProgressionSystem || window.game?.gameState?.visualProgressionSystem
+            : null;
+        const tierUrl = vps?.getSpriteSheetUrl?.('main');
+        const url = tierUrl && !isAssetMissing(tierUrl) ? tierUrl : base.url;
         // Never register a filename that was never drawn (#2542)
-        if (isAssetMissing(sheet.url)) return;
+        if (isAssetMissing(url)) return;
         try {
-            await this.spriteSheetManager.registerSpriteSheet('main_character', {
-                url: sheet.url,
-                frameWidth: sheet.frameWidth,
-                frameHeight: sheet.frameHeight,
-                columns: sheet.columns,
-                rows: sheet.rows,
-                animations: sheet.animations
+            await mgr.registerSpriteSheet('main_character', {
+                url,
+                frameWidth: base.frameWidth,
+                frameHeight: base.frameHeight,
+                columns: base.columns,
+                rows: base.rows,
+                animations: base.animations
             });
+            // Registering only stores metadata; the pixels load here (#2136)
+            if (typeof mgr.loadSpriteSheet === 'function') {
+                await mgr.loadSpriteSheet('main_character');
+            }
         } catch (error) {
             console.warn('Could not register sprite sheets:', error);
         }

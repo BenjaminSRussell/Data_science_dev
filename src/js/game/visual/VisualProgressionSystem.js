@@ -1,12 +1,38 @@
 /**
  * VisualProgressionSystem.js
- * Progressively upgrades game visuals as player advances
- * Better sprites unlock at milestones
+ * Progressively upgrades game visuals as player advances.
+ * Better sprites unlock at milestones. Tier art is the shipped LPC
+ * sheets and generated location backdrops — the old
+ * *_character_sheet.png names are blocklisted and are not registered (#2084).
  */
 
 import { LPC_SHEET_URLS, lpcSheet } from '../../assets/AssetManager.js';
 
 const TIER_ORDER = ['basic', 'mid', 'premium'];
+
+/** Index into each location's generated backdrop set (00–09 all exist). */
+const TIER_BACKDROP_INDEX = {
+    basic: '00',
+    mid: '04',
+    premium: '09'
+};
+
+/**
+ * Show one frame of a tier sheet on a marker. LPC sheets are 13×21
+ * cells, so 1300%×2100% makes a single cell fill the element. The frame
+ * is row 10 (down-facing idle/walk): cell (0,0) is blank in every shipped
+ * sheet, so the marker would show nothing from it.
+ * Does not touch textContent (the evolution emoji stays).
+ */
+export function mountTierSprite(element, url) {
+    if (!element || !url) return;
+    if (!element.style.width) element.style.width = '48px';
+    if (!element.style.height) element.style.height = '48px';
+    element.style.backgroundImage = `url("${url}")`;
+    element.style.backgroundRepeat = 'no-repeat';
+    element.style.backgroundSize = '1300% 2100%';
+    element.style.backgroundPosition = '0% 50%';
+}
 
 export class VisualProgressionSystem {
     constructor(gameState) {
@@ -19,6 +45,9 @@ export class VisualProgressionSystem {
         if (typeof document !== 'undefined' && document.body) {
             this.upgradeBackgrounds(this.currentTier);
         }
+        // Register and load the basic sheet up front, so the player sprite
+        // is not waiting for the first milestone (#2084)
+        this.upgradeSpriteSheets(this.currentTier);
     }
     
     /**
@@ -173,20 +202,60 @@ export class VisualProgressionSystem {
         
         // Update UI elements
         this.upgradeUI(tier);
+
+        // Markers that already exist pick up the new sheet immediately
+        this.paintPlayerSprites();
     }
     
     /**
-     * Upgrade sprite sheets based on tier
+     * Upgrade sprite sheets based on tier.
+     * Registers a file that exists, then loads it. registerSpriteSheet only
+     * stores metadata; nothing rendered until loadSpriteSheet runs (#2084).
      */
     upgradeSpriteSheets(tier) {
         const spriteSheetManager = this.gameState?.spriteSheetManager;
-        if (!spriteSheetManager?.registerSpriteSheet) return;
+        if (typeof spriteSheetManager?.registerSpriteSheet !== 'function') return;
 
         // Tier sheets are real LPC files, all 64px cells. The old
         // basic/mid/premium_character_sheet.png names were never created (#2542).
         const url = LPC_SHEET_URLS[tier];
         if (!url) return;
-        spriteSheetManager.registerSpriteSheet(`character_${tier}`, lpcSheet(url));
+
+        const config = lpcSheet(url);
+        const id = `character_${tier}`;
+        spriteSheetManager.registerSpriteSheet(id, config);
+        this.loadRegisteredSheet(spriteSheetManager, id);
+
+        // ComprehensiveSpriteSystem draws 'main_character', not character_${tier}
+        if (tier === this.currentTier) {
+            spriteSheetManager.registerSpriteSheet('main_character', config);
+            this.loadRegisteredSheet(spriteSheetManager, 'main_character');
+        }
+    }
+
+    /**
+     * loadSpriteSheet rejects when the image 404s. A tier unlock must not.
+     */
+    loadRegisteredSheet(manager, id) {
+        const load = manager.loadSpriteSheet;
+        if (typeof load !== 'function') return;
+        try {
+            const pending = load.call(manager, id);
+            if (pending && typeof pending.then === 'function') pending.catch(() => {});
+        } catch {
+            // Missing image: keep the metadata, skip the pixels
+        }
+    }
+
+    /**
+     * Point existing player markers at the current tier sheet
+     */
+    paintPlayerSprites() {
+        if (typeof document === 'undefined') return;
+        const url = this.getSpriteSheetUrl('main');
+        document.querySelectorAll('.player-icon, .city-player-marker').forEach(el => {
+            mountTierSprite(el, url);
+        });
     }
     
     /**
@@ -204,6 +273,24 @@ export class VisualProgressionSystem {
             el.classList.remove('visual-basic', 'visual-mid', 'visual-premium');
             el.classList.add(`visual-${tier}`);
         });
+
+        // Repaint through LocationBackgroundSystem so getBackgroundUrl is
+        // what the background renderer actually draws (#2084)
+        this.applyTierBackground();
+    }
+
+    /**
+     * Ask the location background renderer to repaint the screen the
+     * player is looking at. No-op until that system and a location exist.
+     */
+    applyTierBackground() {
+        const raw = this.gameState?.worldMap?.currentLocation;
+        const id = typeof raw === 'string' ? raw : raw?.id;
+        const system = this.gameState?.locationBackgroundSystem;
+        if (!id || typeof system?.applyBackground !== 'function') return;
+        if (typeof document === 'undefined') return;
+        const target = document.getElementById('screen-office');
+        if (target) system.applyBackground(id, target);
     }
     
     /**
@@ -303,26 +390,24 @@ export class VisualProgressionSystem {
     }
     
     /**
-     * Get sprite sheet URL for current tier
+     * Get sprite sheet URL for current tier.
+     * 'basic'|'mid'|'premium' name that tier's sheet; anything else
+     * (including 'main') follows the unlocked tier.
      */
     getSpriteSheetUrl(characterType = 'main') {
-        // characterType 'basic'|'mid'|'premium' selects that tier's sheet.
-        // Anything else (including 'main') follows the unlocked tier.
         if (LPC_SHEET_URLS[characterType]) return LPC_SHEET_URLS[characterType];
         return LPC_SHEET_URLS[this.currentTier] || LPC_SHEET_URLS.basic;
     }
     
     /**
-     * Get background URL for location and tier
+     * Get background URL for location and tier.
+     * Files are assets/backgrounds/locations/<id>/<id>_backdrop_NN.png.
      */
     getBackgroundUrl(locationId) {
-        const urls = {
-            basic: `/assets/backgrounds/locations/${locationId}_basic.png`,
-            mid: `/assets/backgrounds/locations/${locationId}_mid.png`,
-            premium: `/assets/backgrounds/locations/${locationId}_premium.png`
-        };
-        
-        return urls[this.currentTier] || urls.basic;
+        if (!locationId) return null;
+        const tier = TIER_BACKDROP_INDEX[this.currentTier] ? this.currentTier : 'basic';
+        const index = TIER_BACKDROP_INDEX[tier];
+        return `/assets/backgrounds/locations/${locationId}/${locationId}_backdrop_${index}.png`;
     }
     
     /**

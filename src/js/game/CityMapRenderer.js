@@ -4,6 +4,8 @@
  * Tile-based system with clear visual hierarchy
  */
 
+import { mountTierSprite } from './visual/VisualProgressionSystem.js';
+
 export class CityMapRenderer {
     constructor(container, game) {
         this.container = container;
@@ -301,6 +303,9 @@ export class CityMapRenderer {
             z-index: 100;
         `;
         
+        const vps = this.game?.visualProgressionSystem || this.game?.gameState?.visualProgressionSystem;
+        const spriteUrl = vps?.getSpriteSheetUrl?.('main');
+        if (spriteUrl) mountTierSprite(marker, spriteUrl);
         container.appendChild(marker);
     }
 

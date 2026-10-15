@@ -69,6 +69,16 @@ describe('LocationBackgroundSystem coverage', () => {
         expect(lbs.getLayeredBackground('atlantis')).toBe(lbs.getDefaultBackground());
     });
 
+    it('prefers the visual-tier backdrop when one is offered (#2084)', () => {
+        gs.visualProgressionSystem = {
+            getBackgroundUrl: (id) => `/assets/backgrounds/locations/${id}/${id}_backdrop_04.png`
+        };
+        const bg = lbs.getLayeredBackground('downtown');
+        expect(bg).toContain('/assets/backgrounds/locations/downtown/downtown_backdrop_04.png');
+        expect(bg).toContain(lbs.getBackground('downtown'));
+        expect(lbs.getLayeredBackground('atlantis')).toBe(lbs.getDefaultBackground());
+    });
+
     it('applyBackground paints the element and tolerates null', () => {
         const el = document.createElement('div');
         const bg = lbs.applyBackground('gym', el);
