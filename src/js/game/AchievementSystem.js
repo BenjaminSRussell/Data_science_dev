@@ -69,4 +69,41 @@ export class AchievementSystem {
         }
         return out;
     }
+
+    /**
+     * Badge rows for the stats screen. These are the only producers of the
+     * .achievement* rules in components.css (#1668).
+     * @param {ParentNode|null} container
+     * @param {Array} completed saved completedAchievements (ids or {id})
+     */
+    static renderBadges(container, completed) {
+        if (!container) return;
+        const have = new Set(
+            (Array.isArray(completed) ? completed : [])
+                .map(entry => (typeof entry === 'string' ? entry : entry?.id))
+                .filter(id => typeof id === 'string')
+        );
+        container.replaceChildren(...ACHIEVEMENTS.map(a => {
+            const unlocked = have.has(a.id);
+            const root = document.createElement('div');
+            root.className = unlocked ? 'achievement unlocked' : 'achievement';
+            root.dataset.achievement = a.id;
+            root.setAttribute('role', 'listitem');
+            const icon = document.createElement('div');
+            icon.className = 'achievement-icon';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.textContent = unlocked ? '★' : '○';
+            const info = document.createElement('div');
+            info.className = 'achievement-info';
+            const name = document.createElement('div');
+            name.className = 'achievement-name';
+            name.textContent = a.name;
+            const desc = document.createElement('div');
+            desc.className = 'achievement-desc';
+            desc.textContent = a.description;
+            info.append(name, desc);
+            root.append(icon, info);
+            return root;
+        }));
+    }
 }
