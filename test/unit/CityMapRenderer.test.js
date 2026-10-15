@@ -110,6 +110,38 @@ describe('CityMapRenderer', () => {
     expect(event.defaultPrevented).toBe(false); // stopPropagation, not preventDefault
   });
 
+  it('renderLocations() skips a location missing position and still draws later markers and the player', () => {
+    const missing = {
+      id: 'loc-missing',
+      name: 'Nowhere',
+      icon: '?',
+      type: 'unknown',
+    };
+    const good = {
+      id: 'loc-good',
+      name: 'Library',
+      icon: '📚',
+      type: 'library',
+      position: { x: 8, y: 12 },
+    };
+    game.worldMap.getAccessibleLocations = vi.fn(() => [missing, good]);
+    game.worldMap.currentLocation = 'loc-good';
+    game.worldMap.getCurrentLocation = vi.fn(() => good);
+
+    expect(() => renderer.renderLocations()).not.toThrow();
+
+    const locationsContainer = container.querySelector('.city-locations-container');
+    expect(locationsContainer).not.toBeNull();
+    expect(locationsContainer.querySelector('.city-location[data-location="loc-missing"]')).toBeNull();
+
+    const marker = locationsContainer.querySelector('.city-location[data-location="loc-good"]');
+    expect(marker).not.toBeNull();
+    expect(marker.classList.contains('current')).toBe(true);
+    expect(marker.style.left).toBe(`${(8 / 30) * 100}%`);
+    expect(marker.style.top).toBe(`${(12 / 30) * 100}%`);
+    expect(locationsContainer.querySelector('.city-player-marker')).not.toBeNull();
+  });
+
   it('update() initializes when not rendered', () => {
     expect(renderer.rendered).toBe(false);
 

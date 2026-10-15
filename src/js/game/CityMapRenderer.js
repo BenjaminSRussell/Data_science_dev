@@ -222,6 +222,9 @@ export class CityMapRenderer {
         const currentLocationId = this.game.worldMap?.currentLocation;
         
         locations.forEach(location => {
+            // Match renderBuildings(): a missing position must not abort the pass.
+            if (!location.position) return;
+
             const locEl = document.createElement('div');
             locEl.className = `city-location ${location.id === currentLocationId ? 'current' : ''}`;
             locEl.dataset.location = location.id;
