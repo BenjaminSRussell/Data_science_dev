@@ -1442,14 +1442,17 @@ export class MainGame {
                 logger.warn('FilterManager not available:', error);
             });
 
-            // Legacy Visual Systems (Phase 4 Cleanup)
-            /*
-            this.characterAnimationSystem = new CharacterAnimationSystem(this.assetManager);
-            this.characterRenderer = new AnimatedCharacterRenderer(this.visualSystem.startLoadingSpriteSheets());
-            this.threeRenderer = new ThreeCharacterRenderer(); // Shared 3D renderer manager
-            this.locationView = new LocationView(this, this.assetManager, this.characterRenderer, this.threeRenderer);
+            // The only LocationView call sat in a comment and passed
+            // AnimatedCharacterRenderer as the animation system (#2201).
+            // CharacterAnimationSystem left with GSAP, so that argument is null.
+            // NPCs with a model render through ThreeCharacterRenderer.
+            if (!this.threeRenderer) this.threeRenderer = new ThreeCharacterRenderer();
+            if (!this.locationView) {
+                this.locationView = new LocationView(this, this.assetManager, null, this.threeRenderer);
+            } else {
+                this.locationView.assetManager = this.assetManager;
+            }
             this.gameState.locationView = this.locationView;
-            */
 
             // Load assets in background (non-blocking, low priority)
             // Phase 4: Try PixiJS Assets first, fallback to old AssetManager
