@@ -5,6 +5,11 @@
 
 import { trainingXpMultiplier, creativityBonus } from './LibraryEffects.js';
 
+/** Cleaning-bug chance removed per intelligenceRating point (#1806). */
+export const INTELLIGENCE_ERROR_CUT = 0.02;
+/** Modeling stages get half the rating as extra work; cleaning gets all of it. */
+export const MODELING_INTELLIGENCE_FACTOR = 0.5;
+
 export class AISystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -14,7 +19,7 @@ export class AISystem {
         this.xpToNextLevel = 100;
 
         // Core Stats
-        this.intelligence = 1; // Reduces error rate / unlocks complex tasks
+        this.intelligence = 1; // Cleaning error rate / complex-task gate (#1806)
         this.speed = 1;        // Work multiplier
         this.creativity = 1;   // Bonus for Game Dev / Creative tasks
 
@@ -39,10 +44,30 @@ export class AISystem {
     }
 
     /**
-     * Calculate intelligence rating (Quality Multiplier)
+     * Quality / error-rate rating. Project work and the complex-contract
+     * gate both read this (#1806); the raw intelligence stat is what the
+     * office UI prints.
      */
     get intelligenceRating() {
         return this.intelligence + (this.level * 0.5);
+    }
+
+    /**
+     * Stage-specific effect of intelligenceRating (#1806).
+     * cleaning: full rating added to work, and the same rating cuts bug chance.
+     * modeling: half rating added to work (complex tasks).
+     * scraping / game_dev: none — those are speed and creativity.
+     */
+    modifiersForStage(stage) {
+        const rating = Number(this.intelligenceRating);
+        const safe = Number.isFinite(rating) && rating > 0 ? rating : 0;
+        if (stage?.type === 'cleaning') {
+            return { work: safe, errorCut: safe * INTELLIGENCE_ERROR_CUT };
+        }
+        if (stage?.type === 'modeling') {
+            return { work: safe * MODELING_INTELLIGENCE_FACTOR, errorCut: 0 };
+        }
+        return { work: 0, errorCut: 0 };
     }
 
     /**
