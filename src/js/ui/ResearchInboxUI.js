@@ -4,6 +4,15 @@
  * Phase 2: Now uses Lit component (ResearchInboxComponent) with fallback
  */
 
+import { ValidationUtils } from '../utils/ValidationUtils.js';
+
+/** Keep a real URL. A bare email becomes a mailto link. Anything else is dropped. */
+function externalPaperHref(value) {
+    if (ValidationUtils.isValidUrl(value)) return value;
+    if (ValidationUtils.isValidEmail(value)) return `mailto:${value}`;
+    return '';
+}
+
 export class ResearchInboxUI {
     constructor(researchPaperSystem) {
         this.researchPaperSystem = researchPaperSystem;
@@ -189,6 +198,7 @@ export class ResearchInboxUI {
         }
 
         // Create detail modal
+        const paperHref = externalPaperHref(paper.url);
         const modal = document.createElement('div');
         modal.className = 'paper-detail-modal';
         modal.innerHTML = `
@@ -224,9 +234,9 @@ export class ResearchInboxUI {
                             ${paper.keywords.map(kw => `<span class="keyword">${kw}</span>`).join('')}
                         </div>
                     </div>
-                    ${paper.url ? `
+                    ${paperHref ? `
                         <div class="paper-detail-link">
-                            <a href="${paper.url}" target="_blank" rel="noopener noreferrer" class="paper-link-btn">
+                            <a href="${paperHref}" target="_blank" rel="noopener noreferrer" class="paper-link-btn">
                                  Read Paper
                             </a>
                         </div>

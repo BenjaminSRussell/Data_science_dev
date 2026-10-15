@@ -4,6 +4,8 @@
  * Can turn relationship aspects on/off
  */
 
+import { ValidationUtils } from '../../utils/ValidationUtils.js';
+
 // Allowed ranges for numeric settings (#1073)
 const NUMERIC_RANGES = {
     difficulty: {
@@ -24,7 +26,7 @@ function sanitizeSetting(category, key, value, defaultValue) {
     }
     if (typeof defaultValue === 'number') {
         const n = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
-        if (typeof n !== 'number' || !Number.isFinite(n)) return { ok: false };
+        if (!ValidationUtils.isNumber(n) || !Number.isFinite(n)) return { ok: false };
         const [min, max] = NUMERIC_RANGES[category]?.[key] ?? [-Infinity, Infinity];
         return { ok: true, value: Math.min(max, Math.max(min, n)) };
     }

@@ -4,8 +4,10 @@
  */
 
 import { pickState, applyState } from '../utils/StateSerializer.js';
+import { ValidationUtils } from '../utils/ValidationUtils.js';
 
-const isAmount = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+// isNonNegative treats Infinity as in range; a money amount must also be finite.
+const isAmount = (v) => ValidationUtils.isNonNegative(v) && Number.isFinite(v);
 const DEFAULT_PRODUCT_COST = 100;
 
 export class InvestmentEcommerceSystem {
@@ -152,7 +154,7 @@ export class InvestmentEcommerceSystem {
 
         // Reject products that would poison revenue with NaN (#1004)
         const id = product?.id;
-        if (id === undefined || id === null || id === '' || !isAmount(product?.price)) {
+        if (!ValidationUtils.isRequired(id) || !isAmount(product?.price)) {
             return { success: false, message: "A product needs an id and a non-negative price." };
         }
         // Re-adding an id used to reset its stock and double its sales (#1981)

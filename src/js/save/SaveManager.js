@@ -6,6 +6,7 @@
  */
 
 import { IndexedDBSaveStore, LEGACY_UNSLOTTED_SAVE_KEY } from './IndexedDBSaveStore.js';
+import { ValidationUtils } from '../utils/ValidationUtils.js';
 
 export { LEGACY_UNSLOTTED_SAVE_KEY, LOCALSTORAGE_MIGRATION } from './IndexedDBSaveStore.js';
 
@@ -68,7 +69,8 @@ export function decodeSaveString(encoded) {
 }
 
 function isValidSlot(slotIndex) {
-    return Number.isInteger(slotIndex) && slotIndex >= 0 && slotIndex < MAX_SAVE_SLOTS;
+    return ValidationUtils.isInteger(slotIndex)
+        && ValidationUtils.isInRange(slotIndex, 0, MAX_SAVE_SLOTS - 1);
 }
 
 /** JSON text, or the legacy base64 export (UTF-8, then Latin-1). */
