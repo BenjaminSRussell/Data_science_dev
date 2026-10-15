@@ -102,6 +102,23 @@ describe('LocationView cluster', () => {
         expect(updateLocationView).toHaveBeenCalled();
     });
 
+    it('a 3D character click uses the live NPC dialogue (#2316)', () => {
+        document.body.innerHTML = '<div id="location-characters"></div>';
+        const npc = { id: 'emma', name: 'Emma', modelPath: '/models/emma.fbx' };
+        const game = makeGame();
+        game.interactWithNPC = vi.fn();
+        game.gameState.npcManager = {
+            getNPCsAtLocation: () => [npc],
+            getAllNPCs: () => [npc],
+            getRelationship: () => 0
+        };
+        const three = { create3DCharacter: () => document.createElement('div') };
+        const view = new LocationView(game, null, null, three);
+        view.renderCharacters('home');
+        document.getElementById('location-char-emma').click();
+        expect(game.interactWithNPC).toHaveBeenCalledWith('emma');
+    });
+
     it('features are keyboard accessible (#878)', () => {
         document.body.innerHTML = '<div id="location-features"></div>';
         const game = makeGame();

@@ -15,7 +15,7 @@ questions against it.
   `setupEventListeners()` method (roughly lines 770–1260).
 - Additional listeners live in other files: `index.html` (window error/load/module-loaded),
   `src/js/audio/AudioManager.js` (music `ended`), and per-UI modules
-  (`CityMapRenderer.js`, `MapRenderer.js`, `TileBasedCityMap.js`, `ConversationScreen.js`,
+  (`CityMapRenderer.js`, `MapRenderer.js`, `TileBasedCityMap.js`,
   `EmotionalBreakdownSystem.js`, `IntroSystem.js`, `NotificationSystem.js`, `NPCHelpers.js`).
 
 ## 2. Classification of the ~60 listeners in main.js

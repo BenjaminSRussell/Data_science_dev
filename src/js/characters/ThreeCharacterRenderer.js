@@ -1,7 +1,7 @@
 /**
  * ThreeCharacterRenderer.js
- * Renders NPC 3D models (FBX) into small canvases for LocationView and
- * ConversationScreen. three.js and the FBX loader are imported lazily so the
+ * Renders NPC 3D models (FBX) into small canvases for LocationView.
+ * three.js and the FBX loader are imported lazily so the
  * main bundle does not pay for them until a 3D NPC is actually shown.
  *
  * create3DCharacter() always returns a container element synchronously. If the
