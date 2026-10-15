@@ -6,6 +6,95 @@
 
 // AssetResolver not currently used - using direct SVG paths
 // import { AssetResolver } from '../../utils/AssetResolver.js';
+import { LICENSES } from '../LegalSystem.js';
+
+/**
+ * Next City Hall license the player does not already hold.
+ * Catalog prices stay in LegalSystem; this only picks which one to file.
+ */
+function nextCityLicense(system) {
+    const legal = system.gameState?.legalSystem;
+    return LICENSES.find(license => !legal?.hasLicense?.(license.id)) || null;
+}
+
+function cityHallLicense(system) {
+    const next = nextCityLicense(system);
+    if (!next) {
+        return { info: true, message: 'You already hold every license City Hall offers.' };
+    }
+    if (typeof system.gameState?.legalSystem?.acquireLicense !== 'function') {
+        return { info: true, message: `The license clerk is out. A ${next.name} would cost $${next.cost}.` };
+    }
+    return {
+        licenseId: next.id,
+        message: `You apply for a ${next.name} ($${next.cost}).`
+    };
+}
+
+/**
+ * Feature results for locations whose actions never matched the generic
+ * rest/work/computer/cook/read/coffee/gossip/boss switch (#2064).
+ * Keyed by feature id so shared verbs (buy, browse, talk, meet, eat)
+ * stay specific to the room the player clicked.
+ */
+const LOCATION_FEATURE_ACTIONS = {
+    flower_store: {
+        counter: { money: -12, reputation: 1, message: 'You buy a bouquet at the flower shop' },
+        display: { info: true, message: 'You browse the seasonal flower display' },
+        plants: { money: -20, message: 'You buy a potted plant' },
+        vases: { money: -8, message: 'You buy a vase' }
+    },
+    networking_bar: {
+        bar: { money: -6, energy: 10, message: 'You order a drink at the Data Lounge' },
+        booth: { energy: 5, message: 'You take a booth and catch your breath' },
+        networking_area: { reputation: 2, skill: 1, message: 'You trade contacts with other professionals' },
+        bartender: { reputation: 1, message: 'You chat with the bartender about who is hiring' }
+    },
+    stock_exchange: {
+        trading_floor: { skill: 1, message: 'You watch the trading floor' },
+        terminal: { skill: 1, openScreen: 'screen-stock-market', message: 'You step up to a trading terminal' },
+        analyst_desk: { skill: 2, message: 'You go over the analyst notes' },
+        meeting_room: { reputation: 1, message: 'You sit in on a market meeting' }
+    },
+    city_hall: {
+        reception: { info: true, message: 'You check in at City Hall reception' },
+        license_office: cityHallLicense,
+        waiting_room: { energy: -5, message: 'You wait for your number to be called' },
+        records: { skill: 1, message: 'You pull public records and take notes' }
+    },
+    mall: {
+        clothing_store: { money: -22, reputation: 1, message: 'You buy clothes at the mall' },
+        electronics: { money: -35, skill: 1, message: 'You buy electronics at the mall' },
+        food_court: { money: -8, energy: 15, message: 'You eat at the food court' },
+        gift_shop: { money: -14, message: 'You buy a gift' }
+    },
+    car_dealership: {
+        showroom: { info: true, message: 'You browse the cars on the lot' },
+        sales_office: { reputation: 1, message: 'You talk through options with a salesperson' },
+        finance: { skill: 1, message: 'You go over financing terms' },
+        test_drive: { energy: -10, skill: 1, message: 'You take a car for a test drive' }
+    },
+    downtown: {
+        office_tower: { skill: 1, message: 'You look through a premium downtown office' },
+        restaurant: { money: -28, energy: 20, message: 'You eat at a downtown restaurant' },
+        meeting_space: { reputation: 2, message: 'You hold a business meeting downtown' },
+        parking: { money: -4, message: 'You park in the downtown garage' }
+    },
+    venture_capital: {
+        investment_desk: { money: -50, skill: 1, message: 'You review a seed-round opportunity' },
+        pitch_room: { reputation: 1, skill: 1, message: 'You hear a startup pitch' },
+        portfolio_room: { skill: 1, message: 'You go through the portfolio' },
+        partner_office: { reputation: 2, message: 'You meet with a venture partner' },
+        deal_room: { money: -25, skill: 1, reputation: 2, message: 'You work through a term sheet' }
+    }
+};
+
+function resolveBespokeAction(system, locationId, featureId) {
+    const spec = LOCATION_FEATURE_ACTIONS[locationId]?.[featureId];
+    if (!spec) return null;
+    if (typeof spec === 'function') return spec(system);
+    return { ...spec };
+}
 
 export class LocationDetailSystem {
     constructor(gameState) {
@@ -396,6 +485,9 @@ export class LocationDetailSystem {
      * Execute feature action
      */
     executeAction(action, locationId, featureId) {
+        const bespoke = resolveBespokeAction(this, locationId, featureId);
+        if (bespoke) return bespoke;
+
         switch (action) {
             case 'rest':
                 return { energy: 50, message: 'You rest and restore energy' };
