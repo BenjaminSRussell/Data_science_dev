@@ -33,6 +33,9 @@ export class RomanceSystem {
 
         if (this.partnerId && this.partnerId !== npcId) {
             this.modifyHappiness(-25); // Partner is upset about cheating attempt
+            const partnerId = this.partnerId;
+            this.gameState.npcManager?.considerEmotionalBreakdown?.(
+                partnerId, 0, this.gameState.npcManager.getRelationship?.(partnerId), 'betrayal');
             return { success: false, message: "You are already seeing someone! Cheater!" };
         }
 
@@ -174,6 +177,10 @@ export class RomanceSystem {
         this.relationshipScore = 0;
         this.anniversary = null;
         this.lastBreakup = { partnerId, reason, previousStatus, day: this.gameState.timeManager?.totalDays ?? null };
+        // Ending it is a rejection, unless the split was already a betrayal.
+        const cause = reason === 'betrayal' ? 'betrayal' : 'rejection';
+        this.gameState.npcManager?.considerEmotionalBreakdown?.(
+            partnerId, 0, this.gameState.npcManager.getRelationship?.(partnerId), cause);
         return { previousStatus, divorceCost, partnerId };
     }
 
