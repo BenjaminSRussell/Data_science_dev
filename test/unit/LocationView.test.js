@@ -103,5 +103,26 @@ describe('LocationView', () => {
                 expect(element.dataset.featureId).toBe(features[index].id);
             });
         });
+
+        it('should placeholder a missing icon and blank a missing name (#2215)', () => {
+            container.innerHTML = '<div id="location-features"></div>';
+            locationView.renderFeatures([
+                { id: 'mystery', icon: '' },
+                { id: 'poster', icon: '/assets/icons/features/poster.png' },
+                { id: 'coffee', name: 'Coffee', icon: '☕' }
+            ]);
+
+            const featureElements = container.querySelectorAll('.location-feature');
+            expect(featureElements[0].querySelector('span').textContent).toBe('?');
+            expect(featureElements[0].querySelector('.location-feature-label').textContent).toBe('');
+
+            const img = featureElements[1].querySelector('img');
+            expect(img.getAttribute('alt')).toBe('');
+            expect(img.getAttribute('src')).toBe('/assets/icons/features/poster.png');
+            expect(featureElements[1].querySelector('.location-feature-label').textContent).toBe('');
+
+            expect(featureElements[2].querySelector('span').textContent).toBe('☕');
+            expect(featureElements[2].querySelector('.location-feature-label').textContent).toBe('Coffee');
+        });
     });
 });

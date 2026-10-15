@@ -65,4 +65,37 @@ describe('LocationViewComponent', () => {
         const background = component.shadowRoot.querySelector('.location-background');
         expect(background.className).to.equal('location-background');
     });
+
+    it('should show a visible placeholder when a feature icon is missing (#2215)', async () => {
+        component.updateLocation('office', {
+            name: 'Office',
+            description: 'Desks.',
+            features: [
+                { id: 'desk', name: 'Desk' },
+                { id: 'lamp', name: 'Lamp', icon: '' },
+                { id: 'coffee', name: 'Coffee', icon: '☕' }
+            ]
+        });
+        await component.updateComplete;
+
+        const spans = component.shadowRoot.querySelectorAll('.location-feature span');
+        expect(spans).to.have.length(3);
+        expect(spans[0].textContent).to.equal('?');
+        expect(spans[1].textContent).to.equal('?');
+        expect(spans[2].textContent).to.equal('☕');
+    });
+
+    it('should use an empty alt when a feature image has no name (#2215)', async () => {
+        component.updateLocation('office', {
+            name: 'Office',
+            description: 'Desks.',
+            features: [{ id: 'poster', icon: '/assets/icons/features/poster.png' }]
+        });
+        await component.updateComplete;
+
+        const img = component.shadowRoot.querySelector('.location-feature img');
+        expect(img).to.exist;
+        expect(img.getAttribute('src')).to.equal('/assets/icons/features/poster.png');
+        expect(img.getAttribute('alt')).to.equal('');
+    });
 });
