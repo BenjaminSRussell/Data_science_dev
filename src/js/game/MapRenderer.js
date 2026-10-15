@@ -271,25 +271,35 @@ export class MapRenderer {
         const envContainer = document.createElement('div');
         envContainer.className = 'map-environment-container';
         this.container.appendChild(envContainer);
-        
-        const elements = this.mapManager.environmentSystem.getAllElements();
+
+        const envSystem = this.mapManager.environmentSystem;
         const gridSystem = this.mapManager.getGridSystem();
-        const containerWidth = this.container.offsetWidth || this.mapManager.getGridSystem().totalWidth;
-        const containerHeight = this.container.offsetHeight || this.mapManager.getGridSystem().totalHeight;
-        
-        // Trees (park and street) and commercial decorations all get drawn (#1452)
+        const containerWidth = this.container.offsetWidth || gridSystem.totalWidth;
+        const containerHeight = this.container.offsetHeight || gridSystem.totalHeight;
+
+        // Trees (park and street) and commercial decorations all get drawn (#1452).
+        // getElementsByType('tree') already includes park-tree and street-tree.
         const CLASS_BY_KIND = {
             'park-tree': 'map-tree map-tree--park',
             'street-tree': 'map-tree map-tree--street',
             tree: 'map-tree',
             decoration: 'map-decoration'
         };
-        elements.forEach(element => {
+        const drawable = new Set([
+            ...envSystem.getElementsByType('tree'),
+            ...envSystem.getElementsByType('decoration')
+        ]);
+        const drawn = new Set();
+
+        const appendElement = (parent, element) => {
+            if (drawn.has(element) || !drawable.has(element)) return;
             const className = CLASS_BY_KIND[element.subtype] || CLASS_BY_KIND[element.type];
             if (!className) return;
+            drawn.add(element);
             const el = document.createElement('div');
             el.className = className;
             el.dataset.envType = element.subtype || element.type;
+            if (element.zoneId) el.dataset.zoneId = element.zoneId;
 
             const pixel = gridSystem.gridToPixel(element.x, element.y);
             const left = (pixel.x / containerWidth) * 100;
@@ -307,8 +317,24 @@ export class MapRenderer {
                 pointer-events: none;
             `;
 
-            envContainer.appendChild(el);
-        });
+            parent.appendChild(el);
+        };
+
+        // Zone layers are not positioned, so child percentages still resolve
+        // against the map. Empty zones add no layer.
+        const zones = this.mapManager.getZoneSystem?.()?.getAllZones?.() ?? [];
+        for (const zone of zones) {
+            const inZone = envSystem.getElementsInZone(zone.id);
+            if (!inZone?.length) continue;
+            const zoneLayer = document.createElement('div');
+            zoneLayer.className = 'map-environment-zone';
+            zoneLayer.dataset.zoneId = zone.id;
+            const before = drawn.size;
+            for (const element of inZone) appendElement(zoneLayer, element);
+            if (drawn.size > before) envContainer.appendChild(zoneLayer);
+        }
+
+        for (const element of drawable) appendElement(envContainer, element);
     }
 
     /**

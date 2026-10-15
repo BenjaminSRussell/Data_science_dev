@@ -73,20 +73,26 @@ describe('park vs street trees are distinguishable (#1563)', () => {
     });
 });
 
+function envQueries(elements) {
+    return {
+        getElementsByType: (type) => elements.filter(el => el.type === type || el.subtype === type),
+        getElementsInZone: (zoneId) => elements.filter(el => el.zoneId === zoneId),
+    };
+}
+
 describe('MapRenderer.renderEnvironment draws decorations (#1452)', () => {
     it('renders trees and decorations with distinct classes', () => {
         const container = document.createElement('div');
         const renderer = Object.create(MapRenderer.prototype);
+        const elements = [
+            { id: 't1', type: 'tree', subtype: 'park-tree', x: 1, y: 1 },
+            { id: 't2', type: 'tree', subtype: 'street-tree', x: 2, y: 2 },
+            { id: 'd1', type: 'decoration', x: 3, y: 3 },
+            { id: 'x', type: 'unknown', x: 4, y: 4 },
+        ];
         renderer.container = container;
         renderer.mapManager = {
-            environmentSystem: {
-                getAllElements: () => [
-                    { id: 't1', type: 'tree', subtype: 'park-tree', x: 1, y: 1 },
-                    { id: 't2', type: 'tree', subtype: 'street-tree', x: 2, y: 2 },
-                    { id: 'd1', type: 'decoration', x: 3, y: 3 },
-                    { id: 'x', type: 'unknown', x: 4, y: 4 },
-                ],
-            },
+            environmentSystem: envQueries(elements),
             getGridSystem: () => ({ totalWidth: 300, totalHeight: 300, gridToPixel: (x, y) => ({ x: x * 10, y: y * 10 }) }),
         };
         renderer.renderEnvironment();
@@ -94,5 +100,37 @@ describe('MapRenderer.renderEnvironment draws decorations (#1452)', () => {
         expect(container.querySelectorAll('.map-tree--street')).toHaveLength(1);
         expect(container.querySelectorAll('.map-decoration')).toHaveLength(1);
         expect(container.querySelector('[data-env-type="unknown"]')).toBeNull();
+    });
+
+    it('places zoned elements through getElementsInZone without duplicating them (#1562)', () => {
+        const container = document.createElement('div');
+        const renderer = Object.create(MapRenderer.prototype);
+        const elements = [
+            { id: 't1', type: 'tree', subtype: 'park-tree', x: 1, y: 1, zoneId: 'park_central' },
+            { id: 'd1', type: 'decoration', x: 3, y: 3, zoneId: 'commercial_downtown' },
+            { id: 't2', type: 'tree', subtype: 'street-tree', x: 2, y: 2 },
+            { id: 'x', type: 'unknown', x: 4, y: 4, zoneId: 'park_central' },
+        ];
+        renderer.container = container;
+        renderer.mapManager = {
+            environmentSystem: envQueries(elements),
+            getZoneSystem: () => ({
+                getAllZones: () => [
+                    { id: 'park_central' },
+                    { id: 'commercial_downtown' },
+                    { id: 'empty' },
+                ],
+            }),
+            getGridSystem: () => ({ totalWidth: 300, totalHeight: 300, gridToPixel: (x, y) => ({ x: x * 10, y: y * 10 }) }),
+        };
+        renderer.renderEnvironment();
+        expect(container.querySelector('.map-environment-zone[data-zone-id="park_central"] .map-tree--park')).not.toBeNull();
+        expect(container.querySelector('.map-environment-zone[data-zone-id="commercial_downtown"] .map-decoration')).not.toBeNull();
+        expect(container.querySelector('.map-environment-zone[data-zone-id="empty"]')).toBeNull();
+        expect(container.querySelector('[data-env-type="unknown"]')).toBeNull();
+        const street = container.querySelector('.map-tree--street');
+        expect(street.parentElement.className).toBe('map-environment-container');
+        expect(container.querySelectorAll('.map-tree')).toHaveLength(2);
+        expect(container.querySelectorAll('.map-decoration')).toHaveLength(1);
     });
 });
