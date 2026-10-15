@@ -35,7 +35,7 @@ describe('Map helpers cluster (#1165, #1170, #1933, #2462)', () => {
     });
 
     it('action locations keep the player on the map screen (#1165)', () => {
-        for (const id of ['gym', 'library', 'stock_exchange', 'city_hall']) {
+        for (const id of ['gym', 'library', 'stock_exchange', 'city_hall', 'university']) {
             expect(MapHelpers.screenForLocation(id)).toBe('screen-map');
         }
         expect(MapHelpers.screenForLocation('coffee_shop')).toBe('screen-office');
@@ -59,6 +59,51 @@ describe('Map helpers cluster (#1165, #1170, #1933, #2462)', () => {
         const fs = await import('node:fs');
         const src = fs.readFileSync('src/js/helpers/MapHelpers.js', 'utf8');
         expect(src).toMatch(/if \(game\.mapRenderer \|\| document\.querySelector\('\.map-location'\)\) \{\s*updateMapLocationIcons\(game\);/);
+    });
+
+    it('university course buttons call handleStartExam (#1965)', () => {
+        document.body.innerHTML = '<div id="location-actions"></div>';
+        const handleStartExam = vi.fn();
+        const game = {
+            worldMap: {
+                currentLocation: 'university',
+                getAccessibleLocations: () => [],
+                getCurrentLocation: () => ({ id: 'university', position: { x: 23, y: 9 } }),
+                ownedVehicles: new Set(['walking']),
+                currentVehicle: 'walking'
+            },
+            timeManager: {
+                getCurrentSlot: () => ({ name: 'Morning', icon: '' }),
+                getDateString: () => 'Day 1',
+                getEnergyPercent: () => 100,
+                energy: 100,
+                maxEnergy: 100
+            },
+            gameState: {
+                educationSystem: {
+                    completedCourses: ['sql_101'],
+                    courses: {
+                        python_101: { id: 'python_101', name: 'Python 101', cost: 500, prereqs: [], description: 'Basics' },
+                        sql_101: { id: 'sql_101', name: 'SQL Fundamentals', cost: 500, prereqs: [] }
+                    }
+                }
+            },
+            handleStartExam
+        };
+
+        MapHelpers.updateMapScreen(game);
+
+        const open = document.querySelector('[data-course="python_101"]');
+        const done = document.querySelector('[data-course="sql_101"]');
+        expect(open).toBeTruthy();
+        expect(open.textContent).toContain('Python 101');
+        expect(open.textContent).toContain('$500');
+        expect(done.disabled).toBe(true);
+        open.click();
+        done.click();
+        expect(handleStartExam).toHaveBeenCalledTimes(1);
+        expect(handleStartExam).toHaveBeenCalledWith('python_101');
+        document.body.innerHTML = '';
     });
 
     it('CameraSystem is a real constructor now (#1169 already fixed)', () => {

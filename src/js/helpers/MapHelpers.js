@@ -142,7 +142,7 @@ export function updateMapScreen(game) {
 
 // Locations whose action buttons (#location-actions) live on the map screen,
 // so travel must leave the player there instead of on the office screen (#1165)
-export const MAP_ACTION_LOCATIONS = new Set(['gym', 'library', 'stock_exchange', 'city_hall']);
+export const MAP_ACTION_LOCATIONS = new Set(['gym', 'library', 'stock_exchange', 'city_hall', 'university']);
 
 /** Screen to show after arriving at a location (#1165) */
 export function screenForLocation(locationId) {
@@ -257,6 +257,9 @@ function updateLocationActions(game) {
         );
     } else if (locId === 'city_hall') {
         createCityHallActions(game, domCache.actionsEl); // appends its own buttons
+    } else if (locId === 'university') {
+        // Course list: each button opens the exam, which enrolls on Start (#1965)
+        buttons.push(...createUniversityCourseButtons(game));
     }
 
     // People here: the live way to meet and talk to NPCs (#1467)
@@ -282,6 +285,58 @@ export function createNPCTalkButtons(game, locId) {
             click: () => game.handleVisitNPC(npc.id)
         }
     }));
+}
+
+/**
+ * Course catalog at Tech University. Clicking a course calls handleStartExam,
+ * which charges tuition through EducationSystem.enroll when the exam starts
+ * (#1270, #1426, #1965).
+ */
+function createUniversityCourseButtons(game) {
+    const edu = game.gameState?.educationSystem;
+    const courses = edu?.courses;
+    if (!courses || typeof courses !== 'object') return [];
+
+    const completed = new Set(edu.completedCourses || []);
+    const courseButtons = [];
+    for (const course of Object.values(courses)) {
+        if (!course || typeof course.id !== 'string') continue;
+        const done = completed.has(course.id);
+        const cost = Number(course.cost) || 0;
+        const prereqNames = (Array.isArray(course.prereqs) ? course.prereqs : [])
+            .map(id => courses[id]?.name || id);
+        const btn = DOMUtils.createElement('button', {
+            className: done ? 'btn-cartoon disabled' : 'btn-cartoon',
+            textContent: done
+                ? `${course.name} (completed)`
+                : `${course.name} ($${cost.toLocaleString()})`,
+            attributes: {
+                type: 'button',
+                'data-course': course.id,
+                'data-action': 'start-exam',
+                title: prereqNames.length
+                    ? `Requires ${prereqNames.join(', ')}`
+                    : (course.description || 'Take the exam')
+            },
+            listeners: done ? undefined : {
+                click: () => game.handleStartExam?.(course.id)
+            }
+        });
+        if (done) btn.disabled = true;
+        courseButtons.push(btn);
+    }
+
+    if (courseButtons.length === 0) return [];
+    return [DOMUtils.createElement('div', {
+        className: 'university-courses',
+        children: [
+            DOMUtils.createElement('div', {
+                className: 'location-actions-label',
+                textContent: 'University courses'
+            }),
+            ...courseButtons
+        ]
+    })];
 }
 
 /**

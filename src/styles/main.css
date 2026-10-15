@@ -2376,3 +2376,17 @@ html.quality-no-animations *::after {
     line-height: 1;
     cursor: default;
 }
+
+/* Tech University course catalog on the map (#1965) */
+.university-courses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    width: 100%;
+}
+
+.university-courses .location-actions-label {
+    flex-basis: 100%;
+    font-weight: 600;
+}

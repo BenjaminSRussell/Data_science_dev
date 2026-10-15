@@ -258,6 +258,8 @@ export function finishExam(game) {
     if (closeBtn) {
         closeBtn.onclick = () => {
             closeExamModal(document.getElementById('modal-exam'));
+            // Rebuild the university course list so a pass shows as completed (#1965)
+            MapHelpers.refreshLocationActions?.(game);
             if (game.updateMapScreen) {
                 game.updateMapScreen();
             }
