@@ -2337,6 +2337,17 @@ html.quality-no-animations *::after {
     to { transform: translateX(100%); }
 }
 
+/* Text-menu host for MenuLogoDisplay. Later than the old hero media queries
+   so those don't blow this line up to a 7rem mark (#1665). */
+#screen-menu .menu-logo-icon {
+    font-family: monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #66cc66;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+
 @keyframes skeleton {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }

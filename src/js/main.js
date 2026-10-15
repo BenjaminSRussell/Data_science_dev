@@ -482,11 +482,17 @@ export class MainGame {
                 }
             }
 
-            // Initialize logo display with statistics
+            // Initialize logo display with statistics.
+            // The constructor only stores null; nothing else ever built this,
+            // so the rotating stats (including achievements) never ran (#1665).
+            // Re-entry drops the previous rotator so two intervals don't stack.
             try {
-                if (this.menuLogoDisplay) {
-                    this.menuLogoDisplay.init();
-                }
+                this.menuLogoDisplay?.destroy();
+                this.menuLogoDisplay = new MenuLogoDisplay(
+                    this.saveManager,
+                    this.statisticsAggregator
+                );
+                this.menuLogoDisplay.init();
             } catch (e) {
                 logger.warn('Failed to initialize logo display:', e);
             }
