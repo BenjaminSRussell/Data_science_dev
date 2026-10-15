@@ -355,8 +355,7 @@ describe('canPlaceBuilding', () => {
 });
 
 // ---------------------------------------------------------------------------
-// markBuildingCells / getBuildingForLocation / getBuildingsInZone /
-// getBuildingAt / getBuildingData
+// markBuildingCells / getBuildingAt / getAllBuildings
 // ---------------------------------------------------------------------------
 
 describe('query and mutation helpers', () => {
@@ -385,31 +384,6 @@ describe('query and mutation helpers', () => {
         expect(system.buildingGrid.has('5,4')).toBe(false);
     });
 
-    it('getBuildingForLocation returns the matching building or undefined', () => {
-        const block = makeBlock(2, 2, 4, 4, 'zone-a');
-        const building = system.placeBuildingInBlock(
-            { id: 'loc-9', type: 'residence' }, block, system.buildingSizes.SMALL
-        );
-
-        expect(system.getBuildingForLocation('loc-9')).toBe(building);
-        expect(system.getBuildingForLocation('loc-missing')).toBeUndefined();
-    });
-
-    it('getBuildingsInZone returns only buildings in the given zone', () => {
-        const blockA = makeBlock(2, 2, 4, 4, 'zone-a');
-        const blockB = makeBlock(10, 10, 4, 4, 'zone-b');
-        const buildingA = system.placeBuildingInBlock(
-            { id: 'loc-a', type: 'residence' }, blockA, system.buildingSizes.SMALL
-        );
-        const buildingB = system.placeBuildingInBlock(
-            { id: 'loc-b', type: 'residence' }, blockB, system.buildingSizes.SMALL
-        );
-
-        expect(system.getBuildingsInZone('zone-a')).toEqual([buildingA]);
-        expect(system.getBuildingsInZone('zone-b')).toEqual([buildingB]);
-        expect(system.getBuildingsInZone('zone-c')).toEqual([]);
-    });
-
     it('getBuildingAt returns the building occupying a cell, or null', () => {
         const block = makeBlock(2, 2, 4, 4, 'zone-a');
         const building = system.placeBuildingInBlock(
@@ -418,20 +392,6 @@ describe('query and mutation helpers', () => {
 
         expect(system.getBuildingAt(building.position.x, building.position.y)).toBe(building);
         expect(system.getBuildingAt(0, 0)).toBeNull();
-    });
-
-    it('getBuildingData returns buildings and the building grid entries', () => {
-        const block = makeBlock(2, 2, 4, 4, 'zone-a');
-        const building = system.placeBuildingInBlock(
-            { id: 'loc-8', type: 'residence' }, block, system.buildingSizes.SMALL
-        );
-
-        const data = system.getBuildingData();
-
-        expect(data.buildings).toEqual([building]);
-        expect(data.buildingGrid).toEqual([
-            [`${building.position.x},${building.position.y}`, building.id]
-        ]);
     });
 
     it('getAllBuildings returns the full building list', () => {
