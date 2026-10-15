@@ -202,10 +202,6 @@ export class ProjectSystem {
         
         if (!stage) return null;
 
-        // If there was a challenge, we assume it was passed (UI handles the challenge interaction before working)
-        // Or we pause here if challenge not met? 
-        // Design Decision: Challenges pause the "Fast Forward".
-
         // Move to next stage, carrying overshoot into it (#1117, #1518, #1789)
         const overflow = Math.max(0, (this.activeProject.stageProgress || 0) - (stage.maxProgress || 0));
         this.activeProject.currentStageIndex = (currentIndex + 1);

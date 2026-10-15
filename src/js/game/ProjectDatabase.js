@@ -25,26 +25,13 @@ export const CONTRACTS = [
                 // JS-rendered page: BeautifulSoup's static-site bonus does not apply (#2418)
                 site: 'dynamic',
                 name: 'Data Collection',
-                description: 'Choose the right library to scrape Twitter.',
-                options: [
-                    { id: 'selenium', name: 'Selenium', result: 'slow', speedPenalty: 0.5 },
-                    { id: 'tweepy', name: 'Tweepy (API)', result: 'optimal', speedBonus: 1.2 },
-                    { id: 'bs4', name: 'BeautifulSoup', result: 'fail', error: 'Twitter uses dynamic JS. BS4 cannot read it.' }
-                ],
+                description: 'Collect tweets mentioning $BTC.',
                 maxProgress: 100
             },
             {
                 type: PROJECT_TYPES.CLEANING,
                 name: 'Remove Bot Spam',
                 description: 'Filter out tweets containing scam links.',
-                challenge: {
-                    question: "Which Regex pattern matches URLs?",
-                    choices: [
-                        { text: "r'http\\S+'", correct: true },
-                        { text: "r'[a-z]+'", correct: false },
-                        { text: "r'\\d{3}'", correct: false }
-                    ]
-                },
                 maxProgress: 100
             }
         ]
@@ -91,14 +78,6 @@ export const CONTRACTS = [
                 type: PROJECT_TYPES.CLEANING,
                 name: 'Sanitize Data',
                 description: 'Remove PII (Personally Identifiable Information) to stay "legal".',
-                challenge: {
-                    question: "How to drop a column in Pandas?",
-                    choices: [
-                        { text: "df.drop('ssn', axis=1)", correct: true },
-                        { text: "df.remove('ssn')", correct: false },
-                        { text: "del df['ssn']", correct: false } // technically valid but drop is cleaner
-                    ]
-                },
                 maxProgress: 150
             },
             {
