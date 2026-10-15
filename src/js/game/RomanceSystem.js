@@ -2,6 +2,8 @@
  * RomanceSystem.js
  * Manages dating, marriage, and family mechanics
  */
+import { readGameplayFlag } from './settings/GameplaySettings.js';
+
 export class RomanceSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -17,9 +19,25 @@ export class RomanceSystem {
     }
 
     /**
+     * Why romance actions are refused, or null when they are allowed.
+     * Missing settings count as on (#2276).
+     */
+    romanceBlocked() {
+        if (!readGameplayFlag(this.gameState, 'relationships', 'enabled')) {
+            return 'Relationships are turned off in gameplay settings.';
+        }
+        if (!readGameplayFlag(this.gameState, 'relationships', 'romance')) {
+            return 'Romance is turned off in gameplay settings.';
+        }
+        return null;
+    }
+
+    /**
      * Ask an NPC on a date
      */
     askOnDate(npcId) {
+        const blocked = this.romanceBlocked();
+        if (blocked) return { success: false, message: blocked };
         const npcManager = this.gameState.npcManager;
         const npc = npcManager?.getNPC(npcId);
 
@@ -69,6 +87,8 @@ export class RomanceSystem {
      * Go on a date action
      */
     goOnDate(type) {
+        const blocked = this.romanceBlocked();
+        if (blocked) return { success: false, message: blocked };
         if (!this.partnerId) return { success: false, message: "You are single." };
 
         // Cost, energy, time (in 2-hour slots) and effect per date type
@@ -120,6 +140,8 @@ export class RomanceSystem {
     }
 
     propose() {
+        const blocked = this.romanceBlocked();
+        if (blocked) return { success: false, message: blocked };
         if (this.relationshipStatus !== 'dating') return { success: false, message: "You need to be dating first." };
 
         if (this.relationshipScore < 80) {
@@ -137,6 +159,8 @@ export class RomanceSystem {
     }
 
     getMarried() {
+        const blocked = this.romanceBlocked();
+        if (blocked) return { success: false, message: blocked };
         if (this.relationshipStatus !== 'engaged') return { success: false, message: "Not engaged." };
 
         // Wedding cost

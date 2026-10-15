@@ -4,6 +4,7 @@
  */
 
 import { pickState, applyState } from '../../utils/StateSerializer.js';
+import { companyFeature } from '../settings/GameplaySettings.js';
 
 export class CompanyManagementSystem {
     /** Staff headcount cap (#1402) */
@@ -37,6 +38,7 @@ export class CompanyManagementSystem {
      * Start a new company
      */
     startCompany(name, type = 'consulting') {
+        if (!companyFeature(this.gameState, 'management')) return null;
         // One company at a time; a second one would orphan the first's staff (#1007)
         if (this.playerCompany) return null;
         this.playerCompany = {
@@ -60,6 +62,9 @@ export class CompanyManagementSystem {
      * Buy an existing company
      */
     buyCompany(companyId, price) {
+        if (!companyFeature(this.gameState, 'management')) {
+            return { success: false, message: 'Company management is turned off in gameplay settings.' };
+        }
         price = Number(price);
         if (!Number.isFinite(price) || price < 0) {
             return { success: false, message: 'Invalid price' };
@@ -99,6 +104,9 @@ export class CompanyManagementSystem {
      * Hire an employee. The first week's salary is paid up front (#218).
      */
     hireEmployee(candidate) {
+        if (!companyFeature(this.gameState, 'hiring')) {
+            return { success: false, message: 'Hiring is turned off in gameplay settings.' };
+        }
         if (!this.playerCompany) {
             return { success: false, message: 'You need a company first' };
         }
@@ -178,6 +186,9 @@ export class CompanyManagementSystem {
      * still in progress unless options.force is set (#1400).
      */
     assignTask(employeeId, task, options = {}) {
+        if (!companyFeature(this.gameState, 'management')) {
+            return { success: false, message: 'Company management is turned off in gameplay settings.' };
+        }
         const employee = this.employees.find(e => e.id === employeeId);
         if (!employee) return { success: false, message: 'Employee not found' };
 
@@ -250,6 +261,7 @@ export class CompanyManagementSystem {
      * Find new clients. Each lead has a stable id (#1009, #1398).
      */
     findClients() {
+        if (!companyFeature(this.gameState, 'clients')) return [];
         // Bigger clients only talk to companies with a reputation (#1740)
         const reputation = Number(this.playerCompany?.reputation ?? this.gameState?.reputation) || 0;
         const potentialClients = [
@@ -280,6 +292,9 @@ export class CompanyManagementSystem {
      * Acquire client (by lead id, or by name for older callers)
      */
     acquireClient(clientId) {
+        if (!companyFeature(this.gameState, 'clients')) {
+            return { success: false, message: 'Clients are turned off in gameplay settings.' };
+        }
         if (!this.playerCompany) {
             return { success: false, message: 'You need a company first' };
         }
@@ -307,6 +322,7 @@ export class CompanyManagementSystem {
      * Schedule meeting (stored so it can be shown and saved) (#1403)
      */
     scheduleMeeting(clientId, location, time) {
+        if (!companyFeature(this.gameState, 'management')) return null;
         const meeting = {
             id: this._nextId('meeting'),
             clientId: clientId,

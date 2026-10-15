@@ -4,6 +4,8 @@
  * NPCs stop talking when jealous
  */
 
+import { relationshipFeature } from '../settings/GameplaySettings.js';
+
 export class JealousySystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -18,9 +20,7 @@ export class JealousySystem {
      * Respect the "jealousy" gameplay setting (#1410)
      */
     isEnabled() {
-        const rel = this.gameState?.gameplaySettings?.settings?.relationships;
-        if (!rel) return true;
-        return rel.enabled !== false && rel.jealousy !== false;
+        return relationshipFeature(this.gameState, 'jealousy');
     }
 
     checkJealousy(playerSuccess = {}) {

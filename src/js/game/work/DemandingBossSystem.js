@@ -5,6 +5,7 @@
  */
 
 import { pickState, applyState } from '../../utils/StateSerializer.js';
+import { readGameplayNumber } from '../settings/GameplaySettings.js';
 
 export class DemandingBossSystem {
     static PRAISE_AT = 80;
@@ -100,7 +101,12 @@ export class DemandingBossSystem {
     calculateDeadline() {
         const baseDays = 7;
         const demandReduction = this.demandLevel * 0.05;
-        return Math.max(1, baseDays - demandReduction);
+        // Task frequency 3 and competition 50 are the defaults and add nothing.
+        // A missing settings object uses those same neutrals. Rewards are untouched (#2276).
+        const freq = readGameplayNumber(this.gameState, 'difficulty', 'taskFrequency', 3);
+        const competition = readGameplayNumber(this.gameState, 'difficulty', 'competition', 50);
+        const extra = (freq - 3) * 0.15 + (competition - 50) / 50;
+        return Math.max(1, baseDays - demandReduction - extra);
     }
     
     /**

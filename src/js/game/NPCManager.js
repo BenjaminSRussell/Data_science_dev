@@ -7,6 +7,7 @@ import { getNPCImage, getNPCFallback } from '../utils/NPCImageMapper.js';
 import { dialogueTreeSystem } from './dialogue/DialogueTreeSystem.js';
 import { conversationSituation, SOCIAL_REACTION_ACTIONS } from './RealisticDialogueSystem.js';
 import { relationshipStage } from '../data/relationshipStages.js';
+import { relationshipFeature } from './settings/GameplaySettings.js';
 
 // Initialize all NPC images - ensures every NPC has a visual
 function initializeNPCImages() {
@@ -1419,8 +1420,9 @@ export class NPCManager {
         const relationship = this.relationships[npcId] || 0;
         const isFirstMeeting = preview ? !this.metNPCs.includes(npcId) : this.registerVisit(npcId);
 
-        // Progressive relationship: Just talking increases relationship slightly
-        if (!preview && !isFirstMeeting && relationship < 100) {
+        // Progressive relationship: Just talking increases relationship slightly.
+        // Turned off with the social gameplay setting (#2276).
+        if (!preview && !isFirstMeeting && relationship < 100 && relationshipFeature(this.gameState, 'social')) {
             let talkGain = 1;
             if (relationship > 60) talkGain = 0.5;
             if (relationship > 85) talkGain = 0.25;

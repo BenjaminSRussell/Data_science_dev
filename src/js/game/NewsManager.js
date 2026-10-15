@@ -4,6 +4,7 @@
  */
 
 import { SLOTS_PER_DAY } from './TimeManager.js';
+import { readGameplayNumber } from './settings/GameplaySettings.js';
 
 // News categories
 export const NEWS_CATEGORIES = {
@@ -482,8 +483,9 @@ export class NewsManager {
         // Roll in a shuffled order so earlier table entries aren't favoured
         const order = [...RANDOM_EVENTS].sort(() => Math.random() - 0.5);
         for (const event of order) {
-            // Check probability
-            if (Math.random() > event.probability) continue;
+            // Check probability. Competition scales rival poaching only;
+            // 50 (the default) leaves the table value alone (#2276).
+            if (Math.random() > this.rollProbability(event)) continue;
 
             // Check requirements
             if (!this.checkEventRequirements(event)) continue;
@@ -499,6 +501,17 @@ export class NewsManager {
         if (day !== null) this.lastRandomEventDay = day;
 
         return triggeredEvents;
+    }
+
+    /**
+     * Probability actually rolled. competitor_steal follows difficulty.competition
+     * (0 silences it, 100 doubles the base 0.04). Every other event is unchanged.
+     */
+    rollProbability(event) {
+        const base = Number(event?.probability) || 0;
+        if (event?.id !== 'competitor_steal') return base;
+        const competition = readGameplayNumber(this.gameState, 'difficulty', 'competition', 50);
+        return Math.min(1, Math.max(0, base * (competition / 50)));
     }
 
     /**
