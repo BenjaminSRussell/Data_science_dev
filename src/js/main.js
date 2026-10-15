@@ -16,6 +16,7 @@ logger.debug('useGameStore imported successfully', { hasStore: typeof useGameSto
 // Keep GameState import for backward compatibility during migration
 import { GameState } from './game/GameState.js';
 import { makePortfolioEntry, addPortfolioEntry, renderPortfolioHTML, exportPortfolioJSON } from './game/Portfolio.js';
+import { listDatasets, renderDatasetListHTML, downloadDatasetManifest } from './data/DatasetCatalog.js';
 import { ScreenManager } from './ui/ScreenManager.js';
 import { ChartManager } from './charts/ChartManager.js';
 import { AudioManager } from './audio/AudioManager.js';
@@ -863,6 +864,16 @@ export class MainGame {
 
         document.getElementById('btn-portfolio')?.addEventListener('click', () => {
             this.showPortfolio();
+        });
+
+        document.getElementById('btn-nav-datasets')?.addEventListener('click', () => {
+            this.openDatasetCatalog();
+        });
+        document.getElementById('btn-back-datasets')?.addEventListener('click', () => {
+            this.screenManager.showScreen('screen-game');
+        });
+        document.getElementById('btn-export-datasets')?.addEventListener('click', () => {
+            this.exportDatasetManifest();
         });
 
         // Navigation buttons
@@ -2315,6 +2326,23 @@ export class MainGame {
         link.remove();
         URL.revokeObjectURL(url);
         return json;
+    }
+
+    /** Shared dataset catalog (#2716): list manifest entries, then show the screen. */
+    openDatasetCatalog() {
+        const datasets = listDatasets();
+        const summary = document.getElementById('dataset-catalog-summary');
+        const list = document.getElementById('dataset-catalog-list');
+        if (summary) {
+            summary.textContent = `${datasets.length} shared datasets. Each card names the notebook that produced it, the sample path, the Scrapy lake table, and the Data-visualizer path.`;
+        }
+        if (list) list.innerHTML = renderDatasetListHTML(datasets);
+        this.screenManager.showScreen('screen-datasets');
+    }
+
+    /** Download datasets/manifest.json */
+    exportDatasetManifest() {
+        return downloadDatasetManifest();
     }
 
     /**

@@ -277,6 +277,7 @@
                                 <button class="btn-grey" id="btn-nav-stats">STATS</button>
                                 <button class="btn-grey" id="btn-nav-staff">TEAM</button>
                                 <button class="btn-grey" id="btn-nav-career">CAREER</button>
+                                <button class="btn-grey" id="btn-nav-datasets" title="Shared datasets">DATA</button>
                                 <button class="btn-grey" id="btn-nav-shop">SHOP</button>
                                 <button class="btn-grey" id="btn-nav-newspaper">PAPER <span id="news-unread-badge"></span></button>
                             </div>
@@ -1152,6 +1153,17 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Shared dataset catalog (#2716) -->
+            <section id="screen-datasets" class="screen screen-datasets hidden text-ui" aria-label="Shared datasets">
+                <div class="dataset-catalog ascii-box" style="max-width: 800px; margin: 0 auto;">
+                    <button class="btn-grey back-btn" id="btn-back-datasets" style="margin-bottom: 1rem;">&lt; BACK</button>
+                    <div class="text-ui-heading">SHARED DATASETS</div>
+                    <p id="dataset-catalog-summary">Notebook outputs linked to Scrapy lake tables and Data-visualizer datasets.</p>
+                    <div id="dataset-catalog-list" class="dataset-catalog-list"></div>
+                    <button class="btn-manual-action" id="btn-export-datasets">[ EXPORT MANIFEST ]</button>
                 </div>
             </section>
 

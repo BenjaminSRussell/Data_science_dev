@@ -148,6 +148,10 @@ test/                        # Unit tests
 - `assets/` is served at `/assets` by the dev server and copied into `dist/assets` on build (see `vite.config.js`)
 - Asset manifests: `game_asset_manifest.json` and `master_asset_manifest.json`
 
+## Shared dataset catalog
+
+[`datasets/manifest.json`](datasets/manifest.json) lists each sample dataset, the notebook that produced it, the local sample path, the Scrapy lake table, and the Data-visualizer API path. The three sample entries are documented in [`datasets/README.md`](datasets/README.md). In the game, NAVIGATION → DATA opens that list and exports the manifest. CI runs `node scripts/validate-dataset-manifest.js`.
+
 ## License
 
 MIT

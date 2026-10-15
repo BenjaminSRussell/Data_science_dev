@@ -1,0 +1,4 @@
+status_code,count,percentage
+200,900,90.0
+404,70,7.0
+500,30,3.0
