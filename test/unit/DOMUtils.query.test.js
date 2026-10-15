@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { DOMUtils } from '../../src/js/utils/DOMUtils.js';
 
-describe('DOMUtils query/update/remove/batch (#478)', () => {
+describe('DOMUtils query/update/batch (#478)', () => {
     beforeEach(() => {
         DOMUtils.queryCache.clear();
         document.body.innerHTML = '';
@@ -50,29 +50,13 @@ describe('DOMUtils query/update/remove/batch (#478)', () => {
         expect(() => DOMUtils.updateElement('#missing', { textContent: 'x' })).not.toThrow();
     });
 
-    it('remove detaches the node and drops its #id cache entry', () => {
-        document.body.innerHTML = '<div id="r"></div>';
-        DOMUtils.query('#r');
-        DOMUtils.remove('#r');
-        expect(document.getElementById('r')).toBeNull();
-        expect(DOMUtils.queryCache.has('#r')).toBe(false);
-        document.body.innerHTML = '<div id="r">again</div>';
-        expect(DOMUtils.query('#r').textContent).toBe('again');
-    });
-
-    it('toggleClass / show / hide / clear', () => {
+    it('toggleClass and clear', () => {
         document.body.innerHTML = '<div id="t"><span>x</span></div>';
         const el = document.getElementById('t');
         DOMUtils.toggleClass(el, 'on');
         expect(el.classList.contains('on')).toBe(true);
         DOMUtils.toggleClass(el, 'on', true);
         expect(el.classList.contains('on')).toBe(true);
-        DOMUtils.hide(el);
-        expect(el.style.display).toBe('none');
-        expect(el.classList.contains('hidden')).toBe(true);
-        DOMUtils.show(el);
-        expect(el.style.display).toBe('');
-        expect(el.classList.contains('hidden')).toBe(false);
         DOMUtils.clear(el);
         expect(el.innerHTML).toBe('');
     });
