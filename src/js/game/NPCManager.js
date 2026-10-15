@@ -1341,9 +1341,10 @@ export class NPCManager {
     }
 
     /**
-     * Modify relationship
+     * Modify relationship.
+     * `cause` is an optional breakdown reason: rejection, betrayal, jealousy.
      */
-    modifyRelationship(npcId, amount) {
+    modifyRelationship(npcId, amount, cause = null) {
         const npc = this.getNPC(npcId);
         if (!npc) return;
 
@@ -1366,19 +1367,52 @@ export class NPCManager {
             this.relationshipCarry[npcId] = 0;
         }
 
-        return this.relationships[npcId];
+        const after = this.relationships[npcId];
+        const appliedDelta = after - before;
+        if (appliedDelta !== 0 || cause) {
+            this.considerEmotionalBreakdown(npcId, appliedDelta, after, cause);
+        }
+        return after;
     }
 
     /**
      * Set a relationship to an absolute value (clamped to 0-100).
+     * `cause` is an optional breakdown reason: rejection, betrayal, jealousy.
      */
-    setRelationship(npcId, value) {
+    setRelationship(npcId, value, cause = null) {
         if (!this.getNPC(npcId)) return undefined;
         const v = Number(value);
         if (!Number.isFinite(v)) return this.relationships[npcId] || 0;
+        const before = this.relationships[npcId] || 0;
         this.relationships[npcId] = Math.max(0, Math.min(100, Math.round(v)));
         this.relationshipCarry[npcId] = 0;
-        return this.relationships[npcId];
+        const after = this.relationships[npcId];
+        if (after !== before || cause) {
+            this.considerEmotionalBreakdown(npcId, after - before, after, cause);
+        }
+        return after;
+    }
+
+    /**
+     * Open an emotional breakdown when a relationship change newly qualifies
+     * (#1830). Called from relationship writes, breakups, and jealousy.
+     */
+    considerEmotionalBreakdown(npcId, delta, newLevel, cause = null) {
+        const ebs = this.gameState?.emotionalBreakdownSystem;
+        if (!npcId || !ebs || this._consideringBreakdown) return null;
+        if (typeof ebs.qualifyRelationshipChange !== 'function') return null;
+        this._consideringBreakdown = true;
+        try {
+            const triggers = ebs.qualifyRelationshipChange(npcId, delta, newLevel, cause) || [];
+            for (const trigger of triggers) {
+                if (ebs.checkBreakdownConditions(npcId, trigger) && ebs.triggerBreakdown(npcId, trigger)) {
+                    return trigger;
+                }
+            }
+            return null;
+        } finally {
+            this._consideringBreakdown = false;
+        }
     }
 
     /**

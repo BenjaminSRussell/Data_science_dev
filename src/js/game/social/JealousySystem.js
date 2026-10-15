@@ -76,9 +76,11 @@ export class JealousySystem {
             this.affectRelationship(npcId, -5);
         }
         
-        // If jealousy is very high, NPC stops talking
+        // If jealousy is very high, NPC stops talking and may break down
         if (current <= 75 && newLevel > 75) {
             this.stopTalking(npcId);
+            const rel = this.gameState.npcManager?.getRelationship?.(npcId);
+            this.gameState.npcManager?.considerEmotionalBreakdown?.(npcId, 0, rel, 'jealousy');
         }
     }
     

@@ -3,6 +3,9 @@ import { DemandingBossSystem } from '../../src/js/game/work/DemandingBossSystem.
 import { WorkInteractionSystem } from '../../src/js/game/WorkInteractionSystem.js';
 import { EmotionalBreakdownSystem } from '../../src/js/game/dialogue/EmotionalBreakdownSystem.js';
 import { EconomySystem } from '../../src/js/game/EconomySystem.js';
+import { NPCManager } from '../../src/js/game/NPCManager.js';
+import { JealousySystem } from '../../src/js/game/social/JealousySystem.js';
+import { RomanceSystem } from '../../src/js/game/RomanceSystem.js';
 import { intervalLacksCleanup } from '../../scripts/static-bug-check.js';
 
 afterEach(() => vi.restoreAllMocks());
@@ -233,6 +236,127 @@ describe('EmotionalBreakdownSystem (#308, #1021, #1831, #2069, #2070, #2071, #22
         const css = fs.readFileSync('src/styles/emotional-breakdown.css', 'utf8');
         expect(css).toMatch(/\.emotion-indicator\.sad\b/);
         expect(css).toMatch(/\.breakdown-character\.sad\b/);
+    });
+});
+
+describe('Emotional breakdowns fire from play (#1830)', () => {
+    const NPC = 'professor_higgins';
+    let gs, mgr, sys;
+
+    const setup = () => {
+        gs = {
+            money: 100000,
+            reputation: 0,
+            timeManager: { totalDays: 1, energy: 100, useEnergy() { return { success: true }; }, advanceTime() {} },
+            characterStats: { ethics: 50, getStat: () => 100, addExperience() {}, modifyEthics() {} }
+        };
+        mgr = new NPCManager(gs);
+        gs.npcManager = mgr;
+        sys = new EmotionalBreakdownSystem(gs);
+        gs.emotionalBreakdownSystem = sys;
+    };
+
+    const clearBreakdowns = () => {
+        if (!sys) return;
+        for (const b of [...sys.activeBreakdowns.values()]) {
+            if (b.timer) clearInterval(b.timer);
+            sys.resolveBreakdown(b.id);
+        }
+        document.querySelectorAll('.emotional-breakdown-overlay').forEach(n => n.remove());
+    };
+
+    afterEach(() => clearBreakdowns());
+
+    it('a relationship drop mounts the breakdown markup, and a later loss does not repeat it', () => {
+        setup();
+        // Score already exists; the recent window has not recorded the climb,
+        // so a 12-point loss is a net drop (#2070).
+        mgr.relationships[NPC] = 40;
+        expect(mgr.setRelationship(NPC, 28)).toBe(28);
+        const overlay = document.querySelector('.emotional-breakdown-overlay');
+        expect(overlay).not.toBeNull();
+        expect(overlay.querySelector('.breakdown-container')).not.toBeNull();
+        expect(overlay.querySelector('.qte-choice')).not.toBeNull();
+        expect(overlay.querySelector('.breakdown-dialogue')).not.toBeNull();
+        expect(overlay.querySelector('.qte-bar')).not.toBeNull();
+        expect(sys.breakdownHistory).toHaveLength(1);
+        expect(sys.breakdownHistory[0].type).toBe('breakdown');
+
+        clearBreakdowns();
+        expect(mgr.setRelationship(NPC, 22)).toBe(22);
+        expect(sys.breakdownHistory).toHaveLength(1);
+        expect(document.querySelector('.emotional-breakdown-overlay')).toBeNull();
+    });
+
+    it('falling under 20 after a real relationship opens the hurt breakdown', () => {
+        setup();
+        mgr.relationships[NPC] = 25;
+        mgr.setRelationship(NPC, 18);
+        expect(sys.breakdownHistory).toHaveLength(1);
+        expect(sys.breakdownHistory[0].emotion).toBe('sad');
+        expect(document.querySelector('.emotional-breakdown-overlay')).not.toBeNull();
+    });
+
+    it('gains inside the window offset a later dip, so a net gain does not break down', () => {
+        setup();
+        mgr.relationships[NPC] = 0;
+        mgr.setRelationship(NPC, 40);
+        mgr.setRelationship(NPC, 28);
+        expect(sys.breakdownHistory).toHaveLength(0);
+        expect(document.querySelector('.emotional-breakdown-overlay')).toBeNull();
+    });
+
+    it('dialogue losses go through modifyRelationship to the same overlay', () => {
+        setup();
+        mgr.relationships[NPC] = 50;
+        // generous personality scales by 1.1; -12 becomes -13, past the drop line
+        mgr.modifyRelationship(NPC, -12);
+        expect(mgr.getRelationship(NPC)).toBe(37);
+        expect(document.querySelector('.qte-choice')).not.toBeNull();
+    });
+
+    it('jealous silence and a breakup each open one breakdown', () => {
+        setup();
+        gs.jealousySystem = new JealousySystem(gs);
+        mgr.relationships[NPC] = 40;
+        gs.jealousySystem.increaseJealousy(NPC, 80);
+        expect(sys.breakdownHistory.some(b => b.type === 'jealousy')).toBe(true);
+
+        clearBreakdowns();
+        const npc = mgr.getAllNPCs().find(n => {
+            if (!n.romanceOptions) return false;
+            const min = n.romanceOptions.minEthics;
+            const max = n.romanceOptions.maxEthics;
+            return (typeof min !== 'number' || min <= 50) && (typeof max !== 'number' || max >= 50);
+        });
+        mgr.relationships[npc.id] = 40;
+        const romance = new RomanceSystem(gs);
+        gs.romanceSystem = romance;
+        expect(romance.askOnDate(npc.id).success).toBe(true);
+        const before = sys.breakdownHistory.length;
+        romance.breakUp('mutual');
+        expect(sys.breakdownHistory.length).toBe(before + 1);
+        expect(sys.breakdownHistory.at(-1).type).toBe('anger');
+    });
+
+    it('cheating on a partner is a betrayal breakdown', () => {
+        setup();
+        gs.characterStats.ethics = 0;
+        const ok = mgr.getAllNPCs().filter(n => {
+            if (!n.romanceOptions) return false;
+            const min = n.romanceOptions.minEthics;
+            const max = n.romanceOptions.maxEthics;
+            return (typeof min !== 'number' || min <= 0) && (typeof max !== 'number' || max >= 0);
+        });
+        expect(ok.length).toBeGreaterThan(1);
+        mgr.relationships[ok[0].id] = 40;
+        mgr.relationships[ok[1].id] = 40;
+        const romance = new RomanceSystem(gs);
+        gs.romanceSystem = romance;
+        expect(romance.askOnDate(ok[0].id).success).toBe(true);
+        expect(romance.askOnDate(ok[1].id).message).toMatch(/Cheater/);
+        expect(sys.breakdownHistory.at(-1).type).toBe('rage');
+        expect(sys.breakdownHistory.at(-1).npcId).toBe(ok[0].id);
     });
 });
 

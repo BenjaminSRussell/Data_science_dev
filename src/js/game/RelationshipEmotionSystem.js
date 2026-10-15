@@ -57,9 +57,10 @@ export class RelationshipEmotionSystem {
         const base = this.calculateRelationshipChange(action, npc, ethics, currentRel, context);
         const change = this.applyEmotionalModifier(base, this.getRelationshipState(npcId));
 
-        // Apply change
+        // Apply change. A betrayal is its own breakdown, not only a point loss.
         if (change !== 0 && this.gameState.npcManager) {
-            this.gameState.npcManager?.modifyRelationship(npcId, change);
+            const cause = action === 'betrayal' ? 'betrayal' : null;
+            this.gameState.npcManager?.modifyRelationship(npcId, change, cause);
         }
 
         // Check for relationship events (breakup, etc.)

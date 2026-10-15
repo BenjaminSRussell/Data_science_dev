@@ -51,6 +51,35 @@ export class EmotionalBreakdownSystem {
         if (npcId) this.betrayals.set(npcId, this.now());
     }
 
+    /**
+     * Record a relationship change and report which breakdowns newly apply.
+     * A condition that is already true does not qualify again: otherwise every
+     * later -1 while the NPC is still upset would reopen the overlay (#1830).
+     * Does not show UI; the caller decides to trigger.
+     * @returns {string[]} trigger names, most specific first
+     */
+    qualifyRelationshipChange(npcId, delta, newLevel = null, cause = null) {
+        if (!npcId) return [];
+        const d = Number(delta) || 0;
+        const beforeDrop = d < 0 ? this.checkRecentRelationshipDrop(npcId) : 0;
+        const level = Number(newLevel);
+        const beforeLevel = Number.isFinite(level) ? level - d : null;
+        if (d !== 0) this.recordRelationshipChange(npcId, d, Number.isFinite(level) ? level : null);
+        if (cause === 'rejection') this.recordRejection(npcId);
+        if (cause === 'betrayal') this.recordBetrayal(npcId);
+
+        const triggers = [];
+        if (cause === 'betrayal' || cause === 'rejection' || cause === 'jealousy') triggers.push(cause);
+        if (d < 0) {
+            // Same lines as getBreakdownConditions: a 10-point recent loss, or
+            // falling through the low-relationship line of 20.
+            const afterDrop = this.checkRecentRelationshipDrop(npcId);
+            if (beforeDrop < 10 && afterDrop >= 10) triggers.push('relationship_drop');
+            if (beforeLevel !== null && beforeLevel >= 20 && level < 20) triggers.push('low_relationship');
+        }
+        return triggers;
+    }
+
     pruneRecent(list) {
         const cutoff = this.now() - EmotionalBreakdownSystem.RECENT_WINDOW_MS;
         return list.filter(e => e.at >= cutoff);
@@ -217,6 +246,7 @@ export class EmotionalBreakdownSystem {
      * Show breakdown UI with quick-time event
      */
     showBreakdownUI(breakdown) {
+        if (typeof document === 'undefined' || !document.body) return;
         const npc = breakdown.npc;
         const emotion = breakdown.emotion;
         
