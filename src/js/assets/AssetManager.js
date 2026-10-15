@@ -27,6 +27,12 @@ export const LPC_SHEET_URLS = {
     premium: '/assets/characters/sprites/lpc_sprite_19.png'
 };
 
+/**
+ * One Pixi atlas for every shipped LPC sheet. They share the 13×21 grid,
+ * so the image URL varies and this JSON does not (#1841).
+ */
+export const LPC_ATLAS_URL = '/assets/characters/sprites/lpc_grid.atlas.json';
+
 export const LPC_SHEET_ANIMATIONS = {
     idle: { row: 10, frameCount: 1 },
     // Up-facing rows are blank in the shipped sheets, so reuse the down walk.
@@ -51,7 +57,7 @@ export const LPC_SHEET_ANIMATIONS = {
 };
 
 export function lpcSheet(url) {
-    return { url, ...LPC_SHEET_GRID, animations: LPC_SHEET_ANIMATIONS };
+    return { url, jsonUrl: LPC_ATLAS_URL, ...LPC_SHEET_GRID, animations: LPC_SHEET_ANIMATIONS };
 }
 
 export class AssetManager {

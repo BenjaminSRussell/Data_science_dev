@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ComprehensiveSpriteSystem } from '../../src/js/assets/ComprehensiveSpriteSystem.js';
 import { bodyLanguageMapper } from '../../src/js/characters/BodyLanguageMapper.js';
-import { LPC_SHEET_URLS } from '../../src/js/assets/AssetManager.js';
+import { LPC_ATLAS_URL, LPC_SHEET_URLS } from '../../src/js/assets/AssetManager.js';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -26,23 +26,23 @@ describe('ComprehensiveSpriteSystem cluster', () => {
         expect(sys.getBodyLanguageSprite('standing')).toBe(img);
     });
 
-    it('#2542 registerSpriteSheets points main_character at a real LPC sheet', async () => {
-        const registerSpriteSheet = vi.fn();
-        const sys = new ComprehensiveSpriteSystem(null, { registerSpriteSheet });
+    it('#1841 #2542 registerSpriteSheets calls Pixi loadSpriteSheet with a real LPC image and atlas', async () => {
+        const loadSpriteSheet = vi.fn();
+        const sys = new ComprehensiveSpriteSystem(null, { loadSpriteSheet });
         await sys.registerSpriteSheets();
-        expect(registerSpriteSheet).toHaveBeenCalledWith('main_character', expect.objectContaining({
-            url: LPC_SHEET_URLS.basic,
-            frameWidth: 64,
-            columns: 13,
-            rows: 21
-        }));
-        const blocked = new ComprehensiveSpriteSystem(
-            { getAssetManifest: () => ({ characters: { spriteSheets: { main: { url: '/assets/characters/sprites/character_sheet.png', frameWidth: 32, frameHeight: 32, columns: 4, rows: 4 } } } }) },
-            { registerSpriteSheet }
-        );
-        registerSpriteSheet.mockClear();
-        await blocked.registerSpriteSheets();
+        expect(loadSpriteSheet).toHaveBeenCalledWith('main_character', LPC_ATLAS_URL, LPC_SHEET_URLS.basic);
+        // The legacy registerSpriteSheet shape is not the Pixi API, so it is not called.
+        const registerSpriteSheet = vi.fn();
+        const legacy = new ComprehensiveSpriteSystem(null, { registerSpriteSheet });
+        await legacy.registerSpriteSheets();
         expect(registerSpriteSheet).not.toHaveBeenCalled();
+        const blocked = new ComprehensiveSpriteSystem(
+            { getAssetManifest: () => ({ characters: { spriteSheets: { main: { url: '/assets/characters/sprites/character_sheet.png', jsonUrl: LPC_ATLAS_URL, frameWidth: 32, frameHeight: 32, columns: 4, rows: 4 } } } }) },
+            { loadSpriteSheet }
+        );
+        loadSpriteSheet.mockClear();
+        await blocked.registerSpriteSheets();
+        expect(loadSpriteSheet).not.toHaveBeenCalled();
     });
 
     it('#2135 #1052 combined sprite scales to the pose size and is a ready-to-draw canvas', () => {

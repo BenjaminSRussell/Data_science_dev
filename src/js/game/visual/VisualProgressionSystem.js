@@ -179,14 +179,23 @@ export class VisualProgressionSystem {
      * Upgrade sprite sheets based on tier
      */
     upgradeSpriteSheets(tier) {
-        const spriteSheetManager = this.gameState?.spriteSheetManager;
-        if (!spriteSheetManager?.registerSpriteSheet) return;
-
         // Tier sheets are real LPC files, all 64px cells. The old
         // basic/mid/premium_character_sheet.png names were never created (#2542).
         const url = LPC_SHEET_URLS[tier];
         if (!url) return;
-        spriteSheetManager.registerSpriteSheet(`character_${tier}`, lpcSheet(url));
+        const sheet = lpcSheet(url);
+
+        // PixiSpriteManager is the canonical loader (#1841). The legacy
+        // registerSpriteSheet path remains only when that manager is absent.
+        const pixi = this.gameState?.pixiSpriteManager;
+        if (typeof pixi?.loadSpriteSheet === 'function' && sheet.jsonUrl) {
+            void pixi.loadSpriteSheet(`character_${tier}`, sheet.jsonUrl, url);
+            return;
+        }
+
+        const spriteSheetManager = this.gameState?.spriteSheetManager;
+        if (!spriteSheetManager?.registerSpriteSheet) return;
+        spriteSheetManager.registerSpriteSheet(`character_${tier}`, sheet);
     }
     
     /**

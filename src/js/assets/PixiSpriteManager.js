@@ -13,7 +13,10 @@ export class PixiSpriteManager {
     }
 
     /**
-     * Load sprite sheet
+     * Load sprite sheet. This is the canonical registration API (#1841):
+     * a Pixi atlas JSON URL plus the image URL. Grid PNGs such as the LPC
+     * sheets use assets/characters/sprites/lpc_grid.atlas.json, not
+     * SpriteSheetManager.registerSpriteSheet.
      * Phase 4: Uses PixiJS Spritesheet class
      */
     async loadSpriteSheet(id, jsonUrl, imageUrl) {
