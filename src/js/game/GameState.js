@@ -151,6 +151,8 @@ export class GameState {
         this.visualSystem = null;
         this.animationManager = null;
         this.assetManager = null;
+        // Runtime only; not saved. Fresh instance is built in startNewGame (#2293)
+        this.spriteSheetManager = null;
         this.performanceManager = null;
         this.uiLayerManager = null;
         this.cameraSystem = null;
