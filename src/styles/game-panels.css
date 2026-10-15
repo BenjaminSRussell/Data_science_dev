@@ -682,6 +682,8 @@
 .lib-cost {
     font-family: var(--font-mono, monospace);
     color: var(--color-text-primary);
+}
+
 /* ---- Main menu statistics dashboard (#1472) ---- */
 .menu-stats-dashboard {
     display: grid;
