@@ -218,7 +218,8 @@ export class MapRenderer {
             const width = ((maxPixel.x - minPixel.x) / containerWidth) * 100;
             const height = ((maxPixel.y - minPixel.y) / containerHeight) * 100;
             
-            // Different colors per building type
+            // Start stops match UnifiedMapSystem so training, shopping, and
+            // investment do not fall through to the business grey (#1451).
             const buildingColors = {
                 'residence': 'linear-gradient(135deg, #d4a574 0%, #b8956a 100%)',
                 'work': 'linear-gradient(135deg, #7a8ba3 0%, #5a6b83 100%)',
@@ -227,8 +228,11 @@ export class MapRenderer {
                 'government': 'linear-gradient(135deg, #607d8b 0%, #455a64 100%)',
                 'shop': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                 'social': 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)',
+                'training': 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                 'business': 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
-                'elite': 'linear-gradient(135deg, #ffd700 0%, #b8860b 100%)'
+                'elite': 'linear-gradient(135deg, #ffd700 0%, #b8860b 100%)',
+                'shopping': 'linear-gradient(135deg, #fb923c 0%, #ea580c 100%)',
+                'investment': 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)'
             };
             
             buildingEl.style.cssText = `
