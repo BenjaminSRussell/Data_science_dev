@@ -1,27 +1,27 @@
 /**
  * RealWorldTaskSystem.js
- * Real-world multi-step problems with different visuals for each task type
- * Teaches actual data science work
+ * Multi-step workflows for the career assignments in JobSystem.JOB_CATEGORIES.
+ * Not a second job ladder: job ids resolve through jobCatalogLink.js (#1827).
+ * Legacy role names still select a workflow list for older callers.
  */
 
-import { SKILL_TO_STAT } from '../ProjectSystem.js';
+import { JOB_CATEGORIES } from '../JobSystem.js';
 import { grantWorkReward } from './workRewards.js';
+import {
+    JOB_CATEGORY_ROLES,
+    describeWorkReward,
+    splitExperience,
+    unmappedCareerCategories,
+    workflowForCareerTask as linkedWorkflowForCareerTask,
+    workflowsForJob
+} from './jobCatalogLink.js';
 
-// Task skill ids that aren't in ProjectSystem's map
-const EXTRA_SKILL_TO_STAT = {
-    pandas: 'analytics', matplotlib: 'analytics', data_processing: 'analytics',
-    airflow: 'focus', git: 'focus', testing: 'focus', documentation: 'charisma',
-    optimization: 'focus', performance: 'focus', database: 'analytics'
-};
+export { JOB_CATEGORY_ROLES };
 
-// JobSystem's JOB_CATEGORIES ids -> the task roles below (#1819)
-export const JOB_CATEGORY_ROLES = {
-    entry_level: 'data_analyst',
-    junior_analyst: 'data_analyst',
-    data_analyst: 'data_analyst',
-    senior_analyst: 'ml_engineer',
-    lead_scientist: 'research_scientist'
-};
+const unmapped = unmappedCareerCategories(Object.keys(JOB_CATEGORIES));
+if (unmapped.length) {
+    throw new Error(`Career categories with no workflow role: ${unmapped.join(', ')}`);
+}
 
 export class RealWorldTaskSystem {
     constructor(gameState) {
@@ -470,52 +470,32 @@ export class RealWorldTaskSystem {
     }
     
     /**
-     * Get available tasks for a job
+     * The career ladder these workflows serve. JobSystem owns the catalog (#1827).
+     */
+    careerCategories() {
+        return JOB_CATEGORIES;
+    }
+
+    /** Workflow id for a JobSystem assignment, or null. */
+    workflowForCareerTask(taskId) {
+        return linkedWorkflowForCareerTask(taskId);
+    }
+
+    /**
+     * Shared reward view. Workflow numbers are the catalog reward, not a rescaled one.
+     */
+    describeTaskReward(taskOrType) {
+        const entry = typeof taskOrType === 'string' ? this.taskTypes[taskOrType] : taskOrType;
+        return describeWorkReward(entry);
+    }
+
+    /**
+     * Workflow ids for a career category or a legacy role name.
+     * Unknown ids get the entry-level list, not every workflow (#1819).
      */
     getAvailableTasks(jobId, context = {}) {
-        
-        // Filter based on job requirements - expanded with new tasks
-        const jobTasks = {
-            'data_analyst': [
-                'data_cleaning', 'exploratory_analysis', 'github_bug_fix',
-                'data_validation', 'ab_test_design', 'time_series_analysis',
-                'feature_engineering', 'model_evaluation', 'clustering_analysis'
-            ],
-            'data_engineer': [
-                'etl_pipeline', 'data_cleaning', 'github_feature',
-                'data_validation', 'database_optimization', 'api_development',
-                'feature_engineering', 'pipeline_optimization'
-            ],
-            'ml_engineer': [
-                'model_training', 'data_cleaning', 'github_feature',
-                'classification_model', 'regression_model', 'hyperparameter_tuning',
-                'model_evaluation', 'model_deployment', 'feature_engineering',
-                'nlp_text_analysis', 'clustering_analysis'
-            ],
-            'research_scientist': [
-                'ai_model_training', 'model_training', 'exploratory_analysis',
-                'time_series_analysis', 'nlp_text_analysis', 'hyperparameter_tuning',
-                'clustering_analysis', 'model_evaluation'
-            ]
-        };
-        
-        // Accept real JobSystem category ids too; an unknown job gets the
-        // entry-level list rather than every task in the game (#1819)
-        const role = jobTasks[jobId] ? jobId : (JOB_CATEGORY_ROLES[jobId] || 'data_analyst');
         // Only task types that are actually defined (#249)
-        let available = jobTasks[role].filter(t => this.taskTypes[t]);
-        
-        // Check if in university lab for AI training
-        if (context.inUniversityLab && available.includes('ai_model_training')) {
-            return ['ai_model_training'];
-        }
-        
-        // Filter out AI training if not in lab
-        if (!context.inUniversityLab) {
-            available = available.filter(t => t !== 'ai_model_training');
-        }
-        
-        return available;
+        return workflowsForJob(jobId, context).filter(t => this.taskTypes[t]);
     }
     
     /**
@@ -588,20 +568,15 @@ export class RealWorldTaskSystem {
             grantWorkReward(this.gameState, { money: task.reward.money, reputation: task.reward.reputation });
             if (task.reward.experience) {
                 // XP goes into the canonical CharacterStats store through its
-                // API, the same way ProjectSystem.completeProject grants it (#165)
-                const skills = Array.isArray(task.skills) ? task.skills : Object.keys(task.skills || {});
+                // API, the same way ProjectSystem.completeProject grants it (#165).
+                // The split is shared with describeWorkReward so the catalog
+                // view and the payout cannot drift (#1820, #1827).
                 const stats = this.gameState.characterStats;
-                if (skills.length && typeof stats?.addExperience === 'function') {
-                    const total = Math.round(Number(task.reward.experience) || 0);
-                    const perSkill = Math.floor(total / skills.length);
-                    // Hand out the remainder too, so the full XP lands (#1820)
-                    let remainder = total - perSkill * skills.length;
-                    skills.forEach(skill => {
-                        const statId = SKILL_TO_STAT[skill] || EXTRA_SKILL_TO_STAT[skill] || 'analytics';
-                        const amount = perSkill + (remainder > 0 ? 1 : 0);
-                        if (remainder > 0) remainder--;
-                        if (amount > 0) stats.addExperience(statId, amount);
-                    });
+                if (typeof stats?.addExperience === 'function') {
+                    const xpByStat = splitExperience(task.skills, task.reward.experience);
+                    for (const [statId, amount] of Object.entries(xpByStat)) {
+                        stats.addExperience(statId, amount);
+                    }
                 }
             }
         }
