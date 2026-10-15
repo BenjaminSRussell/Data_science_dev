@@ -35,9 +35,11 @@ export class MapRenderer {
             }
         });
         
-        // Store in game for access
+        // Store in game for access. WorldMap quotes routes through
+        // mapManager.getNavigationSystem() (#1941).
         if (this.game) {
             this.game.mapManager = this.mapManager;
+            if (this.game.gameState) this.game.gameState.mapManager = this.mapManager;
         }
         
         // Clear old content completely
