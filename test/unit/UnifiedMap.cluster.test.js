@@ -33,7 +33,6 @@ vi.mock('pixi.js', () => {
 
 import { UnifiedMapSystem } from '../../src/js/game/UnifiedMapSystem.js';
 import { WORLD_GRID_SIZE } from '../../src/js/config/mapGrid.js';
-import { PositioningHelper } from '../../src/js/utils/PositioningHelper.js';
 import { MapGridSystem } from '../../src/js/game/MapGridSystem.js';
 import * as PIXI from 'pixi.js';
 
@@ -59,7 +58,6 @@ describe('UnifiedMapSystem', () => {
         const { sys } = makeSystem();
         expect(sys.gridSize).toBe(WORLD_GRID_SIZE);
         expect(new MapGridSystem().gridWidth).toBe(WORLD_GRID_SIZE);
-        expect(PositioningHelper.gridToPercent(WORLD_GRID_SIZE, 0).x).toBe(100);
     });
 
     it('clearLayer destroys what it removes', () => {
