@@ -90,9 +90,21 @@ describe('MapRenderer.renderEnvironment draws decorations (#1452)', () => {
             getGridSystem: () => ({ totalWidth: 300, totalHeight: 300, gridToPixel: (x, y) => ({ x: x * 10, y: y * 10 }) }),
         };
         renderer.renderEnvironment();
-        expect(container.querySelectorAll('.map-tree')).toHaveLength(2);
+        const trees = container.querySelectorAll('.map-tree');
+        expect(trees).toHaveLength(2);
         expect(container.querySelectorAll('.map-tree--street')).toHaveLength(1);
         expect(container.querySelectorAll('.map-decoration')).toHaveLength(1);
         expect(container.querySelector('[data-env-type="unknown"]')).toBeNull();
+        trees.forEach(tree => {
+            const painted = `${tree.style.background} ${tree.style.backgroundImage}`;
+            expect(painted).toContain('linear-gradient');
+            const img = tree.querySelector('img');
+            expect(img).not.toBeNull();
+            expect(img.getAttribute('src')).toMatch(/^\/assets\/map\/trees\/tree_\d{2}\.png$/);
+        });
+        expect(container.querySelector('.map-tree--park img').getAttribute('src')).toBe('/assets/map/trees/tree_04.png');
+        expect(container.querySelector('.map-tree--street img').getAttribute('src')).toBe('/assets/map/trees/tree_08.png');
+        expect(container.querySelector('.map-decoration img')).toBeNull();
+        expect(container.querySelector('.map-decoration').style.background).toBe('');
     });
 });

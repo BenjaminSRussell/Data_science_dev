@@ -7,6 +7,29 @@
 import { MapManager } from './MapManager.js';
 import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
 
+// Sprite set shared with renderMapEnvironment() in MapHelpers.js.
+// Hide a failed image so the tree fill is not covered by a broken-image icon.
+function createTreeSprite(element) {
+    const x = Number(element.x) || 0;
+    const y = Number(element.y) || 0;
+    const treeIndex = Math.abs((x + y * 3) % 10);
+    const treeImg = document.createElement('img');
+    treeImg.src = `/assets/map/trees/tree_${String(treeIndex).padStart(2, '0')}.png`;
+    treeImg.alt = '';
+    treeImg.draggable = false;
+    treeImg.style.cssText = `
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center center;
+        pointer-events: none;
+    `;
+    treeImg.addEventListener('error', function () {
+        this.style.display = 'none';
+    });
+    return treeImg;
+}
+
 export class MapRenderer {
     constructor(container, game) {
         this.container = container;
@@ -277,12 +300,18 @@ export class MapRenderer {
         const containerWidth = this.container.offsetWidth || this.mapManager.getGridSystem().totalWidth;
         const containerHeight = this.container.offsetHeight || this.mapManager.getGridSystem().totalHeight;
         
-        // Trees (park and street) and commercial decorations all get drawn (#1452)
+        // Trees (park and street) and commercial decorations all get drawn (#1452).
+        // Trees also get a fill and a sprite; a bare box is invisible (#1920).
         const CLASS_BY_KIND = {
             'park-tree': 'map-tree map-tree--park',
             'street-tree': 'map-tree map-tree--street',
             tree: 'map-tree',
             decoration: 'map-decoration'
+        };
+        const TREE_FILLS = {
+            'park-tree': 'linear-gradient(135deg, #16a34a 0%, #14532d 100%)',
+            'street-tree': 'linear-gradient(135deg, #4ade80 0%, #166534 100%)',
+            tree: 'linear-gradient(135deg, #228B22 0%, #006400 100%)'
         };
         elements.forEach(element => {
             const className = CLASS_BY_KIND[element.subtype] || CLASS_BY_KIND[element.type];
@@ -294,6 +323,7 @@ export class MapRenderer {
             const pixel = gridSystem.gridToPixel(element.x, element.y);
             const left = (pixel.x / containerWidth) * 100;
             const top = (pixel.y / containerHeight) * 100;
+            const isTree = element.type === 'tree' || className.startsWith('map-tree');
             const size = element.type === 'decoration' ? 12 : 20;
 
             el.style.cssText = `
@@ -306,6 +336,12 @@ export class MapRenderer {
                 z-index: 2;
                 pointer-events: none;
             `;
+
+            if (isTree) {
+                el.style.background = TREE_FILLS[element.subtype] || TREE_FILLS.tree;
+                el.style.borderRadius = '50% 50% 50% 50% / 60% 60% 40% 40%';
+                el.appendChild(createTreeSprite(element));
+            }
 
             envContainer.appendChild(el);
         });
