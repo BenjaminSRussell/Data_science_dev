@@ -144,6 +144,39 @@ describe('placeBuilding', () => {
         expect(blockSystem.assigned).toEqual([]);
     });
 
+    it('prefers the zone already assigned to the location over findZoneForLocationType (#1928)', () => {
+        const assigned = { id: 'finance_district', type: 'finance' };
+        const byType = { id: 'commercial_downtown', type: 'commercial' };
+        const financeBlock = makeBlock(6, 6, 4, 4, 'other-zone', 'block-finance');
+        const typeCalls = [];
+        blockSystem.zoneSystem = {
+            getZoneForLocation: (id) => (id === location.id ? assigned : null),
+            findZoneForLocationType: (type) => { typeCalls.push(type); return byType; },
+            isInZone: (x, y, zoneId) => zoneId === 'finance_district' && x === 6 && y === 6
+        };
+        blockSystem.findAvailableBlock = (zoneType) => (zoneType === 'finance' ? financeBlock : null);
+
+        const building = system.placeBuilding(location);
+
+        expect(typeCalls).toEqual([]);
+        expect(building).not.toBeNull();
+        expect(building.zone).toBe('finance_district');
+        expect(blockSystem.assigned).toEqual([{ locationId: 'loc-1', blockId: 'block-finance' }]);
+    });
+
+    it('keeps the block zone when the assigned zone does not contain the block (#1928)', () => {
+        const block = makeBlock(2, 2, 4, 4, 'zone-a', 'block-assigned');
+        blockSystem.getBlockForLocation = () => block;
+        system.zoneSystem = {
+            getZoneForLocation: () => ({ id: 'somewhere_else', type: 'park' }),
+            isInZone: () => false
+        };
+
+        const building = system.placeBuilding(location);
+
+        expect(building.zone).toBe('zone-a');
+    });
+
     it('resolves a block via findZoneForLocationType + findAvailableBlock when none is assigned', () => {
         const zone = { type: 'residential' };
         const availableBlock = makeBlock(6, 6, 4, 4, 'zone-b', 'block-found');

@@ -58,10 +58,13 @@ export class MapBuildingSystem {
         // Get block for location
         let block = this.blockSystem.getBlockForLocation(location.id);
         if (!block) {
-            // Try to find an available block using zone system
+            // Try to find an available block using zone system.
+            // MapManager already wrote locationZoneMap; read that before
+            // re-deriving a zone from the location type (#1928).
             const zoneSystem = this.zoneSystem || this.blockSystem.zoneSystem;
             if (zoneSystem) {
-                const zone = zoneSystem.findZoneForLocationType(location.type);
+                const zone = zoneSystem.getZoneForLocation?.(location.id)
+                    || zoneSystem.findZoneForLocationType?.(location.type);
                 if (zone) {
                     const availableBlock = this.blockSystem.findAvailableBlock(zone.type, { width: size.width, height: size.height });
                     if (availableBlock) {
@@ -127,7 +130,7 @@ export class MapBuildingSystem {
                     height: size.height
                 },
                 type: location.type,
-                zone: block.zone
+                zone: this.zoneIdFor(location, block)
             };
             
             this.recordBuilding(building, block);
@@ -154,7 +157,7 @@ export class MapBuildingSystem {
                             height: size.height
                         },
                         type: location.type,
-                        zone: block.zone
+                        zone: this.zoneIdFor(location, block)
                     };
                     
                     this.recordBuilding(building, block);
@@ -165,6 +168,23 @@ export class MapBuildingSystem {
         }
         
         return null;
+    }
+
+    /**
+     * Zone stamped on a building. Prefer the zone MapManager assigned to this
+     * location, but only when that zone actually contains the block (#1928).
+     */
+    zoneIdFor(location, block) {
+        const zoneSystem = this.zoneSystem || this.blockSystem?.zoneSystem;
+        const assigned = zoneSystem?.getZoneForLocation?.(location.id) || null;
+        if (!assigned?.id) return block?.zone;
+        const x = block?.center?.x ?? block?.bounds?.x;
+        const y = block?.center?.y ?? block?.bounds?.y;
+        if (x == null || y == null || typeof zoneSystem.isInZone !== 'function') {
+            return assigned.id;
+        }
+        if (block?.zone && !zoneSystem.isInZone(x, y, assigned.id)) return block.zone;
+        return assigned.id;
     }
 
     /**

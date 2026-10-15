@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { MapAssetPlacer } from '../../src/js/game/MapAssetPlacer.js';
 import { MapEnvironmentSystem } from '../../src/js/game/MapEnvironmentSystem.js';
+import { MapGridSystem } from '../../src/js/game/MapGridSystem.js';
 import { MapRenderer } from '../../src/js/game/MapRenderer.js';
+import { MapZoneSystem } from '../../src/js/game/MapZoneSystem.js';
 
 const grid = {
     isValidGridCoord: (x, y) => x >= 0 && y >= 0 && x < 30 && y < 30,
@@ -70,6 +72,95 @@ describe('park vs street trees are distinguishable (#1563)', () => {
         expect(park.every(t => t.zoneId === 'p')).toBe(true);
         expect(street.every(t => t.zoneId === 'r' && t.x === 1)).toBe(true);
         expect(env.getElementsByType('tree')).toHaveLength(park.length + street.length);
+    });
+});
+
+describe('known zones use MapZoneSystem.isInZone (#1928)', () => {
+    it('addParkElements asks the zone system instead of only the local bounds helper', () => {
+        const zoneSystem = new MapZoneSystem(new MapGridSystem());
+        const spy = vi.spyOn(zoneSystem, 'isInZone');
+        const road = roads();
+        const placer = new MapAssetPlacer(grid, road, { getBuildingAt: () => null });
+        const env = new MapEnvironmentSystem(grid, road, zoneSystem, placer);
+        const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+        try {
+            env.addParkElements(zoneSystem.getZoneById('park_central'));
+        } finally {
+            random.mockRestore();
+        }
+        expect(spy).toHaveBeenCalled();
+        expect(env.getAllElements().length).toBeGreaterThan(0);
+        expect(env.getAllElements().every(el => el.zoneId === 'park_central')).toBe(true);
+    });
+});
+
+describe('MapRenderer reads the location-to-zone map (#1928)', () => {
+    it('renderZones paints overlapping zones and the locations assigned to them', () => {
+        const container = document.createElement('div');
+        const renderer = Object.create(MapRenderer.prototype);
+        renderer.container = container;
+        const finance = {
+            id: 'finance_district',
+            type: 'finance',
+            name: 'Financial District',
+            bounds: { minX: 9, maxX: 19, minY: 5, maxY: 9 },
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            borderColor: 'rgba(0,0,0,0.3)'
+        };
+        const offMap = {
+            id: 'off_map',
+            type: 'park',
+            name: 'Off',
+            bounds: { minX: 100, maxX: 110, minY: 100, maxY: 110 },
+            backgroundColor: 'red',
+            borderColor: 'red'
+        };
+        renderer.mapManager = {
+            getZoneSystem: () => ({
+                getZoneData: () => ({
+                    zones: [finance, offMap],
+                    locationZoneMap: [['bank', 'finance_district'], ['atm', 'finance_district']]
+                }),
+                getZonesInRect: (minX, minY, maxX, maxY) => [finance, offMap].filter(z =>
+                    !(z.bounds.maxX < minX || z.bounds.minX > maxX || z.bounds.maxY < minY || z.bounds.minY > maxY))
+            }),
+            getGridSystem: () => ({
+                totalWidth: 600,
+                totalHeight: 600,
+                bounds: { maxX: 29, maxY: 29 },
+                gridToPixel: (x, y) => ({ x: x * 20, y: y * 20 })
+            })
+        };
+        renderer.renderZones();
+        const painted = container.querySelector('[data-zone-id="finance_district"]');
+        expect(painted).not.toBeNull();
+        expect(painted.dataset.locations).toBe('bank,atm');
+        expect(container.querySelector('[data-zone-id="off_map"]')).toBeNull();
+    });
+
+    it('renderLocations stamps the zone assigned to the location', () => {
+        const container = document.createElement('div');
+        const renderer = Object.create(MapRenderer.prototype);
+        renderer.container = container;
+        renderer.renderPlayerMarker = () => {};
+        renderer.game = {
+            worldMap: {
+                currentLocation: 'bank',
+                getAccessibleLocations: () => [{ id: 'bank', name: 'Bank', position: { x: 10, y: 6 }, icon: 'B' }]
+            }
+        };
+        renderer.mapManager = {
+            getZoneSystem: () => ({
+                getZoneForLocation: (id) => (id === 'bank' ? { id: 'finance_district' } : null)
+            }),
+            getGridSystem: () => ({
+                totalWidth: 600,
+                totalHeight: 600,
+                positionToPercent: () => ({ x: 30, y: 20 })
+            })
+        };
+        renderer.renderLocations();
+        expect(container.querySelector('[data-location="bank"]').dataset.zone).toBe('finance_district');
     });
 });
 

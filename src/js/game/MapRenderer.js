@@ -102,15 +102,32 @@ export class MapRenderer {
         zonesContainer.className = 'map-zones-container';
         this.container.appendChild(zonesContainer);
         
-        const zones = this.mapManager.getZoneSystem().getAllZones();
+        const zoneSystem = this.mapManager.getZoneSystem();
         const gridSystem = this.mapManager.getGridSystem();
-        const containerWidth = this.container.offsetWidth || this.mapManager.getGridSystem().totalWidth;
-        const containerHeight = this.container.offsetHeight || this.mapManager.getGridSystem().totalHeight;
+        const containerWidth = this.container.offsetWidth || gridSystem.totalWidth;
+        const containerHeight = this.container.offsetHeight || gridSystem.totalHeight;
+        // Read the location-to-zone map written by MapManager (#1928) and
+        // only paint zones that overlap the grid.
+        const zoneData = typeof zoneSystem.getZoneData === 'function'
+            ? zoneSystem.getZoneData()
+            : { zones: zoneSystem.getAllZones?.() ?? [], locationZoneMap: [] };
+        const maxX = gridSystem.bounds?.maxX ?? ((gridSystem.gridWidth ?? 30) - 1);
+        const maxY = gridSystem.bounds?.maxY ?? ((gridSystem.gridHeight ?? 30) - 1);
+        const zones = typeof zoneSystem.getZonesInRect === 'function'
+            ? zoneSystem.getZonesInRect(0, 0, maxX, maxY)
+            : (zoneData.zones ?? []);
+        const locationsByZone = new Map();
+        for (const [locationId, zoneId] of zoneData.locationZoneMap || []) {
+            if (!locationsByZone.has(zoneId)) locationsByZone.set(zoneId, []);
+            locationsByZone.get(zoneId).push(locationId);
+        }
         
         zones.forEach(zone => {
             const zoneEl = document.createElement('div');
             zoneEl.className = `map-zone ${zone.type}`;
             zoneEl.dataset.zoneId = zone.id;
+            const assigned = locationsByZone.get(zone.id);
+            if (assigned?.length) zoneEl.dataset.locations = assigned.join(',');
             
             // Convert grid bounds to percentage
             const minPixel = gridSystem.gridToPixel(zone.bounds.minX, zone.bounds.minY);
@@ -324,6 +341,8 @@ export class MapRenderer {
             const locEl = document.createElement('div');
             locEl.className = `map-location ${location.id === this.game.worldMap.currentLocation ? 'current' : ''}`;
             locEl.dataset.location = location.id;
+            const zone = this.mapManager.getZoneSystem?.()?.getZoneForLocation?.(location.id);
+            if (zone?.id) locEl.dataset.zone = zone.id;
             
             // Positions are grid coordinates; bounds-check them instead of
             // treating anything <= 100 as a percentage (#158)
