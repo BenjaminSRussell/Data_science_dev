@@ -120,7 +120,8 @@ describe('CityMapRenderer', () => {
     expect(container.querySelector('.city-buildings-container')).not.toBeNull();
   });
 
-  it('update() re-renders only locations, keeping roads and buildings containers', () => {
+  it('update() rebuilds zones, roads, buildings, and location markers', async () => {
+    const { ZONE_DEFINITIONS } = await import('../../src/js/data/mapZones.js');
     const location = {
       id: 'loc-2',
       name: 'Bank',
@@ -131,22 +132,63 @@ describe('CityMapRenderer', () => {
     game.worldMap.getAccessibleLocations = vi.fn(() => [location]);
 
     renderer.initialize();
+    await vi.waitFor(() => {
+      expect(container.querySelectorAll('.city-zone').length).toBe(ZONE_DEFINITIONS.length);
+    });
 
+    const zonesContainer = container.querySelector('.city-zones-container');
     const roadsContainer = container.querySelector('.city-roads-container');
     const buildingsContainer = container.querySelector('.city-buildings-container');
     const firstLocationsContainer = container.querySelector('.city-locations-container');
+    const background = container.querySelector('.city-map-background');
+    const grid = container.querySelector('.city-map-grid');
+    expect(zonesContainer).not.toBeNull();
+    expect(roadsContainer).not.toBeNull();
+    expect(buildingsContainer).not.toBeNull();
     expect(firstLocationsContainer).not.toBeNull();
+    expect(buildingsContainer.querySelectorAll('.city-building').length).toBe(1);
+
+    const unlocked = {
+      id: 'loc-3',
+      name: 'Lab',
+      icon: '🧪',
+      type: 'lab',
+      position: { x: 12, y: 8 },
+    };
+    game.worldMap.getAccessibleLocations = vi.fn(() => [location, unlocked]);
 
     renderer.update();
+    await vi.waitFor(() => {
+      const zones = container.querySelector('.city-zones-container');
+      expect(zones).not.toBe(zonesContainer);
+      expect(zones.querySelectorAll('.city-zone').length).toBe(ZONE_DEFINITIONS.length);
+    });
 
-    // Roads and buildings containers are NOT re-created
-    expect(container.querySelector('.city-roads-container')).toBe(roadsContainer);
-    expect(container.querySelector('.city-buildings-container')).toBe(buildingsContainer);
-
-    // Locations container is re-created
+    const nextZones = container.querySelector('.city-zones-container');
+    const nextRoads = container.querySelector('.city-roads-container');
+    const nextBuildings = container.querySelector('.city-buildings-container');
     const secondLocationsContainer = container.querySelector('.city-locations-container');
-    expect(secondLocationsContainer).not.toBeNull();
+
+    expect(container.querySelectorAll('.city-zones-container').length).toBe(1);
+    expect(container.querySelectorAll('.city-roads-container').length).toBe(1);
+    expect(container.querySelectorAll('.city-buildings-container').length).toBe(1);
+    expect(container.querySelectorAll('.city-locations-container').length).toBe(1);
+
+    expect(nextZones).not.toBe(zonesContainer);
+    expect(nextRoads).not.toBe(roadsContainer);
+    expect(nextBuildings).not.toBe(buildingsContainer);
     expect(secondLocationsContainer).not.toBe(firstLocationsContainer);
+
+    // Static chrome is not part of the dynamic layer set.
+    expect(container.querySelector('.city-map-background')).toBe(background);
+    expect(container.querySelector('.city-map-grid')).toBe(grid);
+
+    expect(nextZones.querySelectorAll('.city-zone').length).toBe(ZONE_DEFINITIONS.length);
+    expect(nextRoads.querySelectorAll('.city-road').length).toBe(18);
+    expect(nextBuildings.querySelectorAll('.city-building').length).toBe(2);
+    expect(nextBuildings.querySelector('.city-building-lab')).not.toBeNull();
+    expect(nextBuildings.querySelector('.city-building-bank')).not.toBeNull();
     expect(secondLocationsContainer.querySelector('.city-location[data-location="loc-2"]')).not.toBeNull();
+    expect(secondLocationsContainer.querySelector('.city-location[data-location="loc-3"]')).not.toBeNull();
   });
 });

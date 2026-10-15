@@ -305,18 +305,32 @@ export class CityMapRenderer {
     }
 
     /**
-     * Update map (refresh locations and player marker)
+     * Refresh the map after accessible locations change.
+     * Background and grid stay; zones, roads, buildings, and markers are rebuilt
+     * so building blocks cannot drift from the marker list.
      */
     update() {
         if (!this.rendered) {
             this.initialize();
-        } else {
-            // Remove and re-render dynamic elements
-            const locationsContainer = this.container.querySelector('.city-locations-container');
-            if (locationsContainer) {
-                locationsContainer.remove();
-            }
-            this.renderLocations();
+            return;
         }
+
+        const dynamicSelectors = [
+            '.city-zones-container',
+            '.city-roads-container',
+            '.city-buildings-container',
+            '.city-locations-container',
+        ];
+        for (const selector of dynamicSelectors) {
+            const layer = this.container.querySelector(selector);
+            if (layer) {
+                layer.remove();
+            }
+        }
+
+        this.renderZones();
+        this.renderRoads();
+        this.renderBuildings();
+        this.renderLocations();
     }
 }
