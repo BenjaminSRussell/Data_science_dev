@@ -213,24 +213,10 @@ export class MapBuildingSystem {
     }
 
     /**
-     * Get building for location
-     */
-    getBuildingForLocation(locationId) {
-        return this.buildings.find(b => b.locationId === locationId);
-    }
-
-    /**
      * Get all buildings
      */
     getAllBuildings() {
         return this.buildings;
-    }
-
-    /**
-     * Get buildings in zone
-     */
-    getBuildingsInZone(zoneId) {
-        return this.buildings.filter(b => b.zone === zoneId);
     }
 
     /**
@@ -243,15 +229,5 @@ export class MapBuildingSystem {
             return this.buildings.find(b => b.id === buildingId);
         }
         return null;
-    }
-
-    /**
-     * Get building data for rendering
-     */
-    getBuildingData() {
-        return {
-            buildings: this.buildings,
-            buildingGrid: Array.from(this.buildingGrid.entries())
-        };
     }
 }
