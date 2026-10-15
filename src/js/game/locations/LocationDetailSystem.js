@@ -4,9 +4,6 @@
  * Dozens of interactive features per location
  */
 
-// AssetResolver not currently used - using direct SVG paths
-// import { AssetResolver } from '../../utils/AssetResolver.js';
-
 export class LocationDetailSystem {
     constructor(gameState) {
         this.gameState = gameState;

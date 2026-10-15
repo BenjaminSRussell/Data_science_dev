@@ -1,103 +1,32 @@
-import { expect } from 'chai';
-import AssetResolver from '../../src/js/utils/AssetResolver';
+/**
+ * AssetResolver claimed to check PNG then SVG, but resolve() never called
+ * assetExists() and nothing in the game imported it (#2246, #1046).
+ * Keep it deleted rather than shipping a passthrough with fallback comments.
+ */
 
-describe('AssetResolver', () => {
-    describe('resolve(assetPath)', () => {
-        it('should return fallback path for null assetPath', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.resolve(null)).to.equal('/assets/icons/ui/info.png');
-        });
+import { describe, it, expect } from 'vitest';
+import fs from 'fs';
+import path from 'path';
 
-        it('should return fallback path for undefined assetPath', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.resolve(undefined)).to.equal('/assets/icons/ui/info.png');
-        });
+describe('AssetResolver removal (issue #2246)', () => {
+    const srcDir = path.join(__dirname, '../../src');
 
-        it('should return fallback path for empty string assetPath', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.resolve('')).to.equal('/assets/icons/ui/info.png');
-        });
+    function walkJs(dir, found = []) {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+            const full = path.join(dir, entry.name);
+            if (entry.isDirectory()) walkJs(full, found);
+            else if (entry.isFile() && entry.name.endsWith('.js')) found.push(full);
+        }
+        return found;
+    }
 
-        it('should return unchanged path for .svg assetPath', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.resolve('/assets/icons/ui/info.svg')).to.equal('/assets/icons/ui/info.svg');
-        });
-
-        it('should return unchanged path for .png assetPath', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.resolve('/assets/icons/ui/info.png')).to.equal('/assets/icons/ui/info.png');
-        });
-
-        it('should return unchanged path for other extensions', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.resolve('/assets/icons/ui/info.jpg')).to.equal('/assets/icons/ui/info.jpg');
-        });
+    it('does not keep src/js/utils/AssetResolver.js', () => {
+        const assetResolverPath = path.join(__dirname, '../../src/js/utils/AssetResolver.js');
+        expect(fs.existsSync(assetResolverPath)).toBe(false);
     });
 
-    describe('withSvgFallback(pngPath)', () => {
-        it('should return fallback svg path for null pngPath', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.withSvgFallback(null)).to.equal('/assets/icons/ui/info.svg');
-        });
-
-        it('should return fallback svg path for undefined pngPath', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.withSvgFallback(undefined)).to.equal('/assets/icons/ui/info.svg');
-        });
-
-        it('should return unchanged path for .svg pngPath', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.withSvgFallback('/assets/icons/ui/info.svg')).to.equal('/assets/icons/ui/info.svg');
-        });
-
-        it('should swap .png to .svg for pngPath', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.withSvgFallback('/assets/icons/ui/info.png')).to.equal('/assets/icons/ui/info.svg');
-        });
-
-        it('should return unchanged path for non-.png/.svg extensions', () => {
-            const resolver = new AssetResolver();
-            expect(resolver.withSvgFallback('/assets/icons/ui/info.jpg')).to.equal('/assets/icons/ui/info.jpg');
-        });
-    });
-
-    describe('assetExists(url)', () => {
-        it('should return true for existing asset', (done) => {
-            const resolver = new AssetResolver();
-            global.Image = class {
-                constructor() {
-                    this.onload = () => {};
-                    this.onerror = () => {};
-                }
-            };
-            const img = new global.Image();
-            img.onload = () => {
-                expect(resolver.assetExists('/assets/icons/ui/info.png')).to.be.true;
-                done();
-            };
-            img.onerror = () => {
-                done(new Error('Image should have loaded'));
-            };
-            img.src = '/assets/icons/ui/info.png';
-        });
-
-        it('should return false for non-existing asset', (done) => {
-            const resolver = new AssetResolver();
-            global.Image = class {
-                constructor() {
-                    this.onload = () => {};
-                    this.onerror = () => {};
-                }
-            };
-            const img = new global.Image();
-            img.onerror = () => {
-                expect(resolver.assetExists('/non-existing-asset.png')).to.be.false;
-                done();
-            };
-            img.onload = () => {
-                done(new Error('Image should not have loaded'));
-            };
-            img.src = '/non-existing-asset.png';
-        });
+    it('is not referenced from application code', () => {
+        const hits = walkJs(srcDir).filter((file) => /AssetResolver/.test(fs.readFileSync(file, 'utf8')));
+        expect(hits).toEqual([]);
     });
 });
