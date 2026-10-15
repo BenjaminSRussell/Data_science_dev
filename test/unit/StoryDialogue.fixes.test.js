@@ -147,12 +147,21 @@ describe('DialogueUI (#47, #1158)', () => {
 
     it('shows the NPC portrait in the fallback box', () => {
         document.body.innerHTML = '';
-        const game = { gameState: { money: 0 } };
-        const d = new DialogueUI(game);
-        d.open({ id: 'emma_bloom', name: 'Emma', type: 'social' });
-        const img = document.querySelector('#dialogue-avatar img.dialogue-portrait');
-        expect(img).not.toBeNull();
-        expect(img.getAttribute('src')).toBeTruthy();
-        d.close();
+        // Portrait markup lives on the DOM fallback, used only when the tag is absent (#2240)
+        const realGet = customElements.get.bind(customElements);
+        const spy = vi.spyOn(customElements, 'get').mockImplementation((name) => (
+            name === 'dialogue-component' ? undefined : realGet(name)
+        ));
+        try {
+            const game = { gameState: { money: 0 } };
+            const d = new DialogueUI(game);
+            d.open({ id: 'emma_bloom', name: 'Emma', type: 'social' });
+            const img = document.querySelector('#dialogue-avatar img.dialogue-portrait');
+            expect(img).not.toBeNull();
+            expect(img.getAttribute('src')).toBeTruthy();
+            d.close();
+        } finally {
+            spy.mockRestore();
+        }
     });
 });

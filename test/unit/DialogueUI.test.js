@@ -4,9 +4,19 @@ import { STATS } from '../../src/js/game/CharacterStats.js';
 import { RealisticDialogueSystem } from '../../src/js/game/RealisticDialogueSystem.js';
 
 /**
+ * Hide <dialogue-component> so DialogueUI builds its DOM fallback. The cases
+ * below assert DOM text; the Lit path has its own case above (#2240).
+ */
+function hideDialogueComponent() {
+  const realGet = customElements.get.bind(customElements);
+  return vi.spyOn(customElements, 'get').mockImplementation((name) => (
+    name === 'dialogue-component' ? undefined : realGet(name)
+  ));
+}
+
+/**
  * Build a minimal game mock sufficient to drive DialogueUI.open() into a
- * known currentNode via the DOM fallback path (customElements.get('dialogue-component')
- * is false in jsdom unless the Lit component is imported).
+ * known currentNode.
  */
 function makeGameMock() {
   const rootNode = {
@@ -36,15 +46,45 @@ function makeGameMock() {
   return { game, tree, rootNode };
 }
 
+describe('DialogueUI Lit path (#2240)', () => {
+  it('registers dialogue-component and opens through it', async () => {
+    expect(customElements.get('dialogue-component')).toBeTruthy();
+    const { game } = makeGameMock();
+    const npc = { id: 'npc-1', name: 'Alice', title: 'Analyst' };
+    const litUi = new DialogueUI(game);
+    expect(litUi.litComponent).toBeInstanceOf(customElements.get('dialogue-component'));
+    expect(litUi.container).toBeNull();
+    expect(document.getElementById('dialogue-ui')).toBeNull();
+    expect(document.querySelector('dialogue-component')).toBe(litUi.litComponent);
+
+    litUi.open(npc);
+    await litUi.litComponent.updateComplete;
+    expect(litUi.isOpen).toBe(true);
+    expect(litUi.litComponent.isOpen).toBe(true);
+    expect(litUi.litComponent.hasAttribute('is-open')).toBe(true);
+    expect(litUi.litComponent.shadowRoot.querySelector('.dialogue-npc-name').textContent).toBe('Alice');
+
+    const btn = litUi.litComponent.shadowRoot.querySelector('.dialogue-choice');
+    expect(btn.textContent.trim()).toBe('Goodbye');
+    btn.click();
+    expect(litUi.isOpen).toBe(false);
+    expect(litUi.currentNPC).toBeFalsy();
+    expect(litUi.litComponent.isOpen).toBe(false);
+    litUi.destroy();
+  });
+});
+
 describe('DialogueUI', () => {
   let ui;
   let game;
   let tree;
   let rootNode;
   let npc;
+  let domSpy;
 
   beforeEach(() => {
     document.body.innerHTML = '';
+    domSpy = hideDialogueComponent();
     const mock = makeGameMock();
     game = mock.game;
     tree = mock.tree;
@@ -55,6 +95,7 @@ describe('DialogueUI', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    domSpy?.mockRestore();
     document.body.innerHTML = '';
   });
 
