@@ -1,7 +1,7 @@
 {
   "name": "data-science-tycoon",
   "version": "1.0.0",
-  "description": "A web-based WASM/C++ simulation game where players climb the corporate data science ladder",
+  "description": "A web-based JavaScript simulation game where players climb the corporate data science ladder",
   "type": "module",
   "scripts": {
     "dev": "vite",
