@@ -271,10 +271,15 @@ export class LocationView {
     }
 
     /**
-     * Apply a feature's energy/skill/money effects; they used to be read
-     * and thrown away (#2391, #2063, #45). Paid features need the cash.
+     * Apply a feature's energy/skill/money/time effects; they used to be read
+     * and thrown away (#2391, #2063, #45, #2065). Paid features need the cash.
+     * A rejected action (success: false) applies nothing.
      */
     applyFeatureResult(res) {
+        if (!res || res.success === false || res.blocked) {
+            const reason = typeof res?.blocked === 'string' ? res.blocked : res?.message;
+            return { blocked: reason || 'You cannot do that.' };
+        }
         const gs = this.game.gameState || {};
         const money = Number(res.money) || 0;
         if (money < 0 && (Number(gs.money) || 0) < -money) {
@@ -300,6 +305,15 @@ export class LocationView {
         if (skill > 0 && stats?.addExperience) {
             stats.addExperience(LocationView.SKILL_STAT, skill * LocationView.XP_PER_SKILL_POINT);
             applied.skill = skill;
+        }
+        const slots = Number(res.timeSlots) || 0;
+        if (slots > 0 && !res.timeConsumed) {
+            if (typeof this.game.handleTimeAdvance === 'function') {
+                this.game.handleTimeAdvance(slots);
+            } else {
+                tm?.advanceTime?.(slots);
+            }
+            applied.timeSlots = slots;
         }
         return applied;
     }
