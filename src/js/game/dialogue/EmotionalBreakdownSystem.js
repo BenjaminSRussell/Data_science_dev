@@ -195,6 +195,9 @@ export class EmotionalBreakdownSystem {
             id: `breakdown_${npcId}_${Date.now()}`,
             npcId: npcId,
             npc: npc,
+            // The dialogue-file key (low_relationship, rejection, ...), not the
+            // emotion bucket. RelationshipDialogueSystem reads it (#2318).
+            triggerType: triggerType,
             type: conditions.condition.type,
             emotion: conditions.condition.emotion,
             quickTimeType: conditions.condition.quickTime,
@@ -250,9 +253,32 @@ export class EmotionalBreakdownSystem {
         `;
         
         document.body.appendChild(overlay);
+
+        // Swap in the NPC file's line for this trigger when one exists (#2318).
+        // The generic line stays if the file has no entry for the trigger.
+        this.applyAuthoredBreakdownLine(breakdown, overlay);
         
         // Start quick-time event
         this.startQuickTimeEvent(breakdown.id, breakdown.quickTimeType);
+    }
+
+    /**
+     * Replace the generic breakdown line with dialogue.breakdowns[trigger]
+     * from the NPC's dialogue file, when RelationshipDialogueSystem has one.
+     * @returns {Promise<string|null>}
+     */
+    applyAuthoredBreakdownLine(breakdown, overlay) {
+        const rds = this.gameState?.relationshipDialogueSystem;
+        const type = breakdown?.triggerType;
+        if (!rds?.getBreakdownDialogue || !type) return Promise.resolve(null);
+        return Promise.resolve(rds.getBreakdownDialogue(breakdown.npcId, type))
+            .then(line => {
+                if (typeof line !== 'string' || !line.trim()) return null;
+                const el = overlay?.querySelector?.('.dialogue-text');
+                if (el) el.textContent = line;
+                return line;
+            })
+            .catch(() => null);
     }
     
     /**

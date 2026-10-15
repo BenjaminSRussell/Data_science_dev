@@ -52,9 +52,10 @@ export class RelationshipDialogueSystem {
         );
 
         // 'next' rotates through the greeting and then each authored topic,
-        // so topic dialogue is actually heard in conversation (#2080)
+        // so topic dialogue is actually heard in conversation (#2080).
+        // The list is the one getAvailableTopics() exposes (#2318).
         if (topic === 'next') {
-            const topics = Object.keys(stageDialogue.topics || {});
+            const topics = await this.getAvailableTopics(npcId, relationshipLevel);
             const n = this.topicCursor.get(npcId) || 0;
             this.topicCursor.set(npcId, n + 1);
             const slot = n % (topics.length + 1);

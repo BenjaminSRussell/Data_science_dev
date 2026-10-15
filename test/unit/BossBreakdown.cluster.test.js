@@ -225,6 +225,32 @@ describe('EmotionalBreakdownSystem (#308, #1021, #1831, #2069, #2070, #2071, #22
         expect(make({}, { reduceTimePressure: true }).sys.getQuickTimeSeconds()).toBe(Infinity);
     });
 
+    it('shows the NPC file breakdown line for the trigger that fired (#2318)', async () => {
+        const npcManager = {
+            relationships: { sarah: 5 },
+            getNPC: id => ({ id, name: id, icon: '' }),
+            modifyRelationship: vi.fn()
+        };
+        const relationshipDialogueSystem = {
+            getBreakdownDialogue: vi.fn(async () => 'I thought we understood each other.')
+        };
+        const sys = new EmotionalBreakdownSystem({ npcManager, relationshipDialogueSystem });
+        sys.startQuickTimeEvent = vi.fn();
+        sys.recordRelationshipChange('sarah', 30, 30);
+        sys.recordRelationshipChange('sarah', -25, 5);
+        const breakdown = sys.triggerBreakdown('sarah', 'low_relationship');
+        expect(breakdown?.triggerType).toBe('low_relationship');
+        await sys.applyAuthoredBreakdownLine(
+            breakdown,
+            document.getElementById(`breakdown-${breakdown.id}`)
+        );
+        // triggerBreakdown already asked once; the direct call asks again
+        expect(relationshipDialogueSystem.getBreakdownDialogue).toHaveBeenCalledWith('sarah', 'low_relationship');
+        expect(document.querySelector(`#breakdown-${breakdown.id} .dialogue-text`).textContent)
+            .toBe('I thought we understood each other.');
+        document.getElementById(`breakdown-${breakdown.id}`)?.remove();
+    });
+
     it('sad breakdowns get dialogue and CSS (#1831)', async () => {
         const { sys } = make();
         const line = sys.getBreakdownDialogue({}, 'sad', 'hurt');

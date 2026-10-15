@@ -107,6 +107,24 @@ export function giftReactionLine(dialogue, giftId) {
 }
 
 /**
+ * The NPC's reaction to this gift. Prefers RelationshipDialogueSystem
+ * .getActionResponse so authored `actions.gift_*` lines are actually read
+ * in play (#2318); falls back to the dialogue file when that system is absent.
+ */
+export async function loadGiftReaction(game, npcId, giftId) {
+    const rds = game?.relationshipDialogueSystem || game?.gameState?.relationshipDialogueSystem;
+    if (rds?.getActionResponse) {
+        for (const key of [giftId, ...(GIFT_ACTION_ALIASES[giftId] || [])]) {
+            const line = await rds.getActionResponse(npcId, `gift_${key}`);
+            if (typeof line === 'string' && line.trim()) return line;
+        }
+        return null;
+    }
+    const dialogue = await npcDialogueLoader.loadNPCDialogue(npcId);
+    return giftReactionLine(dialogue, giftId);
+}
+
+/**
  * Handle giving a gift to an NPC
  */
 export function handleNPCGift(game, npcId, giftId = 'coffee') {
@@ -136,10 +154,9 @@ export function handleNPCGift(game, npcId, giftId = 'coffee') {
     DOMUtils.updateElement(dialogueArea(), {
         textContent: generic
     });
-    // Swap in the NPC's own line for this gift once its dialogue file loads (#1307)
-    const reactionReady = Promise.resolve(npcDialogueLoader.loadNPCDialogue(npcId))
-        .then(dialogue => {
-            const line = giftReactionLine(dialogue, giftId);
+    // Swap in the NPC's own line for this gift once its dialogue file loads (#1307, #2318)
+    const reactionReady = Promise.resolve(loadGiftReaction(game, npcId, giftId))
+        .then(line => {
             if (line) DOMUtils.updateElement(dialogueArea(), { textContent: line });
             return line;
         })
