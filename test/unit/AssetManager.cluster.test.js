@@ -78,4 +78,11 @@ describe('AssetManager cluster (#1040, #1043, #1675, #1676, #2309)', () => {
         const src = fs.readFileSync('src/js/main.js', 'utf8');
         expect(src.indexOf('this.waitForAssets().then(')).toBeLessThan(src.indexOf("this.showLoadingProgress('Ready!', 100)"));
     });
+
+    it('getLocationBackground falls back to the manifest backdrop (#2286)', () => {
+        const am = new AssetManager();
+        const bg = am.getLocationBackground('coffee_shop');
+        expect(bg).toEqual({ src: '/assets/backgrounds/locations/coffee_shop/coffee_shop_backdrop_00.png', fallback: true });
+        expect(am.getLocationBackground('nowhere_at_all')).toBeNull();
+    });
 });

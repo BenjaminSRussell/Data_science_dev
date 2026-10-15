@@ -104,7 +104,6 @@ import { SpriteSheetManager } from './assets/SpriteSheetManager.js';
 import { ThreeCharacterRenderer } from './characters/ThreeCharacterRenderer.js';
 // import { VisualEffectsManager } from './effects/VisualEffectsManager.js';
 // import { CharacterAnimationSystem } from './characters/CharacterAnimationSystem.js';
-import { LocationView } from './ui/LocationView.js';
 
 // Helper modules - split from main.js for easier debugging
 import * as MapHelpers from './helpers/MapHelpers.js';
@@ -1447,8 +1446,6 @@ export class MainGame {
             this.characterAnimationSystem = new CharacterAnimationSystem(this.assetManager);
             this.characterRenderer = new AnimatedCharacterRenderer(this.visualSystem.startLoadingSpriteSheets());
             this.threeRenderer = new ThreeCharacterRenderer(); // Shared 3D renderer manager
-            this.locationView = new LocationView(this, this.assetManager, this.characterRenderer, this.threeRenderer);
-            this.gameState.locationView = this.locationView;
             */
 
             // Load assets in background (non-blocking, low priority)

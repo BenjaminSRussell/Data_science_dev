@@ -4,6 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { LocationViewComponent } from '../../src/js/ui/components/LocationViewComponent.js';
 
 describe('LocationViewComponent behavior', () => {
@@ -96,5 +98,11 @@ describe('LocationViewComponent behavior', () => {
             expect(received.bubbles).toBe(true);
             expect(received.composed).toBe(true);
         });
+    });
+
+    it('LocationViewComponent features are keyboard accessible (#878)', () => {
+        const lit = readFileSync(resolve(__dirname, '../../src/js/ui/components/LocationViewComponent.js'), 'utf8');
+        expect(lit).toMatch(/role="button" tabindex="0"/);
+        expect(lit).toMatch(/@keydown=/);
     });
 });
