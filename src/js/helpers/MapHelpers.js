@@ -12,6 +12,8 @@ import { DOMUtils } from '../utils/DOMUtils.js';
 import { logger } from '../utils/Logger.js';
 import { VEHICLES, VEHICLES_MAP } from '../game/WorldMap.js';
 import { TRAINING_ACTIVITIES } from '../game/CharacterStats.js';
+import { WORLD_GRID_SIZE } from '../config/mapGrid.js';
+import { PositioningHelper } from '../utils/PositioningHelper.js';
 // WorldMapRenderer imported lazily to avoid circular dependencies
 
 // Cache DOM elements to avoid repeated queries (using DOMUtils cache)
@@ -484,20 +486,7 @@ function updateMapLocationStates(game) {
 function updatePlayerMarker(game) {
     const currentLocation = game.worldMap.getCurrentLocation();
     if (currentLocation?.position && domCache.playerMarker) {
-        // All locations use grid coordinates (0-30) - convert to percentage
-        let percentX, percentY;
-        if (game.mapManager) {
-            const percent = game.mapManager.gridToPercent(
-                currentLocation.position.x,
-                currentLocation.position.y
-            );
-            percentX = percent.x;
-            percentY = percent.y;
-        } else {
-            // Fallback: assume 30x30 grid
-            percentX = (currentLocation.position.x / 30) * 100;
-            percentY = (currentLocation.position.y / 30) * 100;
-        }
+        const { x: percentX, y: percentY } = playerMarkerPercent(game, currentLocation.position);
         domCache.playerMarker.style.left = `${percentX}%`;
         domCache.playerMarker.style.top = `${percentY}%`;
     }
@@ -844,4 +833,15 @@ function handleSellCar(game) {
             game.showError(result.reason);
         }
     }
+}
+
+/**
+ * Percent position of the DOM player marker on the live city grid.
+ * game.mapManager is only assigned inside MapRenderer.initialize(), which the
+ * live app never calls, so that branch never ran. UnifiedMapSystem.gridSize
+ * is the grid the map actually draws (#2017).
+ */
+export function playerMarkerPercent(game, position) {
+    const gridSize = game?.unifiedMapSystem?.gridSize || WORLD_GRID_SIZE;
+    return PositioningHelper.gridToPercent(position.x, position.y, gridSize);
 }
