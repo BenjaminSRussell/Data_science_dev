@@ -1,7 +1,20 @@
 /**
  * JobSystem.js
- * Hundreds of real-world jobs and tasks that evolve with career progression
+ * Career ladder: reputation unlocks a category, and each category's tasks
+ * are the assignments the player is hired to do. Multi-step workflows for
+ * those assignments live in RealWorldTaskSystem and are addressed by id
+ * through jobCatalogLink.js — that file is not a second job catalog (#1827).
  */
+
+import { grantWorkReward } from './work/workRewards.js';
+import {
+    describeWorkReward,
+    reputationForTask,
+    resolveJobRole,
+    resolveSkillStat,
+    workflowForCareerTask,
+    workflowsForJob
+} from './work/jobCatalogLink.js';
 
 export const JOB_CATEGORIES = {
     entry_level: {
@@ -365,9 +378,36 @@ export class JobSystem {
      * or 5 per difficulty point (#1824).
      */
     static reputationFor(task) {
-        const explicit = Number(task?.reputationReward);
-        if (Number.isFinite(explicit) && explicit >= 0) return explicit;
-        return Math.max(1, (Number(task?.difficulty) || 1) * 5);
+        return reputationForTask(task);
+    }
+
+    /**
+     * Workflow ids (RealWorldTaskSystem task types) the current career
+     * category may offer. Pay still comes from the career task (#1827).
+     */
+    workflowsForCurrentJob(context = {}) {
+        this.updateCurrentJob();
+        return workflowsForJob(this.currentJob?.category, context);
+    }
+
+    /** Role filter for the current career category. Not a second job id. */
+    workflowRole() {
+        this.updateCurrentJob();
+        return resolveJobRole(this.currentJob?.category);
+    }
+
+    /** Multi-step workflow id for a career assignment, or null. */
+    workflowForTask(taskId) {
+        return workflowForCareerTask(taskId);
+    }
+
+    /**
+     * Reward in the shared shape { money, reputation, experience, xpByStat }.
+     * money is basePay, not the quality-scaled payout from completeTask.
+     */
+    describeTaskReward(taskOrId) {
+        const task = typeof taskOrId === 'string' ? this.findTask(taskOrId) : taskOrId;
+        return describeWorkReward(task);
     }
 
     /**
@@ -397,7 +437,7 @@ export class JobSystem {
         const cs = this.gameState.characterStats;
         const skills = task?.skills || [];
         if (!cs?.getStat || skills.length === 0) return 1;
-        const avg = skills.reduce((sum, s) => sum + (Number(cs.getStat(s)) || 0), 0) / skills.length;
+        const avg = skills.reduce((sum, s) => sum + (Number(cs.getStat(resolveSkillStat(s))) || 0), 0) / skills.length;
         return 0.8 + 0.2 * Math.min(1, avg / 50);
     }
 
@@ -420,22 +460,21 @@ export class JobSystem {
         const clientPayBonus = 1 + ((this.gameState.characterStats?.getTotalBonuses?.()?.clientPay || 0) / 100);
         const pay = Math.floor(task.basePay * q * this.getSkillFactor(task) * clientPayBonus);
 
-        this.gameState.money = (this.gameState.money || 0) + pay;
-        this.gameState.totalEarned = (this.gameState.totalEarned || 0) + pay;
-        this.gameState.weeklyIncome = (this.gameState.weeklyIncome || 0) + pay;
-
-        // Apply XP rewards
+        // Apply XP rewards. Skill names resolve through the shared map so a
+        // tool skill and a character stat are one vocabulary (#1827).
         if (task.xpReward) {
             for (const [stat, amount] of Object.entries(task.xpReward)) {
-                this.gameState.characterStats?.addExperience?.(stat, Math.floor(amount * q));
+                const gained = Math.floor(amount * q);
+                if (gained === 0) continue;
+                this.gameState.characterStats?.addExperience?.(resolveSkillStat(stat), gained);
             }
         }
 
-        // Reputation is what unlocks the next job category; tasks now earn it (#1824)
-        const reputation = Math.round(JobSystem.reputationFor(task) * q);
-        if (reputation > 0) {
-            this.gameState.reputation = (Number(this.gameState.reputation) || 0) + reputation;
-        }
+        // Same money / weekly income / lifetime earnings / reputation floor
+        // as contracts, projects, and workflow tasks (#1824, #267, #1827).
+        const owed = Math.round(JobSystem.reputationFor(task) * q);
+        const booked = grantWorkReward(this.gameState, { money: pay, reputation: owed });
+        const reputation = booked.reputation;
 
         this.completedTasks.push({
             taskId,
