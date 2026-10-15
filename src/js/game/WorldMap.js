@@ -1,3 +1,7 @@
+import { MapGridSystem } from './MapGridSystem.js';
+import { MapNavigationSystem } from './MapNavigationSystem.js';
+import { MapRoadSystem } from './MapRoadSystem.js';
+
 /**
  * World Map - Optimized for linear time complexity
  * Uses Maps for O(1) lookups, caches computed values (the accessible-location
@@ -341,6 +345,10 @@ VEHICLES.forEach(v => VEHICLES_MAP.set(v.id, v));
  * WorldMap class - Optimized for linear time complexity
  */
 export class WorldMap {
+    // A* tile-count is longer than a 6-slot day, so route time is grouped
+    // into this many pathfinder-slots per charged slot (#1941).
+    static ROUTE_STEPS_PER_SLOT = 6;
+
     constructor(gameState) {
         this.gameState = gameState;
         this.currentLocation = 'home';
@@ -489,8 +497,9 @@ export class WorldMap {
     }
 
     /**
-     * Check if can travel to location - O(1) once the accessible list is cached
-     * (rebuilding it after a state change is O(n)) (#1435)
+     * Check if can travel to location. Accessibility is O(1) once cached
+     * (rebuilding it is O(n)) (#1435). The slot quote also asks the road
+     * pathfinder, which caches by coordinate pair (#1941).
      */
     canTravelTo(locationId) {
         const location = LOCATIONS_MAP.get(locationId);
@@ -505,21 +514,98 @@ export class WorldMap {
         }
 
         // Report the same slot cost travelTo() will actually charge (#985)
+        const quote = this._travelQuote(locationId);
         return {
             can: true,
-            travelTime: this.getTravelSlots(locationId),
-            baseTravelTime: location.travelTime
+            travelTime: quote.slots,
+            baseTravelTime: location.travelTime,
+            path: quote.path,
+            pathVisual: quote.visual
         };
+    }
+
+    /**
+     * MapManager's navigator when the renderer has built one; otherwise the
+     * same MapNavigationSystem over the live grid and the road network.
+     */
+    _navigationSystem() {
+        const managed = this.gameState?.mapManager?.getNavigationSystem?.();
+        if (managed?.findPath) return managed;
+        if (this._nav) return this._nav;
+        if (this._navFailed) return null;
+        try {
+            const grid = this.gameState?.mapCoordinateSystem?.gridSystem || new MapGridSystem();
+            this._nav = new MapNavigationSystem(grid, new MapRoadSystem(grid));
+            return this._nav;
+        } catch {
+            this._navFailed = true;
+            return null;
+        }
+    }
+
+    /**
+     * Road route from the current location to `location`, or [] when the
+     * pathfinder cannot produce one (caller keeps the authored tariff).
+     */
+    _routeTo(location) {
+        const from = LOCATIONS_MAP.get(this.currentLocation)?.position;
+        const to = location?.position;
+        if (!from || !to) return [];
+        const nav = this._navigationSystem();
+        if (!nav) return [];
+        try {
+            const path = nav.findPath(from.x, from.y, to.x, to.y);
+            return Array.isArray(path) ? path : [];
+        } catch {
+            return [];
+        }
+    }
+
+    _pathVisual(path) {
+        if (!path?.length) return [];
+        const nav = this._navigationSystem();
+        if (typeof nav?.getPathVisualData !== 'function') return [];
+        try {
+            const visual = nav.getPathVisualData(path);
+            return Array.isArray(visual) ? visual : [];
+        } catch {
+            return [];
+        }
+    }
+
+    /**
+     * Slot quote for a trip. The pathfinder's calculateTravelTime is the
+     * route clock; the location's authored travelTime is only a cap, because
+     * raw tile-count does not fit a 6-slot day. A tariff of 0 stays free.
+     * Already here is 0 (#1434, #2168, #1941).
+     */
+    _travelQuote(locationId) {
+        const location = LOCATIONS_MAP.get(locationId);
+        if (!location || locationId === this.currentLocation) {
+            return { slots: 0, path: [], visual: [] };
+        }
+        const speed = this._activeVehicle()?.travelSpeed || 1;
+        const authored = Math.max(0, Math.ceil(location.travelTime / speed));
+        const path = this._routeTo(location);
+        const visual = this._pathVisual(path);
+        if (!(authored > 0) || !path.length) {
+            return { slots: authored > 0 ? authored : 0, path, visual };
+        }
+        const nav = this._navigationSystem();
+        let routeTime = path.length;
+        if (typeof nav?.calculateTravelTime === 'function') {
+            const computed = nav.calculateTravelTime(path, speed);
+            if (Number.isFinite(computed) && computed > 0) routeTime = computed;
+        }
+        const scaled = Math.max(1, Math.ceil(routeTime / WorldMap.ROUTE_STEPS_PER_SLOT));
+        return { slots: Math.min(authored, scaled), path, visual };
     }
 
     /**
      * Time slots a trip costs with the current vehicle. 0 when already there (#1434, #2168).
      */
     getTravelSlots(locationId) {
-        const location = LOCATIONS_MAP.get(locationId);
-        if (!location || locationId === this.currentLocation) return 0;
-        const speed = this._activeVehicle()?.travelSpeed || 1;
-        return Math.max(0, Math.ceil(location.travelTime / speed));
+        return this._travelQuote(locationId).slots;
     }
 
     /**
@@ -540,7 +626,7 @@ export class WorldMap {
         if (!VEHICLES_MAP.has(this.currentVehicle)) {
             this.currentVehicle = 'walking';
         }
-        const actualSlots = this.getTravelSlots(locationId);
+        const quote = this._travelQuote(locationId);
 
         this.currentLocation = locationId;
         this.visitedLocations.add(locationId); // Set.add is O(1)
@@ -551,7 +637,9 @@ export class WorldMap {
         return {
             success: true,
             location,
-            timeCost: actualSlots
+            timeCost: quote.slots,
+            path: quote.path,
+            pathVisual: quote.visual
         };
     }
 

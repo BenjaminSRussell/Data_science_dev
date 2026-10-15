@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WorldMap, VEHICLES } from '../../src/js/game/WorldMap.js';
+import { MapNavigationSystem } from '../../src/js/game/MapNavigationSystem.js';
 import { EconomySystem } from '../../src/js/game/EconomySystem.js';
 import { WorldEventManager } from '../../src/js/game/WorldEventManager.js';
 import { vehicleRequiresDealership, handleTravel } from '../../src/js/helpers/MapHelpers.js';
@@ -90,6 +91,56 @@ describe('WorldMap travel & vehicles', () => {
         wem.processDay();
         vi.restoreAllMocks();
         expect(wm.getLocation('library').name).not.toBe('Innovation Hub');
+    });
+
+    it('quotes travel from the road pathfinder, capped by the authored tariff (#1941)', () => {
+        const findPath = vi.fn(() => [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }]);
+        const calculateTravelTime = vi.fn((path, speed) => Math.max(1, Math.ceil(path.length / speed)));
+        const getPathVisualData = vi.fn(() => [{ start: { x: 0, y: 0 }, end: { x: 1, y: 0 } }]);
+        wm.gameState.mapManager = {
+            getNavigationSystem: () => ({ findPath, calculateTravelTime, getPathVisualData })
+        };
+
+        // networking_bar's tariff is 2; a 3-tile route scales under that cap
+        expect(wm.getTravelSlots('networking_bar')).toBe(1);
+        expect(findPath).toHaveBeenCalledWith(12, 20, 17, 13);
+        expect(calculateTravelTime).toHaveBeenCalled();
+        expect(getPathVisualData).toHaveBeenCalled();
+
+        // A long route cannot cost more than the authored tariff
+        findPath.mockReturnValue(Array.from({ length: 40 }, (_, i) => ({ x: i, y: 0 })));
+        expect(wm.getTravelSlots('networking_bar')).toBe(2);
+
+        // A tariff of 0 stays free even when a route exists
+        expect(wm.getTravelSlots('coffee_shop')).toBe(0);
+
+        // No route: keep the authored tariff (walking bank is 2)
+        findPath.mockReturnValue([]);
+        expect(wm.getTravelSlots('bank')).toBe(2);
+
+        findPath.mockReturnValue([{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }]);
+        const res = wm.travelTo('office');
+        expect(res.success).toBe(true);
+        expect(res.timeCost).toBe(1);
+        expect(res.path).toHaveLength(3);
+        expect(res.pathVisual).toHaveLength(1);
+        const check = wm.canTravelTo('library');
+        expect(check.travelTime).toBe(wm.travelTo('library').timeCost);
+    });
+
+    it('builds a MapNavigationSystem route when no MapManager is attached (#1941)', () => {
+        const findPath = vi.spyOn(MapNavigationSystem.prototype, 'findPath');
+        const routeTime = vi.spyOn(MapNavigationSystem.prototype, 'calculateTravelTime');
+        const res = wm.travelTo('library');
+        expect(findPath).toHaveBeenCalledWith(12, 20, 22, 10);
+        expect(routeTime).toHaveBeenCalled();
+        expect(res.path[0]).toEqual({ x: 12, y: 20 });
+        expect(res.path.at(-1)).toEqual({ x: 22, y: 10 });
+        expect(res.pathVisual.length).toBe(res.path.length - 1);
+        // Library's tariff is 1, so the cap holds the charge at the authored cost
+        expect(res.timeCost).toBe(1);
+        findPath.mockRestore();
+        routeTime.mockRestore();
     });
 
     it('only cars require the dealership (#1703)', () => {
