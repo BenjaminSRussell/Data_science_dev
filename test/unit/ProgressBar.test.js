@@ -48,4 +48,14 @@ describe('ProgressBar percentage clamping (#150)', () => {
         expect(bar.getAttribute('aria-valuenow')).toBe('3');
         expect(bar.getAttribute('aria-label')).toBe('XP');
     });
+
+    it('formats large value/max with formatNumber like TopBar (#2221)', async () => {
+        const el = await render({ value: 150000, max: 200000, showValue: true });
+        const label = el.shadowRoot.querySelector('.progress-label');
+        const text = label.textContent.replace(/\s+/g, ' ').trim();
+        expect(text).toBe(`${(150000).toLocaleString()} / ${(200000).toLocaleString()}`);
+        const bar = el.shadowRoot.querySelector('[role="progressbar"]');
+        expect(bar.getAttribute('aria-valuenow')).toBe('150000');
+        expect(bar.getAttribute('aria-valuemax')).toBe('200000');
+    });
 });
