@@ -158,13 +158,16 @@ export class LocationViewComponent extends BaseComponent {
     }
 
     /**
-     * Update location
+     * Update location.
+     * Details are a cached object mutated in place. Lit compares with !==,
+     * so a revisit would not render. A nameless requestUpdate() still does.
      */
     updateLocation(locationId, locationDetails, backgroundImage, timeOfDay) {
         this.locationId = locationId;
         this.locationDetails = locationDetails;
         this.backgroundImage = backgroundImage || '';
         this.timeOfDay = timeOfDay || 'noon';
+        this.requestUpdate();
     }
 }
 
