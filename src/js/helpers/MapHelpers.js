@@ -7,7 +7,6 @@
 import { LAWYER_TIERS } from '../game/LegalSystem.js';
 import { CameraSystem } from '../camera/CameraSystem.js';
 import { updateMapLocationIcons, updateLockBadges } from './MapIconRenderer.js';
-import { initializeMapRenderer } from '../game/MapSystemInitializer.js';
 import { DOMUtils } from '../utils/DOMUtils.js';
 import { logger } from '../utils/Logger.js';
 import { VEHICLES, VEHICLES_MAP } from '../game/WorldMap.js';
@@ -25,12 +24,6 @@ const domCache = {
     newsEl: null,
     actionsEl: null,
     playerMarker: null
-};
-
-// Cache for rendered elements to avoid recreation
-const renderCache = {
-    buildings: new Map(),
-    environment: new Set()
 };
 
 /**
@@ -350,108 +343,6 @@ function createCityHallActions(game, actionsEl) {
 export function refreshLocationActions(game) {
     if (domCache.actionsEl) delete domCache.actionsEl.dataset.currentLocation;
     updateLocationActions(game);
-}
-
-/**
- * Render map environment - Optimized to only update changed elements
- */
-// Map environment now handled by SimpleMapRenderer
-export function renderMapEnvironment(game) {
-    // No longer needed - SimpleMapRenderer handles parks/trees
-    if (!domCache.mapContainer) return;
-
-    // Static tree positions - only render once
-    if (renderCache.environment.has('trees')) {
-        return; // Already rendered
-    }
-
-    const treePositions = [
-        { x: 15, y: 20 }, { x: 25, y: 15 }, { x: 35, y: 25 },
-        { x: 65, y: 30 }, { x: 75, y: 20 }, { x: 85, y: 25 },
-        { x: 20, y: 60 }, { x: 30, y: 65 }, { x: 70, y: 70 },
-        { x: 80, y: 75 }, { x: 15, y: 80 }, { x: 25, y: 85 }
-    ];
-
-    // Batch DOM operations
-    const treeElements = treePositions.map((pos, index) => {
-        const treeIndex = index % 10;
-        const treeImg = DOMUtils.createElement('img', {
-            attributes: {
-                src: `/assets/map/trees/tree_${String(treeIndex).padStart(2, '0')}.png`
-            },
-            style: {
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                objectPosition: 'center center'
-            },
-            listeners: {
-                error: function () {
-                    this.style.background = 'linear-gradient(135deg, #228B22 0%, #006400 100%)';
-                    this.style.borderRadius = '50% 50% 50% 50% / 60% 60% 40% 40%';
-                }
-            }
-        });
-
-        return DOMUtils.createElement('div', {
-            className: 'map-tree',
-            style: {
-                left: `${pos.x}%`,
-                top: `${pos.y}%`
-            },
-            children: [treeImg]
-        });
-    });
-
-    const fragment = DOMUtils.batch(treeElements);
-
-    // Road segments
-    const roadSegments = [
-        { x: 20, y: 25, width: 60, height: 2 },
-        { x: 50, y: 10, width: 2, height: 75 },
-        { x: 30, y: 40, width: 30, height: 1 },
-        { x: 40, y: 50, width: 15, height: 1 },
-    ];
-
-    roadSegments.forEach((segment, index) => {
-        const roadTile = document.createElement('div');
-        roadTile.className = 'map-road-tile';
-        roadTile.style.left = `${segment.x}%`;
-        roadTile.style.top = `${segment.y}%`;
-        roadTile.style.width = `${segment.width}%`;
-        roadTile.style.height = `${segment.height}%`;
-
-        const roadImg = document.createElement('img');
-        const roadIndex = index % 10;
-        roadImg.src = `/assets/map/roads/road_${String(roadIndex).padStart(2, '0')}.png`;
-        roadImg.style.width = '100%';
-        roadImg.style.height = '100%';
-        roadImg.style.objectFit = 'cover';
-        roadImg.style.objectPosition = 'center center';
-        roadImg.onerror = () => {
-            roadTile.style.background = '#4a4a4a';
-            roadTile.style.border = '1px solid #2a2a2a';
-        };
-        roadTile.appendChild(roadImg);
-        fragment.appendChild(roadTile);
-    });
-
-    domCache.mapContainer.appendChild(fragment);
-    renderCache.environment.add('trees');
-}
-
-/**
- * Render building visuals - Only update changed buildings
- */
-// Map buildings now handled by SimpleMapRenderer - no separate rendering needed
-
-/**
- * Render NPC houses - DISABLED
- * No people on map for cleaner, simpler appearance
- */
-export function renderNPCHouses(game) {
-    // No longer rendering NPC houses - map is cleaner without people
-    // SimpleMapRenderer handles all map rendering
 }
 
 /**
