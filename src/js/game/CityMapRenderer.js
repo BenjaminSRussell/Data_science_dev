@@ -26,10 +26,9 @@ export class CityMapRenderer {
             this.container.classList.add('map-container');
         }
         
-        // Calculate dimensions
-        const containerWidth = this.container.offsetWidth || 600;
-        const containerHeight = this.container.offsetHeight || 600;
-        this.tileSize = Math.min(containerWidth / this.gridSize, containerHeight / this.gridSize);
+        // Hidden containers report 0×0. The 600 fallback is only a first paint;
+        // _tileSizeProvisional keeps it from staying locked once a real size exists.
+        this._applyContainerSize(this._readContainerSize());
         
         // Render in order: background -> grid -> zones -> roads -> buildings -> locations
         this.renderBackground();
@@ -40,6 +39,105 @@ export class CityMapRenderer {
         this.renderLocations();
         
         this.rendered = true;
+        this._watchContainerSize();
+        if (this._tileSizeProvisional) {
+            this._scheduleProvisionalRemeasure();
+        }
+    }
+
+    /**
+     * offsetWidth/offsetHeight, with the historical 600 fallback when a side is 0.
+     * provisional is true until both sides have been measured above 0.
+     */
+    _readContainerSize() {
+        const width = this.container.offsetWidth || 0;
+        const height = this.container.offsetHeight || 0;
+        return {
+            width: width || 600,
+            height: height || 600,
+            provisional: width <= 0 || height <= 0
+        };
+    }
+
+    _applyContainerSize(size) {
+        this.tileSize = Math.min(size.width / this.gridSize, size.height / this.gridSize);
+        this._tileSizeProvisional = size.provisional;
+    }
+
+    /**
+     * Recompute tileSize from the live container. Ignores 0×0 so a later hide
+     * does not bake the 600 fallback over a measurement that was already real.
+     */
+    _syncTileSizeFromContainer() {
+        if (!this.container || !this.rendered) return;
+        const size = this._readContainerSize();
+        if (size.provisional) return;
+        const next = Math.min(size.width / this.gridSize, size.height / this.gridSize);
+        const unchanged = !this._tileSizeProvisional && Math.abs(next - this.tileSize) < 0.01;
+        this._tileSizeProvisional = false;
+        if (unchanged) return;
+        this.tileSize = next;
+        this._refreshTileSizedLayers();
+    }
+
+    _scheduleProvisionalRemeasure() {
+        if (this._remeasureFrame != null) return;
+        if (typeof requestAnimationFrame !== 'function') return;
+        this._remeasureFrame = requestAnimationFrame(() => {
+            this._remeasureFrame = null;
+            if (!this._tileSizeProvisional || !this.rendered) return;
+            this._syncTileSizeFromContainer();
+        });
+    }
+
+    _watchContainerSize() {
+        if (this._sizeWatchBound) return;
+        this._sizeWatchBound = true;
+        const ResizeObs = window.ResizeObserver;
+        if (typeof ResizeObs === 'function') {
+            this._resizeObserver = new ResizeObs(() => {
+                this._syncTileSizeFromContainer();
+            });
+            this._resizeObserver.observe(this.container);
+            return;
+        }
+        this._onWindowResize = () => this._syncTileSizeFromContainer();
+        window.addEventListener('resize', this._onWindowResize);
+    }
+
+    /**
+     * Grid overlay and building blocks are the only layers sized in px.
+     * Zones, roads, and markers stay in % and scale with the container.
+     */
+    _refreshTileSizedLayers() {
+        const grid = this.container.querySelector('.city-map-grid');
+        if (grid) {
+            grid.style.backgroundSize = `${this.tileSize}px ${this.tileSize}px`;
+        }
+        const buildingPx = `${this.tileSize * 2}px`;
+        this.container.querySelectorAll('.city-building').forEach((building) => {
+            building.style.width = buildingPx;
+            building.style.height = buildingPx;
+        });
+    }
+
+    /**
+     * Drop the resize listener. Safe to call more than once.
+     */
+    destroy() {
+        if (this._remeasureFrame != null && typeof cancelAnimationFrame === 'function') {
+            cancelAnimationFrame(this._remeasureFrame);
+        }
+        this._remeasureFrame = null;
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
+        if (this._onWindowResize) {
+            window.removeEventListener('resize', this._onWindowResize);
+            this._onWindowResize = null;
+        }
+        this._sizeWatchBound = false;
     }
 
     /**
