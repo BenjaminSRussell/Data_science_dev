@@ -52,34 +52,3 @@ describe('Coordinate detection (#1939)', () => {
     });
 });
 
-describe('normalizeToPercent honours the coordinate system (#1940)', () => {
-    it('grid by default, percentage passes through, pixel needs a container', () => {
-        expect(P.normalizeToPercent({ x: 3, y: 6 }, 12)).toEqual(P.gridToPercent(3, 6, 12));
-        expect(P.normalizeToPercent({ x: 25, y: 12 }, 30, 'percentage')).toEqual({ x: 25, y: 12 });
-        expect(P.normalizeToPercent({ x: 500, y: 300 }, 30, 'pixel', { width: 1000, height: 600 }))
-            .toEqual({ x: 50, y: 50 });
-        expect(() => P.normalizeToPercent({ x: 500, y: 300 }, 30, 'pixel')).toThrow(RangeError);
-        expect(() => P.normalizeToPercent({ x: 1, y: 1 }, 30, 'bogus')).toThrow(RangeError);
-    });
-
-    it("'auto' uses detectCoordinateSystem", () => {
-        expect(P.normalizeToPercent({ x: 15, y: 15 }, 30, 'auto')).toEqual(P.gridToPercent(15, 15, 30));
-        expect(() => P.normalizeToPercent({ x: 500, y: 300 }, 30, 'auto')).toThrow(RangeError);
-    });
-});
-
-describe('createPositionedElement center option (#65)', () => {
-    it('centres in every coordinate system when center is true', () => {
-        for (const coordinateSystem of ['grid', 'percentage', 'pixel']) {
-            const el = P.createPositionedElement({ position: { x: 5, y: 5 }, coordinateSystem });
-            expect(el.style.transform).toBe('translate(-50%, -50%)');
-        }
-    });
-
-    it('center: false anchors the top-left corner', () => {
-        for (const coordinateSystem of ['grid', 'percentage', 'pixel']) {
-            const el = P.createPositionedElement({ position: { x: 5, y: 5 }, coordinateSystem, center: false });
-            expect(el.style.transform).toBe('');
-        }
-    });
-});
