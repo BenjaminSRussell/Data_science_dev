@@ -2060,14 +2060,6 @@ export class MainGame {
         NPCHelpers.handleVisitNPC(this, npcId);
     }
 
-    handleNPCTalk(npcId) {
-        NPCHelpers.handleNPCTalk(this, npcId);
-    }
-
-    handleNPCResponse(result) {
-        NPCHelpers.handleNPCResponse(this, result);
-    }
-
     handleNPCGift(npcId) {
         NPCHelpers.handleNPCGift(this, npcId);
     }
