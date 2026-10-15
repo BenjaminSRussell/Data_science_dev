@@ -22,11 +22,8 @@ describe('MapHelpers', () => {
     });
 
     it('should not have unused initializeMapRenderer import', () => {
-        // This is the separate unused import mentioned in #2378 - keep this to ensure it stays unused
-        // For now just verify it's there to track it separately from this issue
-        const hasInitializeMapRenderer = mapHelpersContent.includes("import { initializeMapRenderer } from '../game/MapSystemInitializer.js'");
-        // Note: initializeMapRenderer is also unused but is tracked separately in issue #2378
-        // We're not removing it in this fix to stay minimal
-        expect(hasInitializeMapRenderer, 'initializeMapRenderer import exists (tracked separately in #2378)').toBe(true);
+        // MapSystemInitializer was never called. UnifiedMapSystem owns the live map (#2016).
+        const hasInitializeMapRenderer = mapHelpersContent.includes('initializeMapRenderer');
+        expect(hasInitializeMapRenderer, 'initializeMapRenderer import should not exist').toBe(false);
     });
 });
