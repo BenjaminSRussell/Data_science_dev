@@ -131,6 +131,16 @@ const storeConfig = (set, get) => ({
         return state;
     }),
 
+    // Same shape as unlockChartType. This is the store writer for unlockedThemes (#1615)
+    unlockTheme: (themeId) => set((state) => {
+        if (typeof themeId !== 'string' || themeId.length === 0) return state;
+        const themes = Array.isArray(state.unlockedThemes) ? state.unlockedThemes : ['default'];
+        if (!themes.includes(themeId)) {
+            return { unlockedThemes: [...themes, themeId] };
+        }
+        return state;
+    }),
+
     isChartTypeUnlocked: (type) => {
         // Liberalization: All charts unlocked by default!
         return true;
@@ -157,6 +167,8 @@ const storeConfig = (set, get) => ({
             set((s) => ({
                 unlockedTools: [...s.unlockedTools, item.toolId]
             }));
+        } else if (item.type === 'theme') {
+            get().unlockTheme(item.themeId || item.id);
         } else if (item.type === 'perk') {
             const perkId = item.perkId || item.id;
             set((s) => {

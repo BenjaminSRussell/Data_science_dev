@@ -36,4 +36,33 @@ describe('gameStore fixes', () => {
     it('does not inject a debug overlay into the page (#57)', () => {
         expect(document.getElementById('debug-store-info')).toBeNull();
     });
+
+    it('unlockTheme is the writer for unlockedThemes and does not duplicate (#1615)', () => {
+        const store = useGameStore.getState();
+        expect(store.unlockedThemes).toEqual(['default']);
+        store.unlockTheme('corporate');
+        store.unlockTheme('corporate');
+        store.unlockTheme('');
+        expect(useGameStore.getState().unlockedThemes).toEqual(['default', 'corporate']);
+        useGameStore.getState().reset();
+        expect(useGameStore.getState().unlockedThemes).toEqual(['default']);
+    });
+
+    it('purchaseItem type theme appends themeId (#1615)', () => {
+        useGameStore.setState({ money: 500 });
+        expect(useGameStore.getState().purchaseItem({
+            id: 'theme_corporate', type: 'theme', themeId: 'corporate', price: 100
+        })).toBe(true);
+        const bought = useGameStore.getState();
+        expect(bought.unlockedThemes).toEqual(['default', 'corporate']);
+        expect(bought.purchasedItems).toContain('theme_corporate');
+        expect(bought.money).toBe(400);
+
+        useGameStore.setState({ money: 10 });
+        expect(useGameStore.getState().purchaseItem({
+            id: 'theme_neon', type: 'theme', themeId: 'neon', price: 100
+        })).toBe(false);
+        expect(useGameStore.getState().unlockedThemes).toEqual(['default', 'corporate']);
+        expect(useGameStore.getState().purchasedItems).not.toContain('theme_neon');
+    });
 });

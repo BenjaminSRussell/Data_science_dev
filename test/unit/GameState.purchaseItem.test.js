@@ -6,6 +6,7 @@
  *  - duplicate purchase rejection even when affordable
  *  - type: 'chart' branch calling through to unlockChartType (no duplicate)
  *  - type: 'tool' branch pushing into unlockedTools
+ *  - type: 'theme' branch calling through to unlockTheme (no duplicate)
  *  - no partial mutation on any failure path
  */
 
@@ -98,6 +99,40 @@ describe('GameState.purchaseItem', () => {
         });
     });
 
+    describe("type: 'theme' branch", () => {
+        it('unlocks the theme id via unlockTheme and keeps default', () => {
+            state.money = 100;
+            const item = { id: 'theme_corporate', price: 40, type: 'theme', themeId: 'corporate' };
+
+            expect(state.purchaseItem(item)).toBe(true);
+            expect(state.unlockedThemes).toEqual(['default', 'corporate']);
+            expect(state.money).toBe(60);
+            expect(state.purchasedItems).toContain('theme_corporate');
+        });
+
+        it('does not duplicate a theme already present in unlockedThemes', () => {
+            state.money = 200;
+            state.unlockTheme('corporate');
+            const item = { id: 'theme_corporate', price: 40, type: 'theme', themeId: 'corporate' };
+
+            expect(state.purchaseItem(item)).toBe(true);
+            expect(state.unlockedThemes.filter(id => id === 'corporate')).toHaveLength(1);
+            expect(state.unlockedThemes[0]).toBe('default');
+        });
+
+        it('falls back to item.id when themeId is missing', () => {
+            state.money = 100;
+            expect(state.purchaseItem({ id: 'neon', price: 10, type: 'theme' })).toBe(true);
+            expect(state.unlockedThemes).toEqual(['default', 'neon']);
+        });
+
+        it('ignores an empty theme id without dropping default', () => {
+            state.unlockTheme('');
+            state.unlockTheme(null);
+            expect(state.unlockedThemes).toEqual(['default']);
+        });
+    });
+
     describe("type: 'tool' branch", () => {
         it('pushes the toolId into unlockedTools', () => {
             state.money = 100;
@@ -130,6 +165,16 @@ describe('GameState.purchaseItem', () => {
             expect(state.money).toBe(5);
             expect(state.purchasedItems).toEqual([]);
             expect(state.unlockedTools).toEqual([]);
+        });
+
+        it('unaffordable theme purchase does not append to unlockedThemes', () => {
+            state.money = 5;
+            const item = { id: 'theme_corporate', price: 40, type: 'theme', themeId: 'corporate' };
+
+            expect(state.purchaseItem(item)).toBe(false);
+            expect(state.money).toBe(5);
+            expect(state.purchasedItems).toEqual([]);
+            expect(state.unlockedThemes).toEqual(['default']);
         });
     });
 });
