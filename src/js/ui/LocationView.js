@@ -152,14 +152,15 @@ export class LocationView {
             featureEl.dataset.featureId = feature.id;
             featureEl.style.left = `${20 + (index % 5) * 15}%`;
             featureEl.style.top = `${30 + Math.floor(index / 5) * 20}%`;
-            // Use icon image if available, otherwise use emoji
+            // Missing icon stays visible; missing name must not become alt="undefined" (#2215)
+            const featureName = feature.name || '';
             const iconEl = feature.icon && feature.icon.startsWith('/')
-                ? `<img src="${feature.icon}" alt="${feature.name}" style="width: 32px; height: 32px; object-fit: contain; object-position: center center;">`
-                : `<span>${feature.icon || ''}</span>`;
+                ? `<img src="${feature.icon}" alt="${featureName}" style="width: 32px; height: 32px; object-fit: contain; object-position: center center;">`
+                : `<span>${feature.icon || '?'}</span>`;
 
             featureEl.innerHTML = `
                 ${iconEl}
-                <div class="location-feature-label">${feature.name}</div>
+                <div class="location-feature-label">${featureName}</div>
             `;
 
             // Keyboard users can reach and activate features too (#878)

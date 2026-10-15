@@ -128,6 +128,8 @@ export class LocationViewComponent extends BaseComponent {
         return this.locationDetails.features.map((feature, index) => {
             const left = 20 + (index % 5) * 15;
             const top = 30 + Math.floor(index / 5) * 20;
+            // Missing icon stays visible; missing name must not become alt="undefined" (#2215)
+            const alt = feature.name || '';
 
             return html`
                 <div class="location-feature"
@@ -137,8 +139,8 @@ export class LocationViewComponent extends BaseComponent {
                      @click=${() => this.handleFeatureClick(feature)}
                      @keydown=${(e) => this.handleFeatureKey(e, feature)}>
                     ${feature.icon && feature.icon.startsWith('/')
-                        ? html`<img src="${feature.icon}" alt="${feature.name}" style="width: 32px; height: 32px;">`
-                        : html`<span style="font-size: 32px;">${feature.icon || ''}</span>`
+                        ? html`<img src="${feature.icon}" alt="${alt}" style="width: 32px; height: 32px;">`
+                        : html`<span style="font-size: 32px;">${feature.icon || '?'}</span>`
                     }
                 </div>
             `;
