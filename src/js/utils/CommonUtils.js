@@ -4,6 +4,8 @@
  * Consolidates duplicate logic
  */
 
+import { ValidationUtils } from './ValidationUtils.js';
+
 export class CommonUtils {
     /**
      * Format currency
@@ -126,7 +128,7 @@ export class CommonUtils {
      * Check if value is object
      */
     static isObject(item) {
-        return item && typeof item === 'object' && !Array.isArray(item);
+        return item && ValidationUtils.isObject(item);
     }
 
     /**
@@ -216,9 +218,9 @@ export class CommonUtils {
      */
     static isEmpty(value) {
         if (value === null || value === undefined) return true;
-        if (typeof value === 'string') return value.trim().length === 0;
-        if (Array.isArray(value)) return value.length === 0;
-        if (typeof value === 'object') return Object.keys(value).length === 0;
+        if (ValidationUtils.isString(value)) return !ValidationUtils.isNonEmptyString(value);
+        if (ValidationUtils.isArray(value)) return value.length === 0;
+        if (ValidationUtils.isObject(value)) return Object.keys(value).length === 0;
         return false;
     }
 
@@ -256,7 +258,7 @@ export class CommonUtils {
      */
     static groupBy(array, key) {
         return array.reduce((groups, item) => {
-            const group = typeof key === 'function' ? key(item) : item[key];
+            const group = ValidationUtils.isFunction(key) ? key(item) : item[key];
             if (!groups[group]) groups[group] = [];
             groups[group].push(item);
             return groups;
@@ -270,8 +272,8 @@ export class CommonUtils {
         const sorted = [...array];
         const multiplier = order === 'desc' ? -1 : 1;
         sorted.sort((a, b) => {
-            const aVal = typeof key === 'function' ? key(a) : a[key];
-            const bVal = typeof key === 'function' ? key(b) : b[key];
+            const aVal = ValidationUtils.isFunction(key) ? key(a) : a[key];
+            const bVal = ValidationUtils.isFunction(key) ? key(b) : b[key];
             return (aVal > bVal ? 1 : aVal < bVal ? -1 : 0) * multiplier;
         });
         return sorted;
@@ -284,7 +286,7 @@ export class CommonUtils {
         if (key) {
             const seen = new Set();
             return array.filter(item => {
-                const value = typeof key === 'function' ? key(item) : item[key];
+                const value = ValidationUtils.isFunction(key) ? key(item) : item[key];
                 if (seen.has(value)) return false;
                 seen.add(value);
                 return true;
