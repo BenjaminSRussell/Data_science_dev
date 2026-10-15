@@ -413,6 +413,11 @@ export class LocationDetailSystem {
                 return { relationship: 1, message: 'You chat with coworkers' };
             case 'boss':
                 return { meeting: true, message: 'You meet with your boss' };
+            case 'roommate': {
+                // Door copy is "Talk to your roommate"; talk() is what moves relationship.
+                const talked = this.gameState?.roommateSystem?.interact?.('talk');
+                return talked ?? { message: 'Your roommate is not around' };
+            }
             default:
                 return { message: 'You interact with ' + featureId };
         }
