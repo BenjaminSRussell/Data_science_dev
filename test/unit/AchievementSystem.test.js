@@ -54,6 +54,28 @@ describe('AchievementSystem (#258)', () => {
         expect(out.map(a => a.id)).toEqual(['first_task', 'earned_10k']);
     });
 
+    it('renders locked and unlocked badges for the components.css classes (#1668)', () => {
+        const list = document.createElement('div');
+        AchievementSystem.renderBadges(list, [{ id: 'first_task' }, 'earned_10k', { id: 'first_task' }, 7]);
+        const badges = [...list.querySelectorAll('.achievement')];
+        expect(badges).toHaveLength(ACHIEVEMENTS.length);
+        expect(badges.map(b => b.dataset.achievement)).toEqual(ACHIEVEMENTS.map(a => a.id));
+        const unlocked = badges.filter(b => b.classList.contains('unlocked')).map(b => b.dataset.achievement).sort();
+        expect(unlocked).toEqual(['earned_10k', 'first_task']);
+        const hello = list.querySelector('[data-achievement="first_task"]');
+        expect(hello.querySelector('.achievement-icon').textContent).toBe('★');
+        expect(hello.querySelector('.achievement-icon').getAttribute('aria-hidden')).toBe('true');
+        expect(hello.querySelector('.achievement-info .achievement-name').textContent).toBe('Hello, World');
+        expect(hello.querySelector('.achievement-desc').textContent).toBe('Complete your first chart request');
+        const locked = list.querySelector('[data-achievement="first_year"]');
+        expect(locked.classList.contains('unlocked')).toBe(false);
+        expect(locked.querySelector('.achievement-icon').textContent).toBe('○');
+        AchievementSystem.renderBadges(null, []);
+        AchievementSystem.renderBadges(list, null);
+        expect(list.querySelectorAll('.achievement')).toHaveLength(ACHIEVEMENTS.length);
+        expect(list.querySelectorAll('.achievement.unlocked')).toHaveLength(0);
+    });
+
     it('MainGame.checkAchievements toasts each newly earned achievement', () => {
         const fake = { gameState: { tasksCompleted: 1, timeManager: { totalDays: 1 } }, showToast: vi.fn() };
         const earned = MainGame.prototype.checkAchievements.call(fake);

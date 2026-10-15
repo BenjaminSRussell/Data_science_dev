@@ -4,6 +4,7 @@
  */
 import { OFFICES } from '../data/tycoonData.js';
 import { creativityBonus } from '../game/LibraryEffects.js';
+import { AchievementSystem } from '../game/AchievementSystem.js';
 
 /**
  * Price to move into each office tier, from the canonical OFFICES table (#1767)
@@ -400,6 +401,12 @@ export function updateStatsScreen(game) {
             });
         }
     }
+
+    // Locked and unlocked badges; classes are the components.css achievement block (#1668)
+    AchievementSystem.renderBadges(
+        document.getElementById('stats-achievements-list'),
+        game.gameState?.completedAchievements
+    );
 }
 
 /**

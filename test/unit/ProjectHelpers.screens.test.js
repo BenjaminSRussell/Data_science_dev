@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { updateOfficeScreen, updateStatsScreen, checkForCharacterEvolution, updatePlayerAvatar } from '../../src/js/helpers/ProjectHelpers.js';
 import { OFFICES } from '../../src/js/data/tycoonData.js';
+import { ACHIEVEMENTS } from '../../src/js/game/AchievementSystem.js';
 
 const OFFICE_DOM = `
   <span id="current-office-name"></span>
@@ -83,6 +84,19 @@ describe('updateStatsScreen', () => {
 
     it('does nothing without characterStats', () => {
         expect(() => updateStatsScreen({ gameState: {} })).not.toThrow();
+    });
+
+    it('fills achievement badges from completedAchievements (#1668)', () => {
+        document.body.innerHTML = '<div id="stats-name"></div><div id="stats-achievements-list"></div>';
+        updateStatsScreen({
+            gameState: { playerName: 'Ada', completedAchievements: [{ id: 'first_task' }] },
+            characterStats: { getAllStats: () => [] }
+        });
+        const list = document.getElementById('stats-achievements-list');
+        expect(list.querySelectorAll('.achievement')).toHaveLength(ACHIEVEMENTS.length);
+        expect(list.querySelector('[data-achievement="first_task"]').classList.contains('unlocked')).toBe(true);
+        expect(list.querySelector('.achievement-name').textContent).toBe('Hello, World');
+        expect(list.querySelector('[data-achievement="chief_data_officer"]').classList.contains('unlocked')).toBe(false);
     });
 });
 
