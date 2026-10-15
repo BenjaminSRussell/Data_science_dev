@@ -6,12 +6,22 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { DialogueUI } from '../../src/js/ui/DialogueUI.js';
 
+/** These cases cover the DOM fallback, which remains if the tag is not registered. */
+function hideDialogueComponent() {
+    const realGet = customElements.get.bind(customElements);
+    return vi.spyOn(customElements, 'get').mockImplementation((name) => (
+        name === 'dialogue-component' ? undefined : realGet(name)
+    ));
+}
+
 describe('DialogueUI', () => {
     let dialogueUI;
     let mockGame;
     let mockGameState;
+    let registrySpy;
 
     beforeEach(() => {
+        registrySpy = hideDialogueComponent();
         // Setup mock DOM
         document.body.innerHTML = `
             <div id="dialogue-ui-container"></div>
@@ -40,6 +50,7 @@ describe('DialogueUI', () => {
     });
 
     afterEach(() => {
+        registrySpy?.mockRestore();
         vi.clearAllMocks();
         document.body.innerHTML = '';
     });

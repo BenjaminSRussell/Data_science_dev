@@ -8,6 +8,8 @@ import { dialogueTreeSystem } from '../game/dialogue/DialogueTreeSystem.js';
 import { STATS } from '../game/CharacterStats.js';
 import { conversationSituation, SOCIAL_REACTION_ACTIONS } from '../game/RealisticDialogueSystem.js';
 import { getNPCImage } from '../utils/NPCImageMapper.js';
+// Side-effect import: registers <dialogue-component> before createContainer (#2240)
+import './components/DialogueComponent.js';
 
 // Items a dialogue node can hand over (effects.item) (#47)
 const DIALOGUE_XP_ALIASES = { python: 'analytics', statistics: 'intelligence', sql: 'analytics' };
