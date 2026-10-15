@@ -217,5 +217,32 @@ export const CONTRACTS = [
                 maxProgress: 120
             }
         ]
+    },
+    {
+        id: 'complex_model_audit',
+        client: 'Helena Cho',
+        title: 'Complex Model Audit',
+        description: 'A production model with a noisy table. Opens once your AI companion is sharp enough to keep the error rate down.',
+        difficulty: 2,
+        // Gated on intelligenceRating (>= 4), so it must not strictly dominate
+        // or lose to an ungated contract (#2172, #1806). Less cash than the
+        // ethics-costing loan, less XP than fashion, more grind than a scraper.
+        reward: 2200,
+        xpReward: { machine_learning: 55, statistics: 35 },
+        requirements: { aiIntelligence: 4 },
+        stages: [
+            {
+                type: PROJECT_TYPES.CLEANING,
+                name: 'Audit the Training Table',
+                description: 'High AI intelligence makes this pass faster and less buggy.',
+                maxProgress: 120
+            },
+            {
+                type: PROJECT_TYPES.MODELING,
+                name: 'Stress the Model',
+                description: 'Complex modeling the companion\'s rating unlocked.',
+                maxProgress: 180
+            }
+        ]
     }
 ];

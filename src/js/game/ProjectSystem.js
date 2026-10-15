@@ -98,6 +98,12 @@ export class ProjectSystem {
         if (req.reputation !== undefined && !((this.gameState.reputation || 0) >= req.reputation)) {
             return false;
         }
+        // Complex contracts ask for AI intelligenceRating, not a player stat (#1806).
+        // Fail closed when the companion is missing or still too dim.
+        if (req.aiIntelligence !== undefined) {
+            const rating = Number(this.gameState?.aiSystem?.intelligenceRating);
+            if (!(rating >= req.aiIntelligence)) return false;
+        }
         return true;
     }
 
@@ -148,11 +154,17 @@ export class ProjectSystem {
         // Corrupt/old project data: nothing to work on (#1112)
         if (!stage || !(stage.maxProgress > 0)) return null;
 
-        // AI Bonus Check
+        // AI Bonus Check. Speed feeds every stage; intelligence is per type (#1806).
+        const ai = this.gameState.aiSystem;
         let aiBonus = 0;
-        if (this.gameState.aiSystem) {
-            aiBonus = this.gameState.aiSystem?.processingPower || 0;
+        if (ai) {
+            aiBonus = ai.processingPower || 0;
         }
+        const intel = typeof ai?.modifiersForStage === 'function'
+            ? ai.modifiersForStage(stage)
+            : { work: 0, errorCut: 0 };
+        const intelligenceWork = Number(intel?.work) > 0 ? Number(intel.work) : 0;
+        const errorCut = Number(intel?.errorCut) > 0 ? Number(intel.errorCut) : 0;
 
         // Creativity speeds game-dev / creative stages only (#2418)
         const creativityWork = isCreativeStage(stage) ? effectiveCreativity(this.gameState) : 0;
@@ -161,11 +173,13 @@ export class ProjectSystem {
         // Learned libraries multiply scraping (static) and cleaning on top (#2418).
         const hardwareMultiplier = this.gameState.hardwareManager?.getProductivityMultiplier?.() || 1;
         const libraryMultiplier = stageWorkMultiplier(this.gameState, stage);
-        let effectiveWork = Math.max(0, ((Number(workPower) || 0) + aiBonus + creativityWork) * hardwareMultiplier * libraryMultiplier);
+        let effectiveWork = Math.max(0, ((Number(workPower) || 0) + aiBonus + creativityWork + intelligenceWork) * hardwareMultiplier * libraryMultiplier);
 
         // A cleaning bug wastes half this tick. RegEx halves how often that happens (#2418).
+        // intelligenceRating lowers that chance (#1806). No rng: direct calls stay exact.
         let bugged = false;
-        if (isCleaningStage(stage) && typeof rng === 'function' && rng() < cleaningBugChance(this.gameState)) {
+        const bugChance = Math.max(0, cleaningBugChance(this.gameState) - errorCut);
+        if (isCleaningStage(stage) && typeof rng === 'function' && rng() < bugChance) {
             effectiveWork *= CLEANING_BUG_WASTE;
             bugged = true;
             this.activeProject.cleaningBugs = (this.activeProject.cleaningBugs || 0) + 1;
