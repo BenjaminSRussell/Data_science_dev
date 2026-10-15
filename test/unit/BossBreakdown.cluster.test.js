@@ -89,7 +89,7 @@ describe('DemandingBossSystem (#385, #1014, #1777, #1779, #1780)', () => {
     it('main.js applyTaskRewards feeds the boss', async () => {
         const fs = await import('node:fs');
         const src = fs.readFileSync('src/js/main.js', 'utf8');
-        const body = src.slice(src.indexOf('applyTaskRewards(score)'));
+        const body = src.slice(src.indexOf('    applyTaskRewards(score) {'));
         expect(body.slice(0, 4000)).toMatch(/demandingBoss\?\.recordTaskResult\?\.\(/);
     });
 });
