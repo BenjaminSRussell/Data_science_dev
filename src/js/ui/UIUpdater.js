@@ -18,6 +18,7 @@ import { GameState } from '../game/GameState.js';
 import { renderTaskPanel, bossPreferenceText } from './taskPanel.js';
 import { logger } from '../utils/Logger.js';
 import { NEWS_CATEGORIES } from '../game/NewsManager.js';
+import { housingActivityLabel } from '../game/Housing.js';
 
 // Moved to taskPanel.js with the rest of the task panel (#1133)
 export { bossPreferenceText };
@@ -796,6 +797,8 @@ export class UIUpdater {
     }
 
     getActivityName(activity) {
+        const housingLabel = housingActivityLabel(activity, this.gameState?.housingLevel);
+        if (housingLabel) return housingLabel;
         const names = {
             'buy_donut': 'Buy Donut ($5)',
             'eat_donut': 'Eat Donut',
