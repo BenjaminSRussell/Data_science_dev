@@ -7,10 +7,84 @@
 // AssetResolver not currently used - using direct SVG paths
 // import { AssetResolver } from '../../utils/AssetResolver.js';
 
+import { SLOTS_PER_DAY, TIME_SLOTS } from '../TimeManager.js';
+
+// Payouts are the historical ones. Costs live in ACTION_COSTS so a debit is
+// never returned until the player can pay it (#2065).
+const ACTION_EFFECTS = {
+    rest: { energy: 50, message: 'You rest and restore energy' },
+    work: { skill: 1, message: 'You work on improving your skills' },
+    computer: { info: true, message: 'You check your computer' },
+    cook: { money: -5, energy: 10, message: 'You cook a meal' },
+    read: { skill: 2, message: 'You read and learn' },
+    coffee: { money: -3, energy: 20, message: 'You get coffee' },
+    gossip: { relationship: 1, message: 'You chat with coworkers' },
+    boss: { meeting: true, message: 'You meet with your boss' }
+};
+
+// Read takes more time and energy than work, so +2 skill is not a free upgrade.
+const ACTION_COSTS = {
+    rest: { timeSlots: 1, energyCost: 0 },
+    work: { timeSlots: 1, energyCost: 10 },
+    computer: { timeSlots: 1, energyCost: 5 },
+    cook: { timeSlots: 1, energyCost: 0 },
+    read: { timeSlots: 2, energyCost: 15 },
+    coffee: { timeSlots: 1, energyCost: 0 },
+    gossip: { timeSlots: 1, energyCost: 5 },
+    boss: { timeSlots: 1, energyCost: 10 }
+};
+
+const DEFAULT_COST = { timeSlots: 1, energyCost: 0 };
+
+const PHASE_START_SLOT = { morning: 0, afternoon: 2, evening: 4, night: 5 };
+
+function finiteNumber(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+}
+
+function slotsAtLeastOne(value, fallback) {
+    const n = finiteNumber(value);
+    if (n !== null && n >= 1) return Math.floor(n);
+    const f = finiteNumber(fallback);
+    if (f !== null && f >= 1) return Math.floor(f);
+    return 1;
+}
+
+function energyCostOf(value, fallback) {
+    const n = finiteNumber(value);
+    if (n !== null && n >= 0) return Math.floor(n);
+    const f = finiteNumber(fallback);
+    if (f !== null && f >= 0) return Math.floor(f);
+    return 0;
+}
+
+function moneyDebit(feature, effectMoney) {
+    const fromFeature = finiteNumber(feature?.moneyCost ?? (feature?.cost > 0 ? feature.cost : null));
+    if (fromFeature !== null && fromFeature !== 0) return -Math.abs(fromFeature);
+    const fromEffect = finiteNumber(effectMoney);
+    if (fromEffect !== null && fromEffect < 0) return fromEffect;
+    return 0;
+}
+
+function slotIndex(value) {
+    if (typeof value === 'string') {
+        const key = value.trim().toLowerCase();
+        if (Object.prototype.hasOwnProperty.call(PHASE_START_SLOT, key)) return PHASE_START_SLOT[key];
+        const found = TIME_SLOTS.find(s => s.id === key || s.name.toLowerCase() === key);
+        return found ? found.index : null;
+    }
+    const n = finiteNumber(value);
+    return n === null ? null : Math.floor(n);
+}
+
 export class LocationDetailSystem {
     constructor(gameState) {
         this.gameState = gameState;
         this.locationDetails = new Map();
+        // locationId+action -> { day, slot }. Duplicate features that share an
+        // action (coffee-shop tables) cannot all pay out in the same slot.
+        this.usedActions = new Map();
         this.initializeLocations();
     }
     
@@ -391,31 +465,123 @@ export class LocationDetailSystem {
             result: this.executeAction(feature.action, locationId, featureId)
         };
     }
+
+    /**
+     * Player resources for a gate. An explicit argument wins over gameState
+     * so a caller can pass money, energy, and time-of-day in.
+     */
+    _resources(override) {
+        const gs = this.gameState || {};
+        const src = override && typeof override === 'object' ? override : {};
+        const tm = src.timeManager || gs.timeManager || null;
+        const moneyRaw = src.money !== undefined ? src.money : gs.money;
+        const energyRaw = src.energy !== undefined ? src.energy
+            : (tm && tm.energy !== undefined ? tm.energy : gs.energy);
+        const dayRaw = src.day !== undefined ? src.day
+            : (src.totalDays !== undefined ? src.totalDays
+                : (tm && tm.totalDays !== undefined ? tm.totalDays : gs.day));
+        let slotRaw = null;
+        if (src.timeOfDay !== undefined) slotRaw = src.timeOfDay;
+        else if (src.timeSlot !== undefined) slotRaw = src.timeSlot;
+        else if (tm && tm.timeSlot !== undefined) slotRaw = tm.timeSlot;
+        else if (gs.timeSlot !== undefined) slotRaw = gs.timeSlot;
+        else if (tm && typeof tm.getTimeOfDay === 'function') slotRaw = tm.getTimeOfDay();
+        const money = finiteNumber(moneyRaw);
+        return {
+            money: money === null ? 0 : money,
+            energy: finiteNumber(energyRaw),
+            day: finiteNumber(dayRaw) === null ? 0 : finiteNumber(dayRaw),
+            timeSlot: slotIndex(slotRaw),
+            timeManager: tm
+        };
+    }
+
+    _feature(locationId, featureId) {
+        return this.getLocationFeatures(locationId).find(f => f.id === featureId) || null;
+    }
+
+    _cost(action, feature) {
+        const base = ACTION_COSTS[action] || DEFAULT_COST;
+        const effect = ACTION_EFFECTS[action] || null;
+        return {
+            timeSlots: slotsAtLeastOne(feature?.timeSlots ?? feature?.time, base.timeSlots),
+            energyCost: energyCostOf(feature?.energyCost, base.energyCost),
+            money: moneyDebit(feature, effect?.money)
+        };
+    }
+
+    _useKey(locationId, action) {
+        return String(locationId) + '\0' + String(action);
+    }
+
+    _reject(message) {
+        return { success: false, blocked: true, message, timeSlots: 0 };
+    }
+
+    /**
+     * Enough time left today. Slot math matches TimeManager.getRemainingSlots.
+     */
+    _timeOk(slots, resources) {
+        if (resources.timeSlot !== null) {
+            const remaining = Math.max(0, SLOTS_PER_DAY - resources.timeSlot);
+            if (slots <= SLOTS_PER_DAY && remaining < slots) {
+                return { ok: false, reason: 'Not enough time today' };
+            }
+            return { ok: true };
+        }
+        const check = resources.timeManager?.canPerformAction?.(slots, 0);
+        if (check && check.can === false) {
+            return { ok: false, reason: check.reason || 'Not enough time today' };
+        }
+        return { ok: true };
+    }
+
+    _effectResult(action, featureId, cost) {
+        const effect = ACTION_EFFECTS[action];
+        const result = {
+            success: true,
+            timeSlots: cost.timeSlots,
+            message: effect?.message || ('You interact with ' + featureId)
+        };
+        if (cost.money) result.money = cost.money;
+        if (effect?.energy) result.energy = effect.energy;
+        else if (cost.energyCost) result.energy = -cost.energyCost;
+        if (effect?.skill) result.skill = effect.skill;
+        if (effect?.info) result.info = true;
+        if (effect?.relationship) result.relationship = effect.relationship;
+        if (effect?.meeting) result.meeting = true;
+        return result;
+    }
     
     /**
-     * Execute feature action
+     * Execute feature action. Rewards are withheld when money, energy, or
+     * the rest of the day cannot cover the cost. Every case spends at least
+     * one time slot. The same action at the same location does not pay out
+     * again until time advances.
+     * @param {string} action
+     * @param {string} locationId
+     * @param {string} featureId
+     * @param {{money?: number, energy?: number, timeOfDay?: number|string, timeSlot?: number, day?: number, totalDays?: number, timeManager?: object}} [resources]
      */
-    executeAction(action, locationId, featureId) {
-        switch (action) {
-            case 'rest':
-                return { energy: 50, message: 'You rest and restore energy' };
-            case 'work':
-                return { skill: 1, message: 'You work on improving your skills' };
-            case 'computer':
-                return { info: true, message: 'You check your computer' };
-            case 'cook':
-                return { money: -5, energy: 10, message: 'You cook a meal' };
-            case 'read':
-                return { skill: 2, message: 'You read and learn' };
-            case 'coffee':
-                return { energy: 20, money: -3, message: 'You get coffee' };
-            case 'gossip':
-                return { relationship: 1, message: 'You chat with coworkers' };
-            case 'boss':
-                return { meeting: true, message: 'You meet with your boss' };
-            default:
-                return { message: 'You interact with ' + featureId };
+    executeAction(action, locationId, featureId, resources) {
+        const feature = this._feature(locationId, featureId);
+        const cost = this._cost(action, feature);
+        const player = this._resources(resources);
+        const key = this._useKey(locationId, action);
+        const prev = this.usedActions.get(key);
+        if (prev && prev.day === player.day && prev.slot === player.timeSlot) {
+            return this._reject('You already did that. Time has to pass first.');
         }
+        if (cost.money < 0 && player.money < -cost.money) {
+            return this._reject('Not enough money');
+        }
+        if (cost.energyCost > 0 && (player.energy === null || player.energy < cost.energyCost)) {
+            return this._reject('Not enough energy');
+        }
+        const time = this._timeOk(cost.timeSlots, player);
+        if (!time.ok) return this._reject(time.reason);
+        this.usedActions.set(key, { day: player.day, slot: player.timeSlot });
+        return this._effectResult(action, featureId, cost);
     }
 }
 
