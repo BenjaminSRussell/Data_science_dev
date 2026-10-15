@@ -262,6 +262,18 @@ export class GameState {
     }
 
     /**
+     * Unlock a theme id. Empty and duplicate ids are ignored so the
+     * starter 'default' entry is never dropped or repeated (#1615).
+     */
+    unlockTheme(themeId) {
+        if (typeof themeId !== 'string' || themeId.length === 0) return;
+        if (!Array.isArray(this.unlockedThemes)) this.unlockedThemes = ['default'];
+        if (!this.unlockedThemes.includes(themeId)) {
+            this.unlockedThemes.push(themeId);
+        }
+    }
+
+    /**
      * Check if player can afford an item
      */
     canAfford(price) {
@@ -285,6 +297,8 @@ export class GameState {
             this.unlockChartType(item.chartType);
         } else if (item.type === 'tool') {
             this.unlockedTools.push(item.toolId);
+        } else if (item.type === 'theme') {
+            this.unlockTheme(item.themeId || item.id);
         } else if (item.type === 'software') {
             // Software items are tracked in purchasedItems, no additional action needed
             // Software quality effects are calculated dynamically
