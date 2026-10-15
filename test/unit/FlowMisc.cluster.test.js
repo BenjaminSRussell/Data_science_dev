@@ -1,38 +1,17 @@
 /**
- * Misc game-flow fixes (#1932, #2290, #1486, #1679, #1049, #1251, #1229)
+ * Misc game-flow fixes (#2290, #1486, #1679, #1049, #1251, #1229)
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.hoisted(() => { globalThis.__DSD_NO_AUTOBOOT__ = true; });
 
 import { MainGame } from '../../src/js/main.js';
-import { MapCoordinateSystem } from '../../src/js/game/MapCoordinateSystem.js';
 import { openExamModal, closeExamModal } from '../../src/js/helpers/EducationHelpers.js';
 import { UIUpdater } from '../../src/js/ui/UIUpdater.js';
 import { DemandingBossSystem } from '../../src/js/game/work/DemandingBossSystem.js';
 import { GameplaySettings } from '../../src/js/game/settings/GameplaySettings.js';
 import fs from 'fs';
 import path from 'path';
-
-describe('MapCoordinateSystem rejects off-grid cells (#1932)', () => {
-    it('does not check or reserve a clamped cell', () => {
-        const c = new MapCoordinateSystem();
-        const max = c.gridSystem.bounds.maxX;
-        expect(c.isAvailable(max + 20, 3)).toBe(false);
-        expect(c.occupyCoord(max + 20, 3, 'x')).toBe(false);
-        expect(c.grid.has(`${max},3`)).toBe(false);
-        expect(c.occupyCoord(2, 3, 'x')).toBe(true);
-        c.releaseCoord(max + 20, 3, 'x');
-        expect(c.grid.has('2,3')).toBe(true);
-    });
-
-    it('findAvailableCoord returns exactly the cell it reserved', () => {
-        const c = new MapCoordinateSystem();
-        const out = c.findAvailableCoord(500, 500);
-        expect(c.grid.has(`${out.x},${out.y}`)).toBe(true);
-        expect(c.gridSystem.isValidGridCoord(out.x, out.y)).toBe(true);
-    });
-});
 
 describe('exam modal (#2290)', () => {
     beforeEach(() => {

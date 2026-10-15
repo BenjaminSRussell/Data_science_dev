@@ -142,7 +142,6 @@ export class GameState {
         this.locationBackgroundSystem = null;
         this.weeklyNewsSystem = null;
         this.screenThemeManager = null;
-        this.mapCoordinateSystem = null;
         this.contractSystem = null; // New contract system
         this.gameEndingSystem = null; // Game ending system
         this.gameEnding = null; // Current ending state

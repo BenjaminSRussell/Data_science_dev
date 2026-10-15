@@ -4,7 +4,6 @@ import { MapNavigationSystem } from '../../src/js/game/MapNavigationSystem.js';
 import { MapZoneSystem } from '../../src/js/game/MapZoneSystem.js';
 import { MapGridSystem } from '../../src/js/game/MapGridSystem.js';
 import { getAllZones } from '../../src/js/data/mapZones.js';
-import { MapCoordinateSystem } from '../../src/js/game/MapCoordinateSystem.js';
 
 describe('DetailedMapSystem road grid (#369)', () => {
     const m = new DetailedMapSystem({});
@@ -259,82 +258,5 @@ describe('MapGridSystem position helpers (#158)', () => {
         expect(g.positionToGrid(15, 20)).toEqual({ x: 15, y: 20 });
         expect(g.positionToGrid(50, 50)).toEqual(g.percentToGrid(50, 50, g.totalWidth, g.totalHeight));
         expect(g.positionToGrid(305, 105)).toEqual(g.pixelToGrid(305, 105));
-    });
-});
-
-describe('MapCoordinateSystem occupancy and search (#411)', () => {
-    it('creates a default grid system', () => {
-        expect(new MapCoordinateSystem().gridSystem).toBeInstanceOf(MapGridSystem);
-    });
-
-    it('occupy/release maintain both the grid and the type index', () => {
-        const c = new MapCoordinateSystem();
-        c.occupyCoord(5, 5, 'location');
-        c.occupyCoord(5, 5, 'npc_house');
-        expect([...c.grid.get('5,5')]).toEqual(['location', 'npc_house']);
-        expect(c.typeIndex.get('location').has('5,5')).toBe(true);
-        c.releaseCoord(5, 5, 'location');
-        expect([...c.grid.get('5,5')]).toEqual(['npc_house']);
-        expect(c.typeIndex.has('location')).toBe(false);
-        c.releaseCoord(5, 5, 'npc_house');
-        expect(c.grid.has('5,5')).toBe(false);
-    });
-
-    it('isAvailable checks the radius and rejects out-of-range input', () => {
-        const c = new MapCoordinateSystem();
-        c.occupyCoord(10, 10, 'x');
-        expect(c.isAvailable(10, 10)).toBe(false);
-        expect(c.isAvailable(11, 10)).toBe(false);
-        expect(c.isAvailable(13, 10)).toBe(true);
-        expect(c.isAvailable(13, 10, 3)).toBe(false);
-        expect(c.occupyCoord(-50, -50, 'edge')).toBe(false);
-        expect(c.grid.has('0,0')).toBe(false);
-        expect(c.isAvailable(-50, -50)).toBe(false);
-    });
-
-    it('findAvailableCoord uses the preferred cell, clamped, when free', () => {
-        const c = new MapCoordinateSystem();
-        expect(c.findAvailableCoord(4, 4)).toEqual({ x: 4, y: 4 });
-        const max = c.gridSystem.bounds.maxX;
-        const out = c.findAvailableCoord(999, 3);
-        expect(out).toEqual({ x: max, y: 3 });
-        expect(c.grid.has(`${max},3`)).toBe(true);
-    });
-
-    it('findAvailableCoord spirals outward when the preferred cell is taken', () => {
-        const c = new MapCoordinateSystem();
-        c.occupyCoord(15, 15, 'location');
-        const p = c.findAvailableCoord(15, 15);
-        expect(p).not.toEqual({ x: 15, y: 15 });
-        expect(Math.abs(p.x - 15) + Math.abs(p.y - 15)).toBeGreaterThan(0);
-        expect(c.grid.has(`${p.x},${p.y}`)).toBe(true);
-    });
-
-    it('findRandomAvailable falls back to the centre when nothing is free', () => {
-        const c = new MapCoordinateSystem();
-        vi.spyOn(c, 'isAvailable').mockReturnValue(false);
-        const p = c.findRandomAvailable('t');
-        expect(p).toEqual({ x: 15, y: 15 });
-        vi.restoreAllMocks();
-    });
-
-    it('clearType and initializeWithLocations', () => {
-        const c = new MapCoordinateSystem();
-        c.occupyCoord(1, 1, 'a');
-        c.occupyCoord(2, 2, 'b');
-        c.clearType('a');
-        expect(c.grid.has('1,1')).toBe(false);
-        expect(c.grid.has('2,2')).toBe(true);
-        c.initializeWithLocations([{ position: { x: 3, y: 4 } }, {}]);
-        expect([...c.grid.keys()]).toEqual(['3,4']);
-    });
-
-    it('findNPCHouseCoord treats grid positions as grid, not percent (#158)', () => {
-        const c = new MapCoordinateSystem();
-        vi.spyOn(Math, 'random').mockReturnValue(0);
-        const p = c.findNPCHouseCoord(20, 20);
-        // 2 tiles to the right of (20,20); the old code read 20 as 20% and put it near (6,6)
-        expect(p).toEqual({ x: 22, y: 20 });
-        vi.restoreAllMocks();
     });
 });
