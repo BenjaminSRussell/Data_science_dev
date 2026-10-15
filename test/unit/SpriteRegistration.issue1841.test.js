@@ -3,7 +3,7 @@
  * The LPC atlas JSON must also match gridAtlas(), so a grid edit cannot
  * leave the committed atlas describing frames that are not in the sheet.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
@@ -14,6 +14,7 @@ import {
     lpcSheet
 } from '../../src/js/assets/AssetManager.js';
 import { gridAtlas } from '../../src/js/assets/gridAtlas.js';
+import { VisualProgressionSystem } from '../../src/js/game/visual/VisualProgressionSystem.js';
 
 const ROOT = process.cwd();
 
@@ -73,5 +74,25 @@ describe('sprite registration asset paths (#1841)', () => {
         expect(body).toMatch(/\.loadSpriteSheet\s*\(/);
         expect(body).not.toMatch(/\.registerSpriteSheet\s*\(/);
         expect(body).not.toContain('character_sheet.png');
+    });
+});
+
+describe('callers pass the Pixi manager (#1841)', () => {
+    it('main.js builds ComprehensiveSpriteSystem with PixiSpriteManager, not the legacy manager', () => {
+        const main = fs.readFileSync(path.join(ROOT, 'src/js/main.js'), 'utf8');
+        const args = main.match(/new ComprehensiveSpriteSystem\(([\s\S]*?)\);/)?.[1] ?? '';
+        expect(args).toContain('pixiSpriteManager');
+        expect(args).not.toContain('this.spriteSheetManager');
+    });
+
+    it('tier upgrades load the LPC atlas through Pixi and use the legacy manager only without it', () => {
+        const loadSpriteSheet = vi.fn(() => Promise.resolve(null));
+        const registerSpriteSheet = vi.fn();
+        const legacy = { registerSpriteSheet };
+        new VisualProgressionSystem({ pixiSpriteManager: { loadSpriteSheet }, spriteSheetManager: legacy }).upgradeSpriteSheets('mid');
+        expect(loadSpriteSheet).toHaveBeenCalledWith('character_mid', LPC_ATLAS_URL, LPC_SHEET_URLS.mid);
+        expect(registerSpriteSheet).not.toHaveBeenCalled();
+        new VisualProgressionSystem({ spriteSheetManager: legacy }).upgradeSpriteSheets('mid');
+        expect(registerSpriteSheet).toHaveBeenCalledWith('character_mid', expect.objectContaining({ url: LPC_SHEET_URLS.mid }));
     });
 });

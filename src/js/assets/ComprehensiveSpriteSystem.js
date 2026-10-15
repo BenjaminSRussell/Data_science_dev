@@ -15,8 +15,8 @@ const DEFAULT_SPRITE_SIZE = 64;
 export class ComprehensiveSpriteSystem {
     constructor(assetManager, pixiSpriteManager) {
         this.assetManager = assetManager;
-        // Canonical Phase 4 manager (PixiSpriteManager). A legacy
-        // SpriteSheetManager does not implement loadSpriteSheet (#1841).
+        // Canonical Phase 4 manager (PixiSpriteManager). Do not pass the legacy
+        // SpriteSheetManager: its loadSpriteSheet(id) has another signature (#1841).
         this.spriteSheetManager = pixiSpriteManager;
         this.loadedSprites = new Map();
         this.spriteCache = new Map();
