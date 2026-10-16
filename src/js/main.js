@@ -3887,7 +3887,7 @@ export class MainGame {
                 }
 
                 if (this.gameState.money < -1000) {
-                    this.showToast('CRITICAL: Eviction imminent! Earn money fast!', 'error');
+                    this.showToast('Debt warning: your balance is below -$1,000. Earn money fast!', 'error');
                 }
 
                 // Ending checks run after every event is processed (#1514)
