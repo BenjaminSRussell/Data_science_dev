@@ -2,6 +2,18 @@
  * RomanceSystem.js
  * Manages dating, marriage, and family mechanics
  */
+
+// Housing ladder, indexed by houseLevel. `cost` is paid to move up into that
+// tier. The prices match the office ladder in data/tycoonData.js.
+const HOUSE_TIERS = [
+    { name: 'Apartment', cost: 0 },
+    { name: 'Condo', cost: 15000 },
+    { name: 'House', cost: 50000 },
+    { name: 'Mansion', cost: 200000 }
+];
+const CHILD_COST = 10000;
+const CHILD_COOLDOWN_DAYS = 90;
+
 export class RomanceSystem {
     constructor(gameState) {
         this.gameState = gameState;
@@ -175,6 +187,43 @@ export class RomanceSystem {
         this.anniversary = null;
         this.lastBreakup = { partnerId, reason, previousStatus, day: this.gameState.timeManager?.totalDays ?? null };
         return { previousStatus, divorceCost, partnerId };
+    }
+
+    /**
+     * Move up one housing tier (apartment -> condo -> house -> mansion).
+     * The price of the tier you move into is paid up front.
+     */
+    upgradeHouse() {
+        const level = Math.min(Math.max(0, Math.floor(Number(this.houseLevel) || 0)), HOUSE_TIERS.length - 1);
+        if (level >= HOUSE_TIERS.length - 1) return { success: false, message: "You already have the biggest place in town." };
+
+        const next = HOUSE_TIERS[level + 1];
+        if (this.gameState.money < next.cost) return { success: false, message: `You can't afford a ${next.name.toLowerCase()} yet.` };
+
+        this.gameState.money -= next.cost;
+        this.houseLevel = level + 1;
+        return { success: true, message: `You moved into a ${next.name.toLowerCase()}!`, cost: next.cost, houseLevel: this.houseLevel };
+    }
+
+    /**
+     * Have a baby. Married couples only, and not again until the cooldown has
+     * passed. Each child records its birth day, so the cooldown comes from the
+     * children list and the save shape does not change.
+     */
+    haveChild() {
+        if (this.relationshipStatus !== 'married') return { success: false, message: "You need to be married first." };
+
+        const today = this.gameState.timeManager?.totalDays ?? null;
+        const lastBorn = this.children[this.children.length - 1]?.bornDay;
+        if (typeof lastBorn === 'number' && typeof today === 'number' && today - lastBorn < CHILD_COOLDOWN_DAYS) {
+            return { success: false, message: `You can try again on day ${lastBorn + CHILD_COOLDOWN_DAYS}.` };
+        }
+
+        if (this.gameState.money < CHILD_COST) return { success: false, message: "You can't afford a baby right now." };
+
+        this.gameState.money -= CHILD_COST;
+        this.children.push({ bornDay: today });
+        return { success: true, message: "You have a new baby!", cost: CHILD_COST };
     }
 
     toJSON() {
